@@ -1,7 +1,10 @@
+/* @tailwindcss */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Cairo:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-neon-green: #39FF14;
@@ -12,7 +15,7 @@
   --color-foreground: #FFFFFF;
 
   --font-space: "Space Grotesk", sans-serif;
-  --font-cairo: "Cairo", sans-serif;
+  --font-tajawal: "Tajawal", sans-serif;
 
   @keyframes scanline {
     0% { transform: translateY(-100%); }
@@ -24,16 +27,21 @@
 
 @layer base {
   body {
-    @apply bg-[#050505] text-white selection:bg-neon-green/30 selection:text-neon-green;
+    @apply bg-[#F0F2F5] text-black dark:bg-[#050505] dark:text-white;
     margin: 0;
     min-height: 100vh;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
   }
 
+  ::selection {
+    background-color: var(--selection-bg, #39FF1433);
+    color: var(--selection-text, #39FF14);
+  }
+
   /* Global Typography Scaling for Arabic */
   [lang='ar'] {
-    font-family: var(--font-cairo) !important;
+    font-family: var(--font-tajawal) !important;
   }
 
   [lang='en'] {
@@ -43,7 +51,7 @@
 
 @layer components {
   .glass-panel {
-    @apply bg-white/[0.05] backdrop-blur-md border border-white/5 rounded-sm;
+    @apply bg-black/[0.03] dark:bg-white/[0.05] backdrop-blur-md border border-black/5 dark:border-white/5 rounded-sm;
   }
   
   .scanlines {
@@ -53,6 +61,7 @@
       rgba(57, 255, 20, 0.02) 50%,
       transparent 100%
     );
+    @apply dark:opacity-100 opacity-[0.05];
     background-size: 100% 2px;
     animation: scanline 20s linear infinite;
     pointer-events: none;
@@ -60,8 +69,9 @@
 
   .cyber-grid {
     background-image: 
-      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      linear-gradient(currentColor 1px, transparent 1px),
+      linear-gradient(90deg, currentColor 1px, transparent 1px);
+    @apply text-black/[0.015] dark:text-white/[0.02];
     background-size: 60px 60px;
   }
 
@@ -71,6 +81,57 @@
 
   .hex-slot {
     clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  }
+
+  .glass-card { 
+    @apply bg-black/10 backdrop-blur-[40px]; 
+  }
+  
+  .neon-silver { 
+    border: 2px solid #B0C4DE; 
+    box-shadow: 0 0 8px #B0C4DE inset, 0 0 8px #B0C4DE; 
+    text-shadow: 0 0 8px #B0C4DE; 
+    color: #B0C4DE; 
+  }
+  
+  .neon-platinum { 
+    border: 2px solid #00CED1; 
+    box-shadow: 0 0 8px #00CED1 inset, 0 0 8px #00CED1; 
+    text-shadow: 0 0 8px #00CED1; 
+    color: #00CED1; 
+  }
+  
+  .neon-crown { 
+    border: 2px solid #9370DB; 
+    box-shadow: 0 0 8px #9370DB inset, 0 0 8px #9370DB; 
+    text-shadow: 0 0 8px #9370DB; 
+    color: #9370DB; 
+  }
+  
+  .neon-ace { 
+    border: 2px solid #DC143C; 
+    box-shadow: 0 0 8px #DC143C inset, 0 0 8px #DC143C; 
+    text-shadow: 0 0 8px #DC143C; 
+    color: #DC143C; 
+  }
+  
+  .neon-conqueror { 
+    border: 2px solid #FFD700; 
+    box-shadow: 0 0 8px #FFD700 inset, 0 0 8px #FFD700; 
+    text-shadow: 0 0 8px #FFD700; 
+    color: #FFD700; 
+  }
+  
+  .overlay-crown { 
+    @apply absolute inset-0 bg-[#9370DB]/20 backdrop-blur-sm z-10 flex flex-col items-center justify-center; 
+  }
+  
+  .overlay-ace { 
+    @apply absolute inset-0 bg-[#DC143C]/20 backdrop-blur-sm z-10 flex flex-col items-center justify-center; 
+  }
+  
+  .overlay-conqueror { 
+    @apply absolute inset-0 bg-[#FFD700]/20 backdrop-blur-sm z-10 flex flex-col items-center justify-center; 
   }
 
   .progress-scanline {

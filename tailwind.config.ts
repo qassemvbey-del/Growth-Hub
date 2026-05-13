@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 export default {
+  darkMode: 'class',
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,10 +10,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#efffe3",
+        primary: "var(--color-primary, #efffe3)",
         secondary: "#ebb2ff",
         background: "#131313",
-        "neon-green": "#39ff14",
+        "neon-green": "var(--color-neon-green, #39ff14)",
         "neon-purple": "#b600f8",
         foreground: "#e5e2e1",
         surface: "#131313",
@@ -21,7 +22,7 @@ export default {
       fontFamily: {
         space: ["Space Grotesk", "sans-serif"],
         inter: ["Inter", "sans-serif"],
-        arabic: ["Cairo", "sans-serif"],
+        arabic: ["Tajawal", "sans-serif"],
         marker: ["Permanent Marker", "cursive"],
       },
       borderRadius: {

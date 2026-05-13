@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useMemo } from '
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
-export type Language = 'en' | 'ar' | 'ar-eg'
+export type Language = 'en' | 'ar'
 export type Theme = 'Neon Cyberpunk' | 'Clean Stealth'
 export type AiPersonality = 'SAVAGE' | 'GENTLE'
 
@@ -20,7 +20,67 @@ export interface Profile {
   onboarded: boolean
   ai_name: string | null
   ai_personality: AiPersonality
+  gender: string | null
+  xp: number
+  rank: string
+  active_theme: string
 }
+
+export const THEME_PACKAGES = {
+  SILVER: {
+    id: 'SILVER',
+    name: 'Steel Grey',
+    color: '#B0C4DE',
+    cupStyle: 'cylinder',
+    glow: 'rgba(176, 196, 222, 0.4)',
+    accent: 'text-[#B0C4DE]',
+    border: 'border-[#B0C4DE]/30'
+  },
+  PLATINUM: {
+    id: 'PLATINUM',
+    name: 'Cool Cyan',
+    color: '#00CED1',
+    cupStyle: 'hex',
+    glow: 'rgba(0, 206, 209, 0.4)',
+    accent: 'text-[#00CED1]',
+    border: 'border-[#00CED1]/30'
+  },
+  CROWN: {
+    id: 'CROWN',
+    name: 'Majestic Purple',
+    color: '#9370DB',
+    cupStyle: 'crystal',
+    glow: 'rgba(147, 112, 219, 0.4)',
+    accent: 'text-[#9370DB]',
+    border: 'border-[#9370DB]/30'
+  },
+  ACE: {
+    id: 'ACE',
+    name: 'Crimson Red',
+    color: '#DC143C',
+    cupStyle: 'shard',
+    glow: 'rgba(220, 20, 60, 0.4)',
+    accent: 'text-[#DC143C]',
+    border: 'border-[#DC143C]/30'
+  },
+  CONQUEROR: {
+    id: 'CONQUEROR',
+    name: 'Blazing Gold',
+    color: '#FFD700',
+    cupStyle: 'sphere',
+    glow: 'rgba(255, 215, 0, 0.5)',
+    accent: 'text-[#FFD700]',
+    border: 'border-[#FFD700]/30'
+  }
+}
+
+export const RANK_THRESHOLDS = [
+  { rank: 'SILVER', xp: 0, theme: 'SILVER', perk: 'Basic Protocol' },
+  { rank: 'PLATINUM', xp: 500, theme: 'PLATINUM', perk: 'Energy Streams' },
+  { rank: 'CROWN', xp: 1500, theme: 'CROWN', perk: 'Savage AI Coach' },
+  { rank: 'ACE', xp: 4000, theme: 'ACE', perk: 'Tactical HUD' },
+  { rank: 'CONQUEROR', xp: 10000, theme: 'CONQUEROR', perk: 'Glitch FX' }
+]
 
 export interface MissionTask {
   id: string
@@ -43,60 +103,109 @@ export interface Mission {
 export const TRANSLATIONS = {
   en: {
     dashboard: 'DASHBOARD',
-    mission: 'MISSION_CANVAS',
-    brain: 'BRAIN_NOTES',
-    achievements: 'LEGACY_VAULT',
+    mission: 'MISSIONS',
+    brain: 'NOTES',
+    achievements: 'ACHIEVEMENTS',
+    vault: 'VAULT',
     streak: 'STREAK',
-    exit: 'SAFE EXIT',
-    sync: 'SYNCING_IDENTITY',
-    operator: 'OPERATOR',
-    status: 'SYSTEM: ONLINE',
+    exit: 'Logout',
+    sync: 'SYNCING',
+    operator: 'USER',
+    status: 'ONLINE',
+    createMission: 'CREATE MISSION',
+    task: 'TASK',
+    showOnDashboard: 'SHOW ON DASHBOARD',
+    save: 'SAVE',
+    cancel: 'CANCEL',
+    delete: 'DELETE',
+    edit: 'EDIT',
+    deadline: 'DEADLINE',
+    start_date: 'START DATE',
+    end_date: 'END DATE',
+    title: 'TITLE',
+    progress: 'PROGRESS',
+    on_track: 'ON TRACK',
+    late: 'LATE',
+    ahead: 'AHEAD',
+    addTask: 'ADD TASK',
+    settings: 'SETTINGS',
+    gender: 'GENDER',
+    male: 'MALE',
+    female: 'FEMALE',
+    age: 'AGE',
+    fullName: 'FULL NAME',
+    aiName: 'COACH NAME',
+    aiPersonality: 'AI PERSONALITY',
+    gentle: 'GENTLE',
+    savage: 'SAVAGE',
+    logout: 'LOGOUT',
+    noTasks: 'NO TASKS DETECTED. ADD A TASK BELOW.',
+    tapToEnter: 'TAP TO ENTER MISSION',
+    purge: 'PURGE',
+    deploy: 'DEPLOY',
+    missionColor: 'MISSION COLOR',
+    missionScale: 'MISSION SCALE',
     // AI Templates - GENTLE
-    ai_ahead_gentle: "Uplink successful! Your refactoring on {task} is surgical. Next node, Operator.",
-    ai_red_gentle: "INTERRUPT: {task} is flatlining. Why are you staring at the HUD? Move.",
-    ai_default_gentle: "Uplink stable. Keep executing, {name}.",
+    ai_ahead_gentle: "Great job! You're ahead on {task}. Keep it up.",
+    ai_red_gentle: "Reminder: {task} needs attention. You're falling behind.",
+    ai_default_gentle: "System stable. How are we doing today, {name}?",
     // AI Templates - SAVAGE
-    ai_ahead_savage: "Surgical execution, {name}. {task} was no match for your logic. Don't stop now.",
-    ai_red_savage: "FAILURE_IMMINENT: {task} is bleeding out. Get offline or get it done. No excuses.",
-    ai_default_savage: "Monitoring... Performance is acceptable, {name}. Barely.",
+    ai_ahead_savage: "Efficiency detected, {name}. {task} is under control. Next target.",
+    ai_red_savage: "CRITICAL: {task} is overdue. Stop wasting time and finish it.",
+    ai_default_savage: "Monitoring... Stay focused, {name}. The clock is ticking.",
   },
   ar: {
-    dashboard: 'لوحة القيادة',
-    mission: 'مهام القمة',
-    brain: 'ملاحظات العقل',
-    achievements: 'قبو الإنجازات',
+    dashboard: 'الرئيسية',
+    mission: 'التاسكات',
+    brain: 'الذاكرة',
+    achievements: 'الإنجازات',
+    vault: 'الخزنة',
     streak: 'سلسلة الإنجاز',
-    exit: 'خروج آمن',
-    sync: 'مزامنة الهوية',
-    operator: 'المشغل',
-    status: 'النظام: متصل',
+    exit: 'تسجيل الخروج',
+    sync: 'جاري المزامنة',
+    operator: 'المستخدم',
+    status: 'متصل',
+    createMission: 'إنشاء مهمة',
+    task: 'مهمة فرعية',
+    showOnDashboard: 'عرض على الرئيسية',
+    save: 'حفظ',
+    cancel: 'إلغاء',
+    delete: 'حذف',
+    edit: 'تعديل',
+    deadline: 'الموعد النهائي',
+    start_date: 'تاريخ البدء',
+    end_date: 'تاريخ الانتهاء',
+    title: 'العنوان',
+    progress: 'التقدم',
+    on_track: 'على المسار',
+    late: 'متأخر',
+    ahead: 'متقدم',
+    addTask: 'إضافة مهمة فرعية',
+    settings: 'الإعدادات',
+    gender: 'الجنس',
+    male: 'ذكر',
+    female: 'أنثى',
+    age: 'العمر',
+    fullName: 'الاسم بالكامل',
+    aiName: 'اسم المدرب',
+    aiPersonality: 'شخصية الذكاء الاصطناعي',
+    gentle: 'هادئ',
+    savage: 'شرس',
+    logout: 'تسجيل الخروج',
+    noTasks: 'لم يتم العثور على مهام. أضف مهمة أدناه.',
+    tapToEnter: 'انقر لدخول المهمة',
+    purge: 'مسح',
+    deploy: 'إطلاق',
+    missionColor: 'لون المهمة',
+    missionScale: 'حجم المهمة',
     // AI Templates - GENTLE
-    ai_ahead_gentle: "تم الاتصال بنجاح! تعديلك على {task} دقيق للغاية. العقدة التالية يا مشغل.",
-    ai_red_gentle: "مقاطعة: {task} تتلاشى. لماذا تحدق في الشاشة؟ تحرك.",
-    ai_default_gentle: "الاتصال مستقر. استمر في التنفيذ يا {name}.",
+    ai_ahead_gentle: "عمل رائع! أنت متقدم في {task}. استمر على هذا المنوال.",
+    ai_red_gentle: "تذكير: {task} تحتاج إلى اهتمام. أنت متأخر قليلاً.",
+    ai_default_gentle: "النظام مستقر. كيف حالك اليوم يا {name}؟",
     // AI Templates - SAVAGE
-    ai_ahead_savage: "تنفيذ جراحي يا {name}. {task} لم تكن عائقاً أمام منطقك. لا تتوقف الآن.",
-    ai_red_savage: "فشل وشيك: {task} تنزف. أنجزها أو اخرج من النظام. لا أعذار.",
-    ai_default_savage: "مراقب... الأداء مقبول يا {name}. بالكاد.",
-  },
-  'ar-eg': {
-    dashboard: 'المنصة الرئيسية',
-    mission: 'خطة الشغل',
-    brain: 'نوتات الدماغ',
-    achievements: 'خزنة البطولات',
-    streak: 'عاش يا وحش',
-    exit: 'اخرج بالسلامة',
-    sync: 'بنجيب بياناتك',
-    operator: 'يا بطل',
-    status: 'كله تمام',
-    // AI Templates - GENTLE
-    ai_ahead_gentle: "زي الفل! شغلك على {task} عالمي. اللي بعده يا بطل.",
-    ai_red_gentle: "استنى هنا: الـ {task} بتضيع منك. انت واقف بتتفرج على ايه؟ انجز.",
-    ai_default_gentle: "كله تمام. كمل شغل يا {name}.",
-    // AI Templates - SAVAGE
-    ai_ahead_savage: "وحش يا {name}! الـ {task} خلصت في ثانية. مش عاوز دلع، كمل.",
-    ai_red_savage: "بقولك ايه: الـ {task} هتضيع. فوق كدا وخلصنا، مفيش وقت للدلع.",
-    ai_default_savage: "متابعك... شغال يعني يا {name}. مش بطال.",
+    ai_ahead_savage: "تم الكشف عن الكفاءة يا {name}. {task} تحت السيطرة. الهدف التالي.",
+    ai_red_savage: "حرج: {task} متأخرة. توقف عن إضاعة الوقت وأنهِها.",
+    ai_default_savage: "جاري المراقبة... ابقَ مركزاً يا {name}. الوقت يمر.",
   }
 }
 
@@ -109,8 +218,11 @@ interface GrowthContextType {
   setTutorialActive: (active: boolean) => void
   refreshProfile: () => Promise<void>
   t: (key: keyof typeof TRANSLATIONS['en']) => string
-  getAiMessage: (type: 'AHEAD' | 'RED' | 'DEFAULT', taskName?: string) => string
   mounted: boolean
+  currentTheme: typeof THEME_PACKAGES['SILVER']
+  addXp: (amount: number) => Promise<void>
+  getAiMessage: (type: 'AHEAD' | 'RED' | 'DEFAULT', taskName?: string) => string
+  changeTheme: (themeId: string) => Promise<void>
   calculateAccountability: (mission: Mission) => {
     progress: number
     isInRedZone: boolean
@@ -130,6 +242,53 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
   const isRTL = useMemo(() => profile?.language?.startsWith('ar') || false, [profile?.language])
+
+  const currentTheme = useMemo(() => {
+    const themeKey = (profile?.active_theme || 'SILVER') as keyof typeof THEME_PACKAGES
+    return THEME_PACKAGES[themeKey] || THEME_PACKAGES.SILVER
+  }, [profile?.active_theme])
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.setProperty('--color-neon-green', currentTheme.color)
+      document.documentElement.style.setProperty('--color-primary', currentTheme.color)
+    }
+  }, [currentTheme])
+
+  const addXp = async (amount: number) => {
+    if (!profile) return
+    const newXp = (profile.xp || 0) + Math.round(amount)
+    
+    // Determine new rank
+    let newRank = profile.rank || 'RECRUIT'
+    for (const threshold of [...RANK_THRESHOLDS].reverse()) {
+      if (newXp >= threshold.xp) {
+        newRank = threshold.rank
+        break
+      }
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ xp: newXp, rank: newRank })
+      .eq('id', profile.id)
+
+    if (!error) {
+      setProfile({ ...profile, xp: newXp, rank: newRank })
+    }
+  }
+
+  const changeTheme = async (themeId: string) => {
+    if (!profile) return
+    const { error } = await supabase
+      .from('profiles')
+      .update({ active_theme: themeId })
+      .eq('id', profile.id)
+
+    if (!error) {
+      setProfile({ ...profile, active_theme: themeId })
+    }
+  }
 
   const t = (key: keyof typeof TRANSLATIONS['en']) => {
     const lang = profile?.language || 'en'
@@ -151,7 +310,10 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
           full_name: data.full_name || user.user_metadata.full_name,
           avatar_url: data.avatar_url || user.user_metadata.avatar_url,
           ai_name: data.ai_name,
-          ai_personality: data.ai_personality || 'GENTLE'
+          ai_personality: data.ai_personality || 'GENTLE',
+          xp: data.xp || 0,
+          rank: data.rank || 'RECRUIT',
+          active_theme: data.active_theme || 'SILVER'
         } as Profile)
 
         // Intelligent Gatekeeper Redirection
@@ -199,8 +361,8 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
     if (document.documentElement.dir !== dir) document.documentElement.dir = dir
     if (document.documentElement.lang !== lang) document.documentElement.lang = lang
     
-    const targetSize = lang === 'ar' ? '120%' : '100%'
-    const targetLH = lang === 'ar' ? '1.7' : 'normal'
+    const targetSize = lang === 'ar' ? '140%' : '100%'
+    const targetLH = lang === 'ar' ? '1.8' : 'normal'
     
     if (document.documentElement.style.fontSize !== targetSize) {
       document.documentElement.style.fontSize = targetSize
@@ -219,6 +381,9 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
       refreshProfile,
       t,
       mounted,
+      currentTheme,
+      addXp,
+      changeTheme,
       getAiMessage: (type: 'AHEAD' | 'RED' | 'DEFAULT', taskName?: string) => {
         const lang = profile?.language || 'en'
         const personality = (profile?.ai_personality || 'GENTLE').toLowerCase()

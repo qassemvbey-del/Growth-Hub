@@ -22,7 +22,7 @@ export default function NotesPage() {
   const [editingNote, setEditingNote] = useState<any>(null)
   const [newContent, setNewContent] = useState('')
   const supabase = createClient()
-  const { isRTL } = useGrowth()
+  const { isRTL, currentTheme } = useGrowth()
 
   useEffect(() => { fetchNotes() }, [])
 
@@ -58,7 +58,7 @@ export default function NotesPage() {
     const newNote = {
       user_id: user.id,
       content: newContent,
-      color: 'green',
+      color: currentTheme.color,
       is_locked: false,
       is_on_home: false,
       pos_x: 0,
@@ -87,8 +87,8 @@ export default function NotesPage() {
         {/* Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
           <div className="space-y-2">
-            <h1 className="text-4xl md:text-6xl font-black font-space tracking-tighter uppercase italic text-white leading-none">
-              BRAIN<span className="text-neon-green">_NOTES</span>
+            <h1 className="text-4xl md:text-6xl font-black font-space tracking-tighter uppercase italic text-black dark:text-white leading-none">
+              BRAIN
             </h1>
             <p className="text-[10px] font-space text-neon-green tracking-[0.8em] uppercase font-bold opacity-40">
               CORE_MEMORY // {notes.length}_RECORDS_STABLE
@@ -117,11 +117,11 @@ export default function NotesPage() {
                 onChange={(e) => setNewContent(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && e.metaKey) createNote() }}
                 placeholder="INPUT_CORE_DATA..."
-                className="w-full bg-transparent border-none text-xl md:text-2xl font-space font-black text-white italic outline-none min-h-[100px] placeholder:text-white/10 resize-none"
+                className="w-full bg-transparent border-none text-xl md:text-2xl font-space font-black text-black dark:text-white italic outline-none min-h-[100px] placeholder:text-black/30 dark:placeholder:text-white/10 resize-none"
                 dir="auto"
               />
               <div className="flex justify-end gap-6">
-                <button onClick={() => { setIsCreating(false); setNewContent('') }} className="text-white/20 font-space uppercase text-[10px] tracking-widest hover:text-white transition-all">ABORT</button>
+                <button onClick={() => { setIsCreating(false); setNewContent('') }} className="text-black/40 dark:text-white/20 font-space uppercase text-[10px] tracking-widest hover:text-black dark:hover:text-white transition-all">ABORT</button>
                 <button onClick={createNote} className="px-8 py-2 bg-neon-green text-black font-space font-black uppercase text-xs tracking-widest">UPLOAD</button>
               </div>
             </motion.div>
@@ -131,7 +131,7 @@ export default function NotesPage() {
         {/* Static Grid */}
         {notes.length === 0 && !isCreating ? (
           <div className="flex items-center justify-center py-40">
-            <p className="text-white/10 font-space text-[11px] tracking-[0.5em] uppercase font-black">
+            <p className="text-black/30 dark:text-white/10 font-space text-[11px] tracking-[0.5em] uppercase font-black">
               NO_CORE_RECORDS_FOUND
             </p>
           </div>
@@ -139,7 +139,7 @@ export default function NotesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             <AnimatePresence mode="popLayout">
               {notes.map((note, idx) => {
-                const p = PALETTE.find(p => p.name === note.color) || PALETTE[0]
+                const noteColor = currentTheme.color
                 return (
                   <motion.div
                     key={note.id}
@@ -151,37 +151,40 @@ export default function NotesPage() {
                     className={cn(
                       "group relative p-7 border cursor-pointer transition-all duration-300",
                       "backdrop-blur-xl",
-                      p.bg, p.border, p.hover,
+                      "hover:[border-color:var(--note-color)] hover:[box-shadow:0_0_20px_var(--note-color)]",
                       isRTL ? 'text-right' : 'text-left'
                     )}
                     style={{
-                      background: `linear-gradient(135deg, ${p.color}08 0%, transparent 60%)`,
-                    }}
+                      '--note-color': noteColor,
+                      backgroundColor: `${noteColor}05`,
+                      borderColor: `${noteColor}15`,
+                      background: `linear-gradient(135deg, ${noteColor}08 0%, transparent 60%)`,
+                    } as any}
                   >
                     {/* 1px neon top accent */}
                     <div
                       className="absolute top-0 left-0 right-0 h-[1px] opacity-60 group-hover:opacity-100 transition-opacity"
-                      style={{ background: `linear-gradient(90deg, transparent, ${p.color}, transparent)` }}
+                      style={{ background: `linear-gradient(90deg, transparent, ${noteColor}, transparent)` }}
                     />
 
                     {/* Pin indicator */}
                     {note.is_locked && (
                       <div className="absolute top-3 right-3 opacity-50">
-                        <span className="material-symbols-outlined text-sm" style={{ color: p.color }}>push_pin</span>
+                        <span className="material-symbols-outlined text-sm" style={{ color: noteColor }}>push_pin</span>
                       </div>
                     )}
 
                     {/* Delete button */}
                     <button
                       onClick={(e) => { e.stopPropagation(); deleteNote(note.id) }}
-                      className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 text-white/30 hover:text-red-500 transition-all"
+                      className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 text-black/30 dark:text-white/30 hover:text-red-500 transition-all"
                     >
                       <span className="material-symbols-outlined text-base">delete</span>
                     </button>
 
                     {/* Content */}
                     <p className={cn(
-                      'text-sm leading-relaxed text-white/80 line-clamp-6 mt-2',
+                      'text-sm leading-relaxed text-black/80 dark:text-white/80 line-clamp-6 mt-2',
                       note.font_settings?.family === 'cairo' ? 'font-cairo' : 'font-space',
                       note.font_settings?.weight === 'bold' ? 'font-black' : 'font-normal',
                       note.font_settings?.style === 'italic' ? 'italic' : ''
@@ -190,9 +193,9 @@ export default function NotesPage() {
                     </p>
 
                     {/* Footer */}
-                    <div className="mt-5 pt-4 border-t border-white/5 flex justify-between items-center">
-                      <span className="text-[8px] font-space tracking-[0.3em] text-white/20 uppercase font-black">CORE_LOG</span>
-                      <span className="material-symbols-outlined text-white/15 text-sm group-hover:text-white/40 transition-all">open_in_full</span>
+                    <div className="mt-5 pt-4 border-t border-black/5 dark:border-white/5 flex justify-between items-center">
+                      <span className="text-[8px] font-space tracking-[0.3em] text-black/50 dark:text-white/20 uppercase font-black">CORE_LOG</span>
+                      <span className="material-symbols-outlined text-black/30 dark:text-white/15 text-sm group-hover:text-black/70 dark:group-hover:text-white/40 transition-all">open_in_full</span>
                     </div>
                   </motion.div>
                 )
@@ -209,7 +212,7 @@ export default function NotesPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center p-8 bg-[#050505]/90 backdrop-blur-md"
+            className="fixed inset-0 z-[200] flex items-center justify-center p-8 bg-[#F0F2F5]/90 dark:bg-[#050505]/90 backdrop-blur-md"
             onClick={() => setEditingNote(null)}
           >
             <motion.div
@@ -218,31 +221,31 @@ export default function NotesPage() {
               exit={{ scale: 0.93, y: 20 }}
               onClick={(e) => e.stopPropagation()}
               className={cn(
-                'w-full max-w-3xl p-6 md:p-12 relative border backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-y-auto max-h-[90vh]',
-                (() => {
-                  const p = PALETTE.find(p => p.name === editingNote.color) || PALETTE[0]
-                  return `${p.bg} ${p.border}`
-                })()
+                'w-full max-w-3xl p-6 md:p-12 relative border backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-y-auto max-h-[90vh]'
               )}
+              style={{
+                backgroundColor: `${currentTheme.color}05`,
+                borderColor: `${currentTheme.color}15`
+              }}
             >
               {/* Neon top bar */}
               <div
                 className="absolute top-0 left-0 right-0 h-[1px]"
                 style={{
-                  background: `linear-gradient(90deg, transparent, ${PALETTE.find(p => p.name === editingNote.color)?.color || '#39FF14'}, transparent)`
+                  background: `linear-gradient(90deg, transparent, ${currentTheme.color}, transparent)`
                 }}
               />
 
               {/* Close */}
               <button
                 onClick={() => setEditingNote(null)}
-                className="absolute top-5 right-5 text-white/20 hover:text-white transition-all"
+                className="absolute top-5 right-5 text-black/30 dark:text-white/20 hover:text-black dark:hover:text-white transition-all"
               >
                 <span className="material-symbols-outlined text-2xl">close</span>
               </button>
 
               {/* Font Controls */}
-              <div className="flex gap-3 border-b border-white/5 pb-6 mb-8">
+              <div className="flex gap-3 border-b border-black/5 dark:border-white/5 pb-6 mb-8">
                 {[
                   { icon: 'format_bold', field: 'weight', active: 'bold', inactive: 'normal' },
                   { icon: 'format_italic', field: 'style', active: 'italic', inactive: 'normal' },
@@ -252,22 +255,22 @@ export default function NotesPage() {
                     onClick={() => updateNote(editingNote.id, {
                       font_settings: { ...editingNote.font_settings, [field]: editingNote.font_settings?.[field] === active ? inactive : active }
                     })}
-                    className={cn('p-2.5 border transition-all', editingNote.font_settings?.[field] === active ? 'bg-white/20 border-white' : 'bg-white/5 border-white/10 hover:border-white/30')}
+                    className={cn('p-2.5 border transition-all', editingNote.font_settings?.[field] === active ? 'bg-black/10 dark:bg-white/20 border-black/30 dark:border-white' : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30')}
                   >
-                    <span className="material-symbols-outlined text-white text-base">{icon}</span>
+                    <span className="material-symbols-outlined text-black dark:text-white text-base">{icon}</span>
                   </button>
                 ))}
                 <button
                   onClick={() => updateNote(editingNote.id, {
-                    font_settings: { ...editingNote.font_settings, family: editingNote.font_settings?.family === 'cairo' ? 'space' : 'cairo' }
+                    font_settings: { ...editingNote.font_settings, family: editingNote.font_settings?.family === 'tajawal' ? 'space' : 'tajawal' }
                   })}
-                  className={cn('px-5 py-2 border font-space text-[10px] font-black tracking-widest text-white transition-all', editingNote.font_settings?.family === 'cairo' ? 'bg-white/20 border-white' : 'bg-white/5 border-white/10 hover:border-white/30')}
+                  className={cn('px-5 py-2 border font-space text-sm font-black tracking-widest text-black dark:text-white transition-all', editingNote.font_settings?.family === 'tajawal' ? 'bg-black/10 dark:bg-white/20 border-black/30 dark:border-white' : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30')}
                 >
-                  {editingNote.font_settings?.family === 'cairo' ? 'CAIRO' : 'SPACE'}
+                  {editingNote.font_settings?.family === 'tajawal' ? 'TAJAWAL' : 'SPACE'}
                 </button>
                 <button
                   onClick={() => updateNote(editingNote.id, { is_locked: !editingNote.is_locked })}
-                  className={cn('p-2.5 border transition-all', editingNote.is_locked ? 'bg-neon-green/20 border-neon-green text-neon-green' : 'bg-white/5 border-white/10 hover:border-white/30')}
+                  className={cn('p-2.5 border transition-all', editingNote.is_locked ? 'bg-neon-green/20 border-neon-green text-neon-green' : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30')}
                 >
                   <span className="material-symbols-outlined text-base">push_pin</span>
                 </button>
@@ -279,7 +282,7 @@ export default function NotesPage() {
                 value={editingNote.content}
                 onChange={(e) => updateNote(editingNote.id, { content: e.target.value })}
                 className={cn(
-                  'w-full bg-transparent border-none text-3xl leading-relaxed text-white outline-none min-h-[280px] resize-none',
+                  'w-full bg-transparent border-none text-3xl leading-relaxed text-black dark:text-white outline-none min-h-[280px] resize-none',
                   editingNote.font_settings?.family === 'cairo' ? 'font-cairo' : 'font-space',
                   editingNote.font_settings?.weight === 'bold' ? 'font-black' : 'font-normal',
                   editingNote.font_settings?.style === 'italic' ? 'italic' : '',
@@ -288,24 +291,9 @@ export default function NotesPage() {
                 dir="auto"
               />
 
-              {/* Color Palette */}
-              <div className="pt-8 border-t border-white/5 flex justify-between items-center">
-                <div className="flex gap-3">
-                  {PALETTE.map(p => (
-                    <button
-                      key={p.name}
-                      onClick={() => updateNote(editingNote.id, { color: p.name })}
-                      className="w-7 h-7 rounded-full border-2 transition-all"
-                      style={{
-                        backgroundColor: `${p.color}25`,
-                        borderColor: editingNote.color === p.name ? p.color : `${p.color}30`,
-                        transform: editingNote.color === p.name ? 'scale(1.35)' : 'scale(1)',
-                        boxShadow: editingNote.color === p.name ? `0 0 10px ${p.color}` : 'none',
-                      }}
-                    />
-                  ))}
-                </div>
-                <div className="flex items-center gap-3 text-white/20">
+              {/* Footer */}
+              <div className="pt-8 border-t border-black/5 dark:border-white/5 flex justify-end items-center">
+                <div className="flex items-center gap-3 text-black/40 dark:text-white/20">
                   <span className="text-[9px] font-space tracking-widest uppercase font-black">AUTO_SAVED</span>
                   <span className="material-symbols-outlined text-xl">save</span>
                 </div>

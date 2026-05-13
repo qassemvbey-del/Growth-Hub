@@ -1,193 +1,299 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Shell from '@/components/layout/Shell'
-import { useGrowth, type Language } from '@/context/GrowthContext'
-import { motion } from 'framer-motion'
-import { cn } from '@/lib/utils'
+import { useGrowth } from '@/context/GrowthContext'
 import { createClient } from '@/lib/supabase'
+import { motion, AnimatePresence } from 'framer-motion'
+import { cn } from '@/lib/utils'
+import { useToast } from '@/components/ui/Toast'
 
 export default function SettingsPage() {
-  const { profile, refreshProfile, t } = useGrowth()
-  const [updating, setUpdating] = useState(false)
-  const [localProfile, setLocalProfile] = useState<any>(null)
+  const { profile, setProfile, mounted, t, isRTL } = useGrowth()
+  const { showToast } = useToast()
+  const router = useRouter()
   const supabase = createClient()
+
+  const [formData, setFormData] = useState({
+    full_name: '',
+    age: '',
+    language: 'en',
+    ai_name: '',
+    gender: ''
+  })
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (profile) {
-      setLocalProfile(profile)
+      setFormData({
+        full_name: profile.full_name || '',
+        age: profile.age?.toString() || '',
+        language: profile.language || 'en',
+        ai_name: profile.ai_name || '',
+        gender: profile.gender || ''
+      })
     }
   }, [profile])
 
-  const updateProfileField = async (field: string, value: any) => {
-    setUpdating(true)
+  const handleSave = async () => {
+    setSaving(true)
     const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ [field]: value })
-        .eq('id', user.id)
-      
-      if (!error) {
-        await refreshProfile()
+    if (!user) return
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        full_name: formData.full_name,
+        age: formData.age ? parseInt(formData.age) : null,
+        language: formData.language,
+        ai_name: formData.ai_name,
+        gender: formData.gender,
+      })
+      .eq('id', user.id)
+
+    if (!error) {
+      setProfile({ ...profile, ...formData, age: formData.age ? parseInt(formData.age) : null } as any)
+      showToast(isRTL ? 'تم حفظ التغييرات بنجاح' : 'SETTINGS_UPDATED_SUCCESSFULLY', 'success')
+      if (formData.language !== profile?.language) {
+        window.location.reload()
       }
+    } else {
+      showToast('UPDATE_ERROR', 'error')
     }
-    setUpdating(false)
+    setSaving(false)
   }
 
-  if (!localProfile) return null
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/auth/login')
+  }
+
+  if (!mounted) return null
 
   return (
     <Shell>
-      <div className="p-6 md:p-16 space-y-12 md:space-y-16 max-w-4xl mx-auto">
-        <header className="space-y-4">
-           <div className="flex items-center gap-4">
-             <span className="material-symbols-outlined text-[#39FF14] text-4xl md:text-5xl">settings</span>
-             <h1 className="text-4xl md:text-6xl font-black font-space tracking-tighter uppercase italic text-white leading-none">
-               SYSTEM<span className="text-[#39FF14]">_CONFIG</span>
-             </h1>
-           </div>
-           <p className="text-[10px] font-space text-[#39FF14] tracking-[0.8em] uppercase font-bold opacity-40">
-             CALIBRATING_NEURAL_INTERFACE // {profile?.full_name?.toUpperCase()}
-           </p>
-        </header>
+      <div className="min-h-[calc(100vh-64px)] p-6 md:p-12 flex flex-col items-center">
+        <div className="w-full max-w-2xl space-y-12">
+          
+          <header className="space-y-4">
+            <h1 className="text-4xl md:text-7xl font-black font-space tracking-tighter uppercase italic text-black dark:text-white leading-none">
+              {t('settings')}
+            </h1>
+            <p className="text-[10px] md:text-xs font-space text-neon-green tracking-[0.5em] uppercase font-black opacity-40">
+              {isRTL ? 'تخصيص النظام' : 'SYSTEM_CONFIGURATION'} // ID_{profile?.id?.slice(0, 8).toUpperCase()}
+            </p>
+          </header>
 
-        <section className="space-y-16">
-           {/* Language Selection */}
-           <div className="space-y-6">
-              <h3 className="text-[10px] font-space tracking-[0.5em] text-white/20 uppercase font-black">NEURAL_LEXICON</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                  { id: 'en', label: 'ENGLISH', sub: 'STANDARD' },
-                  { id: 'ar', label: 'ARABIC', sub: 'CLASSIC' },
-                  { id: 'ar-eg', label: 'EGYPTIAN', sub: 'LOCAL' }
-                ].map((lang) => (
-                  <button
-                    key={lang.id}
-                    disabled={updating}
-                    onClick={() => updateProfileField('language', lang.id)}
-                    className={cn(
-                      "p-8 border rounded-sm text-left transition-all relative overflow-hidden group",
-                      profile?.language === lang.id 
-                        ? "bg-[#39FF14]/10 border-[#39FF14] shadow-[0_0_30px_#39FF1411]" 
-                        : "bg-white/5 border-white/5 hover:border-white/10"
-                    )}
-                  >
-                    <div className="relative z-10 space-y-2">
-                       <p className={cn("text-[9px] font-space font-black tracking-widest", profile?.language === lang.id ? "text-[#39FF14]" : "text-white/20")}>{lang.sub}</p>
-                       <p className={cn("text-xl font-space font-black", profile?.language === lang.id ? "text-white" : "text-white/40")}>{lang.label}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-           </div>
-
-           {/* AI Coach Config */}
-           <div className="space-y-6">
-              <h3 className="text-[10px] font-space tracking-[0.5em] text-white/20 uppercase font-black">{profile?.ai_name || 'NEURAL_CORE'}_CALIBRATION</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+            
+            {/* Left Column: Identity */}
+            <section className="space-y-8">
+              <h3 className="text-xs md:text-sm font-space font-black text-neon-green tracking-[0.3em] uppercase border-b border-black/5 dark:border-white/5 pb-2">
+                {isRTL ? 'الهوية' : 'IDENTITY_REF'}
+              </h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[
-                  { id: 'GENTLE', label: 'GENTLE', sub: 'SUPPORTIVE_MODE', icon: 'favorite' },
-                  { id: 'SAVAGE', label: 'SAVAGE', sub: 'DRILL_SERGEANT', icon: 'bolt' }
-                ].map((p) => (
-                  <button
-                    key={p.id}
-                    disabled={updating}
-                    onClick={() => updateProfileField('ai_personality', p.id)}
-                    className={cn(
-                      "p-6 border rounded-sm text-left transition-all relative overflow-hidden group",
-                      profile?.ai_personality === p.id 
-                        ? "bg-secondary/10 border-secondary shadow-[0_0_30px_rgba(0,240,255,0.1)]" 
-                        : "bg-white/5 border-white/5 hover:border-white/10"
-                    )}
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[9px] md:text-xs font-space text-black/40 dark:text-white/20 tracking-widest uppercase font-black">{t('fullName')}</label>
+                  <input
+                    value={formData.full_name}
+                    onChange={e => setFormData({ ...formData, full_name: e.target.value })}
+                    className="w-full bg-black/5 dark:bg-white/[0.02] border border-black/10 dark:border-white/10 p-4 font-space text-base md:text-lg font-black text-black dark:text-white outline-none focus:border-neon-green/50 transition-all uppercase"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[9px] md:text-xs font-space text-black/40 dark:text-white/20 tracking-widest uppercase font-black">{t('age')}</label>
+                    <input
+                      type="number"
+                      value={formData.age}
+                      onChange={e => setFormData({ ...formData, age: e.target.value })}
+                      className="w-full bg-black/5 dark:bg-white/[0.02] border border-black/10 dark:border-white/10 p-4 font-space text-base md:text-lg font-black text-black dark:text-white outline-none focus:border-neon-green/50 transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] md:text-xs font-space text-black/40 dark:text-white/20 tracking-widest uppercase font-black">{t('gender')}</label>
+                    <select
+                      value={formData.gender || ''}
+                      onChange={e => setFormData({ ...formData, gender: e.target.value })}
+                      className="w-full bg-black/5 dark:bg-white/[0.02] border border-black/10 dark:border-white/10 p-4 font-space text-base md:text-lg font-black text-black dark:text-white outline-none focus:border-neon-green/50 transition-all appearance-none"
+                    >
+                      <option value="" disabled>{isRTL ? 'اختر' : 'SELECT'}</option>
+                      <option value="Male">{t('male')}</option>
+                      <option value="Female">{t('female')}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[9px] md:text-xs font-space text-black/40 dark:text-white/20 tracking-widest uppercase font-black">{isRTL ? 'اللغة' : 'LANGUAGE'}</label>
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      { key: 'en', label: 'English' },
+                      { key: 'ar', label: 'العربية' }
+                    ].map(l => (
+                      <button
+                        key={l.key}
+                        onClick={() => setFormData({ ...formData, language: l.key as any })}
+                        className={cn(
+                          'p-4 border font-space text-sm md:text-base font-black transition-all',
+                          formData.language === l.key 
+                            ? 'bg-neon-green text-black border-neon-green shadow-[0_0_15px_rgba(57,255,20,0.2)]' 
+                            : 'bg-black/5 dark:bg-white/[0.02] border-black/10 dark:border-white/10 text-black/40 dark:text-white/20'
+                        )}
+                      >
+                        {l.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Right Column: AI Coach */}
+            <section className="space-y-8">
+              <h3 className="text-xs md:text-sm font-space font-black text-neon-green tracking-[0.3em] uppercase border-b border-black/5 dark:border-white/5 pb-2">
+                {isRTL ? 'المدرب الذكي' : 'AI COACH'}
+              </h3>
+
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[9px] md:text-xs font-space text-black/40 dark:text-white/20 tracking-widest uppercase font-black">{t('aiName')}</label>
+                  <input
+                    value={formData.ai_name}
+                    onChange={e => setFormData({ ...formData, ai_name: e.target.value })}
+                    className="w-full bg-black/5 dark:bg-white/[0.02] border border-black/10 dark:border-white/10 p-4 font-space text-base md:text-lg font-black text-black dark:text-white outline-none focus:border-neon-green/50 transition-all uppercase"
+                  />
+                </div>
+
+
+
+                <div className="pt-4 space-y-4">
+                   <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="w-full bg-neon-green text-black py-5 font-space font-black text-sm md:text-base uppercase tracking-[0.2em] shadow-xl shadow-neon-green/10 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
                   >
-                    <div className="relative z-10 flex items-center gap-4">
-                       <span className={cn("material-symbols-outlined text-2xl", profile?.ai_personality === p.id ? "text-secondary" : "text-white/20")}>{p.icon}</span>
-                       <div>
-                          <p className={cn("text-[9px] font-space font-black tracking-widest", profile?.ai_personality === p.id ? "text-secondary" : "text-white/20")}>{p.sub}</p>
-                          <p className={cn("text-lg font-space font-black", profile?.ai_personality === p.id ? "text-white" : "text-white/40")}>{p.label}</p>
-                       </div>
-                    </div>
+                    {saving ? (isRTL ? 'جاري الحفظ...' : 'SAVING...') : t('save')}
                   </button>
-                ))}
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full py-4 border border-red-500/20 text-red-500/60 hover:bg-red-500/10 hover:text-red-500 transition-all font-space font-black text-xs md:text-sm uppercase tracking-widest"
+                  >
+                    {t('logout')}
+                  </button>
+                </div>
               </div>
+            </section>
+          </div>
 
-              <div className="glass-panel p-6 md:p-10 border-white/5 space-y-8 relative overflow-hidden group">
-                 <div className="absolute inset-0 bg-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                 <div className="space-y-4 relative z-10">
-                    <label className="text-[9px] font-space text-secondary tracking-widest font-black uppercase">COACH_DESIGNATION</label>
-                    <input 
-                      type="text"
-                      className="w-full bg-white/5 border border-white/5 p-4 md:p-6 rounded-sm font-space text-2xl md:text-3xl font-black italic text-white outline-none focus:border-secondary/50 focus:bg-secondary/5 transition-all uppercase"
-                      value={localProfile.ai_name || ''}
-                      onChange={(e) => setLocalProfile({ ...localProfile, ai_name: e.target.value })}
-                      onBlur={(e) => updateProfileField('ai_name', e.target.value)}
-                      placeholder="ENTER_AI_NAME"
-                    />
-                    <p className="text-[10px] font-space text-white/20 tracking-wider">THIS NAME WILL BE USED IN ALL NEURAL NOTIFICATIONS.</p>
-                 </div>
-              </div>
-           </div>
+          {/* System Manual Accordion */}
+          <section className="w-full pt-16 border-t border-black/5 dark:border-white/5 space-y-10">
+            <header className="space-y-2">
+              <h2 className="text-2xl font-space font-black tracking-tight text-black dark:text-white uppercase italic">
+                SYSTEM<span className="text-neon-green">_MANUAL</span>
+              </h2>
+              <p className="text-[10px] font-space text-black/40 dark:text-white/30 tracking-[0.4em] uppercase font-black">
+                {isRTL ? 'دليل تشغيل النظام' : 'OPERATIONAL PROTOCOLS & CORE LOGIC'}
+              </p>
+            </header>
 
-           {/* Operator Config */}
-           <div className="space-y-6">
-              <h3 className="text-[10px] font-space tracking-[0.5em] text-white/20 uppercase font-black">OPERATOR_IDENTITY</h3>
-              <div className="glass-panel p-6 md:p-10 border-white/5 space-y-8">
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-                    <div className="space-y-4">
-                       <label className="text-[9px] font-space text-[#39FF14] tracking-widest font-black uppercase">FULL_NAME</label>
-                       <input 
-                         type="text"
-                         className="w-full bg-white/5 border border-white/5 p-4 md:p-6 rounded-sm font-space text-xl md:text-2xl font-black text-white outline-none focus:border-[#39FF14]/50 focus:bg-[#39FF14]/5 transition-all uppercase"
-                         value={localProfile.full_name || ''}
-                         onChange={(e) => setLocalProfile({ ...localProfile, full_name: e.target.value })}
-                         onBlur={(e) => updateProfileField('full_name', e.target.value)}
-                       />
-                    </div>
-                    <div className="space-y-4">
-                       <label className="text-[9px] font-space text-[#39FF14] tracking-widest font-black uppercase">CHRONO_AGE</label>
-                       <input 
-                         type="number"
-                         className="w-full bg-white/5 border border-white/5 p-4 md:p-6 rounded-sm font-space text-xl md:text-2xl font-black text-white outline-none focus:border-[#39FF14]/50 focus:bg-[#39FF14]/5 transition-all"
-                         value={localProfile.age || ''}
-                         onChange={(e) => setLocalProfile({ ...localProfile, age: e.target.value })}
-                         onBlur={(e) => updateProfileField('age', parseInt(e.target.value))}
-                       />
-                    </div>
-                 </div>
+            <div className="space-y-4">
+              {[
+                { 
+                  title: isRTL ? 'نظرة عامة على النظام' : 'System Overview', 
+                  content: isRTL ? 'Growth Hub هو نظام تشغيل لحياتك، مصمم لتحويل أهدافك إلى طاقة قابلة للقياس.' : 'Growth Hub is your professional Life OS, designed to transform abstract objectives into measurable energy cells.' 
+                },
+                { 
+                  title: isRTL ? 'هيكلية المهمات' : 'Mission Architecture', 
+                  content: isRTL ? 'يمكنك إدارة "المهمات المباشرة" (Live Missions) وتحديد أحجامها. كل حجم يغير شكل خلية الطاقة.' : 'Manage your LIVE MISSIONS through a tiered architecture. High-priority objectives manifest as complex geometric cells (Hex, Shard, etc.) on your mission hub.' 
+                },
+                { 
+                  title: isRTL ? 'أوزان المهام والتقدم' : 'Mission Weights & Goals', 
+                  content: isRTL ? 'كل "هدف نشط" (Active Goal) له وزن محدد. النظام يحسب التقدم بناءً على مجموع الأوزان.' : 'Every ACTIVE GOAL within a mission has a specific weight. The system calculates real-time accountability by comparing completed weights against the total mission volume.' 
+                },
+                { 
+                  title: isRTL ? 'المدرب الذكي' : 'AI Coach Protocol', 
+                  content: isRTL ? 'يراقب النظام أداءك باستمرار. النمط "الشرس" سيعطيك ملاحظات قوية عند التأخر، بينما النمط "الهادئ" سيكون أكثر تشجيعاً.' : 'Select between SAVAGE and GENTLE coaching protocols. The AI monitors your mission velocity and provides real-time feedback based on your chosen intensity.' 
+                },
+                { 
+                  title: isRTL ? 'الرتب والمظاهر' : 'XP & Theme Vaulting', 
+                  content: isRTL ? 'تجمع نقاط XP مع كل مهمة تنجزها لتطوير رتبتك وفتح حزم مظاهر بصرية فريدة في الخزنة.' : 'Earn XP through goal completion to elevate your operator rank. Higher ranks grant access to exclusive UI protocols and geometric themes in the THEME VAULT.' 
+                },
+                { 
+                  title: isRTL ? 'خزنة الإنجازات' : 'Legacy Archiving', 
+                  content: isRTL ? 'المهمات المكتملة لا تختفي، بل يتم أرشفتها في الخزنة كإنجازات دائمة.' : 'Completed missions are automatically migrated to the LEGACY VAULT. This ensures your history of performance is preserved while keeping your mission hub focused on active objectives.' 
+                }
+              ].map((item, idx) => (
+                <AccordionItem key={idx} title={item.title} content={item.content} />
+              ))}
+            </div>
+          </section>
 
-                 <div className="space-y-4 pt-8 border-t border-white/5">
-                    <label className="text-[9px] font-space text-[#39FF14] tracking-widest font-black uppercase">MACRO_MISSION_GOAL</label>
-                    <textarea 
-                      className="w-full bg-white/5 border border-white/5 p-4 md:p-6 rounded-sm font-space text-lg md:text-xl font-black italic text-white outline-none focus:border-[#39FF14]/50 focus:bg-[#39FF14]/5 transition-all uppercase resize-none h-32"
-                      value={localProfile.mission_goal || ''}
-                      onChange={(e) => setLocalProfile({ ...localProfile, mission_goal: e.target.value })}
-                      onBlur={(e) => updateProfileField('mission_goal', e.target.value)}
-                    />
-                 </div>
-              </div>
-           </div>
-        </section>
-
-        <footer className="pt-16 flex flex-col md:flex-row justify-between items-center gap-8">
-           <button 
-             onClick={async () => {
-               await supabase.auth.signOut()
-               window.location.href = '/auth/login'
-             }}
-             className="text-[10px] font-space tracking-[0.4em] uppercase font-black text-red-500/40 hover:text-red-500 transition-colors w-full md:w-auto"
-           >
-             TERMINATE_ACCOUNT_SYNC
-           </button>
-           <div className="flex items-center gap-4">
-              <div className={cn("w-2 h-2 rounded-full animate-pulse", updating ? "bg-secondary" : "bg-[#39FF14]")} />
-              <span className="text-[9px] font-space text-white/20 tracking-widest uppercase font-black">
-                {updating ? 'SYNCING_CHANGES...' : 'ALL_SYSTEMS_SYNCED'}
-              </span>
-           </div>
-        </footer>
+        </div>
       </div>
     </Shell>
+  )
+}
+
+function AccordionItem({ title, content }: { title: string, content: string }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const { currentTheme } = useGrowth()
+
+  return (
+    <div className="relative group overflow-hidden">
+      {/* Tactical Borders */}
+      <div className="absolute top-0 left-0 w-1 h-1 border-t border-l opacity-40 group-hover:opacity-100 transition-opacity" style={{ borderColor: currentTheme.color }} />
+      <div className="absolute top-0 right-0 w-1 h-1 border-t border-r opacity-40 group-hover:opacity-100 transition-opacity" style={{ borderColor: currentTheme.color }} />
+      <div className="absolute bottom-0 left-0 w-1 h-1 border-b border-l opacity-40 group-hover:opacity-100 transition-opacity" style={{ borderColor: currentTheme.color }} />
+      <div className="absolute bottom-0 right-0 w-1 h-1 border-b border-r opacity-40 group-hover:opacity-100 transition-opacity" style={{ borderColor: currentTheme.color }} />
+
+      <div className={cn(
+        "border transition-all duration-300 bg-white/50 dark:bg-white/[0.02] rounded-sm",
+        isOpen ? "border-black/20 dark:border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.03)]" : "border-black/5 dark:border-white/5 hover:border-black/10 dark:hover:border-white/10"
+      )}>
+        <button 
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full flex justify-between items-center p-5 hover:bg-black/5 dark:hover:bg-white/5 transition-all text-start group/btn"
+        >
+          <span className={cn(
+            "font-space font-black text-sm uppercase tracking-wider transition-colors",
+            isOpen ? "text-black dark:text-white" : "text-black/60 dark:text-white/40"
+          )}>
+            {title}
+          </span>
+          <div className="flex items-center gap-4">
+             <div className={cn(
+                "w-8 h-[1px] bg-black/5 dark:bg-white/5 transition-all",
+                isOpen && "w-12 bg-current opacity-40"
+             )} style={{ color: currentTheme.color }} />
+             <span 
+               className={cn("material-symbols-outlined transition-all duration-500", isOpen ? "rotate-180 scale-125" : "opacity-40")}
+               style={{ color: isOpen ? currentTheme.color : undefined, textShadow: isOpen ? `0 0 10px ${currentTheme.color}` : 'none' }}
+             >
+               expand_more
+             </span>
+          </div>
+        </button>
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="px-5 pb-6"
+            >
+              <div className="h-[1px] w-full bg-black/5 dark:bg-white/5 mb-4" />
+              <p className="text-xs font-space text-black/60 dark:text-white/50 leading-relaxed italic border-l-2 pl-4 py-1" style={{ borderColor: `${currentTheme.color}33` }}>
+                {content}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
   )
 }
