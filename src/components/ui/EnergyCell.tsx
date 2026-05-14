@@ -1,260 +1,301 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { cn } from '@/lib/utils'
+import { useMemo } from 'react'
 
 interface EnergyCellProps {
   percentage: number
-  label?: string
-  subLabel?: string
   color: string
   size?: 'sm' | 'md' | 'lg'
   isInRedZone?: boolean
-  cupStyle?: 'cylinder' | 'hex' | 'crystal' | 'shard' | 'sphere'
+  cupStyle?: string
 }
 
-const COLORS = {
-  green: {
-    primary: '#39FF14',
-    glow: 'rgba(57, 255, 20, 0.35)',
-    glowSoft: 'rgba(57, 255, 20, 0.08)',
-    text: 'text-green-700 dark:text-[#39FF14]',
-    border: '#39FF14',
-  },
-  blue: {
-    primary: '#00F0FF',
-    glow: 'rgba(0, 240, 255, 0.35)',
-    glowSoft: 'rgba(0, 240, 255, 0.08)',
-    text: 'text-cyan-700 dark:text-[#00F0FF]',
-    border: '#00F0FF',
-  },
-  purple: {
-    primary: '#b600f8',
-    glow: 'rgba(182, 0, 248, 0.35)',
-    glowSoft: 'rgba(182, 0, 248, 0.08)',
-    text: 'text-purple-700 dark:text-[#b600f8]',
-    border: '#b600f8',
-  },
-  red: {
-    primary: '#FF0000',
-    glow: 'rgba(255, 0, 0, 0.35)',
-    glowSoft: 'rgba(255, 0, 0, 0.08)',
-    text: 'text-red-700 dark:text-[#FF0000]',
-    border: '#FF0000',
-  },
-}
+/**
+ * LIQUID CRYSTAL TROPHY — V7.4
+ * A 3D crystal chalice silhouette with smoked-glass material,
+ * neon liquid fill, SVG wave animation, and rising glow bubbles.
+ *
+ * STRICT SIZE ENFORCEMENT:
+ *   SMALL  → 45px
+ *   MEDIUM → 90px
+ *   LARGE  → 170px
+ */
+const DIMS = {
+  sm: { w: 36, h: 45 },
+  md: { w: 68, h: 90 },
+  lg: { w: 120, h: 170 },
+} as const
 
-const SIZES = {
-  sm: { w: 80, h: 60 },
-  md: { w: 100, h: 130 },
-  lg: { w: 180, h: 220 },
-}
+// Unique ID counter for SVG defs
+let _cellIdCounter = 0
 
-export default function EnergyCell({ percentage, label, subLabel, color, size = 'md', isInRedZone, cupStyle = 'cylinder' }: EnergyCellProps) {
-  const isHex = color?.startsWith('#')
-  const config = isInRedZone 
-    ? COLORS.red 
-    : isHex 
-      ? {
-          primary: color,
-          glow: `${color}59`,
-          glowSoft: `${color}14`,
-          text: '', // Managed via style
-          border: color,
-        }
-      : (COLORS[color as keyof typeof COLORS] || COLORS.green)
-  
-  const { w, h } = SIZES[size]
-  const clampedPct = Math.round(Math.max(0, Math.min(100, isNaN(percentage) ? 0 : percentage)))
-  const fillHeight = (clampedPct / 100) * h
+export default function EnergyCell({
+  percentage,
+  color,
+  size = 'md',
+  isInRedZone,
+}: EnergyCellProps) {
+  const primary = isInRedZone ? '#FF0055' : (color?.startsWith('#') ? color : '#39FF14')
+  const { w, h } = DIMS[size ?? 'sm']
+  const pct = Math.round(Math.max(0, Math.min(100, isNaN(percentage) ? 0 : percentage)))
+
+  // Unique IDs for SVG clip paths
+  const uid = useMemo(() => `ec${++_cellIdCounter}`, [])
+
+  // === Crystal Trophy SVG Path (chalice silhouette) ===
+  // Normalized to 100x100 viewBox, then scaled
+  const chalicePath = `
+    M 30 5 
+    Q 30 0, 50 0 
+    Q 70 0, 70 5
+    L 72 8
+    Q 73 10, 70 12
+    L 65 14
+    Q 52 18, 50 20
+    Q 48 18, 35 14
+    L 30 12
+    Q 27 10, 28 8
+    Z
+    M 35 14
+    Q 30 20, 28 35
+    Q 26 55, 32 70
+    Q 35 78, 40 82
+    L 42 85
+    Q 44 86, 44 88
+    L 44 92
+    Q 44 94, 38 95
+    L 32 96
+    Q 28 97, 28 100
+    L 72 100
+    Q 72 97, 68 96
+    L 62 95
+    Q 56 94, 56 92
+    L 56 88
+    Q 56 86, 58 85
+    L 60 82
+    Q 65 78, 68 70
+    Q 74 55, 72 35
+    Q 70 20, 65 14
+    Z
+  `
+
+  // Glow configs per size
+  const glowSpread = size === 'lg' ? 30 : size === 'md' ? 16 : 8
+  const borderGlow = size === 'lg' ? 20 : size === 'md' ? 10 : 5
+  const fontSize = size === 'sm' ? 9 : size === 'md' ? 14 : 24
+  const fontWeight = 900
+
+  // Bubble config
+  const bubbleCount = size === 'sm' ? 3 : size === 'md' ? 5 : 8
+  const bubbles = useMemo(() => {
+    return Array.from({ length: bubbleCount }, (_, i) => ({
+      x: 35 + Math.random() * 30,
+      delay: Math.random() * 3,
+      duration: 2 + Math.random() * 2,
+      r: size === 'sm' ? 1 : size === 'md' ? 1.5 : 2 + Math.random(),
+    }))
+  }, [bubbleCount, size])
+
+  // Fill level: map pct to Y within the chalice body (14 to 100 in SVG coords)
+  const bodyTop = 14
+  const bodyBottom = 100
+  const bodyHeight = bodyBottom - bodyTop
+  const fillY = bodyBottom - (pct / 100) * bodyHeight
+  const waveY = fillY
 
   return (
-    <div className="flex flex-col items-center gap-6 group">
-      <div className="relative">
-        
-        {/* CONQUEROR: Orbiting Rings */}
-        {cupStyle === 'sphere' && (
-           <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-              {[1, 2, 3].map((i) => (
-                <motion.div
-                  key={i}
-                  className="absolute border border-white/10"
-                  style={{ 
-                    width: w * (1 + i * 0.15), 
-                    height: w * (1 + i * 0.15), 
-                    borderRadius: '50%',
-                    borderColor: `${config.primary}${i === 1 ? '44' : '22'}`,
-                    rotateX: i * 30,
-                    rotateY: i * 45
-                  }}
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 10 / i, repeat: Infinity, ease: "linear" }}
-                />
-              ))}
-           </div>
-        )}
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={{ position: 'relative', width: w, height: h, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 
-        {/* Cell Body */}
-        <motion.div
-          className="relative overflow-hidden group/cell z-10"
-          style={{
-            width: w,
-            height: h,
-            background: 'transparent',
-            border: 'none',
-            borderRadius: cupStyle === 'cylinder' ? '30px' :
-                          cupStyle === 'hex' ? '12px' :
-                          cupStyle === 'crystal' ? '4px' :
-                          cupStyle === 'shard' ? '24px 4px 24px 4px' :
-                          cupStyle === 'sphere' ? '50%' : '16px',
-            background: size === 'lg'
-                          ? `linear-gradient(135deg, ${config.primary}22 0%, rgba(0,0,0,0.8) 50%, ${config.primary}44 100%)`
-                          : cupStyle === 'cylinder' 
-                          ? 'linear-gradient(135deg, rgba(176,196,222,0.1) 0%, rgba(112,128,144,0.4) 50%, rgba(47,79,79,0.8) 100%)'
-                          : cupStyle === 'sphere' 
-                          ? 'linear-gradient(135deg, rgba(255,215,0,0.2) 0%, rgba(218,165,32,0.5) 50%, rgba(184,134,11,0.8) 100%)'
-                          : 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.2) 100%)',
-          }}
-          animate={isInRedZone ? {
-            boxShadow: [
-              `0 0 20px ${config.glow}, inset 0 0 30px ${config.glowSoft}`,
-              `0 0 40px ${config.glow}, inset 0 0 50px ${config.glowSoft}`,
-              `0 0 20px ${config.glow}, inset 0 0 30px ${config.glowSoft}`,
-            ]
-          } : size === 'lg' ? {
-            boxShadow: [
-              `0 0 30px ${config.primary}80, inset 0 0 40px ${config.primary}40`,
-              `0 0 60px ${config.primary}, inset 0 0 60px ${config.primary}80`,
-              `0 0 30px ${config.primary}80, inset 0 0 40px ${config.primary}40`,
-            ],
-            transition: { duration: 2, repeat: Infinity }
-          } : {
-            boxShadow: `0 0 15px ${config.glowSoft}, inset 0 8px 16px rgba(255,255,255,0.2), inset 0 -8px 16px rgba(0,0,0,0.6)`,
-          }}
+        {/* Orbit rings — LARGE ONLY */}
+        {size === 'lg' && [1, 2].map(i => (
+          <motion.div
+            key={i}
+            style={{
+              position: 'absolute',
+              width: w * (1 + i * 0.35),
+              height: h * (1 + i * 0.1),
+              borderRadius: '50%',
+              border: `1px solid ${primary}${i === 1 ? '30' : '18'}`,
+              pointerEvents: 'none',
+            }}
+            animate={{ rotate: 360 * (i % 2 === 0 ? 1 : -1) }}
+            transition={{ duration: 8 + i * 6, repeat: Infinity, ease: 'linear' }}
+          />
+        ))}
+
+        {/* === THE CRYSTAL CHALICE === */}
+        <svg
+          width={w}
+          height={h}
+          viewBox="0 0 100 100"
+          style={{ overflow: 'visible', filter: `drop-shadow(0 0 ${glowSpread}px ${primary}88)` }}
         >
-          {/* Glass & Material Background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-black/60 dark:from-white/5 dark:to-black/80 backdrop-blur-md z-0" 
-               style={{
-                 boxShadow: `inset 0 1px 1px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.7)`,
-                 opacity: cupStyle === 'cylinder' || cupStyle === 'sphere' ? 0.3 : 1
-               }}
+          <defs>
+            {/* Clip to the chalice shape */}
+            <clipPath id={`${uid}-clip`}>
+              <path d={chalicePath} />
+            </clipPath>
+
+            {/* Smoked glass gradient */}
+            <linearGradient id={`${uid}-glass`} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="rgba(30,30,35,0.85)" />
+              <stop offset="40%" stopColor="rgba(15,15,20,0.92)" />
+              <stop offset="100%" stopColor="rgba(5,5,8,0.95)" />
+            </linearGradient>
+
+            {/* Liquid fill gradient */}
+            <linearGradient id={`${uid}-liquid`} x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stopColor={primary} stopOpacity="0.9" />
+              <stop offset="40%" stopColor={primary} stopOpacity="0.6" />
+              <stop offset="70%" stopColor={primary} stopOpacity="0.3" />
+              <stop offset="100%" stopColor={primary} stopOpacity="0.05" />
+            </linearGradient>
+
+            {/* Top glass highlight */}
+            <linearGradient id={`${uid}-highlight`} x1="0.3" y1="0" x2="0.7" y2="0.5">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.12)" />
+              <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+            </linearGradient>
+
+            {/* Glow filter for liquid surface */}
+            <filter id={`${uid}-glow`} x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation={size === 'lg' ? 3 : 2} result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          {/* Chalice body — smoked glass */}
+          <path
+            d={chalicePath}
+            fill={`url(#${uid}-glass)`}
+            stroke={`${primary}55`}
+            strokeWidth={size === 'lg' ? 0.8 : 0.6}
           />
 
-          {/* PLATINUM: Vertical Energy Streams */}
-          {cupStyle === 'hex' && (
-            <div className="absolute inset-0 z-0 flex justify-around opacity-30">
-               {[1, 2, 3].map(i => (
-                 <motion.div 
-                   key={i}
-                   className="w-[1px] h-full"
-                   style={{ background: `linear-gradient(to bottom, transparent, ${config.primary}, transparent)` }}
-                   animate={{ y: [-h, h] }}
-                   transition={{ duration: 3 / i, repeat: Infinity, ease: "linear" }}
-                 />
-               ))}
-            </div>
-          )}
+          {/* Content clipped to chalice shape */}
+          <g clipPath={`url(#${uid}-clip)`}>
 
-          {/* CROWN: Pulsing Inner Light */}
-          {cupStyle === 'crystal' && (
-            <motion.div 
-              className="absolute inset-0 z-0 flex items-center justify-center"
-              animate={{ opacity: [0.1, 0.4, 0.1] }}
-              transition={{ duration: 2, repeat: Infinity }}
+            {/* Tick marks */}
+            {size !== 'sm' && [25, 50, 75].map(tick => {
+              const yPos = bodyBottom - (tick / 100) * bodyHeight
+              return (
+                <line
+                  key={tick}
+                  x1="25" y1={yPos} x2="75" y2={yPos}
+                  stroke={`${primary}22`}
+                  strokeWidth="0.5"
+                />
+              )
+            })}
+
+            {/* NEON LIQUID FILL */}
+            <motion.rect
+              x="0" width="100"
+              initial={{ y: 100, height: 0 }}
+              animate={{ y: fillY, height: bodyBottom - fillY }}
+              transition={{ duration: size === 'lg' ? 2.8 : 2, ease: 'easeInOut' }}
+              fill={`url(#${uid}-liquid)`}
+            />
+
+            {/* SVG WAVE at liquid surface */}
+            <motion.g
+              initial={{ y: 100 - bodyTop }}
+              animate={{ y: waveY - bodyTop }}
+              transition={{ duration: size === 'lg' ? 2.8 : 2, ease: 'easeInOut' }}
             >
-              <div className="w-12 h-12 rounded-full blur-2xl" style={{ backgroundColor: config.primary }} />
-            </motion.div>
-          )}
+              <motion.path
+                d={`M 20 0 Q 30 -3, 40 0 Q 50 3, 60 0 Q 70 -3, 80 0 L 80 4 L 20 4 Z`}
+                fill={primary}
+                opacity={0.7}
+                filter={`url(#${uid}-glow)`}
+                animate={{
+                  d: [
+                    `M 20 0 Q 30 -3, 40 0 Q 50 3, 60 0 Q 70 -3, 80 0 L 80 4 L 20 4 Z`,
+                    `M 20 0 Q 30 3, 40 0 Q 50 -3, 60 0 Q 70 3, 80 0 L 80 4 L 20 4 Z`,
+                    `M 20 0 Q 30 -3, 40 0 Q 50 3, 60 0 Q 70 -3, 80 0 L 80 4 L 20 4 Z`,
+                  ]
+                }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+              />
+              {/* Bright surface line */}
+              <line
+                x1="25" y1="0" x2="75" y2="0"
+                stroke={primary}
+                strokeWidth={size === 'lg' ? 1.2 : 0.8}
+                filter={`url(#${uid}-glow)`}
+              />
+            </motion.g>
 
-          {/* ACE: Leakage Particles */}
-          {cupStyle === 'shard' && (
-            <div className="absolute inset-0 z-10 pointer-events-none">
-               {[1, 2, 3, 4, 5].map(i => (
-                 <motion.div 
-                   key={i}
-                   className="absolute w-1 h-1 rounded-full"
-                   style={{ backgroundColor: config.primary, left: `${20 + i * 15}%`, top: `${10 + i * 15}%` }}
-                   animate={{ 
-                     y: [0, -20, 0], 
-                     x: [0, 10, 0],
-                     opacity: [0, 1, 0],
-                     scale: [0.5, 1, 0.5]
-                   }}
-                   transition={{ duration: 2, delay: i * 0.4, repeat: Infinity }}
-                 />
-               ))}
-            </div>
-          )}
+            {/* RISING BUBBLES */}
+            {bubbles.map((b, i) => (
+              <motion.circle
+                key={i}
+                cx={b.x}
+                r={b.r}
+                fill={primary}
+                opacity={0.6}
+                initial={{ cy: 95, opacity: 0 }}
+                animate={{
+                  cy: [95, fillY + 5, fillY - 2],
+                  opacity: [0, 0.7, 0],
+                }}
+                transition={{
+                  duration: b.duration,
+                  delay: b.delay,
+                  repeat: Infinity,
+                  ease: 'easeOut',
+                }}
+              />
+            ))}
 
-          {/* Liquid fill */}
-          <motion.div
-            className="absolute bottom-0 left-0 w-full"
-            initial={{ height: 0 }}
-            animate={{ height: fillHeight }}
-            transition={{ duration: 2.2, ease: 'easeInOut' }}
+            {/* Inner shimmer (medium + large) */}
+            {size !== 'sm' && (
+              <motion.ellipse
+                cx="50" cy="50" rx="18" ry="30"
+                fill={`${primary}11`}
+                animate={{ opacity: [0.05, 0.2, 0.05] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            )}
+
+            {/* Glass highlight overlay */}
+            <path
+              d={chalicePath}
+              fill={`url(#${uid}-highlight)`}
+            />
+          </g>
+
+          {/* Crystal edge highlight (inner border glow) */}
+          <path
+            d={chalicePath}
+            fill="none"
+            stroke={`${primary}44`}
+            strokeWidth={0.5}
+            style={{ filter: `drop-shadow(0 0 ${size === 'lg' ? 4 : 2}px ${primary}44)` }}
+          />
+
+          {/* % Readout */}
+          <text
+            x="50"
+            y={size === 'sm' ? 62 : 58}
+            textAnchor="middle"
+            dominantBaseline="central"
             style={{
-              background: `linear-gradient(to top, ${config.primary}60, ${config.primary}10)`,
-              boxShadow: `0 0 15px ${config.primary}30`,
+              fontFamily: "'Space Grotesk', monospace",
+              fontWeight,
+              fontSize: size === 'sm' ? '12px' : size === 'md' ? '14px' : '18px',
+              fill: '#ffffff',
+              filter: `drop-shadow(0 0 6px ${primary}) drop-shadow(0 0 12px ${primary}66)`,
             }}
           >
-            <div
-              className="absolute top-0 left-0 w-full"
-              style={{
-                height: '1.5px',
-                background: config.primary,
-                boxShadow: `0 0 12px ${config.primary}`,
-              }}
-            />
-          </motion.div>
-
-          {/* SILVER: High-Tech Grid */}
-          <div className="absolute inset-0 z-0 pointer-events-none">
-             {[25, 50, 75].map((tick) => (
-               <div
-                 key={tick}
-                 className="absolute left-0 w-full"
-                 style={{
-                   bottom: `${tick}%`,
-                   height: '1px',
-                   background: `${config.primary}${cupStyle === 'cylinder' ? '33' : '18'}`,
-                   boxShadow: cupStyle === 'cylinder' ? `0 0 5px ${config.primary}22` : 'none'
-                 }}
-               />
-             ))}
-             {cupStyle === 'cylinder' && [20, 40, 60, 80].map(x => (
-                <div key={x} className="absolute top-0 bottom-0 w-[1px]" style={{ left: `${x}%`, background: `${config.primary}11` }} />
-             ))}
-          </div>
-
-          {/* Outer Border */}
-          <div className="absolute inset-0 pointer-events-none z-20" 
-               style={{ 
-                 border: `1px solid ${config.border}60`,
-                 borderRadius: 'inherit',
-                 boxShadow: `inset 0 0 10px ${config.border}20, 0 4px 20px rgba(0,0,0,0.4)`
-               }} 
-          />
-
-          {/* Percentage overlay */}
-          <div className="absolute inset-0 flex items-center justify-center z-10">
-            <span
-              className="font-space font-black text-lg md:text-xl tracking-tighter text-gray-900 dark:text-white"
-              style={{
-                textShadow: clampedPct > 0 ? `0 0 10px ${config.primary}60` : 'none',
-              }}
-            >
-              {clampedPct}%
-            </span>
-          </div>
-        </motion.div>
-      </div>
-
-      <div className="text-center space-y-1">
-        {subLabel && (
-          <p className="text-sm font-space text-black dark:text-white uppercase tracking-widest font-black max-w-[180px] truncate drop-shadow-sm">
-            {subLabel}
-          </p>
-        )}
+            {pct}%
+          </text>
+        </svg>
       </div>
     </div>
   )

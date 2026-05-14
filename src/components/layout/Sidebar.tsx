@@ -94,7 +94,7 @@ export default function Sidebar({ isRTL = false }: { isRTL?: boolean }) {
         </Link>
 
         {/* XP Progress Bar */}
-        <div className="w-full space-y-1.5">
+        <div id="hud-xp-bar" className="w-full space-y-1.5">
           <div className="flex justify-between items-end text-sm font-space text-black/40 dark:text-white/40 tracking-widest uppercase font-black">
             <span>{isRTL ? 'نقاط الخبرة' : 'SYSTEM_XP'}</span>
             <span className="text-3xl" style={{ color: currentTheme.color }}>{profile?.xp || 0}</span>

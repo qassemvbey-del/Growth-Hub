@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Shell from '@/components/layout/Shell'
 import EnergyCell from '@/components/ui/EnergyCell'
-import Tutorial from '@/components/ui/Tutorial'
 import { createClient } from '@/lib/supabase'
 import { useGrowth } from '@/context/GrowthContext'
 import { motion } from 'framer-motion'
@@ -13,13 +12,14 @@ import React from 'react'
 
 const SLOT_COLORS = ['#39FF14', '#00F0FF', '#b600f8'] as const
 
+// DB stores 'sm' | 'md' | 'lg' — cover all aliases too
 const SIZE_MAP: Record<string, 'sm' | 'md' | 'lg'> = {
-  S: 'sm',
-  SMALL: 'sm',
-  M: 'md',
-  MEDIUM: 'md',
-  L: 'lg',
-  LARGE: 'lg',
+  // Direct DB values (primary)
+  sm: 'sm', md: 'md', lg: 'lg',
+  // Aliases
+  S: 'sm', SMALL: 'sm', small: 'sm',
+  M: 'md', MEDIUM: 'md', medium: 'md',
+  L: 'lg', LARGE: 'lg', large: 'lg',
 }
 
 export default function Dashboard() {
@@ -50,17 +50,23 @@ export default function Dashboard() {
 
   return (
     <Shell syncedMissions={missions} onMissionsRefresh={fetchDashboardMissions}>
-      <Tutorial />
 
       <div className="w-full min-h-[calc(100vh-64px)] flex flex-col py-6 md:py-16 px-4 md:px-12 space-y-8 md:space-y-24">
 
         {/* ── CENTERED TITLE ── */}
         <div className="flex flex-col items-center text-center space-y-4 md:space-y-6">
-          <div className="flex items-center gap-6 opacity-20">
-            <div className="h-[1px] w-32 bg-gradient-to-r from-transparent to-black dark:to-white" />
-            <span className="material-symbols-outlined text-neon-green text-sm">bolt</span>
-            <span className="material-symbols-outlined text-sm" style={{ color: currentTheme.color }}>bolt</span>
-            <div className="h-[1px] w-32 bg-gradient-to-l from-transparent to-black dark:to-white" />
+          <div className="flex items-center gap-6">
+            <div className="h-[1px] w-24 md:w-32 bg-gradient-to-r from-transparent" style={{ background: `linear-gradient(to right, transparent, ${currentTheme.color}40)` }} />
+            {/* ONE breathing lightning bolt */}
+            <motion.span
+              className="material-symbols-outlined text-lg md:text-2xl"
+              style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }}
+              animate={{ opacity: [0.3, 1, 0.3] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              bolt
+            </motion.span>
+            <div className="h-[1px] w-24 md:w-32" style={{ background: `linear-gradient(to left, transparent, ${currentTheme.color}40)` }} />
           </div>
 
           <motion.h1
@@ -68,7 +74,7 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl md:text-8xl lg:text-9xl font-black font-space italic tracking-tighter uppercase leading-none text-black dark:text-white break-words"
           >
-            {isRTL ? 'لوحة' : 'MISSION'}<span style={{ color: currentTheme.color }}>{isRTL ? ' المهام' : '_HUB'}</span>
+            {isRTL ? 'مركز' : 'GROWTH'}<span style={{ color: currentTheme.color }}>{isRTL ? ' النمو' : '_HUB'}</span>
           </motion.h1>
 
           <p className="text-[10px] md:text-xs font-space text-black/40 dark:text-white/40 tracking-[0.6em] uppercase font-black">
@@ -76,8 +82,64 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* ── MISSION CARDS GRID (PRECISION ARCHITECTURE) ── */}
-        <section className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 cells-target">
+        {/* ═══════════════════════════════════════════════════ */}
+        {/* ██  FOCUS CAPACITY — BOLD, GLOWING, text-3xl/4xl ██ */}
+        {/* ═══════════════════════════════════════════════════ */}
+        {(() => {
+          const SIZE_SLOTS: Record<string, number> = { sm: 1, md: 1.5, lg: 3, s: 1, m: 1.5, l: 3 }
+          const usedSlots = missions.reduce((acc: number, m: any) => acc + (SIZE_SLOTS[m.size?.toLowerCase()] ?? 1), 0)
+          const pct = Math.min(100, (usedSlots / 9) * 100)
+          const isFull = usedSlots >= 9
+          return (
+            <div className="w-full max-w-lg mx-auto space-y-4">
+              {/* FOCUS CAPACITY — HERO LABEL */}
+              <div className="flex justify-between items-end">
+                <span
+                  className="text-3xl md:text-4xl font-space font-black tracking-tight uppercase"
+                  style={{
+                    color: isFull ? '#FF0055' : currentTheme.color,
+                    textShadow: `0 0 20px ${isFull ? '#FF005588' : currentTheme.color + '88'}, 0 0 40px ${isFull ? '#FF005544' : currentTheme.color + '44'}`,
+                  }}
+                >
+                  {isRTL ? 'سعة المحطة' : 'FOCUS_CAPACITY'}
+                </span>
+                <span
+                  className="text-2xl md:text-3xl font-space font-black tracking-tight"
+                  style={{
+                    color: isFull ? '#FF0055' : currentTheme.color,
+                    textShadow: `0 0 12px ${isFull ? '#FF005566' : currentTheme.color + '66'}`,
+                  }}
+                >
+                  {usedSlots.toFixed(1).replace('.0', '')}/9
+                </span>
+              </div>
+              {/* Segmented 9-slot bar */}
+              <div className="flex gap-[3px] h-[6px]">
+                {Array.from({ length: 9 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-full transition-all duration-700"
+                    style={{
+                      backgroundColor: i < usedSlots
+                        ? (isFull ? '#FF0055' : currentTheme.color)
+                        : `${currentTheme.color}18`,
+                      boxShadow: i < usedSlots && !isFull
+                        ? `0 0 8px ${currentTheme.color}`
+                        : i < usedSlots && isFull
+                          ? '0 0 8px #FF0055'
+                          : 'none',
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* ═══════════════════════════════════════════════════ */}
+        {/* ██  MISSION CARDS GRID — STRICT 3-COL + LAYOUT  ██ */}
+        {/* ═══════════════════════════════════════════════════ */}
+        <section className="w-full grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 cells-target">
           {missions.map((mission, idx) => {
             const { progress, isInRedZone } = calculateAccountability(mission)
             const roundedProgress = Math.round(progress)
@@ -87,84 +149,105 @@ export default function Dashboard() {
 
             return (
               <React.Fragment key={mission.id}>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  onClick={() => router.push(`/missions/${mission.id}`)}
-                  className={cn(
-                    'group relative cursor-pointer rounded-sm border p-4 md:p-8 flex flex-col items-center gap-4 md:gap-8 transition-all duration-300 overflow-hidden',
-                    'bg-white dark:bg-black/40 backdrop-blur-md min-h-[200px] md:min-h-[320px] justify-center w-full',
-                    mission.size === 'lg' ? 'col-span-1 md:col-span-2 lg:col-span-3' : '',
-                    isInRedZone
-                      ? 'border-red-500/30 hover:border-red-500/60 shadow-[0_0_30px_rgba(255,0,0,0.06)]'
-                      : 'border-black/5 dark:border-white/5 hover:border-black/20 dark:hover:border-white/20'
-                  )}
-                >
-                  {/* Top accent line */}
-                  <div className="absolute top-0 inset-x-0 h-[3px]" style={{ background: `linear-gradient(to right, ${topBorderColor}, transparent)` }} />
+                {/* Derive canonical size */}
+                {(() => {
+                  const kasaSize: 'sm' | 'md' | 'lg' = SIZE_MAP[mission.size?.toUpperCase?.()] ?? SIZE_MAP[mission.size] ?? 'sm'
+                  // For dashboard cards: cap kasa display to sm/md to fit card
+                  const cardKasaSize = kasaSize === 'lg' ? 'md' : kasaSize
 
-                  {/* Mission Title Section */}
-                  <div className="w-full text-center space-y-2">
-                    <p 
+                  // Format dates
+                  const fmtDate = (d: string | null) => {
+                    if (!d) return null
+                    try { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) } catch { return null }
+                  }
+                  const startStr = fmtDate(mission.start_date)
+                  const endStr = fmtDate(mission.end_date)
+
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      onClick={() => router.push(`/missions/${mission.id}`)}
                       className={cn(
-                        'text-[9px] md:text-[11px] font-space font-black tracking-[0.5em] uppercase transition-opacity',
-                        isInRedZone ? 'text-red-500' : 'text-black/40 dark:text-white/30'
+                        'group relative cursor-pointer rounded-sm border transition-all duration-300 overflow-hidden',
+                        'bg-white dark:bg-[#090909] w-full',
+                        'min-h-[240px] max-h-[360px]',
+                        'p-5 md:p-6 flex flex-col',
+                        isInRedZone
+                          ? 'border-red-500/30 hover:border-red-500/60 shadow-[0_0_30px_rgba(255,0,0,0.06)]'
+                          : 'border-black/5 dark:border-white/5 hover:border-black/20 dark:hover:border-white/20'
                       )}
-                      style={(!isInRedZone && customColor) ? { color: customColor } : {}}
+                      style={{ borderColor: isInRedZone ? undefined : `${topBorderColor}22` }}
                     >
-                      {isInRedZone ? (isRTL ? '⚠ وضع حرج' : '⚠ RED_ZONE') : (isRTL ? 'هدف نشط' : 'ACTIVE GOAL')}
-                    </p>
-                    <h2 className="text-base md:text-xl font-space font-black text-black dark:text-white uppercase tracking-wider truncate leading-tight italic">
-                      {mission.title}
-                    </h2>
-                  </div>
+                      {/* Top neon accent line */}
+                      <div className="absolute top-0 inset-x-0 h-[2.5px]" style={{
+                        background: `linear-gradient(to right, ${topBorderColor}, ${topBorderColor}66, transparent)`
+                      }} />
 
-                  {/* Energy Cup Trophy */}
-                  <div className="relative py-1 md:py-2 group-hover:scale-110 transition-transform duration-500 flex justify-center">
-                    <EnergyCell
-                      percentage={roundedProgress}
-                      color={isInRedZone ? 'red' : (customColor || fallbackColor)}
-                      size={(mission.size === 'lg' ? 'md' : 'sm') as 'sm' | 'md' | 'lg'}
-                      isInRedZone={isInRedZone}
-                      cupStyle={currentTheme.cupStyle as any}
-                    />
-                    <div className="absolute inset-0 blur-3xl rounded-full -z-10 opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: `${topBorderColor}1a` }} />
-                  </div>
+                      {/* === TOP: Label + Title === */}
+                      <div className="w-full text-center space-y-1 mb-auto">
+                        <p
+                          className={cn(
+                            'text-[8px] font-space font-black tracking-[0.4em] uppercase',
+                            isInRedZone ? 'text-red-500' : 'text-black/30 dark:text-white/20'
+                          )}
+                          style={(!isInRedZone && customColor) ? { color: `${customColor}99` } : {}}
+                        >
+                          {isInRedZone ? '⚠ RED_ZONE' : 'ACTIVE_GOAL'}
+                        </p>
+                        <h2 className="text-sm md:text-base font-space font-black text-black dark:text-white uppercase tracking-wide truncate leading-tight italic">
+                          {mission.title}
+                        </h2>
+                      </div>
 
-                  {/* Progress Tracking Bar */}
-                  <div className="w-full space-y-2">
-                    <div className="flex justify-between text-[9px] md:text-[11px] font-space font-black tracking-widest uppercase text-black/40 dark:text-white/20">
-                      <span>{isRTL ? 'التقدم' : 'PROGRESS'}</span>
-                      <span 
-                        className={cn("font-bold text-sm", isInRedZone ? 'text-red-500' : 'text-black dark:text-white')}
-                        style={(!isInRedZone && customColor) ? { color: customColor } : {}}
-                      >
-                        {roundedProgress}%
-                      </span>
-                    </div>
-                    <div className="w-full h-[4px] bg-black/5 dark:bg-white/5 overflow-hidden rounded-full">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${roundedProgress}%` }}
-                        transition={{ duration: 1.5, ease: 'easeOut' }}
-                        className="h-full rounded-full"
-                        style={{ 
-                          backgroundColor: topBorderColor, 
-                          boxShadow: `0 0 15px ${topBorderColor}` 
-                        }}
-                      />
-                    </div>
-                  </div>
-                </motion.div>
+                      {/* === CENTER: Crystal Trophy Kasa === */}
+                      <div className="flex justify-center items-center py-3 group-hover:scale-105 transition-transform duration-500">
+                        <EnergyCell
+                          percentage={roundedProgress}
+                          color={isInRedZone ? '#FF0055' : (customColor || fallbackColor)}
+                          size={cardKasaSize}
+                          isInRedZone={isInRedZone}
+                        />
+                      </div>
+
+                      {/* === BOTTOM: Progress + dates === */}
+                      <div className="w-full mt-auto space-y-2">
+                        <div className="flex justify-between text-[9px] font-space font-black tracking-widest uppercase text-black/30 dark:text-white/20">
+                          <span>{isRTL ? 'التقدم' : 'PROGRESS'}</span>
+                          <span
+                            className={cn('text-sm font-bold', isInRedZone ? 'text-red-500' : 'text-black dark:text-white')}
+                            style={(!isInRedZone && customColor) ? { color: customColor } : {}}
+                          >
+                            {roundedProgress}%
+                          </span>
+                        </div>
+                        <div className="w-full h-[3px] bg-black/5 dark:bg-white/5 overflow-hidden rounded-full">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${roundedProgress}%` }}
+                            transition={{ duration: 1.5, ease: 'easeOut' }}
+                            className="h-full rounded-full"
+                            style={{
+                              backgroundColor: topBorderColor,
+                              boxShadow: `0 0 12px ${topBorderColor}`
+                            }}
+                          />
+                        </div>
+                        {/* Dates row */}
+                        {(startStr || endStr) && (
+                          <p className="text-[7px] font-space text-black/20 dark:text-white/15 uppercase tracking-wider text-center">
+                            {startStr || '—'} → {endStr || '—'}
+                          </p>
+                        )}
+                      </div>
+                    </motion.div>
+                  )
+                })()}
 
                 {/* Section Divider after every 3 missions (Desktop) */}
                 {(idx + 1) % 3 === 0 && (
-                   <div className="col-span-full w-full h-[1px] border-t border-black/5 dark:border-white/10 shadow-[0_1px_10px_rgba(255,255,255,0.05)] my-8 hidden lg:block" />
-                )}
-                {/* Responsive divider for Tablet (MD) */}
-                {(idx + 1) % 2 === 0 && (
-                   <div className="col-span-full w-full h-[1px] border-t border-black/5 dark:border-white/10 shadow-[0_1px_10px_rgba(255,255,255,0.05)] my-8 hidden md:block lg:hidden" />
+                   <div className="col-span-full w-full h-[1px] border-t border-black/5 dark:border-white/10 my-6 hidden lg:block" />
                 )}
               </React.Fragment>
             )

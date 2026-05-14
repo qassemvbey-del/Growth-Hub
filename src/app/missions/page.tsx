@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useToast } from '@/components/ui/Toast'
 import { useRouter } from 'next/navigation'
+import EnergyCell from '@/components/ui/EnergyCell'
 import React from 'react'
 
 const SIZES = [
@@ -27,6 +28,8 @@ export default function MissionsPage() {
   const [newTitle, setNewTitle] = useState('')
   const [newSize, setNewSize] = useState('md')
   const [syncOnCreate, setSyncOnCreate] = useState(true)
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const supabase = createClient()
 
   useEffect(() => { 
@@ -46,23 +49,56 @@ export default function MissionsPage() {
     setLoading(false)
   }
 
+  const SIZE_SLOTS: Record<string, number> = { sm: 1, md: 1.5, lg: 3, s: 1, m: 1.5, l: 3 }
+
   const addMission = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    const { data, error } = await supabase.from('cups').insert({
+
+    // Capacity guard: only check if syncing to dashboard
+    if (syncOnCreate) {
+      const { data: synced } = await supabase
+        .from('cups')
+        .select('id, size')
+        .eq('user_id', user.id)
+        .eq('sync_to_dashboard', true)
+        .eq('is_archived', false)
+
+      const usedSlots = (synced || []).reduce((acc: number, m: any) => {
+        return acc + (SIZE_SLOTS[m.size?.toLowerCase()] ?? 1)
+      }, 0)
+      const newSlots = SIZE_SLOTS[newSize] ?? 1
+      if (usedSlots + newSlots > 9) {
+        showToast(
+          isRTL
+            ? `سعة المحطة ممتلئة (${usedSlots}/9 فتحات) - أتمم أو أزل مهمات موجودة.`
+            : `FOCUS CAPACITY FULL (${usedSlots}/9 SLOTS) — Complete or un-equip existing missions first.`,
+          'error'
+        )
+        return
+      }
+    }
+
+    const insertData: any = {
       user_id: user.id,
       title: newTitle.trim() || (isRTL ? 'مهمة جديدة' : 'NEW_MISSION'),
       status: 'active',
       size: newSize,
       is_archived: false,
       sync_to_dashboard: syncOnCreate
-    }).select().single()
+    }
+    if (startDate) insertData.start_date = startDate
+    if (endDate) insertData.end_date = endDate
+
+    const { data, error } = await supabase.from('cups').insert(insertData).select().single()
     
     if (data) {
       setMissions([data, ...missions])
       setShowCreate(false)
       setNewTitle('')
       setNewSize('md')
+      setStartDate('')
+      setEndDate('')
       showToast(isRTL ? 'تم إنشاء المهمة' : 'MISSION_INITIALIZED', 'success')
       router.push(`/missions/${data.id}`)
     }
@@ -157,7 +193,9 @@ export default function MissionsPage() {
           )}
         </AnimatePresence>
 
-        {/* Create Mission Modal */}
+        {/* ═══════════════════════════════════════════════════ */}
+        {/* ██  CREATE MISSION MODAL — WITH DATES RESTORED  ██ */}
+        {/* ═══════════════════════════════════════════════════ */}
         <AnimatePresence>
           {showCreate && (
             <motion.div
@@ -178,6 +216,7 @@ export default function MissionsPage() {
                   {isRTL ? 'إعدادات المهمة الجديدة' : 'MISSION_INITIALIZATION'}
                 </h2>
 
+                {/* Title */}
                 <div className="space-y-3">
                   <label className="text-sm md:text-base font-space text-neon-green tracking-widest uppercase font-black">{t('title')}</label>
                   <input
@@ -211,8 +250,38 @@ export default function MissionsPage() {
                   </div>
                 </div>
 
+                {/* ══════════════════════════════════════ */}
+                {/* ██ START DATE & END DATE — RESTORED ██ */}
+                {/* ══════════════════════════════════════ */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <label className="text-sm md:text-base font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>
+                      {t('start_date')}
+                    </label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={e => setStartDate(e.target.value)}
+                      className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-4 font-space text-sm md:text-base font-black text-black dark:text-white outline-none focus:border-neon-green/50 transition-all uppercase rounded-sm date-input-tactical"
+                      style={{ colorScheme: 'dark' }}
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <label className="text-sm md:text-base font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>
+                      {t('end_date')}
+                    </label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={e => setEndDate(e.target.value)}
+                      className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-4 font-space text-sm md:text-base font-black text-black dark:text-white outline-none focus:border-neon-green/50 transition-all uppercase rounded-sm date-input-tactical"
+                      style={{ colorScheme: 'dark' }}
+                    />
+                  </div>
+                </div>
+
+                {/* HUD Visibility */}
                 <div className="flex flex-col md:flex-row gap-8">
-                  {/* Sync on Dashboard */}
                   <div className="space-y-3 flex-1">
                      <label className="text-sm md:text-base font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'عرض في اللوحة' : 'HUD_VISIBILITY'}</label>
                      <button 
@@ -232,6 +301,7 @@ export default function MissionsPage() {
                   </div>
                 </div>
 
+                {/* Actions */}
                 <div className="flex justify-end gap-6 pt-4 border-t border-black/5 dark:border-white/5">
                   <button onClick={() => setShowCreate(false)} className="text-black/40 dark:text-white/20 font-space text-sm md:text-base uppercase tracking-widest hover:text-black dark:hover:text-white font-black">{t('cancel')}</button>
                   <button onClick={addMission} className="px-10 py-4 font-space font-black text-sm md:text-base uppercase tracking-widest shadow-lg" style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 0 20px ${currentTheme.color}44` }}>{t('deploy')}</button>
@@ -241,18 +311,27 @@ export default function MissionsPage() {
           )}
         </AnimatePresence>
 
-        {/* Mission Grid (3x3 Style) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* ═════════════════════════════════════════ */}
+        {/* ██  MISSION GRID — STRICT 3-COL LAYOUT ██ */}
+        {/* ═════════════════════════════════════════ */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <AnimatePresence mode='popLayout'>
             {missions.map((mission, idx) => {
-              const { progress } = calculateAccountability(mission)
+              const { progress, isInRedZone } = calculateAccountability(mission)
               const percentage = Math.round(progress)
               const color = currentTheme.color
               const completedTasks = mission.tasks?.filter((t: any) => t.is_completed).length || 0
               const totalTasks = mission.tasks?.length || 0
+              const kasaSize = mission.size === 'lg' ? 'md' : mission.size === 'md' ? 'sm' : 'sm'
               
               // Map size to icon
               const sizeIcon = SIZES.find(s => s.key === mission.size)?.icon || 'layers'
+
+              // Format dates
+              const fmtDate = (d: string | null) => {
+                if (!d) return '—'
+                try { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) } catch { return '—' }
+              }
 
               return (
                 <motion.div
@@ -263,47 +342,65 @@ export default function MissionsPage() {
                   transition={{ delay: idx * 0.05 }}
                   onClick={() => router.push(`/missions/${mission.id}`)}
                   className={cn(
-                    "group relative flex flex-col p-6 md:p-8 bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/5 hover:border-black/20 dark:hover:border-white/10 cursor-pointer transition-all rounded-sm shadow-xl min-h-[220px] justify-between overflow-hidden",
-                    mission.size === 'lg' ? "col-span-1 md:col-span-2 lg:col-span-3" : ""
+                    "group relative flex flex-col bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/5 hover:border-black/20 dark:hover:border-white/10 cursor-pointer transition-all rounded-sm shadow-xl overflow-hidden",
+                    "min-h-[240px] max-h-[340px] p-5 md:p-6"
                   )}
                 >
                   {/* Top accent line */}
-                  <div className="absolute top-0 inset-x-0 h-[2.5px]" style={{ backgroundColor: color }} />
+                  <div className="absolute top-0 inset-x-0 h-[2.5px]" style={{ backgroundColor: isInRedZone ? '#FF0055' : color }} />
                   
-                  {/* Status & Percentage Header */}
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="flex flex-col gap-1">
+                  {/* === TOP SECTION: Title & Status === */}
+                  <div className="flex justify-between items-start mb-auto">
+                    <div className="flex flex-col gap-1 flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-xs opacity-40" style={{ color }}>{sizeIcon}</span>
-                        <p className="text-[9px] font-space tracking-[0.3em] uppercase font-black opacity-40">
+                        <span className="material-symbols-outlined text-xs opacity-40" style={{ color: isInRedZone ? '#FF0055' : color }}>{sizeIcon}</span>
+                        <p className="text-[8px] font-space tracking-[0.3em] uppercase font-black opacity-40">
                            {mission.sync_to_dashboard ? (isRTL ? 'نشط' : 'HUD_ACTIVE') : (isRTL ? 'استعداد' : 'STANDBY')}
                         </p>
                       </div>
-                      <h3 className="text-lg md:text-xl font-space font-black uppercase italic text-black dark:text-white truncate max-w-[180px]">
+                      <h3 className="text-base md:text-lg font-space font-black uppercase italic text-black dark:text-white truncate">
                          {mission.title}
                       </h3>
                     </div>
-                    <span className="text-2xl md:text-3xl font-black font-space italic" style={{ color }}>{percentage}%</span>
+                    <span className="text-xl md:text-2xl font-black font-space italic shrink-0 ml-2" style={{ color: isInRedZone ? '#FF0055' : color }}>{percentage}%</span>
                   </div>
 
-                  {/* Progress Bar Center */}
-                  <div className="w-full space-y-6">
+                  {/* === CENTER: Energy Kasa (Crystal Trophy) === */}
+                  <div className="flex justify-center items-center py-3">
+                    <EnergyCell
+                      percentage={percentage}
+                      color={isInRedZone ? '#FF0055' : color}
+                      size={kasaSize as 'sm' | 'md'}
+                      isInRedZone={isInRedZone}
+                    />
+                  </div>
+
+                  {/* === BOTTOM: Progress bar + Dates + Tasks === */}
+                  <div className="mt-auto space-y-3">
+                    {/* Progress Bar */}
                     <div className="w-full h-[1.5px] bg-black/5 dark:bg-white/5 relative">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${percentage}%` }}
                         className="h-full absolute top-0 start-0"
-                        style={{ backgroundColor: color, boxShadow: `0 0 10px ${color}` }}
+                        style={{ backgroundColor: isInRedZone ? '#FF0055' : color, boxShadow: `0 0 10px ${isInRedZone ? '#FF0055' : color}` }}
                       />
                     </div>
-                  </div>
 
-                  {/* Footer - Tasks & Arrow */}
-                  <div className="flex justify-between items-center mt-6">
-                     <p className="text-[8px] font-space text-black/30 dark:text-white/20 uppercase font-black tracking-widest">
-                        {completedTasks}/{totalTasks} {isRTL ? 'المهام' : 'TASKS'}
-                     </p>
-                     <span className="material-symbols-outlined text-black/20 dark:text-white/10 group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform text-lg">arrow_forward</span>
+                    {/* Footer: Tasks count + Dates + Arrow */}
+                    <div className="flex justify-between items-center">
+                       <div className="flex items-center gap-3">
+                         <p className="text-[8px] font-space text-black/30 dark:text-white/20 uppercase font-black tracking-widest">
+                           {completedTasks}/{totalTasks} {isRTL ? 'المهام' : 'TASKS'}
+                         </p>
+                         {(mission.start_date || mission.end_date) && (
+                           <p className="text-[7px] font-space text-black/20 dark:text-white/15 uppercase tracking-wider">
+                             {fmtDate(mission.start_date)} → {fmtDate(mission.end_date)}
+                           </p>
+                         )}
+                       </div>
+                       <span className="material-symbols-outlined text-black/20 dark:text-white/10 group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform text-lg">arrow_forward</span>
+                    </div>
                   </div>
                 </motion.div>
               )
@@ -314,7 +411,7 @@ export default function MissionsPage() {
           {missions.length > 0 && (
              <motion.div
                onClick={() => setShowCreate(true)}
-               className="flex flex-col items-center justify-center p-8 border border-dashed border-black/10 dark:border-white/5 rounded-sm hover:border-neon-green/30 transition-all cursor-pointer group min-h-[220px]"
+               className="flex flex-col items-center justify-center p-8 border border-dashed border-black/10 dark:border-white/5 rounded-sm hover:border-neon-green/30 transition-all cursor-pointer group min-h-[240px] max-h-[340px]"
              >
                 <span className="material-symbols-outlined text-4xl text-black/10 dark:text-white/10 group-hover:text-neon-green/40 transition-colors">add_circle</span>
              </motion.div>

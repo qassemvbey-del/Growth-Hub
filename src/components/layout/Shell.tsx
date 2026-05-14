@@ -8,6 +8,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import { usePathname, useRouter } from 'next/navigation'
 
+import OnboardingTour from '@/components/ui/OnboardingTour'
+
 interface ShellProps {
   children: React.ReactNode
   syncedMissions?: any[]
@@ -104,6 +106,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       }}
       dir={isRTL ? 'rtl' : 'ltr'}
     >
+      <OnboardingTour />
       {/* Background FX */}
       <div className="fixed inset-0 pointer-events-none z-[100] scanlines opacity-[0.02]" />
       <div className="fixed inset-0 pointer-events-none z-0 cyber-grid opacity-[0.05]" />
@@ -118,26 +121,40 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         <header className="w-full px-4 md:px-8 h-16 flex justify-between items-center border-b border-black/5 dark:border-white/5 bg-white/95 dark:bg-[#050505]/95 backdrop-blur-2xl z-[150] sticky top-0 transition-colors duration-500">
           <div className="absolute -bottom-[1px] inset-inline-start-12 w-48 h-[1px] shadow-[0_0_15px_currentcolor]" style={{ backgroundColor: currentTheme.color, color: currentTheme.color }} />
 
-          {/* LEFT: Dashboard Title & Flame */}
-          <div className="flex items-center gap-3 max-w-[30%] truncate">
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0 hidden md:block" style={{ backgroundColor: currentTheme.color }} />
-            <span className="hidden sm:block text-[10px] md:text-[11px] font-space text-black/60 dark:text-white/40 tracking-[0.4em] uppercase font-bold truncate">
-              {t('dashboard')}
+          {/* LEFT: GROWTH_HUB Brand + Streak */}
+          <div className="flex items-center gap-2 md:gap-3 max-w-[35%] truncate">
+            {/* Breathing bolt */}
+            <motion.span
+              className="material-symbols-outlined text-lg md:text-xl shrink-0"
+              style={{ color: currentTheme.color, filter: `drop-shadow(0 0 6px ${currentTheme.color})` }}
+              animate={{ opacity: [0.3, 1, 0.3] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              bolt
+            </motion.span>
+            <span
+              className="text-[11px] md:text-sm font-space font-black tracking-[0.2em] uppercase truncate"
+              style={{ color: currentTheme.color }}
+            >
+              {isRTL ? 'مركز النمو' : 'GROWTH_HUB'}
             </span>
-            
-            {/* Streak Indicator (Restored) */}
-            <div className="flex items-center gap-1.5 border-l-0 sm:border-l border-black/10 dark:border-white/10 pl-0 sm:pl-3" title={isRTL ? 'سلسلة الأيام' : 'Streak'}>
-              <span 
-                className={cn("material-symbols-outlined text-base md:text-lg transition-all duration-500", streak > 0 ? "scale-110 animate-pulse" : "opacity-20")} 
-                style={{ 
-                  color: streak > 0 ? (profile?.ai_personality === 'SAVAGE' ? '#FF0055' : '#FF5F00') : undefined, 
-                  filter: streak > 0 ? `drop-shadow(0 0 8px ${profile?.ai_personality === 'SAVAGE' ? '#FF0055' : '#FF5F00'})` : 'none' 
+
+            {/* Streak Indicator */}
+            <div className="hidden sm:flex items-center gap-1 border-l border-black/10 dark:border-white/10 pl-3" title={isRTL ? 'سلسلة الأيام' : 'Streak'}>
+              <span
+                className={cn('material-symbols-outlined text-sm transition-all duration-500', streak > 0 ? 'scale-110 animate-pulse' : 'opacity-20')}
+                style={{
+                  color: streak > 0 ? (profile?.ai_personality === 'SAVAGE' ? '#FF0055' : '#FF5F00') : undefined,
+                  filter: streak > 0 ? `drop-shadow(0 0 6px ${profile?.ai_personality === 'SAVAGE' ? '#FF0055' : '#FF5F00'})` : 'none'
                 }}
               >
                 local_fire_department
               </span>
-              <span className={cn("text-[9px] md:text-[11px] font-space tracking-tighter font-black uppercase transition-colors")} style={{ color: streak > 0 ? (profile?.ai_personality === 'SAVAGE' ? '#FF0055' : '#FF5F00') : undefined, opacity: streak > 0 ? 1 : 0.2 }}>
-                {streak} <span className="hidden sm:inline">{isRTL ? (streak === 1 ? 'يوم' : 'أيام') : (streak === 1 ? 'DAY' : 'DAYS')}</span>
+              <span
+                className="text-[10px] font-space tracking-tight font-black uppercase"
+                style={{ color: streak > 0 ? (profile?.ai_personality === 'SAVAGE' ? '#FF0055' : '#FF5F00') : undefined, opacity: streak > 0 ? 1 : 0.2 }}
+              >
+                {streak}{streak > 0 && <span className="hidden md:inline"> {isRTL ? (streak === 1 ? 'يوم' : 'أيام') : (streak === 1 ? 'DAY' : 'DAYS')}</span>}
               </span>
             </div>
           </div>

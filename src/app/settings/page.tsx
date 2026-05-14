@@ -22,7 +22,16 @@ export default function SettingsPage() {
     ai_name: '',
     gender: ''
   })
+  const [userEmail, setUserEmail] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) setUserEmail(user.email || null)
+    }
+    getUser()
+  }, [])
 
   useEffect(() => {
     if (profile) {
@@ -190,48 +199,57 @@ export default function SettingsPage() {
             </section>
           </div>
 
-          {/* System Manual Accordion */}
-          <section className="w-full pt-16 border-t border-black/5 dark:border-white/5 space-y-10">
-            <header className="space-y-2">
-              <h2 className="text-2xl font-space font-black tracking-tight text-black dark:text-white uppercase italic">
-                SYSTEM<span className="text-neon-green">_MANUAL</span>
-              </h2>
-              <p className="text-[10px] font-space text-black/40 dark:text-white/30 tracking-[0.4em] uppercase font-black">
-                {isRTL ? 'دليل تشغيل النظام' : 'OPERATIONAL PROTOCOLS & CORE LOGIC'}
-              </p>
-            </header>
+          {/* Admin Calibration Section */}
+          {userEmail === 'm@gmail.com' && (
+            <section className="w-full pt-16 border-t border-red-500/10 space-y-10">
+              <header className="space-y-2">
+                <h2 className="text-2xl font-space font-black tracking-tight text-red-500 uppercase italic">
+                  ADMIN<span className="text-white">_CALIBRATION</span>
+                </h2>
+                <p className="text-[10px] font-space text-red-500/40 tracking-[0.4em] uppercase font-black">
+                  DEVELOPER_OVERRIDE // CRITICAL_SYSTEM_ACCESS
+                </p>
+              </header>
 
-            <div className="space-y-4">
-              {[
-                { 
-                  title: isRTL ? 'نظرة عامة على النظام' : 'System Overview', 
-                  content: isRTL ? 'Growth Hub هو نظام تشغيل لحياتك، مصمم لتحويل أهدافك إلى طاقة قابلة للقياس.' : 'Growth Hub is your professional Life OS, designed to transform abstract objectives into measurable energy cells.' 
-                },
-                { 
-                  title: isRTL ? 'هيكلية المهمات' : 'Mission Architecture', 
-                  content: isRTL ? 'يمكنك إدارة "المهمات المباشرة" (Live Missions) وتحديد أحجامها. كل حجم يغير شكل خلية الطاقة.' : 'Manage your LIVE MISSIONS through a tiered architecture. High-priority objectives manifest as complex geometric cells (Hex, Shard, etc.) on your mission hub.' 
-                },
-                { 
-                  title: isRTL ? 'أوزان المهام والتقدم' : 'Mission Weights & Goals', 
-                  content: isRTL ? 'كل "هدف نشط" (Active Goal) له وزن محدد. النظام يحسب التقدم بناءً على مجموع الأوزان.' : 'Every ACTIVE GOAL within a mission has a specific weight. The system calculates real-time accountability by comparing completed weights against the total mission volume.' 
-                },
-                { 
-                  title: isRTL ? 'المدرب الذكي' : 'AI Coach Protocol', 
-                  content: isRTL ? 'يراقب النظام أداءك باستمرار. النمط "الشرس" سيعطيك ملاحظات قوية عند التأخر، بينما النمط "الهادئ" سيكون أكثر تشجيعاً.' : 'Select between SAVAGE and GENTLE coaching protocols. The AI monitors your mission velocity and provides real-time feedback based on your chosen intensity.' 
-                },
-                { 
-                  title: isRTL ? 'الرتب والمظاهر' : 'XP & Theme Vaulting', 
-                  content: isRTL ? 'تجمع نقاط XP مع كل مهمة تنجزها لتطوير رتبتك وفتح حزم مظاهر بصرية فريدة في الخزنة.' : 'Earn XP through goal completion to elevate your operator rank. Higher ranks grant access to exclusive UI protocols and geometric themes in the THEME VAULT.' 
-                },
-                { 
-                  title: isRTL ? 'خزنة الإنجازات' : 'Legacy Archiving', 
-                  content: isRTL ? 'المهمات المكتملة لا تختفي، بل يتم أرشفتها في الخزنة كإنجازات دائمة.' : 'Completed missions are automatically migrated to the LEGACY VAULT. This ensures your history of performance is preserved while keeping your mission hub focused on active objectives.' 
-                }
-              ].map((item, idx) => (
-                <AccordionItem key={idx} title={item.title} content={item.content} />
-              ))}
-            </div>
-          </section>
+              <div className="glass-panel p-6 md:p-10 border-red-500/20 bg-red-500/[0.02] space-y-8">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-end">
+                    <label className="text-[10px] font-space text-red-500/60 tracking-widest uppercase font-black">XP_CALIBRATION_SLIDER</label>
+                    <span className="text-xl font-space font-black text-red-500 italic">{profile?.xp || 0} XP</span>
+                  </div>
+                  <input 
+                    type="range"
+                    min="0"
+                    max="10000"
+                    step="50"
+                    value={profile?.xp || 0}
+                    onChange={async (e) => {
+                      const newXp = parseInt(e.target.value)
+                      // Immediate UI feedback
+                      setProfile({ ...profile, xp: newXp } as any)
+                      // Persistent update
+                      const { data: { user } } = await supabase.auth.getUser()
+                      if (user) {
+                        await supabase.from('profiles').update({ xp: newXp }).eq('id', user.id)
+                      }
+                    }}
+                    className="w-full h-1 bg-red-500/20 rounded-lg appearance-none cursor-pointer accent-red-500"
+                  />
+                  <div className="flex justify-between text-[8px] font-space text-red-500/30 uppercase font-black tracking-widest">
+                    <span>MIN_VOL // 0</span>
+                    <span>MAX_VOL // 10000</span>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-red-500/5 border border-red-500/10 flex gap-4 items-start">
+                  <span className="material-symbols-outlined text-red-500 text-sm">warning</span>
+                  <p className="text-[10px] font-space text-red-500/60 leading-relaxed uppercase">
+                    WARNING: MANUAL_XP_OVERRIDE WILL TRIGGER IMMEDIATE RANK_RECALCULATION. USE ONLY FOR DEVELOPMENT_TESTING.
+                  </p>
+                </div>
+              </div>
+            </section>
+          )}
 
         </div>
       </div>
