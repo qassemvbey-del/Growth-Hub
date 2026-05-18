@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk, Tajawal } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { GrowthProvider } from "@/context/GrowthContext";
 import { SoundProvider } from "@/context/SoundContext";
@@ -26,8 +27,36 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="dark">
       <head>
-        <script dangerouslySetInnerHTML={{
-          __html: `document.documentElement.classList.add('dark')`
+        <Script id="theme-lang-script" strategy="beforeInteractive" dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              try {
+                document.documentElement.classList.add('dark');
+                
+                // Restore language and direction immediately before rendering
+                var lang = localStorage.getItem('language') || 'en';
+                var isRTL = lang === 'ar';
+                document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+                document.documentElement.lang = isRTL ? 'ar' : 'en';
+                
+                var targetSize = isRTL ? '140%' : '100%';
+                var targetLH = isRTL ? '1.8' : 'normal';
+                document.documentElement.style.fontSize = targetSize;
+                document.documentElement.style.lineHeight = targetLH;
+                
+                // Restore theme color immediately before rendering
+                var cachedColor = localStorage.getItem('cached_theme_color') || '#22c55e';
+                document.documentElement.style.setProperty('--color-neon-green', cachedColor);
+                document.documentElement.style.setProperty('--color-primary', cachedColor);
+                document.documentElement.style.setProperty('--theme-color', cachedColor);
+                
+                var metaThemeColor = document.querySelector('meta[name="theme-color"]');
+                if (metaThemeColor) {
+                  metaThemeColor.setAttribute('content', cachedColor);
+                }
+              } catch (e) {}
+            })();
+          `
         }} />
         <link rel="manifest" href="/manifest.json" />
         <link 

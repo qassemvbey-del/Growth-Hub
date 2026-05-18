@@ -39,15 +39,22 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   const [streak, setStreak] = useState(0)
 
   const [mounted, setMounted] = useState(false)
-  const [shellIsRTL, setShellIsRTL] = useState(false)
+  const [shellIsRTL, setShellIsRTL] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('language') === 'ar'
+    }
+    return false
+  })
 
   useEffect(() => {
     setMounted(true)
     const lang = localStorage.getItem('language') || 'en'
     const rtl = lang === 'ar'
     setShellIsRTL(rtl)
-    document.documentElement.dir = rtl ? 'rtl' : 'ltr'
-    document.documentElement.lang = rtl ? 'ar' : 'en'
+    if (typeof document !== 'undefined') {
+      document.documentElement.dir = rtl ? 'rtl' : 'ltr'
+      document.documentElement.lang = rtl ? 'ar' : 'en'
+    }
   }, [])
 
   useEffect(() => {
@@ -55,9 +62,10 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   }, [isRTL])
 
   useEffect(() => {
-    if (!mounted) return
-    document.documentElement.dir = shellIsRTL ? 'rtl' : 'ltr'
-  }, [shellIsRTL, mounted])
+    if (typeof document !== 'undefined') {
+      document.documentElement.dir = shellIsRTL ? 'rtl' : 'ltr'
+    }
+  }, [shellIsRTL])
 
   const { reports, markAsRead } = useInbox()
   const unreadCount = useMemo(() => reports.filter(r => !r.is_read).length, [reports])
@@ -149,7 +157,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         ['--selection-bg' as any]: `${currentTheme.color}33`, 
         ['--selection-text' as any]: currentTheme.color 
       }}
-      dir={mounted ? (shellIsRTL ? 'rtl' : 'ltr') : 'ltr'}
+      dir={shellIsRTL ? 'rtl' : 'ltr'}
     >
       {/* Background FX */}
       <div className="fixed inset-0 pointer-events-none z-[100] scanlines opacity-[0.02]" />

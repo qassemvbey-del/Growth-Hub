@@ -33,56 +33,154 @@ export interface Profile {
 export const THEME_PACKAGES = {
   SILVER: {
     id: 'SILVER',
-    name: 'Steel Grey',
-    color: '#B0C4DE',
+    name: 'Silver // Slate',
+    color: '#94a3b8',
     cupStyle: 'cylinder',
-    glow: 'rgba(176, 196, 222, 0.4)',
-    accent: 'text-[#B0C4DE]',
-    border: 'border-[#B0C4DE]/30'
+    glow: 'rgba(148, 163, 184, 0.4)',
+    accent: 'text-[#94a3b8]',
+    accentColor: '#475569',
+    border: 'border-[#94a3b8]/30'
+  },
+  GOLD: {
+    id: 'GOLD',
+    name: 'Gold // Gold Burst',
+    color: '#ffcc00',
+    cupStyle: 'cylinder',
+    glow: 'rgba(255, 204, 0, 0.4)',
+    accent: 'text-[#ffcc00]',
+    accentColor: '#553b00',
+    border: 'border-[#ffcc00]/30'
   },
   PLATINUM: {
     id: 'PLATINUM',
-    name: 'Cool Cyan',
-    color: '#00CED1',
+    name: 'Platinum // Pulse',
+    color: '#38bdf8',
     cupStyle: 'hex',
-    glow: 'rgba(0, 206, 209, 0.4)',
-    accent: 'text-[#00CED1]',
-    border: 'border-[#00CED1]/30'
+    glow: 'rgba(56, 189, 248, 0.4)',
+    accent: 'text-[#38bdf8]',
+    accentColor: '#0369a1',
+    border: 'border-[#38bdf8]/30'
+  },
+  DIAMOND: {
+    id: 'DIAMOND',
+    name: 'Diamond // Glow',
+    color: '#d500f9',
+    cupStyle: 'crystal',
+    glow: 'rgba(213, 0, 249, 0.4)',
+    accent: 'text-[#d500f9]',
+    accentColor: '#4a0055',
+    border: 'border-[#d500f9]/30'
   },
   CROWN: {
     id: 'CROWN',
-    name: 'Majestic Purple',
-    color: '#9370DB',
+    name: 'Crown // Gold',
+    color: '#FACC15',
     cupStyle: 'crystal',
-    glow: 'rgba(147, 112, 219, 0.4)',
-    accent: 'text-[#9370DB]',
-    border: 'border-[#9370DB]/30'
+    glow: 'rgba(250, 204, 21, 0.4)',
+    accent: 'text-[#FACC15]',
+    accentColor: '#713f12',
+    border: 'border-[#FACC15]/30'
   },
   ACE: {
     id: 'ACE',
-    name: 'Crimson Red',
-    color: '#DC143C',
+    name: 'Ace // Orange',
+    color: '#F97316',
     cupStyle: 'shard',
-    glow: 'rgba(220, 20, 60, 0.4)',
-    accent: 'text-[#DC143C]',
-    border: 'border-[#DC143C]/30'
+    glow: 'rgba(249, 115, 22, 0.4)',
+    accent: 'text-[#F97316]',
+    accentColor: '#7c2d12',
+    border: 'border-[#F97316]/30'
   },
   CONQUEROR: {
     id: 'CONQUEROR',
-    name: 'Blazing Gold',
-    color: '#FFD700',
+    name: 'Conqueror // Red',
+    color: '#EF4444',
     cupStyle: 'sphere',
-    glow: 'rgba(255, 215, 0, 0.5)',
-    accent: 'text-[#FFD700]',
-    border: 'border-[#FFD700]/30'
+    glow: 'rgba(239, 68, 68, 0.5)',
+    accent: 'text-[#EF4444]',
+    accentColor: '#7f1d1d',
+    border: 'border-[#EF4444]/30'
+  },
+  // Theme aliases
+  INIT_GREEN: {
+    id: 'SILVER',
+    name: 'Silver // Slate',
+    color: '#94a3b8',
+    cupStyle: 'cylinder',
+    glow: 'rgba(148, 163, 184, 0.4)',
+    accent: 'text-[#94a3b8]',
+    accentColor: '#475569',
+    border: 'border-[#94a3b8]/30'
+  },
+  GOLD_BURST: {
+    id: 'GOLD',
+    name: 'Gold // Gold Burst',
+    color: '#ffcc00',
+    cupStyle: 'cylinder',
+    glow: 'rgba(255, 204, 0, 0.4)',
+    accent: 'text-[#ffcc00]',
+    accentColor: '#553b00',
+    border: 'border-[#ffcc00]/30'
+  },
+  PLATINUM_PULSE: {
+    id: 'PLATINUM',
+    name: 'Platinum // Pulse',
+    color: '#38bdf8',
+    cupStyle: 'hex',
+    glow: 'rgba(56, 189, 248, 0.4)',
+    accent: 'text-[#38bdf8]',
+    accentColor: '#0369a1',
+    border: 'border-[#38bdf8]/30'
+  },
+  DIAMOND_GLOW: {
+    id: 'DIAMOND',
+    name: 'Diamond // Glow',
+    color: '#d500f9',
+    cupStyle: 'crystal',
+    glow: 'rgba(213, 0, 249, 0.4)',
+    accent: 'text-[#d500f9]',
+    accentColor: '#4a0055',
+    border: 'border-[#d500f9]/30'
+  },
+  CROWN_SHADOW: {
+    id: 'CROWN',
+    name: 'Crown // Gold',
+    color: '#FACC15',
+    cupStyle: 'crystal',
+    glow: 'rgba(250, 204, 21, 0.4)',
+    accent: 'text-[#FACC15]',
+    accentColor: '#713f12',
+    border: 'border-[#FACC15]/30'
+  },
+  ACE_STRIKE: {
+    id: 'ACE',
+    name: 'Ace // Orange',
+    color: '#F97316',
+    cupStyle: 'shard',
+    glow: 'rgba(249, 115, 22, 0.4)',
+    accent: 'text-[#F97316]',
+    accentColor: '#7c2d12',
+    border: 'border-[#F97316]/30'
+  },
+  CONQUEROR_SUPREME: {
+    id: 'CONQUEROR',
+    name: 'Conqueror // Red',
+    color: '#EF4444',
+    cupStyle: 'sphere',
+    glow: 'rgba(239, 68, 68, 0.5)',
+    accent: 'text-[#EF4444]',
+    accentColor: '#7f1d1d',
+    border: 'border-[#EF4444]/30'
   }
 }
 
 export const RANK_THRESHOLDS = [
   { rank: 'SILVER', xp: 0, theme: 'SILVER', perk: 'Basic Protocol' },
-  { rank: 'PLATINUM', xp: 500, theme: 'PLATINUM', perk: 'Energy Streams' },
-  { rank: 'CROWN', xp: 1500, theme: 'CROWN', perk: 'Savage AI Coach' },
-  { rank: 'ACE', xp: 4000, theme: 'ACE', perk: 'Tactical HUD' },
+  { rank: 'GOLD', xp: 300, theme: 'GOLD', perk: 'Focus Expansion' },
+  { rank: 'PLATINUM', xp: 800, theme: 'PLATINUM', perk: 'Energy Streams' },
+  { rank: 'DIAMOND', xp: 1800, theme: 'DIAMOND', perk: 'Quantum Sync' },
+  { rank: 'CROWN', xp: 3500, theme: 'CROWN', perk: 'Savage AI Coach' },
+  { rank: 'ACE', xp: 6000, theme: 'ACE', perk: 'Tactical HUD' },
   { rank: 'CONQUEROR', xp: 10000, theme: 'CONQUEROR', perk: 'Glitch FX' }
 ]
 
@@ -228,7 +326,17 @@ interface GrowthContextType {
 const GrowthContext = createContext<GrowthContextType | undefined>(undefined)
 
 export function GrowthProvider({ children }: { children: React.ReactNode }) {
-  const [profile, setProfile] = useState<Profile | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem('cached_profile')
+      if (cached) {
+        try {
+          return JSON.parse(cached) as Profile
+        } catch (e) {}
+      }
+    }
+    return null
+  })
   const [isLoading, setIsLoading] = useState(true)
   const [tutorialActive, setTutorialActive] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -243,16 +351,30 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
 
   const isRTL = useMemo(() => profile?.language?.startsWith('ar') || false, [profile?.language])
 
+  const calculatedRank = useMemo(() => {
+    const xp = profile?.xp || 0
+    if (xp >= 10000) return 'CONQUEROR'
+    if (xp >= 6000) return 'ACE'
+    if (xp >= 3500) return 'CROWN'
+    if (xp >= 1800) return 'DIAMOND'
+    if (xp >= 800) return 'PLATINUM'
+    if (xp >= 300) return 'GOLD'
+    return 'SILVER'
+  }, [profile?.xp])
+
   const currentTheme = useMemo(() => {
-    const themeKey = (profile?.active_theme || 'SILVER') as keyof typeof THEME_PACKAGES
+    const activeThemeKey = profile?.active_theme || calculatedRank
+    const themeKey = (THEME_PACKAGES[activeThemeKey as keyof typeof THEME_PACKAGES] ? activeThemeKey : calculatedRank) as keyof typeof THEME_PACKAGES
     return THEME_PACKAGES[themeKey] || THEME_PACKAGES.SILVER
-  }, [profile?.active_theme])
+  }, [profile?.active_theme, calculatedRank])
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.style.setProperty('--color-neon-green', currentTheme.color)
       document.documentElement.style.setProperty('--color-primary', currentTheme.color)
       document.documentElement.style.setProperty('--theme-color', currentTheme.color)
+
+      localStorage.setItem('cached_theme_color', currentTheme.color)
 
       // Dynamic PWA Window Frame/Chrome Theme Color Sync
       let metaThemeColor = document.querySelector('meta[name="theme-color"]')
@@ -354,7 +476,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
         const storedLang = typeof window !== 'undefined' ? localStorage.getItem('language') as Language : null
         
         if (data) {
-          setProfile({
+          const profileData = {
             ...data,
             language: data.language || storedLang || 'en',
             full_name: data.full_name || user.user_metadata.full_name,
@@ -367,10 +489,14 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
             blocked: data.blocked || false,
             last_seen: data.last_seen,
             email: user.email || null
-          } as Profile)
+          } as Profile
+          setProfile(profileData)
 
-          if (data.language && typeof window !== 'undefined') {
-            localStorage.setItem('language', data.language)
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('cached_profile', JSON.stringify(profileData))
+            if (profileData.language) {
+              localStorage.setItem('language', profileData.language)
+            }
           }
 
           // Blocked Check
@@ -409,10 +535,14 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
             .single()
 
           if (!createError && newProfile) {
-            setProfile({
+            const newProfileData = {
               ...newProfile,
               email: user.email || null
-            } as Profile)
+            } as Profile
+            setProfile(newProfileData)
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('cached_profile', JSON.stringify(newProfileData))
+            }
           } else {
             console.error('PROFILE_CREATION_FAILED:', createError)
             if (!window.location.pathname.startsWith('/auth') && window.location.pathname !== '/onboarding') {

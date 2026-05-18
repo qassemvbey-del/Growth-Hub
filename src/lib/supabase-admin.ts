@@ -12,6 +12,18 @@ export const createAdminClient = () => {
     auth: {
       autoRefreshToken: false,
       persistSession: false
+    },
+    global: {
+      fetch: (url, init) => {
+        return fetch(url, {
+          ...init,
+          headers: {
+            ...init?.headers,
+            'Connection': 'keep-alive',
+          },
+          next: { revalidate: 0 },
+        })
+      }
     }
   })
 }

@@ -12,11 +12,13 @@ import EnergyCell from '@/components/ui/EnergyCell'
 import React from 'react'
 import { useSound } from '@/context/SoundContext'
 import MissionAttachmentsModal from '@/components/ui/MissionAttachmentsModal'
+import { validateContent } from '@/lib/profanityFilter'
+import { aiProfanityCheck } from '@/app/actions/profanityCheck'
 
 const SIZES = [
-  { key: 'lg', label: 'BIG GOAL',    desc: 'Macro Objective', icon: 'trophy' },
-  { key: 'md', label: 'MID GOAL',    desc: 'Standard Focus',  icon: 'military_tech' },
-  { key: 'sm', label: 'SMALL GOAL', desc: 'Micro Focus',      icon: 'workspace_premium' },
+  { key: 'lg', label: 'LARGE GOAL',  desc: 'Macro Objective', icon: 'trophy' },
+  { key: 'md', label: 'MEDIUM GOAL', desc: 'Standard Focus',  icon: 'military_tech' },
+  { key: 'sm', label: 'SMALL GOAL',  desc: 'Micro Focus',     icon: 'workspace_premium' },
 ]
 
 export default function MissionsPage() {
@@ -33,6 +35,9 @@ export default function MissionsPage() {
   const [syncOnCreate, setSyncOnCreate] = useState(true)
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [showWarningModal, setShowWarningModal] = useState(false)
+  const [warningSlots, setWarningSlots] = useState(0)
+  const [warningCriticalCount, setWarningCriticalCount] = useState(0)
   const supabase = createClient()
 
   // ── Attachments state ─────────────────────────────────────────────────
@@ -110,32 +115,77 @@ export default function MissionsPage() {
 
   const SIZE_SLOTS: Record<string, number> = { sm: 1, md: 1.5, lg: 3, s: 1, m: 1.5, l: 3 }
 
-  const addMission = async () => {
+  const addMission = async (bypassWarning: boolean = false) => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
+    const titleToCheck = newTitle.trim() || (isRTL ? 'هدف جديد' : 'New Goal')
+    const { isValid } = validateContent(titleToCheck)
+    if (!isValid) {
+      showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')
+      playError()
+      return
+    }
+
+    const isAiValid = await aiProfanityCheck(titleToCheck)
+    if (!isAiValid) {
+      showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')
+      playError()
+      return
+    }
+
+    // 1. Get synced cups to check capacity
+    const { data: synced } = await supabase
+      .from('cups')
+      .select('id, size')
+      .eq('user_id', user.id)
+      .eq('sync_to_dashboard', true)
+      .eq('is_archived', false)
+
+    const usedSlots = (synced || []).reduce((acc: number, m: any) => {
+      return acc + (SIZE_SLOTS[m.size?.toLowerCase()] ?? 1)
+    }, 0)
+
     // Capacity guard: only check if syncing to dashboard
     if (syncOnCreate) {
-      const { data: synced } = await supabase
-        .from('cups')
-        .select('id, size')
-        .eq('user_id', user.id)
-        .eq('sync_to_dashboard', true)
-        .eq('is_archived', false)
-
-      const usedSlots = (synced || []).reduce((acc: number, m: any) => {
-        return acc + (SIZE_SLOTS[m.size?.toLowerCase()] ?? 1)
-      }, 0)
       const newSlots = SIZE_SLOTS[newSize] ?? 1
       if (usedSlots + newSlots > 9) {
-          showToast(
-            isRTL
-              ? `سعة المحطة ممتلئة (${usedSlots.toFixed(1).replace('.0','')}/9 فتحات) - أتمم أو أزل مهمات موجودة.`
-              : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0','')}/9 SLOTS) — Complete or un-equip existing missions.`,
-            'warning'
-          )
+        showToast(
+          isRTL
+            ? `سعة المحطة ممتلئة (${usedSlots.toFixed(1).replace('.0','')}/9 فتحات) - أتمم أو أزل مهمات موجودة.`
+            : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0','')}/9 SLOTS) — Complete or un-equip existing missions.`,
+          'warning'
+        )
         playError()
         return
+      }
+    }
+
+    // 2. Perform Feature 3 checks (Context Switching Warning):
+    if (!bypassWarning) {
+      const cooldown = localStorage.getItem('context_warning_cooldown')
+      const isCooldownActive = cooldown && (Date.now() - Number(cooldown) < 24 * 60 * 60 * 1000)
+
+      if (!isCooldownActive) {
+        // Condition A: Is active Focus Capacity Used >= 77%? (7/9 slots or more occupied)
+        const isCapacityHeavy = usedSlots >= 7
+
+        // Condition B: Are there critical missions? (end_date <= 5 days remaining AND progress < 50%)
+        const criticalMissions = missions.filter(m => {
+          if (!m.end_date) return false
+          const daysLeft = (new Date(m.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+          const { progress } = calculateAccountability(m)
+          return daysLeft <= 5 && progress < 50
+        })
+        const hasCriticalMissions = criticalMissions.length > 0
+
+        if (isCapacityHeavy || hasCriticalMissions) {
+          setWarningSlots(usedSlots)
+          setWarningCriticalCount(criticalMissions.length)
+          setShowWarningModal(true)
+          playError()
+          return // Halt creation flow!
+        }
       }
     }
 
@@ -155,6 +205,7 @@ export default function MissionsPage() {
     if (data) {
       setMissions([data, ...missions])
       setShowCreate(false)
+      setShowWarningModal(false)
       setNewTitle('')
       setNewSize('md')
       setStartDate('')
@@ -371,17 +422,41 @@ export default function MissionsPage() {
                      <label className="text-sm md:text-base font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'عرض في اللوحة' : 'Show on Dashboard'}</label>
                      <button 
                        onClick={() => setSyncOnCreate(!syncOnCreate)}
-                       style={{ 
-                         backgroundColor: syncOnCreate ? `${currentTheme.color}11` : 'transparent', 
-                         color: syncOnCreate ? currentTheme.color : undefined, 
-                         borderColor: syncOnCreate ? currentTheme.color : undefined 
+                       className="w-full p-4 border font-space text-sm md:text-base font-black uppercase tracking-widest transition-all duration-300 rounded-sm flex items-center justify-between gap-4"
+                       style={syncOnCreate ? {
+                         backgroundColor: currentTheme.color,
+                         borderColor: currentTheme.color,
+                         color: '#000',
+                         boxShadow: `0 0 18px ${currentTheme.color}55`
+                       } : {
+                         backgroundColor: 'transparent',
+                         borderColor: 'var(--card-border)',
+                         color: 'var(--text-secondary)'
                        }}
-                       className={cn(
-                         "w-full p-4 border font-space text-sm md:text-base font-black uppercase tracking-widest transition-all rounded-sm",
-                         !syncOnCreate && "border-[var(--card-border)] text-[var(--text-secondary)]"
-                       )}
                      >
-                        {syncOnCreate ? (isRTL ? 'مفعل' : 'SHOW ON DASHBOARD') : (isRTL ? 'مخفي' : 'STAY OFF-GRID')}
+                       <span className="flex items-center gap-3">
+                         <span className="material-symbols-outlined text-xl">
+                           {syncOnCreate ? 'hub' : 'hub'}
+                         </span>
+                         {syncOnCreate
+                           ? (isRTL ? 'مرئي في اللوحة' : 'SHOW ON DASHBOARD')
+                           : (isRTL ? 'مخفي من اللوحة' : 'STAY OFF-GRID')}
+                       </span>
+                       {/* ON / OFF pill */}
+                       <span
+                         className="text-[10px] font-black tracking-widest px-2 py-0.5 rounded-full border transition-all duration-300"
+                         style={syncOnCreate ? {
+                           backgroundColor: 'rgba(0,0,0,0.25)',
+                           borderColor: 'rgba(0,0,0,0.2)',
+                           color: '#000'
+                         } : {
+                           backgroundColor: 'transparent',
+                           borderColor: 'var(--card-border)',
+                           color: 'var(--text-secondary)'
+                         }}
+                       >
+                         {syncOnCreate ? 'ON' : 'OFF'}
+                       </span>
                      </button>
                   </div>
                 </div>
@@ -389,7 +464,7 @@ export default function MissionsPage() {
                 {/* Actions */}
                 <div className="flex justify-end gap-6 pt-4 border-t border-black/5 dark:border-white/5">
                   <button onClick={() => setShowCreate(false)} className="text-[var(--text-secondary)] font-space text-sm md:text-base uppercase tracking-widest hover:text-[var(--text-primary)] font-black">{isRTL ? 'إلغاء' : 'Cancel'}</button>
-                  <button onClick={addMission} className="px-10 py-4 font-space font-black text-sm md:text-base uppercase tracking-widest shadow-lg rounded-xl" style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 0 20px ${currentTheme.color}4d` }}>{isRTL ? 'تفعيل' : 'Activate'}</button>
+                  <button onClick={() => addMission()} className="px-10 py-4 font-space font-black text-sm md:text-base uppercase tracking-widest shadow-lg rounded-xl" style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 0 20px ${currentTheme.color}4d` }}>{isRTL ? 'تفعيل' : 'Activate'}</button>
                 </div>
               </motion.div>
             </motion.div>
@@ -573,6 +648,88 @@ export default function MissionsPage() {
               onCountChange={count => handleAttachmentCountChange(attachmentMissionId, count)}
             />
           )}
+
+          {/* FEATURE 3: CONTEXT SWITCHING WARNING OVERLAY */}
+          <AnimatePresence>
+            {showWarningModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+              >
+                <motion.div
+                  initial={{ scale: 0.9, y: 20 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.9, y: 20 }}
+                  className="w-full max-w-md border bg-[var(--card-bg)] p-6 rounded-sm shadow-[0_0_50px_rgba(255,0,85,0.3)] relative overflow-hidden"
+                  style={{ borderColor: '#FF0055' }}
+                >
+                  {/* Neon alert top line */}
+                  <div className="absolute top-0 inset-x-0 h-[2.5px] bg-[#FF0055]" />
+                  
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3 text-[#FF0055]">
+                      <span className="material-symbols-outlined text-3xl animate-pulse">warning</span>
+                      <h3 className="text-lg font-black tracking-widest uppercase font-space">
+                        {isRTL ? 'تحذير: تشتيت التركيز' : 'WARNING: CONTEXT SWITCHING'}
+                      </h3>
+                    </div>
+
+                    <div className="space-y-4 font-space text-xs leading-relaxed text-[var(--text-primary)]">
+                      <p className="font-bold border-l-2 border-[#FF0055] pl-3 py-1 bg-[#FF0055]/5">
+                        {isRTL 
+                          ? '🚧 تشتيت التركيز يقلل الأداء الذهني بنسبة تصل إلى 40%.' 
+                          : '🚧 WARNING: Context Switching degrades cognitive performance by up to 40%.'}
+                      </p>
+                      <p className="text-[var(--text-secondary)]">
+                        {isRTL
+                          ? 'توجد مهام نشطة تستهلك سعة التركيز أو مهام حرجة قريبة من الموعد النهائي. إضافة هدف جديد سيقلل من جودة التنفيذ.'
+                          : 'Multiple cognitive focus slots are active, or critical missions are near their deadline. Adding a new goal will degrade execution quality.'}
+                      </p>
+                      
+                      <div className="p-3 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-sm space-y-2">
+                        {warningSlots >= 7 && (
+                          <div className="flex justify-between items-center text-[10px] uppercase font-bold text-[var(--text-secondary)] font-space">
+                            <span>{isRTL ? 'سعة التركيز النشطة:' : 'Active Focus Capacity:'}</span>
+                            <span className="text-[#FF0055] font-black">{warningSlots.toFixed(1).replace('.0','')}/9 Slots ({(warningSlots/9 * 100).toFixed(0)}%)</span>
+                          </div>
+                        )}
+                        {warningCriticalCount > 0 && (
+                          <div className="flex justify-between items-center text-[10px] uppercase font-bold text-[var(--text-secondary)] font-space">
+                            <span>{isRTL ? 'المهام الحرجة القريبة:' : 'Critical Near-Deadline Goals:'}</span>
+                            <span className="text-[#FF0055] font-black">{warningCriticalCount} {isRTL ? 'مهام' : 'Missions'}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                      <button
+                        onClick={() => {
+                          localStorage.setItem('context_warning_cooldown', Date.now().toString());
+                          addMission(true);
+                        }}
+                        className="flex-1 py-2.5 bg-[#FF0055]/10 text-[#FF0055] border border-[#FF0055]/30 hover:bg-[#FF0055]/20 font-space font-black text-xs uppercase tracking-widest transition-all"
+                      >
+                        {isRTL ? 'استبدال المهمة' : 'FORCE SWAP'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          playBlip();
+                          setShowWarningModal(false);
+                        }}
+                        className="flex-1 py-2.5 text-white dark:text-black font-space font-black text-xs uppercase tracking-widest transition-all"
+                        style={{ backgroundColor: currentTheme.color }}
+                      >
+                        {isRTL ? 'الاستمرار بالتركيز' : 'KEEP FOCUSING'}
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {missions.length === 0 && !loading && (
             <div className="col-span-full py-24">

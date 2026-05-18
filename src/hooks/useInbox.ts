@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase'
 export interface Report {
   id: string
   user_id: string
-  type: 'daily_brief' | 'deadline_alert' | 'mission_complete'
+  type: 'daily_brief' | 'deadline_alert' | 'mission_complete' | 'weekly_review'
   title: string
   content: any
   is_read: boolean
@@ -242,12 +242,169 @@ XP المكسوب: +[${xpAmount}]
     fetchReports()
   }
 
+  const generateWeeklyReview = async (userId: string) => {
+    const now = new Date()
+    const day = now.getDay()
+    const diff = now.getDate() - (day === 0 ? 6 : day - 1)
+    const monday = new Date(now.setDate(diff))
+    monday.setHours(0, 0, 0, 0)
+    const mondayStr = monday.toISOString()
+    
+    const { data: existingReview } = await supabase
+      .from('inbox_reports')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('type', 'weekly_review')
+      .gte('created_at', mondayStr)
+      .limit(1)
+
+    if (existingReview && existingReview.length > 0) return
+
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+
+    const { data: taskLogs } = await supabase
+      .from('task_completion_log')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('completed_at', sevenDaysAgo)
+
+    const completedCount = taskLogs?.length || 0
+    const gainedXp = completedCount * 25
+
+    const { data: completedMissions } = await supabase
+      .from('cups')
+      .select('*, tasks(*)')
+      .eq('user_id', userId)
+      .eq('is_archived', true)
+      .gte('created_at', sevenDaysAgo)
+
+    let missionXp = 0
+    if (completedMissions) {
+      completedMissions.forEach((m: any) => {
+        const total = m.tasks?.length || 0
+        missionXp += total * 10 + 50
+      })
+    }
+    const totalWeeklyXp = gainedXp + missionXp
+
+    const { data: activeMissions } = await supabase
+      .from('cups')
+      .select('*, tasks(*)')
+      .eq('user_id', userId)
+      .eq('is_archived', false)
+
+    let activeMissionsList: string[] = []
+    let activeMissionsTextAr = ""
+    let activeMissionsTextEn = ""
+    let criticalGoalTitle = ""
+    let criticalGoalDays = 999
+    
+    const SIZE_SLOTS: Record<string, number> = { sm: 1, md: 1.5, lg: 3, s: 1, m: 1.5, l: 3 }
+    let usedSlots = 0
+
+    if (activeMissions) {
+      activeMissions.forEach((m: any) => {
+        const total = m.tasks?.length || 0
+        const done = m.tasks?.filter((t: any) => t.is_completed).length || 0
+        const progress = total > 0 ? Math.round((done / total) * 100) : 0
+        activeMissionsList.push(`${m.title} (${progress}%)`)
+        activeMissionsTextAr += `- [${m.title}]: بنسبة إنجاز [${progress}%]\n`
+        activeMissionsTextEn += `- [${m.title}]: at [${progress}%] progress\n`
+        
+        usedSlots += SIZE_SLOTS[m.size?.toLowerCase()] ?? 1
+
+        if (m.end_date) {
+          const days = Math.ceil((new Date(m.end_date).getTime() - new Date().getTime()) / (1000 * 3600 * 24))
+          if (days > 0 && days <= 5 && progress < 50) {
+            if (days < criticalGoalDays) {
+              criticalGoalDays = days
+              criticalGoalTitle = m.title
+            }
+          }
+        }
+      })
+    }
+
+    let recommendationsAr = ""
+    let recommendationsEn = ""
+    let recommendationsList: string[] = []
+
+    if (completedCount === 0) {
+      recommendationsAr = `1. 💤 ركز هذا الأسبوع على مهمة واحدة صغيرة لكسر الجمود واسترجاع طاقتك.`
+      recommendationsEn = `1. 💤 Focus on a single small task this week to break the ice and build up momentum.`
+      recommendationsList.push("Focus on small tasks to build momentum")
+    } else if (criticalGoalTitle) {
+      recommendationsAr = `1. 🚨 الهدف "${criticalGoalTitle}" يقترب من موعده النهائي وباقي ${criticalGoalDays} أيام فقط. ركز جهودك عليه أولاً.`
+      recommendationsEn = `1. 🚨 Goal "${criticalGoalTitle}" is nearing its deadline in ${criticalGoalDays} days. Prioritize it to avoid overrun.`
+      recommendationsList.push(`Prioritize urgent goal: ${criticalGoalTitle}`)
+    } else if (usedSlots >= 7) {
+      recommendationsAr = `1. 🚧 سعة التركيز لديك مرتفعة جداً (${usedSlots}/9). تجنب بدء أهداف جديدة قبل إنهاء الأهداف الحالية.`
+      recommendationsEn = `1. 🚧 Your focus slot capacity is high (${usedSlots}/9). Avoid starting new goals until current ones are resolved.`
+      recommendationsList.push("Clear existing focus slots before starting new goals")
+    } else {
+      recommendationsAr = `1. ⚡ أداء رائع! حافظ على هذا الإيقاع واستمر في حصد الـ XP والنمو.`
+      recommendationsEn = `1. ⚡ Excellent execution! Maintain this tempo, keep farming XP and expanding your capabilities.`
+      recommendationsList.push("Maintain current productive tempo")
+    }
+
+    const title = `📊 الحصاد الأسبوعي // WEEKLY_REVIEW`
+    const contentText = `📊 الحصاد الأسبوعي // WEEKLY REVIEW
+
+📅 الأسبوع اللي فات (Last Week):
+- المهام المنجزة: [${completedCount}] مهمة
+- نقاط XP المكتسبة: +[${totalWeeklyXp}] نقطة
+- حالة المهمات النشطة:
+${activeMissionsTextAr || '- لا يوجد مهمات نشطة حالياً.'}
+
+🚀 الأسبوع الجاي (Next Week):
+- حالة سعة المحطة الحالية: ${usedSlots}/9 وحدات تركيز.
+- خطط التركيز المقترحة: ${criticalGoalTitle ? `التركيز فوراً على إنهاء "${criticalGoalTitle}"` : `الحفاظ على معدل الإنجاز واستثمار طاقة الرانك`}
+
+💡 التوصية (Recommendation):
+${recommendationsAr}
+
+========================================
+
+📊 WEEKLY INTELLIGENCE REPORT
+
+📅 LAST WEEK:
+- Tasks Completed: [${completedCount}] tasks
+- XP Gained: +[${totalWeeklyXp}] XP
+- Active Missions Status:
+${activeMissionsTextEn || '- No active missions currently.'}
+
+🚀 NEXT WEEK:
+- Current Station Capacity: ${usedSlots}/9 focus slots.
+- Suggested Directive: ${criticalGoalTitle ? `Prioritize completing urgent target: "${criticalGoalTitle}"` : `Maintain current momentum and optimize slot utilization.`}
+
+💡 RECOMMENDATION:
+${recommendationsEn}`
+
+    const { data: newReport } = await supabase.from('inbox_reports').insert({
+      user_id: userId,
+      type: 'weekly_review',
+      title,
+      content: {
+        text: contentText,
+        completed_tasks: completedCount,
+        gained_xp: totalWeeklyXp,
+        active_missions: activeMissionsList,
+        recommendations: recommendationsList
+      }
+    }).select().single()
+
+    if (newReport) {
+      setReports(prev => [newReport, ...prev])
+    }
+  }
+
   useEffect(() => {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await fetchReports()
         await generateDailyBrief(user.id)
+        await generateWeeklyReview(user.id)
         await checkDeadlinesAndCompletions(user.id)
       }
     }

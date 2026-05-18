@@ -15,7 +15,7 @@ function hexToRgb(hex: string) {
 export default function NeuralMesh({ overrideColor }: { overrideColor?: string } = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const glowRef = useRef<HTMLDivElement>(null)
-  const { currentTheme } = useGrowth()
+  const { currentTheme, mounted } = useGrowth()
   const activeColor = overrideColor || currentTheme.color
   const colorRef = useRef(activeColor)
 
@@ -213,17 +213,19 @@ export default function NeuralMesh({ overrideColor }: { overrideColor?: string }
         style={{ width: '100vw', height: '100vh' }}
       />
       {/* Soft Glow Spotlight */}
-      <div 
-        ref={glowRef}
-        className="fixed top-0 left-0 w-[600px] h-[600px] rounded-full pointer-events-none z-[-1] will-change-transform opacity-0"
-        style={{
-          background: `radial-gradient(circle, rgba(${rgbGlow.r}, ${rgbGlow.g}, ${rgbGlow.b}, 0.25) 0%, transparent 60%)`,
-          filter: 'blur(100px)',
-          marginLeft: '-300px',
-          marginTop: '-300px',
-          transition: 'opacity 0.5s ease'
-        }}
-      />
+      {mounted && (
+        <div 
+          ref={glowRef}
+          className="fixed top-0 left-0 w-[600px] h-[600px] rounded-full pointer-events-none z-[-1] will-change-transform opacity-0"
+          style={{
+            background: `radial-gradient(circle, rgba(${rgbGlow.r}, ${rgbGlow.g}, ${rgbGlow.b}, 0.25) 0%, transparent 60%)`,
+            filter: 'blur(100px)',
+            marginLeft: '-300px',
+            marginTop: '-300px',
+            transition: 'opacity 0.5s ease'
+          }}
+        />
+      )}
     </>
   )
 }

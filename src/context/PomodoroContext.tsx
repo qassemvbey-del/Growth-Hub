@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { useToast } from '@/components/ui/Toast'
 import { useSound } from '@/context/SoundContext'
+import { createClient } from '@/lib/supabase'
 
 type SessionType = 'FOCUS' | 'BREAK'
 
@@ -16,13 +17,20 @@ interface PomodoroContextType {
   isInitialized: boolean
   focusDuration: number
   breakDuration: number
-  startFocus: (taskName: string) => void
+  startFocus: (taskName: string, taskId?: string, cupId?: string) => void
   startTimer: () => void
   pause: () => void
   resume: () => void
   stop: () => void
   toggleMinimize: () => void
   updateConfig: (focus: number, breakTime: number) => void
+  taskId?: string
+  cupId?: string
+  showSwitchWarning: boolean
+  setShowSwitchWarning: (show: boolean) => void
+  pendingSwitchTask: { name: string; taskId?: string; cupId?: string } | null
+  confirmSwitch: () => void
+  cancelSwitch: () => void
 }
 
 const PomodoroContext = createContext<PomodoroContextType | undefined>(undefined)
@@ -38,8 +46,12 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   const [isPaused, setIsPaused] = useState(false)
   const [sessionType, setSessionType] = useState<SessionType>('FOCUS')
   const [taskName, setTaskName] = useState('')
+  const [taskId, setTaskId] = useState<string | undefined>(undefined)
+  const [cupId, setCupId] = useState<string | undefined>(undefined)
   const [isMinimized, setIsMinimized] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [showSwitchWarning, setShowSwitchWarning] = useState(false)
+  const [pendingSwitchTask, setPendingSwitchTask] = useState<{ name: string; taskId?: string; cupId?: string } | null>(null)
 
   const { showToast } = useToast()
   const { playSuccess, playBlip } = useSound()
@@ -69,6 +81,8 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
           setIsInitialized(true)
           setSessionType(data.sessionType)
           setTaskName(data.taskName)
+          setTaskId(data.taskId)
+          setCupId(data.cupId)
         }
       } else {
         setTimeRemaining(data.timeRemaining)
@@ -77,6 +91,8 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
         setIsInitialized(data.isInitialized || data.isActive)
         setSessionType(data.sessionType)
         setTaskName(data.taskName)
+        setTaskId(data.taskId)
+        setCupId(data.cupId)
       }
     }
   }, [])
@@ -91,6 +107,8 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
         isInitialized,
         sessionType,
         taskName,
+        taskId,
+        cupId,
         startTime: Date.now(),
         initialTime: timeRemaining
       }
@@ -98,7 +116,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     } else {
       localStorage.removeItem('pomodoro_session')
     }
-  }, [timeRemaining, isActive, isPaused, isInitialized, sessionType, taskName])
+  }, [timeRemaining, isActive, isPaused, isInitialized, sessionType, taskName, taskId, cupId])
 
   useEffect(() => {
     if (isActive && !isPaused && timeRemaining > 0) {
@@ -114,10 +132,44 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isActive, isPaused, timeRemaining])
 
+  const saveTimeLog = async (durationSecs: number, endedAt: string) => {
+    if (!taskId || !cupId || durationSecs <= 0) return
+
+    const activeSessionStr = localStorage.getItem('active_session')
+    if (!activeSessionStr) return
+    const activeSession = JSON.parse(activeSessionStr)
+
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const durationMin = Math.max(1, Math.round(durationSecs / 60))
+
+    try {
+      await supabase.from('time_logs').insert({
+        user_id: user.id,
+        task_id: taskId,
+        cup_id: cupId,
+        started_at: activeSession.started_at || new Date().toISOString(),
+        ended_at: endedAt,
+        duration_minutes: durationMin,
+        session_type: 'pomodoro'
+      })
+      localStorage.removeItem('active_session')
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('time-log-saved', { detail: { taskId, cupId } }))
+      }
+    } catch (e) {
+      console.error('FAILED TO SAVE TIME LOG:', e)
+    }
+  }
+
   const handleSessionComplete = () => {
     playSuccess()
     if (sessionType === 'FOCUS') {
       showToast('FOCUS_SESSION_COMPLETE // TAKE A BREAK', 'success')
+      saveTimeLog(focusDuration * 60, new Date().toISOString())
       setSessionType('BREAK')
       setTimeRemaining(breakDuration * 60)
     } else {
@@ -128,8 +180,24 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const startFocus = (name: string) => {
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isActive && sessionType === 'FOCUS') {
+        e.preventDefault()
+        e.returnValue = ''
+        return ''
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [isActive, sessionType])
+
+  const executeStartFocus = (name: string, tId?: string, cId?: string) => {
     setTaskName(name)
+    setTaskId(tId)
+    setCupId(cId)
     setSessionType('FOCUS')
     setTimeRemaining(focusDuration * 60)
     setIsInitialized(true)
@@ -139,10 +207,48 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     playBlip()
   }
 
+  const startFocus = (name: string, tId?: string, cId?: string) => {
+    if (isActive && sessionType === 'FOCUS' && taskId && taskId !== tId) {
+      setPendingSwitchTask({ name, taskId: tId, cupId: cId })
+      setShowSwitchWarning(true)
+      playBlip()
+      return
+    }
+    executeStartFocus(name, tId, cId)
+  }
+
+  const confirmSwitch = () => {
+    if (pendingSwitchTask) {
+      if (sessionType === 'FOCUS' && isActive) {
+        const elapsed = (focusDuration * 60) - timeRemaining
+        if (elapsed > 0) {
+          saveTimeLog(elapsed, new Date().toISOString())
+        }
+      }
+      executeStartFocus(pendingSwitchTask.name, pendingSwitchTask.taskId, pendingSwitchTask.cupId)
+      setShowSwitchWarning(false)
+      setPendingSwitchTask(null)
+    }
+  }
+
+  const cancelSwitch = () => {
+    setShowSwitchWarning(false)
+    setPendingSwitchTask(null)
+    playBlip()
+  }
+
   const startTimer = () => {
     setIsActive(true)
     setIsPaused(false)
     playBlip()
+
+    if (taskId && cupId) {
+      localStorage.setItem('active_session', JSON.stringify({
+        task_id: taskId,
+        cup_id: cupId,
+        started_at: new Date().toISOString()
+      }))
+    }
   }
 
   const pause = () => {
@@ -156,11 +262,20 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   }
 
   const stop = () => {
+    if (sessionType === 'FOCUS' && isActive) {
+      const elapsed = (focusDuration * 60) - timeRemaining
+      if (elapsed > 0) {
+        saveTimeLog(elapsed, new Date().toISOString())
+      }
+    }
+
     setIsActive(false)
     setIsPaused(false)
     setIsInitialized(false)
     setTimeRemaining(focusDuration * 60)
     setTaskName('')
+    setTaskId(undefined)
+    setCupId(undefined)
     playBlip()
   }
 
@@ -183,7 +298,9 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     <PomodoroContext.Provider value={{
       timeRemaining, isActive, isPaused, sessionType, taskName, isMinimized, isInitialized,
       focusDuration, breakDuration,
-      startFocus, startTimer, pause, resume, stop, toggleMinimize, updateConfig
+      startFocus, startTimer, pause, resume, stop, toggleMinimize, updateConfig,
+      taskId, cupId,
+      showSwitchWarning, setShowSwitchWarning, pendingSwitchTask, confirmSwitch, cancelSwitch
     }}>
       {children}
     </PomodoroContext.Provider>

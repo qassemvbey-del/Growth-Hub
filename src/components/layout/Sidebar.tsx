@@ -82,7 +82,7 @@ export default function Sidebar({ isRTL = false }: { isRTL?: boolean }) {
       {/* Sidebar Header - Profile Sync */}
       <div className="pt-16 px-10 flex flex-col items-start gap-6 relative overflow-hidden group text-start">
         <Link href="/settings" className="flex items-center gap-4 group/avatar">
-            {profile?.avatar_url ? (
+            {mounted && profile?.avatar_url ? (
              <img 
                src={profile.avatar_url} 
                alt="User" 

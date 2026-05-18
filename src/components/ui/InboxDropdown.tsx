@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 
 interface Report {
   id: string
-  type: 'daily_brief' | 'deadline_alert' | 'mission_complete'
+  type: 'daily_brief' | 'deadline_alert' | 'mission_complete' | 'weekly_review'
   title: string
   content: any
   is_read: boolean
@@ -102,6 +102,7 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, themeC
               <p className="text-[11px] font-space text-black/60 dark:text-white/50 truncate w-full">
                 {report.type === 'daily_brief' ? `Tasks completed today: ${report.content.completed_count}` : 
                  report.type === 'deadline_alert' ? `DEADLINE_APPROACHING: ${report.content.mission_title}` :
+                 report.type === 'weekly_review' ? `WEEKLY_REVIEW // XP: +${report.content.gained_xp}` :
                  `MISSION_COMPLETE: ${report.content.mission_title}`}
               </p>
             </button>

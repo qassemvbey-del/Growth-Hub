@@ -22,15 +22,92 @@ const SIZE_MAP: Record<string, 'sm' | 'md' | 'lg'> = {
   L: 'lg', LARGE: 'lg', large: 'lg',
 }
 
+function WeatherWidget({ isRTL }: { isRTL: boolean }) {
+  const [weather, setWeather] = useState<{ temp: number; emoji: string; messageAr: string; messageEn: string } | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    async function fetchWeather() {
+      try {
+        let lat = '31.2001'
+        let lon = '29.9187'
+        if (navigator.geolocation) {
+          await new Promise<void>((resolve) => {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                lat = pos.coords.latitude.toString()
+                lon = pos.coords.longitude.toString()
+                resolve()
+              },
+              () => resolve(),
+              { timeout: 5000 }
+            )
+          })
+        }
+        const res = await fetch(`/api/weather?lat=${lat}&lon=${lon}`)
+        if (!res.ok) throw new Error('API request failed')
+        const data = await res.json()
+        if (active) {
+          setWeather(data)
+          setLoading(false)
+        }
+      } catch (err) {
+        console.error('Weather error:', err)
+        if (active) {
+          setWeather({
+            temp: 24,
+            emoji: '☀️',
+            messageAr: 'الجو حلو النهاردة، فرصة ممتازة تخلص اللي وراك!',
+            messageEn: 'Nice weather today—perfect time to get things done!'
+          })
+          setLoading(false)
+        }
+      }
+    }
+    fetchWeather()
+    return () => {
+      active = false
+    }
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="bg-white/[0.02] border border-white/5 rounded-xl p-4 backdrop-blur-md mb-4 flex items-center justify-between animate-pulse w-full max-w-lg mx-auto">
+        <div className="h-5 w-16 bg-white/10 rounded-sm" />
+        <div className="h-4 w-48 bg-white/10 rounded-sm" />
+      </div>
+    )
+  }
+
+  if (!weather) return null
+
+  return (
+    <div className="bg-white/[0.02] border border-white/5 rounded-xl p-4 backdrop-blur-md mb-4 flex items-center justify-between w-full max-w-lg mx-auto">
+      <div className="text-sm font-medium text-white/90 flex items-center gap-1.5 font-space">
+        <span>{weather.emoji}</span>
+        <span>{weather.temp}°C</span>
+      </div>
+      <div className="text-xs text-white/50 font-normal text-right max-w-[60%] leading-relaxed font-space">
+        {isRTL ? weather.messageAr : weather.messageEn}
+      </div>
+    </div>
+  )
+}
+
 export default function Dashboard() {
   const { profile, calculateAccountability, mounted, t, isRTL, currentTheme } = useGrowth()
   const router = useRouter()
   const [missions, setMissions] = useState<any[]>([])
+  const [weeklyMinutes, setWeeklyMinutes] = useState<number>(0)
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
   useEffect(() => {
-    if (mounted) fetchDashboardMissions()
+    if (mounted) {
+      fetchDashboardMissions()
+      fetchWeeklyTimeLogs()
+    }
   }, [mounted])
 
 
@@ -48,6 +125,33 @@ export default function Dashboard() {
     
     if (data) setMissions(data)
     setLoading(false)
+  }
+
+  async function fetchWeeklyTimeLogs() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const now = new Date()
+    const day = now.getDay()
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1)
+    const monday = new Date(now.setDate(diff))
+    monday.setHours(0, 0, 0, 0)
+
+    const { data, error } = await supabase
+      .from('time_logs')
+      .select('duration_minutes')
+      .eq('user_id', user.id)
+      .gte('started_at', monday.toISOString())
+
+    if (error) {
+      console.error("ERROR FETCHING WEEKLY TIME LOGS:", error)
+      return
+    }
+
+    if (data) {
+      const total = data.reduce((acc: number, log: any) => acc + (log.duration_minutes || 0), 0)
+      setWeeklyMinutes(total)
+    }
   }
 
   if (!mounted) return null
@@ -84,11 +188,18 @@ export default function Dashboard() {
           <p className="text-[10px] md:text-xs font-space text-black/40 dark:text-white/40 tracking-[0.6em] uppercase font-black">
             {isRTL ? 'لوحة الأهداف' : 'GOAL CANVAS'} // {profile?.full_name?.toUpperCase() || (isRTL ? 'المستخدم' : 'OPERATOR')}
           </p>
+
+          {/* Sleek, low-profile weekly time floating sub-badge */}
+          <div className="font-space font-black text-white/50 text-xs tracking-wider uppercase flex items-center gap-1.5 justify-center mt-2">
+            <span>⏱ THIS WEEK: {Math.floor(weeklyMinutes / 60)}h {weeklyMinutes % 60}m invested</span>
+          </div>
         </div>
 
         {/* ═══════════════════════════════════════════════════ */}
         {/* ██  FOCUS CAPACITY — BOLD, GLOWING, text-3xl/4xl ██ */}
         {/* ═══════════════════════════════════════════════════ */}
+        <WeatherWidget isRTL={isRTL} />
+
         {(() => {
           const SIZE_SLOTS: Record<string, number> = { sm: 1, md: 1.5, lg: 3, s: 1, m: 1.5, l: 3 }
           const usedSlots = missions.reduce((acc: number, m: any) => acc + (SIZE_SLOTS[m.size?.toLowerCase()] ?? 1), 0)
@@ -142,6 +253,17 @@ export default function Dashboard() {
                     }}
                   />
                 ))}
+              </div>
+              
+              {/* Weekly Time Logged Stat */}
+              <div className="flex justify-between items-center text-[10px] font-space text-[var(--text-secondary)] uppercase tracking-wider pt-1">
+                <span className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[12px]" style={{ color: currentTheme.color }}>timer</span>
+                  {isRTL ? 'الاستثمار هذا الأسبوع:' : 'INVESTED THIS WEEK:'}
+                </span>
+                <span className="font-black italic text-xs" style={{ color: currentTheme.color }}>
+                  {Math.floor(weeklyMinutes / 60)}h {weeklyMinutes % 60}m
+                </span>
               </div>
             </div>
           )

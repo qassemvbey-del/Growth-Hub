@@ -30,7 +30,14 @@ export default function EnergyCell({
 }: EnergyCellProps) {
   const primary = isInRedZone ? '#FF0055' : (color?.startsWith('#') ? color : '#39FF14')
   const { w, h } = DIMS[size ?? 'md']
-  const pct = Math.round(Math.max(0, Math.min(100, isNaN(percentage) ? 0 : percentage)))
+  let parsedPct = 0
+  if (typeof percentage === 'number' && !isNaN(percentage)) {
+    parsedPct = percentage
+  } else if (typeof percentage === 'string') {
+    const parsed = parseFloat(percentage)
+    if (!isNaN(parsed)) parsedPct = parsed
+  }
+  const pct = Math.round(Math.max(0, Math.min(100, parsedPct)))
   const uid = useId().replace(/:/g, '')
 
   // Fill calculation: path height is roughly 2 to 72 in 60x80 viewBox

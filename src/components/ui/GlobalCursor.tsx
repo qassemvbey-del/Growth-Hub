@@ -5,7 +5,7 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
 
 export default function GlobalCursor() {
-  const { currentTheme } = useGrowth()
+  const { currentTheme, mounted } = useGrowth()
   const [isTouchDevice, setIsTouchDevice] = useState(false)
   
   const mouseX = useMotionValue(-100)
@@ -55,8 +55,8 @@ export default function GlobalCursor() {
     }
   }, [])
 
-  // Complete exclusion for touch screens
-  if (isTouchDevice) return null
+  // Complete exclusion for touch screens or before mount
+  if (!mounted || isTouchDevice) return null
 
   return (
     <>

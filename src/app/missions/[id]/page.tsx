@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Shell from '@/components/layout/Shell'
 import EnergyCell from '@/components/ui/EnergyCell'
@@ -14,6 +14,9 @@ import PlaylistImportModal from '@/components/ui/PlaylistImportModal'
 import { usePomodoro } from '@/context/PomodoroContext'
 import { cleanPlaylistTitles } from '@/app/actions/ai-magic'
 import MissionAttachmentsModal from '@/components/ui/MissionAttachmentsModal'
+import SmartImportModal from '@/components/ui/SmartImportModal'
+import { validateContent } from '@/lib/profanityFilter'
+import { aiProfanityCheck } from '@/app/actions/profanityCheck'
 
 // --- HELPER COMPONENT: CYBERPUNK WEIGHT BARS ---
 const WeightVisualizer = ({ weight, color, isCompleted = false, onSelect }: { weight: number, color: string, isCompleted?: boolean, onSelect?: (w: number) => void }) => {
@@ -54,6 +57,9 @@ export default function MissionDetailPage() {
   const [linkedNotes, setLinkedNotes] = useState<any[]>([])
   const [showIntelModal, setShowIntelModal] = useState(false)
   const [showPlaylistModal, setShowPlaylistModal] = useState(false)
+  const [showSmartImportModal, setShowSmartImportModal] = useState(false)
+  const [timeStatsMap, setTimeStatsMap] = useState<Record<string, number>>({})
+  const [totalTimeInvested, setTotalTimeInvested] = useState<number>(0)
   
   // --- ATTACHMENTS STATE ---
   const [attachmentMissionId, setAttachmentMissionId] = useState<string | null>(null)
@@ -73,12 +79,54 @@ export default function MissionDetailPage() {
   const supabase = createClient()
   const { startFocus } = usePomodoro()
 
+  const fetchTimeStats = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { data, error } = await supabase
+      .from('time_logs')
+      .select('duration_minutes, task_id')
+      .eq('cup_id', id)
+      .eq('user_id', user.id)
+
+    if (error) {
+      console.error("ERROR FETCHING TIME STATS:", error)
+      return
+    }
+
+    if (data) {
+      const aggregation: Record<string, number> = {}
+      let grandTotal = 0
+      data.forEach((row: any) => {
+        const taskId = row.task_id
+        const mins = row.duration_minutes || 0
+        aggregation[taskId] = (aggregation[taskId] || 0) + mins
+        grandTotal += mins
+      })
+
+      setTimeStatsMap(aggregation)
+      setTotalTimeInvested(grandTotal)
+    }
+  }, [id, supabase])
+
   useEffect(() => {
     if (mounted) {
       fetchMission()
       fetchAttachmentCount()
+      fetchTimeStats()
     }
   }, [id, mounted])
+
+  useEffect(() => {
+    const handleTimeLogSaved = (e: any) => {
+      console.log("Time log saved event received, updating inline timers...")
+      fetchTimeStats()
+    }
+    window.addEventListener('time-log-saved', handleTimeLogSaved)
+    return () => {
+      window.removeEventListener('time-log-saved', handleTimeLogSaved)
+    }
+  }, [fetchTimeStats])
 
   async function fetchAttachmentCount() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -252,12 +300,28 @@ export default function MissionDetailPage() {
 
   const addTask = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
-    if (!newTaskTitle.trim()) return
+    const rawTitle = newTaskTitle.trim()
+    if (!rawTitle) return
     
+    // Profanity checks
+    const { isValid } = validateContent(rawTitle)
+    if (!isValid) {
+      showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')
+      playError()
+      return
+    }
+
+    const isAiValid = await aiProfanityCheck(rawTitle)
+    if (!isAiValid) {
+      showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')
+      playError()
+      return
+    }
+
     const payload = {
       cup_id: id,
-      title: newTaskTitle.trim(),
-      original_title: newTaskTitle.trim(),
+      title: rawTitle,
+      original_title: rawTitle,
       weight: newTaskWeight,
       is_completed: false,
       type: 'standard'
@@ -283,11 +347,9 @@ export default function MissionDetailPage() {
   }
 
   // ── HUD CAPACITY LOGIC ──
-  // Total slots = 9 max. S=1 slot, M=1.5 slots, L=3 slots.
   const SIZE_SLOTS: Record<string, number> = { sm: 1, md: 1.5, lg: 3, s: 1, m: 1.5, l: 3, small: 1, medium: 1.5, large: 3 }
 
   const updateMission = async (updates: any) => {
-    // Guard: If enabling HUD sync, check capacity first
     if (updates.sync_to_dashboard === true) {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
@@ -297,7 +359,7 @@ export default function MissionDetailPage() {
           .eq('user_id', user.id)
           .eq('sync_to_dashboard', true)
           .eq('is_archived', false)
-          .neq('id', id) // exclude current mission
+          .neq('id', id)
 
         const usedSlots = (synced || []).reduce((acc: number, m: any) => {
           return acc + (SIZE_SLOTS[m.size?.toLowerCase()] ?? 1)
@@ -314,7 +376,7 @@ export default function MissionDetailPage() {
             'warning'
           )
           playError()
-          return // ← BLOCK the update
+          return
         }
       }
     }
@@ -359,42 +421,55 @@ export default function MissionDetailPage() {
       <div className="max-w-4xl mx-auto p-4 md:p-12 space-y-8 md:space-y-12">
         
         {/* Mission Header Overview */}
-        <section className="bg-[var(--card-bg)] border border-[var(--card-border)] p-6 md:p-12 rounded-sm space-y-8 md:space-y-10 relative overflow-hidden">
-           <div className="absolute top-0 inset-x-0 h-[2.5px]" style={{ background: missionColor }} />
-           
-           <div className="flex justify-between items-start gap-4">
-              <div className="space-y-1 flex-1 min-w-0">
-                 <h1 className="text-2xl md:text-5xl font-black font-space tracking-tighter uppercase italic text-[var(--text-primary)] leading-none break-words">
-                    {mission.title}
-                 </h1>
-                 <p className="text-[9px] font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
-                    ID: {mission.id.slice(0, 8).toUpperCase()}
-                 </p>
-              </div>
-               <div className="flex flex-col items-end gap-1 shrink-0">
-                  <div className="flex items-center gap-2 md:gap-4">
-                     <button 
-                        onClick={deleteMission}
-                        className="p-2 text-black/20 dark:text-white/10 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-full"
-                        title={isRTL ? 'حذف المهمة' : 'DELETE_MISSION'}
-                     >
-                        <span className="material-symbols-outlined text-xl">delete_forever</span>
-                     </button>
-                     <span className="text-3xl md:text-6xl font-black font-space italic" style={{ color: missionColor }}>{roundedProgress}%</span>
-                  </div>
-                  <p className="text-[9px] font-space text-[var(--text-secondary)] tracking-[0.4em] uppercase font-black">{isRTL ? 'مزامنة' : 'Complete'}</p>
+        <section className="bg-[var(--card-bg)] border border-[var(--card-border)] p-6 md:p-12 rounded-sm space-y-6 relative overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-[2.5px]" style={{ background: missionColor }} />
+            
+            <div className="flex justify-between items-start gap-4">
+               <div className="space-y-1 flex-1 min-w-0">
+                  <h1 className="text-2xl md:text-5xl font-black font-space tracking-tighter uppercase italic text-[var(--text-primary)] leading-none break-words">
+                     {mission.title}
+                  </h1>
                </div>
-           </div>
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                   <div className="flex items-center gap-2 md:gap-4">
+                      <button 
+                         onClick={deleteMission}
+                         className="p-2 text-black/20 dark:text-white/10 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-full"
+                         title={isRTL ? 'حذف المهمة' : 'DELETE_MISSION'}
+                      >
+                         <span className="material-symbols-outlined text-xl">delete_forever</span>
+                      </button>
+                      <span className="text-3xl md:text-6xl font-black font-space italic" style={{ color: missionColor }}>{roundedProgress}%</span>
+                   </div>
+                   <p className="text-[9px] font-space text-[var(--text-secondary)] tracking-[0.4em] uppercase font-black">{isRTL ? 'مكتمل' : 'Complete'}</p>
+                </div>
+            </div>
 
-           <div className="w-full h-[1.5px] bg-[var(--input-bg)] relative">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${roundedProgress}%` }}
-                className="h-full absolute top-0 start-0"
-                style={{ backgroundColor: missionColor, boxShadow: `0 0 15px ${missionColor}` }}
-              />
-           </div>
-        </section>
+            {/* Horizontal Stats Row */}
+            <div className="flex flex-wrap items-center pt-4 border-t border-white/5 gap-y-2">
+               <div className="inline-flex items-center text-xs font-mono text-white/50 border-r border-white/10 pr-3 mr-3 last:border-0">
+                  <span className="material-symbols-outlined text-sm mr-1.5" style={{ color: missionColor }}>schedule</span>
+                  <span>{isRTL ? 'إجمالي التركيز:' : 'Total Focus:'} <strong className="text-white font-black ml-1">{Math.floor(totalTimeInvested / 60)}h {totalTimeInvested % 60}m</strong></span>
+               </div>
+               <div className="inline-flex items-center text-xs font-mono text-white/50 border-r border-white/10 pr-3 mr-3 last:border-0">
+                  <span className="material-symbols-outlined text-sm mr-1.5" style={{ color: missionColor }}>radar</span>
+                  <span>{isRTL ? 'مكتمل:' : 'Done:'} <strong className="text-white font-black ml-1">{completedCount}</strong></span>
+               </div>
+               <div className="inline-flex items-center text-xs font-mono text-white/50 border-r border-white/10 pr-3 mr-3 last:border-0">
+                  <span className="material-symbols-outlined text-sm mr-1.5" style={{ color: missionColor }}>checklist</span>
+                  <span>{isRTL ? 'المهام الإجمالية:' : 'Total Tasks:'} <strong className="text-white font-black ml-1">{totalCount}</strong></span>
+               </div>
+            </div>
+
+            <div className="w-full h-[1.5px] bg-[var(--input-bg)] relative">
+               <motion.div
+                 initial={{ width: 0 }}
+                 animate={{ width: `${roundedProgress}%` }}
+                 className="h-full absolute top-0 start-0"
+                 style={{ backgroundColor: missionColor, boxShadow: `0 0 15px ${missionColor}` }}
+               />
+            </div>
+         </section>
 
          {/* Mission Configuration */}
          <div className="space-y-4">
@@ -427,6 +502,22 @@ export default function MissionDetailPage() {
              >
                 <span className="material-symbols-outlined text-base">playlist_add</span>
                 {isRTL ? 'استورد قائمة تشغيل' : 'IMPORT'}
+             </button>
+
+             {/* SMART_IMPORT button */}
+             <button
+                onClick={() => { playBlip(); setShowSmartImportModal(true); }}
+                className="px-4 md:px-6 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-sm uppercase flex items-center gap-3 hover:opacity-85"
+                style={{
+                  borderColor: `${missionColor}55`,
+                  color: missionColor,
+                  backgroundColor: `${missionColor}10`,
+                }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = `${missionColor}20` }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = `${missionColor}10` }}
+             >
+                <span className="material-symbols-outlined text-base">content_paste</span>
+                {isRTL ? 'استيراد ذكي' : 'SMART IMPORT'}
              </button>
 
              {/* INTEL button */}
@@ -529,9 +620,7 @@ export default function MissionDetailPage() {
                   </button>
                 )}
               </div>
-              <span className="text-[10px] font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
-                 {completedCount}/{totalCount} {isRTL ? 'مهمة اتخلصت' : 'Done'}
-              </span>
+              
            </div>
 
            {/* Task List */}
@@ -566,12 +655,27 @@ export default function MissionDetailPage() {
                              {task.is_completed && <span className="material-symbols-outlined text-black font-black text-lg">check</span>}
                           </button>
                           
-                          <span className={cn(
-                             "text-base md:text-xl font-space font-bold tracking-tight transition-all uppercase truncate",
-                             task.is_completed ? "text-[var(--text-secondary)] opacity-50 line-through" : "text-[var(--text-primary)]"
-                          )}>
-                             {task.title}
-                          </span>
+                          <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                             <span className={cn(
+                                "text-base md:text-xl font-space font-bold tracking-tight transition-all uppercase truncate max-w-full",
+                                task.is_completed ? "text-[var(--text-secondary)] opacity-55 line-through" : "text-[var(--text-primary)]"
+                             )}>
+                                {task.title}
+                             </span>
+                             {(() => {
+                               const taskMinutes = timeStatsMap[task.id] || 0;
+                               if (taskMinutes === 0) return null;
+                               const timeFormatted = taskMinutes >= 60 
+                                 ? `${Math.floor(taskMinutes / 60)}h ${taskMinutes % 60}m` 
+                                 : `${taskMinutes}m`;
+                               return (
+                                 <span className="ml-2 font-mono text-[11px] text-white/40 bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-md tracking-wider inline-flex items-center gap-1 shrink-0">
+                                   <span className="material-symbols-outlined text-[10px]" style={{ color: currentTheme.color }}>schedule</span>
+                                   {timeFormatted}
+                                 </span>
+                               );
+                             })()}
+                           </div>
                        </div>
 
                        <div className="flex items-center gap-2 md:gap-4 shrink-0">
@@ -579,7 +683,7 @@ export default function MissionDetailPage() {
                           
                           {/* POMODORO BUTTON */}
                           <button
-                            onClick={() => startFocus(task.title)}
+                            onClick={() => startFocus(task.title, task.id, id as string)}
                             className="opacity-0 group-hover:opacity-100 text-[var(--text-secondary)] transition-all p-2"
                             onMouseEnter={e => e.currentTarget.style.color = currentTheme.color}
                             onMouseLeave={e => e.currentTarget.style.color = ''}
@@ -763,6 +867,27 @@ export default function MissionDetailPage() {
             tasks: [...(prev.tasks || []), ...newTasks]
           }))
           showToast(isRTL ? 'تم استيراد قائمة التشغيل بنجاح' : 'PLAYLIST_IMPORTED // TASKS_DEPLOYED', 'success')
+          playSuccess()
+        }}
+      />
+
+      {/* Smart Import Modal */}
+      <SmartImportModal
+        isOpen={showSmartImportModal}
+        onClose={() => setShowSmartImportModal(false)}
+        missionId={id as string}
+        themeColor={missionColor}
+        onTasksAdded={(newTasks) => {
+          setMission((prev: any) => ({
+            ...prev,
+            tasks: [...(prev.tasks || []), ...newTasks]
+          }))
+          showToast(
+            isRTL
+              ? `تم إضافة ${newTasks.length} مهمة بنجاح`
+              : `SMART_IMPORT // ${newTasks.length} TASKS_DEPLOYED`,
+            'success'
+          )
           playSuccess()
         }}
       />

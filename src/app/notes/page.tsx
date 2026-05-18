@@ -8,6 +8,83 @@ import { createClient } from '@/lib/supabase'
 import { useGrowth } from '@/context/GrowthContext'
 import CustomSelect from '@/components/ui/CustomSelect'
 
+interface WikiSearchProps {
+  onInsert: (text: string) => void
+  color: string
+  isRTL: boolean
+}
+
+function WikiSearch({ onInsert, color, isRTL }: WikiSearchProps) {
+  const [query, setQuery] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSearch = async () => {
+    if (!query.trim()) return
+    setLoading(true)
+    setError('')
+    
+    // Arabic char detection logic
+    const hasArabic = /[\u0600-\u06FF]/.test(query)
+    const domain = hasArabic ? 'ar' : 'en'
+    const url = `https://${domain}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query.trim())}`
+
+    try {
+      const res = await fetch(url)
+      if (!res.ok) {
+        throw new Error('Not found')
+      }
+      const data = await res.ok ? await res.json() : null
+      if (data && data.extract) {
+        onInsert(data.extract)
+        setQuery('')
+      } else {
+        throw new Error('No extract')
+      }
+    } catch (e) {
+      setError(isRTL ? 'لم نجد نتائج لهذا الموضوع' : 'No results found for this topic')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="w-full max-w-[280px] md:max-w-[320px] shrink-0 text-left">
+      <span className="text-[10px] font-mono tracking-widest text-black/30 dark:text-white/30 uppercase block mb-1">
+        W // WIKIPEDIA
+      </span>
+      <div className="flex relative">
+        <input
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') handleSearch() }}
+          placeholder={loading ? (isRTL ? 'جاري البحث...' : 'Searching...') : (isRTL ? 'بحث سريع...' : 'Quick search...')}
+          disabled={loading}
+          className="w-full bg-black/[0.01] dark:bg-white/[0.01] border border-black/5 dark:border-white/5 rounded-l-md px-2 py-1 text-xs text-black dark:text-white placeholder:text-black/30 dark:placeholder:text-white/20 focus:outline-none focus:border-black/20 dark:focus:border-white/10 transition-all font-space"
+        />
+        <button
+          onClick={handleSearch}
+          disabled={loading}
+          className="border-y border-r border-black/5 dark:border-white/5 bg-black/[0.03] dark:bg-white/[0.03] px-2.5 py-1 text-xs text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white rounded-r-md transition-colors font-mono shrink-0 active:scale-95 flex items-center justify-center min-w-[50px]"
+        >
+          {loading ? '...' : (isRTL ? 'بحث' : 'GO')}
+        </button>
+        
+        {loading && (
+          <div className="absolute right-[60px] top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none">
+            <span className="w-1 h-1 rounded-full animate-ping" style={{ backgroundColor: color }} />
+          </div>
+        )}
+      </div>
+      {error && (
+        <span className="text-[9px] font-space font-bold tracking-wide text-red-500/80 mt-1 block">
+          {error}
+        </span>
+      )}
+    </div>
+  )
+}
+
 export default function NotesPage() {
   const [notes, setNotes] = useState<any[]>([])
   const [missions, setMissions] = useState<any[]>([])
@@ -21,7 +98,7 @@ export default function NotesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterTag, setFilterTag] = useState('all')
   const supabase = createClient()
-  const { currentTheme } = useGrowth()
+  const { currentTheme, isRTL, mounted } = useGrowth()
 
   useEffect(() => { 
     fetchNotes()
@@ -186,6 +263,17 @@ export default function NotesPage() {
                   onBlur={e => e.currentTarget.style.borderColor = ''}
                   required
                 />
+                
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 sm:gap-4 mt-2 border-b border-black/5 dark:border-white/5 pb-2">
+                  <span className="text-[10px] font-space tracking-widest text-black/30 dark:text-white/20 uppercase font-black mb-1">
+                    Note Canvas
+                  </span>
+                  <WikiSearch
+                    isRTL={isRTL}
+                    color={currentTheme.color}
+                    onInsert={(text) => setNewContent(prev => prev ? `${prev}\n\n${text}` : text)}
+                  />
+                </div>
                 
                 <textarea
                   autoFocus
@@ -502,6 +590,17 @@ export default function NotesPage() {
                     {t.label}
                   </button>
                 ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 sm:gap-4 mb-4 border-b border-black/5 dark:border-white/5 pb-2">
+                <span className="text-[10px] font-space tracking-widest text-[var(--text-secondary)]/30 uppercase font-black mb-1">
+                  Canvas Editor
+                </span>
+                <WikiSearch
+                  isRTL={isRTL}
+                  color={currentTheme.color}
+                  onInsert={(text) => updateNote(editingNote.id, { content: editingNote.content ? `${editingNote.content}\n\n${text}` : text })}
+                />
               </div>
 
               <textarea

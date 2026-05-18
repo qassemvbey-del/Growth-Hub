@@ -4,7 +4,7 @@ import React from 'react'
 import { motion, useMotionValue, useSpring, useMotionTemplate } from 'framer-motion'
 import Shell from '@/components/layout/Shell'
 import EnergyCell from '@/components/ui/EnergyCell'
-import { useGrowth, THEME_PACKAGES } from '@/context/GrowthContext'
+import { useGrowth } from '@/context/GrowthContext'
 import { cn } from '@/lib/utils'
 
 interface RankData {
@@ -44,7 +44,7 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
   const springX = useSpring(mouseX, { stiffness: 280, damping: 25 })
   const springY = useSpring(mouseY, { stiffness: 280, damping: 25 })
 
-  // Radial dynamic gradient background highlight
+  // Radial dynamic gradient background highlight - using active global theme's color
   const radialBg = useMotionTemplate`radial-gradient(280px circle at ${springX}px ${springY}px, ${currentTheme.color}15, transparent 80%)`
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -58,7 +58,7 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative flex flex-col flex-shrink-0 w-[85vw] sm:w-[380px] snap-center h-[560px] justify-center"
+      className="relative flex flex-col min-w-[320px] md:min-w-[350px] flex-shrink-0 snap-center h-[550px] justify-center transition-all duration-300"
     >
       <motion.div
         layout
@@ -74,19 +74,28 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
           layout: { duration: 0.3 }
         }}
         className={cn(
-          "relative flex flex-col items-center cursor-none overflow-hidden group select-none w-full",
+          "relative flex flex-col items-center cursor-none overflow-hidden group select-none w-full h-full",
           "bg-black/40 backdrop-blur-xl border rounded-2xl p-6 md:p-8",
           status === 'EQUIPPED'
             ? "z-10 shadow-2xl"
             : "border-white/10"
         )}
         style={{
-          borderColor: status === 'EQUIPPED' ? `${rank.color}50` : 'rgba(255, 255, 255, 0.1)',
+          borderColor: status === 'EQUIPPED' ? `${currentTheme.color}60` : 'rgba(255, 255, 255, 0.1)',
           boxShadow: status === 'EQUIPPED' 
-            ? `0 0 30px ${rank.color}15, 0 12px 40px rgba(0,0,0,0.6)` 
+            ? `0 0 30px ${currentTheme.color}20, 0 12px 40px rgba(0,0,0,0.6)` 
             : '0 8px 32px rgba(0,0,0,0.3)'
         }}
       >
+        {/* Tier Inner Border Accent */}
+        <div className={cn(
+          "absolute inset-1 rounded-[14px] border pointer-events-none",
+          rank.id === 'SILVER' ? 'border-slate-500/10' :
+          rank.id === 'PLATINUM' ? 'border-sky-500/10' :
+          rank.id === 'CROWN' ? 'border-yellow-500/10' :
+          rank.id === 'ACE' ? 'border-orange-500/10' : 'border-red-500/10'
+        )} />
+
         {/* 1. Radial Spot Light Tracking Pointer */}
         <motion.div
           className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -94,7 +103,13 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
         />
 
         {/* Rank Title */}
-        <h2 className="text-4xl md:text-5xl font-black font-space mb-2 uppercase tracking-wider transition-transform duration-300 group-hover:scale-105" style={{ color: rank.color }}>
+        <h2 className={cn(
+          "text-4xl md:text-5xl font-black font-space mb-2 uppercase tracking-wider transition-transform duration-300 group-hover:scale-105",
+          rank.id === 'SILVER' ? 'text-slate-400' :
+          rank.id === 'PLATINUM' ? 'text-sky-400' :
+          rank.id === 'CROWN' ? 'text-yellow-400' :
+          rank.id === 'ACE' ? 'text-orange-500' : 'text-red-500'
+        )} style={{ color: rank.color }}>
           {isRTL ? (
             rank.id === 'SILVER' ? 'سيلفر' :
             rank.id === 'PLATINUM' ? 'بلاتينوم' :
@@ -107,7 +122,7 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
         <div
           className="px-5 py-1.5 rounded-full font-space text-[10px] font-black tracking-widest mb-6 border transition-all duration-300"
           style={status === 'EQUIPPED'
-            ? { backgroundColor: `${rank.color}20`, borderColor: `${rank.color}60`, color: rank.color, boxShadow: `0 0 15px ${rank.color}33` }
+            ? { backgroundColor: `${currentTheme.color}20`, borderColor: `${currentTheme.color}60`, color: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` }
             : { borderColor: `${rank.color}30`, color: `${rank.color}70` }
           }
         >
@@ -126,7 +141,7 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
           />
         </div>
 
-        {/* 3. HOVER REVEAL DETAILS AND ACTIONS (Smooth Opacity Sync - Zero Layout Shift) */}
+        {/* 3. HOVER REVEAL DETAILS AND ACTIONS (Smooth Opacity Sync) */}
         <div className="w-full flex-grow flex flex-col justify-end">
           <motion.div
             animate={{ opacity: isHovered ? 1.0 : 0.0, height: isHovered ? 'auto' : 0 }}
@@ -156,10 +171,15 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
                 className="space-y-0.5"
               >
                 <p className="font-space text-[9px] uppercase tracking-[0.25em] font-black" style={{ color: rank.color }}>
-                  {isRTL ? 'الميزة النشطة' : 'ACTIVE SYSTEM PERK'}
+                  {isRTL ? 'الميزة النشطة' : 'ACTIVE PERK'}
                 </p>
                 <p className="text-[11px] font-bold font-space uppercase tracking-widest text-white/80">
-                  {rank.perk}
+                  {isRTL ? (
+                    rank.id === 'SILVER' ? 'الميزات القياسية مفتوحة' :
+                    rank.id === 'PLATINUM' ? 'تخطيط لوحة التحكم المتقدمة' :
+                    rank.id === 'CROWN' ? 'مساعد ذكاء اصطناعي نشط' :
+                    rank.id === 'ACE' ? 'رؤى الأداء المتقدمة' : 'مظاهر واجهة مستخدم متميزة'
+                  ) : rank.perk}
                 </p>
               </motion.div>
 
@@ -170,10 +190,15 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
                 className="space-y-0.5"
               >
                 <p className="font-space text-[9px] text-white/40 uppercase tracking-[0.25em] font-black">
-                  {isRTL ? 'مكافأة فتح القفل' : 'INTELLIGENCE UNLOCKS'}
+                  {isRTL ? 'ميزات الرتبة' : 'RANK UNLOCKS'}
                 </p>
                 <p className="text-[10px] font-space text-white/60 tracking-wider">
-                  {rank.unlocks}
+                  {isRTL ? (
+                    rank.id === 'SILVER' ? 'الوصول لصفحة الملاحظات والإعدادات' :
+                    rank.id === 'PLATINUM' ? 'إمكانية اختيار لون مظهر النظام' :
+                    rank.id === 'CROWN' ? 'استشارات ورؤى فورية من مدرب الذكاء الاصطناعي' :
+                    rank.id === 'ACE' ? 'لوحة تحليلات تفصيلية للوقت والتركيز' : 'الحصول على كافة ترقيات المظهر المميزة'
+                  ) : rank.unlocks}
                 </p>
               </motion.div>
 
@@ -187,21 +212,21 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
                     changeTheme(rank.themeId)
                   }}
                   className="w-full py-2.5 font-space font-black text-[10px] uppercase tracking-widest transition-all duration-300 rounded-xl mt-3 border cursor-none"
-                  style={{ borderColor: `${rank.color}60`, color: rank.color }}
+                  style={{ borderColor: `${currentTheme.color}60`, color: currentTheme.color }}
                   onMouseEnter={e => { 
                     const el = e.currentTarget; 
-                    el.style.backgroundColor = rank.color; 
+                    el.style.backgroundColor = currentTheme.color; 
                     el.style.color = '#000';
-                    el.style.boxShadow = `0 0 12px ${rank.color}55`;
+                    el.style.boxShadow = `0 0 12px ${currentTheme.color}55`;
                   }}
                   onMouseLeave={e => { 
                     const el = e.currentTarget; 
                     el.style.backgroundColor = 'transparent'; 
-                    el.style.color = rank.color;
+                    el.style.color = currentTheme.color;
                     el.style.boxShadow = 'none';
                   }}
                 >
-                  {isRTL ? 'استخدم البروتوكول' : 'EQUIP SYSTEM THEME'}
+                  {isRTL ? 'تفعيل المظهر' : 'EQUIP THEME'}
                 </motion.button>
               )}
             </div>
@@ -223,7 +248,7 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
                 {rank.threshold - xp} {isRTL ? 'خبرة مطلوبة للفتح' : 'XP REQUIRED TO UNLOCK'}
               </p>
               <p className="text-[9px] font-space text-white/40 tracking-wider uppercase">
-                {isRTL ? 'استمر في إنهاء المهمات اليومية' : 'CONTINUE COMPLETING ACTIVE MISSIONS'}
+                {isRTL ? 'استمر في إنجاز أهدافك' : 'CONTINUE ACHIEVING GOALS'}
               </p>
             </motion.div>
           </div>
@@ -268,43 +293,43 @@ export function VaultContent() {
       name: 'SILVER',
       threshold: 0,
       themeId: 'SILVER',
-      color: '#B0C4DE',
+      color: '#94a3b8',
       neonClass: 'neon-silver',
-      perk: 'Standard Operator Kit',
-      unlocks: 'Access to Personal Notes Canvas & System Configs',
+      perk: 'Standard Features Unlocked',
+      unlocks: 'Access to Notes and Settings pages',
       vessel: 'Cylinder'
     },
     {
       id: 'PLATINUM',
       name: 'PLATINUM',
-      threshold: 500,
+      threshold: 800,
       themeId: 'PLATINUM',
-      color: '#00CED1',
+      color: '#38bdf8',
       neonClass: 'neon-platinum',
-      perk: 'Advanced HUD Uplink',
-      unlocks: 'Dynamic Platform Interface Color Customization',
+      perk: 'Advanced Dashboard Layout',
+      unlocks: 'Dynamic theme color selector access',
       vessel: 'Hex'
     },
     {
       id: 'CROWN',
       name: 'CROWN',
-      threshold: 1500,
+      threshold: 3500,
       themeId: 'CROWN',
-      color: '#9370DB',
+      color: '#FACC15',
       neonClass: 'neon-crown',
-      perk: 'Empathetic AI Persona Sync',
-      unlocks: 'Real-time System Calibration & Settings Controls',
-      vessel: 'Shard'
+      perk: 'AI Coach Active Assistance',
+      unlocks: 'Personalized AI Coach insights',
+      vessel: 'Crystal'
     },
     {
       id: 'ACE',
       name: 'ACE',
-      threshold: 4000,
+      threshold: 6000,
       themeId: 'ACE',
-      color: '#DC143C',
+      color: '#F97316',
       neonClass: 'neon-ace',
-      perk: 'Tactical HUD Analytics',
-      unlocks: 'Advanced Mission Priorities & Capacity Expansion',
+      perk: 'Advanced Performance Insights',
+      unlocks: 'Detailed time analytics dashboard',
       vessel: 'Shard'
     },
     {
@@ -312,40 +337,43 @@ export function VaultContent() {
       name: 'CONQUEROR',
       threshold: 10000,
       themeId: 'CONQUEROR',
-      color: '#FFD700',
+      color: '#EF4444',
       neonClass: 'neon-conqueror',
-      perk: 'Ultimate Glitch FX Theme Override',
-      unlocks: 'Full System Autonomy & Prestige Calibrators',
+      perk: 'Prestige UI Themes',
+      unlocks: 'All prestige status awards',
       vessel: 'Sphere'
     }
   ]
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-16">
+    <div className="max-w-[1600px] mx-auto space-y-12">
       
-      {/* Hide Scrollbars Local CSS Style Block */}
+      {/* Scrollbar hide utility styling */}
       <style>{`
-        .hide-scrollbar::-webkit-scrollbar {
+        .scrollbar-none::-webkit-scrollbar {
           display: none !important;
         }
-        .hide-scrollbar {
+        .scrollbar-none {
           -ms-overflow-style: none !important;
           scrollbar-width: none !important;
         }
       `}</style>
-      
+
       {/* Header */}
       <header className="border-b border-black/10 dark:border-white/10 pb-4 md:pb-6 w-full max-w-full">
         <h1 className="text-2xl md:text-6xl font-black font-space tracking-wider text-black dark:text-white uppercase leading-none">
-          {isRTL ? 'الرتب' : 'RANKS'}
+          {isRTL ? 'الرتب والترقيات' : 'RANKS & SYSTEMS'}
         </h1>
         <p className="text-[10px] md:text-xs font-space text-black/40 dark:text-white/30 tracking-[0.4em] md:tracking-[0.6em] uppercase font-black mt-2">
           {isRTL ? 'مستوى تقدمك الحالي' : 'Your Progress Status'} &nbsp;·&nbsp; {xp.toLocaleString()} XP
         </p>
       </header>
 
-      {/* Swipeable Horizontal Slider Carousel Layout */}
-      <div ref={containerRef} className="flex flex-row gap-6 overflow-x-auto snap-x snap-mandatory pb-8 pt-4 w-full scroll-smooth hide-scrollbar">
+      {/* Premium Gaming Echelon Slider Container */}
+      <div 
+        ref={containerRef} 
+        className="flex flex-row overflow-x-auto snap-x snap-mandatory scrollbar-none pb-8 gap-6 w-full px-6"
+      >
         {RANKS_DATA.map((rank) => {
           const status = getRankStatus(rank.threshold, rank.themeId)
 

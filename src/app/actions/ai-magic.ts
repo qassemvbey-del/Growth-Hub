@@ -288,3 +288,116 @@ export async function cleanPlaylistTitles(titles: string[]) {
     return titles
   }
 }
+
+// ── SMART_IMPORT: Extract tasks from any pasted text ──
+export async function extractTasksFromText(text: string): Promise<{ success: boolean; tasks?: string[]; error?: string }> {
+  if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
+    return { success: false, error: 'PROTOCOL_FAILURE: NO_API_KEY' }
+  }
+
+  if (!text.trim()) {
+    return { success: false, error: 'EMPTY_INPUT' }
+  }
+
+  const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' })
+
+  const prompt = `
+You are a smart task extractor.
+The user will paste ANY type of content:
+- Course curriculum or syllabus
+- Book table of contents
+- Project plan or roadmap
+- Meeting notes or agenda
+- Any structured list
+
+YOUR JOB:
+Understand what type of content this is,
+then extract meaningful, actionable tasks.
+
+RULES FOR EXTRACTION:
+
+1. UNDERSTAND THE CONTENT TYPE:
+   - Course/Tutorial → extract lesson names
+   - Book → extract chapter names
+   - Project → extract milestones
+   - List → extract list items
+   - Mixed content → extract the most meaningful actionable items
+
+2. WHAT TO EXTRACT:
+   ✓ Lessons, chapters, modules, sections
+   ✓ Action items and deliverables
+   ✓ Steps in a process
+   ✓ Goals and objectives (bullet points)
+
+3. WHAT TO IGNORE:
+   ✗ Single words or very short terms (under 3 words)
+   ✗ Category labels like "Skills:", "Category:"
+   ✗ Metadata like dates, prices, durations
+   ✗ Marketing text and descriptions
+   ✗ Duplicate or very similar items
+
+4. CLEAN THE TASKS:
+   - Remove numbering (1. 2. 3.)
+   - Remove bullets (• - *)
+   - Remove extra spaces
+   - Keep the language (Arabic stays Arabic)
+   - Max 80 characters per task
+   - Make each task clear and standalone
+
+5. IF CONTENT IS UNCLEAR:
+   Extract the most meaningful phrases
+   that could be actionable tasks.
+
+EXAMPLES:
+
+Course content input:
+"Week 1: Introduction
+ - What is Python?
+ - Installing Python
+ Week 2: Variables
+ - Data types
+ - String formatting"
+Output: ["Introduction to Python", "What is Python", "Installing Python", "Data Types and Variables", "String Formatting"]
+
+Book content input:
+"Chapter 1: The Beginning
+ Chapter 2: Building Habits
+ Chapter 3: Breaking Bad Habits"
+Output: ["The Beginning", "Building Habits", "Breaking Bad Habits"]
+
+Project plan input:
+"- Design the homepage
+ - Build the backend API
+ - Test user flows
+ - Deploy to production"
+Output: ["Design the Homepage", "Build the Backend API", "Test User Flows", "Deploy to Production"]
+
+Return ONLY a valid JSON array of strings.
+No markdown, no explanation, just JSON.
+Max 100 tasks.
+
+Content to analyze:
+${text.slice(0, 8000)}
+  `
+
+  try {
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    const raw = response.text().replace(/\`\`\`json|\`\`\`/g, '').trim()
+    const tasks: string[] = JSON.parse(raw)
+
+    if (!Array.isArray(tasks) || tasks.length === 0) {
+      return { success: false, error: 'NO_TASKS_FOUND' }
+    }
+
+    const cleaned = tasks
+      .filter((t): t is string => typeof t === 'string' && t.trim().length > 0)
+      .map(t => t.trim().slice(0, 80))
+      .slice(0, 100)
+
+    return { success: true, tasks: cleaned }
+  } catch (error) {
+    console.error('SMART_IMPORT_ERROR:', error)
+    return { success: false, error: 'ANALYSIS_FAILED' }
+  }
+}
