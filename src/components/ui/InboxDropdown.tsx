@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
@@ -22,7 +22,15 @@ interface Props {
 }
 
 export default function InboxDropdown({ isOpen, reports, onClose, onRead, themeColor }: Props) {
+  const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all')
+
   if (!isOpen) return null
+
+  const filteredReports = reports.filter(r => {
+    if (filter === 'unread') return !r.is_read
+    if (filter === 'read') return r.is_read
+    return true
+  })
 
   return (
     <motion.div
@@ -31,24 +39,45 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, themeC
       exit={{ opacity: 0, y: -10, scale: 0.95 }}
       className="absolute top-full mt-4 right-0 w-[90vw] max-w-[360px] bg-white/95 dark:bg-[#050505]/95 backdrop-blur-2xl border border-black/10 dark:border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[250] rounded-sm flex flex-col overflow-hidden"
     >
-      <div className="px-5 py-4 border-b border-black/5 dark:border-white/5 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-sm" style={{ color: themeColor }}>inbox</span>
-          <span className="text-[10px] font-space font-black tracking-[0.3em] uppercase opacity-40">COMM_UPLINK // INBOX</span>
+      <div className="px-5 py-4 border-b border-black/5 dark:border-white/5 flex flex-col gap-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-sm" style={{ color: themeColor }}>inbox</span>
+            <span className="text-[10px] font-space font-black tracking-[0.3em] uppercase opacity-40">COMM_UPLINK // INBOX</span>
+          </div>
+          <span className="text-[9px] font-space font-black bg-white/10 px-2 py-0.5 rounded-full" style={{ color: themeColor }}>
+            {reports.filter(r => !r.is_read).length} UNREAD
+          </span>
         </div>
-        <span className="text-[9px] font-space font-black bg-white/10 px-2 py-0.5 rounded-full" style={{ color: themeColor }}>
-          {reports.filter(r => !r.is_read).length} UNREAD
-        </span>
+
+        {/* Filter Tabs */}
+        <div className="flex gap-2">
+          {['all', 'unread', 'read'].map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f as any)}
+              className={cn(
+                "px-3 py-1 rounded-full text-[8px] font-space font-black uppercase tracking-widest border transition-all",
+                filter === f 
+                  ? "bg-white/10 border-white/20" 
+                  : "border-transparent text-white/20 hover:text-white/40"
+              )}
+              style={filter === f ? { color: themeColor, borderColor: `${themeColor}44` } : {}}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="max-h-[400px] overflow-y-auto scrollbar-thin">
-        {reports.length === 0 ? (
+        {filteredReports.length === 0 ? (
           <div className="py-12 flex flex-col items-center justify-center gap-3 opacity-20">
             <span className="material-symbols-outlined text-4xl">inbox_customize</span>
-            <p className="text-[10px] font-space font-black uppercase tracking-widest">NO_REPORTS_AVAILABLE</p>
+            <p className="text-[10px] font-space font-black uppercase tracking-widest">NO_REPORTS_IN_{filter.toUpperCase()}</p>
           </div>
         ) : (
-          reports.map(report => (
+          filteredReports.map(report => (
             <button
               key={report.id}
               onClick={() => onRead(report)}

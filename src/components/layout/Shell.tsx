@@ -9,12 +9,16 @@ import { createClient } from '@/lib/supabase'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSound } from '@/context/SoundContext'
 
-import OnboardingTour from '@/components/ui/OnboardingTour'
+
 import { useInbox } from '@/hooks/useInbox'
 import InboxDropdown from '@/components/ui/InboxDropdown'
 import ReportModal from '@/components/ui/ReportModal'
 import PomodoroHUD from '@/components/ui/PomodoroHUD'
 import CoachPanel from '@/components/ui/CoachPanel'
+import OperatorGuide from '@/components/ui/OperatorGuide'
+import GlobalActionMenu from '@/components/ui/GlobalActionMenu'
+import LevelUpModal from '@/components/ui/LevelUpModal'
+import GlitchOverlay from '@/components/ui/GlitchOverlay'
 
 interface ShellProps {
   children: React.ReactNode
@@ -24,7 +28,7 @@ interface ShellProps {
 
 export default function Shell({ children, syncedMissions = [], onMissionsRefresh }: ShellProps) {
   // 1. ALL HOOKS AT THE TOP
-  const { isRTL, profile, calculateAccountability, lastAiMessage, t, currentTheme } = useGrowth()
+  const { isRTL, profile, calculateAccountability, lastAiMessage, t, currentTheme, isRankUpModalOpen } = useGrowth()
   const pathname = usePathname()
   const router = useRouter()
   const { playNeuralLink, playBlip } = useSound()
@@ -33,6 +37,27 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   const [inboxOpen, setInboxOpen] = useState(false)
   const [selectedReport, setSelectedReport] = useState<any>(null)
   const [streak, setStreak] = useState(0)
+
+  const [mounted, setMounted] = useState(false)
+  const [shellIsRTL, setShellIsRTL] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    const lang = localStorage.getItem('language') || 'en'
+    const rtl = lang === 'ar'
+    setShellIsRTL(rtl)
+    document.documentElement.dir = rtl ? 'rtl' : 'ltr'
+    document.documentElement.lang = rtl ? 'ar' : 'en'
+  }, [])
+
+  useEffect(() => {
+    setShellIsRTL(isRTL)
+  }, [isRTL])
+
+  useEffect(() => {
+    if (!mounted) return
+    document.documentElement.dir = shellIsRTL ? 'rtl' : 'ltr'
+  }, [shellIsRTL, mounted])
 
   const { reports, markAsRead } = useInbox()
   const unreadCount = useMemo(() => reports.filter(r => !r.is_read).length, [reports])
@@ -84,11 +109,13 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   }, [syncedMissions, calculateAccountability])
 
   useEffect(() => {
-    if (hasRedZoneMission && !aiOpen) {
+    const hasShown = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('redZoneShown') : null;
+    if (hasRedZoneMission && !hasShown && !aiOpen) {
       setAiOpen(true)
       playNeuralLink()
+      if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('redZoneShown', 'true')
     }
-  }, [hasRedZoneMission])
+  }, [hasRedZoneMission, aiOpen])
 
   const systemProgress = useMemo(() => {
     if (!syncedMissions || syncedMissions.length === 0) return 0
@@ -106,6 +133,13 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
     }
   }, [lastAiMessage])
 
+  const personality = useMemo(() => {
+    const rank = profile?.rank || 'SILVER'
+    if (rank === 'CONQUEROR') return 'SAVAGE'
+    if (rank === 'ACE' || rank === 'CROWN') return 'DIRECT'
+    return 'SUPPORTIVE'
+  }, [profile?.rank])
+
   return (
     <div
       className={cn(
@@ -115,9 +149,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         ['--selection-bg' as any]: `${currentTheme.color}33`, 
         ['--selection-text' as any]: currentTheme.color 
       }}
-      dir={isRTL ? 'rtl' : 'ltr'}
+      dir={mounted ? (shellIsRTL ? 'rtl' : 'ltr') : 'ltr'}
     >
-      <OnboardingTour />
       {/* Background FX */}
       <div className="fixed inset-0 pointer-events-none z-[100] scanlines opacity-[0.02]" />
       <div className="fixed inset-0 pointer-events-none z-0 cyber-grid opacity-[0.05]" />
@@ -129,7 +162,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         'lg:ps-72 lg:max-w-none'
       )}>
         {/* Top Navigation */}
-        <header className="w-full px-4 md:px-8 h-16 flex justify-between items-center border-b border-black/5 dark:border-white/5 bg-white/95 dark:bg-[#050505]/95 backdrop-blur-2xl z-[150] sticky top-0 transition-colors duration-500">
+        <header className="w-full px-4 md:px-8 h-16 flex justify-between items-center border-b border-[var(--card-border)] bg-[var(--sidebar-bg)]/95 backdrop-blur-2xl z-[150] sticky top-0 transition-colors duration-500">
           <div className="absolute -bottom-[1px] inset-inline-start-12 w-48 h-[1px] shadow-[0_0_15px_currentcolor]" style={{ backgroundColor: currentTheme.color, color: currentTheme.color }} />
 
           {/* LEFT: GROWTH_HUB Brand + Streak */}
@@ -143,30 +176,21 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
             >
               bolt
             </motion.span>
-            <span
-              className={cn(
-                "font-space font-black tracking-[0.2em] uppercase truncate",
-                isRTL ? "text-[16px] text-white" : "text-[11px] md:text-sm"
-              )}
-              style={{ color: isRTL ? undefined : currentTheme.color }}
-            >
-              {isRTL ? 'مركز النمو' : 'GROWTH_HUB'}
-            </span>
 
             {/* Streak Indicator */}
-            <div className="hidden sm:flex items-center gap-1 border-l border-black/10 dark:border-white/10 pl-3" title={isRTL ? 'سلسلة الأيام' : 'Streak'}>
+            <div className="hidden sm:flex items-center gap-1 border-l border-[var(--card-border)] pl-3" title={isRTL ? 'سلسلة الأيام' : 'Streak'}>
               <span
                 className={cn('material-symbols-outlined text-sm transition-all duration-500', streak > 0 ? 'scale-110 animate-pulse' : 'opacity-20')}
                 style={{
-                  color: streak > 0 ? (profile?.ai_personality === 'SAVAGE' ? '#FF0055' : '#FF5F00') : undefined,
-                  filter: streak > 0 ? `drop-shadow(0 0 6px ${profile?.ai_personality === 'SAVAGE' ? '#FF0055' : '#FF5F00'})` : 'none'
+                  color: streak > 0 ? (personality === 'SAVAGE' ? '#FF0055' : '#FF5F00') : undefined,
+                  filter: streak > 0 ? `drop-shadow(0 0 6px ${personality === 'SAVAGE' ? '#FF0055' : '#FF5F00'})` : 'none'
                 }}
               >
                 local_fire_department
               </span>
               <span
                 className="text-[10px] font-space tracking-tight font-black uppercase"
-                style={{ color: streak > 0 ? (profile?.ai_personality === 'SAVAGE' ? '#FF0055' : '#FF5F00') : undefined, opacity: streak > 0 ? 1 : 0.2 }}
+                style={{ color: streak > 0 ? (personality === 'SAVAGE' ? '#FF0055' : '#FF5F00') : undefined, opacity: streak > 0 ? 1 : 0.2 }}
               >
                 {streak}{streak > 0 && <span className="hidden md:inline"> {isRTL ? (streak === 1 ? 'يوم' : 'أيام') : (streak === 1 ? 'DAY' : 'DAYS')}</span>}
               </span>
@@ -183,22 +207,22 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
               className={cn(
                 "flex items-center gap-2 px-3 md:px-5 py-1.5 md:py-2 rounded-full transition-all duration-300 border shadow-lg group relative",
                 coachPanelOpen
-                  ? profile?.ai_personality === 'SAVAGE'
+                  ? personality === 'SAVAGE'
                     ? 'bg-[#FF0055] border-[#FF0055] text-white shadow-[0_0_20px_rgba(255,0,85,0.4)]'
                     : 'bg-[#00E5FF] border-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]'
-                  : 'bg-black/5 dark:bg-black/40 border-black/10 dark:border-white/10 text-black/60 dark:text-white/60 hover:border-cyan-400/50 hover:text-cyan-400'
+                  : 'bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:border-cyan-400/50 hover:text-cyan-400'
               )}
             >
-              <div className="absolute inset-0 rounded-full animate-pulse opacity-20" style={{ backgroundColor: profile?.ai_personality === 'SAVAGE' ? '#FF0055' : '#00E5FF' }}></div>
+              <div className="absolute inset-0 rounded-full animate-pulse opacity-20" style={{ backgroundColor: personality === 'SAVAGE' ? '#FF0055' : '#00E5FF' }}></div>
               <motion.span 
                 animate={{ opacity: [1, 1, 0.2, 1, 1], x: [0, 0, -2, 2, 0] }}
                 transition={{ duration: 12, repeat: Infinity, ease: 'linear', times: [0, 0.9, 0.92, 0.95, 1] }}
                 className="material-symbols-outlined text-[16px] md:text-[18px] relative z-10 group-hover:animate-spin-slow"
               >
-                {profile?.ai_personality === 'SAVAGE' ? 'whatshot' : 'cognition'}
+                {personality === 'SAVAGE' ? 'whatshot' : 'cognition'}
               </motion.span>
               <span className="text-[9px] md:text-[11px] font-space tracking-widest uppercase font-black relative z-10 hidden sm:block">
-                {profile?.ai_name || (isRTL ? 'المدرب' : 'COACH')}: {profile?.ai_personality === 'SAVAGE' ? (isRTL ? 'شرس' : 'SAVAGE') : (isRTL ? 'هادئ' : 'GENTLE')}
+                {profile?.ai_name || (isRTL ? 'المدرب' : 'COACH')}: {personality === 'SAVAGE' ? (isRTL ? 'شرس' : 'SAVAGE') : personality === 'DIRECT' ? (isRTL ? 'مباشر' : 'DIRECT') : (isRTL ? 'داعم' : 'SUPPORTIVE')}
               </span>
             </button>
 
@@ -213,8 +237,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                 className={cn(
                   "flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-full transition-all border relative",
                   inboxOpen 
-                    ? "bg-white/10 border-white/40 text-white shadow-[0_0_15px_rgba(255,255,255,0.2)]" 
-                    : "bg-black/5 dark:bg-black/40 border-black/10 dark:border-white/10 text-black/60 dark:text-white/60 hover:border-white/30 hover:text-white"
+                    ? "bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-primary)] shadow-[0_0_15px_rgba(255,255,255,0.2)]" 
+                    : "bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)] hover:text-[var(--text-primary)]"
                 )}
               >
                 <span className="material-symbols-outlined text-[18px] md:text-[20px]">notifications</span>
@@ -282,27 +306,29 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                 const isDark = document.documentElement.classList.toggle('dark')
                 localStorage.setItem('theme', isDark ? 'dark' : 'light')
               }}
-              className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-sm bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white hover:border-black/50 dark:hover:border-white/50 transition-all group relative"
+              className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-sm bg-[var(--input-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border)] transition-all group relative"
               title={isRTL ? 'الوضع الليلي/النهاري' : 'Toggle Theme'}
             >
               <div className="absolute inset-0 bg-black/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <span className="material-symbols-outlined text-[16px] md:text-[20px]">contrast</span>
             </button>
             
-            <button
-              onClick={() => { playBlip(); router.push('/settings') }}
-              className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-sm bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white hover:border-black/50 dark:hover:border-white/50 transition-all group relative"
-              title={isRTL ? 'الإعدادات' : 'Settings'}
-            >
-              <div className="absolute inset-0 bg-black/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <motion.span 
-                animate={pathname === '/settings' ? { rotate: 360 } : {}}
-                transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                className="material-symbols-outlined text-[16px] md:text-[20px] group-hover:animate-spin-slow"
+            <div className="md:hidden">
+              <button
+                onClick={() => { playBlip(); router.push('/settings') }}
+                className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-sm bg-[var(--input-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border)] transition-all group relative"
+                title={isRTL ? 'الإعدادات' : 'Settings'}
               >
-                settings
-              </motion.span>
-            </button>
+                <div className="absolute inset-0 bg-black/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <motion.span 
+                  animate={pathname === '/settings' ? { rotate: 360 } : {}}
+                  transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                  className="material-symbols-outlined text-[16px] md:text-[20px] group-hover:animate-spin-slow"
+                >
+                  settings
+                </motion.span>
+              </button>
+            </div>
           </div>
         </header>
 
@@ -331,7 +357,11 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         "inset-inline-start-72"
       )} />
 
+      <OperatorGuide />
+      <GlobalActionMenu />
 
+      <LevelUpModal />
+      <GlitchOverlay active={isRankUpModalOpen} />
     </div>
   )
 }

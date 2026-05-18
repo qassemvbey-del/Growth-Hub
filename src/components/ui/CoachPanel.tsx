@@ -14,10 +14,21 @@ interface CoachPanelProps {
 }
 
 export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProps) {
-  const { profile, setLastAiMessage } = useGrowth()
+  const { profile, setLastAiMessage, currentTheme } = useGrowth()
   const { playNeuralLink, playBlip } = useSound()
-  const [response, setResponse] = useState('AWAITING_ORDERS // SELECT_ACTION_BELOW')
+  const [response, setResponse] = useState(profile?.language === 'ar' ? 'في انتظار الأوامر // اختر إجراء من الأسفل' : 'AWAITING_ORDERS // SELECT_ACTION_BELOW')
   const [isLoading, setIsLoading] = useState(false)
+
+  const isArabic = /[\u0600-\u06FF]/.test(response)
+
+  const personality = React.useMemo(() => {
+    const rank = profile?.rank || 'SILVER'
+    if (rank === 'CONQUEROR') return 'SAVAGE'
+    if (rank === 'ACE' || rank === 'CROWN') return 'DIRECT'
+    return 'SUPPORTIVE'
+  }, [profile?.rank])
+
+  const coachColor = currentTheme?.color || '#00E5FF'
 
   const activeMissions = missions.filter(m => !m.is_archived && m.sync_to_dashboard)
   
@@ -39,6 +50,12 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
         break
       case 'brief_mission':
         prompt = 'Brief me on my most critical mission. Give me a tactical breakdown of what I need to do next.'
+        break
+      case 'motivate_me':
+        prompt = 'Give me a harsh, high-energy motivational speech based on my current progress. Make me want to work right now.'
+        break
+      case 'how_to_start':
+        prompt = 'I feel stuck. What is the smallest, easiest task I can do right now to build momentum?'
         break
     }
 
@@ -69,12 +86,14 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
       }))
     }
 
-    const res = await chatWithCoach(prompt, userData)
+    const res = await chatWithCoach(prompt, userData, profile?.language || 'en')
     setResponse(res)
     setLastAiMessage(res)
     setIsLoading(false)
     playBlip()
   }
+
+  const coachName = profile?.ai_name || personality;
 
   return (
     <AnimatePresence>
@@ -92,94 +111,131 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-screen w-full max-w-[380px] bg-[#0a0a0a] border-l border-neon-green/30 z-[300] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] flex flex-col font-space"
+            className="fixed top-0 right-0 h-screen w-full max-w-[420px] bg-[var(--card-bg)] border-l border-[var(--card-border)] z-[300] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] flex flex-col font-space"
+            style={{ borderColor: `${coachColor}44` }}
           >
             {/* Header */}
-            <div className="p-6 border-b border-neon-green/20 flex justify-between items-center">
+            <div className="p-6 border-b flex justify-between items-center" style={{ borderColor: `${coachColor}22` }}>
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-neon-green animate-pulse">bolt</span>
-                <span className="text-sm font-black tracking-[0.3em] text-neon-green uppercase">
-                  COACH_SAVAGE // ONLINE
+                <span className="material-symbols-outlined animate-pulse" style={{ color: coachColor }}>bolt</span>
+                <span className="text-sm font-black tracking-[0.2em] uppercase whitespace-nowrap overflow-hidden" style={{ color: coachColor }}>
+                  COACH: {coachName} // ONLINE
                 </span>
               </div>
-              <button onClick={onClose} className="text-white/40 hover:text-white transition-colors">
+              <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
 
             {/* Response Area */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div className="p-6">
               <div className="relative group">
-                <div className="absolute -inset-0.5 bg-neon-green/10 rounded opacity-0 group-hover:opacity-100 transition duration-1000"></div>
-                <div className="relative p-4 bg-black/40 border border-neon-green/10 min-h-[150px]">
+                <div className="absolute -inset-0.5 rounded opacity-0 group-hover:opacity-100 transition duration-1000" style={{ backgroundColor: `${coachColor}22` }}></div>
+                <div 
+                  className="relative p-6 bg-[rgba(0,0,0,0.2)] border overflow-y-auto scrollbar-thin rounded-sm" 
+                  style={{ 
+                    borderColor: `${coachColor}44`,
+                    backgroundColor: `${coachColor}0A`,
+                    minHeight: '250px',
+                    maxHeight: '40vh',
+                    direction: isArabic ? 'rtl' : 'ltr',
+                    textAlign: isArabic ? 'right' : 'left'
+                  }}
+                >
                   {isLoading ? (
-                    <div className="flex flex-col items-center justify-center h-full space-y-3 py-10">
-                       <span className="text-neon-green text-[10px] font-black tracking-widest animate-pulse">
-                         {profile?.language === 'ar' ? 'المدرب بيفكر...' : 'SAVAGE_PROCESSING...'}
+                    <div className="flex flex-col items-center justify-center h-full space-y-4 py-10">
+                       <span className="text-xs font-black tracking-widest animate-pulse uppercase" style={{ color: coachColor }}>
+                         {profile?.language === 'ar' ? `${coachName} بيفكر...` : `${coachName}_PROCESSING...`}
                        </span>
-                       <div className="flex gap-1">
+                       <div className="flex gap-2">
                           {[0, 1, 2].map(i => (
                             <motion.div
                               key={i}
                               animate={{ opacity: [0.2, 1, 0.2] }}
                               transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
-                              className="w-1 h-1 bg-neon-green rounded-full"
+                              className="w-1.5 h-1.5 rounded-full"
+                              style={{ backgroundColor: coachColor }}
                             />
                           ))}
                        </div>
                     </div>
                   ) : (
-                    <p className="text-neon-green text-[15px] font-bold leading-relaxed whitespace-pre-wrap">
+                    <p className="text-[var(--text-primary)] text-sm md:text-base font-bold leading-relaxed whitespace-pre-wrap">
                       {response}
                     </p>
                   )}
                 </div>
               </div>
+            </div>
 
-              {/* Action Buttons */}
-              <div className="pt-4 space-y-4">
-                <span className="text-[10px] font-black text-white/30 tracking-[0.4em] uppercase">SELECT_ACTION:</span>
-                
-                <div className="grid grid-cols-1 gap-3">
-                  <ActionButton 
-                    icon="analytics" 
-                    title="SCAN_STATUS" 
-                    subtitle={profile?.language === 'ar' ? 'اتحلل وضعي' : 'تحليل وضعك الحالي كامل'} 
-                    onClick={() => handleAction('scan_status')}
-                    disabled={isLoading}
-                  />
-                  <ActionButton 
-                    icon="event_note" 
-                    title="DAILY_PLAN" 
-                    subtitle={profile?.language === 'ar' ? 'خطة النهارده' : 'إيه اللي المفروض تخلصه النهارده'} 
-                    onClick={() => handleAction('daily_plan')}
-                    disabled={isLoading}
-                  />
-                  <ActionButton 
-                    icon="warning" 
-                    title="CRITICAL_ALERT" 
-                    subtitle={profile?.language === 'ar' ? 'تنبيهات خطيرة' : 'المهام اللي في خطر دلوقتي'} 
-                    onClick={() => handleAction('critical_alert')}
-                    disabled={isLoading}
-                  />
-                  <ActionButton 
-                    icon="target" 
-                    title="BRIEF_MISSION" 
-                    subtitle={profile?.language === 'ar' ? 'بريف عن المهام' : 'تبريك عن أهم Mission'} 
-                    onClick={() => handleAction('brief_mission')}
-                    disabled={isLoading}
-                  />
-                </div>
+            {/* Action Buttons */}
+            <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-4 scrollbar-thin">
+              <span className="text-[10px] font-black tracking-[0.4em] uppercase" style={{ color: coachColor }}>SELECT_ACTION:</span>
+              
+              <div className="grid grid-cols-1 gap-3">
+                <ActionButton 
+                  icon="analytics" 
+                  title="SCAN_STATUS" 
+                  subtitle={profile?.language === 'ar' ? 'تحليل وضعي الحالي' : 'Complete status analysis'} 
+                  onClick={() => handleAction('scan_status')}
+                  disabled={isLoading}
+                  color={coachColor}
+                  lang={profile?.language}
+                />
+                <ActionButton 
+                  icon="event_note" 
+                  title="DAILY_PLAN" 
+                  subtitle={profile?.language === 'ar' ? 'خطة النهارده' : 'What to focus on today'} 
+                  onClick={() => handleAction('daily_plan')}
+                  disabled={isLoading}
+                  color={coachColor}
+                  lang={profile?.language}
+                />
+                <ActionButton 
+                  icon="warning" 
+                  title="CRITICAL_ALERT" 
+                  subtitle={profile?.language === 'ar' ? 'تنبيهات خطيرة' : 'Missions in danger'} 
+                  onClick={() => handleAction('critical_alert')}
+                  disabled={isLoading}
+                  color={coachColor}
+                  lang={profile?.language}
+                />
+                <ActionButton 
+                  icon="target" 
+                  title="BRIEF_MISSION" 
+                  subtitle={profile?.language === 'ar' ? 'بريف عن أهم هدف' : 'Tactical mission breakdown'} 
+                  onClick={() => handleAction('brief_mission')}
+                  disabled={isLoading}
+                  color={coachColor}
+                  lang={profile?.language}
+                />
+                <ActionButton 
+                  icon="local_fire_department" 
+                  title="MOTIVATE_ME" 
+                  subtitle={profile?.language === 'ar' ? 'شجعني واضغط عليا' : 'Give me a harsh motivational speech'} 
+                  onClick={() => handleAction('motivate_me')}
+                  disabled={isLoading}
+                  color={coachColor}
+                  lang={profile?.language}
+                />
+                <ActionButton 
+                  icon="bolt" 
+                  title="HOW_TO_START" 
+                  subtitle={profile?.language === 'ar' ? 'أبدأ بإيه دلوقتي؟' : 'What is the easiest task to start with?'} 
+                  onClick={() => handleAction('how_to_start')}
+                  disabled={isLoading}
+                  color={coachColor}
+                  lang={profile?.language}
+                />
               </div>
             </div>
 
             {/* Footer Decorative */}
-            <div className="p-4 border-t border-neon-green/10">
-               <div className="flex justify-between items-center opacity-20">
-                  <span className="text-[8px] font-black text-neon-green tracking-widest">PROTOCOL_V7.4</span>
+            <div className="p-4 border-t" style={{ borderColor: `${coachColor}22` }}>
+                <div className="flex justify-end items-center opacity-40">
                   <div className="flex gap-1">
-                     <div className="w-8 h-1 bg-neon-green"></div>
-                     <div className="w-2 h-1 bg-neon-green"></div>
+                     <div className="w-8 h-1" style={{ backgroundColor: coachColor }}></div>
+                     <div className="w-2 h-1" style={{ backgroundColor: coachColor }}></div>
                   </div>
                </div>
             </div>
@@ -190,30 +246,49 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
   )
 }
 
-function ActionButton({ icon, title, subtitle, onClick, disabled }: any) {
+function ActionButton({ icon, title, subtitle, onClick, disabled, color, lang }: any) {
+  const isRTL = lang === 'ar'
   return (
     <button
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "w-full p-4 bg-white/[0.03] border border-white/5 hover:border-neon-green/40 hover:bg-neon-green/5 transition-all duration-300 group flex items-start gap-4 text-start relative overflow-hidden",
+        "w-full p-3 px-4 bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 transition-all duration-300 group flex items-start gap-4 text-start relative overflow-hidden",
         disabled && "opacity-50 cursor-not-allowed"
       )}
+      style={{
+        ':hover': {
+          borderColor: `${color}66`,
+          backgroundColor: `${color}11`
+        }
+      } as any}
+      onMouseEnter={e => {
+        if (!disabled) {
+          e.currentTarget.style.borderColor = `${color}66`
+          e.currentTarget.style.backgroundColor = `${color}11`
+        }
+      }}
+      onMouseLeave={e => {
+        if (!disabled) {
+          e.currentTarget.style.borderColor = ''
+          e.currentTarget.style.backgroundColor = ''
+        }
+      }}
     >
-      <div className="absolute top-0 right-0 w-16 h-16 bg-neon-green/5 blur-2xl group-hover:bg-neon-green/10 transition-colors"></div>
-      <span className="material-symbols-outlined text-white/30 group-hover:text-neon-green transition-colors mt-1">
+      <div className="absolute top-0 right-0 w-16 h-16 opacity-5 blur-2xl group-hover:opacity-20 transition-colors" style={{ backgroundColor: color }}></div>
+      <span className="material-symbols-outlined text-[var(--text-secondary)] transition-colors mt-1" style={{ color: 'var(--text-secondary)' }} onMouseEnter={e => { if(!disabled) e.currentTarget.style.color = color }} onMouseLeave={e => { if(!disabled) e.currentTarget.style.color = 'var(--text-secondary)' }}>
         {icon}
       </span>
       <div className="flex flex-col flex-1">
-        <span className="text-[11px] font-black tracking-widest text-white group-hover:text-neon-green transition-colors">
+        <span className="text-[11px] font-black tracking-widest text-[var(--text-primary)] transition-colors">
           {title}
         </span>
-        <span className="text-[10px] font-bold text-white/40 mt-1" dir="rtl">
+        <span className="text-[10px] font-bold text-[var(--text-secondary)] mt-1" dir={isRTL ? "rtl" : "ltr"}>
           {subtitle}
         </span>
       </div>
-      <span className="material-symbols-outlined text-xs text-white/10 group-hover:text-neon-green/40 mt-1">
-        arrow_forward_ios
+      <span className="material-symbols-outlined text-xs text-[var(--text-secondary)]/30 mt-1 transition-colors">
+        {isRTL ? 'arrow_back_ios_new' : 'arrow_forward_ios'}
       </span>
     </button>
   )

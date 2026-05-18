@@ -25,7 +25,7 @@ const TOUR_STEPS = [
   },
   {
     id: 'mission-grid',
-    title: 'MISSION_CANVAS',
+    title: 'MY GOALS',
     subtitle: 'ACTIVE_OPERATIONS // GRID',
     body: 'Your active missions appear here as Energy Cells. Tap any cell to view tasks and track progress.',
     bodyAr: 'مهامك النشطة تظهر هنا كخلايا طاقة. اضغط على أي خلية لعرض المهام وتتبع التقدم.',
@@ -35,7 +35,7 @@ const TOUR_STEPS = [
   {
     id: 'sidebar',
     title: 'NAVIGATION_HUD',
-    subtitle: 'SECTOR_MAP // DEPLOYED',
+    subtitle: 'SECTOR_MAP // CREATED',
     body: 'Use the bottom nav to switch between Dashboard, Missions, Notes, Achievements, and the Vault.',
     bodyAr: 'استخدم شريط التنقل السفلي للتنقل بين لوحة التحكم والمهام والملاحظات والإنجازات والخزنة.',
     icon: 'explore',

@@ -10,6 +10,7 @@ interface PreviewTask {
   duration: string // ISO 8601
   seconds: number
   weight: number
+  originalTitle: string
 }
 
 interface Props {
@@ -113,6 +114,7 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
         const seconds = parseDuration(duration)
         return {
           title: cleanTitles[idx] || it.snippet.title,
+          originalTitle: it.snippet.title,
           duration,
           seconds,
           weight: calculateWeight(seconds)
@@ -139,6 +141,7 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
     const payload = previewTasks.map(t => ({
       cup_id: missionId,
       title: t.title,
+      original_title: t.originalTitle,
       weight: t.weight,
       is_completed: false,
       type: 'standard'
@@ -239,7 +242,7 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
                     onClick={onClose}
                     className="px-6 py-3 font-space font-black text-[10px] uppercase tracking-widest text-white/40 hover:text-white"
                   >
-                    ABORT
+                    CANCEL
                   </button>
                   <button 
                     onClick={handleDeploy}
@@ -247,7 +250,7 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
                     className="px-8 py-3 font-space font-black text-[10px] uppercase tracking-widest bg-neon-green text-black shadow-lg"
                     style={{ backgroundColor: themeColor, boxShadow: `0 0 20px ${themeColor}44` }}
                   >
-                    {confirming ? 'DEPLOYING...' : 'DEPLOY_TASKS'}
+                    {confirming ? 'CREATING...' : 'CREATE'}
                   </button>
                 </div>
               </motion.div>

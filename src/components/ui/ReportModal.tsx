@@ -115,7 +115,7 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                      <p className="text-3xl font-black" style={{ color: themeColor }}>+{report.content.xp_earned || 500}</p>
                   </div>
                   <div className="pt-4 border-t border-white/5 text-center">
-                    <p className="text-[10px] text-white/30 uppercase tracking-widest">STATUS: ARCHIVED_TO_LEGACY_VAULT</p>
+                    <p className="text-[10px] text-white/30 uppercase tracking-widest">STATUS: ARCHIVED_TO_WINS_VAULT</p>
                   </div>
                 </div>
               )}

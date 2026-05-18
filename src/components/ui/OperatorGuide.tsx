@@ -1,0 +1,125 @@
+'use client'
+
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { usePathname } from 'next/navigation'
+import { useGrowth } from '@/context/GrowthContext'
+import { cn } from '@/lib/utils'
+
+const GUIDE_CONTENT: Record<string, { title: string; tips: string[] }> = {
+  '/': {
+    title: 'DASHBOARD_TACTICS',
+    tips: [
+      'Focus Capacity is limited to 9 units. Prioritize big wins.',
+      'Missions in RED_ZONE need immediate intervention.',
+      'The EnergyCell shows real-time progress for your active goals.'
+    ]
+  },
+  '/missions': {
+    title: 'MISSION_CONTROL',
+    tips: [
+      'Break large goals into smaller, manageable tasks.',
+      'Use the Calendar icon to sync targets with your Google Calendar.',
+      'Archive completed missions to declutter your focus capacity.'
+    ]
+  },
+  '/notes': {
+    title: 'NOTES',
+    tips: [
+      'Capture ideas instantly before they vanish into the void.',
+      'Use tags like #Task or #Idea to filter your mental archive.',
+      'Search memory bar retrieves any log entry in milliseconds.'
+    ]
+  },
+  '/vault': {
+    title: 'RANKING_PROTOCOL',
+    tips: [
+      'Higher ranks unlock premium interface themes and AI behaviors.',
+      'XP is earned by completing mission tasks and hitting milestones.',
+      'Reach CONQUEROR rank to unlock the full SAVAGE coach protocol.'
+    ]
+  },
+  '/achievements': {
+    title: 'HONOR_LOG',
+    tips: [
+      'Medals are proof of your consistent high-performance execution.',
+      'Complete unique streaks to unlock rare tactical badges.',
+      'Every milestone recorded here boosts your overall rank progression.'
+    ]
+  }
+}
+
+export default function OperatorGuide() {
+  const pathname = usePathname()
+  const { isRTL, currentTheme } = useGrowth()
+  const [isOpen, setIsOpen] = useState(false)
+
+  const content = GUIDE_CONTENT[pathname] || {
+    title: 'SYSTEM_READY',
+    tips: ['Execute your objectives. Maintain high-fidelity focus. No excuses.']
+  }
+
+  return (
+    <>
+      {/* Floating Button */}
+      <div className={cn("fixed bottom-24 md:bottom-8 z-[200]", isRTL ? "left-6 md:left-12" : "right-6 md:right-12")}>
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center border shadow-2xl backdrop-blur-xl transition-all"
+          style={{ 
+            backgroundColor: `${currentTheme.color}22`, 
+            borderColor: `${currentTheme.color}44`,
+            color: currentTheme.color,
+            boxShadow: isOpen ? `0 0 20px ${currentTheme.color}44` : 'none'
+          }}
+        >
+          <span className="material-symbols-outlined text-2xl md:text-3xl">
+            {isOpen ? 'close' : 'help'}
+          </span>
+        </motion.button>
+
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.9 }}
+              className={cn(
+                "absolute bottom-16 md:bottom-20 w-72 md:w-80 glass-panel p-6 border shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[200]",
+                isRTL ? "left-0 origin-bottom-left" : "right-0 origin-bottom-right"
+              )}
+              style={{ borderColor: `${currentTheme.color}33` }}
+            >
+              <div className="space-y-4">
+                <header className="flex justify-between items-center border-b border-black/10 dark:border-white/10 pb-3">
+                  <span className="text-[10px] font-space tracking-[0.3em] font-black uppercase opacity-60" style={{ color: currentTheme.color }}>
+                    OPERATOR_GUIDE // {content.title}
+                  </span>
+                </header>
+
+                <div className="space-y-4">
+                  {content.tips.map((tip, i) => (
+                    <div key={i} className="flex gap-3">
+                      <span className="text-[10px] font-black mt-1 opacity-40" style={{ color: currentTheme.color }}>0{i+1}</span>
+                      <p className="text-xs md:text-sm font-bold text-black/80 dark:text-white/80 leading-relaxed">
+                        {tip}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-4 border-t border-black/10 dark:border-white/10">
+                  <p className="text-[9px] font-space tracking-widest uppercase opacity-30">
+                    {isRTL ? 'حافظ على التركيز' : 'STAY_FOCUSED // EXECUTE'}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </>
+  )
+}

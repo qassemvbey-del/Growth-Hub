@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase'
 import { useGrowth } from '@/context/GrowthContext'
+import CustomSelect from '@/components/ui/CustomSelect'
 
 export default function NotesPage() {
   const [notes, setNotes] = useState<any[]>([])
@@ -14,13 +15,21 @@ export default function NotesPage() {
   const [isCreating, setIsCreating] = useState(false)
   const [editingNote, setEditingNote] = useState<any>(null)
   const [newContent, setNewContent] = useState('')
+  const [newTitle, setNewTitle] = useState('')
+  const [newTag, setNewTag] = useState('')
   const [newMissionId, setNewMissionId] = useState<string>('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterTag, setFilterTag] = useState('all')
   const supabase = createClient()
-  const { isRTL, currentTheme } = useGrowth()
+  const { currentTheme } = useGrowth()
 
   useEffect(() => { 
     fetchNotes()
     fetchMissions()
+    if (window.location.search.includes('create=true')) {
+      setIsCreating(true)
+      window.history.replaceState({}, '', '/notes')
+    }
   }, [])
 
   async function fetchNotes() {
@@ -48,7 +57,7 @@ export default function NotesPage() {
   }
 
   const deleteNote = async (id: string) => {
-    if (confirm(isRTL ? 'امسح السجل ده؟' : 'PURGE CORE LOG?')) {
+    if (confirm('Delete this note?')) {
       setNotes(prev => prev.filter(n => n.id !== id))
       await supabase.from('notes').delete().eq('id', id)
     }
@@ -60,12 +69,33 @@ export default function NotesPage() {
     await supabase.from('notes').update(updates).eq('id', id)
   }
 
+  const TAGS = [
+    { label: '💡 Idea', value: 'idea' },
+    { label: '⚠️ Important', value: 'urgent' },
+    { label: '📚 Source', value: 'source' },
+    { label: '✅ Task', value: 'task' },
+    { label: '🔖 Reference', value: 'reference' }
+  ]
+
+  const filteredNotes = notes.filter(n => {
+    const q = searchQuery.toLowerCase()
+    const matchesSearch = (
+      n.title?.toLowerCase().includes(q) ||
+      n.content?.toLowerCase().includes(q) ||
+      n.cups?.title?.toLowerCase().includes(q)
+    )
+    const matchesTag = filterTag === 'all' || n.tag === filterTag
+    return matchesSearch && matchesTag
+  })
+
   async function createNote() {
     if (!newContent.trim()) return
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     const newNote: any = {
       user_id: user.id,
+      title: newTitle || 'Untitled Note',
+      tag: newTag || null,
       content: newContent,
       color: currentTheme.color,
       is_locked: false,
@@ -81,14 +111,20 @@ export default function NotesPage() {
       setNotes([data, ...notes])
       setIsCreating(false)
       setNewContent('')
+      setNewTitle('')
+      setNewTag('')
       setNewMissionId('')
     }
   }
 
   if (loading) return (
     <Shell>
-      <div className="p-16 text-neon-green font-space animate-pulse tracking-widest">
-        INITIALIZING_CORE_DATABASE...
+      <div className="p-4 md:p-12 space-y-10">
+        <div className="animate-pulse flex flex-col gap-4">
+          <div className="h-40 bg-gray-800 rounded"/>
+          <div className="h-40 bg-gray-800 rounded"/>
+          <div className="h-40 bg-gray-800 rounded"/>
+        </div>
       </div>
     </Shell>
   )
@@ -99,19 +135,35 @@ export default function NotesPage() {
         {/* Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
           <div className="space-y-2">
-            <h1 className="text-4xl md:text-6xl font-black font-space tracking-tighter uppercase italic text-black dark:text-white leading-none">
-              {isRTL ? 'العقل' : 'BRAIN'}
-            </h1>
-            <p className="text-[14px] font-space text-white tracking-[0.4em] uppercase font-bold">
-              {isRTL ? 'السجلات الأساسية' : 'CORE_MEMORY'} // {notes.length} {isRTL ? 'سجل محفوظ' : 'RECORDS_STABLE'}
-            </p>
+            <div className="flex items-center gap-3">
+              <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase text-black dark:text-white leading-none">
+                NOTES
+              </h1>
+              <span className="inline-flex items-center justify-center px-3 py-1 bg-white/10 rounded-lg text-sm font-space font-bold text-white/50 tracking-normal normal-case">
+                {notes.length}
+              </span>
+            </div>
           </div>
+          <div className="flex flex-row items-center gap-3 w-full md:w-auto">
+            {/* Search Bar */}
+            <div className="relative group flex-1 md:flex-none">
+              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]/40 group-focus-within:text-[var(--text-secondary)] transition-colors text-[18px]">search</span>
+              <input
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search notes..."
+                className="h-11 w-full md:w-64 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl pl-10 pr-4 font-space text-[11px] text-[var(--text-primary)] tracking-wide outline-none focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                style={{ ['--tw-ring-color' as any]: `${currentTheme.color}55` }}
+              />
+            </div>
             <button
               onClick={() => setIsCreating(true)}
-              className="w-full md:w-auto px-10 py-4 bg-neon-green/10 border border-neon-green text-neon-green font-space font-black uppercase tracking-widest hover:bg-neon-green hover:text-black transition-all shadow-[0_0_20px_rgba(57,255,20,0.15)]"
+              className="flex flex-row items-center justify-center gap-2 h-11 px-5 bg-white/5 border border-white/10 text-white/70 font-space font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all duration-300 text-xs rounded-xl shrink-0"
             >
-              {isRTL ? 'سجل جديد +' : 'NEW_LOG +'}
+              <span className="material-symbols-outlined text-[16px] leading-none">add</span>
+              Add Note
             </button>
+          </div>
         </header>
 
         {/* Create Panel */}
@@ -121,65 +173,145 @@ export default function NotesPage() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="glass-panel p-6 md:p-10 border-neon-green/25 bg-neon-green/[0.03] space-y-6 overflow-hidden"
+              className="glass-panel p-6 md:p-10 border space-y-6 overflow-hidden"
+              style={{ borderColor: `${currentTheme.color}25`, backgroundColor: `${currentTheme.color}03` }}
             >
-              <textarea
-                autoFocus
-                value={newContent}
-                onChange={(e) => setNewContent(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter' && e.metaKey) createNote() }}
-                placeholder={isRTL ? 'اكتب اللي في دماغك هنا...' : 'INPUT_CORE_DATA...'}
-                className="w-full bg-transparent border-none text-xl md:text-2xl font-space font-black text-black dark:text-white italic outline-none min-h-[100px] placeholder:text-black/30 dark:placeholder:text-white/10 resize-none"
-                dir="auto"
-              />
+              <div className="space-y-4">
+                <input 
+                  value={newTitle}
+                  onChange={e => setNewTitle(e.target.value)}
+                  placeholder="Note title..."
+                  className="w-full bg-transparent border-b border-white/10 p-3 font-space font-black text-2xl text-black dark:text-white outline-none transition-colors"
+                  onFocus={e => e.currentTarget.style.borderColor = currentTheme.color}
+                  onBlur={e => e.currentTarget.style.borderColor = ''}
+                  required
+                />
+                
+                <textarea
+                  autoFocus
+                  value={newContent}
+                  onChange={(e) => setNewContent(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && e.metaKey) createNote() }}
+                  placeholder="Write your note here..."
+                  className="w-full bg-transparent border-none text-lg font-space text-black/70 dark:text-white/60 outline-none min-h-[120px] placeholder:text-black/30 dark:placeholder:text-white/10 resize-none"
+                  dir="auto"
+                />
+              </div>
+
+              {/* Tag Selector for creation */}
+              <div className="flex gap-2 flex-wrap">
+                {TAGS.map(t => (
+                  <button
+                    key={t.value}
+                    onClick={() => setNewTag(newTag === t.value ? '' : t.value)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-sm font-space text-[9px] font-black tracking-widest border transition-all",
+                      newTag === t.value 
+                        ? "text-black border-transparent shadow-lg" 
+                        : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)]/50"
+                    )}
+                    style={newTag === t.value ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 10px ${currentTheme.color}55` } : {}}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
 
               {/* Mission Link Dropdown */}
               {missions.length > 0 && (
                 <div className="space-y-2">
                   <label className="text-[9px] font-space text-black/40 dark:text-white/30 tracking-widest uppercase font-black">
-                    {isRTL ? 'ربط بمهمة (اختياري)' : 'LINK_TO_MISSION (optional)'}
+                    Link to Goal (optional)
                   </label>
-                  <select
+                  <CustomSelect
                     value={newMissionId}
-                    onChange={e => setNewMissionId(e.target.value)}
-                    className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-3 font-space text-sm font-black text-black dark:text-white outline-none appearance-none"
-                    style={{ borderColor: newMissionId ? `${currentTheme.color}60` : undefined }}
-                  >
-                    <option value="">{isRTL ? '— لا ربط —' : '— NO LINK —'}</option>
-                    {missions.map(m => (
-                      <option key={m.id} value={m.id}>{m.title.toUpperCase()}</option>
-                    ))}
-                  </select>
+                    onChange={val => setNewMissionId(val)}
+                    options={[
+                      { value: '', label: '— NO LINK —' },
+                      ...missions.map(m => ({ value: m.id, label: m.title.toUpperCase() }))
+                    ]}
+                  />
                 </div>
               )}
 
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2 text-[9px] font-space text-black/30 dark:text-white/20 tracking-widest uppercase">
                   <span className="material-symbols-outlined text-sm">keyboard</span>
-                  ⌘+ENTER TO UPLOAD
+                  ⌘+Enter to save
                 </div>
                 <div className="flex gap-6">
-                  <button onClick={() => { setIsCreating(false); setNewContent(''); setNewMissionId('') }} className="text-black/40 dark:text-white/20 font-space uppercase text-[10px] tracking-widest hover:text-black dark:hover:text-white transition-all">{isRTL ? 'إلغاء' : 'ABORT'}</button>
-                  <button onClick={createNote} className="px-8 py-2 bg-neon-green text-black font-space font-black uppercase text-xs tracking-widest">{isRTL ? 'حفظ' : 'UPLOAD'}</button>
+                  <button onClick={() => { setIsCreating(false); setNewContent(''); setNewTitle(''); setNewTag(''); setNewMissionId('') }} className="text-[var(--text-secondary)] font-space uppercase text-[10px] tracking-widest hover:text-[var(--text-primary)] transition-all">CANCEL</button>
+                  <button 
+                    onClick={createNote} 
+                    className="px-8 py-2 text-black font-space font-black uppercase text-xs tracking-widest rounded-xl transition-all duration-300 hover:brightness-110 active:scale-95"
+                    style={{ backgroundColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}44` }}
+                  >
+                    Save
+                  </button>
                 </div>
               </div>
             </motion.div>
           )}
+
         </AnimatePresence>
 
+        {/* Tag Filter Bar */}
+        <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+          <button
+            onClick={() => setFilterTag('all')}
+            className={cn(
+              "px-6 py-2 border font-space text-[10px] font-black tracking-widest uppercase transition-all whitespace-nowrap",
+              filterTag === 'all' 
+                ? "text-black border-transparent shadow-lg" 
+                : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)]/50"
+            )}
+            style={filterTag === 'all' ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 20px ${currentTheme.color}33` } : {}}
+          >
+            ALL
+          </button>
+          {TAGS.map(t => (
+            <button
+              key={t.value}
+              onClick={() => setFilterTag(t.value)}
+              className={cn(
+                "px-6 py-2 border font-space text-[10px] font-black tracking-widest uppercase transition-all whitespace-nowrap",
+                filterTag === t.value 
+                  ? "text-black border-transparent shadow-lg" 
+                  : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)]/50"
+              )}
+              style={filterTag === t.value ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 20px ${currentTheme.color}33` } : {}}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+
         {/* Notes Grid */}
-        {notes.length === 0 && !isCreating ? (
+        {filteredNotes.length === 0 ? (
           <div className="flex items-center justify-center py-40">
             <p className="text-black/30 dark:text-white/10 font-space text-[11px] tracking-[0.5em] uppercase font-black">
-              NO_CORE_RECORDS_FOUND
+              {searchQuery ? 'No matching notes' : 'No notes yet — add your first'}
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             <AnimatePresence mode="popLayout">
-              {notes.map((note, idx) => {
+              {filteredNotes.map((note, idx) => {
                 const noteColor = currentTheme.color
                 const linkedMission = note.cups
+                const tagObj = TAGS.find(t => t.value === note.tag)
+                const dateObj = new Date(note.created_at)
+                const date = dateObj.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+                const dateSuffix = `${dateObj.getDate()}_${dateObj.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}`
+                
+                // Fix 4: Clean preview text
+                const plainText = (note.content || '')
+                  .replace(/<[^>]*>/g, '') // Strip HTML
+                  .replace(/[#*`_~]/g, '') // Strip Markdown symbols
+                  .trim()
+                  .slice(0, 60) || 'Empty note...'
+
                 return (
                   <motion.div
                     key={note.id}
@@ -189,15 +321,11 @@ export default function NotesPage() {
                     transition={{ delay: idx * 0.03 }}
                     onClick={() => setEditingNote(note)}
                     className={cn(
-                      "group relative p-7 border cursor-pointer transition-all duration-300",
+                      "group relative p-7 border cursor-pointer transition-all duration-300 min-h-[220px] flex flex-col",
+                      "bg-[var(--card-bg)] border-[var(--card-border)] hover:border-[var(--card-border)]/50",
                       "backdrop-blur-xl",
-                      isRTL ? 'text-right' : 'text-left'
+                      "text-left"
                     )}
-                    style={{
-                      backgroundColor: `${noteColor}05`,
-                      borderColor: `${noteColor}15`,
-                      background: `linear-gradient(135deg, ${noteColor}08 0%, transparent 60%)`,
-                    }}
                   >
                     {/* Neon top accent */}
                     <div
@@ -220,31 +348,40 @@ export default function NotesPage() {
                       </div>
                     )}
 
-                    {/* Delete button */}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); deleteNote(note.id) }}
-                      className={cn(
-                        "absolute bottom-3 text-black/30 dark:text-white/30 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all",
-                        isRTL ? 'right-3' : 'left-3'
-                      )}
-                    >
-                      <span className="material-symbols-outlined text-base">delete</span>
-                    </button>
+                    {/* Title (Fix 5) */}
+                    <h3 className="text-xl font-black font-space text-[var(--text-primary)] mt-4 uppercase italic tracking-tighter truncate">
+                      {note.title && note.title !== 'Untitled Note' ? note.title : `Note — ${dateSuffix}`}
+                    </h3>
 
-                    {/* Content */}
+                    {/* Preview */}
                     <p className={cn(
-                      'text-sm leading-relaxed text-black/80 dark:text-white/80 line-clamp-6 mt-2',
-                      note.font_settings?.family === 'tajawal' ? 'font-tajawal' : 'font-space',
-                      note.font_settings?.weight === 'bold' ? 'font-black' : 'font-normal',
-                      note.font_settings?.style === 'italic' ? 'italic' : ''
+                      'text-xs leading-relaxed text-[var(--text-secondary)] mt-3 italic font-space'
                     )}>
-                      {note.content}
+                      "{plainText}"
                     </p>
 
-                    {/* Footer */}
-                    <div className="mt-5 pt-4 border-t border-black/5 dark:border-white/5 flex justify-between items-center">
-                      <span className="text-[8px] font-space tracking-[0.3em] text-black/50 dark:text-white/20 uppercase font-black">CORE_LOG</span>
-                      <span className="material-symbols-outlined text-black/30 dark:text-white/15 text-sm group-hover:text-black/70 dark:group-hover:text-white/40 transition-all">open_in_full</span>
+                    {/* Footer / Meta */}
+                    <div className="mt-auto pt-5 flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                         {tagObj && (
+                          <span 
+                            className="px-2 py-0.5 border text-[9px] font-black font-space tracking-widest uppercase rounded-sm"
+                            style={{ borderColor: `${noteColor}40`, color: noteColor, backgroundColor: `${noteColor}08` }}
+                          >
+                            {tagObj.label}
+                          </span>
+                        )}
+                        <span className="text-[9px] font-space text-[var(--text-secondary)] font-black tracking-widest">
+                          {date}
+                        </span>
+                      </div>
+                      
+                      <button
+                        onClick={(e) => { e.stopPropagation(); deleteNote(note.id) }}
+                        className="text-[var(--text-secondary)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                      >
+                        <span className="material-symbols-outlined text-base">delete</span>
+                      </button>
                     </div>
                   </motion.div>
                 )
@@ -261,7 +398,7 @@ export default function NotesPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8 bg-[#F0F2F5]/90 dark:bg-[#050505]/90 backdrop-blur-md"
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8 bg-white/90 dark:bg-black/90 backdrop-blur-md"
             onClick={() => setEditingNote(null)}
           >
             <motion.div
@@ -269,11 +406,7 @@ export default function NotesPage() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.93, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-3xl p-6 md:p-12 relative border backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-y-auto max-h-[90vh]"
-              style={{
-                backgroundColor: `${currentTheme.color}05`,
-                borderColor: `${currentTheme.color}15`
-              }}
+              className="w-full max-w-3xl p-6 md:p-12 relative border border-[var(--card-border)] bg-[var(--card-bg)] backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-y-auto max-h-[90vh]"
             >
               {/* Neon top bar */}
               <div
@@ -281,24 +414,35 @@ export default function NotesPage() {
                 style={{ background: `linear-gradient(90deg, transparent, ${currentTheme.color}, transparent)` }}
               />
 
-              {/* Mission link indicator */}
-              {editingNote.cups && (
-                <div className="mb-6 flex items-center gap-2 text-[10px] font-space font-black tracking-widest uppercase" style={{ color: currentTheme.color }}>
-                  <span className="material-symbols-outlined text-sm">link</span>
-                  {isRTL ? 'مرتبط بـ:' : 'LINKED_TO:'} {editingNote.cups.title.toUpperCase()}
-                </div>
-              )}
+              <div className="flex justify-between items-center mb-6">
+                 {editingNote.cups && (
+                   <div className="flex items-center gap-2 text-[10px] font-space font-black tracking-widest uppercase" style={{ color: currentTheme.color }}>
+                     <span className="material-symbols-outlined text-sm">link</span>
+                     Linked to: {editingNote.cups.title}
+                   </div>
+                 )}
+                  <span className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black tracking-widest">
+                    ID: {editingNote?.id?.slice(0, 8) ?? 'NEW'}
+                  </span>
+               </div>
 
-              {/* Close */}
+              <input 
+                 value={editingNote.title || ''}
+                 onChange={(e) => updateNote(editingNote.id, { title: e.target.value })}
+                 placeholder="Note title..."
+                 className="w-full bg-transparent border-none p-0 mb-8 font-space font-black text-4xl md:text-5xl text-[var(--text-primary)] outline-none transition-colors italic tracking-tighter"
+                 onFocus={e => e.currentTarget.style.color = currentTheme.color}
+                 onBlur={e => e.currentTarget.style.color = ''}
+               />
+
               <button
                 onClick={() => setEditingNote(null)}
-                className="absolute top-5 right-5 text-black/30 dark:text-white/20 hover:text-black dark:hover:text-white transition-all"
+                 className="absolute top-5 right-5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
               >
                 <span className="material-symbols-outlined text-2xl">close</span>
               </button>
 
-              {/* Font Controls */}
-              <div className="flex gap-3 flex-wrap border-b border-black/5 dark:border-white/5 pb-6 mb-8">
+               <div className="flex gap-3 flex-wrap border-b border-[var(--card-border)] pb-6 mb-8">
                 {[
                   { icon: 'format_bold', field: 'weight', active: 'bold', inactive: 'normal' },
                   { icon: 'format_italic', field: 'style', active: 'italic', inactive: 'normal' },
@@ -308,61 +452,75 @@ export default function NotesPage() {
                     onClick={() => updateNote(editingNote.id, {
                       font_settings: { ...editingNote.font_settings, [field]: editingNote.font_settings?.[field] === active ? inactive : active }
                     })}
-                    className={cn('p-2.5 border transition-all', editingNote.font_settings?.[field] === active ? 'bg-black/10 dark:bg-white/20 border-black/30 dark:border-white' : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30')}
+                    className={cn('p-2.5 border transition-all', editingNote.font_settings?.[field] === active ? 'bg-[var(--input-bg)] border-[var(--card-border)]' : 'bg-[var(--input-bg)] border border-[var(--card-border)] hover:opacity-80')}
                   >
-                    <span className="material-symbols-outlined text-black dark:text-white text-base">{icon}</span>
+                    <span className="material-symbols-outlined text-[var(--text-primary)] text-base">{icon}</span>
                   </button>
                 ))}
                 <button
                   onClick={() => updateNote(editingNote.id, {
                     font_settings: { ...editingNote.font_settings, family: editingNote.font_settings?.family === 'tajawal' ? 'space' : 'tajawal' }
                   })}
-                  className={cn('px-5 py-2 border font-space text-sm font-black tracking-widest text-black dark:text-white transition-all', editingNote.font_settings?.family === 'tajawal' ? 'bg-black/10 dark:bg-white/20 border-black/30 dark:border-white' : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30')}
+                  className={cn('px-5 py-2 border font-space text-sm font-black tracking-widest text-[var(--text-primary)] transition-all', editingNote.font_settings?.family === 'tajawal' ? 'bg-[var(--input-bg)] border-[var(--card-border)]' : 'bg-[var(--input-bg)] border border-[var(--card-border)] hover:opacity-80')}
                 >
                   {editingNote.font_settings?.family === 'tajawal' ? 'TAJAWAL' : 'SPACE'}
                 </button>
                 <button
                   onClick={() => updateNote(editingNote.id, { is_locked: !editingNote.is_locked })}
-                  className={cn('p-2.5 border transition-all', editingNote.is_locked ? 'bg-neon-green/20 border-neon-green text-neon-green' : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30')}
+                  className={cn('p-2.5 border transition-all', editingNote.is_locked ? 'text-black border-transparent' : 'bg-[var(--input-bg)] border border-[var(--card-border)] hover:opacity-80')}
+                  style={editingNote.is_locked ? { backgroundColor: currentTheme.color, boxShadow: `0 0 10px ${currentTheme.color}55` } : {}}
                 >
                   <span className="material-symbols-outlined text-base">push_pin</span>
                 </button>
 
-                {/* Mission link selector in edit modal */}
                 {missions.length > 0 && (
-                  <select
+                  <CustomSelect
                     value={editingNote.mission_id || ''}
-                    onChange={e => updateNote(editingNote.id, { mission_id: e.target.value || null })}
-                    className="px-3 py-2 border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 font-space text-xs font-black text-black dark:text-white outline-none appearance-none"
-                    style={{ borderColor: editingNote.mission_id ? `${currentTheme.color}60` : undefined }}
-                  >
-                    <option value="">{isRTL ? '— لا ربط —' : '— NO LINK —'}</option>
-                    {missions.map(m => (
-                      <option key={m.id} value={m.id}>{m.title.toUpperCase()}</option>
-                    ))}
-                  </select>
+                    onChange={val => updateNote(editingNote.id, { mission_id: val || null })}
+                    options={[
+                      { value: '', label: '— NO LINK —' },
+                      ...missions.map(m => ({ value: m.id, label: m.title.toUpperCase() }))
+                    ]}
+                    className="w-48"
+                  />
                 )}
               </div>
 
-              {/* Textarea */}
+              <div className="flex gap-2 flex-wrap mb-8 border-b border-[var(--card-border)] pb-6">
+                {TAGS.map(t => (
+                  <button
+                    key={t.value}
+                    onClick={() => updateNote(editingNote.id, { tag: editingNote.tag === t.value ? null : t.value })}
+                    className={cn(
+                      "px-4 py-2 rounded-sm font-space text-[10px] font-black tracking-widest border transition-all",
+                      editingNote.tag === t.value 
+                        ? "text-black border-transparent shadow-lg" 
+                        : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)]/50 hover:text-[var(--text-primary)]"
+                    )}
+                    style={editingNote.tag === t.value ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}44` } : {}}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+
               <textarea
                 autoFocus
                 value={editingNote.content}
                 onChange={(e) => updateNote(editingNote.id, { content: e.target.value })}
                 className={cn(
-                  'w-full bg-transparent border-none text-3xl leading-relaxed text-black dark:text-white outline-none min-h-[280px] resize-none',
+                  'w-full bg-transparent border-none text-3xl leading-relaxed text-[var(--text-primary)] outline-none min-h-[280px] resize-none',
                   editingNote.font_settings?.family === 'tajawal' ? 'font-tajawal' : 'font-space',
                   editingNote.font_settings?.weight === 'bold' ? 'font-black' : 'font-normal',
                   editingNote.font_settings?.style === 'italic' ? 'italic' : '',
-                  isRTL ? 'text-right' : 'text-left'
+                  "text-left"
                 )}
                 dir="auto"
               />
 
-              {/* Footer */}
-              <div className="pt-8 border-t border-black/5 dark:border-white/5 flex justify-end items-center">
-                <div className="flex items-center gap-3 text-black/40 dark:text-white/20">
-                  <span className="text-[9px] font-space tracking-widest uppercase font-black">AUTO_SAVED</span>
+              <div className="pt-8 border-t border-[var(--card-border)] flex justify-end items-center">
+                <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                   <span className="text-[9px] font-space tracking-widest uppercase font-black">Auto-saved</span>
                   <span className="material-symbols-outlined text-xl">save</span>
                 </div>
               </div>

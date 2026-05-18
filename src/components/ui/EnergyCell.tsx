@@ -1,34 +1,26 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useMemo, useState, useEffect, useId } from 'react'
+import { useId } from 'react'
 
 interface EnergyCellProps {
   percentage: number
   color: string
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
   isInRedZone?: boolean
-  cupStyle?: string
 }
 
 /**
- * LIQUID CRYSTAL TROPHY — V7.4
- * A 3D crystal chalice silhouette with smoked-glass material,
- * neon liquid fill, SVG wave animation, and rising glow bubbles.
- *
- * STRICT SIZE ENFORCEMENT:
- *   SMALL  → 45px
- *   MEDIUM → 90px
- *   LARGE  → 170px
+ * CRYSTAL SHARD ENERGY CELL — V8.0
+ * Irregular crystal shard design with angular facets,
+ * liquid fill animation, and 100% overflow effects.
  */
 const DIMS = {
-  sm: { w: 36, h: 45 },
-  md: { w: 68, h: 90 },
-  lg: { w: 120, h: 170 },
+  sm: { w: 40, h: 55 },    // Create Mission Modal
+  md: { w: 60, h: 80 },    // Mission Card
+  lg: { w: 80, h: 100 },   // Dashboard Card
+  xl: { w: 100, h: 130 },  // Legacy Vault
 } as const
-
-// Unique ID counter for SVG defs - REMOVED for useId
-
 
 export default function EnergyCell({
   percentage,
@@ -37,268 +29,175 @@ export default function EnergyCell({
   isInRedZone,
 }: EnergyCellProps) {
   const primary = isInRedZone ? '#FF0055' : (color?.startsWith('#') ? color : '#39FF14')
-  const { w, h } = DIMS[size ?? 'sm']
+  const { w, h } = DIMS[size ?? 'md']
   const pct = Math.round(Math.max(0, Math.min(100, isNaN(percentage) ? 0 : percentage)))
- 
-  // Unique IDs for SVG clip paths using React's useId for SSR safety
   const uid = useId().replace(/:/g, '')
 
-  // === Crystal Trophy SVG Path (chalice silhouette) ===
-  // Normalized to 100x100 viewBox, then scaled
-  const chalicePath = `
-    M 30 5 
-    Q 30 0, 50 0 
-    Q 70 0, 70 5
-    L 72 8
-    Q 73 10, 70 12
-    L 65 14
-    Q 52 18, 50 20
-    Q 48 18, 35 14
-    L 30 12
-    Q 27 10, 28 8
-    Z
-    M 35 14
-    Q 30 20, 28 35
-    Q 26 55, 32 70
-    Q 35 78, 40 82
-    L 42 85
-    Q 44 86, 44 88
-    L 44 92
-    Q 44 94, 38 95
-    L 32 96
-    Q 28 97, 28 100
-    L 72 100
-    Q 72 97, 68 96
-    L 62 95
-    Q 56 94, 56 92
-    L 56 88
-    Q 56 86, 58 85
-    L 60 82
-    Q 65 78, 68 70
-    Q 74 55, 72 35
-    Q 70 20, 65 14
-    Z
-  `
+  // Fill calculation: path height is roughly 2 to 72 in 60x80 viewBox
+  const topY = 2
+  const bottomY = 72
+  const fillHeight = bottomY - topY
+  const fillLevelY = bottomY - (pct / 100) * fillHeight
 
-  // Glow configs per size
-  const glowSpread = size === 'lg' ? 30 : size === 'md' ? 16 : 8
-  const borderGlow = size === 'lg' ? 20 : size === 'md' ? 10 : 5
-  const fontSize = size === 'sm' ? 9 : size === 'md' ? 14 : 24
-  const fontWeight = 900
-
-  // Bubble config
-  const bubbleCount = size === 'sm' ? 3 : size === 'md' ? 5 : 8
-  const [bubbles, setBubbles] = useState<{x: number, delay: number, duration: number, r: number}[]>([])
- 
-  useEffect(() => {
-    const generated = Array.from({ length: bubbleCount }, (_, i) => ({
-      x: 35 + Math.random() * 30,
-      delay: Math.random() * 3,
-      duration: 2 + Math.random() * 2,
-      r: size === 'sm' ? 1 : size === 'md' ? 1.5 : 2 + Math.random(),
-    }))
-    setBubbles(generated)
-  }, [bubbleCount, size])
-
-  // Fill level: map pct to Y within the chalice body (14 to 100 in SVG coords)
-  const bodyTop = 14
-  const bodyBottom = 100
-  const bodyHeight = bodyBottom - bodyTop
-  const fillY = bodyBottom - (pct / 100) * bodyHeight
-  const waveY = fillY
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <div style={{ position: 'relative', width: w, height: h, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-
-        {/* Orbit rings — LARGE ONLY */}
-        {size === 'lg' && [1, 2].map(i => (
-          <motion.div
-            key={i}
-            style={{
-              position: 'absolute',
-              width: w * (1 + i * 0.35),
-              height: h * (1 + i * 0.1),
-              borderRadius: '50%',
-              border: `1px solid ${primary}${i === 1 ? '30' : '18'}`,
-              pointerEvents: 'none',
-            }}
-            animate={{ rotate: 360 * (i % 2 === 0 ? 1 : -1) }}
-            transition={{ duration: 8 + i * 6, repeat: Infinity, ease: 'linear' }}
-          />
-        ))}
-
-        {/* === THE CRYSTAL CHALICE === */}
+    <div className="flex flex-col items-center">
+      <div 
+        className="relative flex items-center justify-center"
+        style={{ width: w, height: h }}
+      >
         <svg
-          width={w}
-          height={h}
-          viewBox="0 0 100 100"
-          style={{ overflow: 'visible', filter: `drop-shadow(0 0 ${glowSpread}px ${primary}88)` }}
+          width="100%"
+          height="100%"
+          viewBox="0 0 60 80"
+          style={{ overflow: 'visible' }}
         >
           <defs>
-            {/* Clip to the chalice shape */}
-            <clipPath id={`${uid}-clip`}>
-              <path d={chalicePath} />
+            {/* STATIC Crystal Shard shape for masking animated fills */}
+            <clipPath id={`crystal-path-${uid}`}>
+              <polygon points="30,2 8,25 5,55 30,72 55,55 52,25" />
             </clipPath>
 
-            {/* Smoked glass gradient */}
-            <linearGradient id={`${uid}-glass`} x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="rgba(30,30,35,0.85)" />
-              <stop offset="40%" stopColor="rgba(15,15,20,0.92)" />
-              <stop offset="100%" stopColor="rgba(5,5,8,0.95)" />
-            </linearGradient>
-
-            {/* Liquid fill gradient */}
-            <linearGradient id={`${uid}-liquid`} x1="0" y1="1" x2="0" y2="0">
-              <stop offset="0%" stopColor={primary} stopOpacity="0.9" />
-              <stop offset="40%" stopColor={primary} stopOpacity="0.6" />
-              <stop offset="70%" stopColor={primary} stopOpacity="0.3" />
-              <stop offset="100%" stopColor={primary} stopOpacity="0.05" />
-            </linearGradient>
-
-            {/* Top glass highlight */}
-            <linearGradient id={`${uid}-highlight`} x1="0.3" y1="0" x2="0.7" y2="0.5">
-              <stop offset="0%" stopColor="rgba(255,255,255,0.12)" />
-              <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-            </linearGradient>
-
-            {/* Glow filter for liquid surface */}
-            <filter id={`${uid}-glow`} x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation={size === 'lg' ? 3 : 2} result="blur" />
+            {/* Standard compliant SVG filter for premium glow */}
+            <filter id={`glow-${uid}`}>
+              <feGaussianBlur stdDeviation="2.5" result="blur" />
               <feMerge>
                 <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+
+            {/* Ultra-High-Performance GPU-Accelerated Particles Style */}
+            <style>{`
+              @keyframes float-particle-1-${uid} {
+                0% { transform: translateY(0px) scale(0); opacity: 0; }
+                20% { opacity: 0.8; }
+                80% { opacity: 0.8; }
+                100% { transform: translateY(-35px) scale(1.4); opacity: 0; }
+              }
+              @keyframes float-particle-2-${uid} {
+                0% { transform: translateY(0px) scale(0); opacity: 0; }
+                30% { opacity: 0.7; }
+                70% { opacity: 0.7; }
+                100% { transform: translateY(-40px) scale(1.1); opacity: 0; }
+              }
+              @keyframes float-particle-3-${uid} {
+                0% { transform: translateY(0px) scale(0); opacity: 0; }
+                15% { opacity: 0.9; }
+                75% { opacity: 0.9; }
+                100% { transform: translateY(-45px) scale(1.5); opacity: 0; }
+              }
+              .animate-p1-${uid} {
+                animation: float-particle-1-${uid} 2.4s infinite ease-out;
+                transform-origin: center;
+                transform-box: fill-box;
+              }
+              .animate-p2-${uid} {
+                animation: float-particle-2-${uid} 3.2s infinite ease-out 0.6s;
+                transform-origin: center;
+                transform-box: fill-box;
+              }
+              .animate-p3-${uid} {
+                animation: float-particle-3-${uid} 2.8s infinite ease-out 1.2s;
+                transform-origin: center;
+                transform-box: fill-box;
+              }
+            `}</style>
           </defs>
 
-          {/* Chalice body — smoked glass */}
-          <path
-            d={chalicePath}
-            fill={`url(#${uid}-glass)`}
-            stroke={`${primary}55`}
-            strokeWidth={size === 'lg' ? 0.8 : 0.6}
+          {/* 1. Liquid Fill (Clipped by static crystal path) */}
+          <motion.rect 
+            x="0" 
+            width="60"
+            initial={{ y: 80, height: 0 }}
+            animate={{ y: fillLevelY, height: 80 - fillLevelY }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            fill={primary}
+            opacity="0.5"
+            clipPath={`url(#crystal-path-${uid})`}
           />
 
-          {/* Content clipped to chalice shape */}
-          <g clipPath={`url(#${uid}-clip)`}>
+          {/* 2. Liquid ripple animation (Clipped by static crystal path) */}
+          <motion.path
+            d={`M 5 ${fillLevelY} Q 30 ${fillLevelY - 4}, 55 ${fillLevelY} L 55 80 L 5 80 Z`}
+            fill={primary}
+            opacity="0.25"
+            animate={{
+              d: [
+                `M 5 ${fillLevelY} Q 30 ${fillLevelY - 4}, 55 ${fillLevelY} L 55 80 L 5 80 Z`,
+                `M 5 ${fillLevelY} Q 30 ${fillLevelY + 4}, 55 ${fillLevelY} L 55 80 L 5 80 Z`,
+                `M 5 ${fillLevelY} Q 30 ${fillLevelY - 4}, 55 ${fillLevelY} L 55 80 L 5 80 Z`
+              ]
+            }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            clipPath={`url(#crystal-path-${uid})`}
+          />
 
-            {/* Tick marks */}
-            {size !== 'sm' && [25, 50, 75].map(tick => {
-              const yPos = bodyBottom - (tick / 100) * bodyHeight
-              return (
-                <line
-                  key={tick}
-                  x1="25" y1={yPos} x2="75" y2={yPos}
-                  stroke={`${primary}22`}
-                  strokeWidth="0.5"
-                />
-              )
-            })}
+          {/* 3. Main Crystal Body Outline (Standard glow and styling) */}
+          <motion.polygon 
+            points="30,2 8,25 5,55 30,72 55,55 52,25"
+            fill="none" 
+            stroke={primary} 
+            strokeWidth="1.5"
+            animate={{
+              strokeOpacity: [0.6, 1, 0.6]
+            }}
+            filter={`url(#glow-${uid})`}
+            style={{
+              filter: `drop-shadow(0 0 4px ${primary}88)`
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          />
 
-            {/* NEON LIQUID FILL */}
-            <motion.rect
-              x="0" width="100"
-              initial={{ y: 100, height: 0 }}
-              animate={{ y: fillY, height: bodyBottom - fillY }}
-              transition={{ duration: size === 'lg' ? 2.8 : 2, ease: 'easeInOut' }}
-              fill={`url(#${uid}-liquid)`}
-            />
-
-            {/* SVG WAVE at liquid surface */}
-            <motion.g
-              initial={{ y: 100 - bodyTop }}
-              animate={{ y: waveY - bodyTop }}
-              transition={{ duration: size === 'lg' ? 2.8 : 2, ease: 'easeInOut' }}
-            >
-              <motion.path
-                d={`M 20 0 Q 30 -3, 40 0 Q 50 3, 60 0 Q 70 -3, 80 0 L 80 4 L 20 4 Z`}
-                fill={primary}
-                opacity={0.7}
-                filter={`url(#${uid}-glow)`}
-                animate={{
-                  d: [
-                    `M 20 0 Q 30 -3, 40 0 Q 50 3, 60 0 Q 70 -3, 80 0 L 80 4 L 20 4 Z`,
-                    `M 20 0 Q 30 3, 40 0 Q 50 -3, 60 0 Q 70 3, 80 0 L 80 4 L 20 4 Z`,
-                    `M 20 0 Q 30 -3, 40 0 Q 50 3, 60 0 Q 70 -3, 80 0 L 80 4 L 20 4 Z`,
-                  ]
-                }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-              />
-              {/* Bright surface line */}
-              <line
-                x1="25" y1="0" x2="75" y2="0"
-                stroke={primary}
-                strokeWidth={size === 'lg' ? 1.2 : 0.8}
-                filter={`url(#${uid}-glow)`}
-              />
-            </motion.g>
-
-            {/* RISING BUBBLES */}
-            {bubbles.map((b, i) => (
-              <motion.circle
-                key={i}
-                cx={b.x}
-                r={b.r}
-                fill={primary}
-                opacity={0.6}
-                initial={{ cy: 95, opacity: 0 }}
-                animate={{
-                  cy: [95, fillY + 5, fillY - 2],
-                  opacity: [0, 0.7, 0],
-                }}
-                transition={{
-                  duration: b.duration,
-                  delay: b.delay,
-                  repeat: Infinity,
-                  ease: 'easeOut',
-                }}
-              />
-            ))}
-
-            {/* Inner shimmer (medium + large) */}
-            {size !== 'sm' && (
-              <motion.ellipse
-                cx="50" cy="50" rx="18" ry="30"
-                fill={`${primary}11`}
-                animate={{ opacity: [0.05, 0.2, 0.05] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-              />
-            )}
-
-            {/* Glass highlight overlay */}
-            <path
-              d={chalicePath}
-              fill={`url(#${uid}-highlight)`}
-            />
+          {/* 4. Internal Facet Lines */}
+          <g stroke={primary} strokeOpacity="0.6" strokeWidth="0.8">
+            <line x1="30" y1="2" x2="15" y2="40" />
+            <line x1="30" y1="2" x2="45" y2="40" />
+            <line x1="8" y1="25" x2="52" y2="25" />
+            <line x1="15" y1="40" x2="45" y2="40" strokeOpacity="0.4" />
+            <line x1="15" y1="40" x2="8" y2="25" strokeOpacity="0.5" />
+            <line x1="45" y1="40" x2="52" y2="25" strokeOpacity="0.5" />
+            <line x1="30" y1="72" x2="15" y2="40" strokeOpacity="0.5" />
+            <line x1="30" y1="72" x2="45" y2="40" strokeOpacity="0.5" />
           </g>
 
-          {/* Crystal edge highlight (inner border glow) */}
-          <path
-            d={chalicePath}
-            fill="none"
-            stroke={`${primary}44`}
-            strokeWidth={0.5}
-            style={{ filter: `drop-shadow(0 0 ${size === 'lg' ? 4 : 2}px ${primary}44)` }}
+          {/* 5. Surface highlight line */}
+          <motion.line
+            x1="5" y1={fillLevelY} x2="55" y2={fillLevelY}
+            stroke={primary}
+            strokeWidth="1.5"
+            opacity="0.8"
+            clipPath={`url(#crystal-path-${uid})`}
+            filter={`url(#glow-${uid})`}
           />
 
-          {/* % Readout */}
-          <text
-            x="50"
-            y={size === 'sm' ? 62 : 58}
-            textAnchor="middle"
-            dominantBaseline="central"
-            style={{
-              fontFamily: "'Space Grotesk', monospace",
-              fontWeight,
-              fontSize: size === 'sm' ? '12px' : size === 'md' ? '14px' : '18px',
-              fill: '#ffffff',
-              filter: `drop-shadow(0 0 6px ${primary}) drop-shadow(0 0 12px ${primary}66)`,
-            }}
-          >
-            {pct}%
-          </text>
+          {/* 6. Base Glow */}
+          <ellipse 
+            cx="30" cy="72" rx="20" ry="4"
+            fill={primary} 
+            opacity="0.3"
+          />
+
+          {/* 7. Overflow Particles at 100% (CSS-only for massive performance boost) */}
+          {pct >= 100 && (
+            <g style={{ pointerEvents: 'none' }}>
+              <circle cx="22" cy="45" r="1.5" fill={primary} className={`animate-p1-${uid}`} />
+              <circle cx="38" cy="48" r="1.2" fill={primary} className={`animate-p2-${uid}`} />
+              <circle cx="30" cy="38" r="1.8" fill={primary} className={`animate-p3-${uid}`} />
+            </g>
+          )}
         </svg>
+
+        {/* % Readout overlay */}
+        <div 
+          className="absolute inset-0 flex items-center justify-center font-space font-black tracking-tighter text-white pointer-events-none"
+          style={{ 
+            fontSize: size === 'sm' ? '8px' : size === 'md' ? '12px' : '16px',
+            textShadow: `0 0 10px ${primary}`
+          }}
+        >
+          {pct}%
+        </div>
       </div>
     </div>
   )

@@ -35,9 +35,13 @@ export default function Dashboard() {
 
 
   async function fetchDashboardMissions() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
     const { data } = await supabase
       .from('cups')
       .select('*, tasks(*)')
+      .eq('user_id', user.id)
       .eq('sync_to_dashboard', true)
       .eq('is_archived', false)
       .order('created_at', { ascending: false })
@@ -78,7 +82,7 @@ export default function Dashboard() {
           </motion.h1>
 
           <p className="text-[10px] md:text-xs font-space text-black/40 dark:text-white/40 tracking-[0.6em] uppercase font-black">
-            {isRTL ? 'المحطة مفعلة' : 'LIVE MISSIONS'} // {profile?.full_name?.toUpperCase() || (isRTL ? 'المستخدم' : 'OPERATOR')}
+            {isRTL ? 'لوحة الأهداف' : 'GOAL CANVAS'} // {profile?.full_name?.toUpperCase() || (isRTL ? 'المستخدم' : 'OPERATOR')}
           </p>
         </div>
 
@@ -116,11 +120,12 @@ export default function Dashboard() {
                   {usedSlots.toFixed(1).replace('.0', '')}/9
                 </span>
               </div>
-              {/* Segmented 9-slot bar - Fuchsia Energy Tank */}
+              {/* Segmented 9-slot bar - Dynamic Theme Energy Tank */}
               <div 
-                className="flex gap-[4px] h-[16px] p-[2px] rounded-sm border border-[#FF00FF]/40 bg-[#050505] overflow-hidden"
+                className="flex gap-[4px] h-[16px] p-[2px] rounded-sm border bg-[#050505] overflow-hidden"
                 style={{
-                  boxShadow: '0 0 15px rgba(255, 0, 255, 0.3), inset 0 0 10px rgba(255, 0, 255, 0.1)',
+                  borderColor: `${currentTheme.color}40`,
+                  boxShadow: `0 0 15px ${currentTheme.color}26, inset 0 0 10px ${currentTheme.color}0d`,
                 }}
               >
                 {Array.from({ length: 9 }).map((_, i) => (
@@ -129,10 +134,10 @@ export default function Dashboard() {
                     className="flex-1 rounded-[1px] transition-all duration-700"
                     style={{
                       backgroundColor: i < usedSlots
-                        ? '#FF00FF'
-                        : 'rgba(255, 0, 255, 0.05)',
+                        ? currentTheme.color
+                        : `${currentTheme.color}0d`,
                       boxShadow: i < usedSlots 
-                        ? '0 0 10px #FF00FF, inset 0 0 5px rgba(255,255,255,0.5)'
+                        ? `0 0 10px ${currentTheme.color}, inset 0 0 5px rgba(255,255,255,0.5)`
                         : 'none',
                     }}
                   />
@@ -177,12 +182,12 @@ export default function Dashboard() {
                       onClick={() => router.push(`/missions/${mission.id}`)}
                       className={cn(
                         'group relative cursor-pointer rounded-sm border transition-all duration-300 overflow-hidden',
-                        'bg-white/5 dark:bg-black/20 backdrop-blur-md w-full',
+                        'bg-[var(--card-bg)] border-[var(--card-border)] backdrop-blur-md w-full',
                         'min-h-[240px] max-h-[360px]',
                         'p-5 md:p-6 flex flex-col',
                         isInRedZone
                           ? 'border-red-500/30 hover:border-red-500/60 shadow-[0_0_30px_rgba(255,0,0,0.06)]'
-                          : 'border-black/5 dark:border-white/5 hover:border-black/20 dark:hover:border-white/20'
+                          : 'hover:border-[var(--card-border)]/50'
                       )}
                       style={{ borderColor: isInRedZone ? undefined : `${topBorderColor}22` }}
                     >
@@ -196,14 +201,14 @@ export default function Dashboard() {
                         <p
                           className={cn(
                             'font-space font-black tracking-[0.4em] uppercase',
-                            isRTL ? 'text-[14px] text-white' : 'text-[8px] text-black/30 dark:text-white/20',
+                            isRTL ? 'text-[14px] text-[var(--text-primary)]' : 'text-[8px] text-[var(--text-secondary)]',
                             isInRedZone ? 'text-red-500' : ''
                           )}
                           style={(!isInRedZone && !isRTL && customColor) ? { color: `${customColor}99` } : {}}
                         >
-                          {isInRedZone ? (isRTL ? 'تنبيه خطير' : '⚠ RED_ZONE') : (isRTL ? 'هدف نشط' : 'ACTIVE_GOAL')}
+                          {isInRedZone ? (isRTL ? 'تنبيه خطير' : '⚠ RED_ZONE') : (isRTL ? 'هدف نشط' : 'ACTIVE')}
                         </p>
-                        <h2 className="text-sm md:text-base font-space font-black text-black dark:text-white uppercase tracking-wide truncate leading-tight italic">
+                        <h2 className="text-sm md:text-base font-space font-black text-[var(--text-primary)] uppercase tracking-wide truncate leading-tight italic">
                           {mission.title}
                         </h2>
                       </div>
@@ -220,16 +225,16 @@ export default function Dashboard() {
 
                       {/* === BOTTOM: Progress + dates === */}
                       <div className="w-full mt-auto space-y-2">
-                        <div className="flex justify-between text-[9px] font-space font-black tracking-widest uppercase text-black/30 dark:text-white/20">
+                        <div className="flex justify-between text-[9px] font-space font-black tracking-widest uppercase text-[var(--text-secondary)]">
                           <span>{isRTL ? 'التقدم' : 'PROGRESS'}</span>
                           <span
-                            className={cn('text-sm font-bold', isInRedZone ? 'text-red-500' : 'text-black dark:text-white')}
+                            className={cn('text-sm font-bold', isInRedZone ? 'text-red-500' : 'text-[var(--text-primary)]')}
                             style={(!isInRedZone && customColor) ? { color: customColor } : {}}
                           >
                             {roundedProgress}%
                           </span>
                         </div>
-                        <div className="w-full h-[3px] bg-black/5 dark:bg-white/5 overflow-hidden rounded-full">
+                        <div className="w-full h-[3px] bg-[var(--input-bg)] overflow-hidden rounded-full">
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${roundedProgress}%` }}
@@ -243,7 +248,7 @@ export default function Dashboard() {
                         </div>
                         {/* Dates row */}
                         {(startStr || endStr) && (
-                          <p className="text-[7px] font-space text-black/20 dark:text-white/15 uppercase tracking-wider text-center">
+                          <p className="text-[7px] font-space text-[var(--text-secondary)]/50 uppercase tracking-wider text-center">
                             {startStr || '—'} → {endStr || '—'}
                           </p>
                         )}
@@ -260,27 +265,10 @@ export default function Dashboard() {
             )
           })}
 
-          {/* Empty State */}
           {missions.length === 0 && !loading && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="col-span-full flex flex-col items-center justify-center gap-6 p-8 md:p-24 border border-dashed border-black/10 dark:border-white/10 rounded-sm cursor-pointer transition-all group text-center"
-              style={{ borderColor: `${currentTheme.color}33` }}
-              onClick={() => router.push('/missions')}
-            >
-              <span className="material-symbols-outlined text-4xl md:text-6xl text-black/10 dark:text-white/10 transition-colors" style={{ color: currentTheme.color }}>add_circle</span>
-              <p className="text-xs md:text-sm font-space text-black/30 dark:text-white/20 tracking-[0.4em] uppercase font-black max-w-xs">
-                {isRTL ? 'لا توجد مهام مفعلة - أنشئ مهمتك الأولى' : 'NO_SYNCED_MISSIONS'}
-              </p>
-              <button
-                onClick={(e) => { e.stopPropagation(); router.push('/missions') }}
-                className="mt-2 px-6 py-3 text-[11px] font-space font-black tracking-widest uppercase border rounded-sm transition-all hover:scale-105 active:scale-95"
-                style={{ borderColor: currentTheme.color, color: currentTheme.color }}
-              >
-                {isRTL ? 'إنشاء مهمة' : 'CREATE_MISSION'}
-              </button>
-            </motion.div>
+            <div className="col-span-full py-24">
+              <p className="text-white/30 text-sm text-center">No active goals synced. Use the action panel above to initiate.</p>
+            </div>
           )}
         </section>
       </div>

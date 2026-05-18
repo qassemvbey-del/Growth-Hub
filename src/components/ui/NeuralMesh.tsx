@@ -1,10 +1,27 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
+import { useGrowth } from '@/context/GrowthContext'
 
-export default function NeuralMesh() {
+function hexToRgb(hex: string) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : { r: 16, g: 185, b: 129 }
+}
+
+export default function NeuralMesh({ overrideColor }: { overrideColor?: string } = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const glowRef = useRef<HTMLDivElement>(null)
+  const { currentTheme } = useGrowth()
+  const activeColor = overrideColor || currentTheme.color
+  const colorRef = useRef(activeColor)
+
+  useEffect(() => {
+    colorRef.current = activeColor
+  }, [activeColor])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -83,8 +100,8 @@ export default function NeuralMesh() {
       time += 0.015
       
       // Pitch black background
-      ctx.fillStyle = '#000000'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      // ctx.fillStyle = '#000000'
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
       
       // Calculate physics first
       for (let i = 0; i < dots.length; i++) {
@@ -122,6 +139,8 @@ export default function NeuralMesh() {
 
       // Draw lines for particles near mouse
       ctx.lineWidth = 0.5
+      const rgb = hexToRgb(colorRef.current)
+
       for (let i = 0; i < dots.length; i++) {
         const p1 = dots[i]
         const dxMouse = mouse.x - p1.x
@@ -138,12 +157,12 @@ export default function NeuralMesh() {
 
             // Connect nearby displaced particles
             if (dist < spacing * 1.5) {
-              const lineAlpha = Math.max(0, 1 - (distMouse / (mouse.radius * 1.5))) * 0.25
+              const lineAlpha = Math.max(0, 1 - (distMouse / (mouse.radius * 1.5))) * 0.4
               if (lineAlpha > 0.01) {
                 ctx.beginPath()
                 ctx.moveTo(p1.x, p1.y)
                 ctx.lineTo(p2.x, p2.y)
-                ctx.strokeStyle = `rgba(16, 185, 129, ${lineAlpha})`
+                ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${lineAlpha})`
                 ctx.stroke()
               }
             }
@@ -152,7 +171,7 @@ export default function NeuralMesh() {
       }
 
       // Draw dots
-      ctx.fillStyle = '#10B981'
+      ctx.fillStyle = colorRef.current
       for (let i = 0; i < dots.length; i++) {
         const p = dots[i]
         const dxMouse = mouse.x - p.x
@@ -162,9 +181,9 @@ export default function NeuralMesh() {
         // Illumination logic: particles glow brighter when inside the spotlight radius
         if (distMouse < mouse.radius * 1.5) {
           const glowRatio = Math.max(0, 1 - (distMouse / (mouse.radius * 1.5)))
-          ctx.globalAlpha = 0.2 + (glowRatio * 0.8) // Range: 0.2 to 1.0
+          ctx.globalAlpha = 0.35 + (glowRatio * 0.65) // Range: 0.35 to 1.0
         } else {
-          ctx.globalAlpha = 0.2 // Default dim opacity
+          ctx.globalAlpha = 0.35 // Default dim opacity
         }
 
         ctx.fillRect(p.x - 0.75, p.y - 0.75, 1.5, 1.5)
@@ -184,6 +203,8 @@ export default function NeuralMesh() {
     }
   }, [])
 
+  const rgbGlow = hexToRgb(activeColor)
+
   return (
     <>
       <canvas
@@ -196,7 +217,7 @@ export default function NeuralMesh() {
         ref={glowRef}
         className="fixed top-0 left-0 w-[600px] h-[600px] rounded-full pointer-events-none z-[-1] will-change-transform opacity-0"
         style={{
-          background: 'radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 60%)',
+          background: `radial-gradient(circle, rgba(${rgbGlow.r}, ${rgbGlow.g}, ${rgbGlow.b}, 0.25) 0%, transparent 60%)`,
           filter: 'blur(100px)',
           marginLeft: '-300px',
           marginTop: '-300px',

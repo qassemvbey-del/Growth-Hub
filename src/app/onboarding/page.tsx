@@ -4,45 +4,53 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { useGrowth, type Language, type AiPersonality } from '@/context/GrowthContext'
+import { useGrowth, type Language } from '@/context/GrowthContext'
 import { cn } from '@/lib/utils'
 
 const STEPS = [
-  { id: 'language',   label: 'LANGUAGE',   title: { en: 'CHOOSE_INTERFACE_LANGUAGE', ar: 'اختر لغة النظام' } },
-  { id: 'ai_protocol', label: 'AI_COACH',   title: { en: 'SELECT_AI_BEHAVIORAL_PROTOCOL', ar: 'اختر شخصية المدرب الذكي' } },
-  { id: 'identity',   label: 'IDENTITY',   title: { en: 'WHO_ARE_YOU?', ar: 'من أنت؟' } },
-  { id: 'mission',    label: 'MISSION',    title: { en: 'YOUR_MAIN_MISSION?', ar: 'ما هي مهمتك الكبرى؟' } },
-  { id: 'project',    label: 'PROJECT',    title: { en: 'WEEKLY_PROJECT?', ar: 'مشروع الأسبوع؟' } },
-  { id: 'focus',      label: 'DAILY',      title: { en: 'DAILY_FOCUS?', ar: 'تركيز اليوم؟' } }
+  { id: 'IDENTITY', label: 'IDENTITY', title: 'WHO_ARE_YOU?' },
+  { id: 'FIRST_MISSION', label: 'MISSION', title: 'YOUR_FIRST_MISSION' },
+  { id: 'SYSTEM_READY', label: 'READY', title: 'UPLINK_ESTABLISHED' }
 ]
 
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState({
+    name: '',
     language: 'en' as Language,
-    ai_personality: 'GENTLE' as AiPersonality,
-    full_name: '',
-    age: '',
-    mission_goal: '',
-    weekly_project: '',
-    daily_focus: ''
+    missionTitle: '',
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: '',
+    missionSize: 'MEDIUM' as 'BIG' | 'MEDIUM' | 'SMALL'
   })
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
-  const { refreshProfile, isRTL: globalRTL } = useGrowth()
+  const { refreshProfile, isRTL: globalRTL, currentTheme } = useGrowth()
 
-  // Local RTL check for onboarding before profile is loaded
   const isRTL = formData.language === 'ar'
 
   useEffect(() => {
-    async function prefill() {
+    async function checkExisting() {
       const { data: { user } } = await supabase.auth.getUser()
-      if (user?.user_metadata?.full_name) {
-        setFormData(prev => ({ ...prev, full_name: user.user_metadata.full_name }))
+      if (!user) return
+
+      // Check localStorage first for instant skip
+      if (localStorage.getItem('onboarding_complete') === 'true') {
+        router.push('/')
+        return
+      }
+
+      // Check DB for profile or missions
+      const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+      const { data: missions } = await supabase.from('cups').select('id').eq('user_id', user.id).limit(1)
+
+      if (profile?.full_name || (missions && missions.length > 0)) {
+        localStorage.setItem('onboarding_complete', 'true')
+        router.push('/')
       }
     }
-    prefill()
+    checkExisting()
   }, [])
 
   const handleNext = () => {
@@ -57,59 +65,80 @@ export default function OnboardingPage() {
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
+      // 1. Update Profile
+      console.log('ONBOARDING_FINALIZE // SAVING_PROFILE:', formData.name)
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
           id: user.id,
-          full_name: formData.full_name || user.user_metadata?.full_name || 'OPERATOR',
-          age: parseInt(formData.age) || null,
-          mission_goal: formData.mission_goal,
-          weekly_project: formData.weekly_project,
-          daily_focus: formData.daily_focus,
+          full_name: formData.name,
           language: formData.language,
-          ai_personality: formData.ai_personality,
           onboarded: true,
+          xp: 0,
+          blocked: false,
+          last_seen: new Date().toISOString(),
           updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'id'
         })
       
       if (profileError) {
+        console.error('ONBOARDING_ERROR // PROFILE_SAVE_FAILED:', profileError)
         setLoading(false)
+        alert('CRITICAL_ERROR: Failed to save operator profile. Please try again.')
         return
       }
 
-      const missions = []
-      if (formData.mission_goal)    missions.push({ user_id: user.id, title: formData.mission_goal, sync_to_dashboard: true, status: 'ACTIVE', is_archived: false })
-      if (formData.weekly_project)  missions.push({ user_id: user.id, title: formData.weekly_project, sync_to_dashboard: true, status: 'ACTIVE', is_archived: false })
-      if (formData.daily_focus)     missions.push({ user_id: user.id, title: formData.daily_focus, sync_to_dashboard: true, status: 'ACTIVE', is_archived: false })
-      if (missions.length > 0) await supabase.from('cups').insert(missions)
+      // 2. Create First Mission
+      if (formData.missionTitle) {
+        await supabase.from('cups').insert({
+          user_id: user.id,
+          title: formData.missionTitle,
+          start_date: formData.startDate,
+          end_date: formData.endDate,
+          size: formData.missionSize === 'BIG' ? 'lg' : formData.missionSize === 'MEDIUM' ? 'md' : 'sm',
+          sync_to_dashboard: true,
+          status: 'ACTIVE',
+          is_archived: false
+        })
+      }
 
+      localStorage.setItem('onboarding_complete', 'true')
       await refreshProfile()
       router.push('/')
     } else {
-       router.push('/')
+       router.push('/auth/login')
     }
     setLoading(false)
   }
 
-  const handleSkip = () => completeOnboarding()
+  const sizes = [
+    { id: 'BIG', label: 'BIG', color: '#FF3131', cost: '3 Units' },
+    { id: 'MEDIUM', label: 'MEDIUM', color: '#FFD700', cost: '1.5 Units' },
+    { id: 'SMALL', label: 'SMALL', color: '#39FF14', cost: '1 Unit' }
+  ]
 
   return (
     <div className={cn(
-      "min-h-screen bg-[#F0F2F5] dark:bg-[#0D0D0D] flex flex-col items-center justify-center p-8 relative overflow-hidden transition-colors",
-      isRTL ? "font-noto" : "font-space"
+      "min-h-screen bg-[#0D0D0D] text-white flex flex-col items-center justify-center p-6 md:p-12 relative overflow-hidden",
+      isRTL ? "font-tajawal" : "font-space"
     )} dir={isRTL ? 'rtl' : 'ltr'}>
       
-      {/* Step Progress HUD */}
-      <div className="absolute top-12 left-1/2 -translate-x-1/2 flex gap-8 z-20 overflow-x-auto max-w-full px-8 pb-4 scrollbar-hide">
+      {/* HUD Background FX */}
+      <div className="fixed inset-0 pointer-events-none opacity-5 cyber-grid" />
+      <div className="fixed inset-0 pointer-events-none opacity-10 scanlines" />
+
+      {/* Progress HUD */}
+      <div className="absolute top-8 md:top-16 inset-x-0 flex justify-center gap-4 md:gap-12 px-6 z-20">
          {STEPS.map((step, i) => (
-           <div key={step.id} className="flex flex-col items-center gap-2 min-w-[100px]">
+           <div key={step.id} className="flex flex-col items-center gap-2 min-w-[80px] md:min-w-[120px]">
              <div className={cn(
-               "w-full h-[3px] bg-black/5 dark:bg-white/5 transition-all duration-700 rounded-full",
+               "w-full h-[2px] transition-all duration-1000 rounded-full bg-white/5",
                i <= currentStep ? "bg-[#39FF14] shadow-[0_0_15px_#39FF14]" : ""
              )} />
              <span className={cn(
-               "text-[9px] md:text-[11px] font-black tracking-widest uppercase whitespace-nowrap transition-colors",
-               i === currentStep ? "text-[#39FF14]" : "text-black/20 dark:text-white/10"
+               "text-[9px] md:text-[10px] font-black tracking-widest uppercase transition-colors",
+               i === currentStep ? "text-[#39FF14]" : "text-white/20"
              )}>
                {step.label}
              </span>
@@ -120,189 +149,196 @@ export default function OnboardingPage() {
       <AnimatePresence mode="wait">
         <motion.div
           key={currentStep}
-          initial={{ opacity: 0, x: isRTL ? -30 : 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: isRTL ? 30 : -30 }}
-          className="w-full max-w-3xl space-y-12 relative z-10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="w-full max-w-4xl space-y-12 relative z-10 py-12"
         >
-           <header className="space-y-4">
-              <span className="text-[10px] md:text-xs text-[#39FF14] tracking-[0.6em] uppercase font-bold opacity-60">
-                {isRTL ? 'الخطوة' : 'STEP'} _0{currentStep + 1}
-              </span>
-              <h2 className={cn(
-                "text-3xl md:text-6xl font-black tracking-tighter italic uppercase text-black dark:text-white leading-tight",
-                isRTL ? "text-4xl md:text-7xl" : ""
-              )}>
-                {STEPS[currentStep].title[formData.language === 'ar' ? 'ar' : 'en']}
-              </h2>
-           </header>
+            <header className="space-y-4 text-center md:text-start">
+               <span className="text-[10px] md:text-xs text-[#39FF14] tracking-[0.5em] uppercase font-black opacity-50">
+                 PHASE_0{currentStep + 1}
+               </span>
+               <h2 className="text-4xl md:text-8xl font-black tracking-tighter italic uppercase leading-none break-words">
+                 {isRTL && currentStep === 0 ? 'من أنت؟' : 
+                  isRTL && currentStep === 1 ? 'مهمتك الأولى' : 
+                  isRTL && currentStep === 2 ? 'النظام جاهز' : 
+                  STEPS[currentStep].title}
+               </h2>
+               {currentStep === 1 && (
+                 <p className="text-white/40 font-bold uppercase tracking-widest text-xs md:text-sm">
+                   {isRTL ? 'كل بطل يحتاج إلى هدف.' : 'Every operator needs a target.'}
+                 </p>
+               )}
+            </header>
 
-           <div className="space-y-10">
-
-              {/* STEP 0: Language */}
-              {currentStep === 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                   {[
-                     { id: 'en', label: 'ENGLISH', sub: 'STANDARD' },
-                     { id: 'ar', label: 'العربية', sub: 'ARABIC' }
-                   ].map(lang => (
-                     <button
-                       key={lang.id}
-                       onClick={() => setFormData({ ...formData, language: lang.id as Language })}
-                       className={cn(
-                         "p-8 md:p-12 border rounded-sm text-left transition-all group relative overflow-hidden",
-                         lang.id === 'ar' ? 'text-right' : 'text-left',
-                         formData.language === lang.id 
-                          ? "bg-[#39FF14]/10 border-[#39FF14] shadow-[0_0_30px_rgba(57,255,20,0.1)]" 
-                          : "bg-black/5 dark:bg-white/5 border-black/5 dark:border-white/5 hover:border-black/10 dark:hover:border-white/10"
-                       )}
-                     >
-                       <div className="space-y-3 relative z-10">
-                          <p className={cn("text-[10px] md:text-xs font-black tracking-widest uppercase", formData.language === lang.id ? "text-[#39FF14]" : "text-black/20 dark:text-white/20")}>{lang.sub}</p>
-                          <p className={cn("text-2xl md:text-4xl font-black", formData.language === lang.id ? "text-black dark:text-white" : "text-black/40 dark:text-white/30")}>{lang.label}</p>
+            <div className="space-y-8 md:space-y-12">
+               {/* STEP 1: IDENTITY */}
+               {currentStep === 0 && (
+                 <div className="space-y-10">
+                    <div className="space-y-4">
+                       <label className="text-[10px] md:text-xs font-black text-white/30 tracking-[0.3em] uppercase">OPERATOR_NAME</label>
+                       <input 
+                         type="text"
+                         placeholder="IDENTIFY_YOURSELF"
+                         value={formData.name}
+                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                         className="w-full bg-white/5 border border-white/5 p-6 md:p-10 rounded-sm text-2xl md:text-5xl outline-none focus:border-[#39FF14]/50 focus:bg-[#39FF14]/5 transition-all placeholder:opacity-5 font-black italic"
+                       />
+                    </div>
+                    <div className="space-y-6">
+                       <label className="text-[10px] md:text-xs font-black text-white/30 tracking-[0.3em] uppercase">INTERFACE_LANGUAGE</label>
+                       <div className="flex gap-4">
+                          {['en', 'ar'].map(l => (
+                            <button
+                              key={l}
+                              onClick={() => setFormData({ ...formData, language: l as Language })}
+                              className={cn(
+                                "flex-1 py-6 md:py-8 border rounded-sm font-black tracking-widest transition-all uppercase",
+                                formData.language === l 
+                                  ? "bg-[#39FF14] text-black border-[#39FF14] shadow-[0_0_30px_rgba(57,255,20,0.3)]" 
+                                  : "bg-white/5 border-white/5 text-white/40 hover:border-white/20"
+                              )}
+                            >
+                              {l === 'en' ? 'ENGLISH' : 'العربية'}
+                            </button>
+                          ))}
                        </div>
-                       {formData.language === lang.id && (
-                         <motion.div layoutId="lang-check" className={cn("absolute top-6 text-[#39FF14]", isRTL ? 'left-6' : 'right-6')}>
-                            <span className="material-symbols-outlined text-3xl">check_circle</span>
-                         </motion.div>
-                       )}
-                     </button>
-                   ))}
-                </div>
-              )}
-
-              {/* STEP 1: AI Personality */}
-              {currentStep === 1 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* SAVAGE */}
-                  <button
-                    onClick={() => setFormData({ ...formData, ai_personality: 'SAVAGE' })}
-                    className={cn(
-                      "p-8 md:p-12 border rounded-sm text-start transition-all relative overflow-hidden group",
-                      formData.ai_personality === 'SAVAGE'
-                        ? "bg-[#FF3131]/10 border-[#FF3131] shadow-[0_0_40px_rgba(255,49,49,0.15)]"
-                        : "bg-black/5 dark:bg-white/5 border-black/5 dark:border-white/5 hover:border-black/10 dark:hover:border-white/10"
-                    )}
-                  >
-                    <div className="space-y-6">
-                      <span className="text-5xl">🔥</span>
-                      <p className={cn("text-2xl md:text-3xl font-black uppercase italic tracking-tighter", formData.ai_personality === 'SAVAGE' ? "text-[#FF3131]" : "text-black/40 dark:text-white/30")}>
-                        {isRTL ? 'قاسي' : 'SAVAGE'}
-                      </p>
-                      <p className={cn("text-sm md:text-base leading-relaxed font-bold", formData.ai_personality === 'SAVAGE' ? "text-black/70 dark:text-white/70" : "text-black/20 dark:text-white/20")}>
-                        {isRTL ? "المدرب سيكون حاداً جداً إذا تأخرت. لا رحمة. لا أعذار. منطق الضغط العالي فقط." : "AI will trash talk if you're late. No mercy. No excuses. High pressure logic only."}
-                      </p>
                     </div>
-                  </button>
+                 </div>
+               )}
 
-                  {/* GENTLE */}
-                  <button
-                    onClick={() => setFormData({ ...formData, ai_personality: 'GENTLE' })}
-                    className={cn(
-                      "p-8 md:p-12 border rounded-sm text-start transition-all relative overflow-hidden group",
-                      formData.ai_personality === 'GENTLE'
-                        ? "bg-[#39FF14]/10 border-[#39FF14] shadow-[0_0_40px_rgba(57,255,20,0.15)]"
-                        : "bg-black/5 dark:bg-white/5 border-black/5 dark:border-white/5 hover:border-black/10 dark:hover:border-white/10"
-                    )}
-                  >
-                    <div className="space-y-6">
-                      <span className="text-5xl">💚</span>
-                      <p className={cn("text-2xl md:text-3xl font-black uppercase italic tracking-tighter", formData.ai_personality === 'GENTLE' ? "text-[#39FF14]" : "text-black/40 dark:text-white/30")}>
-                        {isRTL ? 'لطيف' : 'GENTLE'}
-                      </p>
-                      <p className={cn("text-sm md:text-base leading-relaxed font-bold", formData.ai_personality === 'GENTLE' ? "text-black/70 dark:text-white/70" : "text-black/20 dark:text-white/20")}>
-                        {isRTL ? "مدرب داعم. يركز على التعزيز الإيجابي والنمو المستمر بخطوات ثابتة." : "Supportive AI coach. Focuses on positive reinforcement and steady growth."}
-                      </p>
+               {/* STEP 2: FIRST MISSION */}
+               {currentStep === 1 && (
+                 <div className="space-y-8 md:space-y-12">
+                    <div className="space-y-4">
+                       <label className="text-[10px] md:text-xs font-black text-white/30 tracking-[0.3em] uppercase">MISSION_TITLE</label>
+                       <input 
+                         type="text"
+                         placeholder={isRTL ? "ماذا تريد أن تحقق؟" : "What do you want to achieve?"}
+                         value={formData.missionTitle}
+                         onChange={(e) => setFormData({ ...formData, missionTitle: e.target.value })}
+                         className="w-full bg-white/5 border border-white/5 p-6 md:p-10 rounded-sm text-2xl md:text-4xl outline-none focus:border-[#39FF14]/50 focus:bg-[#39FF14]/5 transition-all placeholder:opacity-10 font-black italic"
+                       />
                     </div>
-                  </button>
-                </div>
-              )}
 
-              {/* STEP 2: Identity */}
-              {currentStep === 2 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                   <div className="space-y-4">
-                      <label className="text-[10px] md:text-xs font-black text-black/30 dark:text-white/20 tracking-widest uppercase">{isRTL ? 'الاسم بالكامل' : 'FULL_NAME'}</label>
-                      <input 
-                        type="text"
-                        placeholder="ENTER_NAME"
-                        value={formData.full_name}
-                        onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                        className="w-full bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 p-8 rounded-sm text-2xl md:text-3xl outline-none focus:border-[#39FF14]/50 focus:bg-[#39FF14]/5 transition-all uppercase placeholder:opacity-5 text-black dark:text-white font-black italic"
-                      />
-                   </div>
-                   <div className="space-y-4">
-                      <label className="text-[10px] md:text-xs font-black text-black/30 dark:text-white/20 tracking-widest uppercase">{isRTL ? 'العمر' : 'AGE'}</label>
-                      <input 
-                        type="number"
-                        placeholder="00"
-                        value={formData.age}
-                        onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                        className="w-full bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 p-8 rounded-sm text-2xl md:text-3xl outline-none focus:border-[#39FF14]/50 focus:bg-[#39FF14]/5 transition-all uppercase placeholder:opacity-5 text-black dark:text-white font-black italic"
-                      />
-                   </div>
-                </div>
-              )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <div className="space-y-4">
+                          <label className="text-[10px] md:text-xs font-black text-white/30 tracking-[0.3em] uppercase">START_DATE</label>
+                          <input 
+                            type="date"
+                            value={formData.startDate}
+                            onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                            className="w-full bg-white/5 border border-white/10 p-5 rounded-sm outline-none focus:border-[#39FF14]/50 transition-all font-space uppercase text-white font-bold"
+                          />
+                       </div>
+                       <div className="space-y-4">
+                          <label className="text-[10px] md:text-xs font-black text-white/30 tracking-[0.3em] uppercase">END_DATE</label>
+                          <input 
+                            type="date"
+                            value={formData.endDate}
+                            onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                            className="w-full bg-white/5 border border-white/10 p-5 rounded-sm outline-none focus:border-[#39FF14]/50 transition-all font-space uppercase text-white font-bold"
+                          />
+                       </div>
+                    </div>
 
-              {/* STEPS 3-5: Mission / Project / Focus */}
-              {currentStep >= 3 && (
-                <div className="space-y-6">
-                   <label className="text-[10px] md:text-xs font-black text-[#39FF14] tracking-widest uppercase">
-                     {currentStep === 3 ? (isRTL ? 'الهدف الأكبر // بعيد المدى' : 'MACRO_GOAL // LONG_TERM') : 
-                      currentStep === 4 ? (isRTL ? 'مشروع الأسبوع // متوسط المدى' : 'MESO_PROJECT // WEEKLY') : 
-                      (isRTL ? 'تركيز اليوم // قصير المدى' : 'MICRO_FOCUS // DAILY')}
-                   </label>
-                   <textarea 
-                     placeholder={isRTL ? 'اشرح تفاصيل هدفك...' : 'DESCRIBE_OBJECTIVE_SPECIFICS'}
-                     value={currentStep === 3 ? formData.mission_goal : currentStep === 4 ? formData.weekly_project : formData.daily_focus}
-                     onChange={(e) => {
-                        const val = e.target.value
-                        if (currentStep === 3) setFormData({ ...formData, mission_goal: val })
-                        else if (currentStep === 4) setFormData({ ...formData, weekly_project: val })
-                        else setFormData({ ...formData, daily_focus: val })
-                     }}
-                     className="w-full h-40 md:h-64 bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 p-8 md:p-12 rounded-sm text-2xl md:text-5xl italic font-black outline-none focus:border-[#39FF14]/50 focus:bg-[#39FF14]/5 transition-all uppercase placeholder:opacity-5 text-black dark:text-white resize-none leading-tight"
-                   />
-                </div>
-              )}
+                    <div className="space-y-6">
+                       <label className="text-[10px] md:text-xs font-black text-white/30 tracking-[0.3em] uppercase">MISSION_SIZE</label>
+                       <div className="grid grid-cols-3 gap-4">
+                          {sizes.map(s => (
+                            <button
+                              key={s.id}
+                              onClick={() => setFormData({ ...formData, missionSize: s.id as any })}
+                              className={cn(
+                                "flex flex-col items-center justify-center p-6 md:p-8 border rounded-sm transition-all group relative overflow-hidden",
+                                formData.missionSize === s.id 
+                                  ? "bg-white/10" 
+                                  : "bg-white/5 border-white/5 hover:border-white/20"
+                              )}
+                              style={{ borderColor: formData.missionSize === s.id ? s.color : undefined }}
+                            >
+                              <span className="text-xs md:text-sm font-black tracking-widest uppercase mb-1" style={{ color: formData.missionSize === s.id ? s.color : 'inherit', opacity: formData.missionSize === s.id ? 1 : 0.4 }}>{s.label}</span>
+                              <span className="text-[9px] font-bold uppercase opacity-30">{s.cost}</span>
+                              {formData.missionSize === s.id && (
+                                <motion.div layoutId="size-indicator" className="absolute bottom-0 inset-x-0 h-1" style={{ backgroundColor: s.color, boxShadow: `0 0 15px ${s.color}` }} />
+                              )}
+                            </button>
+                          ))}
+                       </div>
+                    </div>
+                 </div>
+               )}
 
-              {/* Navigation */}
-               <div className="flex flex-col md:flex-row justify-between items-center pt-8 md:pt-16 gap-8">
-                  <div className="flex items-center gap-8 w-full md:w-auto justify-between">
+               {/* STEP 3: SYSTEM READY */}
+               {currentStep === 2 && (
+                 <div className="glass-panel p-8 md:p-12 border-white/10 space-y-10 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-5">
+                       <span className="material-symbols-outlined text-9xl">verified_user</span>
+                    </div>
+
+                    <div className="space-y-8 relative z-10">
+                       <div className="space-y-2">
+                          <p className="text-[10px] font-black text-[#39FF14] tracking-widest uppercase opacity-60">OPERATOR_PROFILE</p>
+                          <p className="text-2xl md:text-5xl font-black italic uppercase tracking-tighter">{formData.name || 'ANONYMOUS'}</p>
+                       </div>
+                       
+                       <div className="space-y-2">
+                          <p className="text-[10px] font-black text-[#39FF14] tracking-widest uppercase opacity-60">PRIMARY_OBJECTIVE</p>
+                          <p className="text-xl md:text-3xl font-black italic uppercase text-white/80 leading-tight">{formData.missionTitle || 'NO_TARGET_SET'}</p>
+                       </div>
+
+                       <div className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-4">
+                          <div>
+                             <p className="text-[9px] font-black text-white/30 tracking-widest uppercase">WINDOW</p>
+                             <p className="text-xs font-bold">{formData.startDate} // {formData.endDate || 'TBD'}</p>
+                          </div>
+                          <div>
+                             <p className="text-[9px] font-black text-white/30 tracking-widest uppercase">CAPACITY_COST</p>
+                             <p className="text-xs font-bold" style={{ color: sizes.find(s => s.id === formData.missionSize)?.color }}>{sizes.find(s => s.id === formData.missionSize)?.cost}</p>
+                          </div>
+                          <div>
+                             <p className="text-[9px] font-black text-white/30 tracking-widest uppercase">AI_COACH</p>
+                             <p className="text-xs font-bold">RECRUIT_PROTOCOL</p>
+                          </div>
+                       </div>
+                    </div>
+
+                    <div className="bg-[#39FF14]/5 p-4 border border-[#39FF14]/20 text-[#39FF14] text-[10px] md:text-xs font-bold tracking-wider uppercase text-center animate-pulse">
+                      {isRTL ? "جارٍ إعداد الأوامر القتالية..." : "COMPILING_TACTICAL_PROTOCOLS..."}
+                    </div>
+                 </div>
+               )}
+
+               {/* Navigation */}
+               <div className="flex flex-col md:flex-row justify-between items-center gap-6 pt-6">
+                  <div className="flex items-center gap-8">
                     <button 
                       onClick={() => currentStep > 0 && setCurrentStep(prev => prev - 1)}
                       className={cn(
-                        "text-[10px] md:text-xs font-black tracking-[0.4em] uppercase px-10 py-5 border border-black/10 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 transition-all text-black/30 dark:text-white/20 rounded-sm",
+                        "text-[10px] font-black tracking-widest uppercase px-8 py-4 border border-white/10 hover:bg-white/5 transition-all text-white/30 rounded-sm",
                         currentStep === 0 ? "opacity-0 pointer-events-none" : ""
                       )}
                     >
                       {isRTL ? 'رجوع' : 'BACK'}
                     </button>
-
-                    <button
-                      onClick={handleSkip}
-                      disabled={loading}
-                      className="text-[10px] md:text-xs font-black tracking-[0.4em] uppercase text-black/20 dark:text-white/10 hover:text-black/60 dark:hover:text-white/40 transition-all flex items-center gap-3 disabled:opacity-30"
-                    >
-                      {isRTL ? 'تخطي البروتوكول' : 'SKIP_PROTOCOL'}
-                      <span className="material-symbols-outlined text-lg">fast_forward</span>
-                    </button>
                   </div>
                   
                   <button 
-                    disabled={loading}
+                    disabled={loading || (currentStep === 0 && !formData.name) || (currentStep === 1 && (!formData.missionTitle || !formData.endDate))}
                     onClick={handleNext}
-                    className="w-full md:w-auto flex items-center justify-center gap-8 bg-[#39FF14] text-[#0D0D0D] px-12 md:px-20 py-5 md:py-8 rounded-sm text-[14px] md:text-[16px] tracking-[0.3em] font-black uppercase hover:scale-105 active:scale-95 transition-all shadow-[0_0_50px_rgba(57,255,20,0.25)]"
+                    className="w-full md:w-auto flex items-center justify-center gap-10 bg-[#39FF14] text-black px-12 md:px-24 py-6 md:py-8 rounded-sm text-[14px] md:text-[18px] tracking-[0.4em] font-black uppercase hover:scale-105 active:scale-95 transition-all shadow-[0_0_60px_rgba(57,255,20,0.2)] disabled:opacity-20 disabled:grayscale"
                   >
-                    {loading ? (isRTL ? 'جاري التحميل...' : 'CALIBRATING...') : currentStep === STEPS.length - 1 ? (isRTL ? 'بدء التشغيل' : 'FINALIZE_UPLINK') : (isRTL ? 'الخطوة التالية' : 'NEXT_STEP')}
-                    <span className="material-symbols-outlined text-3xl rotate-0 rtl:rotate-180">arrow_forward</span>
+                    {loading ? (isRTL ? 'جاري المزامنة...' : 'SYNCING...') : currentStep === STEPS.length - 1 ? (isRTL ? 'تفعيل النظام' : 'INITIALIZE_SYSTEM') : (isRTL ? 'التالي' : 'NEXT_PHASE')}
+                    <span className="material-symbols-outlined text-3xl">arrow_forward</span>
                   </button>
                </div>
-           </div>
+            </div>
         </motion.div>
       </AnimatePresence>
 
-      <div className="fixed inset-0 pointer-events-none opacity-[0.03] scanlines dark:opacity-[0.05]" />
+      <div className="fixed bottom-8 text-[8px] md:text-[10px] font-space text-white/10 tracking-[1em] uppercase font-black">
+        NEURAL_MESH_ESTABLISHED // V8.0
+      </div>
     </div>
   )
 }

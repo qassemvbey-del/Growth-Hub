@@ -1,7 +1,8 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { cn } from '@/lib/utils'
 
 interface ProgressCupProps {
   percentage: number // 0 to 100
@@ -11,115 +12,149 @@ interface ProgressCupProps {
 
 export default function ProgressCup({ percentage, onComplete, isInRedZone }: ProgressCupProps) {
   const [prevPercentage, setPrevPercentage] = useState(0)
+  const [isDark, setIsDark] = useState(true)
+  const progress = percentage || 0
 
   useEffect(() => {
-    if (percentage >= 100 && prevPercentage < 100) {
+    const checkDark = () => {
+      setIsDark(document.documentElement.classList.contains('dark'))
+    }
+    checkDark()
+    const observer = new MutationObserver(checkDark)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (progress >= 100 && prevPercentage < 100) {
       onComplete?.()
     }
-    setPrevPercentage(percentage)
-  }, [percentage, prevPercentage, onComplete])
+    setPrevPercentage(progress)
+  }, [progress, prevPercentage, onComplete])
 
-  // Map 0-100 to wave position
-  // 100% means the wave is at the top
-  const liquidLevel = 100 - (percentage || 0)
+  const strokeColor = isDark ? '#ffffff' : '#333333'
+
+  const safePercentage = isNaN(progress) ? 0 : Math.min(100, Math.max(0, progress))
+  const color = isInRedZone ? '#FF0055' : '#39FF14'
+  const fillLevel = (72 - (safePercentage / 100) * 70) || 0
 
   return (
-    <div className="relative w-48 h-64 flex flex-col items-center justify-center">
-      <motion.div 
-        className="relative w-40 h-52 overflow-hidden border glass rounded-b-[40px] rounded-t-[10px]"
-        style={{
-          borderColor: isInRedZone ? '#FF0000' : 'rgba(255,255,255,0.1)',
-          boxShadow: isInRedZone ? '0 0 30px rgba(255,0,0,0.2)' : '0 0 30px rgba(57,255,20,0.1)'
-        }}
-        animate={isInRedZone ? {
-          boxShadow: [
-            '0 0 20px rgba(255,0,0,0.2)',
-            '0 0 40px rgba(255,0,0,0.4)',
-            '0 0 20px rgba(255,0,0,0.2)',
-          ]
-        } : {}}
-        transition={isInRedZone ? { duration: 2, repeat: Infinity, ease: "easeInOut" } : {}}
-      >
-        {/* Liquid Body */}
-        <motion.div 
-          className="absolute inset-0 z-10"
-          initial={{ y: '100%' }}
-          animate={{ y: `${liquidLevel}%` }}
-          transition={{ duration: 2, ease: "easeInOut" }}
-        >
-          {/* Waves */}
-          <div className="liquid-wave" style={{ top: '-150%' }} />
-          <div className="liquid-wave-2" style={{ top: '-145%' }} />
-          
-          {/* Solid fill */}
-          <div 
-            className="absolute inset-0 opacity-30 transition-colors duration-500" 
-            style={{ 
-              backgroundColor: isInRedZone ? '#FF0000' : '#39FF14',
-              boxShadow: isInRedZone ? 'inset 0 0 40px rgba(255,0,0,0.4)' : 'inset 0 0 40px rgba(57,255,20,0.4)'
-            }}
-          />
-          
-          {/* Glow at the surface */}
-          <div 
-            className="absolute top-0 left-0 w-full h-1 transition-colors duration-500" 
-            style={{ 
-              backgroundColor: isInRedZone ? '#FF0000' : '#39FF14',
-              boxShadow: isInRedZone ? '0 0 15px #FF0000' : '0 0 15px #39FF14'
-            }}
-          />
-        </motion.div>
+    <div className="relative flex flex-col items-center justify-center">
+      <div className="relative w-48 h-64 flex items-center justify-center">
+        <svg viewBox="0 0 60 80" className="w-full h-full drop-shadow-[0_0_15px_rgba(57,255,20,0.2)]">
+          <defs>
+            <clipPath id="crystalPathBig">
+              <polygon points="30,2 8,25 5,55 30,72 55,55 52,25" />
+            </clipPath>
+            <linearGradient id="crystalGlowBig" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+              <stop offset="50%" stopColor={color} stopOpacity="0.05" />
+              <stop offset="100%" stopColor={color} stopOpacity="0.2" />
+            </linearGradient>
+          </defs>
 
-        {/* Scanlines on the cup itself */}
-        <div className="absolute inset-0 pointer-events-none opacity-20 scanlines z-30" />
-        
-        {/* Highlight/Reflections */}
-        <div className="absolute top-4 left-4 w-1 h-32 bg-white/10 rounded-full blur-[1px] z-40" />
-      </motion.div>
+          {/* Liquid Fill */}
+          <g clipPath="url(#crystalPathBig)">
+            <motion.rect
+              x="0"
+              initial={{ y: 72 }}
+              animate={{ y: fillLevel || 0 }}
+              transition={{ duration: 1.5, ease: "easeOut" }}
+              width="60"
+              height="80"
+              fill={color || '#39FF14'}
+              className="opacity-30"
+            />
+            
+            {/* Liquid Surface Ripple */}
+            <motion.path
+              initial={{ x: -10, y: 72 }}
+              animate={{ 
+                x: [0, -20, 0],
+                y: fillLevel || 0
+              }}
+              transition={{ 
+                x: { duration: 3, repeat: Infinity, ease: "linear" },
+                y: { duration: 1.5, ease: "easeOut" }
+              }}
+              d="M0,0 Q15,-3 30,0 T60,0 V10 H0 Z"
+              fill={color || '#39FF14'}
+              className="opacity-50"
+            />
+          </g>
+
+          {/* Crystal Body */}
+          <polygon 
+            points="30,2 8,25 5,55 30,72 55,55 52,25"
+            fill="url(#crystalGlowBig)"
+            stroke={strokeColor}
+            strokeWidth="1.5"
+            className={cn(
+              "transition-all duration-500",
+              progress === 100 ? "stroke-[2]" : "opacity-60"
+            )}
+            style={{ filter: `drop-shadow(0 0 10px ${color}44)` }}
+          />
+
+          {/* Facet Lines */}
+          <g className="opacity-30" stroke={strokeColor} strokeWidth="0.8">
+            <line x1="30" y1="2" x2="15" y2="40" />
+            <line x1="30" y1="2" x2="45" y2="40" />
+            <line x1="8" y1="25" x2="52" y2="25" />
+            <line x1="15" y1="40" x2="45" y2="40" />
+            <line x1="15" y1="40" x2="5" y2="55" />
+            <line x1="45" y1="40" x2="55" y2="55" />
+          </g>
+
+          {/* Core Pulse */}
+          <motion.circle
+            cx="30"
+            cy="40"
+            r="8"
+            fill={color}
+            initial={{ opacity: 0.1, scale: 0.8 }}
+            animate={{ 
+              opacity: [0.1, 0.3, 0.1],
+              scale: [0.8, 1.2, 0.8]
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </svg>
+
+        {/* Completion Particles */}
+        <AnimatePresence>
+          {progress === 100 && (
+            <div className="absolute inset-0 pointer-events-none">
+              {[...Array(12)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ x: "50%", y: "50%", opacity: 1, scale: 1 }}
+                  animate={{ 
+                    x: `${50 + (Math.random() - 0.5) * 150}%`,
+                    y: `${50 + (Math.random() - 0.5) * 150}%`,
+                    opacity: 0,
+                    scale: 0
+                  }}
+                  transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.1 }}
+                  className="absolute w-1.5 h-1.5 rotate-45"
+                  style={{ backgroundColor: color, boxShadow: `0 0 10px ${color}` }}
+                />
+              ))}
+            </div>
+          )}
+        </AnimatePresence>
+      </div>
 
       <div className="mt-8 text-center relative">
         <div 
           className="font-space text-5xl font-black tracking-tighter transition-colors duration-500"
-          style={{ color: isInRedZone ? '#FF0000' : '#39FF14' }}
+          style={{ color }}
         >
-          {Math.round(percentage || 0)}<span className="text-sm opacity-40 ml-1">%</span>
+          {Math.round(safePercentage)}<span className="text-sm opacity-40 ml-1">%</span>
         </div>
         <p className="text-[10px] font-space text-foreground/40 uppercase tracking-[0.5em] mt-3 font-bold">
           XP_LOAD_STATUS
         </p>
-        
-        {/* Small decorative blip */}
-        <div 
-          className="absolute -top-2 -right-4 w-1.5 h-1.5 rounded-full animate-ping transition-colors duration-500" 
-          style={{ backgroundColor: isInRedZone ? '#FF0000' : '#39FF14' }}
-        />
-      </div>
-
-      {/* Bubble particles */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full blur-[1px] transition-colors duration-500"
-            style={{ 
-              backgroundColor: isInRedZone ? 'rgba(255,0,0,0.4)' : 'rgba(57,255,20,0.4)',
-              width: 10, 
-              height: 10,
-              left: `${30 + (i * 10)}%`,
-              bottom: '20%'
-            }}
-            animate={{
-              bottom: ['20%', '80%'],
-              opacity: [0, 0.8, 0],
-              scale: [0.5, 1.2, 0.5]
-            }}
-            transition={{
-              duration: 2 + i,
-              repeat: Infinity,
-              delay: i
-            }}
-          />
-        ))}
       </div>
     </div>
   )

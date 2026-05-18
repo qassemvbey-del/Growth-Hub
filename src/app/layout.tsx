@@ -6,6 +6,8 @@ import { SoundProvider } from "@/context/SoundContext";
 import { ToastProvider } from "@/components/ui/Toast";
 import { PomodoroProvider } from "@/context/PomodoroContext";
 import NeuralMesh from "@/components/ui/NeuralMesh";
+import PWARegistration from "@/components/layout/PWARegistration";
+import GlobalCursor from "@/components/ui/GlobalCursor";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space" });
@@ -27,10 +29,16 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{
           __html: `document.documentElement.classList.add('dark')`
         }} />
+        <link rel="manifest" href="/manifest.json" />
         <link 
           rel="stylesheet" 
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" 
         />
+        <meta name="theme-color" content="#B0C4DE" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Growth Hub" />
+        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable} ${tajawal.variable} antialiased text-lg md:text-xl`}>
         <ToastProvider>
@@ -38,6 +46,8 @@ export default function RootLayout({
             <GrowthProvider>
               <PomodoroProvider>
                 <NeuralMesh />
+                <PWARegistration />
+                <GlobalCursor />
                 {children}
               </PomodoroProvider>
             </GrowthProvider>

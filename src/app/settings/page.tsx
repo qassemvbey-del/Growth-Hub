@@ -9,23 +9,32 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/components/ui/Toast'
 import { useSound } from '@/context/SoundContext'
+import CustomSelect from '@/components/ui/CustomSelect'
 
 export default function SettingsPage() {
-  const { profile, setProfile, mounted, t, isRTL } = useGrowth()
+  const { profile, setProfile, isLoading, refreshProfile, mounted, t, isRTL, currentTheme } = useGrowth()
   const { showToast } = useToast()
   const router = useRouter()
   const supabase = createClient()
   const { volume, setVolume, isMuted, setIsMuted, playBlip } = useSound()
 
+  const [activeTab, setActiveTab] = useState<'ACCOUNT' | 'AI_COACH' | 'AUDIO'>('ACCOUNT')
   const [formData, setFormData] = useState({
     full_name: '',
-    age: '',
+    age: '18',
     language: 'en',
     ai_name: '',
     gender: ''
   })
+  
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+
+  // Dynamic AI Name Header calculation (No hardcoded "COACH" word)
+  const aiNameHeader = profile?.ai_name 
+    ? profile.ai_name.toUpperCase() 
+    : (isRTL ? 'المنظومة الذكية' : 'AI SYSTEM')
 
   useEffect(() => {
     async function getUser() {
@@ -36,41 +45,49 @@ export default function SettingsPage() {
   }, [])
 
   useEffect(() => {
-    if (profile) {
-      setFormData({
-        full_name: profile.full_name || '',
-        age: profile.age?.toString() || '',
-        language: profile.language || 'en',
-        ai_name: profile.ai_name || '',
-        gender: profile.gender || ''
-      })
-    }
+    if (!profile) return
+    setFormData({
+      full_name: profile.full_name || '',
+      age: profile.age?.toString() || '18',
+      language: profile.language || 'en',
+      ai_name: profile.ai_name || '',
+      gender: profile.gender || ''
+    })
   }, [profile])
 
   const handleSave = async () => {
     setSaving(true)
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    
+    if (!user) {
+      setSaving(false)
+      return
+    }
 
     const { error } = await supabase
       .from('profiles')
-      .update({
+      .upsert({
+        id: user.id,
         full_name: formData.full_name,
         age: formData.age ? parseInt(formData.age) : null,
         language: formData.language,
-        ai_name: formData.ai_name,
-        gender: formData.gender,
+        ai_name: formData.ai_name || null,
+        gender: formData.gender || null,
+        xp: profile?.xp || 0,
+        onboarded: profile?.onboarded ?? true,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'id'
       })
-      .eq('id', user.id)
 
     if (!error) {
-      setProfile({ ...profile, ...formData, age: formData.age ? parseInt(formData.age) : null } as any)
+      localStorage.setItem('language', formData.language)
+      localStorage.setItem('cached_name', formData.full_name)
+      await refreshProfile()
       showToast(isRTL ? 'تم حفظ التغييرات بنجاح' : 'SETTINGS_UPDATED_SUCCESSFULLY', 'success')
-      if (formData.language !== profile?.language) {
-        window.location.reload()
-      }
     } else {
       showToast('UPDATE_ERROR', 'warning')
+      alert('SAVE_FAILED: ' + error.message)
     }
     setSaving(false)
   }
@@ -80,218 +97,520 @@ export default function SettingsPage() {
     router.push('/auth/login')
   }
 
-  if (!mounted) return null
+  // Counter Widget Increments/Decrements
+  const handleDecrementAge = () => {
+    const currentAge = parseInt(formData.age) || 18
+    if (currentAge > 13) {
+      setFormData(prev => ({ ...prev, age: (currentAge - 1).toString() }))
+      playBlip()
+    }
+  }
+
+  const handleIncrementAge = () => {
+    const currentAge = parseInt(formData.age) || 18
+    if (currentAge < 120) {
+      setFormData(prev => ({ ...prev, age: (currentAge + 1).toString() }))
+      playBlip()
+    }
+  }
+
+  // Catastrophic Delete Action
+  const handlePermanentlyDeleteAccount = async () => {
+    if (!profile) return
+    playBlip()
+    const { error } = await supabase
+      .from('profiles')
+      .delete()
+      .eq('id', profile.id)
+
+    if (!error) {
+      await supabase.auth.signOut()
+      localStorage.clear()
+      showToast(isRTL ? 'تم حذف حسابك نهائياً بنجاح' : 'ACCOUNT_WIPED_SUCCESSFULLY', 'success')
+      router.push('/auth/login')
+    } else {
+      showToast('DELETE_FAILED', 'warning')
+      alert('Account deletion failed: ' + error.message)
+    }
+    setIsDeleteModalOpen(false)
+  }
+
+  if (isLoading || !mounted) return (
+    <Shell>
+      <div className="p-16 font-space animate-pulse tracking-widest text-sm md:text-base" style={{ color: currentTheme.color }}>
+        {isRTL ? 'جاري التحميل...' : 'LOADING_OPERATOR_DATA...'}
+      </div>
+    </Shell>
+  )
+
+  const tabOptions = [
+    { id: 'ACCOUNT', label: isRTL ? 'الحساب' : 'ACCOUNT', icon: 'person' },
+    { id: 'AI_COACH', label: aiNameHeader, icon: 'psychology' },
+    { id: 'AUDIO', label: isRTL ? 'الصوت' : 'AUDIO', icon: 'volume_up' }
+  ] as const
 
   return (
     <Shell>
       <div className="min-h-[calc(100vh-64px)] p-6 md:p-12 flex flex-col items-center">
-        <div className="w-full max-w-2xl space-y-12">
+        <div className="w-full max-w-4xl space-y-10">
           
-          <header className="space-y-4">
-            <h1 className="text-4xl md:text-7xl font-black font-space tracking-tighter uppercase italic text-black dark:text-white leading-none">
+          {/* Symmetrical Settings Header */}
+          <header className="space-y-3">
+            <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase not-italic text-black dark:text-white leading-none">
               {t('settings')}
             </h1>
-            <p className="text-[10px] md:text-xs font-space text-neon-green tracking-[0.5em] uppercase font-black opacity-40">
-              {isRTL ? 'تخصيص النظام' : 'SYSTEM_CONFIGURATION'} // ID_{profile?.id?.slice(0, 8).toUpperCase()}
+            <p className="text-[10px] md:text-xs font-space tracking-[0.5em] uppercase font-black opacity-50" style={{ color: currentTheme.color }}>
+              {isRTL ? 'تخصيص النظام' : 'SYSTEM CONFIGURATION'}
             </p>
           </header>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+          {/* Symmetrical layout split (1/4 vertical left tab sidebar, 3/4 content tab cards) */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
             
-            {/* Left Column: Identity */}
-            <section className="space-y-8">
-              <h3 className="font-space font-black text-neon-green tracking-[0.3em] uppercase border-b border-black/5 dark:border-white/5 pb-2" style={{ fontSize: isRTL ? '18px' : '14px' }}>
-                {isRTL ? 'بياناتك' : 'IDENTITY_REF'}
-              </h3>
+            {/* Mobile Swipe selector pills */}
+            <div className="flex md:hidden flex-row gap-2 overflow-x-auto pb-4 justify-between w-full scrollbar-none">
+              {tabOptions.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id)
+                    playBlip()
+                  }}
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-3 rounded-xl font-space font-black text-xs uppercase border tracking-wider transition-all duration-300 flex-1 whitespace-nowrap justify-center",
+                    activeTab === tab.id
+                      ? "text-black font-bold shadow-lg"
+                      : "bg-black/20 border-white/5 text-white/60 hover:text-white"
+                  )}
+                  style={activeTab === tab.id ? {
+                    backgroundColor: currentTheme.color,
+                    borderColor: currentTheme.color,
+                    boxShadow: `0 0 15px ${currentTheme.color}33`
+                  } : {}}
+                >
+                  <span className="material-symbols-outlined text-sm">{tab.icon}</span>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Desktop Left Sidebar Tab Card */}
+            <div className="hidden md:flex flex-col col-span-1 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl space-y-2">
+              <div className="px-3 py-2 text-[9px] font-space tracking-[0.3em] font-black text-white/30 uppercase">
+                {isRTL ? 'الفئات' : 'CATEGORIES'}
+              </div>
+              {tabOptions.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id)
+                    playBlip()
+                  }}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3.5 rounded-xl font-space font-black text-xs uppercase border tracking-widest transition-all duration-300 w-full text-left relative overflow-hidden group",
+                    activeTab === tab.id
+                      ? "text-black border-transparent shadow-lg"
+                      : "bg-transparent border-transparent text-white/50 hover:text-white hover:bg-white/5 hover:border-white/5"
+                  )}
+                  style={activeTab === tab.id ? {
+                    backgroundColor: currentTheme.color,
+                    boxShadow: `0 0 20px ${currentTheme.color}26`
+                  } : {}}
+                >
+                  {activeTab === tab.id && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-white" />
+                  )}
+                  <span className={cn(
+                    "material-symbols-outlined text-lg transition-transform duration-300 group-hover:scale-110",
+                    activeTab === tab.id ? "text-black" : "text-white/40"
+                  )}>
+                    {tab.icon}
+                  </span>
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Right Panel Content Card */}
+            <div className="col-span-1 md:col-span-3 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl min-h-[460px] flex flex-col justify-between relative overflow-hidden">
               
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className={cn("font-space tracking-widest uppercase font-black", isRTL ? "text-[14px] text-white" : "text-[9px] md:text-xs text-black/40 dark:text-white/20")}>{t('fullName')}</label>
-                  <input
-                    value={formData.full_name}
-                    onChange={e => setFormData({ ...formData, full_name: e.target.value })}
-                    className="w-full bg-black/5 dark:bg-white/[0.02] border border-black/10 dark:border-white/10 p-4 font-space text-base md:text-lg font-black text-black dark:text-white outline-none focus:border-neon-green/50 transition-all uppercase"
-                  />
-                </div>
+              {/* Decorative dynamic corner frames */}
+              <div className="absolute top-0 right-0 w-12 h-12 border-t-2 border-r-2 border-white/5 pointer-events-none rounded-tr-2xl" />
+              <div className="absolute bottom-0 left-0 w-12 h-12 border-b-2 border-l-2 border-white/5 pointer-events-none rounded-bl-2xl" />
 
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <div className="space-y-2">
-                      <label className={cn("font-space tracking-widest uppercase font-black", isRTL ? "text-[14px] text-white" : "text-[9px] md:text-xs text-black/40 dark:text-white/20")}>{t('age')}</label>
-                      <input
-                        type="number"
-                        value={formData.age}
-                        onChange={e => setFormData({ ...formData, age: e.target.value })}
-                        className="w-full bg-black/5 dark:bg-white/[0.02] border border-black/10 dark:border-white/10 p-4 font-space text-base md:text-lg font-black text-black dark:text-white outline-none focus:border-neon-green/50 transition-all"
-                      />
+              {/* Dynamic Content Switching with motion triggers */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-8"
+                >
+                  
+                  {/* ACCOUNT SECTION VIEW */}
+                  {activeTab === 'ACCOUNT' && (
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                        <span className="material-symbols-outlined text-2xl" style={{ color: currentTheme.color }}>person</span>
+                        <h3 className="font-space font-black tracking-widest text-sm uppercase text-white">
+                          {isRTL ? 'إعدادات الحساب الشخصي' : 'ACCOUNT CONFIGURATION'}
+                        </h3>
+                      </div>
+
+                      <div className="space-y-6">
+                        {/* Full Name */}
+                        <div className="space-y-2">
+                          <label className="font-space tracking-widest uppercase font-black text-xs text-[var(--text-secondary)]">
+                            {t('fullName')}
+                          </label>
+                          <input
+                            value={formData.full_name}
+                            onChange={e => setFormData({ ...formData, full_name: e.target.value })}
+                            className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl px-4 py-3.5 font-space text-sm font-bold text-[var(--text-primary)] outline-none focus:ring-2 focus:border-transparent transition-all"
+                            style={{ ['--tw-ring-color' as any]: `${currentTheme.color}55` }}
+                          />
+                        </div>
+
+                        {/* Counter Widget and Gender Row */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          
+                          {/* CUSTOM AGE COUNTER (No Spinner arrows) */}
+                          <div className="space-y-2">
+                            <label className="font-space tracking-widest uppercase font-black text-xs text-[var(--text-secondary)]">
+                              {t('age')}
+                            </label>
+                            
+                            <div className="flex items-center bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl p-1 h-12 w-full justify-between">
+                              <button
+                                type="button"
+                                onClick={handleDecrementAge}
+                                className="w-10 h-10 rounded-lg flex items-center justify-center border font-bold text-lg transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/80"
+                                style={{ borderColor: `${currentTheme.color}40`, color: currentTheme.color }}
+                              >
+                                &minus;
+                              </button>
+
+                              <span className="font-space font-black text-lg text-white tracking-widest px-4">
+                                {formData.age}
+                              </span>
+
+                              <button
+                                type="button"
+                                onClick={handleIncrementAge}
+                                className="w-10 h-10 rounded-lg flex items-center justify-center border font-bold text-lg transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/80"
+                                style={{ borderColor: `${currentTheme.color}40`, color: currentTheme.color }}
+                              >
+                                &#43;
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Gender CustomSelect */}
+                          <div className="space-y-2">
+                            <label className="font-space tracking-widest uppercase font-black text-xs text-[var(--text-secondary)]">
+                              {t('gender')}
+                            </label>
+                            <CustomSelect
+                              value={formData.gender || ''}
+                              onChange={val => setFormData({ ...formData, gender: val })}
+                              options={[
+                                { value: 'Male', label: t('male') },
+                                { value: 'Female', label: t('female') }
+                              ]}
+                              placeholder={isRTL ? 'اختر' : 'SELECT'}
+                              className="h-12 flex items-center"
+                            />
+                          </div>
+
+                        </div>
+
+                        {/* Language switch */}
+                        <div className="space-y-2">
+                          <label className="text-[10px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
+                            {isRTL ? 'اللغة' : 'LANGUAGE'}
+                          </label>
+                          <div className="grid grid-cols-2 gap-4">
+                            {[
+                              { key: 'en', label: 'English' },
+                              { key: 'ar', label: 'العربية' }
+                            ].map(l => (
+                              <button
+                                key={l.key}
+                                type="button"
+                                onClick={() => {
+                                  setFormData({ ...formData, language: l.key as any })
+                                  playBlip()
+                                }}
+                                className={cn(
+                                  'py-3.5 border font-space text-xs font-black transition-all rounded-xl uppercase tracking-widest',
+                                  formData.language === l.key 
+                                    ? 'text-black border-transparent shadow-lg font-black' 
+                                    : 'bg-[var(--input-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-white'
+                                )}
+                                style={formData.language === l.key ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
+                              >
+                                {l.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Connected User Email Security */}
+                        <div className="space-y-2 pt-2">
+                          <label className="text-[10px] font-space text-[var(--text-secondary)] tracking-widest uppercase font-black flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-xs">lock</span>
+                            {isRTL ? 'البريد الإلكتروني المتصل' : 'CONNECTED SECURITY EMAIL'}
+                          </label>
+                          <div className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3.5 font-space text-xs text-white/40 tracking-wider">
+                            {userEmail || 'UNRESOLVED_IDENTITY'}
+                          </div>
+                        </div>
+
+                        {/* Account Delete Alert Row */}
+                        <div className="border border-red-500/20 bg-red-500/[0.02] p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-8">
+                          <div className="space-y-1">
+                            <h4 className="font-space font-black text-xs text-red-500 uppercase tracking-widest">
+                              {isRTL ? 'حذف الحساب بشكل نهائي' : 'PERMANENT DELETION'}
+                            </h4>
+                            <p className="text-[10px] font-space text-white/40 tracking-wider">
+                              {isRTL 
+                                ? 'سيتم مسح جميع البيانات الخاصة بك نهائياً.' 
+                                : 'Irrevocably wipe your profile, milestones, notes, and ranks.'}
+                            </p>
+                          </div>
+                          
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsDeleteModalOpen(true)
+                              playBlip()
+                            }}
+                            className="px-4 py-2 border border-red-500/30 text-red-500 text-xs font-black font-space rounded-xl hover:bg-red-500/10 transition-all uppercase tracking-wider whitespace-nowrap w-full sm:w-auto text-center"
+                          >
+                            {isRTL ? 'حذف الحساب' : 'DELETE ACCOUNT'}
+                          </button>
+                        </div>
+
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="space-y-2">
-                      <label className={cn("font-space tracking-widest uppercase font-black", isRTL ? "text-[14px] text-white" : "text-[9px] md:text-xs text-black/40 dark:text-white/20")}>{t('gender')}</label>
-                      <select
-                        value={formData.gender || ''}
-                        onChange={e => setFormData({ ...formData, gender: e.target.value })}
-                        className="w-full bg-black/5 dark:bg-white/[0.02] border border-black/10 dark:border-white/10 p-4 font-space text-base md:text-lg font-black text-black dark:text-white outline-none focus:border-neon-green/50 transition-all appearance-none"
-                      >
-                        <option value="" disabled>{isRTL ? 'اختر' : 'SELECT'}</option>
-                        <option value="Male">{t('male')}</option>
-                        <option value="Female">{t('female')}</option>
-                      </select>
+                  )}
+
+                  {/* DYNAMIC AI NAME SECTION VIEW (AI COACH PURGED AND INTENSITY FREE) */}
+                  {activeTab === 'AI_COACH' && (
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                        <span className="material-symbols-outlined text-2xl" style={{ color: currentTheme.color }}>psychology</span>
+                        <h3 className="font-space font-black tracking-widest text-sm uppercase text-white">
+                          {aiNameHeader}
+                        </h3>
+                      </div>
+
+                      <div className="space-y-8">
+                        {/* Dynamic custom AI Name input field */}
+                        <div className="space-y-2">
+                          <label className="font-space tracking-widest uppercase font-black text-xs text-[var(--text-secondary)]">
+                            {t('aiName')}
+                          </label>
+                          <input
+                            value={formData.ai_name}
+                            onChange={e => setFormData({ ...formData, ai_name: e.target.value })}
+                            className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl px-4 py-3.5 font-space text-sm font-bold text-[var(--text-primary)] outline-none focus:ring-2 focus:border-transparent transition-all"
+                            style={{ ['--tw-ring-color' as any]: `${currentTheme.color}55` }}
+                          />
+                        </div>
+
+                        {/* Dynamic read-only status badge showing the current automated state synced directly to rank color */}
+                        <div className="space-y-2">
+                          <label className="font-space tracking-widest uppercase font-black text-xs text-[var(--text-secondary)]">
+                            {isRTL ? 'الحالة الآلية للمنظومة' : 'AUTOMATED SYSTEM SYNC'}
+                          </label>
+                          
+                          <div 
+                            className="border rounded-xl p-4 flex items-center justify-between transition-all duration-300"
+                            style={{ 
+                              borderColor: `${currentTheme.color}30`, 
+                              backgroundColor: `${currentTheme.color}05`,
+                              boxShadow: `inset 0 0 15px ${currentTheme.color}08`
+                            }}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="relative flex h-2.5 w-2.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: currentTheme.color }}></span>
+                                <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ backgroundColor: currentTheme.color }}></span>
+                              </span>
+                              <div className="space-y-0.5">
+                                <p className="font-space font-black text-xs text-white uppercase tracking-wider">
+                                  {isRTL ? 'المزامنة مع الرتبة النشطة' : 'RANK-ALIGNED DIRECTIVE'}
+                                </p>
+                                <p className="text-[10px] font-space text-white/40 tracking-wider">
+                                  {isRTL 
+                                    ? 'تتحول شخصية النظام تلقائياً بناءً على الرتبة الحالية للمستخدم لتفعيل الرقابة التامة.' 
+                                    : 'System tone algorithms and accountability frequency auto-calibrate based on your active rank tier.'}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            <div 
+                              className="px-3 py-1 border text-[9px] font-space font-black rounded-lg uppercase tracking-widest"
+                              style={{
+                                color: currentTheme.color,
+                                borderColor: `${currentTheme.color}40`,
+                                backgroundColor: `${currentTheme.color}15`,
+                                textShadow: `0 0 8px ${currentTheme.color}40`
+                              }}
+                            >
+                              {isRTL ? 'متزامن نشط' : 'SYNCHRONIZED'}
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  )}
 
-                <div className="space-y-2">
-                  <label className="text-[9px] md:text-xs font-space text-black/40 dark:text-white/20 tracking-widest uppercase font-black">{isRTL ? 'اللغة' : 'LANGUAGE'}</label>
-                  <div className="grid grid-cols-2 gap-4">
-                    {[
-                      { key: 'en', label: 'English' },
-                      { key: 'ar', label: 'العربية' }
-                    ].map(l => (
-                      <button
-                        key={l.key}
-                        onClick={() => setFormData({ ...formData, language: l.key as any })}
-                        className={cn(
-                          'p-4 border font-space text-sm md:text-base font-black transition-all',
-                          formData.language === l.key 
-                            ? 'bg-neon-green text-black border-neon-green shadow-[0_0_15px_rgba(57,255,20,0.2)]' 
-                            : 'bg-black/5 dark:bg-white/[0.02] border-black/10 dark:border-white/10 text-black/40 dark:text-white/20'
-                        )}
-                      >
-                        {l.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                  {/* AUDIO SECTION VIEW */}
+                  {activeTab === 'AUDIO' && (
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                        <span className="material-symbols-outlined text-2xl" style={{ color: currentTheme.color }}>volume_up</span>
+                        <h3 className="font-space font-black tracking-widest text-sm uppercase text-white">
+                          {isRTL ? 'إعدادات الصوت والنظام' : 'AUDIO CALIBRATION'}
+                        </h3>
+                      </div>
+
+                      <div className="space-y-8">
+                        {/* Master range volume slider */}
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center">
+                            <label className="text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
+                              {isRTL ? 'مستوى الصوت العام' : 'MASTER SYSTEM VOLUME'}
+                            </label>
+                            <span className="text-sm font-space font-black" style={{ color: currentTheme.color }}>
+                              {Math.round(volume * 100)}%
+                            </span>
+                          </div>
+                          <input 
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.05"
+                            value={volume}
+                            onChange={(e) => setVolume(parseFloat(e.target.value))}
+                            onMouseUp={playBlip}
+                            onTouchEnd={playBlip}
+                            disabled={isMuted}
+                            className={cn(
+                              "w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer transition-all",
+                              isMuted && "opacity-30 grayscale"
+                            )}
+                            style={{ accentColor: currentTheme.color }}
+                          />
+                        </div>
+
+                        {/* Sliding custom mute toggle */}
+                        <div className="flex items-center justify-between border-t border-white/10 pt-6">
+                          <div className="space-y-1">
+                            <p className="text-xs font-space text-white tracking-widest uppercase font-black">
+                              {isRTL ? 'كتم جميع الأصوات' : 'MUTE MASTER SFX'}
+                            </p>
+                            <p className="text-[10px] font-space text-white/40 tracking-wider">
+                              {isRTL ? 'تعطيل المؤثرات الصوتية بالكامل' : 'SILENCE ALL HIGH-FIDELITY SYSTEM AUDIO FEEDBACK'}
+                            </p>
+                          </div>
+                          
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsMuted(!isMuted)
+                              if (isMuted) playBlip()
+                            }}
+                            className={cn(
+                              "w-14 h-7 rounded-full transition-all relative border flex items-center px-1.5 cursor-pointer",
+                              isMuted 
+                                ? "bg-red-500/20 border-red-500/50 justify-end" 
+                                : "justify-start bg-white/[0.02] border-white/10"
+                            )}
+                            style={!isMuted ? { backgroundColor: `${currentTheme.color}20`, borderColor: `${currentTheme.color}50` } : {}}
+                          >
+                            <motion.div 
+                              layout
+                              className={cn(
+                                "w-4 h-4 rounded-full shadow-lg transition-colors",
+                                isMuted ? "bg-red-500" : ""
+                              )}
+                              style={!isMuted ? { backgroundColor: currentTheme.color } : {}}
+                            />
+                          </button>
+                        </div>
+
+                        {/* Dynamic Sound Spatializer test button */}
+                        <div className="border border-white/5 bg-white/[0.01] p-4 rounded-xl flex items-center justify-between gap-4">
+                          <p className="text-[10px] font-space text-white/40 tracking-wider">
+                            {isRTL 
+                              ? 'اختبار حزمة الصوت والتوليف التفاعلي الحالي.' 
+                              : 'Test audio response speed and dynamic sound spatializers.'}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={playBlip}
+                            disabled={isMuted}
+                            className="px-4 py-2 border border-white/10 text-xs font-space font-black rounded-xl hover:bg-white/5 transition-all uppercase tracking-wider disabled:opacity-30 whitespace-nowrap"
+                            style={!isMuted ? { color: currentTheme.color, borderColor: `${currentTheme.color}40` } : {}}
+                          >
+                            {isRTL ? 'اختبار الصوت' : 'TEST SFX ENGINE'}
+                          </button>
+                        </div>
+
+                      </div>
+                    </div>
+                  )}
+
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Symmetrical Settings panel action footer */}
+              <div className="pt-8 mt-8 border-t border-white/10 flex flex-col sm:flex-row gap-4 w-full">
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="flex-1 text-black py-4 font-space font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 rounded-xl cursor-pointer text-center font-bold"
+                  style={{ backgroundColor: currentTheme.color, boxShadow: `0 4px 20px ${currentTheme.color}20` }}
+                >
+                  {saving ? (isRTL ? 'جاري الحفظ...' : 'SAVING...') : t('save')}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="py-4 px-6 border border-white/10 hover:bg-white/5 text-white/60 hover:text-white transition-all font-space font-black text-xs uppercase tracking-widest rounded-xl text-center"
+                >
+                  {t('logout')}
+                </button>
               </div>
-            </section>
 
-            {/* Middle Column: System Audio */}
-            <section className="space-y-8 md:col-span-2 lg:col-span-1">
-               <h3 className="font-space font-black text-neon-green tracking-[0.3em] uppercase border-b border-black/5 dark:border-white/5 pb-2" style={{ fontSize: isRTL ? '18px' : '14px' }}>
-                 {isRTL ? 'الصوت' : 'SYSTEM AUDIO'}
-               </h3>
-               
-               <div className="space-y-8 p-6 bg-black/5 dark:bg-white/[0.02] border border-black/10 dark:border-white/10 rounded-sm">
-                  {/* Master Volume */}
-                  <div className="space-y-4">
-                     <div className="flex justify-between items-end">
-                       <label className="text-[10px] font-space text-black/60 dark:text-white/40 tracking-widest uppercase font-black">
-                         {isRTL ? 'مستوى الصوت' : 'MASTER_VOLUME'}
-                       </label>
-                       <span className="text-sm font-space font-black text-neon-green italic">
-                         {Math.round(volume * 100)}%
-                       </span>
-                     </div>
-                     <input 
-                       type="range"
-                       min="0"
-                       max="1"
-                       step="0.05"
-                       value={volume}
-                       onChange={(e) => {
-                          setVolume(parseFloat(e.target.value))
-                       }}
-                       onMouseUp={playBlip}
-                       onTouchEnd={playBlip}
-                       disabled={isMuted}
-                       className={cn(
-                          "w-full h-1 bg-black/20 dark:bg-white/20 rounded-lg appearance-none cursor-pointer accent-neon-green",
-                          isMuted && "opacity-50 grayscale"
-                       )}
-                     />
-                  </div>
-
-                  {/* Mute Toggle */}
-                  <div className="flex items-center justify-between border-t border-black/10 dark:border-white/10 pt-6">
-                     <div className="space-y-1">
-                        <p className="text-[10px] font-space text-black/60 dark:text-white/40 tracking-widest uppercase font-black">
-                          {isRTL ? 'كتم الصوت' : 'MUTE_ALL'}
-                        </p>
-                        <p className="text-[8px] font-space text-black/40 dark:text-white/20 tracking-[0.2em] uppercase font-bold">
-                          {isRTL ? 'إلغاء التنبيهات الصوتية' : 'DISABLE TACTICAL SFX'}
-                        </p>
-                     </div>
-                     <button
-                       onClick={() => {
-                          setIsMuted(!isMuted)
-                          if (isMuted) playBlip() // play when unmuting
-                       }}
-                       className={cn(
-                          "w-12 h-6 rounded-full transition-all relative border flex items-center px-1",
-                          isMuted 
-                            ? "bg-red-500/20 border-red-500/50 justify-end" 
-                            : "bg-neon-green/20 border-neon-green/50 justify-start"
-                       )}
-                     >
-                        <motion.div 
-                          layout
-                          className={cn(
-                             "w-4 h-4 rounded-full shadow-lg",
-                             isMuted ? "bg-red-500" : "bg-neon-green"
-                          )}
-                        />
-                     </button>
-                  </div>
-               </div>
-            </section>
-
-            {/* Right Column: AI Coach */}
-            <section className="space-y-8 md:col-span-2 lg:col-span-1">
-              <h3 className="font-space font-black text-neon-green tracking-[0.3em] uppercase border-b border-black/5 dark:border-white/5 pb-2" style={{ fontSize: isRTL ? '18px' : '14px' }}>
-                {isRTL ? 'المدرب الذكي' : 'AI COACH'}
-              </h3>
-
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[9px] md:text-xs font-space text-black/40 dark:text-white/20 tracking-widest uppercase font-black">{t('aiName')}</label>
-                  <input
-                    value={formData.ai_name}
-                    onChange={e => setFormData({ ...formData, ai_name: e.target.value })}
-                    className="w-full bg-black/5 dark:bg-white/[0.02] border border-black/10 dark:border-white/10 p-4 font-space text-base md:text-lg font-black text-black dark:text-white outline-none focus:border-neon-green/50 transition-all uppercase"
-                  />
-                </div>
-
-
-
-                <div className="pt-4 space-y-4">
-                   <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="w-full bg-neon-green text-black py-5 font-space font-black text-sm md:text-base uppercase tracking-[0.2em] shadow-xl shadow-neon-green/10 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
-                  >
-                    {saving ? (isRTL ? 'جاري الحفظ...' : 'SAVING...') : t('save')}
-                  </button>
-
-                  <button
-                    onClick={handleLogout}
-                    className="w-full py-4 border border-red-500/20 text-red-500/60 hover:bg-red-500/10 hover:text-red-500 transition-all font-space font-black text-xs md:text-sm uppercase tracking-widest"
-                  >
-                    {t('logout')}
-                  </button>
-                </div>
-              </div>
-            </section>
+            </div>
           </div>
 
           {/* Admin Calibration Section */}
           {userEmail === 'm@gmail.com' && (
-            <section className="w-full pt-16 border-t border-red-500/10 space-y-10">
-              <header className="space-y-2">
-                <h2 className="text-2xl font-space font-black tracking-tight text-red-500 uppercase italic">
+            <section className="w-full pt-12 border-t border-red-500/10 space-y-6">
+              <header className="space-y-1">
+                <h2 className="text-xl font-space font-black tracking-tight text-red-500 uppercase italic">
                   ADMIN<span className="text-white">_CALIBRATION</span>
                 </h2>
-                <p className="text-[10px] font-space text-red-500/40 tracking-[0.4em] uppercase font-black">
+                <p className="text-[9px] font-space text-red-500/40 tracking-[0.4em] uppercase font-black">
                   DEVELOPER_OVERRIDE // CRITICAL_SYSTEM_ACCESS
                 </p>
               </header>
 
-              <div className="glass-panel p-6 md:p-10 border-red-500/20 bg-red-500/[0.02] space-y-8">
+              <div className="bg-black/40 backdrop-blur-xl border border-red-500/20 rounded-2xl p-6 bg-red-500/[0.01] space-y-6">
                 <div className="space-y-4">
                   <div className="flex justify-between items-end">
                     <label className="text-[10px] font-space text-red-500/60 tracking-widest uppercase font-black">XP_CALIBRATION_SLIDER</label>
-                    <span className="text-xl font-space font-black text-red-500 italic">{profile?.xp || 0} XP</span>
+                    <span className="text-lg font-space font-black text-red-500 italic">{profile?.xp || 0} XP</span>
                   </div>
                   <input 
                     type="range"
@@ -301,9 +620,7 @@ export default function SettingsPage() {
                     value={profile?.xp || 0}
                     onChange={async (e) => {
                       const newXp = parseInt(e.target.value)
-                      // Immediate UI feedback
                       setProfile({ ...profile, xp: newXp } as any)
-                      // Persistent update
                       const { data: { user } } = await supabase.auth.getUser()
                       if (user) {
                         await supabase.from('profiles').update({ xp: newXp }).eq('id', user.id)
@@ -311,15 +628,11 @@ export default function SettingsPage() {
                     }}
                     className="w-full h-1 bg-red-500/20 rounded-lg appearance-none cursor-pointer accent-red-500"
                   />
-                  <div className="flex justify-between text-[8px] font-space text-red-500/30 uppercase font-black tracking-widest">
-                    <span>MIN_VOL // 0</span>
-                    <span>MAX_VOL // 10000</span>
-                  </div>
                 </div>
 
-                <div className="p-4 bg-red-500/5 border border-red-500/10 flex gap-4 items-start">
+                <div className="p-4 bg-red-500/5 border border-red-500/10 flex gap-4 items-center rounded-xl">
                   <span className="material-symbols-outlined text-red-500 text-sm">warning</span>
-                  <p className="text-[10px] font-space text-red-500/60 leading-relaxed uppercase">
+                  <p className="text-[9px] font-space text-red-500/60 leading-relaxed uppercase tracking-wider">
                     WARNING: MANUAL_XP_OVERRIDE WILL TRIGGER IMMEDIATE RANK_RECALCULATION. USE ONLY FOR DEVELOPMENT_TESTING.
                   </p>
                 </div>
@@ -329,65 +642,75 @@ export default function SettingsPage() {
 
         </div>
       </div>
-    </Shell>
-  )
-}
 
-function AccordionItem({ title, content }: { title: string, content: string }) {
-  const [isOpen, setIsOpen] = useState(false)
-  const { currentTheme } = useGrowth()
-
-  return (
-    <div className="relative group overflow-hidden">
-      {/* Tactical Borders */}
-      <div className="absolute top-0 left-0 w-1 h-1 border-t border-l opacity-40 group-hover:opacity-100 transition-opacity" style={{ borderColor: currentTheme.color }} />
-      <div className="absolute top-0 right-0 w-1 h-1 border-t border-r opacity-40 group-hover:opacity-100 transition-opacity" style={{ borderColor: currentTheme.color }} />
-      <div className="absolute bottom-0 left-0 w-1 h-1 border-b border-l opacity-40 group-hover:opacity-100 transition-opacity" style={{ borderColor: currentTheme.color }} />
-      <div className="absolute bottom-0 right-0 w-1 h-1 border-b border-r opacity-40 group-hover:opacity-100 transition-opacity" style={{ borderColor: currentTheme.color }} />
-
-      <div className={cn(
-        "border transition-all duration-300 bg-white/50 dark:bg-white/[0.02] rounded-sm",
-        isOpen ? "border-black/20 dark:border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.03)]" : "border-black/5 dark:border-white/5 hover:border-black/10 dark:hover:border-white/10"
-      )}>
-        <button 
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex justify-between items-center p-5 hover:bg-black/5 dark:hover:bg-white/5 transition-all text-start group/btn"
-        >
-          <span className={cn(
-            "font-space font-black text-sm uppercase tracking-wider transition-colors",
-            isOpen ? "text-black dark:text-white" : "text-black/60 dark:text-white/40"
-          )}>
-            {title}
-          </span>
-          <div className="flex items-center gap-4">
-             <div className={cn(
-                "w-8 h-[1px] bg-black/5 dark:bg-white/5 transition-all",
-                isOpen && "w-12 bg-current opacity-40"
-             )} style={{ color: currentTheme.color }} />
-             <span 
-               className={cn("material-symbols-outlined transition-all duration-500", isOpen ? "rotate-180 scale-125" : "opacity-40")}
-               style={{ color: isOpen ? currentTheme.color : undefined, textShadow: isOpen ? `0 0 10px ${currentTheme.color}` : 'none' }}
-             >
-               expand_more
-             </span>
-          </div>
-        </button>
-        <AnimatePresence>
-          {isOpen && (
+      {/* CATASTROPHIC DATA WIPE CONFIRMATION MODAL */}
+      <AnimatePresence>
+        {isDeleteModalOpen && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
+            
+            {/* Modal Box */}
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="px-5 pb-6"
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="bg-[#0c0c0c] border-2 border-red-500/30 rounded-2xl p-8 max-w-md w-full shadow-2xl relative space-y-6 text-center"
+              style={{ boxShadow: '0 0 50px rgba(239, 68, 68, 0.15)' }}
             >
-              <div className="h-[1px] w-full bg-black/5 dark:bg-white/5 mb-4" />
-              <p className="text-xs font-space text-black/60 dark:text-white/50 leading-relaxed italic border-l-2 pl-4 py-1" style={{ borderColor: `${currentTheme.color}33` }}>
-                {content}
-              </p>
+              <div className="flex justify-center">
+                <div className="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center animate-pulse">
+                  <span className="material-symbols-outlined text-red-500 text-3xl font-bold">warning</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="font-space font-black text-xl text-red-500 uppercase tracking-widest leading-none">
+                  {isRTL ? 'تحذير: مسح كارثي للبيانات' : 'CATASTROPHIC DATA WIPE'}
+                </h3>
+                <p className="text-[9px] font-space text-red-500/60 tracking-[0.25em] uppercase font-black">
+                  WARNING // PERMANENT_ACCOUNT_DESTRUCTION
+                </p>
+              </div>
+
+              {/* Strict warn messages */}
+              <div className="space-y-4 text-left bg-black/40 border border-white/5 rounded-xl p-4 max-h-60 overflow-y-auto">
+                <p className="font-space text-xs text-white/70 leading-relaxed">
+                  <strong>English:</strong> Warning: This action is permanent. All tracked progress, logs, goals, earned ranks, and profile metadata will be completely and irrevocably wiped from the server databases.
+                </p>
+
+                <div className="h-[1px] bg-white/5 w-full" />
+
+                <p className="font-tajawal text-xs text-white/70 leading-relaxed text-right">
+                  <strong>العربية:</strong> تحذير: هذا الإجراء دائم ولا يمكن التراجع عنه. سيتم مسح جميع البيانات، ومستويات التقدم المحرز، والأهداف، والرتب المكتسبة بالكامل وبشكل نهائي من قواعد البيانات.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={handlePermanentlyDeleteAccount}
+                  className="w-full bg-red-600 hover:bg-red-500 text-white py-3.5 font-space font-black text-xs uppercase tracking-widest rounded-xl transition-all duration-300 shadow-lg shadow-red-600/10 cursor-pointer active:scale-98"
+                >
+                  {isRTL ? 'تأكيد الحذف النهائي' : 'CONFIRM PERMANENT WIPE'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsDeleteModalOpen(false)
+                    playBlip()
+                  }}
+                  className="w-full bg-transparent border border-white/10 hover:bg-white/5 text-white/60 hover:text-white py-3 font-space font-black text-xs uppercase tracking-widest rounded-xl transition-all duration-300 cursor-pointer"
+                >
+                  {isRTL ? 'إلغاء' : 'CANCEL'}
+                </button>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
+
+          </div>
+        )}
+      </AnimatePresence>
+
+    </Shell>
   )
 }

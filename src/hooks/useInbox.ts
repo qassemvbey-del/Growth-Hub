@@ -70,7 +70,7 @@ export function useInbox() {
       .select('*, tasks(*)')
       .eq('user_id', userId)
       .eq('is_archived', false)
-      .neq('status', 'completed')
+      .neq('status', 'complete')
       .order('end_date', { ascending: true })
     
     const activeMissionsCount = missions?.length || 0
@@ -145,7 +145,7 @@ export function useInbox() {
 
     for (const mission of missions) {
       // 1. Check Deadline Alert
-      if (mission.end_date && !mission.is_archived && mission.status !== 'completed') {
+      if (mission.end_date && !mission.is_archived && mission.status !== 'complete') {
         const days = Math.ceil((new Date(mission.end_date).getTime() - new Date().getTime()) / (1000 * 3600 * 24))
         if (days > 0 && days <= 3) {
           // Check database for existing alert for this mission and deadline
@@ -190,41 +190,53 @@ export function useInbox() {
       // 2. Check Mission Complete
       const totalTasks = mission.tasks?.length || 0
       const doneTasks = mission.tasks?.filter((t: any) => t.is_completed).length || 0
-      if (totalTasks > 0 && totalTasks === doneTasks && mission.status === 'completed') {
-        // Check database for existing completion report
-        const { data: existingComp } = await supabase
+      
+      const isCompleted = totalTasks > 0 && totalTasks === doneTasks && mission.status === 'completed'
+      const belongsToUser = mission.user_id === userId
+      const isArchived = mission.is_archived === true
+
+      if (isCompleted && belongsToUser && isArchived) {
+        // Only notify if archived recently (last 24 hours)
+        const lastModified = (mission as any).updated_at || mission.end_date || mission.created_at
+        const archivedRecently = new Date(lastModified) > new Date(Date.now() - 24 * 60 * 60 * 1000)
+        if (!archivedRecently) continue
+
+        // Check if notification already exists using JSON content query for cup_id
+        const { data: existing } = await supabase
           .from('inbox_reports')
           .select('id')
           .eq('user_id', userId)
           .eq('type', 'mission_complete')
-          .contains('content', { mission_id: mission.id })
-          .limit(1)
+          .eq('content->>cup_id', mission.id)
+          .maybeSingle()
 
-        if (!existingComp || existingComp.length === 0) {
-          const xpAmount = totalTasks * 10 + 50
-          const startDate = new Date(mission.start_date || mission.created_at).toLocaleDateString('en-US')
-          const endDate = new Date().toLocaleDateString('en-US')
-          const timeTaken = `${startDate} to ${endDate}`
-          
-          const title = "✅ مهمة اتخلصت!"
-          const content = `مبروك! خلصت [${mission.title}]
+        if (existing) continue // Skip if already notified
+
+        const xpAmount = totalTasks * 10 + 50
+        const startDate = new Date(mission.start_date || mission.created_at).toLocaleDateString('en-US')
+        const endDate = new Date().toLocaleDateString('en-US')
+        const timeTaken = `${startDate} to ${endDate}`
+        
+        const title = "✅ مهمة اتخلصت!"
+        const content = `مبروك! خلصت [${mission.title}]
 XP المكسوب: +[${xpAmount}]
 الوقت اللي اخدته: [${timeTaken}]
-الخطوة الجاية: روح Legacy Vault تشوف الكأس`
+الخطوة الجاية: روح لصفحة الإنجازات (Wins) عشان تشوف الكأس المذهب`
 
-          await supabase.from('inbox_reports').insert({
-            user_id: userId,
-            type: 'mission_complete',
-            title,
-            content: {
-              text: content,
-              mission_id: mission.id,
-              mission_title: mission.title,
-              xp_earned: xpAmount,
-              time_taken: timeTaken
-            }
-          })
-        }
+        await supabase.from('inbox_reports').insert({
+          user_id: userId,
+          type: 'mission_complete',
+          title,
+          content: {
+            text: content,
+            cup_id: mission.id,
+            mission_id: mission.id,
+            mission_name: mission.title,
+            mission_title: mission.title,
+            xp_earned: xpAmount,
+            time_taken: timeTaken
+          }
+        })
       }
     }
     fetchReports()

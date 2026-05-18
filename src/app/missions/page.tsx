@@ -14,9 +14,9 @@ import { useSound } from '@/context/SoundContext'
 import MissionAttachmentsModal from '@/components/ui/MissionAttachmentsModal'
 
 const SIZES = [
-  { key: 'lg', label: 'BIG MISSION',  desc: 'Macro Objective', icon: 'trophy' },
-  { key: 'md', label: 'MID MISSION',    desc: 'Standard Task', icon: 'military_tech' },
-  { key: 'sm', label: 'SMALL MISSION',  desc: 'Micro Focus', icon: 'workspace_premium' },
+  { key: 'lg', label: 'BIG GOAL',    desc: 'Macro Objective', icon: 'trophy' },
+  { key: 'md', label: 'MID GOAL',    desc: 'Standard Focus',  icon: 'military_tech' },
+  { key: 'sm', label: 'SMALL GOAL', desc: 'Micro Focus',      icon: 'workspace_premium' },
 ]
 
 export default function MissionsPage() {
@@ -42,7 +42,13 @@ export default function MissionsPage() {
   const [modalLoading, setModalLoading] = useState(false)
 
   useEffect(() => { 
-    if (mounted) fetchMissions() 
+    if (mounted) {
+      fetchMissions() 
+      if (window.location.search.includes('create=true')) {
+        setShowCreate(true)
+        window.history.replaceState({}, '', '/missions')
+      }
+    }
   }, [mounted])
 
   async function fetchMissions() {
@@ -135,7 +141,7 @@ export default function MissionsPage() {
 
     const insertData: any = {
       user_id: user.id,
-      title: newTitle.trim() || (isRTL ? 'مهمة جديدة' : 'NEW_MISSION'),
+      title: newTitle.trim() || (isRTL ? 'هدف جديد' : 'New Goal'),
       status: 'active',
       size: newSize,
       is_archived: false,
@@ -153,7 +159,7 @@ export default function MissionsPage() {
       setNewSize('md')
       setStartDate('')
       setEndDate('')
-      showToast(isRTL ? 'تم إنشاء المهمة' : 'MISSION_INITIALIZED', 'success')
+      showToast(isRTL ? 'تم إنشاء الهدف' : 'Goal activated!', 'success')
       playDeploy()
       router.push(`/missions/${data.id}`)
     }
@@ -161,8 +167,12 @@ export default function MissionsPage() {
 
   if (loading || !mounted) return (
     <Shell>
-      <div className="p-16 text-neon-green font-space animate-pulse tracking-widest text-sm md:text-base">
-        {isRTL ? 'جاري التحميل...' : 'SCANNING_CORE_OBJECTIVES...'}
+      <div className="max-w-7xl mx-auto p-6 md:p-12 space-y-12">
+        <div className="animate-pulse flex flex-col gap-4">
+          <div className="h-40 bg-gray-800 rounded"/>
+          <div className="h-40 bg-gray-800 rounded"/>
+          <div className="h-40 bg-gray-800 rounded"/>
+        </div>
       </div>
     </Shell>
   )
@@ -171,27 +181,28 @@ export default function MissionsPage() {
     <Shell>
       <div className="max-w-7xl mx-auto p-6 md:p-12 space-y-12">
         {/* Header */}
-        <header className="flex flex-col md:flex-row justify-between items-center gap-8 border-b border-black/5 dark:border-white/5 pb-8">
+        <header className="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-black/5 dark:border-white/5 pb-8">
           <div className="space-y-4 text-center md:text-start">
             <div className="flex items-center gap-4 justify-center md:justify-start">
-              <span className="material-symbols-outlined text-neon-green text-3xl md:text-4xl">layers</span>
-              <h1 className="text-4xl md:text-6xl font-black font-space tracking-tighter uppercase italic text-black dark:text-white leading-none break-words break-all sm:break-normal">
-                {isRTL ? 'لوحة' : 'MISSION'}<span className="text-neon-green">{isRTL ? ' المهام' : '_CANVAS'}</span>
+              <span className="material-symbols-outlined text-3xl md:text-4xl" style={{ color: currentTheme.color }}>layers</span>
+              <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase not-italic text-black dark:text-white leading-none">
+                {isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الأهداف' : '_CANVAS'}</span>
               </h1>
-              <button onClick={() => setShowGuide(true)} className="material-symbols-outlined text-neon-green/60 hover:text-neon-green transition-colors text-2xl md:text-3xl" title="Tactical Guide">
+              <button onClick={() => setShowGuide(true)} className="material-symbols-outlined text-[var(--text-secondary)]/40 hover:text-[var(--text-secondary)] transition-colors duration-300 text-xl" title="Guide">
                 info
               </button>
             </div>
-            <p className="text-[14px] font-space text-white tracking-[0.4em] uppercase font-bold">
-               {isRTL ? 'الأهداف الأساسية النشطة' : 'ACTIVE_CORE_OBJECTIVES'} // {missions.length} {isRTL ? 'مهمة شغالة' : 'MISSIONS RUNNING'}
+            <p className={cn("text-[11px] font-space tracking-[0.35em] uppercase font-bold", isRTL ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]")}>
+               {isRTL ? 'الأهداف الأساسية النشطة' : 'Active Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'هدف نشط' : 'total'}
             </p>
           </div>
           <button
             onClick={() => { playBlip(); setShowCreate(true); }}
-            className="w-full md:w-auto bg-neon-green text-black px-12 py-5 font-space text-xs md:text-sm tracking-[0.2em] font-black uppercase hover:scale-105 active:scale-95 transition-all shadow-lg shadow-neon-green/20 flex items-center justify-center gap-4 rounded-sm"
+            className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-xl font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg"
+            style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
           >
-            <span className="material-symbols-outlined font-black">add_circle</span>
-            {isRTL ? 'ابدأ مهمة جديدة' : 'INITIALIZE_MISSION'}
+            <span className="material-symbols-outlined text-[16px] leading-none">add</span>
+            {isRTL ? 'إنشاء هدف' : 'Create Goal'}
           </button>
         </header>
 
@@ -210,36 +221,36 @@ export default function MissionsPage() {
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9 }}
                 onClick={e => e.stopPropagation()}
-                className="w-full max-w-2xl bg-white dark:bg-[#0A0A0A] border border-black/10 dark:border-white/10 p-8 md:p-12 space-y-8 rounded-sm shadow-2xl my-8 relative"
+                className="w-full max-w-2xl bg-[var(--card-bg)] border border-[var(--card-border)] p-8 md:p-12 space-y-8 rounded-sm shadow-2xl my-8 relative"
               >
                 <button 
                   onClick={() => setShowGuide(false)} 
-                  className="absolute top-6 right-6 rtl:left-6 rtl:right-auto material-symbols-outlined text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white"
+                  className="absolute top-6 right-6 rtl:left-6 rtl:right-auto material-symbols-outlined text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 >
                   close
                 </button>
                 <div className="space-y-6">
-                  <div className="space-y-2 border-l-4 border-neon-green pl-4 rtl:pl-0 rtl:pr-4 rtl:border-l-0 rtl:border-r-4">
-                    <p className="text-2xl md:text-3xl font-black text-black dark:text-white mb-4">
+                  <div className="space-y-2 border-l-4 pl-4 rtl:pl-0 rtl:pr-4 rtl:border-l-0 rtl:border-r-4" style={{ borderColor: currentTheme.color }}>
+                    <p className="text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-4">
                       أهلاً بيك في ساحة المعركة يا وحش! ده مش مجرد جدول مهام، ده سيستم (Battle Royale) لحياتك.
                     </p>
-                    <ol className="list-decimal list-inside space-y-3 text-lg text-black/80 dark:text-white/80 font-bold">
-                      <li><span className="text-neon-green">ميزان القوة (الـ HUD):</span> عقلك والداشبورد بيشيلوا ٩ وحدات بس. الصغير (Small) بـ ١، المتوسط (Medium) بـ ١.٥، والكبير (Large) بـ ٣ أماكن.</li>
-                      <li><span className="text-neon-green">عقود الاشتباك (XP):</span> كل شرطة مجهود بـ ١٠ XP. والمهمات الكبيرة ليها "بونص" ٥٠ نقطة لما تقفلها.</li>
-                      <li><span className="text-neon-green">نزيف الطاقة (XP Bleed):</span> لو اتأخرت عن ميعادك، السيستم هيسحب منك ٥ XP كل يوم. ولو كسلت أسبوع، فيه غرامة ١٠ XP.</li>
+                    <ol className="list-decimal list-inside space-y-3 text-lg text-[var(--text-primary)]/80 font-bold">
+                      <li><span style={{ color: currentTheme.color }}>ميزان القوة (الـ HUD):</span> عقلك والداشبورد بيشيلوا ٩ وحدات بس. الصغير (Small) بـ ١، المتوسط (Medium) بـ ١.٥، والكبير (Large) بـ ٣ أماكن.</li>
+                      <li><span style={{ color: currentTheme.color }}>عقود الاشتباك (XP):</span> كل شرطة مجهود بـ ١٠ XP. والمهمات الكبيرة ليها "بونص" ٥٠ نقطة لما تقفلها.</li>
+                      <li><span style={{ color: currentTheme.color }}>نزيف الطاقة (XP Bleed):</span> لو اتأخرت عن ميعادك، السيستم هيسحب منك ٥ XP كل يوم. ولو كسلت أسبوع، فيه غرامة ١٠ XP.</li>
                     </ol>
                   </div>
                   
-                  <div className="h-px w-full bg-black/10 dark:bg-white/10 my-8"></div>
+                  <div className="h-px w-full bg-[var(--card-border)] my-8"></div>
 
-                  <div className="space-y-2 border-l-4 border-neon-green pl-4 rtl:pl-0 rtl:pr-4 rtl:border-l-0 rtl:border-r-4">
-                    <p className="text-xl md:text-2xl font-black font-space text-black dark:text-white uppercase italic tracking-tighter mb-4">
+                  <div className="space-y-2 border-l-4 pl-4 rtl:pl-0 rtl:pr-4 rtl:border-l-0 rtl:border-r-4" style={{ borderColor: currentTheme.color }}>
+                    <p className="text-xl md:text-2xl font-black font-space text-[var(--text-primary)] uppercase italic tracking-tighter mb-4">
                       "Welcome, Soldier. This is your Tactical Life OS."
                     </p>
-                    <ol className="list-decimal list-inside space-y-3 text-base md:text-lg text-black/80 dark:text-white/80 font-bold font-space">
-                      <li><span className="text-neon-green uppercase tracking-widest">Grid Slots:</span> Your HUD has 9 slots total. Small = 1, Medium = 1.5, Large = 3.</li>
-                      <li><span className="text-neon-green uppercase tracking-widest">XP Logic:</span> 1 Task Bar = 10 XP. Large missions give +50 XP bonus.</li>
-                      <li><span className="text-neon-green uppercase tracking-widest">The Penalties:</span> Delay costs -5 XP/day. Inactivity for 7 days costs -10 XP.</li>
+                    <ol className="list-decimal list-inside space-y-3 text-base md:text-lg text-[var(--text-primary)]/80 font-bold font-space">
+                      <li><span className="uppercase tracking-widest" style={{ color: currentTheme.color }}>Grid Slots:</span> Your HUD has 9 slots total. Small = 1, Medium = 1.5, Large = 3.</li>
+                      <li><span className="uppercase tracking-widest" style={{ color: currentTheme.color }}>XP Logic:</span> 1 Task Bar = 10 XP. Large missions give +50 XP bonus.</li>
+                      <li><span className="uppercase tracking-widest" style={{ color: currentTheme.color }}>The Penalties:</span> Delay costs -5 XP/day. Inactivity for 7 days costs -10 XP.</li>
                     </ol>
                   </div>
                 </div>
@@ -265,27 +276,39 @@ export default function MissionsPage() {
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9 }}
                 onClick={e => e.stopPropagation()}
-                className="w-full max-w-xl bg-white dark:bg-[#0A0A0A] border border-black/10 dark:border-white/10 p-8 md:p-12 space-y-10 rounded-sm shadow-2xl my-8"
+                className="w-full max-w-xl bg-[var(--card-bg)] border border-[var(--card-border)] p-8 md:p-12 space-y-10 rounded-sm shadow-2xl my-8"
               >
                 <h2 className="text-2xl md:text-3xl font-space font-black uppercase italic text-black dark:text-white tracking-tighter">
-                  {isRTL ? 'إعدادات المهمة الجديدة' : 'MISSION_INITIALIZATION'}
+                  {isRTL ? 'إنشاء هدف جديد' : 'Create New Goal'}
                 </h2>
 
                 {/* Title */}
                 <div className="space-y-3">
-                  <label className="text-sm md:text-base font-space text-neon-green tracking-widest uppercase font-black">{t('title')}</label>
+                  <label className="text-sm md:text-base font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'عنوان الهدف' : 'Goal Title'}</label>
                   <input
                     autoFocus
                     value={newTitle}
-                    placeholder={isRTL ? 'عنوان المهمة...' : 'MISSION_TITLE...'}
+                    placeholder={isRTL ? 'اسم هدفك...' : 'Name your goal...'}
                     onChange={e => setNewTitle(e.target.value)}
-                    className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-4 font-space text-lg md:text-xl font-black text-black dark:text-white italic outline-none focus:border-neon-green/50 transition-all uppercase"
+                    className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] p-4 font-space text-lg md:text-xl font-black text-[var(--text-primary)] italic outline-none transition-all"
+                    onFocus={e => e.currentTarget.style.borderColor = currentTheme.color}
+                    onBlur={e => e.currentTarget.style.borderColor = ''}
                   />
                 </div>
 
                 {/* Size Selection */}
                 <div className="space-y-3">
-                  <label className="text-sm md:text-base font-space text-neon-green tracking-widest uppercase font-black">{isRTL ? 'حجم المهمة' : 'MISSION_SCALE'}</label>
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm md:text-base font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'حجم الهدف' : 'Goal Size'}</label>
+                    <div className="group relative flex items-center cursor-help">
+                      <span className="material-symbols-outlined text-[var(--text-secondary)] text-sm md:text-base transition-colors group-hover:text-white">info</span>
+                      <div className="pointer-events-none absolute bottom-full mb-2 w-64 md:w-80 rounded bg-[var(--card-bg)] border border-[var(--card-border)] p-3 md:p-4 text-xs md:text-sm text-[var(--text-primary)] shadow-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-[300]">
+                        {isRTL 
+                          ? "حجم الهدف يحدد سعة الـ Slots المستهلكة في لوحة القيادة، وسقف نقاط الـ XP المكتسبة (Small: 4 مهام، Medium: 8 مهام، Large: 20 مهمة). يمكنك إضافة مهام إضافية بعد السقف للتنظيم فقط."
+                          : "Goal size determines Focus Slots consumed on the dashboard and the XP reward ceiling (Small: 4 tasks, Medium: 8 tasks, Large: 20 tasks). Extra tasks can be added freely for organization."}
+                      </div>
+                    </div>
+                  </div>
                   <div className="grid grid-cols-3 gap-4">
                     {SIZES.map(s => (
                       <button
@@ -294,9 +317,12 @@ export default function MissionsPage() {
                         className={cn(
                           "p-4 border flex flex-col items-center gap-2 transition-all rounded-sm",
                           newSize === s.key 
-                            ? "bg-neon-green border-neon-green text-black shadow-[0_0_15px_rgba(57,255,20,0.3)]" 
-                            : "border-black/10 dark:border-white/10 text-black/40 dark:text-white/20 hover:border-neon-green/40"
+                            ? "text-black border-transparent shadow-lg" 
+                            : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-transparent"
                         )}
+                        style={newSize === s.key ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}55` } : {}}
+                        onMouseEnter={e => { if (newSize !== s.key) e.currentTarget.style.borderColor = `${currentTheme.color}60` }}
+                        onMouseLeave={e => { if (newSize !== s.key) e.currentTarget.style.borderColor = '' }}
                       >
                         <span className="material-symbols-outlined text-2xl">{s.icon}</span>
                         <span className="text-sm font-space font-black uppercase tracking-tighter">{isRTL ? (s.key === 'lg' ? 'كبيرة' : s.key === 'md' ? 'متوسطة' : 'صغيرة') : s.label}</span>
@@ -317,8 +343,10 @@ export default function MissionsPage() {
                       type="date"
                       value={startDate}
                       onChange={e => setStartDate(e.target.value)}
-                      className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-4 font-space text-sm md:text-base font-black text-black dark:text-white outline-none focus:border-neon-green/50 transition-all uppercase rounded-sm date-input-tactical"
+                      className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] p-4 font-space text-sm md:text-base font-black text-[var(--text-primary)] outline-none transition-all uppercase rounded-sm date-input-tactical"
                       style={{ colorScheme: 'dark' }}
+                      onFocus={e => e.currentTarget.style.borderColor = currentTheme.color}
+                      onBlur={e => e.currentTarget.style.borderColor = ''}
                     />
                   </div>
                   <div className="space-y-3">
@@ -329,8 +357,10 @@ export default function MissionsPage() {
                       type="date"
                       value={endDate}
                       onChange={e => setEndDate(e.target.value)}
-                      className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-4 font-space text-sm md:text-base font-black text-black dark:text-white outline-none focus:border-neon-green/50 transition-all uppercase rounded-sm date-input-tactical"
+                      className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] p-4 font-space text-sm md:text-base font-black text-[var(--text-primary)] outline-none transition-all uppercase rounded-sm date-input-tactical"
                       style={{ colorScheme: 'dark' }}
+                      onFocus={e => e.currentTarget.style.borderColor = currentTheme.color}
+                      onBlur={e => e.currentTarget.style.borderColor = ''}
                     />
                   </div>
                 </div>
@@ -338,7 +368,7 @@ export default function MissionsPage() {
                 {/* HUD Visibility */}
                 <div className="flex flex-col md:flex-row gap-8">
                   <div className="space-y-3 flex-1">
-                     <label className="text-sm md:text-base font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'عرض في اللوحة' : 'HUD_VISIBILITY'}</label>
+                     <label className="text-sm md:text-base font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'عرض في اللوحة' : 'Show on Dashboard'}</label>
                      <button 
                        onClick={() => setSyncOnCreate(!syncOnCreate)}
                        style={{ 
@@ -348,7 +378,7 @@ export default function MissionsPage() {
                        }}
                        className={cn(
                          "w-full p-4 border font-space text-sm md:text-base font-black uppercase tracking-widest transition-all rounded-sm",
-                         !syncOnCreate && "border-black/10 dark:border-white/10 text-black/40 dark:text-white/20"
+                         !syncOnCreate && "border-[var(--card-border)] text-[var(--text-secondary)]"
                        )}
                      >
                         {syncOnCreate ? (isRTL ? 'مفعل' : 'SHOW ON DASHBOARD') : (isRTL ? 'مخفي' : 'STAY OFF-GRID')}
@@ -358,8 +388,8 @@ export default function MissionsPage() {
 
                 {/* Actions */}
                 <div className="flex justify-end gap-6 pt-4 border-t border-black/5 dark:border-white/5">
-                  <button onClick={() => setShowCreate(false)} className="text-black/40 dark:text-white/20 font-space text-sm md:text-base uppercase tracking-widest hover:text-black dark:hover:text-white font-black">{t('cancel')}</button>
-                  <button onClick={addMission} className="px-10 py-4 font-space font-black text-sm md:text-base uppercase tracking-widest shadow-lg" style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 0 20px ${currentTheme.color}44` }}>{t('deploy')}</button>
+                  <button onClick={() => setShowCreate(false)} className="text-[var(--text-secondary)] font-space text-sm md:text-base uppercase tracking-widest hover:text-[var(--text-primary)] font-black">{isRTL ? 'إلغاء' : 'Cancel'}</button>
+                  <button onClick={addMission} className="px-10 py-4 font-space font-black text-sm md:text-base uppercase tracking-widest shadow-lg rounded-xl" style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 0 20px ${currentTheme.color}4d` }}>{isRTL ? 'تفعيل' : 'Activate'}</button>
                 </div>
               </motion.div>
             </motion.div>
@@ -397,7 +427,7 @@ export default function MissionsPage() {
                   transition={{ delay: idx * 0.05 }}
                   onClick={() => { playBlip(); router.push(`/missions/${mission.id}`); }}
                   className={cn(
-                    "group relative flex flex-col bg-white dark:bg-[#0A0A0A] border border-black/5 dark:border-white/5 hover:border-black/20 dark:hover:border-white/10 cursor-pointer transition-all rounded-sm shadow-xl overflow-hidden",
+                    "group relative flex flex-col bg-[var(--card-bg)] border border-[var(--card-border)] hover:border-[var(--card-border)]/50 cursor-pointer transition-all rounded-sm shadow-xl overflow-hidden",
                     "min-h-[240px] max-h-[340px] p-5 md:p-6"
                   )}
                 >
@@ -410,10 +440,10 @@ export default function MissionsPage() {
                       <div className="flex items-center gap-2">
                         <span className="material-symbols-outlined text-xs opacity-40" style={{ color: isInRedZone ? '#FF0055' : color }}>{sizeIcon}</span>
                         <p className="text-[8px] font-space tracking-[0.3em] uppercase font-black opacity-40">
-                           {mission.sync_to_dashboard ? (isRTL ? 'نشط' : 'HUD_ACTIVE') : (isRTL ? 'استعداد' : 'STANDBY')}
+                           {mission.sync_to_dashboard ? (isRTL ? 'نشط' : 'ACTIVE') : (isRTL ? 'استعداد' : 'STANDBY')}
                         </p>
                       </div>
-                      <h3 className="text-base md:text-lg font-space font-black uppercase italic text-black dark:text-white truncate">
+                      <h3 className="text-base md:text-lg font-space font-black uppercase italic text-[var(--text-primary)] truncate">
                          {mission.title}
                       </h3>
                     </div>
@@ -433,7 +463,7 @@ export default function MissionsPage() {
                   {/* === BOTTOM: Progress bar + Dates + Tasks === */}
                   <div className="mt-auto space-y-3">
                     {/* Progress Bar */}
-                    <div className="w-full h-[1.5px] bg-black/5 dark:bg-white/5 relative">
+                    <div className="w-full h-[1.5px] bg-[var(--input-bg)] relative">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${percentage}%` }}
@@ -445,14 +475,14 @@ export default function MissionsPage() {
                     {/* Footer: Tasks count + Dates + Arrow */}
                     <div className="flex justify-between items-center">
                        <div className="flex items-center gap-3">
-                         <p className="text-[8px] font-space text-black/30 dark:text-white/20 uppercase font-black tracking-widest">
-                           {completedTasks}/{totalTasks} {isRTL ? 'المهام' : 'TASKS'}
-                         </p>
-                         {(mission.start_date || mission.end_date) && (
-                           <p className="text-[7px] font-space text-black/20 dark:text-white/15 uppercase tracking-wider">
-                             {fmtDate(mission.start_date)} → {fmtDate(mission.end_date)}
-                           </p>
-                         )}
+                          <p className="text-[8px] font-space text-[var(--text-secondary)] uppercase font-black tracking-widest">
+                            {completedTasks}/{totalTasks} {isRTL ? 'المهام' : 'TASKS'}
+                          </p>
+                          {(mission.start_date || mission.end_date) && (
+                            <p className="text-[7px] font-space text-[var(--text-secondary)]/50 uppercase tracking-wider">
+                              {fmtDate(mission.start_date)} → {fmtDate(mission.end_date)}
+                            </p>
+                          )}
                        </div>
                        <div className="flex items-center gap-2">
                          <button
@@ -484,10 +514,12 @@ export default function MissionsPage() {
                              window.open(googleUrl, '_blank');
                              playBlip();
                            }}
-                           className="relative flex items-center justify-center w-8 h-8 border border-white/10 dark:border-white/5 hover:border-neon-green/40 transition-all rounded-sm"
-                           title="ADD_TO_GOOGLE_CALENDAR"
-                         >
-                           <span className="material-symbols-outlined text-sm text-neon-green" style={{ textShadow: `0 0 8px #39FF14` }}>calendar_month</span>
+                           className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] transition-all rounded-sm"
+                            onMouseEnter={e => e.currentTarget.style.borderColor = `${color}60`}
+                            onMouseLeave={e => e.currentTarget.style.borderColor = ''}
+                            title="ADD_TO_GOOGLE_CALENDAR"
+                          >
+                            <span className="material-symbols-outlined text-sm" style={{ color, textShadow: `0 0 8px ${color}` }}>calendar_month</span>
                          </button>
 
                          <button
@@ -495,7 +527,9 @@ export default function MissionsPage() {
                              e.stopPropagation();
                              openAttachments(mission.id);
                            }}
-                           className="relative flex items-center justify-center w-8 h-8 border border-white/10 dark:border-white/5 hover:border-neon-green/40 transition-all rounded-sm group/attach"
+                           className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] transition-all rounded-sm group/attach"
+                            onMouseEnter={e => e.currentTarget.style.borderColor = `${color}60`}
+                            onMouseLeave={e => e.currentTarget.style.borderColor = ''}
                            style={{ 
                              borderColor: (attachmentCounts[mission.id] || 0) > 0 ? `${color}44` : undefined,
                              boxShadow: (attachmentCounts[mission.id] || 0) > 0 ? `0 0 10px ${color}22` : undefined
@@ -513,7 +547,7 @@ export default function MissionsPage() {
                              </span>
                            )}
                          </button>
-                         <span className="material-symbols-outlined text-black/20 dark:text-white/10 group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform text-lg">arrow_forward</span>
+                         <span className="material-symbols-outlined text-[var(--text-secondary)]/35 group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform text-lg">arrow_forward</span>
                        </div>
                     </div>
                   </div>
@@ -540,26 +574,10 @@ export default function MissionsPage() {
             />
           )}
 
-          {/* Create Mission Card Shortcut */}
-          {missions.length > 0 && (
-             <motion.div
-               onClick={() => setShowCreate(true)}
-               className="flex flex-col items-center justify-center p-8 border border-dashed border-black/10 dark:border-white/5 rounded-sm hover:border-neon-green/30 transition-all cursor-pointer group min-h-[240px] max-h-[340px]"
-             >
-                <span className="material-symbols-outlined text-4xl text-black/10 dark:text-white/10 group-hover:text-neon-green/40 transition-colors">add_circle</span>
-             </motion.div>
-          )}
-
           {missions.length === 0 && !loading && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="col-span-full py-32 flex flex-col items-center justify-center border border-dashed border-black/10 dark:border-white/5 rounded-sm cursor-pointer hover:border-neon-green/30 transition-all group"
-              onClick={() => setShowCreate(true)}
-            >
-               <span className="material-symbols-outlined text-6xl text-black/10 dark:text-white/10 group-hover:text-neon-green/40 transition-colors">layers</span>
-               <p className="text-[10px] font-space tracking-[0.5em] uppercase font-black mt-4 text-black/30 dark:text-white/20">{isRTL ? 'لا توجد مهام - ابدأ الآن' : 'EMPTY_STACK - INITIALIZE'}</p>
-            </motion.div>
+            <div className="col-span-full py-24">
+              <p className="text-white/30 text-sm text-center">No active goals synced. Use the action panel above to initiate.</p>
+            </div>
           )}
         </div>
       </div>

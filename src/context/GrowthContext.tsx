@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { useSound } from '@/context/SoundContext'
 
 export type Language = 'en' | 'ar'
 export type Theme = 'Neon Cyberpunk' | 'Clean Stealth'
@@ -24,6 +25,9 @@ export interface Profile {
   xp: number
   rank: string
   active_theme: string
+  blocked: boolean
+  last_seen: string | null
+  email: string | null
 }
 
 export const THEME_PACKAGES = {
@@ -208,6 +212,11 @@ interface GrowthContextType {
   lastAiMessage: string
   setLastAiMessage: (msg: string) => void
   changeTheme: (themeId: string) => Promise<void>
+  isRankUpModalOpen: boolean
+  setIsRankUpModalOpen: (open: boolean) => void
+  oldRank: string
+  newRank: string
+  triggerRankUp: (oldVal: string, newVal: string) => void
   calculateAccountability: (mission: Mission) => {
     progress: number
     isInRedZone: boolean
@@ -224,8 +233,13 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
   const [tutorialActive, setTutorialActive] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [lastAiMessage, setLastAiMessage] = useState('SYSTEM_ONLINE // STANDING_BY')
+  const [isRankUpModalOpen, setIsRankUpModalOpen] = useState(false)
+  const [oldRank, setOldRank] = useState('SILVER')
+  const [newRank, setNewRank] = useState('SILVER')
+  
   const supabase = createClient()
   const router = useRouter()
+  const { playRankUpChime } = useSound()
 
   const isRTL = useMemo(() => profile?.language?.startsWith('ar') || false, [profile?.language])
 
@@ -238,29 +252,75 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
     if (typeof document !== 'undefined') {
       document.documentElement.style.setProperty('--color-neon-green', currentTheme.color)
       document.documentElement.style.setProperty('--color-primary', currentTheme.color)
+      document.documentElement.style.setProperty('--theme-color', currentTheme.color)
+
+      // Dynamic PWA Window Frame/Chrome Theme Color Sync
+      let metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      if (!metaThemeColor) {
+        metaThemeColor = document.createElement('meta')
+        metaThemeColor.setAttribute('name', 'theme-color')
+        document.head.appendChild(metaThemeColor)
+      }
+      metaThemeColor.setAttribute('content', currentTheme.color)
     }
   }, [currentTheme])
+
+  const triggerRankUp = (oldVal: string, newVal: string) => {
+    setOldRank(oldVal)
+    setNewRank(newVal)
+    setIsRankUpModalOpen(true)
+    playRankUpChime()
+  }
+
+  // Realtime subscription for automatic profile/rank changes
+  useEffect(() => {
+    if (!profile?.id) return
+
+    const channel = supabase
+      .channel(`profile-rank-lock:${profile.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${profile.id}`
+        },
+        (payload) => {
+          const nextData = payload.new as Profile
+          const prevData = payload.old as Profile
+
+          if (nextData && prevData && nextData.rank !== prevData.rank) {
+            triggerRankUp(prevData.rank || 'SILVER', nextData.rank || 'SILVER')
+          }
+          setProfile(prev => prev ? { ...prev, ...nextData } : nextData)
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [profile?.id])
 
   const addXp = async (amount: number) => {
     if (!profile) return
     const newXp = (profile.xp || 0) + Math.round(amount)
-    
-    // Determine new rank
-    let newRank = profile.rank || 'RECRUIT'
-    for (const threshold of [...RANK_THRESHOLDS].reverse()) {
-      if (newXp >= threshold.xp) {
-        newRank = threshold.rank
-        break
-      }
-    }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
-      .update({ xp: newXp, rank: newRank })
+      .update({ xp: newXp })
       .eq('id', profile.id)
+      .select()
+      .single()
 
-    if (!error) {
-      setProfile({ ...profile, xp: newXp, rank: newRank })
+    if (!error && data) {
+      const prevRank = profile.rank || 'SILVER'
+      const nextRank = data.rank || 'SILVER'
+      if (prevRank !== nextRank) {
+        triggerRankUp(prevRank, nextRank)
+      }
+      setProfile({ ...profile, ...data } as Profile)
     }
   }
 
@@ -278,64 +338,134 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
 
   const t = (key: keyof typeof TRANSLATIONS['en']) => {
     const lang = profile?.language || 'en'
-    return TRANSLATIONS[lang][key] || TRANSLATIONS['en'][key]
+    return TRANSLATIONS[lang as keyof typeof TRANSLATIONS]?.[key] || TRANSLATIONS['en'][key]
   }
 
   const refreshProfile = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-      
-      if (data) {
-        setProfile({
-          ...data,
-          full_name: data.full_name || user.user_metadata.full_name,
-          avatar_url: data.avatar_url || user.user_metadata.avatar_url,
-          ai_name: data.ai_name,
-          ai_personality: data.ai_personality || 'GENTLE',
-          xp: data.xp || 0,
-          rank: data.rank || 'RECRUIT',
-          active_theme: data.active_theme || 'SILVER'
-        } as Profile)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle()
+        
+        const storedLang = typeof window !== 'undefined' ? localStorage.getItem('language') as Language : null
+        
+        if (data) {
+          setProfile({
+            ...data,
+            language: data.language || storedLang || 'en',
+            full_name: data.full_name || user.user_metadata.full_name,
+            avatar_url: data.avatar_url || user.user_metadata.avatar_url,
+            ai_name: data.ai_name,
+            ai_personality: data.ai_personality || 'GENTLE',
+            xp: data.xp || 0,
+            rank: data.rank || 'RECRUIT',
+            active_theme: data.active_theme || 'SILVER',
+            blocked: data.blocked || false,
+            last_seen: data.last_seen,
+            email: user.email || null
+          } as Profile)
 
-        // Intelligent Gatekeeper Redirection
-        const hasName = !!data.full_name
-        const isAtOnboarding = window.location.pathname === '/onboarding'
-        const isAtAuth = window.location.pathname.startsWith('/auth')
+          if (data.language && typeof window !== 'undefined') {
+            localStorage.setItem('language', data.language)
+          }
 
-        if (!isAtAuth) {
-          if (!hasName && !isAtOnboarding) {
-            router.push('/onboarding')
-          } else if (hasName && isAtOnboarding) {
-            router.push('/')
+          // Blocked Check
+          if (data.blocked) {
+            router.push('/blocked')
+            return
+          }
+
+          // Intelligent Gatekeeper Redirection
+          const hasName = !!data.full_name
+          const isOnboarded = data.onboarded || localStorage.getItem('onboarding_complete') === 'true'
+          const isAtOnboarding = window.location.pathname === '/onboarding'
+          const isAtAuth = window.location.pathname.startsWith('/auth')
+
+          if (!isAtAuth) {
+            if (!isOnboarded && !isAtOnboarding) {
+              router.push('/onboarding')
+            } else if (isOnboarded && isAtOnboarding) {
+              router.push('/')
+            }
+          }
+        } else {
+          console.log('PROFILE_MISSING: Auto-creating profile for', user.id)
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              id: user.id,
+              full_name: user.user_metadata.full_name || user.email?.split('@')[0] || 'User',
+              onboarded: true,
+              xp: 0,
+              rank: 'RECRUIT',
+              active_theme: 'INIT_GREEN',
+              language: storedLang || 'en'
+            })
+            .select()
+            .single()
+
+          if (!createError && newProfile) {
+            setProfile({
+              ...newProfile,
+              email: user.email || null
+            } as Profile)
+          } else {
+            console.error('PROFILE_CREATION_FAILED:', createError)
+            if (!window.location.pathname.startsWith('/auth') && window.location.pathname !== '/onboarding') {
+              router.push('/onboarding')
+            }
           }
         }
       } else {
-        if (!window.location.pathname.startsWith('/auth') && window.location.pathname !== '/onboarding') {
-          router.push('/onboarding')
-        }
+         if (!window.location.pathname.startsWith('/auth')) {
+           router.push('/auth/login')
+         }
       }
-    } else {
-       if (!window.location.pathname.startsWith('/auth')) {
-         router.push('/auth/login')
-       }
+    } catch (err) {
+      console.error('REFRESH_PROFILE_ERROR:', err)
+    } finally {
+      setIsLoading(false)
     }
-    setIsLoading(false)
   }
 
   useEffect(() => {
     console.log('CONTEXT_MOUNTED:', true)
     setMounted(true)
+    
+    const cachedLang = localStorage.getItem('language')
+    const cachedName = localStorage.getItem('cached_name')
+    if (cachedLang || cachedName) {
+      setProfile(prev => prev || { language: cachedLang || 'en', full_name: cachedName } as Profile)
+    }
+
     refreshProfile().then(() => {
-      console.log('PROFILE_DATA:', profile)
+      console.log('PROFILE_DATA_LOADED')
     }).catch((err) => {
       console.error('PROFILE_ERROR:', err)
     })
   }, [])
+
+  // Periodically update last_seen every 5 minutes
+  useEffect(() => {
+    if (!profile?.id) return
+
+    const updateLastSeen = async () => {
+      await supabase
+        .from('profiles')
+        .update({ last_seen: new Date().toISOString() })
+        .eq('id', profile.id)
+    }
+
+    // Initial update
+    updateLastSeen()
+
+    const interval = setInterval(updateLastSeen, 5 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [profile?.id])
 
   useEffect(() => {
     if (!mounted || !profile) return
@@ -372,6 +502,11 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
       changeTheme,
       lastAiMessage,
       setLastAiMessage,
+      isRankUpModalOpen,
+      setIsRankUpModalOpen,
+      oldRank,
+      newRank,
+      triggerRankUp,
       calculateAccountability: (mission: Mission) => {
         const tasks = mission.tasks || []
         const totalWeight = tasks.reduce((acc, t) => acc + (Number(t.weight) || 1), 0)
