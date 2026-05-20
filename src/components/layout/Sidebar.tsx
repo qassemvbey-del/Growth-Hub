@@ -252,7 +252,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
           onClick={playBlip}
           onMouseEnter={() => setIsSettingsHovered(true)}
           onMouseLeave={() => setIsSettingsHovered(false)}
-          className="flex-1 flex items-center justify-start gap-3 p-3.5 glass-panel border rounded-xl transition-all font-space text-xs tracking-[0.2em] font-black min-h-[44px]"
+          className="w-full flex items-center justify-start gap-3 p-3.5 glass-panel border rounded-xl transition-all font-space text-xs tracking-[0.2em] font-black min-h-[44px]"
           style={{
             color: isSettingsHovered ? currentTheme.color : 'var(--text-secondary)',
             borderColor: isSettingsHovered ? `${currentTheme.color}40` : 'var(--card-border)',
@@ -267,19 +267,6 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
             {mounted ? (isRTL ? 'الإعدادات' : 'Settings') : 'Settings'}
           </span>
         </Link>
-
-        <button
-          onClick={() => {
-            playBlip()
-            const isDark = document.documentElement.classList.toggle('dark')
-            localStorage.setItem('theme', isDark ? 'dark' : 'light')
-          }}
-          className="w-12 h-12 flex items-center justify-center rounded-xl bg-[var(--input-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border)] transition-all group relative shrink-0 cursor-pointer shadow-sm"
-          title={mounted ? (isRTL ? 'الوضع الليلي/النهاري' : 'Toggle Theme') : 'Toggle Theme'}
-        >
-          <div className="absolute inset-0 bg-black/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
-          <span className="material-symbols-outlined text-lg group-hover:rotate-180 transition-transform duration-500">contrast</span>
-        </button>
       </div>
     </aside>
   )

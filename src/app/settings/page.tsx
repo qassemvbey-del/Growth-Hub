@@ -37,6 +37,11 @@ export default function SettingsPage() {
   const [surveyBothered, setSurveyBothered] = useState<string>('')
   const [surveyRating, setSurveyRating] = useState<number>(0)
   const [surveyAlternative, setSurveyAlternative] = useState<string>('')
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(true)
+
+  useEffect(() => {
+    setIsDarkMode(document.documentElement.classList.contains('dark'))
+  }, [])
 
   // Dynamic AI Name Header calculation (No hardcoded "COACH" word)
   const aiNameHeader = profile?.ai_name 
@@ -558,6 +563,44 @@ export default function SettingsPage() {
                             ))}
                           </div>
                         </div>
+                        {/* Theme switch */}
+                        <div className="space-y-4 border-b border-white/10 pb-8 mt-8">
+                          <label className="text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
+                            {isRTL ? 'المظهر' : 'APPEARANCE'}
+                          </label>
+                          <div className="grid grid-cols-2 gap-4">
+                            {[
+                              { key: 'dark', label: isRTL ? 'ليلي' : 'DARK', icon: 'dark_mode' },
+                              { key: 'light', label: isRTL ? 'نهاري' : 'LIGHT', icon: 'light_mode' }
+                            ].map(theme => {
+                              const isActive = (theme.key === 'dark' && isDarkMode) || (theme.key === 'light' && !isDarkMode)
+                              return (
+                                <button
+                                  key={theme.key}
+                                  type="button"
+                                  onClick={() => {
+                                    playBlip()
+                                    const setDark = theme.key === 'dark'
+                                    document.documentElement.classList.toggle('dark', setDark)
+                                    localStorage.setItem('theme', theme.key)
+                                    setIsDarkMode(setDark)
+                                  }}
+                                  className={cn(
+                                    'py-3.5 flex items-center justify-center gap-2 border font-space text-xs font-black transition-all rounded-xl uppercase tracking-widest',
+                                    isActive
+                                      ? 'text-black border-transparent shadow-lg font-black' 
+                                      : 'bg-[var(--input-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--card-border)]'
+                                  )}
+                                  style={isActive ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
+                                >
+                                  <span className="material-symbols-outlined text-sm">{theme.icon}</span>
+                                  {theme.label}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+
                         {/* Master range volume slider */}
                         <div className="space-y-4">
                           <div className="flex justify-between items-center">
