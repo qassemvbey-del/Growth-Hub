@@ -82,7 +82,7 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
         if (itemsData.error.errors?.[0]?.reason === 'playlistNotFound' || itemsData.error.code === 404) {
           setError('ACCESS_DENIED // PRIVATE_FEED')
         } else {
-          setError('UPLINK_FAILED // RETRY_SEQUENCE')
+          setError('CONNECTION ERROR // RETRY_SEQUENCE')
         }
         setLoading(false)
         return
@@ -123,7 +123,7 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
 
       setPreviewTasks(mapped)
     } catch (err) {
-      setError('UPLINK_FAILED // RETRY_SEQUENCE')
+      setError('CONNECTION ERROR // RETRY_SEQUENCE')
     } finally {
       setLoading(false)
     }
@@ -132,7 +132,9 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
   const handleDeploy = async () => {
     setConfirming(true)
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    const isLocal = typeof missionId === 'string' && missionId.startsWith('local_')
+
+    if (!user && !isLocal) {
       setError('AUTH_REQUIRED // SESSION_TERMINATED')
       setConfirming(false)
       return
@@ -146,6 +148,34 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
       is_completed: false,
       type: 'standard'
     }))
+
+    if (isLocal) {
+      const generatedTasks = payload.map(p => ({
+        ...p,
+        id: 'task_' + Math.random().toString(36).substring(2, 9),
+        created_at: new Date().toISOString()
+      }))
+
+      // Save to localStorage under guest_goals
+      const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+      const updatedGoals = guestGoals.map((g: any) => {
+        if (g.id === missionId) {
+          return {
+            ...g,
+            tasks: [...(g.tasks || []), ...generatedTasks]
+          }
+        }
+        return g
+      })
+      localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+
+      onTasksAdded(generatedTasks)
+      onClose()
+      setConfirming(false)
+      setPlaylistUrl('')
+      setPreviewTasks([])
+      return
+    }
 
     const { data, error: insertError } = await supabase.from('tasks').insert(payload).select()
 
@@ -167,11 +197,12 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
   const totalDuration = previewTasks.reduce((acc, t) => acc + t.seconds, 0)
 
   return (
-    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-white/60 dark:bg-black/90 backdrop-blur-md">
+    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-white/60 dark:bg-black/90 backdrop-blur-md" onClick={onClose}>
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-2xl bg-white/95 dark:bg-[#080808] border rounded-sm overflow-hidden flex flex-col shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+        className="w-[calc(100%-2rem)] mx-auto md:max-w-2xl bg-white/95 dark:bg-[#080808]/90 backdrop-blur-xl border rounded-2xl overflow-hidden flex flex-col shadow-2xl max-h-[90vh] my-auto"
         style={{ borderColor: `${themeColor}33` }}
       >
         {/* Header */}
@@ -192,16 +223,16 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
                 value={playlistUrl}
                 onChange={e => setPlaylistUrl(e.target.value)}
                 placeholder="HTTPS://WWW.YOUTUBE.COM/PLAYLIST?LIST=..."
-                className="flex-1 bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 p-3 font-space text-xs text-zinc-900 dark:text-white outline-none focus:border-neon-green/50"
+                className="flex-1 bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 py-2.5 px-4 rounded-xl font-space text-xs text-zinc-900 dark:text-white outline-none focus:border-neon-green/50"
                 style={{ borderColor: error ? '#FF0055' : undefined }}
               />
               <button 
                 onClick={handleFetch}
                 disabled={loading || !playlistUrl.trim()}
-                className="px-6 py-3 font-space font-black text-[10px] uppercase tracking-widest transition-all bg-neon-green text-black disabled:opacity-30"
+                className="py-2.5 px-4 font-space font-black text-[10px] uppercase tracking-widest transition-all bg-neon-green text-black disabled:opacity-30 rounded-xl shadow-lg hover:brightness-110 shrink-0"
                 style={{ backgroundColor: themeColor }}
               >
-                {loading ? 'PROCESSING_TITLES // AI_CLEANING...' : 'SCAN'}
+                {loading ? 'PROCESSING...' : 'SCAN'}
               </button>
             </div>
             {error && <p className="text-[10px] font-space font-black text-[#FF0055] tracking-widest mt-2">{error}</p>}
@@ -222,7 +253,7 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
                 </div>
                 <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2 scrollbar-thin">
                   {previewTasks.map((t, i) => (
-                    <div key={i} className="flex justify-between items-center p-3 border border-zinc-200 dark:border-white/5 bg-black/5 dark:bg-white/5">
+                    <div key={i} className="flex justify-between items-center py-2.5 px-4 border border-zinc-200 dark:border-white/5 bg-black/5 dark:bg-white/5 rounded-xl">
                       <div className="flex-1 min-w-0 pr-4">
                         <p className="font-space text-[11px] font-bold text-zinc-900 dark:text-white uppercase truncate">{t.title}</p>
                         <p className="font-space text-[9px] text-zinc-500 dark:text-white/40 uppercase tracking-tighter">DURATION: {formatSeconds(t.seconds)}</p>
@@ -240,14 +271,14 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
                 <div className="flex justify-end gap-4 pt-4 border-t border-zinc-200 dark:border-white/5">
                   <button 
                     onClick={onClose}
-                    className="px-6 py-3 font-space font-black text-[10px] uppercase tracking-widest text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white"
+                    className="py-2.5 px-4 font-space font-black text-[10px] uppercase tracking-widest text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white rounded-xl transition-all"
                   >
                     CANCEL
                   </button>
                   <button 
                     onClick={handleDeploy}
                     disabled={confirming}
-                    className="px-8 py-3 font-space font-black text-[10px] uppercase tracking-widest bg-neon-green text-black shadow-lg"
+                    className="py-2.5 px-6 font-space font-black text-[10px] uppercase tracking-widest bg-neon-green text-black shadow-lg rounded-xl transition-all hover:brightness-110"
                     style={{ backgroundColor: themeColor, boxShadow: `0 0 20px ${themeColor}44` }}
                   >
                     {confirming ? 'CREATING...' : 'CREATE'}

@@ -7,11 +7,11 @@ import { useGrowth } from '@/context/GrowthContext'
 import { useRouter } from 'next/navigation'
 import { 
   getAdminStats, 
-  getOperatorRegistry, 
+  getMemberRegistry, 
   toggleBlockUser, 
   deleteUser, 
   getRecentActivity,
-  getMissionAnalytics 
+  getGoalAnalytics 
 } from '@/app/actions/adminActions'
 
 export default function AdminDashboard() {
@@ -53,9 +53,9 @@ export default function AdminDashboard() {
       setDataLoading(true)
       const [s, u, a, an] = await Promise.all([
         getAdminStats(),
-        getOperatorRegistry(),
+        getMemberRegistry(),
         getRecentActivity(),
-        getMissionAnalytics()
+        getGoalAnalytics()
       ])
       setStats(s)
       setUsers(u)
@@ -70,13 +70,13 @@ export default function AdminDashboard() {
   }
 
   const handleToggleBlock = async (userId: string, isBlocked: boolean) => {
-    if (!confirm(`Confirm ${isBlocked ? 'BLOCK' : 'UNBLOCK'} operation for operator ${userId}?`)) return
+    if (!confirm(`Confirm ${isBlocked ? 'BLOCK' : 'UNBLOCK'} operation for member ${userId}?`)) return
     await toggleBlockUser(userId, isBlocked)
     loadData()
   }
 
   const handleDelete = async (userId: string) => {
-    if (!confirm(`WARNING: Permanent PURGE of operator ${userId} and all associated data? This cannot be undone.`)) return
+    if (!confirm(`WARNING: Permanent deletion of member ${userId} and all associated data? This cannot be undone.`)) return
     await deleteUser(userId)
     loadData()
   }
@@ -86,7 +86,7 @@ export default function AdminDashboard() {
       <div className="min-h-screen bg-[#050505] flex items-center justify-center font-space">
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 border-2 border-red-500/20 border-t-red-600 rounded-full animate-spin" />
-          <p className="text-red-500 text-xs font-black tracking-[0.3em] animate-pulse uppercase">UPLINKING_TO_CONTROL_CENTER...</p>
+          <p className="text-red-500 text-xs font-black tracking-[0.3em] animate-pulse uppercase">LOADING_ADMIN_DASHBOARD...</p>
         </div>
       </div>
     )
@@ -113,7 +113,7 @@ export default function AdminDashboard() {
           
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-[9px] text-white/30 font-black tracking-widest uppercase">OPERATOR_IN_CHARGE</p>
+              <p className="text-[9px] text-white/30 font-black tracking-widest uppercase">ADMIN_IN_CHARGE</p>
               <p className="text-sm font-bold text-red-500">{profile?.full_name}</p>
             </div>
             <div className="w-12 h-12 border border-red-500/30 rounded-sm bg-red-500/10 flex items-center justify-center">
@@ -127,8 +127,8 @@ export default function AdminDashboard() {
         
         {/* STATS GRID */}
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatsCard title="TOTAL_OPERATORS" value={stats?.totalUsers} icon="groups" trend="NEW_PROTOCOLS" />
-          <StatsCard title="ACTIVE_MISSIONS" value={stats?.activeMissions} icon="target" />
+          <StatsCard title="TOTAL_MEMBERS" value={stats?.totalUsers} icon="groups" trend="GROWTH_METRICS" />
+          <StatsCard title="ACTIVE_GOALS" value={stats?.activeMissions} icon="target" />
           <StatsCard title="ONLINE_NOW" value={stats?.onlineNow} icon="sensors" isOnline />
           <StatsCard title="TOTAL_XP_GENERATED" value={stats?.totalXp?.toLocaleString()} icon="bolt" />
           
@@ -140,8 +140,8 @@ export default function AdminDashboard() {
 
         {/* TABS */}
         <div className="flex border-b border-white/5 gap-8">
-          <TabButton active={activeTab === 'users'} onClick={() => setActiveTab('users')} label="OPERATOR_REGISTRY" icon="badge" />
-          <TabButton active={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} label="MISSION_ANALYTICS" icon="analytics" />
+          <TabButton active={activeTab === 'users'} onClick={() => setActiveTab('users')} label="MEMBER_REGISTRY" icon="badge" />
+          <TabButton active={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} label="GOAL_ANALYTICS" icon="analytics" />
           <TabButton active={activeTab === 'activity'} onClick={() => setActiveTab('activity')} label="RECENT_ACTIVITY" icon="history" />
         </div>
 
@@ -159,9 +159,9 @@ export default function AdminDashboard() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-red-500/30 bg-red-500/5">
-                      <th className="p-4 text-[10px] font-black tracking-widest text-red-400 uppercase">OPERATOR</th>
+                      <th className="p-4 text-[10px] font-black tracking-widest text-red-400 uppercase">MEMBER</th>
                       <th className="p-4 text-[10px] font-black tracking-widest text-red-400 uppercase">RANK/XP</th>
-                      <th className="p-4 text-[10px] font-black tracking-widest text-red-400 uppercase">MISSIONS</th>
+                      <th className="p-4 text-[10px] font-black tracking-widest text-red-400 uppercase">GOALS</th>
                       <th className="p-4 text-[10px] font-black tracking-widest text-red-400 uppercase">STATUS</th>
                       <th className="p-4 text-[10px] font-black tracking-widest text-red-400 uppercase">ACTIONS</th>
                     </tr>

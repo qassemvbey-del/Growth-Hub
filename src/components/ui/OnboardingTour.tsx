@@ -8,45 +8,45 @@ const TOUR_STEPS = [
   {
     id: 'welcome',
     title: 'SYSTEM_ONLINE',
-    subtitle: 'TACTICAL_BRIEFING // V7.0',
-    body: 'Welcome to Growth Hub — your personal Life OS. This guided protocol will show you the key systems.',
-    bodyAr: 'مرحباً بك في Growth Hub — نظام تشغيل حياتك الشخصي. هذا البروتوكول الموجه سيريك الأنظمة الرئيسية.',
+    subtitle: 'WORKSPACE_BRIEFING // V7.0',
+    body: 'Welcome to Growth Hub — your personal Life OS. This guided walk-through will show you the key systems.',
+    bodyAr: 'مرحباً بك في Growth Hub — نظام تشغيل حياتك الشخصي. هذا الدليل الإرشادي سيريك الأنظمة الرئيسية.',
     icon: 'bolt',
     arrowDir: null as null | 'top' | 'bottom',
   },
   {
     id: 'xp-bar',
     title: 'XP_TRACKER',
-    subtitle: 'OPERATOR_RANK // PROGRESSION',
-    body: 'This is your XP Bar. Complete mission tasks to earn XP and rank up from RECRUIT to CONQUEROR.',
-    bodyAr: 'هذا شريط XP الخاص بك. أتمم أهداف المهام لكسب XP والترقي من RECRUIT إلى CONQUEROR.',
+    subtitle: 'MEMBER_RANK // PROGRESSION',
+    body: 'This is your XP Bar. Complete goal tasks to earn XP and rank up from RECRUIT to CONQUEROR.',
+    bodyAr: 'هذا شريط XP الخاص بك. أتمم مهام الأهداف لكسب XP والترقي من RECRUIT إلى CONQUEROR.',
     icon: 'military_tech',
     arrowDir: 'top' as null | 'top' | 'bottom',
   },
   {
     id: 'mission-grid',
     title: 'MY GOALS',
-    subtitle: 'ACTIVE_OPERATIONS // GRID',
-    body: 'Your active missions appear here as Energy Cells. Tap any cell to view tasks and track progress.',
-    bodyAr: 'مهامك النشطة تظهر هنا كخلايا طاقة. اضغط على أي خلية لعرض المهام وتتبع التقدم.',
+    subtitle: 'ACTIVE_GOALS // GRID',
+    body: 'Your active goals appear here as Energy Cells. Tap any cell to view tasks and track progress.',
+    bodyAr: 'أهدافك النشطة تظهر هنا كخلايا طاقة. اضغط على أي خلية لعرض المهام وتتبع التقدم.',
     icon: 'grid_view',
     arrowDir: 'bottom' as null | 'top' | 'bottom',
   },
   {
     id: 'sidebar',
-    title: 'NAVIGATION_HUD',
+    title: 'NAVIGATION',
     subtitle: 'SECTOR_MAP // CREATED',
-    body: 'Use the bottom nav to switch between Dashboard, Missions, Notes, Achievements, and the Vault.',
-    bodyAr: 'استخدم شريط التنقل السفلي للتنقل بين لوحة التحكم والمهام والملاحظات والإنجازات والخزنة.',
+    body: 'Use the navigation options to switch between Dashboard, Goals, Notes, Achievements, and Wins.',
+    bodyAr: 'استخدم خيارات التنقل للتنقل بين لوحة التحكم والمهام والملاحظات والإنجازات والخزنة.',
     icon: 'explore',
     arrowDir: 'bottom' as null | 'top' | 'bottom',
   },
   {
     id: 'complete',
     title: 'BRIEFING_COMPLETE',
-    subtitle: 'OPERATOR_CLEARED // GO_DARK',
-    body: 'You are cleared for operation. Build missions, earn XP, and conquer your objectives.',
-    bodyAr: 'تم التخليص للعمليات. أنشئ المهام، اكسب XP، وتغلب على أهدافك.',
+    subtitle: 'MEMBER_CLEARED // DASHBOARD',
+    body: 'You are ready to begin. Create goals, earn XP, and achieve your objectives.',
+    bodyAr: 'تم تفعيل حسابك. أنشئ الأهداف، اكسب XP، وحقق أهدافك.',
     icon: 'verified',
     arrowDir: null as null | 'top' | 'bottom',
   },
@@ -187,7 +187,7 @@ export default function OnboardingTour() {
                       onClick={dismiss}
                       className="text-[10px] font-space font-black tracking-[0.3em] uppercase text-zinc-500 dark:text-white/20 hover:text-zinc-900 dark:hover:text-white/60 transition-all"
                     >
-                      {isRTL ? 'تخطي' : 'SKIP_PROTOCOL'}
+                      {isRTL ? 'تخطي' : 'SKIP TOUR'}
                     </button>
 
                     <div className="flex items-center gap-3">
@@ -205,7 +205,7 @@ export default function OnboardingTour() {
                         style={{ backgroundColor: neonColor, boxShadow: `0 0 20px ${neonColor}40` }}
                       >
                         {isLast
-                          ? (isRTL ? 'ابدأ العمليات' : 'GO_DARK')
+                          ? (isRTL ? 'ابدأ العمل' : 'GET STARTED')
                           : (isRTL ? 'التالي' : 'GOT_IT')}
                       </button>
                     </div>

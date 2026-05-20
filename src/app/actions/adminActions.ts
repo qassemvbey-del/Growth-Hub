@@ -71,7 +71,7 @@ export async function getAdminStats() {
   }
 }
 
-export async function getOperatorRegistry() {
+export async function getMemberRegistry() {
   await checkAdmin()
   const supabase = createAdminClient()
 
@@ -124,7 +124,7 @@ export async function deleteUser(userId: string) {
   await checkAdmin()
   const supabase = createAdminClient()
 
-  console.log('PURGE_SEQUENCE // INITIATED_FOR_OPERATOR:', userId)
+  console.log('PURGE_SEQUENCE // INITIATED_FOR_MEMBER:', userId)
 
   // Call PostgreSQL RPC to purge all user data in a single transactional procedure
   const { error: rpcError } = await supabase.rpc('purge_user_data', { target_user_id: userId })
@@ -141,7 +141,7 @@ export async function deleteUser(userId: string) {
     throw error
   }
 
-  console.log('PURGE_SEQUENCE // COMPLETE_FOR_OPERATOR:', userId)
+  console.log('PURGE_SEQUENCE // COMPLETE_FOR_MEMBER:', userId)
   return { success: true }
 }
 
@@ -160,14 +160,14 @@ export async function getRecentActivity() {
 
   return logs?.map(log => ({
     id: log.id,
-    name: log.profiles?.full_name || 'UNKNOWN_OPERATOR',
+    name: log.profiles?.full_name || 'UNKNOWN_MEMBER',
     type: 'XP_GAIN',
     content: { title: log.reason, amount: log.amount },
     timestamp: log.created_at
   })) || []
 }
 
-export async function getMissionAnalytics() {
+export async function getGoalAnalytics() {
   await checkAdmin()
   const supabase = createAdminClient()
 

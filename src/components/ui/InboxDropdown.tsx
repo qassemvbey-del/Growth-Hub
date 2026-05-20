@@ -40,7 +40,10 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, themeC
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -10, scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-      className="absolute top-full mt-4 right-0 w-[90vw] max-w-[360px] bg-white/95 dark:bg-[#050505]/95 backdrop-blur-2xl border border-black/10 dark:border-white/10 shadow-[0_15px_50px_rgba(0,0,0,0.5)] z-[250] rounded-sm flex flex-col overflow-hidden"
+      className={cn(
+        "absolute top-full mt-4 w-[90vw] max-w-[360px] bg-white/95 dark:bg-[#050505]/95 backdrop-blur-2xl border border-black/10 dark:border-white/10 shadow-[0_15px_50px_rgba(0,0,0,0.5)] z-[250] rounded-sm flex flex-col overflow-hidden",
+        isRTL ? "left-0" : "right-0"
+      )}
       style={{ 
         boxShadow: `0 0 30px ${themeColor}15, 0 15px 50px rgba(0,0,0,0.5)`
       }}

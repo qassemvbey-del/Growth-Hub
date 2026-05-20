@@ -24,6 +24,7 @@ export default {
         inter: ["Inter", "sans-serif"],
         arabic: ["Tajawal", "sans-serif"],
         marker: ["Permanent Marker", "cursive"],
+        exo: ["var(--font-exo2)", "sans-serif"],
       },
       borderRadius: {
         DEFAULT: "0.125rem",

@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
   <defs>
     <radialGradient id="bg-zain" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.3" />
-      <stop offset="100%" stop-color="#004D40" stop-opacity="0.1" />
+      <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.45" />
+      <stop offset="60%" stop-color="#E0F7FA" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.15" />
     </radialGradient>
-    <linearGradient id="hoodie-zain" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#1A1A1A" />
-      <stop offset="100%" stop-color="#0A0A0A" />
+    <linearGradient id="suit-zain" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1A1A24" />
+      <stop offset="100%" stop-color="#0A0A0F" />
     </linearGradient>
     <linearGradient id="visor-zain" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#00E5FF" />
@@ -24,16 +25,39 @@
     </filter>
   </defs>
 
-  <!-- Background Glow -->
+  <!-- Background Glow & Cyber Ring -->
   <circle cx="200" cy="200" r="190" fill="url(#bg-zain)" />
-  <circle cx="200" cy="200" r="185" fill="none" stroke="#00E5FF" stroke-width="2" stroke-opacity="0.4" stroke-dasharray="10 10" />
+  <circle cx="200" cy="200" r="185" fill="none" stroke="#00E5FF" stroke-width="2" stroke-opacity="0.5" stroke-dasharray="10 10" />
 
-  <!-- Body / Dark Hoodie -->
-  <path d="M100 380 C100 290, 300 290, 300 380 Z" fill="url(#hoodie-zain)" stroke="#00E5FF" stroke-width="2" stroke-opacity="0.3" />
-  <!-- Inner Hoodie Strings & Zipper -->
-  <line x1="200" y1="340" x2="200" y2="380" stroke="#00E5FF" stroke-width="2" opacity="0.6" />
-  <path d="M165 340 L165 380" stroke="#333" stroke-width="4" stroke-linecap="round" />
-  <path d="M235 340 L235 380" stroke="#333" stroke-width="4" stroke-linecap="round" />
+  <!-- Startup Entrepreneur / Visual Background Elements -->
+  <!-- Left Side: Glowing Growth Chart Arrow -->
+  <g opacity="0.4">
+    <path d="M60 160 L80 140 L90 148 L110 125" fill="none" stroke="#00E5FF" stroke-width="3" stroke-linecap="round" />
+    <path d="M100 125 L110 125 L110 135" fill="none" stroke="#00E5FF" stroke-width="3" stroke-linecap="round" />
+    <circle cx="60" cy="160" r="3.5" fill="#00E5FF" />
+    <circle cx="80" cy="140" r="3.5" fill="#00E5FF" />
+    <circle cx="90" cy="148" r="3.5" fill="#00E5FF" />
+  </g>
+  <!-- Right Side: Glowing Startup Rocket launching -->
+  <g opacity="0.45" filter="url(#glow-zain)">
+    <path d="M308 128 C308 112, 316 102, 316 102 C316 102, 324 112, 324 128 L321 138 L311 138 Z" fill="#E0F7FA" stroke="#00E5FF" stroke-width="2" />
+    <path d="M308 131 L301 138 L309 138 Z M324 131 L331 138 L323 138 Z" fill="#00E5FF" stroke="#00E5FF" stroke-width="1.5" />
+    <!-- Fire flame -->
+    <path d="M313 140 Q316 153 313 155 Q319 153 319 140" fill="#FF5F00" />
+  </g>
+  <!-- Aspiring Floating Stars -->
+  <circle cx="85" cy="100" r="2" fill="#00E5FF" opacity="0.5" />
+  <circle cx="340" cy="85" r="1.5" fill="#00E5FF" opacity="0.4" />
+
+  <!-- Body / Premium Corporate Cyber Blazer Suite representing "Startup Founder" -->
+  <path d="M100 380 C100 295, 300 295, 300 380 Z" fill="url(#suit-zain)" stroke="#00E5FF" stroke-width="2" stroke-opacity="0.3" />
+  <!-- V-neck neon high-tech shirt -->
+  <path d="M165 380 L165 315 L200 360 L235 315 L235 380 Z" fill="#006064" stroke="#00E5FF" stroke-width="1.5" />
+  <!-- Neon Suit lapel lines -->
+  <path d="M132 315 L165 380" stroke="#00E5FF" stroke-width="3.5" stroke-linecap="round" filter="url(#glow-zain)" opacity="0.8" />
+  <path d="M268 315 L235 380" stroke="#00E5FF" stroke-width="3.5" stroke-linecap="round" filter="url(#glow-zain)" opacity="0.8" />
+  <!-- Founder Lapel Badge -->
+  <polygon points="144,334 149,329 151,335 146,339" fill="#FFE082" stroke="#FFD700" stroke-width="1.5" filter="url(#glow-zain)" />
 
   <!-- Neck -->
   <path d="M175 250 L225 250 L220 340 L180 340 Z" fill="url(#skin-zain)" />
@@ -53,8 +77,8 @@
   <!-- Nose -->
   <path d="M200 195 L205 212 L195 212" fill="none" stroke="#D84315" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
 
-  <!-- Mouth / Stern Hacker Expression -->
-  <path d="M185 240 L215 240" stroke="#BF360C" stroke-width="3.5" stroke-linecap="round" />
+  <!-- Mouth / Confident Hacker/Founder Smile -->
+  <path d="M182 240 Q200 248 218 240" fill="none" stroke="#BF360C" stroke-width="3.5" stroke-linecap="round" />
 
   <!-- Futuristic Cyber Visor / Glasses -->
   <path d="M140 170 L260 170 L250 200 L210 200 L200 190 L190 200 L150 200 Z" fill="url(#visor-zain)" stroke="#00E5FF" stroke-width="2" filter="url(#glow-zain)" opacity="0.9" />
@@ -64,6 +88,6 @@
   <circle cx="170" cy="190" r="3" fill="#FFFFFF" filter="url(#glow-zain)" />
   <circle cx="230" cy="190" r="3" fill="#FFFFFF" filter="url(#glow-zain)" />
 
-  <!-- Hoodie Hood covering top of head -->
-  <path d="M110 250 C100 120, 140 70, 200 70 C260 70, 300 120, 290 250 C270 140, 240 100, 200 100 C160 100, 130 140, 110 250 Z" fill="url(#hoodie-zain)" stroke="#333333" stroke-width="3" />
+  <!-- Hoodie Hood draping onto shoulders (light background keeps features perfectly visible!) -->
+  <path d="M110 250 C100 120, 140 70, 200 70 C260 70, 300 120, 290 250 C270 140, 240 100, 200 100 C160 100, 130 140, 110 250 Z" fill="none" stroke="#00E5FF" stroke-width="2" stroke-opacity="0.4" />
 </svg>

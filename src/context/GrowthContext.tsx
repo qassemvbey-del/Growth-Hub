@@ -252,21 +252,21 @@ export const TRANSLATIONS = {
   },
   ar: {
     dashboard: 'الرئيسية',
-    mission: 'المهام الشغالة',
-    brain: 'الذاكرة',
+    mission: 'الأهداف النشطة',
+    brain: 'الأفكار والملاحظات',
     achievements: 'الإنجازات',
     vault: 'الخزنة',
     streak: 'سجل الأيام',
     exit: 'خروج',
     sync: 'جاري المزامنة',
-    operator: 'أوبريتور',
+    operator: 'المستخدم',
     status: 'متصل',
-    createMission: 'ابدأ مهمة جديدة',
+    createMission: 'إنشاء هدف جديد',
     task: 'مهمة فرعية',
     showOnDashboard: 'عرض في الرئيسية',
     save: 'حفظ',
     cancel: 'إلغاء',
-    delete: 'احذف',
+    delete: 'حذف',
     edit: 'تعديل',
     deadline: 'الموعد النهائي',
     start_date: 'تاريخ البدء',
@@ -276,22 +276,22 @@ export const TRANSLATIONS = {
     on_track: 'على المسار',
     late: 'متأخر',
     ahead: 'متقدم',
-    addTask: 'ضيف مهمة فرعية',
+    addTask: 'إضافة مهمة فرعية',
     settings: 'الإعدادات',
     gender: 'الجنس',
     male: 'ذكر',
     female: 'أنثى',
     age: 'السن',
     fullName: 'الاسم بالكامل',
-    aiName: 'اسم المدرب',
-    aiPersonality: 'شخصية المدرب',
+    aiName: 'اسم المساعد الذكي',
+    aiPersonality: 'شخصية المساعد الذكي',
     gentle: 'هادئ',
-    savage: 'شرس',
+    savage: 'حازم',
     logout: 'خروج',
-    noTasks: 'مفيش مهام مضافة.. ضيف واحدة دلوقتي.',
+    noTasks: 'لا توجد مهام فرعية مضافة حالياً. يرجى إضافة مهمة فرعية أدناه.',
     tapToEnter: 'انقر للدخول',
     purge: 'مسح',
-    deploy: 'ابدأ التنفيذ',
+    deploy: 'بدء الهدف',
     missionColor: 'لون المهمة',
     missionScale: 'حجم المهمة',
   }
@@ -323,6 +323,8 @@ interface GrowthContextType {
     isAheadOfSchedule: boolean
     status: 'LATE' | 'ON_TRACK'
   }
+  showAuthModal: boolean
+  setShowAuthModal: (open: boolean) => void
 }
 
 const GrowthContext = createContext<GrowthContextType | undefined>(undefined)
@@ -339,13 +341,26 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
     }
     return null
   })
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem('cached_profile')
+      const hasAuthToken = localStorage.getItem('growth-hub-auth-token')
+      if (cached && hasAuthToken) {
+        try {
+          JSON.parse(cached)
+          return false
+        } catch (e) {}
+      }
+    }
+    return true
+  })
   const [tutorialActive, setTutorialActive] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [lastAiMessage, setLastAiMessage] = useState('SYSTEM_ONLINE // STANDING_BY')
   const [isRankUpModalOpen, setIsRankUpModalOpen] = useState(false)
   const [oldRank, setOldRank] = useState('SILVER')
   const [newRank, setNewRank] = useState('SILVER')
+  const [showAuthModal, setShowAuthModal] = useState(false)
   
   const supabase = createClient()
   const router = useRouter()
@@ -392,7 +407,8 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
   const triggerRankUp = (oldVal: string, newVal: string) => {
     setOldRank(oldVal)
     setNewRank(newVal)
-    setIsRankUpModalOpen(true)
+    // Rank-up modal disabled — play chime only (no full-screen takeover)
+    // setIsRankUpModalOpen(true)
     playRankUpChime()
   }
 
@@ -438,7 +454,10 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
         }
         router.push('/auth/login')
       } else if (event === 'SIGNED_IN') {
-        setIsLoading(true)
+        const hasCachedProfile = typeof window !== 'undefined' && !!localStorage.getItem('cached_profile')
+        if (!hasCachedProfile) {
+          setIsLoading(true)
+        }
         refreshProfile()
       }
     })
@@ -490,6 +509,31 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
+        // --- POST-AUTH GUEST GOAL MERGE ---
+        if (typeof window !== 'undefined') {
+          const guestGoalsStr = localStorage.getItem('guest_goals')
+          if (guestGoalsStr) {
+            try {
+              const guestGoals = JSON.parse(guestGoalsStr)
+              if (Array.isArray(guestGoals) && guestGoals.length > 0) {
+                console.log('POST_AUTH_MERGE: Migrating guest goals to user DB...', guestGoals)
+                // Filter out the local IDs and set the correct user_id
+                const localGoals = guestGoals.map((g: any) => {
+                  const { id, ...rest } = g
+                  return { ...rest, user_id: user.id }
+                })
+                const { error: mergeError } = await supabase.from('cups').insert(localGoals)
+                if (!mergeError) {
+                  localStorage.removeItem('guest_goals')
+                  console.log('POST_AUTH_MERGE: Success.')
+                } else {
+                  console.error('POST_AUTH_MERGE: Failed to insert.', mergeError)
+                }
+              }
+            } catch (e) {}
+          }
+        }
+
         const { data } = await supabase
           .from('profiles')
           .select('*')
@@ -609,9 +653,39 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       } else {
-         if (!window.location.pathname.startsWith('/auth')) {
-           router.push('/auth/login')
-         }
+        const hasLocalAuth = typeof window !== 'undefined' && !!localStorage.getItem('growth-hub-auth-token')
+        const hasCachedProfile = typeof window !== 'undefined' && !!localStorage.getItem('cached_profile')
+        if (hasLocalAuth && hasCachedProfile) {
+          console.log('HYDRATION_INTEGRATION: Active cached session and local tokens present. Bypassing redirect.')
+        } else {
+          // --- GUEST MODE IMPLEMENTATION ---
+          console.log('GUEST_MODE: No active session found. Mounting Guest profile.');
+          const storedLang = typeof window !== 'undefined' ? localStorage.getItem('language') as Language : 'en';
+          const guestProfile: Profile = {
+            id: 'guest',
+            full_name: 'Guest',
+            avatar_url: '/avatars/omar.svg',
+            age: null,
+            mission_goal: null,
+            weekly_project: null,
+            daily_focus: null,
+            language: storedLang,
+            onboarded: false,
+            ai_name: null,
+            ai_personality: 'GENTLE',
+            gender: null,
+            xp: 0,
+            rank: 'SILVER',
+            active_theme: 'SILVER',
+            blocked: false,
+            last_seen: new Date().toISOString(),
+            email: null
+          };
+          setProfile(guestProfile);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('cached_profile', JSON.stringify(guestProfile));
+          }
+        }
       }
     } catch (err) {
       console.error('REFRESH_PROFILE_ERROR:', err)
@@ -660,7 +734,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
     
     // Break Infinite Loop: Only apply if values changed
     const dir = isRTL ? 'rtl' : 'ltr'
-    const lang = profile.language.startsWith('ar') ? 'ar' : 'en'
+    const lang = profile.language?.startsWith('ar') ? 'ar' : 'en'
     
     if (document.documentElement.dir !== dir) document.documentElement.dir = dir
     if (document.documentElement.lang !== lang) document.documentElement.lang = lang
@@ -726,7 +800,9 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
           isAheadOfSchedule,
           status
         }
-      }
+      },
+      showAuthModal,
+      setShowAuthModal
     }}>
       {children}
     </GrowthContext.Provider>

@@ -14,37 +14,37 @@ const STEPS = [
   {
     id: 1,
     titleEn: 'YOUR GOALS COME ALIVE',
-    titleAr: 'أهدافك بتتحرك هنا',
+    titleAr: 'تجسيد الأهداف وتطويرها',
     descEn: 'Every goal you add becomes a living crystal. Complete tasks to fill it up. When it hits 100%, it transforms into a permanent achievement.',
-    descAr: 'كل هدف بتضيفه بيبقى كريستال حي. خلص tasks وشوفه يتملى. لما يوصل 100% بيتحول لإنجاز دايم في مكتبتك.'
+    descAr: 'كل هدف تضيفه يظهر كعنصر تفاعلي نشط. أكمل المهام المرتبطة به لزيادة تقدمه، وعند وصوله إلى 100% يتحول لإنجاز دائم موثق في مكتبتك.'
   },
   {
     id: 2,
     titleEn: '9 UNITS. CHOOSE WISELY.',
-    titleAr: '٩ وحدات. اختار صح.',
+    titleAr: 'سعة التركيز: 9 وحدات',
     descEn: 'Your brain can only handle so much at once. You have 9 Focus Units. Big goal = 3 units. Medium = 1.5. Small = 1. Pick your battles carefully.',
-    descAr: 'عقلك مش هيقدر يركز في كل حاجة في وقت واحد. عندك ٩ وحدات تركيز بس. هدف كبير = ٣ وحدات. متوسط = ١.٥. صغير = ١. اختار معاركك.'
+    descAr: 'يعمل العقل بأقصى كفاءة عند التركيز المحدود. يمنحك النظام 9 وحدات تركيز كحد أقصى؛ الأهداف الكبيرة تستهلك 3 وحدات، المتوسطة 1.5، والصغيرة وحدة واحدة. خطط لأهدافك بذكاء.'
   },
   {
     id: 3,
     titleEn: 'LEVEL UP YOUR LIFE',
-    titleAr: 'ارتقِ في الرتب',
+    titleAr: 'تطور مستوى الإنتاجية',
     descEn: 'Every task you complete earns XP. Your rank evolves from Recruit to Ace to Conqueror. Fall behind on deadlines and you lose XP. Stay sharp.',
-    descAr: 'كل task بتخلصها بتكسب XP. رتبتك بتتطور من مجند لمحترف لمسيطر. لو اتأخرت عن المواعيد بتخسر XP. افضل في المعركة.'
+    descAr: 'إكمال المهام يمنحك نقاط خبرة (XP). يتطور تصنيفك المهني تدريجياً ليعكس حجم التزامك. تأخرك عن المواعيد النهائية يؤدي إلى تراجع نقاطك تدريجياً.'
   },
   {
     id: 4,
     titleEn: 'YOUR PERSONAL COMMANDER',
-    titleAr: 'مدربك الشخصي',
+    titleAr: 'المساعد الذكي المخصص',
     descEn: 'SAVAGE knows your data. He tells you exactly what to focus on today, which goals are in danger, and what your next move should be. No generic advice. Ever.',
-    descAr: 'المدرب عارف بياناتك كلها. بيقولك بالظبط إيه اللي تركز فيه النهارده، وأنهي أهداف في خطر، وإيه خطوتك الجاية. مفيش كلام عام.'
+    descAr: 'يقوم المساعد الذكي بتحليل أدائك بدقة، ليوجهك مباشرة إلى المهام الأكثر أهمية اليوم، وينبهك للأهداف المعرضة للتأخير لتتخذ الإجراء المناسب بناءً على معطيات حقيقية.'
   },
   {
     id: 5,
     titleEn: 'NEVER MISS A DEADLINE',
-    titleAr: 'مش هتنسى حاجة',
+    titleAr: 'متابعة مستمرة ودقيقة',
     descEn: 'Your inbox sends weekly performance reports, deadline warnings 3 days before they hit, and celebrates every goal you complete. Stay informed. Stay ahead.',
-    descAr: 'الـ Inbox بيبعتلك تقرير أسبوعي عن أدائك، تنبيه قبل الـ deadline بـ ٣ أيام، ويحتفل معاك لما بتخلص هدف. فضل على علم دايماً.'
+    descAr: 'تلقَّ تقارير أداء أسبوعية مفصلة، وتنبيهات استباقية قبل 3 أيام من المواعيد النهائية للمهام، بجانب توثيق واحتفاء بكافة الأهداف المكتملة لتبقى دائماً في طليعة المنجزين.'
   }
 ]
 

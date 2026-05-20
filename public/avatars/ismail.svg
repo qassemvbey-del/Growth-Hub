@@ -1,8 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
   <defs>
     <radialGradient id="bg-ismail" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#1976D2" stop-opacity="0.3" />
-      <stop offset="100%" stop-color="#0D47A1" stop-opacity="0.1" />
+      <stop offset="0%" stop-color="#1976D2" stop-opacity="0.45" />
+      <stop offset="60%" stop-color="#BBDEFB" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.15" />
     </radialGradient>
     <linearGradient id="jacket-ismail" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#1A237E" />
@@ -24,9 +25,29 @@
     </linearGradient>
   </defs>
 
-  <!-- Background Glow -->
+  <!-- Background Glow & Cyber Ring -->
   <circle cx="200" cy="200" r="190" fill="url(#bg-ismail)" />
-  <circle cx="200" cy="200" r="185" fill="none" stroke="#2196F3" stroke-width="2" stroke-opacity="0.4" stroke-dasharray="12 6" />
+  <circle cx="200" cy="200" r="185" fill="none" stroke="#2196F3" stroke-width="2" stroke-opacity="0.5" stroke-dasharray="12 6" />
+
+  <!-- Freelancer Remote Work Background Details -->
+  <!-- Left Side: Remote Work Globe Network -->
+  <g opacity="0.35">
+    <circle cx="80" cy="130" r="22" fill="none" stroke="#1976D2" stroke-width="1.5" />
+    <path d="M58 130 Q80 145 102 130 M58 130 Q80 115 102 130 M80 108 Q88 130 80 152 M80 108 Q72 130 80 152" fill="none" stroke="#1976D2" stroke-width="1" />
+    <circle cx="68" cy="118" r="2" fill="#2196F3" />
+    <circle cx="92" cy="142" r="2" fill="#2196F3" />
+  </g>
+  <!-- Right Side: Timezone Clock -->
+  <g opacity="0.35">
+    <circle cx="320" cy="130" r="22" fill="none" stroke="#1976D2" stroke-width="2" />
+    <line x1="320" y1="108" x2="320" y2="113" stroke="#1976D2" stroke-width="1.5" />
+    <line x1="320" y1="152" x2="320" y2="147" stroke="#1976D2" stroke-width="1.5" />
+    <line x1="298" y1="130" x2="303" y2="130" stroke="#1976D2" stroke-width="1.5" />
+    <line x1="342" y1="130" x2="337" y2="130" stroke="#1976D2" stroke-width="1.5" />
+    <!-- Clock Hands (different timezone) -->
+    <line x1="320" y1="130" x2="320" y2="116" stroke="#1976D2" stroke-width="2" stroke-linecap="round" />
+    <line x1="320" y1="130" x2="332" y2="130" stroke="#1976D2" stroke-width="2" stroke-linecap="round" />
+  </g>
 
   <!-- Body / Dark Blue Robe/Jacket with inner light shirt -->
   <path d="M110 380 C110 300, 290 300, 290 380 Z" fill="url(#jacket-ismail)" />
@@ -35,6 +56,17 @@
   <!-- Robe Lapels -->
   <path d="M140 320 L165 380 L130 380 Z" fill="#1565C0" opacity="0.7" />
   <path d="M260 320 L235 380 L270 380 Z" fill="#1565C0" opacity="0.7" />
+
+  <!-- Cozy Freelance Coffee Cup in foreground -->
+  <g filter="drop-shadow(0 0 3px rgba(25,118,210,0.3))">
+    <!-- Steam rising -->
+    <path d="M107 334 Q104 324 110 318" fill="none" stroke="#2196F3" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <path d="M115 334 Q112 324 118 318" fill="none" stroke="#2196F3" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <!-- Cup body -->
+    <path d="M98 342 L122 342 C122 368, 98 368, 98 342 Z" fill="#ECEFF1" stroke="#1976D2" stroke-width="2.5" />
+    <!-- Handle -->
+    <path d="M98 347 Q88 347 92 356 Q96 361 100 359" fill="none" stroke="#1976D2" stroke-width="2" />
+  </g>
 
   <!-- Neck -->
   <path d="M175 250 L225 250 L220 330 L180 330 Z" fill="url(#skin-ismail)" />
@@ -62,7 +94,7 @@
   <!-- Nose -->
   <path d="M200 190 L205 212 L195 212" fill="none" stroke="#C68400" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
 
-  <!-- Mouth / Confident smile -->
+  <!-- Mouth -->
   <path d="M185 240 Q200 250 215 238" fill="none" stroke="#A1887F" stroke-width="3.5" stroke-linecap="round" />
 
   <!-- Round Glasses (Thin elegant dark frame) -->
@@ -75,7 +107,7 @@
   <line x1="160" y1="172" x2="175" y2="167" stroke="#FFFFFF" stroke-width="2" opacity="0.6" stroke-linecap="round" />
   <line x1="216" y1="172" x2="231" y2="167" stroke="#FFFFFF" stroke-width="2" opacity="0.6" stroke-linecap="round" />
 
-  <!-- Hair (Brown Wavy/Voluminous top) -->
+  <!-- Hair (Brown Wavy/Voluminous top - highly visible on light background) -->
   <path d="M130 165 C120 110, 150 80, 200 85 C250 80, 280 110, 270 165 C255 125, 220 115, 200 120 C180 115, 145 125, 130 165 Z" fill="url(#hair-ismail)" />
   <path d="M150 115 Q175 95 195 110" fill="none" stroke="#795548" stroke-width="3" stroke-linecap="round" opacity="0.6" />
   <path d="M205 105 Q225 95 245 115" fill="none" stroke="#795548" stroke-width="3" stroke-linecap="round" opacity="0.6" />

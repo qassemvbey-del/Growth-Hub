@@ -7,11 +7,11 @@ import { useGrowth } from '@/context/GrowthContext'
 import { useToast } from '@/components/ui/Toast'
 
 const CUSTOM_SVGS = [
-  { id: 'omar', label: 'Omar', arLabel: 'عمر', gender: 'male', sub: 'Programmer', arSub: 'مبرمج', icon: 'school' },
-  { id: 'maya', label: 'Maya', arLabel: 'مايا', gender: 'female', sub: 'Learner', arSub: 'متعلم', icon: 'code' },
+  { id: 'omar', label: 'Omar', arLabel: 'عمر', gender: 'male', sub: 'Programmer', arSub: 'مبرمج', icon: 'laptop_mac' },
+  { id: 'maya', label: 'Maya', arLabel: 'مايا', gender: 'female', sub: 'Learner', arSub: 'متعلم', icon: 'school' },
   { id: 'ismail', label: 'Ismail', arLabel: 'إسماعيل', gender: 'male', sub: 'Freelancer', arSub: 'مستقل', icon: 'work' },
   { id: 'zain', label: 'Zain', arLabel: 'زين', gender: 'male', sub: 'Startup', arSub: 'رائد أعمال', icon: 'rocket_launch' },
-  { id: 'menna', label: 'Menna', arLabel: 'منة', gender: 'female', sub: 'Creator', arSub: 'صانع محتوى', icon: 'videocam' },
+  { id: 'menna', label: 'Menna', arLabel: 'منة', gender: 'female', sub: 'Content Creator', arSub: 'صانعة محتوى', icon: 'videocam' },
   { id: 'nour', label: 'Nour', arLabel: 'نور', gender: 'female', sub: 'Professional', arSub: 'موظف', icon: 'trending_up' },
 ]
 
@@ -152,16 +152,13 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                 <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
                 {/* Top Badge */}
-                <div className="w-full flex items-center justify-between z-10">
+                <div className="w-full flex items-center justify-start z-10">
                   <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 backdrop-blur-md">
                     <span className="w-2 h-2 rounded-full animate-ping" style={{ backgroundColor: currentTheme.color }} />
                     <span className="text-[9px] font-space font-black tracking-widest uppercase text-zinc-800 dark:text-white/80">
                       {isRTL ? 'حساب جوجل' : 'GOOGLE AUTH'}
                     </span>
                   </div>
-                  <span className="material-symbols-outlined text-zinc-400 dark:text-white/30 group-hover:text-zinc-600 dark:group-hover:text-white/60 transition-colors text-base">
-                    cloud_sync
-                  </span>
                 </div>
 
                 {/* Avatar Display Container */}
@@ -172,12 +169,25 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                     style={{ borderColor: selected === null ? currentTheme.color : 'rgba(150,150,150,0.3)' }}
                   />
                   {/* Inner Avatar */}
-                  <div className="w-full h-full rounded-full overflow-hidden border-2 border-zinc-300 dark:border-white/20 bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center shadow-inner">
+                  <div className="w-full h-full rounded-full overflow-hidden border-2 border-zinc-300 dark:border-white/20 bg-zinc-100/80 dark:bg-white/10 flex items-center justify-center shadow-inner backdrop-blur-md">
                     {profile?.google_avatar_url ? (
-                      <img src={profile.google_avatar_url} alt="Google Auth" className="w-full h-full object-cover scale-[1.05]" />
+                      <img src={profile.google_avatar_url} alt="Google Auth" className="w-[90%] h-[90%] mx-auto object-contain p-1 rounded-full" />
                     ) : (
                       <span className="material-symbols-outlined text-zinc-400 dark:text-white/40 text-5xl font-light">account_circle</span>
                     )}
+                  </div>
+                  {/* Visual Role Icon Overlay Badge at bottom-right */}
+                  <div 
+                    className="absolute bottom-0 right-0 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center border-2 border-white dark:border-black shadow-lg z-20 backdrop-blur-md"
+                    style={{ 
+                      backgroundColor: selected === null ? currentTheme.color : '#71717a', 
+                      color: selected === null ? '#000000' : '#ffffff',
+                      boxShadow: selected === null ? `0 0 15px ${currentTheme.color}` : undefined
+                    }}
+                  >
+                    <span className="material-symbols-outlined text-xs md:text-sm font-black">
+                      cloud_sync
+                    </span>
                   </div>
                 </div>
 
@@ -224,16 +234,13 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                     <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
                     {/* Top Badge */}
-                    <div className="w-full flex items-center justify-between z-10">
+                    <div className="w-full flex items-center justify-start z-10">
                       <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 backdrop-blur-md">
                         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: avatar.gender === 'male' ? '#00E5FF' : '#E91E63' }} />
                         <span className="text-[9px] font-space font-black tracking-widest uppercase text-zinc-800 dark:text-white/80">
                           {isRTL ? 'شخصية مهنية' : 'PERSONA'}
                         </span>
                       </div>
-                      <span className="material-symbols-outlined text-zinc-400 dark:text-white/30 group-hover:text-zinc-600 dark:group-hover:text-white/60 transition-colors text-base">
-                        {avatar.icon}
-                      </span>
                     </div>
 
                     {/* Avatar Display Container */}
@@ -243,9 +250,22 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                         className="absolute inset-0 rounded-full border-2 border-dashed transition-colors duration-300 animate-spin-slow pointer-events-none"
                         style={{ borderColor: isActive ? currentTheme.color : 'rgba(150,150,150,0.3)' }}
                       />
-                      {/* Inner Avatar (p-0 and scale-[1.15] for larger, clearer display) */}
-                      <div className="w-full h-full rounded-full overflow-hidden border-2 border-zinc-300 dark:border-white/20 bg-zinc-100 dark:bg-black/60 flex items-center justify-center shadow-inner backdrop-blur-md">
-                        <img src={avatarUrl} alt={avatar.label} className="w-full h-full object-cover scale-[1.15] group-hover:scale-[1.25] transition-transform duration-500" />
+                      {/* Inner Avatar */}
+                      <div className="w-full h-full rounded-full overflow-hidden border-2 border-zinc-300 dark:border-white/20 bg-zinc-100/80 dark:bg-white/10 flex items-center justify-center shadow-inner backdrop-blur-md p-1">
+                        <img src={avatarUrl} alt={avatar.label} className="w-[90%] h-[90%] mx-auto object-contain p-1 group-hover:scale-105 transition-transform duration-500" />
+                      </div>
+                      {/* Visual Role Icon Overlay Badge at bottom-right */}
+                      <div 
+                        className="absolute bottom-0 right-0 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center border-2 border-white dark:border-black shadow-lg z-20 backdrop-blur-md transition-colors"
+                        style={{ 
+                          backgroundColor: isActive ? currentTheme.color : '#71717a', 
+                          color: isActive ? '#000000' : '#ffffff',
+                          boxShadow: isActive ? `0 0 15px ${currentTheme.color}` : undefined
+                        }}
+                      >
+                        <span className="material-symbols-outlined text-xs md:text-sm font-black">
+                          {avatar.icon}
+                        </span>
                       </div>
                     </div>
 

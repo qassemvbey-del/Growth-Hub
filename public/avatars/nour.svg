@@ -1,8 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
   <defs>
     <radialGradient id="bg-nour" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#FFD700" stop-opacity="0.3" />
-      <stop offset="100%" stop-color="#FF6F00" stop-opacity="0.1" />
+      <stop offset="0%" stop-color="#FFD700" stop-opacity="0.45" />
+      <stop offset="60%" stop-color="#FFF9C4" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.15" />
     </radialGradient>
     <linearGradient id="jacket-nour" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#FFFFFF" />
@@ -29,9 +30,24 @@
     </filter>
   </defs>
 
-  <!-- Background Glow -->
+  <!-- Background Glow & Cyber Ring -->
   <circle cx="200" cy="200" r="190" fill="url(#bg-nour)" />
-  <circle cx="200" cy="200" r="185" fill="none" stroke="#FFD700" stroke-width="2" stroke-opacity="0.4" stroke-dasharray="15 10" />
+  <circle cx="200" cy="200" r="185" fill="none" stroke="#FFD700" stroke-width="2" stroke-opacity="0.5" stroke-dasharray="15 10" />
+
+  <!-- Professional / Corporate Background Elements -->
+  <!-- Left Side: Glowing Security Shield representing efficiency & management -->
+  <g opacity="0.35">
+    <path d="M60 120 L80 110 L100 120 L100 145 C100 160, 80 170, 80 170 C80 170, 60 160, 60 145 Z" fill="none" stroke="#FFD700" stroke-width="2" />
+    <path d="M72 138 L78 144 L88 132" fill="none" stroke="#FFD700" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+  <!-- Right Side: Glowing KPI Target Board representing goals & targets -->
+  <g opacity="0.35">
+    <circle cx="320" cy="140" r="22" fill="none" stroke="#FFD700" stroke-width="2" />
+    <circle cx="320" cy="140" r="10" fill="none" stroke="#FFD700" stroke-width="1.5" />
+    <!-- Bullseye Arrow -->
+    <line x1="338" y1="122" x2="322" y2="138" stroke="#FFD700" stroke-width="2.5" stroke-linecap="round" />
+    <path d="M320 140 L327 137 M320 140 L323 133" stroke="#FFD700" stroke-width="2" stroke-linecap="round" />
+  </g>
 
   <!-- Body / White High-Collar Jacket -->
   <path d="M110 380 C110 300, 290 300, 290 380 Z" fill="url(#jacket-nour)" />
@@ -39,11 +55,27 @@
   <path d="M150 380 L160 310 L240 310 L250 380 Z" fill="url(#collar-nour)" opacity="0.9" />
   <path d="M170 310 L200 350 L230 310" fill="none" stroke="#FFFFFF" stroke-width="3" opacity="0.8" />
 
+  <!-- Corporate ID Badge Lanyard representing "Professional" -->
+  <g filter="drop-shadow(0 0 3px rgba(255,160,0,0.3))">
+    <!-- Strap -->
+    <path d="M174 322 L200 354 L226 322" fill="none" stroke="#FFA000" stroke-width="2.5" stroke-linecap="round" />
+    <!-- Ring loop -->
+    <circle cx="200" cy="354" r="2.5" fill="#FFD700" />
+    <!-- ID Card -->
+    <rect x="188" y="356" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#FFA000" stroke-width="1.5" />
+    <!-- ID Photo -->
+    <rect x="191" y="359" width="8" height="10" rx="1" fill="#FFA000" opacity="0.7" />
+    <!-- ID Detail Lines -->
+    <line x1="202" y1="361" x2="209" y2="361" stroke="#FF8F00" stroke-width="1.5" opacity="0.7" />
+    <line x1="202" y1="365" x2="207" y2="365" stroke="#FF8F00" stroke-width="1.5" opacity="0.7" />
+    <line x1="191" y1="373" x2="209" y2="373" stroke="#FF8F00" stroke-width="1" opacity="0.7" />
+  </g>
+
   <!-- Neck -->
   <path d="M175 250 L225 250 L220 315 L180 315 Z" fill="url(#skin-nour)" />
   <ellipse cx="200" cy="275" rx="18" ry="6" fill="#FF8F00" opacity="0.3" />
 
-  <!-- Elegant Futuristic Bun Hair (Top) -->
+  <!-- Elegant Futuristic Bun Hair (Top - beautifully contrasted now!) -->
   <circle cx="200" cy="80" r="35" fill="url(#hair-nour)" />
   <!-- Gold Hairpin / Cybernetic ring around bun -->
   <ellipse cx="200" cy="80" rx="38" ry="12" fill="none" stroke="#FFD700" stroke-width="5" filter="url(#glow-nour)" />
@@ -83,7 +115,7 @@
   <path d="M165 202 L178 202" stroke="#FFD700" stroke-width="3" stroke-linecap="round" filter="url(#glow-nour)" opacity="0.8" />
   <path d="M222 202 L235 202" stroke="#FFD700" stroke-width="3" stroke-linecap="round" filter="url(#glow-nour)" opacity="0.8" />
 
-  <!-- Front Hair / Sleek Pulled Back -->
+  <!-- Front Hair / Sleek Pulled Back - highly visible against gold/white background -->
   <path d="M140 165 Q150 110 200 100 Q250 110 260 165 Q250 120 200 115 Q150 120 140 165 Z" fill="url(#hair-nour)" />
   <!-- Hair line accents -->
   <path d="M160 130 Q180 110 200 115" fill="none" stroke="#5D4037" stroke-width="2" opacity="0.5" />

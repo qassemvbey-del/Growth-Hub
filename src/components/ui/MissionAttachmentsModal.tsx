@@ -417,11 +417,10 @@ const MissionAttachmentsModal = ({
       <div className="fixed inset-0 z-[300] flex items-center justify-center bg-white/60 dark:bg-black/90 backdrop-blur-md p-4" onClick={onClose}>
         <div
           onClick={e => e.stopPropagation()}
-          className="w-full max-w-xl flex flex-col bg-white/95 dark:bg-[#080808] border rounded-sm shadow-2xl overflow-hidden"
+          className="w-[calc(100%-2rem)] mx-auto md:max-w-xl flex flex-col bg-white/95 dark:bg-[#080808] border rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] my-auto"
           style={{
             borderColor: `${themeColor}33`,
             boxShadow: `0 0 60px ${themeColor}18`,
-            maxHeight: '88vh',
           }}
         >
           {/* ── Modal Header ─────────────────────────────────────── */}
@@ -436,7 +435,7 @@ const MissionAttachmentsModal = ({
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <span className="font-space font-black text-xs px-2 py-1 rounded-sm" style={{ color: themeColor, backgroundColor: `${themeColor}18`, border: `1px solid ${themeColor}33` }}>
+              <span className="font-space font-black text-xs px-2 py-1 rounded-xl" style={{ color: themeColor, backgroundColor: `${themeColor}18`, border: `1px solid ${themeColor}33` }}>
                 {attachments.length}
               </span>
               <button onClick={onClose} className="material-symbols-outlined text-zinc-400 dark:text-white/30 hover:text-zinc-900 dark:hover:text-white transition-colors text-xl">close</button>
@@ -448,7 +447,7 @@ const MissionAttachmentsModal = ({
             {/* Google Drive Primary Button with signature dark glass style */}
             <button
               onClick={handleConnectGoogleDrive}
-              className="w-full flex items-center justify-center gap-3 py-4 px-6 font-space font-black text-xs uppercase tracking-widest text-zinc-900 dark:text-white/90 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.06] dark:hover:bg-white/[0.06] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 transition-all duration-300 rounded-lg shadow-lg mb-2 cursor-pointer"
+              className="w-full flex items-center justify-center gap-3 py-2.5 px-4 font-space font-black text-xs uppercase tracking-widest text-zinc-900 dark:text-white/90 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.06] dark:hover:bg-white/[0.06] border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 transition-all duration-300 rounded-xl shadow-lg mb-2 cursor-pointer"
               onMouseEnter={e => {
                 const el = e.currentTarget;
                 el.style.backgroundColor = 'rgba(128, 128, 128, 0.1)';
@@ -498,7 +497,7 @@ const MissionAttachmentsModal = ({
                       value={newName}
                       onChange={e => setNewName(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && handleAddManual()}
-                      className="w-full bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/8 px-4 py-3 font-space text-xs font-black text-zinc-900 dark:text-white uppercase tracking-widest outline-none placeholder:text-zinc-400 dark:placeholder:text-white/20 transition-all rounded-sm"
+                      className="w-full bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/8 py-2.5 px-4 font-space text-xs font-black text-zinc-900 dark:text-white uppercase tracking-widest outline-none placeholder:text-zinc-400 dark:placeholder:text-white/20 transition-all rounded-xl"
                     />
                     <div className="flex gap-2">
                       <input
@@ -507,12 +506,12 @@ const MissionAttachmentsModal = ({
                         value={newUrl}
                         onChange={e => setNewUrl(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && handleAddManual()}
-                        className="flex-1 bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/8 px-4 py-3 font-space text-xs font-black text-zinc-900 dark:text-white uppercase tracking-widest outline-none placeholder:text-zinc-400 dark:placeholder:text-white/20 transition-all rounded-sm"
+                        className="flex-1 bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/8 py-2.5 px-4 font-space text-xs font-black text-zinc-900 dark:text-white uppercase tracking-widest outline-none placeholder:text-zinc-400 dark:placeholder:text-white/20 transition-all rounded-xl"
                       />
                       <button
                         onClick={handleAddManual}
                         disabled={adding || !newName.trim() || !newUrl.trim()}
-                        className="px-5 py-3 font-space font-black uppercase tracking-widest text-[10px] text-black transition-all rounded-sm shrink-0 cursor-pointer"
+                        className="py-2.5 px-4 font-space font-black uppercase tracking-widest text-[10px] text-black transition-all rounded-xl shrink-0 cursor-pointer"
                         style={{ backgroundColor: themeColor, boxShadow: `0 0 16px ${themeColor}44` }}
                       >
                         {adding ? <span className="material-symbols-outlined text-base animate-spin">progress_activity</span> : (isRTL ? 'إضافة' : 'ADD')}

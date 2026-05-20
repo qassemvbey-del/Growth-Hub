@@ -22,23 +22,33 @@ import { aiProfanityCheck } from '@/app/actions/profanityCheck'
 const WeightVisualizer = ({ weight, color, isCompleted = false, onSelect }: { weight: number, color: string, isCompleted?: boolean, onSelect?: (w: number) => void }) => {
   const bars = [1, 2, 3, 4, 5, 6]
   return (
-    <div className="flex gap-[3px]">
+    <div className="flex gap-1 md:gap-[5px]">
       {bars.map(i => (
         <div 
           key={i}
           onClick={() => onSelect?.(i)}
           className={cn(
-            "w-[6px] h-[16px] transition-all duration-300 rounded-[1px]",
-            onSelect ? "cursor-pointer hover:opacity-80" : "",
-            i <= weight 
-              ? "opacity-100" 
-              : "bg-black/10 dark:bg-white/10"
+            "relative flex items-center justify-center py-1",
+            onSelect ? "cursor-pointer group" : ""
           )}
-          style={i <= weight ? { 
-            backgroundColor: isCompleted ? 'var(--text-secondary)' : color,
-            boxShadow: isCompleted ? 'none' : `0 0 12px ${color}88`
-          } : {}}
-        />
+        >
+          {/* Increased hit area for easier clicking */}
+          {onSelect && <div className="absolute inset-[-4px] z-10" />}
+          
+          <div
+            className={cn(
+              "w-[8px] h-[18px] transition-all duration-300 rounded-[2px]",
+              onSelect ? "group-hover:opacity-80 group-hover:scale-110" : "",
+              i <= weight 
+                ? "opacity-100" 
+                : "bg-black/10 dark:bg-white/10"
+            )}
+            style={i <= weight ? { 
+              backgroundColor: isCompleted ? 'var(--text-secondary)' : color,
+              boxShadow: isCompleted ? 'none' : `0 0 12px ${color}88`
+            } : {}}
+          />
+        </div>
       ))}
     </div>
   )
@@ -85,7 +95,7 @@ export default function MissionDetailPage() {
 
   const generateLocalCardBlob = async (): Promise<Blob | null> => {
     try {
-      const response = await fetch(`/api/missions/${id}/og?t=${Date.now()}`)
+      const response = await fetch(`${window.location.origin}/api/missions/${id}/og?t=${Date.now()}`)
       if (!response.ok) throw new Error('Failed to fetch OG image')
       return await response.blob()
     } catch (err) {
@@ -181,6 +191,20 @@ export default function MissionDetailPage() {
     }
   }, [id, mounted])
 
+  // Close all modals event listener from global Shell ESC matrix
+  useEffect(() => {
+    const handleCloseAll = () => {
+      setShowIntelModal(false)
+      setShowShareModal(false)
+      setShowPlaylistModal(false)
+      setShowSmartImportModal(false)
+      setAttachmentMissionId(null)
+      setActiveAttachments([])
+    }
+    window.addEventListener('close-all-modals', handleCloseAll)
+    return () => window.removeEventListener('close-all-modals', handleCloseAll)
+  }, [])
+
   useEffect(() => {
     const handleTimeLogSaved = (e: any) => {
       console.log("Time log saved event received, updating inline timers...")
@@ -225,20 +249,34 @@ export default function MissionDetailPage() {
     try {
       const originalTitles = mission.tasks.map((t: any) => t.original_title || t.title)
       const cleanedTitles = await cleanPlaylistTitles(originalTitles)
+      const isLocal = typeof id === 'string' && id.startsWith('local_')
       
-      for (let i = 0; i < mission.tasks.length; i++) {
-        if (mission.tasks[i].title !== cleanedTitles[i]) {
-          await supabase
-            .from('tasks')
-            .update({ title: cleanedTitles[i] })
-            .eq('id', mission.tasks[i].id)
+      if (isLocal) {
+        setMission((prev: any) => {
+          const next = {
+            ...prev,
+            tasks: prev.tasks.map((t: any, idx: number) => ({ ...t, title: cleanedTitles[idx] }))
+          }
+          const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+          const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g)
+          localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+          return next
+        })
+      } else {
+        for (let i = 0; i < mission.tasks.length; i++) {
+          if (mission.tasks[i].title !== cleanedTitles[i]) {
+            await supabase
+              .from('tasks')
+              .update({ title: cleanedTitles[i] })
+              .eq('id', mission.tasks[i].id)
+          }
         }
+        
+        setMission((prev: any) => ({
+          ...prev,
+          tasks: prev.tasks.map((t: any, idx: number) => ({ ...t, title: cleanedTitles[idx] }))
+        }))
       }
-      
-      setMission((prev: any) => ({
-        ...prev,
-        tasks: prev.tasks.map((t: any, idx: number) => ({ ...t, title: cleanedTitles[idx] }))
-      }))
       
       localStorage.setItem(`cleaned_${id}`, 'true')
       setIsCleaned(true)
@@ -257,6 +295,19 @@ export default function MissionDetailPage() {
   }, [id])
 
   async function fetchMission() {
+    if (typeof id === 'string' && id.startsWith('local_')) {
+      const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+      const goal = guestGoals.find((g: any) => g.id === id)
+      if (goal) {
+        goal.tasks = (goal.tasks || []).sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+        setMission(goal)
+      } else {
+        router.push('/missions')
+      }
+      setLoading(false)
+      return
+    }
+
     const { data } = await supabase
       .from('cups')
       .select('*, tasks(*)')
@@ -295,12 +346,12 @@ export default function MissionDetailPage() {
       if (roundedProgress === 100 && !mission.is_archived) {
         const { error } = await supabase
           .from('cups')
-          .update({ is_archived: true, status: 'completed' })
+          .update({ is_archived: true, status: 'completed', color: currentTheme.color })
           .eq('id', id)
         
         if (!error) {
           setMission((prev: any) => ({ ...prev, is_archived: true, status: 'completed' }))
-          showToast(isRTL ? 'تم اكتمال المهمة! نقلت إلى الخزنة' : 'MISSION COMPLETE! ARCHIVED TO VAULT', 'success')
+          showToast(isRTL ? 'تم اكتمال المهمة! نقلت إلى الخزنة' : 'GOAL ACHIEVED! MOVED TO WINS', 'success')
           playSuccess()
         }
       } else if (roundedProgress < 100 && mission.is_archived) {
@@ -320,6 +371,24 @@ export default function MissionDetailPage() {
 
   const toggleTask = async (taskId: string, currentStatus: boolean) => {
     const nextStatus = !currentStatus
+    const isLocal = typeof id === 'string' && id.startsWith('local_')
+
+    if (isLocal) {
+      setMission((prev: any) => {
+        const next = {
+          ...prev,
+          tasks: prev.tasks.map((t: any) => t.id === taskId ? { ...t, is_completed: nextStatus } : t)
+        }
+        const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+        const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g)
+        localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+        return next
+      })
+      if (nextStatus) playSuccess()
+      else playBlip()
+      return
+    }
+
     const { error } = await supabase
       .from('tasks')
       .update({ is_completed: nextStatus })
@@ -388,7 +457,24 @@ export default function MissionDetailPage() {
       original_title: rawTitle,
       weight: newTaskWeight,
       is_completed: false,
-      type: 'standard'
+      type: 'standard',
+      created_at: new Date().toISOString()
+    }
+
+    const isLocal = typeof id === 'string' && id.startsWith('local_')
+    if (isLocal) {
+      const fakeId = 'task_' + Math.random().toString(36).substring(2, 9)
+      const data = { ...payload, id: fakeId }
+      setMission((prev: any) => {
+        const next = { ...prev, tasks: [...prev.tasks, data] }
+        const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+        const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g)
+        localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+        return next
+      })
+      setNewTaskTitle('')
+      showToast(isRTL ? 'تم إضافة الهدف محلياً' : 'TASK_SAVED', 'success')
+      return
     }
 
     const { data } = await supabase.from('tasks').insert(payload).select().single()
@@ -401,6 +487,18 @@ export default function MissionDetailPage() {
   }
 
   const deleteTask = async (taskId: string) => {
+    const isLocal = typeof id === 'string' && id.startsWith('local_')
+    if (isLocal) {
+      setMission((prev: any) => {
+        const next = { ...prev, tasks: prev.tasks.filter((t: any) => t.id !== taskId) }
+        const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+        const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g)
+        localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+        return next
+      })
+      return
+    }
+
     const { error } = await supabase.from('tasks').delete().eq('id', taskId)
     if (!error) {
       setMission((prev: any) => ({
@@ -414,6 +512,20 @@ export default function MissionDetailPage() {
   const SIZE_SLOTS: Record<string, number> = { sm: 1, md: 1.5, lg: 3, s: 1, m: 1.5, l: 3, small: 1, medium: 1.5, large: 3 }
 
   const updateMission = async (updates: any) => {
+    const isLocal = typeof id === 'string' && id.startsWith('local_')
+
+    if (isLocal) {
+      setMission((prev: any) => {
+        const next = { ...prev, ...updates }
+        const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+        const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g)
+        localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+        return next
+      })
+      showToast(isRTL ? 'تم التحديث' : 'GOAL UPDATED', 'success')
+      return
+    }
+
     if (updates.sync_to_dashboard === true) {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
@@ -448,15 +560,26 @@ export default function MissionDetailPage() {
     const { error } = await supabase.from('cups').update(updates).eq('id', id)
     if (!error) {
       setMission((prev: any) => ({ ...prev, ...updates }))
-      showToast(isRTL ? 'تم التحديث' : 'PROTOCOL_UPDATED', 'success')
+      showToast(isRTL ? 'تم التحديث' : 'GOAL UPDATED', 'success')
     }
   }
 
   const deleteMission = async () => {
     if (!confirm(isRTL ? 'هل أنت متأكد من حذف هذه المهمة؟' : 'CONFIRM MISSION TERMINATION?')) return
+    const isLocal = typeof id === 'string' && id.startsWith('local_')
+
+    if (isLocal) {
+      const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+      const updatedGoals = guestGoals.filter((g: any) => g.id !== id)
+      localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+      showToast(isRTL ? 'تم حذف المهمة' : 'GOAL DELETED', 'success')
+      router.push('/missions')
+      return
+    }
+
     const { error } = await supabase.from('cups').delete().eq('id', id)
     if (!error) {
-      showToast(isRTL ? 'تم حذف المهمة' : 'MISSION TERMINATED', 'success')
+      showToast(isRTL ? 'تم حذف المهمة' : 'GOAL DELETED', 'success')
       router.push('/missions')
     }
   }
@@ -471,7 +594,7 @@ export default function MissionDetailPage() {
   if (loading || !mounted) return (
     <Shell>
       <div className="p-16 font-space animate-pulse tracking-widest text-sm uppercase" style={{ color: currentTheme.color }}>
-        {isRTL ? 'جاري التحميل...' : 'LOADING_UPLINK...'}
+        {isRTL ? 'جاري التحميل...' : 'LOADING WORKSPACE...'}
       </div>
     </Shell>
   )
@@ -554,9 +677,9 @@ export default function MissionDetailPage() {
                 } : {}}
              >
                 <span className="material-symbols-outlined text-base">
-                   {mission.sync_to_dashboard ? 'sensors' : 'sensors_off'}
+                   {mission.sync_to_dashboard ? 'grid_view' : 'visibility_off'}
                 </span>
-                {mission.sync_to_dashboard ? (isRTL ? 'متصل بالشبكة' : 'TASKS') : (isRTL ? 'خارج الشبكة' : 'OFF_GRID')}
+                {mission.sync_to_dashboard ? (isRTL ? 'في الواجهة' : 'PINNED TO DASHBOARD') : (isRTL ? 'مخفي' : 'UNPINNED')}
              </button>
              
              {/* PLAYLIST_IMPORT button */}
@@ -565,7 +688,7 @@ export default function MissionDetailPage() {
                 className="px-4 md:px-6 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-sm uppercase flex items-center gap-3 border-[var(--card-border)] text-[var(--text-secondary)] hover:opacity-85"
              >
                 <span className="material-symbols-outlined text-base">playlist_add</span>
-                {isRTL ? 'استورد قائمة تشغيل' : 'IMPORT'}
+                {isRTL ? 'استيراد قائمة تشغيل' : 'IMPORT PLAYLIST'}
              </button>
 
              {/* SMART_IMPORT button */}
@@ -676,25 +799,6 @@ export default function MissionDetailPage() {
            <div className="flex justify-between items-center border-b border-[var(--card-border)] pb-4">
               <div className="flex items-center gap-4">
                 <h2 className="text-[10px] font-black font-space text-[var(--text-secondary)] tracking-[0.5em] uppercase">{isRTL ? 'قائمة المهام' : 'TASKS'}</h2>
-                {mission.tasks?.length > 0 && !isCleaned && (
-                  <button
-                    onClick={handleCleanTitles}
-                    disabled={isCleaning}
-                    className="flex items-center gap-2 px-3 py-1 text-[9px] font-black font-space rounded-full transition-all uppercase tracking-widest disabled:opacity-50"
-                    style={{
-                      backgroundColor: `${currentTheme.color}15`,
-                      border: `1px solid ${currentTheme.color}33`,
-                      color: currentTheme.color
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = `${currentTheme.color}30`}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = `${currentTheme.color}15`}
-                  >
-                    <span className={cn("material-symbols-outlined text-xs", isCleaning && "animate-spin")}>
-                      {isCleaning ? 'sync' : 'magic_button'}
-                    </span>
-                    {isCleaning ? (isRTL ? 'جاري التنظيف...' : 'CLEANING...') : (isRTL ? 'تنظيف العناوين' : 'CLEAN_TITLES')}
-                  </button>
-                )}
               </div>
               
            </div>
@@ -801,7 +905,17 @@ export default function MissionDetailPage() {
                 </div>
 
                 <div className="flex flex-col gap-2 justify-center px-4 md:px-6 py-3 md:py-0 border border-[var(--card-border)] bg-[var(--input-bg)]">
-                   <span className="text-[8px] font-space text-[var(--text-secondary)] uppercase tracking-widest font-black">SET_POWER</span>
+                   <div className="flex items-center gap-2">
+                     <span className="text-[8px] font-space text-[var(--text-secondary)] uppercase tracking-widest font-black">SET_POWER</span>
+                     <div className="group relative flex items-center cursor-help">
+                       <span className="material-symbols-outlined text-[12px] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">help</span>
+                       <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 rounded bg-[var(--card-bg)] border border-[var(--card-border)] p-2 text-[10px] md:text-xs text-[var(--text-primary)] shadow-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-[300] text-center">
+                         {isRTL 
+                           ? "هذه الأشرطة تحدد وزن أو حجم المهمة. المهمة الأكبر تمنحك نقاط خبرة أكثر وتأخذ وقتاً أطول."
+                           : "These bars set the task weight/power. A heavier task grants more XP and takes more effort."}
+                       </div>
+                     </div>
+                   </div>
                    <WeightVisualizer 
                      weight={newTaskWeight} 
                      color={missionColor} 
@@ -860,7 +974,7 @@ export default function MissionDetailPage() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.93, y: 20 }}
               onClick={e => e.stopPropagation()}
-              className="w-full max-w-2xl max-h-[80vh] overflow-y-auto relative border border-[var(--card-border)] bg-[var(--card-bg)] rounded-sm"
+              className="w-[calc(100%-2rem)] mx-auto md:max-w-2xl max-h-[85vh] overflow-y-auto relative border border-[var(--card-border)] bg-[var(--card-bg)] rounded-2xl my-auto"
               style={{ borderColor: `${missionColor}30` }}
             >
               {/* Top neon bar */}
@@ -902,7 +1016,7 @@ export default function MissionDetailPage() {
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: idx * 0.05 }}
-                        className="p-5 border rounded-sm relative"
+                        className="p-5 border rounded-xl relative"
                         style={{ borderColor: `${missionColor}20`, backgroundColor: `${missionColor}05` }}
                       >
                         <div className="absolute top-0 left-0 right-0 h-[1px]" style={{ background: `linear-gradient(90deg, ${missionColor}60, transparent)` }} />

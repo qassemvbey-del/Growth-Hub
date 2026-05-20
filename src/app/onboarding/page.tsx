@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 const STEPS = [
   { id: 'IDENTITY', label: 'IDENTITY', title: 'WHO_ARE_YOU?' },
   { id: 'FIRST_MISSION', label: 'MISSION', title: 'YOUR_FIRST_MISSION' },
-  { id: 'SYSTEM_READY', label: 'READY', title: 'UPLINK_ESTABLISHED' }
+  { id: 'SYSTEM_READY', label: 'READY', title: 'WORKSPACE_LOADED' }
 ]
 
 export default function OnboardingPage() {
@@ -88,7 +88,7 @@ export default function OnboardingPage() {
       if (profileError) {
         console.error('ONBOARDING_ERROR // PROFILE_SAVE_FAILED:', JSON.stringify(profileError, null, 2))
         setLoading(false)
-        alert('CRITICAL_ERROR: Failed to save operator profile. Please try again.')
+        alert('CRITICAL_ERROR: Failed to save member profile. Please try again.')
         return
       }
 
@@ -184,7 +184,7 @@ export default function OnboardingPage() {
             </h2>
             {currentStep === 1 && (
               <p className="text-white/40 font-bold uppercase tracking-widest text-xs md:text-sm">
-                {isRTL ? 'كل بطل يحتاج إلى هدف.' : 'Every operator needs a target.'}
+                {isRTL ? 'كل بطل يحتاج إلى هدف.' : 'Every member needs a target.'}
               </p>
             )}
           </header>
@@ -196,7 +196,7 @@ export default function OnboardingPage() {
               <div className="space-y-10">
                 <div className="space-y-4">
                   <label className="text-[10px] md:text-xs font-black text-white/30 tracking-[0.3em] uppercase">
-                    OPERATOR_NAME
+                    MEMBER_NAME
                   </label>
                   <input
                     type="text"
@@ -317,7 +317,7 @@ export default function OnboardingPage() {
 
                 <div className="space-y-8 relative z-10">
                   <div className="space-y-2">
-                    <p className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">OPERATOR_PROFILE</p>
+                    <p className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">MEMBER_PROFILE</p>
                     <p className="text-2xl md:text-5xl font-black italic uppercase tracking-tighter">{formData.name || 'ANONYMOUS'}</p>
                   </div>
 

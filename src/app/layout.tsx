@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk, Tajawal } from "next/font/google";
+import { Inter, Space_Grotesk, Tajawal, Exo_2 } from "next/font/google";
 import "./globals.css";
 import { GrowthProvider } from "@/context/GrowthContext";
 import { SoundProvider } from "@/context/SoundContext";
@@ -9,9 +9,12 @@ import NeuralMesh from "@/components/ui/NeuralMesh";
 import PWARegistration from "@/components/layout/PWARegistration";
 import GlobalCursor from "@/components/ui/GlobalCursor";
 
+import Script from "next/script";
+
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space" });
 const tajawal = Tajawal({ weight: ["400", "500", "700", "800", "900"], subsets: ["arabic"], variable: "--font-tajawal" });
+const exo2 = Exo_2({ subsets: ["latin"], weight: ["700", "800", "900"], variable: "--font-exo2" });
 
 export const metadata: Metadata = {
   title: "Growth Hub | Life Optimization Interface",
@@ -26,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="dark">
       <head>
-        <script id="theme-lang-script" dangerouslySetInnerHTML={{
+        <Script id="theme-lang-script" strategy="beforeInteractive" dangerouslySetInnerHTML={{
           __html: `
             (function() {
               try {
@@ -58,9 +61,10 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Growth Hub" />
-        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+        <link rel="apple-touch-icon" href="/icon.svg" />
       </head>
-      <body className={`${inter.variable} ${spaceGrotesk.variable} ${tajawal.variable} antialiased text-lg md:text-xl`}>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} ${tajawal.variable} ${exo2.variable} antialiased text-lg md:text-xl`}>
         <SoundProvider>
           <GrowthProvider>
             <ToastProvider>

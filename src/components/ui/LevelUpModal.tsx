@@ -20,7 +20,7 @@ export default function LevelUpModal() {
           <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0)_95%,rgba(0,206,209,0.03)_95%)] bg-[size:100%_18px] pointer-events-none" />
 
           {/* Central celebratory card */}
-          <div className="relative flex flex-col items-center max-w-lg w-full p-8 mx-4 border border-cyan-500/20 bg-white/90 dark:bg-[#050505]/80 backdrop-blur-md text-center rounded-sm shadow-2xl">
+          <div className="relative flex flex-col items-center w-[calc(100%-2rem)] mx-auto md:max-w-lg p-5 md:p-8 border border-cyan-500/20 bg-white/90 dark:bg-[#050505]/80 backdrop-blur-md text-center rounded-2xl shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
             {/* Top flashing system indicator */}
             <div className="absolute top-0 inset-x-0 h-[3px] bg-gradient-to-r from-transparent via-[#00CED1] to-transparent animate-pulse" />
             
@@ -82,7 +82,7 @@ export default function LevelUpModal() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="mt-3 inline-flex items-center gap-3 px-4 py-1.5 rounded-sm bg-cyan-500/10 dark:bg-cyan-950/40 border border-cyan-800/30 text-[10px] md:text-xs font-space font-black tracking-widest text-zinc-700 dark:text-[#B0C4DE]"
+              className="mt-3 inline-flex items-center gap-3 py-2.5 px-4 rounded-xl bg-cyan-500/10 dark:bg-cyan-950/40 border border-cyan-800/30 text-[10px] md:text-xs font-space font-black tracking-widest text-zinc-700 dark:text-[#B0C4DE]"
             >
               <span>{oldRank}</span>
               <span className="material-symbols-outlined text-sm text-[#00CED1]">double_arrow</span>
@@ -96,8 +96,8 @@ export default function LevelUpModal() {
               className="mt-6 text-[10px] md:text-xs leading-relaxed text-black/50 dark:text-white/50 tracking-widest font-space max-w-sm uppercase"
             >
               {isRTL 
-                ? 'تم بنجاح تحديث ترخيص الأوبريتور. تم زيادة معدل الخطر البيئي للمستويات العليا.' 
-                : 'OPERATOR DEPLOYMENT AUTHORIZATION MODIFIED. ENVIRONMENT RISK PROFILE ELEVATED TO ACTIVE THREAT STATUS.'}
+                ? 'تم بنجاح تحديث ترخيص العضو. تم تفعيل ميزات النظام الإضافية للمستوى التالي.' 
+                : 'MEMBER STATUS MODIFIED. ACTIVE SYSTEM PERKS EXPANDED TO THE NEXT TIER.'}
             </motion.p>
 
             <motion.button
@@ -107,9 +107,9 @@ export default function LevelUpModal() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9 }}
               onClick={() => setIsRankUpModalOpen(false)}
-              className="mt-8 w-full py-3.5 text-xs font-black tracking-widest text-black bg-[#00CED1] rounded-sm font-space uppercase transition-all hover:brightness-110 active:brightness-90"
+              className="mt-8 w-full py-2.5 px-4 text-xs font-black tracking-widest text-black bg-[#00CED1] rounded-xl font-space uppercase transition-all hover:brightness-110 active:brightness-90 shadow-lg"
             >
-              {isRTL ? 'حقن البيانات للـ HUD' : 'INJECT DATA TO HUD'}
+              {isRTL ? 'تحديث واجهة التحكم' : 'UPDATE DASHBOARD'}
             </motion.button>
           </div>
         </motion.div>

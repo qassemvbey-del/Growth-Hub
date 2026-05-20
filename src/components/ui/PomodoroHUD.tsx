@@ -84,20 +84,20 @@ export default function PomodoroHUD() {
                       style={{ backgroundColor: sessionType === 'FOCUS' ? currentTheme.color : '#00E5FF' }}
                     />
                     <span className="text-[12px] font-black tracking-[0.2em] uppercase italic" style={{ color: sessionType === 'FOCUS' ? currentTheme.color : '#00E5FF' }}>
-                      {sessionType === 'FOCUS' ? (isRTL ? '⚡ وضع التركيز شغّال' : '⚡ FOCUS_MODE_ACTIVE') : (isRTL ? '☕ وقت الراحة' : '☕ RECOVERY_PERIOD')}
+                      {sessionType === 'FOCUS' ? (isRTL ? '⚡ وضع التركيز نشط' : '⚡ FOCUS_MODE_ACTIVE') : (isRTL ? '☕ فترة الاستراحة' : '☕ RECOVERY_PERIOD')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     {!isMinimized && (
                       <button 
                         onClick={() => setShowSettings(!showSettings)} 
-                        className={cn("material-symbols-outlined text-xs transition-colors hover:text-[var(--text-primary)]")}
+                        className={cn("material-symbols-outlined text-xs transition-colors hover:text-[var(--text-primary)] pomodoro-btn")}
                         style={{ color: showSettings ? currentTheme.color : 'var(--text-secondary)' }}
                       >
                         settings
                       </button>
                     )}
-                    <button onClick={toggleMinimize} className="material-symbols-outlined text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                    <button onClick={toggleMinimize} className="material-symbols-outlined text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] pomodoro-btn">
                       unfold_less
                     </button>
                   </div>
@@ -137,7 +137,7 @@ export default function PomodoroHUD() {
                       </div>
                       <button 
                         onClick={handleSave}
-                        className="w-full py-2 font-space font-black text-[11px] uppercase tracking-widest text-zinc-900"
+                        className="w-full py-2 font-space font-black text-[11px] uppercase tracking-widest text-zinc-900 pomodoro-btn"
                         style={{ backgroundColor: currentTheme.color }}
                       >
                         {isRTL ? 'حفظ الإعدادات' : 'SAVE_CONFIG'}
@@ -171,7 +171,7 @@ export default function PomodoroHUD() {
                         {!isActive ? (
                           <button 
                             onClick={startTimer}
-                            className="flex-1 py-2 text-zinc-900 font-space font-black text-[12px] uppercase tracking-[0.2em]"
+                            className="flex-1 py-2 text-zinc-900 font-space font-black text-[12px] uppercase tracking-[0.2em] pomodoro-btn"
                             style={{ backgroundColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}66` }}
                           >
                             {isRTL ? 'ابدأ الجلسة' : 'START_SESSION'}
@@ -179,7 +179,7 @@ export default function PomodoroHUD() {
                         ) : isPaused ? (
                           <button 
                             onClick={resume}
-                            className="flex-1 py-1.5 text-zinc-900 font-space font-black text-[9px] uppercase tracking-widest hover:brightness-110"
+                            className="flex-1 py-1.5 text-zinc-900 font-space font-black text-[9px] uppercase tracking-widest hover:brightness-110 pomodoro-btn"
                             style={{ backgroundColor: currentTheme.color }}
                           >
                             RESUME
@@ -187,16 +187,16 @@ export default function PomodoroHUD() {
                         ) : (
                           <button 
                             onClick={pause}
-                            className="flex-1 py-1.5 bg-[var(--input-bg)] border border-[var(--card-border)] text-[var(--text-primary)] font-space font-black text-[9px] uppercase tracking-widest"
+                            className="flex-1 py-1.5 bg-[var(--input-bg)] border border-[var(--card-border)] text-[var(--text-primary)] font-space font-black text-[9px] uppercase tracking-widest pomodoro-btn"
                           >
                             PAUSE
                           </button>
                         )}
                         <button 
                           onClick={stop}
-                          className="px-3 py-1.5 bg-[#FF0055]/10 text-[#FF0055] border border-[#FF0055]/30 font-space font-black text-[11px] uppercase tracking-widest hover:bg-[#FF0055]/20"
+                          className="px-3 py-1.5 bg-[#FF0055]/10 text-[#FF0055] border border-[#FF0055]/30 font-space font-black text-[11px] uppercase tracking-widest hover:bg-[#FF0055]/20 pomodoro-btn"
                         >
-                          {isActive ? (isRTL ? 'وقف' : 'STOP') : (isRTL ? 'قفل' : 'CLOSE')}
+                          {isActive ? (isRTL ? 'إيقاف' : 'STOP') : (isRTL ? 'إغلاق' : 'CLOSE')}
                         </button>
                       </div>
                     </>
@@ -238,12 +238,12 @@ export default function PomodoroHUD() {
                 <div className="space-y-4 font-space text-xs leading-relaxed text-[var(--text-primary)]">
                   <p className="font-bold border-l-2 border-[#FF0055] pl-3 py-1 bg-[#FF0055]/5">
                     {isRTL 
-                      ? '🚧 تشتيت التركيز يقلل الأداء الذهني بنسبة تصل إلى 40%.' 
+                      ? '🚧 تنبيه: التنقل المتكرر بين المهام يقلل الأداء الذهني بنسبة تصل إلى 40%.' 
                       : '🚧 WARNING: Context Switching degrades cognitive performance by up to 40%.'}
                   </p>
                   <p className="text-[var(--text-secondary)]">
                     {isRTL
-                      ? 'التركيز هو مصدر طاقة نظامك الأساسي. الاستمرار في الانتقال وتغيير المهام سيؤثر على سرعة إنجازك لخططك الحالية.'
+                      ? 'التركيز هو الركيزة الأساسية للإنتاجية. الانتقال المتكرر بين المهام وتشتيت الانتباه يؤثر سلباً على سرعة وجودة إنجاز أهدافك الحالية.'
                       : 'Multi-tasking is a cognitive drain. Sticking to a single task until completion is the optimal path for operational success.'}
                   </p>
                   {pendingSwitchTask && (
@@ -261,13 +261,13 @@ export default function PomodoroHUD() {
                 <div className="flex flex-col sm:flex-row gap-3 pt-2">
                   <button
                     onClick={confirmSwitch}
-                    className="flex-1 py-2.5 bg-[#FF0055]/10 text-[#FF0055] border border-[#FF0055]/30 hover:bg-[#FF0055]/20 font-space font-black text-xs uppercase tracking-widest transition-all"
+                    className="flex-1 py-2.5 bg-[#FF0055]/10 text-[#FF0055] border border-[#FF0055]/30 hover:bg-[#FF0055]/20 font-space font-black text-xs uppercase tracking-widest transition-all pomodoro-btn"
                   >
                     {isRTL ? 'استبدال المهمة' : 'FORCE SWAP'}
                   </button>
                   <button
                     onClick={cancelSwitch}
-                    className="flex-1 py-2.5 text-zinc-900 font-space font-black text-xs uppercase tracking-widest transition-all"
+                    className="flex-1 py-2.5 text-zinc-900 font-space font-black text-xs uppercase tracking-widest transition-all pomodoro-btn"
                     style={{ backgroundColor: currentTheme.color }}
                   >
                     {isRTL ? 'الاستمرار بالتركيز' : 'KEEP FOCUSING'}

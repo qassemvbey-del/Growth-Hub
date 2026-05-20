@@ -91,7 +91,7 @@ export function useInbox() {
         const days = Math.ceil((new Date(nearestMission.end_date).getTime() - new Date().getTime()) / (1000 * 3600 * 24))
         nearestDays = days
         nearestMissionTitle = nearestMission.title
-        nearestDeadlineStr = lang === 'ar' ? `${nearestMission.title} باقي ${days} أيام` : `${nearestMission.title} in ${days} days`
+        nearestDeadlineStr = lang === 'ar' ? `${nearestMission.title} متبقي ${days} أيام` : `${nearestMission.title} in ${days} days`
       }
 
       // 3. Calculate Overall Progress
@@ -116,12 +116,12 @@ export function useInbox() {
       const totalXp = profile?.xp || 0
 
       // 5. Create report
-      const title = lang === 'ar' ? `📋 تقرير ${new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}` : `📋 Brief ${new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`
-      const content = lang === 'ar' ? `وضعك النهارده:
-- المهام الشغالة: [${activeMissionsCount}]
-- أقرب deadline: [${nearestMissionTitle}] باقي [${nearestDays}] أيام
-- التقدم العام: [${totalProgress}]%
-- XP الكلي: [${totalXp}]` : `Today's Status:
+      const title = lang === 'ar' ? `📋 تقرير الأداء اليومي - ${new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}` : `📋 Brief ${new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`
+      const content = lang === 'ar' ? `ملخص حالة الإنتاجية اليومية:
+- الأهداف النشطة: [${activeMissionsCount}]
+- أقرب موعد نهائي: [${nearestMissionTitle}] متبقي [${nearestDays}] أيام
+- نسبة التقدم العام: [${totalProgress}]%
+- إجمالي نقاط الإنجاز (XP): [${totalXp}]` : `Today's Status:
 - Active Missions: [${activeMissionsCount}]
 - Nearest deadline: [${nearestMissionTitle}] in [${nearestDays}] days
 - Overall Progress: [${totalProgress}]%
@@ -188,10 +188,10 @@ export function useInbox() {
               const remainingTasks = totalTasksCount - doneTasksCount
               const tasksPerDay = days > 0 ? (remainingTasks / days).toFixed(1) : remainingTasks
 
-              const title = lang === 'ar' ? `⚠️ تحذير: ${mission.title}` : `⚠️ Warning: ${mission.title}`
-              const content = lang === 'ar' ? `[${mission.title}] باقي [${days}] أيام بس!
-إنت عند [${currentProgress}]% 
-محتاج تخلص [${tasksPerDay}] tasks في اليوم عشان توصل` : `[${mission.title}] only [${days}] days left!
+              const title = lang === 'ar' ? `⚠️ تنبيه الموعد النهائي: ${mission.title}` : `⚠️ Warning: ${mission.title}`
+              const content = lang === 'ar' ? `[${mission.title}] متبقي [${days}] أيام فقط!
+نسبة الإنجاز الحالية: [${currentProgress}]%
+معدل العمل المطلوب: إكمال [${tasksPerDay}] مهام يومياً للوفاء بالموعد المحدد.` : `[${mission.title}] only [${days}] days left!
 You are at [${currentProgress}]%
 You need to complete [${tasksPerDay}] tasks per day to make it.`
 
@@ -243,11 +243,11 @@ You need to complete [${tasksPerDay}] tasks per day to make it.`
           const endDate = new Date().toLocaleDateString('en-US')
           const timeTaken = `${startDate} to ${endDate}`
 
-          const title = lang === 'ar' ? "✅ مهمة اتخلصت!" : "✅ Goal Achieved!"
-          const content = lang === 'ar' ? `مبروك! خلصت [${mission.title}]
-XP المكسوب: +[${xpAmount}]
-الوقت اللي اخدته: [${timeTaken}]
-الخطوة الجاية: روح لصفحة الإنجازات (Wins) عشان تشوف الكأس المذهب` : `Congrats! You finished [${mission.title}]
+          const title = lang === 'ar' ? "✅ تم تحقيق الهدف بنجاح!" : "✅ Goal Achieved!"
+          const content = lang === 'ar' ? `تهانينا! لقد أكملت العمل على هدف: [${mission.title}]
+نقاط الإنجاز المكتسبة: +[${xpAmount}] نقطة
+المدة المستغرقة: [${timeTaken}]
+الخطوة التالية: يمكنك زيارة معرض الإنجازات لاستعراض الكأس الذهبي الموثق باسمك.` : `Congrats! You finished [${mission.title}]
 XP Earned: +[${xpAmount}]
 Time Taken: [${timeTaken}]
 Next step: Visit the Wins page to view your golden cup.`
@@ -377,25 +377,25 @@ Next step: Visit the Wins page to view your golden cup.`
         recommendationsEn = `1. 🚧 Your focus slot capacity is high (${usedSlots}/9). Avoid starting new goals until current ones are resolved.`
         recommendationsList.push("Clear existing focus slots before starting new goals")
       } else {
-        recommendationsAr = `1. ⚡ أداء رائع! حافظ على هذا الإيقاع واستمر في حصد الـ XP والنمو.`
+        recommendationsAr = `1. ⚡ أداء رائع! حافظ على هذا الإيقاع واستمر في كسب نقاط الخبرة والنمو الذاتي.`
         recommendationsEn = `1. ⚡ Excellent execution! Maintain this tempo, keep farming XP and expanding your capabilities.`
         recommendationsList.push("Maintain current productive tempo")
       }
 
-      const title = lang === 'ar' ? `📊 الحصاد الأسبوعي` : `📊 Weekly Review`
-      const contentText = lang === 'ar' ? `📊 الحصاد الأسبوعي // WEEKLY REVIEW
+      const title = lang === 'ar' ? `📊 تقرير الأداء الأسبوعي` : `📊 Weekly Review`
+      const contentText = lang === 'ar' ? `📊 تقرير الأداء الأسبوعي // WEEKLY REVIEW
 
-📅 الأسبوع اللي فات:
-- المهام المنجزة: [${completedCount}] مهمة
-- نقاط XP المكتسبة: +[${totalWeeklyXp}] نقطة
-- حالة المهمات النشطة:
-${activeMissionsTextAr || '- لا يوجد مهمات نشطة حالياً.'}
+📅 مراجعة الأسبوع المنصرم:
+- المهام المكتملة: [${completedCount}] مهمة
+- إجمالي نقاط الخبرة المكتسبة: +[${totalWeeklyXp}] نقطة
+- حالة الأهداف النشطة:
+${activeMissionsTextAr || '- لا توجد أهداف نشطة حالياً.'}
 
-🚀 الأسبوع الجاي:
-- حالة سعة المحطة الحالية: ${usedSlots}/9 وحدات تركيز.
-- خطط التركيز المقترحة: ${criticalGoalTitle ? `التركيز فوراً على إنهاء "${criticalGoalTitle}"` : `الحفاظ على معدل الإنجاز واستثمار طاقة الرانك`}
+🚀 تطلعات الأسبوع المقبل:
+- سعة التركيز الحالية: ${usedSlots}/9 وحدات تركيز.
+- التوجيه المقترح لزيادة الإنتاجية: ${criticalGoalTitle ? `التركيز الفوري على إتمام "${criticalGoalTitle}"` : `الحفاظ على معدل الإنتاجية الحالي وتعزيز تقدمك`}
 
-💡 التوصية:
+💡 التوصية المخصصة:
 ${recommendationsAr}` : `📊 WEEKLY INTELLIGENCE REPORT
 
 📅 LAST WEEK:

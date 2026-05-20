@@ -1,8 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
   <defs>
     <radialGradient id="bg-maya" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#D32F2F" stop-opacity="0.3" />
-      <stop offset="100%" stop-color="#B71C1C" stop-opacity="0.1" />
+      <stop offset="0%" stop-color="#E53935" stop-opacity="0.45" />
+      <stop offset="60%" stop-color="#FFCDD2" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.15" />
     </radialGradient>
     <linearGradient id="shirt-maya" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#E53935" />
@@ -20,9 +21,24 @@
     </linearGradient>
   </defs>
 
-  <!-- Background Glow -->
+  <!-- Background Glow & Cyber Ring -->
   <circle cx="200" cy="200" r="190" fill="url(#bg-maya)" />
-  <circle cx="200" cy="200" r="185" fill="none" stroke="#E53935" stroke-width="2" stroke-opacity="0.4" stroke-dasharray="8 4" />
+  <circle cx="200" cy="200" r="185" fill="none" stroke="#E53935" stroke-width="2" stroke-opacity="0.5" stroke-dasharray="8 4" />
+
+  <!-- Glowing Scientific Background Elements -->
+  <!-- Left Side: Glowing Atom -->
+  <g opacity="0.3">
+    <ellipse cx="80" cy="140" rx="22" ry="7" fill="none" stroke="#E53935" stroke-width="2" transform="rotate(30, 80, 140)" />
+    <ellipse cx="80" cy="140" rx="22" ry="7" fill="none" stroke="#E53935" stroke-width="2" transform="rotate(-30, 80, 140)" />
+    <circle cx="80" cy="140" r="5" fill="#FFCDD2" />
+  </g>
+  <!-- Right Side: Glowing Idea Lightbulb -->
+  <g opacity="0.3">
+    <path d="M312 125 C304 125, 304 142, 312 148 L312 155 L328 155 L328 148 C336 142, 336 125, 328 125 Z" fill="none" stroke="#E53935" stroke-width="2" />
+    <line x1="316" y1="159" x2="324" y2="159" stroke="#E53935" stroke-width="2" />
+    <line x1="318" y1="163" x2="322" y2="163" stroke="#E53935" stroke-width="2" />
+    <circle cx="320" cy="138" r="12" fill="#FFE082" opacity="0.2" />
+  </g>
 
   <!-- Body / Red Shirt -->
   <path d="M110 380 C110 310, 290 310, 290 380 Z" fill="url(#shirt-maya)" />
@@ -33,7 +49,7 @@
   <path d="M175 250 L225 250 L220 335 L180 335 Z" fill="url(#skin-maya)" />
   <ellipse cx="200" cy="275" rx="20" ry="7" fill="#5D4037" opacity="0.4" />
 
-  <!-- Braided Pigtails (Left & Right) -->
+  <!-- Braided Pigtails (Left & Right - extremely visible now!) -->
   <!-- Left Pigtail Balls -->
   <circle cx="120" cy="240" r="22" fill="url(#hair-maya)" />
   <circle cx="120" cy="280" r="22" fill="url(#hair-maya)" />
@@ -78,7 +94,7 @@
   <!-- Nose -->
   <path d="M200 192 L204 212 L196 212" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
 
-  <!-- Mouth / Full red lips -->
+  <!-- Mouth -->
   <path d="M185 238 Q200 248 215 238 Q200 242 185 238 Z" fill="#D32F2F" />
 
   <!-- Front Hair / Middle Part Bangs -->
@@ -86,4 +102,13 @@
   <path d="M264 170 Q270 110 200 115 Q230 140 264 170 Z" fill="url(#hair-maya)" />
   <!-- Top Head Hair Curve -->
   <path d="M130 140 C120 90, 160 80, 200 85 C240 80, 280 90, 270 140 C250 100, 200 115, 200 115 C200 115, 150 100, 130 140 Z" fill="url(#hair-maya)" />
+
+  <!-- High-Tech Graduation Cap (Mortarboard) representing "Learner" -->
+  <!-- Cap Skull Base -->
+  <path d="M164 92 C164 76, 236 76, 236 92 Z" fill="#1C2833" stroke="#E53935" stroke-width="2" />
+  <!-- Diamond Top Plate -->
+  <polygon points="120,72 200,48 280,72 200,96" fill="#2C3E50" stroke="#E53935" stroke-width="3" filter="drop-shadow(0 0 3px #E53935)" />
+  <!-- Gold Hanging Tassel -->
+  <path d="M200 72 Q144 74 135 110" fill="none" stroke="#FFD700" stroke-width="2.5" stroke-linecap="round" />
+  <polygon points="130,110 140,110 135,126" fill="#FFD700" />
 </svg>

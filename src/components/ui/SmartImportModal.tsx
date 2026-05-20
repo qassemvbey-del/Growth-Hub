@@ -28,9 +28,9 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
   const supabase = createClient()
 
   const errorMessages: Record<string, string> = {
-    EMPTY_INPUT: isRTL ? 'من فضلك الصق محتوى أولاً' : 'Please paste some content first',
+    EMPTY_INPUT: isRTL ? 'يرجى لصق المحتوى أولاً' : 'Please paste some content first',
     NO_TASKS_FOUND: isRTL ? 'لم يتم العثور على مهام في هذا النص' : 'No tasks could be extracted from this content',
-    ANALYSIS_FAILED: isRTL ? 'فشل التحليل، حاول مرة أخرى' : 'Analysis failed, please try again',
+    ANALYSIS_FAILED: isRTL ? 'فشل التحليل، يرجى المحاولة مرة أخرى' : 'Analysis failed, please try again',
     'PROTOCOL_FAILURE: NO_API_KEY': isRTL ? 'خطأ في إعدادات النظام' : 'System configuration error',
   }
 
@@ -59,8 +59,10 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
   const handleDeploy = async () => {
     setDeploying(true)
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      setError(isRTL ? 'يجب تسجيل الدخول' : 'AUTH_REQUIRED')
+    const isLocal = typeof missionId === 'string' && missionId.startsWith('local_')
+
+    if (!user && !isLocal) {
+      setError(isRTL ? 'يرجى تسجيل الدخول للمتابعة' : 'AUTH_REQUIRED')
       setDeploying(false)
       return
     }
@@ -72,6 +74,31 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
       is_completed: false,
       type: 'standard',
     }))
+
+    if (isLocal) {
+      const generatedTasks = payload.map(p => ({
+        ...p,
+        id: 'task_' + Math.random().toString(36).substring(2, 9),
+        created_at: new Date().toISOString()
+      }))
+
+      // Save to localStorage under guest_goals
+      const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+      const updatedGoals = guestGoals.map((g: any) => {
+        if (g.id === missionId) {
+          return {
+            ...g,
+            tasks: [...(g.tasks || []), ...generatedTasks]
+          }
+        }
+        return g
+      })
+      localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+
+      onTasksAdded(generatedTasks)
+      handleClose()
+      return
+    }
 
     const { data, error: insertError } = await supabase.from('tasks').insert(payload).select()
 
@@ -102,13 +129,14 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-white/60 dark:bg-black/90 backdrop-blur-md">
+    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-white/60 dark:bg-black/90 backdrop-blur-md" onClick={handleClose}>
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        className="w-full max-w-2xl bg-[var(--card-bg)] border rounded-sm overflow-hidden flex flex-col shadow-2xl"
-        style={{ borderColor: `${themeColor}44`, boxShadow: `0 0 60px ${themeColor}15` }}
+        onClick={(e) => e.stopPropagation()}
+        className="w-[calc(100%-2rem)] mx-auto md:max-w-2xl bg-[var(--card-bg)]/90 backdrop-blur-xl border rounded-2xl overflow-hidden flex flex-col shadow-2xl"
+        style={{ borderColor: `${themeColor}44`, boxShadow: `0 0 60px ${themeColor}15`, maxHeight: '90vh', margin: 'auto' }}
       >
         {/* ── HEADER ── */}
         <div
@@ -161,7 +189,7 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
               >
                 <p className="text-[11px] font-space text-[var(--text-secondary)] tracking-wide leading-relaxed">
                   {isRTL
-                    ? 'الصق أي نص: منهج دراسي، فهرس كتاب، قائمة دروس، أو أي محتوى منظم...'
+                    ? 'يرجى لصق النص المطلوب هنا: منهج دراسي، فهرس كتاب، قائمة دروس، أو أي محتوى آخر...'
                     : 'Paste your course curriculum, chapter list, table of contents, or any structured content below:'}
                 </p>
 
@@ -170,14 +198,13 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                     value={pastedText}
                     onChange={e => { setPastedText(e.target.value); setError(null) }}
                     placeholder={isRTL
-                      ? 'الصق المحتوى هنا...'
+                      ? 'يرجى لصق المحتوى هنا...'
                       : 'Paste your course curriculum, chapter list, or any content here...'}
                     rows={10}
                     dir="auto"
-                    className="w-full bg-[var(--input-bg)] border p-4 font-space text-xs text-[var(--text-primary)] outline-none resize-none placeholder:text-[var(--text-secondary)]/50 transition-all focus:border-opacity-80"
+                    className="w-full bg-[var(--input-bg)] border py-2.5 px-4 font-space text-xs text-[var(--text-primary)] outline-none resize-none placeholder:text-[var(--text-secondary)]/50 transition-all focus:border-opacity-80 rounded-xl"
                     style={{
                       borderColor: error ? '#FF0055' : `${themeColor}30`,
-                      borderRadius: '2px',
                     }}
                     onFocus={e => { e.currentTarget.style.borderColor = `${themeColor}70` }}
                     onBlur={e => { e.currentTarget.style.borderColor = error ? '#FF0055' : `${themeColor}30` }}
@@ -209,7 +236,7 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                   <button
                     onClick={handleAnalyze}
                     disabled={analyzing || !pastedText.trim()}
-                    className="flex items-center gap-3 px-8 py-3 font-space font-black text-[11px] uppercase tracking-[0.2em] transition-all disabled:opacity-30"
+                    className="flex items-center gap-3 py-2.5 px-6 font-space font-black text-[11px] uppercase tracking-[0.2em] transition-all disabled:opacity-30 rounded-xl"
                     style={{
                       backgroundColor: themeColor,
                       color: '#000',
@@ -246,10 +273,10 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                   </span>
                   <div>
                     <p className="text-[13px] font-space font-black uppercase tracking-widest" style={{ color: themeColor }}>
-                      {isRTL ? `تم استخراج ${extractedTasks.length} مهمة` : `✓ FOUND ${extractedTasks.length} TASKS`}
+                      {isRTL ? `تم استخراج ${extractedTasks.length} مهمة بنجاح` : `✓ FOUND ${extractedTasks.length} TASKS`}
                     </p>
                     <p className="text-[9px] font-space text-[var(--text-secondary)] tracking-widest uppercase">
-                      {isRTL ? 'راجع القائمة وأضفها' : 'REVIEW AND CONFIRM TO ADD'}
+                      {isRTL ? 'يرجى مراجعة القائمة وتأكيد الإضافة' : 'REVIEW AND CONFIRM TO ADD'}
                     </p>
                   </div>
                 </div>
@@ -262,7 +289,7 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                       initial={{ opacity: 0, x: -6 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.02 }}
-                      className="flex items-center gap-3 p-3 border border-[var(--card-border)] bg-[var(--input-bg)]"
+                      className="flex items-center gap-3 py-2.5 px-4 border border-[var(--card-border)] bg-[var(--input-bg)] rounded-xl"
                     >
                       <span
                         className="text-[9px] font-space font-black shrink-0 w-6 text-right"
@@ -309,14 +336,14 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                   <div className="flex items-center gap-3">
                     <button
                       onClick={handleClose}
-                      className="px-5 py-2.5 font-space font-black text-[10px] uppercase tracking-widest text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                      className="py-2.5 px-4 font-space font-black text-[10px] uppercase tracking-widest text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors rounded-xl"
                     >
                       {isRTL ? 'إلغاء' : 'CANCEL'}
                     </button>
                     <button
                       onClick={handleDeploy}
                       disabled={deploying}
-                      className="flex items-center gap-2 px-8 py-2.5 font-space font-black text-[11px] uppercase tracking-[0.2em] transition-all disabled:opacity-40"
+                      className="flex items-center gap-2 py-2.5 px-6 font-space font-black text-[11px] uppercase tracking-[0.2em] transition-all disabled:opacity-40 rounded-xl"
                       style={{
                         backgroundColor: themeColor,
                         color: '#000',

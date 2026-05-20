@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Shell from '@/components/layout/Shell'
 import EnergyCell from '@/components/ui/EnergyCell'
+import SmartImportModal from '@/components/ui/SmartImportModal'
 import { createClient } from '@/lib/supabase'
 import { useGrowth } from '@/context/GrowthContext'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import React from 'react'
 
@@ -14,9 +15,7 @@ const SLOT_COLORS = ['#39FF14', '#00F0FF', '#b600f8'] as const
 
 // DB stores 'sm' | 'md' | 'lg' — cover all aliases too
 const SIZE_MAP: Record<string, 'sm' | 'md' | 'lg'> = {
-  // Direct DB values (primary)
   sm: 'sm', md: 'md', lg: 'lg',
-  // Aliases
   S: 'sm', SMALL: 'sm', small: 'sm',
   M: 'md', MEDIUM: 'md', medium: 'md',
   L: 'lg', LARGE: 'lg', large: 'lg',
@@ -47,7 +46,6 @@ function WeatherWidget({ isRTL }: { isRTL: boolean }) {
         let lat = '31.2001'
         let lon = '29.9187'
         
-        // Try getting cached coordinates first
         if (typeof window !== 'undefined') {
           const cachedLat = localStorage.getItem('cached_lat')
           const cachedLon = localStorage.getItem('cached_lon')
@@ -73,10 +71,8 @@ function WeatherWidget({ isRTL }: { isRTL: boolean }) {
           }
         }
 
-        // 1. Instantly trigger background fetch using whatever coordinates we have (default or cached)
         fetchAndStore(lat, lon)
 
-        // 2. Try precise geolocation asynchronously (non-blocking)
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
             (pos) => {
@@ -86,7 +82,6 @@ function WeatherWidget({ isRTL }: { isRTL: boolean }) {
                 localStorage.setItem('cached_lat', freshLat)
                 localStorage.setItem('cached_lon', freshLon)
               }
-              // If coordinates are different from what we used, fetch again in background
               if (freshLat !== lat || freshLon !== lon) {
                 fetchAndStore(freshLat, freshLon)
               }
@@ -106,12 +101,13 @@ function WeatherWidget({ isRTL }: { isRTL: boolean }) {
   }, [])
 
   return (
-    <div className="bg-white/60 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-xl p-4 backdrop-blur-md mb-4 flex items-center justify-between w-full max-w-lg mx-auto shadow-sm dark:shadow-none">
-      <div className="text-sm font-medium text-zinc-900 dark:text-white/90 flex items-center gap-1.5 font-space">
-        <span>{weather.emoji}</span>
-        <span>{weather.temp}°C</span>
+    <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-4 md:p-5 backdrop-blur-md mb-6 flex items-center justify-between w-full max-w-5xl mx-auto shadow-md relative overflow-hidden">
+      <div className="absolute top-0 inset-x-0 h-1" style={{ background: `linear-gradient(to right, var(--theme-color), var(--theme-color), transparent)` }} />
+      <div className="text-base md:text-lg font-bold text-zinc-900 dark:text-white flex items-center gap-2.5 font-space shrink-0">
+        <span className="text-xl md:text-2xl">{weather.emoji}</span>
+        <span className="font-black tracking-tight">{weather.temp}°C</span>
       </div>
-      <div className="text-xs text-zinc-600 dark:text-white/50 font-normal text-right max-w-[60%] leading-relaxed font-space">
+      <div className="text-sm md:text-base text-zinc-800 dark:text-white/90 font-medium text-right max-w-[75%] leading-relaxed font-space">
         {isRTL ? weather.messageAr : weather.messageEn}
       </div>
     </div>
@@ -124,7 +120,21 @@ export default function Dashboard() {
   const [missions, setMissions] = useState<any[]>([])
   const [weeklyMinutes, setWeeklyMinutes] = useState<number>(0)
   const [loading, setLoading] = useState(true)
+  const [importModalOpen, setImportModalOpen] = useState(false)
+  const [selectedImportMissionId, setSelectedImportMissionId] = useState<string>('')
+
   const supabase = createClient()
+
+  // Global Escape key listener to close active modals in Dashboard
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setImportModalOpen(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   useEffect(() => {
     if (mounted) {
@@ -132,7 +142,6 @@ export default function Dashboard() {
       fetchWeeklyTimeLogs()
     }
   }, [mounted])
-
 
   async function fetchDashboardMissions() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -146,7 +155,12 @@ export default function Dashboard() {
       .eq('is_archived', false)
       .order('created_at', { ascending: false })
     
-    if (data) setMissions(data)
+    if (data) {
+      setMissions(data)
+      if (data.length > 0 && !selectedImportMissionId) {
+        setSelectedImportMissionId(data[0].id)
+      }
+    }
     setLoading(false)
   }
 
@@ -177,245 +191,388 @@ export default function Dashboard() {
     }
   }
 
+  const allTasks = useMemo(() => {
+    const list: any[] = []
+    missions.forEach(m => {
+      if (m.tasks) {
+        m.tasks.forEach((t: any) => {
+          list.push({ ...t, missionTitle: m.title, missionColor: m.color || currentTheme.color })
+        })
+      }
+    })
+    // Keep original insertion order — no resorting on completion
+    return list
+  }, [missions, currentTheme.color])
+
+  const completedTasksCount = useMemo(() => allTasks.filter(t => t.is_completed).length, [allTasks])
+  const pendingTasksCount = useMemo(() => allTasks.filter(t => !t.is_completed).length, [allTasks])
+
+  const coachTip = useMemo(() => {
+    const redZoneMission = missions.find(m => calculateAccountability(m).isInRedZone)
+    if (redZoneMission) {
+      return isRTL
+        ? `لديك أهداف في المنطقة الحمراء! ركّز جهودك اليوم على "${redZoneMission.title}" لتفادي خسارة النقاط.`
+        : `You have goals in the Red Zone! Direct your energy to "${redZoneMission.title}" today to avoid XP penalties.`
+    }
+
+    if (weeklyMinutes === 0 && completedTasksCount === 0) {
+      return isRTL
+        ? `أسبوعك يبدأ الآن. رتّب أولوياتك، ضع خطتك، وانطلق بكامل طاقتك لتفوز بالأسبوع!`
+        : `Your week begins now. Prioritize, map your tasks, and start executing to win the week!`
+    }
+
+    if (pendingTasksCount > 4) {
+      return isRTL
+        ? `لديك ${pendingTasksCount} مهام معلّقة. قسّمها لمهام أصغر وأنجز الأهم أولاً.`
+        : `You have ${pendingTasksCount} pending tasks. Break them down and tackle the highest leverage item first.`
+    }
+
+    if (weeklyMinutes >= 1200) {
+      return isRTL
+        ? `عمل رائع! لقد تجاوزت هدف الـ 20 ساعة لهذا الأسبوع. استمر في هذا الأداء المتميز.`
+        : `Elite effort! You've crossed the 20-hour focus target for this week. Keep up the momentum.`
+    }
+
+    return isRTL
+      ? `التزم بفترات العمل العميقة (Deep Work). ركّز على مهمة واحدة في كل مرة لتصل لأقصى إنتاجية.`
+      : `Protect your focus blocks. Multi-tasking dilutes energy; execute single tasks with deep concentration.`
+  }, [missions, weeklyMinutes, completedTasksCount, pendingTasksCount, isRTL, calculateAccountability])
+
   if (!mounted) return null
 
   return (
     <Shell syncedMissions={missions} onMissionsRefresh={fetchDashboardMissions}>
-
-      <div className="w-full min-h-[calc(100vh-64px)] flex flex-col py-6 md:py-16 px-4 md:px-12 space-y-8 md:space-y-24">
-
-        {/* ── CENTERED TITLE ── */}
-        <div className="flex flex-col items-center text-center space-y-4 md:space-y-6">
+      <div className="w-full min-h-[calc(100vh-64px)] flex flex-col py-8 md:py-12 px-4 md:px-12 space-y-8 max-w-7xl mx-auto">
+        
+        {/* ── HEADER & WEATHER ── */}
+        <div className="w-full flex flex-col items-center text-center space-y-4">
           <div className="flex items-center gap-6">
-            <div className="h-[1px] w-24 md:w-32 bg-gradient-to-r from-transparent" style={{ background: `linear-gradient(to right, transparent, ${currentTheme.color}40)` }} />
-            {/* ONE breathing lightning bolt */}
+            <div className="h-[1px] w-20 md:w-32" style={{ background: `linear-gradient(to right, transparent, ${currentTheme.color}40)` }} />
             <motion.span
-              className="material-symbols-outlined text-lg md:text-2xl"
+              className="material-symbols-outlined text-xl md:text-2xl"
               style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }}
               animate={{ opacity: [0.3, 1, 0.3] }}
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             >
               bolt
             </motion.span>
-            <div className="h-[1px] w-24 md:w-32" style={{ background: `linear-gradient(to left, transparent, ${currentTheme.color}40)` }} />
+            <div className="h-[1px] w-20 md:w-32" style={{ background: `linear-gradient(to left, transparent, ${currentTheme.color}40)` }} />
           </div>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-8xl lg:text-9xl font-black font-space italic tracking-tighter uppercase leading-none text-black dark:text-white break-words"
+            className="text-2xl md:text-4xl lg:text-5xl font-black font-space tracking-tight uppercase leading-none text-zinc-900 dark:text-white"
           >
-            {isRTL ? 'مركز' : 'GROWTH'}<span style={{ color: currentTheme.color }}>{isRTL ? ' النمو' : '_HUB'}</span>
+            {isRTL ? 'مساحة' : 'WORK'}<span style={{ color: currentTheme.color }}>{isRTL ? ' العمل' : '_SPACE'}</span>
           </motion.h1>
 
-          <p className="text-[10px] md:text-xs font-space text-black/40 dark:text-white/40 tracking-[0.6em] uppercase font-black">
-            {isRTL ? 'لوحة الأهداف' : 'GOAL CANVAS'} // {profile?.full_name?.toUpperCase() || (isRTL ? 'المستخدم' : 'OPERATOR')}
+          <p className="text-xs font-space text-zinc-500 dark:text-white/40 tracking-[0.5em] uppercase font-black">
+            {isRTL ? 'لوحة التحكم' : 'DASHBOARD'} // {profile?.rank || 'MEMBER'}
           </p>
-
-          {/* Sleek, low-profile weekly time floating sub-badge */}
-          <div className="font-space font-black text-zinc-600 dark:text-white/50 text-xs tracking-wider uppercase flex items-center gap-1.5 justify-center mt-2">
-            <span>⏱ THIS WEEK: {Math.floor(weeklyMinutes / 60)}h {weeklyMinutes % 60}m invested</span>
-          </div>
         </div>
 
-        {/* ═══════════════════════════════════════════════════ */}
-        {/* ██  FOCUS CAPACITY — BOLD, GLOWING, text-3xl/4xl ██ */}
-        {/* ═══════════════════════════════════════════════════ */}
         <WeatherWidget isRTL={isRTL} />
 
+        {/* ═══════════════════════════════════════════════════ */}
+        {/* ██  FOCUS CAPACITY — BOLD, GLOWING 9-SLOT TANK   ██ */}
+        {/* ═══════════════════════════════════════════════════ */}
         {(() => {
           const SIZE_SLOTS: Record<string, number> = { sm: 1, md: 1.5, lg: 3, s: 1, m: 1.5, l: 3 }
           const usedSlots = missions.reduce((acc: number, m: any) => acc + (SIZE_SLOTS[m.size?.toLowerCase()] ?? 1), 0)
-          const pct = Math.min(100, (usedSlots / 9) * 100)
           const isFull = usedSlots >= 9
+          const isOverCap = usedSlots > 9
+
           return (
-            <div className="w-full max-w-lg mx-auto space-y-4">
-              {/* FOCUS CAPACITY — HERO LABEL */}
-              <div className="flex justify-between items-end">
-                <span
-                  className={cn(
-                    "font-space font-black tracking-tight uppercase",
-                    isRTL ? "text-[20px] text-[#FF0055]" : "text-3xl md:text-4xl"
-                  )}
-                  style={{
-                    color: isRTL ? '#FF0055' : (isFull ? '#FF0055' : currentTheme.color),
-                    textShadow: `0 0 20px ${isFull || isRTL ? '#FF005588' : currentTheme.color + '88'}, 0 0 40px ${isFull || isRTL ? '#FF005544' : currentTheme.color + '44'}`,
-                  }}
-                >
-                  {isRTL ? 'سعة التركيز' : 'FOCUS_CAPACITY'}
-                </span>
-                <span
-                  className="text-2xl md:text-3xl font-space font-black tracking-tight"
-                  style={{
-                    color: isFull ? '#FF0055' : currentTheme.color,
-                    textShadow: `0 0 12px ${isFull ? '#FF005566' : currentTheme.color + '66'}`,
-                  }}
-                >
-                  {usedSlots.toFixed(1).replace('.0', '')}/9
-                </span>
-              </div>
-              {/* Segmented 9-slot bar - Dynamic Theme Energy Tank */}
-              <div 
-                className="flex gap-[4px] h-[16px] p-[2px] rounded-sm border bg-zinc-100 dark:bg-[#050505] overflow-hidden"
-                style={{
-                  borderColor: `${currentTheme.color}40`,
-                  boxShadow: `0 0 15px ${currentTheme.color}26, inset 0 0 10px ${currentTheme.color}0d`,
-                }}
-              >
-                {Array.from({ length: 9 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex-1 rounded-[1px] transition-all duration-700"
-                    style={{
-                      backgroundColor: i < usedSlots
-                        ? currentTheme.color
-                        : `${currentTheme.color}0d`,
-                      boxShadow: i < usedSlots 
-                        ? `0 0 10px ${currentTheme.color}, inset 0 0 5px rgba(255,255,255,0.5)`
-                        : 'none',
-                    }}
-                  />
-                ))}
-              </div>
+            <div className="w-full max-w-5xl mx-auto bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-6 md:p-8 space-y-6 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-1" style={{ background: `linear-gradient(to right, ${isOverCap ? '#FF0055' : currentTheme.color}, ${isOverCap ? '#FF0055' : currentTheme.color}88, transparent)` }} />
               
-              {/* Weekly Time Logged Stat */}
-              <div className="flex justify-between items-center text-[10px] font-space text-[var(--text-secondary)] uppercase tracking-wider pt-1">
-                <span className="flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-[12px]" style={{ color: currentTheme.color }}>timer</span>
-                  {isRTL ? 'الاستثمار هذا الأسبوع:' : 'INVESTED THIS WEEK:'}
-                </span>
-                <span className="font-black italic text-xs" style={{ color: currentTheme.color }}>
-                  {Math.floor(weeklyMinutes / 60)}h {weeklyMinutes % 60}m
-                </span>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="material-symbols-outlined text-sm" style={{ color: isOverCap ? '#FF0055' : currentTheme.color }}>bolt</span>
+                    <h2 className="text-xs md:text-sm font-space text-[var(--text-secondary)] uppercase tracking-wider font-bold">
+                      {isRTL ? 'سعة التركيز' : 'FOCUS CAPACITY'}
+                    </h2>
+                    {isOverCap && (
+                      <span className="px-2 py-0.5 rounded-sm bg-[#FF0055]/20 border border-[#FF0055] text-[#FF0055] text-[10px] font-space font-black uppercase animate-pulse ml-2">
+                        {isRTL ? 'تجاوز الحد الأقصى!' : 'OVERCAPACITY'}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs font-space text-zinc-500 dark:text-zinc-400 mt-1">
+                    {isRTL ? 'الحد الأقصى 9 خانات لضمان أعلى جودة تركيز.' : 'Constrained to 9 slots maximum to ensure elite execution focus.'}
+                  </p>
+                </div>
+
+                <div className="flex items-baseline gap-1 bg-[var(--input-bg)] px-6 py-4 rounded-xl border border-[var(--card-border)] shadow-inner">
+                  <span className="text-5xl md:text-6xl font-space font-black tracking-tighter" style={{ color: isOverCap ? '#FF0055' : currentTheme.color }}>
+                    {usedSlots.toFixed(1).replace('.0', '')}
+                  </span>
+                  <span className="text-xl font-space font-bold text-zinc-400 dark:text-zinc-600">/9</span>
+                </div>
               </div>
+
+              {/* Segmented 9-slot bar */}
+              <div 
+                className="flex gap-1.5 h-6 p-1 rounded-xl border bg-zinc-100 dark:bg-[#050505] overflow-hidden shadow-inner"
+                style={{ borderColor: `${currentTheme.color}40` }}
+              >
+                {Array.from({ length: 9 }).map((_, i) => {
+                  const isActive = i < usedSlots
+                  return (
+                    <div
+                      key={i}
+                      className="flex-1 rounded-lg transition-all duration-500 relative overflow-hidden"
+                      style={{
+                        backgroundColor: isActive
+                          ? (isOverCap ? '#FF0055' : currentTheme.color)
+                          : `${currentTheme.color}10`,
+                        boxShadow: isActive 
+                          ? `0 0 15px ${isOverCap ? '#FF0055' : currentTheme.color}`
+                          : 'none',
+                      }}
+                    >
+                      {isActive && (
+                        <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+
+              {isOverCap && (
+                <div className="p-4 rounded-xl bg-[#FF0055]/10 border border-[#FF0055]/30 flex items-center gap-3 text-[#FF0055] text-xs font-space font-bold">
+                  <span className="material-symbols-outlined text-lg shrink-0 animate-bounce">warning</span>
+                  <p>
+                    {isRTL 
+                      ? 'تحذير: لقد تجاوزت سعة التركيز القصوى (9 خانات). يوصى بأرشفة أو إنهاء بعض الأهداف لتجنب تشتت الجهد.' 
+                      : 'WARNING: You have exceeded the elite focus constraint (9 slots). Archiving or completing active missions is strongly recommended.'}
+                  </p>
+                </div>
+              )}
             </div>
           )
         })()}
 
         {/* ═══════════════════════════════════════════════════ */}
-        {/* ██  MISSION CARDS GRID — STRICT 3-COL + LAYOUT  ██ */}
+        {/* ██  ACTIVE MISSIONS GRID (CRYSTALS UNDER FOCUS)  ██ */}
         {/* ═══════════════════════════════════════════════════ */}
-        <section className="w-full grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 cells-target">
-          {missions.map((mission, idx) => {
-            const { progress, isInRedZone } = calculateAccountability(mission)
-            const roundedProgress = Math.round(progress)
-            const customColor = mission.color || currentTheme.color;
-            const fallbackColor = SLOT_COLORS[idx % SLOT_COLORS.length]
-            const topBorderColor = isInRedZone ? '#ef4444' : (customColor || fallbackColor);
+        <div className="w-full max-w-7xl mx-auto space-y-6 pt-4">
+          <div className="flex items-center gap-3 px-2">
+            <span className="material-symbols-outlined text-2xl" style={{ color: currentTheme.color }}>flag</span>
+            <h2 className="text-xl font-space font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-wide">
+              {isRTL ? 'الأهداف النشطة' : 'ACTIVE MISSIONS'}
+            </h2>
+          </div>
 
-            return (
-              <React.Fragment key={mission.id}>
-                {/* Derive canonical size */}
-                {(() => {
-                  const kasaSize: 'sm' | 'md' | 'lg' = SIZE_MAP[mission.size?.toUpperCase?.()] ?? SIZE_MAP[mission.size] ?? 'sm'
-                  // For dashboard cards: cap kasa display to sm/md to fit card
-                  const cardKasaSize = kasaSize === 'lg' ? 'md' : kasaSize
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 cells-target">
+            {missions.map((mission, idx) => {
+              const { progress, isInRedZone } = calculateAccountability(mission)
+              const roundedProgress = Math.round(progress)
+              const customColor = mission.color || currentTheme.color
+              const fallbackColor = SLOT_COLORS[idx % SLOT_COLORS.length]
+              const topBorderColor = isInRedZone ? '#ef4444' : (customColor || fallbackColor)
 
-                  // Format dates
-                  const fmtDate = (d: string | null) => {
-                    if (!d) return null
-                    try { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) } catch { return null }
-                  }
-                  const startStr = fmtDate(mission.start_date)
-                  const endStr = fmtDate(mission.end_date)
+              const kasaSize: 'sm' | 'md' | 'lg' = SIZE_MAP[mission.size?.toUpperCase?.()] ?? SIZE_MAP[mission.size] ?? 'sm'
+              const cardKasaSize = kasaSize === 'lg' ? 'md' : kasaSize
 
-                  return (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.05 }}
-                      onClick={() => router.push(`/missions/${mission.id}`)}
+              const fmtDate = (d: string | null) => {
+                if (!d) return null
+                try { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) } catch { return null }
+              }
+              const startStr = fmtDate(mission.start_date)
+              const endStr = fmtDate(mission.end_date)
+
+              return (
+                <motion.div
+                  key={mission.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  onClick={() => router.push(`/missions/${mission.id}`)}
+                  className={cn(
+                    'group relative cursor-pointer rounded-2xl border transition-all duration-300 overflow-hidden',
+                    'bg-[var(--card-bg)] border-[var(--card-border)] backdrop-blur-md w-full shadow-lg hover:shadow-xl',
+                    'min-h-[260px] p-6 flex flex-col',
+                    isInRedZone
+                      ? 'border-red-500/40 hover:border-red-500 shadow-[0_0_30px_rgba(255,0,0,0.15)]'
+                      : 'hover:border-zinc-400 dark:hover:border-white/30'
+                  )}
+                  style={{ borderColor: isInRedZone ? undefined : `${topBorderColor}33` }}
+                >
+                  <div className="absolute top-0 inset-x-0 h-1" style={{
+                    background: `linear-gradient(to right, ${topBorderColor}, ${topBorderColor}88, transparent)`
+                  }} />
+
+                  {/* Top Label + Title */}
+                  <div className="w-full text-center space-y-1.5 mb-auto">
+                    <p
                       className={cn(
-                        'group relative cursor-pointer rounded-sm border transition-all duration-300 overflow-hidden',
-                        'bg-[var(--card-bg)] border-[var(--card-border)] backdrop-blur-md w-full',
-                        'min-h-[240px] max-h-[360px]',
-                        'p-5 md:p-6 flex flex-col',
-                        isInRedZone
-                          ? 'border-red-500/30 hover:border-red-500/60 shadow-[0_0_30px_rgba(255,0,0,0.06)]'
-                          : 'hover:border-[var(--card-border)]/50'
+                        'font-space font-black tracking-[0.3em] uppercase text-[10px]',
+                        isInRedZone ? 'text-red-500 animate-pulse' : 'text-[var(--text-secondary)]'
                       )}
-                      style={{ borderColor: isInRedZone ? undefined : `${topBorderColor}22` }}
+                      style={(!isInRedZone && customColor) ? { color: customColor } : {}}
                     >
-                      {/* Top neon accent line */}
-                      <div className="absolute top-0 inset-x-0 h-[2.5px]" style={{
-                        background: `linear-gradient(to right, ${topBorderColor}, ${topBorderColor}66, transparent)`
-                      }} />
+                      {isInRedZone ? (isRTL ? 'تنبيه خطير' : '⚠ RED_ZONE') : (isRTL ? 'هدف نشط' : 'ACTIVE MISSION')}
+                    </p>
+                    <h3 className="text-base font-space font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-wide truncate leading-tight italic">
+                      {mission.title}
+                    </h3>
+                  </div>
 
-                      {/* === TOP: Label + Title === */}
-                      <div className="w-full text-center space-y-1 mb-auto">
-                        <p
-                          className={cn(
-                            'font-space font-black tracking-[0.4em] uppercase',
-                            isRTL ? 'text-[14px] text-[var(--text-primary)]' : 'text-[8px] text-[var(--text-secondary)]',
-                            isInRedZone ? 'text-red-500' : ''
-                          )}
-                          style={(!isInRedZone && !isRTL && customColor) ? { color: `${customColor}99` } : {}}
-                        >
-                          {isInRedZone ? (isRTL ? 'تنبيه خطير' : '⚠ RED_ZONE') : (isRTL ? 'هدف نشط' : 'ACTIVE')}
-                        </p>
-                        <h2 className="text-sm md:text-base font-space font-black text-[var(--text-primary)] uppercase tracking-wide truncate leading-tight italic">
-                          {mission.title}
-                        </h2>
-                      </div>
+                  {/* Crystal Trophy Kasa */}
+                  <div className="flex justify-center items-center py-4 group-hover:scale-105 transition-transform duration-500">
+                    <EnergyCell
+                      percentage={roundedProgress}
+                      color={isInRedZone ? '#FF0055' : (customColor || fallbackColor)}
+                      size={cardKasaSize}
+                      isInRedZone={isInRedZone}
+                    />
+                  </div>
 
-                      {/* === CENTER: Crystal Trophy Kasa === */}
-                      <div className="flex justify-center items-center py-3 group-hover:scale-105 transition-transform duration-500">
-                        <EnergyCell
-                          percentage={roundedProgress}
-                          color={isInRedZone ? '#FF0055' : (customColor || fallbackColor)}
-                          size={cardKasaSize}
-                          isInRedZone={isInRedZone}
-                        />
-                      </div>
+                  {/* Bottom Progress */}
+                  <div className="w-full mt-auto space-y-2.5 pt-2">
+                    <div className="flex justify-between items-center text-xs font-space font-black tracking-widest uppercase">
+                      <span className="text-[var(--text-secondary)]">{isRTL ? 'التقدم' : 'PROGRESS'}</span>
+                      <span
+                        className={cn('text-sm font-bold', isInRedZone ? 'text-red-500' : 'text-zinc-900 dark:text-zinc-100')}
+                        style={(!isInRedZone && customColor) ? { color: customColor } : {}}
+                      >
+                        {roundedProgress}%
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-[var(--input-bg)] overflow-hidden rounded-full border border-[var(--card-border)] shadow-inner">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${roundedProgress}%` }}
+                        transition={{ duration: 1.5, ease: 'easeOut' }}
+                        className="h-full rounded-full"
+                        style={{
+                          backgroundColor: topBorderColor,
+                          boxShadow: `0 0 12px ${topBorderColor}`
+                        }}
+                      />
+                    </div>
+                    {(startStr || endStr) && (
+                      <p className="text-[9px] font-space text-[var(--text-secondary)] uppercase tracking-wider text-center pt-1">
+                        {startStr || '—'} → {endStr || '—'}
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
+              )
+            })}
 
-                      {/* === BOTTOM: Progress + dates === */}
-                      <div className="w-full mt-auto space-y-2">
-                        <div className="flex justify-between text-[9px] font-space font-black tracking-widest uppercase text-[var(--text-secondary)]">
-                          <span>{isRTL ? 'التقدم' : 'PROGRESS'}</span>
-                          <span
-                            className={cn('text-sm font-bold', isInRedZone ? 'text-red-500' : 'text-[var(--text-primary)]')}
-                            style={(!isInRedZone && customColor) ? { color: customColor } : {}}
-                          >
-                            {roundedProgress}%
-                          </span>
-                        </div>
-                        <div className="w-full h-[3px] bg-[var(--input-bg)] overflow-hidden rounded-full">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${roundedProgress}%` }}
-                            transition={{ duration: 1.5, ease: 'easeOut' }}
-                            className="h-full rounded-full"
-                            style={{
-                              backgroundColor: topBorderColor,
-                              boxShadow: `0 0 12px ${topBorderColor}`
-                            }}
-                          />
-                        </div>
-                        {/* Dates row */}
-                        {(startStr || endStr) && (
-                          <p className="text-[7px] font-space text-[var(--text-secondary)]/50 uppercase tracking-wider text-center">
-                            {startStr || '—'} → {endStr || '—'}
-                          </p>
-                        )}
-                      </div>
-                    </motion.div>
-                  )
-                })()}
+            {missions.length === 0 && !loading && (
+              <div className="col-span-full py-16 text-center bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-8">
+                <p className="text-zinc-500 dark:text-white/40 text-sm font-space">
+                  {isRTL ? 'لا توجد أهداف نشطة حالياً. ابدأ بإنشاء هدف جديد!' : 'No active goals synced. Initiate a new mission to begin execution.'}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
 
-                {/* Section Divider after every 3 missions (Desktop) */}
-                {(idx + 1) % 3 === 0 && (
-                   <div className="col-span-full w-full h-[1px] border-t border-black/5 dark:border-white/10 my-6 hidden lg:block" />
-                )}
-              </React.Fragment>
-            )
-          })}
-
-          {missions.length === 0 && !loading && (
-            <div className="col-span-full py-24">
-              <p className="text-zinc-500 dark:text-white/30 text-sm text-center">No active goals synced. Use the action panel above to initiate.</p>
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        {/* ██                BOTTOM GRID: WEEKLY STATS & COACH          ██ */}
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        <div className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 pt-12 border-t border-[var(--card-border)] mt-12 items-start pb-8">
+          
+          {/* Weekly Stats Section ("This Week") */}
+          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-6 md:p-8 space-y-6 shadow-xl relative overflow-hidden h-full">
+            <div className="absolute top-0 inset-x-0 h-1" style={{ background: `linear-gradient(to right, ${currentTheme.color}, ${currentTheme.color}88, transparent)` }} />
+            <div className="flex items-center gap-2 mb-4">
+              <span className="material-symbols-outlined text-sm" style={{ color: currentTheme.color }}>monitoring</span>
+              <h2 className="text-xs md:text-sm font-space text-[var(--text-secondary)] uppercase tracking-wider font-bold">
+                {isRTL ? 'أسبوعي' : 'This Week'}
+              </h2>
             </div>
-          )}
-        </section>
+
+            {weeklyMinutes === 0 && completedTasksCount === 0 ? (
+              <div className="flex flex-col items-center justify-center text-center py-8 space-y-5">
+                <span className="material-symbols-outlined text-5xl text-zinc-300 dark:text-zinc-600 animate-pulse">insights</span>
+                <p className="text-sm font-space text-zinc-500 dark:text-zinc-400 max-w-xs leading-relaxed">
+                  {isRTL ? 'ابدأ أول task وهنبدأ نتتبع أسبوعك' : 'Complete your first task to start tracking your week'}
+                </p>
+                <button
+                  onClick={() => router.push('/missions')}
+                  className="px-5 py-2.5 border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 rounded-xl text-xs font-space font-black uppercase tracking-wider transition-all bg-transparent text-zinc-800 dark:text-zinc-200 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                >
+                  {isRTL ? 'تصفح الأهداف' : 'View Goals'}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <div className="text-4xl md:text-5xl font-space font-black tracking-tighter" style={{ color: currentTheme.color }}>
+                      {Math.floor(weeklyMinutes / 60)}h {weeklyMinutes % 60}m
+                    </div>
+                    <span className="text-[10px] md:text-xs font-space text-[var(--text-secondary)] uppercase tracking-wider block">
+                      {isRTL ? 'الوقت المستثمر' : 'TIME INVESTED'}
+                    </span>
+                  </div>
+
+                  <div className="w-full h-2 bg-[var(--input-bg)] rounded-full overflow-hidden border border-[var(--card-border)] shadow-inner mt-4">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(100, (weeklyMinutes / 1200) * 100)}%` }} // 20 hours target
+                      transition={{ duration: 1 }}
+                      className="h-full rounded-full"
+                      style={{ backgroundColor: currentTheme.color, boxShadow: `0 0 10px ${currentTheme.color}` }}
+                    />
+                  </div>
+                  <p className="text-[10px] font-space text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-right">
+                    {isRTL ? 'الهدف الأسبوعي: 20 ساعة' : 'WEEKLY TARGET: 20 HOURS'}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[var(--card-border)]">
+                  <div className="bg-[var(--input-bg)] p-4 rounded-xl border border-[var(--card-border)] text-center space-y-1">
+                    <span className="text-3xl font-space font-black text-zinc-900 dark:text-zinc-100 block">
+                      {completedTasksCount}
+                    </span>
+                    <span className="text-[10px] md:text-xs font-space text-[var(--text-secondary)] uppercase tracking-wider block">
+                      {isRTL ? 'مهام منجزة' : 'COMPLETED'}
+                    </span>
+                  </div>
+                  <div className="bg-[var(--input-bg)] p-4 rounded-xl border border-[var(--card-border)] text-center space-y-1">
+                    <span className="text-3xl font-space font-black text-zinc-900 dark:text-zinc-100 block">
+                      {pendingTasksCount}
+                    </span>
+                    <span className="text-[10px] md:text-xs font-space text-[var(--text-secondary)] uppercase tracking-wider block">
+                      {isRTL ? 'مهام قيد الانتظار' : 'PENDING'}
+                    </span>
+                  </div>
+                </div>
+
+
+              </div>
+            )}
+          </div>
+
+          {/* Coach Tip Section */}
+          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-6 md:p-8 space-y-4 shadow-xl relative overflow-hidden h-full flex flex-col justify-between">
+            <div className="absolute top-0 inset-x-0 h-1" style={{ background: `linear-gradient(to right, ${currentTheme.color}, ${currentTheme.color}88, transparent)` }} />
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="material-symbols-outlined text-sm text-amber-500">lightbulb</span>
+                <h2 className="text-xs md:text-sm font-space text-[var(--text-secondary)] uppercase tracking-wider font-bold">
+                  {isRTL ? 'نصيحة المدرب' : 'Coach Tip'}
+                </h2>
+              </div>
+              <p className="text-xl md:text-2xl font-space text-zinc-900 dark:text-zinc-100 leading-relaxed italic font-bold">
+                "{coachTip}"
+              </p>
+            </div>
+            
+            <div className="text-[9px] font-space text-zinc-400 dark:text-zinc-600 uppercase tracking-widest pt-6">
+              GROWTH HUB // PERSONALIZED COACHING MESH
+            </div>
+          </div>
+
+        </div>
       </div>
     </Shell>
   )

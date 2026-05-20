@@ -60,7 +60,7 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
     }
 
     const userData = {
-      username: profile?.full_name || 'OPERATOR',
+      username: profile?.full_name || 'MEMBER',
       rank: profile?.rank || 'RECRUIT',
       xp: profile?.xp || 0,
       capacity_used: activeMissions.length,

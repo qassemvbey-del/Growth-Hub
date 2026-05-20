@@ -12,9 +12,9 @@ export default function GlobalCursor() {
   const mouseY = useMotionValue(-100)
   const cursorOpacity = useMotionValue(0)
   
-  // High-performance spring physics for custom trailing
-  const springX = useSpring(mouseX, { stiffness: 380, damping: 26 })
-  const springY = useSpring(mouseY, { stiffness: 380, damping: 26 })
+  // High-performance spring physics for custom trailing (speed increased by 20%)
+  const springX = useSpring(mouseX, { stiffness: 456, damping: 31 })
+  const springY = useSpring(mouseY, { stiffness: 456, damping: 31 })
   
   // Site-wide soft background spotlight opacity transform (reduced opacity)
   const glowOpacity = useTransform(cursorOpacity, [0, 1], [0, 0.04])

@@ -32,7 +32,7 @@ interface CoachUserData {
 export async function chatWithCoach(prompt: string, userData: CoachUserData, language: string) {
   if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
     console.error('COACH_UPLINK_ERROR: NEXT_PUBLIC_GEMINI_API_KEY is missing from environment')
-    return "UPLINK_FAILED // NO_API_KEY_FOUND"
+    return "CONNECTION ERROR // NO_API_KEY_FOUND"
   }
   const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' })
 
@@ -80,7 +80,7 @@ export async function chatWithCoach(prompt: string, userData: CoachUserData, lan
       You are inside the Growth Hub interface.
       Your job is to act as a tactical coach who knows the user's data perfectly.
 
-      OPERATOR_DATA:
+      MEMBER_DATA:
       - Name: ${userData.username}
       - Rank: ${userData.rank}
       - Total XP: ${userData.xp}
@@ -140,7 +140,7 @@ export async function chatWithCoach(prompt: string, userData: CoachUserData, lan
     return response.text()
   } catch (error) {
     console.error('COACH_UPLINK_ERROR:', error)
-    return "UPLINK_FAILED // RETRY_SEQUENCE"
+    return "CONNECTION ERROR // RETRY_SEQUENCE"
   }
 }
 

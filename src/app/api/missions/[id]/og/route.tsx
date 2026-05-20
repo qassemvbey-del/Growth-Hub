@@ -1,7 +1,6 @@
 import { ImageResponse } from 'next/og'
 import { createAdminClient } from '@/lib/supabase-admin'
 
-export const runtime = 'edge'
 
 const RANK_THEMES: Record<string, { name: string; color: string; glow: string }> = {
   SILVER: { name: 'SILVER', color: '#94a3b8', glow: 'rgba(148, 163, 184, 0.4)' },
@@ -18,6 +17,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+  const { origin } = new URL(request.url)
 
   try {
     const supabase = createAdminClient()
@@ -210,6 +210,7 @@ export async function GET(
     const googleAvatar = profile?.avatar_url?.startsWith('http') ? profile.avatar_url : null
     const defaultAvatar = (profile?.gender === 'female' || profile?.gender === 'أنثى' || profile?.gender === 'Female') ? '/avatars/menna.svg' : '/avatars/omar.svg'
     const resolvedAvatarUrl = customAvatar || googleAvatar || defaultAvatar
+    const absoluteAvatarUrl = resolvedAvatarUrl?.startsWith('http') ? resolvedAvatarUrl : `${origin}${resolvedAvatarUrl}`
 
     // -------------------------------------------------------------------------
     // V18.4 CYBERPUNK PLAYER ID CARD (NEON BORDER)
@@ -269,15 +270,15 @@ export async function GET(
             >
               {/* User Header */}
               <div style={{ display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: '24px', marginBottom: '40px' }}>
-                {resolvedAvatarUrl ? (
-                  <img src={resolvedAvatarUrl} style={{ width: '90px', height: '90px', borderRadius: '50%', border: `3px solid ${rankColor}`, objectFit: 'cover' }} />
+                {absoluteAvatarUrl ? (
+                  <img src={absoluteAvatarUrl} style={{ width: '90px', height: '90px', borderRadius: '50%', border: `3px solid ${rankColor}`, objectFit: 'cover' }} />
                 ) : (
                   <div style={{ width: '90px', height: '90px', borderRadius: '50%', border: `3px solid ${rankColor}`, backgroundColor: `${rankColor}33`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', fontSize: '36px', fontWeight: 'bold' }}>
                     {userFullName.charAt(0).toUpperCase()}
                   </div>
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: isRTL ? 'flex-end' : 'flex-start' }}>
-                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '18px', letterSpacing: '0.2em', fontFamily: 'monospace' }}>OPERATOR ID</span>
+                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '18px', letterSpacing: '0.2em', fontFamily: 'monospace' }}>MEMBER PROFILE</span>
                   <span style={{ color: '#FFFFFF', fontSize: '42px', fontWeight: '900', textTransform: 'uppercase', textShadow: '0 0 10px rgba(255,255,255,0.3)' }}>{userFullName}</span>
                 </div>
               </div>

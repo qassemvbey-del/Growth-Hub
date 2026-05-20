@@ -43,13 +43,13 @@ export default function BlockedPage() {
           
           <div className="space-y-4">
             <p className="text-white/60 text-sm leading-relaxed">
-              <span className="text-red-500 font-bold tracking-widest block mb-2">OPERATOR_SUSPENDED</span>
+              <span className="text-red-500 font-bold tracking-widest block mb-2">ACCOUNT_SUSPENDED</span>
               Your access to the Growth Hub has been terminated by system administration. 
-              Violation of core protocols detected.
+              Violation of core terms detected.
             </p>
             
             <div className="p-4 bg-red-500/5 border border-red-500/10 rounded-sm text-left">
-              <p className="text-[10px] font-black text-red-400/50 tracking-widest uppercase mb-1">CONTACT_UPLINK:</p>
+              <p className="text-[10px] font-black text-red-400/50 tracking-widest uppercase mb-1">CONTACT SUPPORT:</p>
               <p className="text-xs text-white/40 font-mono">admin@growthhub.sys</p>
             </div>
           </div>
@@ -58,7 +58,7 @@ export default function BlockedPage() {
             onClick={handleLogout}
             className="w-full py-4 bg-red-600 hover:bg-red-500 text-white font-black tracking-[0.3em] uppercase text-xs transition-all shadow-[0_0_20px_rgba(220,20,60,0.3)] hover:shadow-[0_0_30px_rgba(220,20,60,0.5)] active:scale-95"
           >
-            TERMINATE_SESSION
+            LOGOUT
           </button>
         </div>
       </motion.div>

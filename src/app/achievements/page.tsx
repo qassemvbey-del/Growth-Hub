@@ -238,7 +238,7 @@ export default function WinsPage() {
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9 }}
                 onClick={e => e.stopPropagation()}
-                className="w-full max-w-2xl bg-[var(--card-bg)] border border-[var(--card-border)] p-8 md:p-12 space-y-10 max-h-[90vh] overflow-y-auto custom-scrollbar rounded-sm shadow-2xl"
+                className="w-[calc(100%-2rem)] mx-auto md:max-w-2xl bg-[var(--card-bg)] border border-[var(--card-border)] p-5 md:p-12 space-y-10 max-h-[90vh] overflow-y-auto custom-scrollbar rounded-2xl shadow-2xl my-auto"
               >
                 <div className="flex justify-between items-start">
                   <div className="space-y-4">
@@ -280,7 +280,7 @@ export default function WinsPage() {
                    <h4 className="text-[11px] md:text-sm font-space tracking-[0.4em] uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'سجل المهام الفرعية' : 'Task Log'}</h4>
                    <div className="space-y-3">
                      {selectedMission.tasks?.map((task: any) => (
-                       <div key={task.id} className="flex items-center justify-between p-4 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-sm">
+                       <div key={task.id} className="flex items-center justify-between py-2.5 px-4 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl">
                          <div className="flex items-center gap-4">
                            <span className="material-symbols-outlined text-sm" style={{ color: currentTheme.color }}>check_circle</span>
                            <span className="text-sm md:text-base font-space font-bold text-[var(--text-primary)]">{task.title}</span>
@@ -293,7 +293,7 @@ export default function WinsPage() {
 
                 <button
                   onClick={(e) => unarchive(selectedMission.id, e)}
-                  className="w-full py-5 border font-space text-[10px] md:text-xs tracking-widest uppercase font-black transition-all rounded-sm shadow-lg"
+                  className="w-full py-2.5 px-4 border font-space text-[10px] md:text-xs tracking-widest uppercase font-black transition-all rounded-xl shadow-lg"
                   style={{ borderColor: `${currentTheme.color}30`, color: currentTheme.color, background: `${currentTheme.color}08` }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = currentTheme.color; (e.currentTarget as HTMLElement).style.color = '#000'; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = `${currentTheme.color}08`; (e.currentTarget as HTMLElement).style.color = currentTheme.color; }}

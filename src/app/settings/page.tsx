@@ -62,6 +62,17 @@ export default function SettingsPage() {
     })
   }, [profile])
 
+  // Close all modals event listener from global Shell ESC matrix
+  useEffect(() => {
+    const handleCloseAll = () => {
+      setIsAvatarSelectorOpen(false)
+      setIsLogoutModalOpen(false)
+      setIsDeleteModalOpen(false)
+    }
+    window.addEventListener('close-all-modals', handleCloseAll)
+    return () => window.removeEventListener('close-all-modals', handleCloseAll)
+  }, [])
+
   const handleSave = async () => {
     setSaving(true)
     const { data: { user } } = await supabase.auth.getUser()
@@ -69,6 +80,26 @@ export default function SettingsPage() {
     if (!user) {
       setSaving(false)
       return
+    }
+
+    // ── OPTIMISTIC UPDATE: immediately push changes to context so all
+    //    components (CoachPanel, Shell header, Sidebar) see the new name
+    //    before the DB round-trip completes.
+    if (profile) {
+      const optimistic = {
+        ...profile,
+        full_name: formData.full_name || profile.full_name,
+        ai_name: formData.ai_name || null,
+        language: formData.language as any,
+        gender: formData.gender || profile.gender,
+        age: formData.age ? parseInt(formData.age) : profile.age,
+      }
+      setProfile(optimistic)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cached_profile', JSON.stringify(optimistic))
+        localStorage.setItem('language', formData.language)
+        localStorage.setItem('cached_name', formData.full_name)
+      }
     }
 
     const { error } = await supabase
@@ -90,7 +121,8 @@ export default function SettingsPage() {
     if (!error) {
       localStorage.setItem('language', formData.language)
       localStorage.setItem('cached_name', formData.full_name)
-      await refreshProfile()
+      // Background DB sync — don't await to keep UI snappy
+      refreshProfile()
       showToast(isRTL ? 'تم حفظ التغييرات بنجاح' : 'SETTINGS_UPDATED_SUCCESSFULLY', 'success')
     } else {
       showToast('UPDATE_ERROR', 'warning')
@@ -146,7 +178,7 @@ export default function SettingsPage() {
   if (isLoading || !mounted) return (
     <Shell>
       <div className="p-16 font-space animate-pulse tracking-widest text-sm md:text-base" style={{ color: currentTheme.color }}>
-        {isRTL ? 'جاري التحميل...' : 'LOADING_OPERATOR_DATA...'}
+        {isRTL ? 'جاري التحميل...' : 'LOADING USER DATA...'}
       </div>
     </Shell>
   )
@@ -271,7 +303,7 @@ export default function SettingsPage() {
                         {/* Avatar Display Section */}
                         <div className="border border-white/10 bg-white/[0.02] rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
                           <div className="flex items-center gap-6">
-                            <div className="relative w-20 h-20 rounded-full border border-white/20 p-1 flex items-center justify-center bg-black/40 overflow-hidden shadow-2xl group">
+                            <div className="relative w-20 h-20 rounded-full border border-white/20 p-1 flex items-center justify-center bg-zinc-100/80 dark:bg-white/10 backdrop-blur-md overflow-hidden shadow-2xl group">
                               {profile?.avatar_url ? (
                                 <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover rounded-full" />
                               ) : (
@@ -283,7 +315,7 @@ export default function SettingsPage() {
                             </div>
                             <div className="space-y-1 text-center sm:text-start">
                               <h4 className="font-space font-black text-lg text-white tracking-wider uppercase">
-                                {profile?.full_name || 'OPERATOR'}
+                                {profile?.full_name || 'MEMBER'}
                               </h4>
                               <p className="text-[10px] font-space tracking-[0.3em] uppercase font-black" style={{ color: currentTheme.color }}>
                                 {profile?.rank || 'RECRUIT'} // {profile?.custom_avatar ? 'CUSTOM_SVG' : 'GOOGLE_PROFILE'}
@@ -461,7 +493,7 @@ export default function SettingsPage() {
                                 </p>
                                 <p className="text-[10px] font-space text-white/40 tracking-wider">
                                   {isRTL 
-                                    ? 'تتحول شخصية النظام تلقائياً بناءً على الرتبة الحالية للمستخدم لتفعيل الرقابة التامة.' 
+                                    ? 'يتم ضبط وتيرة التوجيهات وأسلوب المساعد الذكي تلقائياً بناءً على مستوى تقدمك الحالي.' 
                                     : 'System tone algorithms and accountability frequency auto-calibrate based on your active rank tier.'}
                                 </p>
                               </div>
@@ -720,8 +752,8 @@ export default function SettingsPage() {
 
               <p className="text-sm font-space text-white/60 leading-relaxed">
                 {isRTL 
-                  ? 'هل أنت متأكد أنك تريد تسجيل الخروج؟ نتمنى عودتك سريعاً للمهمة أيها القائد!'
-                  : 'Are you sure you want to log out? We hope to see you back soon, Operator!'}
+                  ? 'هل أنت متأكد من رغبتك في تسجيل الخروج؟ نتمنى رؤيتك مجدداً في أقرب وقت.'
+                  : 'Are you sure you want to log out? We hope to see you back soon, Member!'}
               </p>
 
               <div className="flex flex-col gap-3">
@@ -795,14 +827,14 @@ export default function SettingsPage() {
                 {/* Question 1: What bothered you? */}
                 <div className="space-y-3">
                   <label className="text-[10px] md:text-xs font-space text-white/50 tracking-widest uppercase font-black">
-                    {isRTL ? '1. هل في حاجة معينة ضايقتك في الموقع؟' : '1. IS THERE SOMETHING SPECIFIC THAT BOTHERED YOU?'}
+                    {isRTL ? '1. ما هو السبب الرئيسي لإلغاء الحساب؟' : '1. IS THERE SOMETHING SPECIFIC THAT BOTHERED YOU?'}
                   </label>
                   
                   <div className="grid grid-cols-1 gap-2">
                     {[
-                      { key: 'COMPLICATED', ar: 'صعب الاستخدام ومعقد', en: 'Too complicated/hard to use' },
-                      { key: 'LATENCY', ar: 'بطء استجابة المدرب الذكي', en: 'AI coach response latency' },
-                      { key: 'CLUTTER', ar: 'تشتت بصري في الواجهة', en: 'Too much visual clutter' },
+                      { key: 'COMPLICATED', ar: 'صعوبة الاستخدام أو تعقيد الواجهة', en: 'Too complicated/hard to use' },
+                      { key: 'LATENCY', ar: 'بطء في استجابة النظام', en: 'AI coach response latency' },
+                      { key: 'CLUTTER', ar: 'تكدس بصري في التصميم', en: 'Too much visual clutter' },
                       { key: 'FEATURES', ar: 'عدم وجود الميزات التي أحتاجها', en: 'Missing features I need' },
                       { key: 'OTHER', ar: 'سبب آخر', en: 'Other reason' }
                     ].map(opt => (
@@ -832,7 +864,7 @@ export default function SettingsPage() {
                 {/* Question 2: Star rating */}
                 <div className="space-y-3">
                   <label className="text-[10px] md:text-xs font-space text-white/50 tracking-widest uppercase font-black block">
-                    {isRTL ? '2. تقييمك للموقع من 5؟' : '2. HOW WOULD YOU RATE THE HUB OUT OF 5?'}
+                    {isRTL ? '2. كيف تقيم تجربتك الإجمالية من 5؟' : '2. HOW WOULD YOU RATE THE HUB OUT OF 5?'}
                   </label>
                   
                   <div className="flex items-center gap-3 justify-center py-2 bg-white/[0.02] border border-white/5 rounded-xl">
@@ -865,14 +897,14 @@ export default function SettingsPage() {
                 {/* Question 3: Better alternative? */}
                 <div className="space-y-3">
                   <label className="text-[10px] md:text-xs font-space text-white/50 tracking-widest uppercase font-black block">
-                    {isRTL ? '3. هل لقيت بديل أحسن؟' : '3. DID YOU FIND A BETTER ALTERNATIVE?'}
+                    {isRTL ? '3. هل وجدت بديلاً أفضل؟ (اختياري)' : '3. DID YOU FIND A BETTER ALTERNATIVE?'}
                   </label>
                   
                   <textarea
                     value={surveyAlternative}
                     onChange={e => setSurveyAlternative(e.target.value)}
                     rows={3}
-                    placeholder={isRTL ? "مثال: نعم، انتقلت لتطبيق..." : "e.g. Yes, switched to another solution..."}
+                    placeholder={isRTL ? "مثال: نعم، انتقلت لاستخدام أداة أخرى..." : "e.g. Yes, switched to another solution..."}
                     className="w-full bg-white/[0.02] border border-white/5 rounded-xl p-4 font-space text-xs text-white outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500/30 transition-all placeholder:text-white/20"
                   />
                 </div>

@@ -51,7 +51,7 @@ function WikiSearch({ onInsert, color, isRTL }: WikiSearchProps) {
   return (
     <div className="w-full max-w-[280px] md:max-w-[320px] shrink-0 text-left">
       <span className="text-[10px] font-mono tracking-widest text-black/30 dark:text-white/30 uppercase block mb-1">
-        W // WIKIPEDIA
+        {isRTL ? 'و // ويكيبيديا' : 'W // WIKIPEDIA'}
       </span>
       <div className="flex relative">
         <input
@@ -109,6 +109,16 @@ export default function NotesPage() {
     }
   }, [])
 
+  // Close all modals event listener from global Shell ESC matrix
+  useEffect(() => {
+    const handleCloseAll = () => {
+      setIsCreating(false)
+      setEditingNote(null)
+    }
+    window.addEventListener('close-all-modals', handleCloseAll)
+    return () => window.removeEventListener('close-all-modals', handleCloseAll)
+  }, [])
+
   async function fetchNotes() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
@@ -134,7 +144,7 @@ export default function NotesPage() {
   }
 
   const deleteNote = async (id: string) => {
-    if (confirm('Delete this note?')) {
+    if (confirm(isRTL ? 'هل تريد حذف هذه الملاحظة؟' : 'Delete this note?')) {
       setNotes(prev => prev.filter(n => n.id !== id))
       await supabase.from('notes').delete().eq('id', id)
     }
@@ -147,11 +157,11 @@ export default function NotesPage() {
   }
 
   const TAGS = [
-    { label: '💡 Idea', value: 'idea' },
-    { label: '⚠️ Important', value: 'urgent' },
-    { label: '📚 Source', value: 'source' },
-    { label: '✅ Task', value: 'task' },
-    { label: '🔖 Reference', value: 'reference' }
+    { label: isRTL ? '💡 فكرة' : '💡 Idea', value: 'idea' },
+    { label: isRTL ? '⚠️ هام' : '⚠️ Important', value: 'urgent' },
+    { label: isRTL ? '📚 مصدر' : '📚 Source', value: 'source' },
+    { label: isRTL ? '✅ مهمة' : '✅ Task', value: 'task' },
+    { label: isRTL ? '🔖 مرجع' : '🔖 Reference', value: 'reference' }
   ]
 
   const filteredNotes = notes.filter(n => {
@@ -171,7 +181,7 @@ export default function NotesPage() {
     if (!user) return
     const newNote: any = {
       user_id: user.id,
-      title: newTitle || 'Untitled Note',
+      title: newTitle || (isRTL ? 'ملاحظة غير معنونة' : 'Untitled Note'),
       tag: newTag || null,
       content: newContent,
       color: currentTheme.color,
@@ -214,7 +224,7 @@ export default function NotesPage() {
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase text-black dark:text-white leading-none">
-                NOTES
+                {isRTL ? 'الملاحظات' : 'NOTES'}
               </h1>
               <span className="inline-flex items-center justify-center px-3 py-1 bg-white/10 rounded-lg text-sm font-space font-bold text-white/50 tracking-normal normal-case">
                 {notes.length}
@@ -224,12 +234,15 @@ export default function NotesPage() {
           <div className="flex flex-row items-center gap-3 w-full md:w-auto">
             {/* Search Bar */}
             <div className="relative group flex-1 md:flex-none">
-              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]/40 group-focus-within:text-[var(--text-secondary)] transition-colors text-[18px]">search</span>
+              <span className={cn("material-symbols-outlined absolute top-1/2 -translate-y-1/2 text-[var(--text-secondary)]/40 group-focus-within:text-[var(--text-secondary)] transition-colors text-[18px]", isRTL ? "right-3.5" : "left-3.5")}>search</span>
               <input
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search notes..."
-                className="h-11 w-full md:w-64 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl pl-10 pr-4 font-space text-[11px] text-[var(--text-primary)] tracking-wide outline-none focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                placeholder={isRTL ? 'البحث في الملاحظات...' : 'Search notes...'}
+                className={cn(
+                  "h-11 w-full md:w-64 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl font-space text-[11px] text-[var(--text-primary)] tracking-wide outline-none focus:outline-none focus:ring-2 focus:border-transparent transition-all",
+                  isRTL ? "pr-10 pl-4" : "pl-10 pr-4"
+                )}
                 style={{ ['--tw-ring-color' as any]: `${currentTheme.color}55` }}
               />
             </div>
@@ -238,7 +251,7 @@ export default function NotesPage() {
               className="flex flex-row items-center justify-center gap-2 h-11 px-5 bg-white/5 border border-white/10 text-white/70 font-space font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all duration-300 text-xs rounded-xl shrink-0"
             >
               <span className="material-symbols-outlined text-[16px] leading-none">add</span>
-              Add Note
+              {isRTL ? 'إضافة ملاحظة' : 'Add Note'}
             </button>
           </div>
         </header>
@@ -257,8 +270,11 @@ export default function NotesPage() {
                 <input 
                   value={newTitle}
                   onChange={e => setNewTitle(e.target.value)}
-                  placeholder="Note title..."
-                  className="w-full bg-transparent border-b border-white/10 p-3 font-space font-black text-2xl text-black dark:text-white outline-none transition-colors"
+                  placeholder={isRTL ? 'عنوان الملاحظة...' : 'Note title...'}
+                  className={cn(
+                    "w-full bg-transparent border-b border-white/10 p-3 font-space font-black text-2xl text-black dark:text-white outline-none transition-colors",
+                    isRTL ? "text-right" : "text-left"
+                  )}
                   onFocus={e => e.currentTarget.style.borderColor = currentTheme.color}
                   onBlur={e => e.currentTarget.style.borderColor = ''}
                   required
@@ -266,7 +282,7 @@ export default function NotesPage() {
                 
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 sm:gap-4 mt-2 border-b border-black/5 dark:border-white/5 pb-2">
                   <span className="text-[10px] font-space tracking-widest text-black/30 dark:text-white/20 uppercase font-black mb-1">
-                    Note Canvas
+                    {isRTL ? 'لوحة الملاحظة' : 'Note Canvas'}
                   </span>
                   <WikiSearch
                     isRTL={isRTL}
@@ -280,8 +296,11 @@ export default function NotesPage() {
                   value={newContent}
                   onChange={(e) => setNewContent(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && e.metaKey) createNote() }}
-                  placeholder="Write your note here..."
-                  className="w-full bg-transparent border-none text-lg font-space text-black/70 dark:text-white/60 outline-none min-h-[120px] placeholder:text-black/30 dark:placeholder:text-white/10 resize-none"
+                  placeholder={isRTL ? 'اكتب ملاحظتك هنا...' : 'Write your note here...'}
+                  className={cn(
+                    "w-full bg-transparent border-none text-lg font-space text-black/70 dark:text-white/60 outline-none min-h-[120px] placeholder:text-black/30 dark:placeholder:text-white/10 resize-none",
+                    isRTL ? "text-right" : "text-left"
+                  )}
                   dir="auto"
                 />
               </div>
@@ -309,13 +328,13 @@ export default function NotesPage() {
               {missions.length > 0 && (
                 <div className="space-y-2">
                   <label className="text-[9px] font-space text-black/40 dark:text-white/30 tracking-widest uppercase font-black">
-                    Link to Goal (optional)
+                    {isRTL ? 'ربط بالهدف (اختياري)' : 'Link to Goal (optional)'}
                   </label>
                   <CustomSelect
                     value={newMissionId}
                     onChange={val => setNewMissionId(val)}
                     options={[
-                      { value: '', label: '— NO LINK —' },
+                      { value: '', label: isRTL ? '— بدون ربط —' : '— NO LINK —' },
                       ...missions.map(m => ({ value: m.id, label: m.title.toUpperCase() }))
                     ]}
                   />
@@ -325,16 +344,16 @@ export default function NotesPage() {
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2 text-[9px] font-space text-black/30 dark:text-white/20 tracking-widest uppercase">
                   <span className="material-symbols-outlined text-sm">keyboard</span>
-                  ⌘+Enter to save
+                  {isRTL ? 'اضغط ⌘+Enter للحفظ' : '⌘+Enter to save'}
                 </div>
                 <div className="flex gap-6">
-                  <button onClick={() => { setIsCreating(false); setNewContent(''); setNewTitle(''); setNewTag(''); setNewMissionId('') }} className="text-[var(--text-secondary)] font-space uppercase text-[10px] tracking-widest hover:text-[var(--text-primary)] transition-all">CANCEL</button>
+                  <button onClick={() => { setIsCreating(false); setNewContent(''); setNewTitle(''); setNewTag(''); setNewMissionId('') }} className="text-[var(--text-secondary)] font-space uppercase text-[10px] tracking-widest hover:text-[var(--text-primary)] transition-all">{isRTL ? 'إلغاء' : 'CANCEL'}</button>
                   <button 
                     onClick={createNote} 
                     className="px-8 py-2 text-black font-space font-black uppercase text-xs tracking-widest rounded-xl transition-all duration-300 hover:brightness-110 active:scale-95"
                     style={{ backgroundColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}44` }}
                   >
-                    Save
+                    {isRTL ? 'حفظ' : 'Save'}
                   </button>
                 </div>
               </div>
@@ -355,7 +374,7 @@ export default function NotesPage() {
             )}
             style={filterTag === 'all' ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 20px ${currentTheme.color}33` } : {}}
           >
-            ALL
+            {isRTL ? 'الكل' : 'ALL'}
           </button>
           {TAGS.map(t => (
             <button
@@ -379,7 +398,9 @@ export default function NotesPage() {
         {filteredNotes.length === 0 ? (
           <div className="flex items-center justify-center py-40">
             <p className="text-black/30 dark:text-white/10 font-space text-[11px] tracking-[0.5em] uppercase font-black">
-              {searchQuery ? 'No matching notes' : 'No notes yet — add your first'}
+              {searchQuery 
+                ? (isRTL ? 'لا توجد ملاحظات مطابقة' : 'No matching notes') 
+                : (isRTL ? 'لا توجد ملاحظات بعد — أضف ملاحظتك الأولى' : 'No notes yet — add your first')}
             </p>
           </div>
         ) : (
@@ -398,7 +419,7 @@ export default function NotesPage() {
                   .replace(/<[^>]*>/g, '') // Strip HTML
                   .replace(/[#*`_~]/g, '') // Strip Markdown symbols
                   .trim()
-                  .slice(0, 60) || 'Empty note...'
+                  .slice(0, 60) || (isRTL ? 'ملاحظة فارغة...' : 'Empty note...')
 
                 return (
                   <motion.div
@@ -412,7 +433,7 @@ export default function NotesPage() {
                       "group relative p-7 border cursor-pointer transition-all duration-300 min-h-[220px] flex flex-col",
                       "bg-[var(--card-bg)] border-[var(--card-border)] hover:border-[var(--card-border)]/50",
                       "backdrop-blur-xl",
-                      "text-left"
+                      isRTL ? "text-right" : "text-left"
                     )}
                   >
                     {/* Neon top accent */}
@@ -438,7 +459,7 @@ export default function NotesPage() {
 
                     {/* Title (Fix 5) */}
                     <h3 className="text-xl font-black font-space text-[var(--text-primary)] mt-4 uppercase italic tracking-tighter truncate">
-                      {note.title && note.title !== 'Untitled Note' ? note.title : `Note — ${dateSuffix}`}
+                      {note.title && note.title !== 'Untitled Note' ? note.title : (isRTL ? `ملاحظة — ${dateSuffix}` : `Note — ${dateSuffix}`)}
                     </h3>
 
                     {/* Preview */}
@@ -494,7 +515,7 @@ export default function NotesPage() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.93, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-3xl p-6 md:p-12 relative border border-[var(--card-border)] bg-[var(--card-bg)] backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-y-auto max-h-[90vh]"
+              className="w-[calc(100%-2rem)] mx-auto md:max-w-3xl p-5 md:p-12 relative border border-[var(--card-border)] bg-[var(--card-bg)] backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-y-auto max-h-[90vh] rounded-2xl my-auto"
             >
               {/* Neon top bar */}
               <div
@@ -506,7 +527,7 @@ export default function NotesPage() {
                  {editingNote.cups && (
                    <div className="flex items-center gap-2 text-[10px] font-space font-black tracking-widest uppercase" style={{ color: currentTheme.color }}>
                      <span className="material-symbols-outlined text-sm">link</span>
-                     Linked to: {editingNote.cups.title}
+                     {isRTL ? `مرتبط بـ: ${editingNote.cups.title}` : `Linked to: ${editingNote.cups.title}`}
                    </div>
                  )}
                   <span className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black tracking-widest">
@@ -517,8 +538,11 @@ export default function NotesPage() {
               <input 
                  value={editingNote.title || ''}
                  onChange={(e) => updateNote(editingNote.id, { title: e.target.value })}
-                 placeholder="Note title..."
-                 className="w-full bg-transparent border-none p-0 mb-8 font-space font-black text-4xl md:text-5xl text-[var(--text-primary)] outline-none transition-colors italic tracking-tighter"
+                 placeholder={isRTL ? 'عنوان الملاحظة...' : 'Note title...'}
+                 className={cn(
+                   "w-full bg-transparent border-none p-0 mb-8 font-space font-black text-4xl md:text-5xl text-[var(--text-primary)] outline-none transition-colors italic tracking-tighter",
+                   isRTL ? "text-right" : "text-left"
+                 )}
                  onFocus={e => e.currentTarget.style.color = currentTheme.color}
                  onBlur={e => e.currentTarget.style.color = ''}
                />
@@ -540,7 +564,7 @@ export default function NotesPage() {
                     onClick={() => updateNote(editingNote.id, {
                       font_settings: { ...editingNote.font_settings, [field]: editingNote.font_settings?.[field] === active ? inactive : active }
                     })}
-                    className={cn('p-2.5 border transition-all', editingNote.font_settings?.[field] === active ? 'bg-[var(--input-bg)] border-[var(--card-border)]' : 'bg-[var(--input-bg)] border border-[var(--card-border)] hover:opacity-80')}
+                    className={cn('p-2.5 border rounded-xl transition-all', editingNote.font_settings?.[field] === active ? 'bg-[var(--input-bg)] border-[var(--card-border)]' : 'bg-[var(--input-bg)] border border-[var(--card-border)] hover:opacity-80')}
                   >
                     <span className="material-symbols-outlined text-[var(--text-primary)] text-base">{icon}</span>
                   </button>
@@ -549,13 +573,13 @@ export default function NotesPage() {
                   onClick={() => updateNote(editingNote.id, {
                     font_settings: { ...editingNote.font_settings, family: editingNote.font_settings?.family === 'tajawal' ? 'space' : 'tajawal' }
                   })}
-                  className={cn('px-5 py-2 border font-space text-sm font-black tracking-widest text-[var(--text-primary)] transition-all', editingNote.font_settings?.family === 'tajawal' ? 'bg-[var(--input-bg)] border-[var(--card-border)]' : 'bg-[var(--input-bg)] border border-[var(--card-border)] hover:opacity-80')}
+                  className={cn('px-5 py-2 border rounded-xl font-space text-sm font-black tracking-widest text-[var(--text-primary)] transition-all', editingNote.font_settings?.family === 'tajawal' ? 'bg-[var(--input-bg)] border-[var(--card-border)]' : 'bg-[var(--input-bg)] border border-[var(--card-border)] hover:opacity-80')}
                 >
                   {editingNote.font_settings?.family === 'tajawal' ? 'TAJAWAL' : 'SPACE'}
                 </button>
                 <button
                   onClick={() => updateNote(editingNote.id, { is_locked: !editingNote.is_locked })}
-                  className={cn('p-2.5 border transition-all', editingNote.is_locked ? 'text-black border-transparent' : 'bg-[var(--input-bg)] border border-[var(--card-border)] hover:opacity-80')}
+                  className={cn('p-2.5 border rounded-xl transition-all', editingNote.is_locked ? 'text-black border-transparent' : 'bg-[var(--input-bg)] border border-[var(--card-border)] hover:opacity-80')}
                   style={editingNote.is_locked ? { backgroundColor: currentTheme.color, boxShadow: `0 0 10px ${currentTheme.color}55` } : {}}
                 >
                   <span className="material-symbols-outlined text-base">push_pin</span>
@@ -580,7 +604,7 @@ export default function NotesPage() {
                     key={t.value}
                     onClick={() => updateNote(editingNote.id, { tag: editingNote.tag === t.value ? null : t.value })}
                     className={cn(
-                      "px-4 py-2 rounded-sm font-space text-[10px] font-black tracking-widest border transition-all",
+                      "py-2.5 px-4 rounded-xl font-space text-[10px] font-black tracking-widest border transition-all",
                       editingNote.tag === t.value 
                         ? "text-black border-transparent shadow-lg" 
                         : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)]/50 hover:text-[var(--text-primary)]"
@@ -594,7 +618,7 @@ export default function NotesPage() {
 
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 sm:gap-4 mb-4 border-b border-black/5 dark:border-white/5 pb-2">
                 <span className="text-[10px] font-space tracking-widest text-[var(--text-secondary)]/30 uppercase font-black mb-1">
-                  Canvas Editor
+                  {isRTL ? 'محرر اللوحة' : 'Canvas Editor'}
                 </span>
                 <WikiSearch
                   isRTL={isRTL}
@@ -612,14 +636,16 @@ export default function NotesPage() {
                   editingNote.font_settings?.family === 'tajawal' ? 'font-tajawal' : 'font-space',
                   editingNote.font_settings?.weight === 'bold' ? 'font-black' : 'font-normal',
                   editingNote.font_settings?.style === 'italic' ? 'italic' : '',
-                  "text-left"
+                  isRTL ? "text-right" : "text-left"
                 )}
                 dir="auto"
               />
 
               <div className="pt-8 border-t border-[var(--card-border)] flex justify-end items-center">
                 <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                   <span className="text-[9px] font-space tracking-widest uppercase font-black">Auto-saved</span>
+                   <span className="text-[9px] font-space tracking-widest uppercase font-black">
+                     {isRTL ? 'حفظ تلقائي' : 'Auto-saved'}
+                   </span>
                   <span className="material-symbols-outlined text-xl">save</span>
                 </div>
               </div>

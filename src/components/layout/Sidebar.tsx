@@ -5,15 +5,14 @@ import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useGrowth, RANK_THRESHOLDS } from '@/context/GrowthContext'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useSound } from '@/context/SoundContext'
 
-export default function Sidebar({ isRTL = false }: { isRTL?: boolean }) {
+export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolean, onOpenCoach?: () => void }) {
   const pathname = usePathname()
   const router = useRouter()
   const { profile, t, currentTheme } = useGrowth()
-  const [mobileOpen, setMobileOpen] = useState(false)
   const [cachedName, setCachedName] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const supabase = createClient()
@@ -34,9 +33,32 @@ export default function Sidebar({ isRTL = false }: { isRTL?: boolean }) {
     }
   }, [profile?.full_name])
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/auth/login')
+  const { currentXp, nextRankName, xpNeeded, progressPct } = useMemo(() => {
+    if (!profile) return { currentXp: 0, nextRankName: 'GOLD', xpNeeded: 300, progressPct: 0 }
+    const xp = profile.xp || 0
+    const currentRankIdx = Math.max(0, RANK_THRESHOLDS.findIndex(r => r.rank === profile.rank))
+    const nextRank = RANK_THRESHOLDS[currentRankIdx + 1]
+    if (!nextRank) {
+      return { currentXp: xp, nextRankName: 'MAX RANK', xpNeeded: 0, progressPct: 100 }
+    }
+    const prevXp = RANK_THRESHOLDS[currentRankIdx].xp
+    const targetXp = nextRank.xp
+    const needed = targetXp - xp
+    const range = targetXp - prevXp
+    const earned = xp - prevXp
+    const pct = Math.min(100, Math.max(0, (earned / range) * 100))
+    return { currentXp: xp, nextRankName: nextRank.rank, xpNeeded: needed > 0 ? needed : 0, progressPct: pct }
+  }, [profile])
+
+  const getRoleIcon = (url?: string | null) => {
+    if (!url) return 'account_circle'
+    if (url.includes('omar')) return 'laptop_mac'
+    if (url.includes('maya')) return 'school'
+    if (url.includes('ismail')) return 'work'
+    if (url.includes('zain')) return 'rocket_launch'
+    if (url.includes('menna')) return 'videocam'
+    if (url.includes('nour')) return 'trending_up'
+    return 'cloud_sync'
   }
 
   const MENU_ITEMS = [
@@ -47,107 +69,78 @@ export default function Sidebar({ isRTL = false }: { isRTL?: boolean }) {
   ]
 
   return (
-    <>
-      {/* Mobile Tactical Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-[var(--sidebar-bg)] border-t border-[var(--card-border)] z-[200] flex justify-around items-center px-2">
-        {MENU_ITEMS.map((item) => {
-          const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={playBlip}
-              className={cn(
-                "flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors min-h-[44px] min-w-[44px]",
-                isActive ? "" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-              )}
-              style={{ color: isActive ? currentTheme.color : undefined }}
-            >
-              <span className="material-symbols-outlined text-2xl">
-                {item.icon}
-              </span>
-              <span className="text-[8px] font-space tracking-widest font-black uppercase">
-                {item.label}
-              </span>
-            </Link>
-          )
-        })}
-      </nav>
-      
-      <aside className={cn(
-        "hidden lg:flex w-72 bg-[var(--sidebar-bg)] h-screen fixed top-0 flex-col z-[110] border-y-0 shadow-[20px_0_50px_rgba(0,0,0,0.05)] dark:shadow-[20px_0_50px_rgba(0,0,0,0.5)] sidebar-target transition-all duration-300",
-        "inset-inline-start-0",
-        isRTL ? "border-l border-[var(--card-border)]" : "border-r border-[var(--card-border)]"
-      )}>
-      {/* Sidebar Header - Profile Sync */}
-      <div className="pt-16 px-10 flex flex-col items-start gap-6 relative overflow-hidden group text-start">
-        <Link href="/settings" className="flex items-center gap-4 group/avatar">
+    <aside className={cn(
+      "hidden lg:flex w-72 bg-[var(--sidebar-bg)] h-screen fixed top-0 flex-col z-[110] border-y-0 shadow-[20px_0_50px_rgba(0,0,0,0.05)] dark:shadow-[20px_0_50px_rgba(0,0,0,0.5)] sidebar-target transition-all duration-300",
+      "inset-inline-start-0",
+      isRTL ? "border-l border-[var(--card-border)]" : "border-r border-[var(--card-border)]"
+    )}>
+      {/* ── ULTRA-PREMIUM IDENTITY LAYER ── */}
+      <div className="pt-12 px-8 flex flex-col items-center text-center relative overflow-hidden group border-b border-[var(--card-border)] pb-8 bg-[var(--sidebar-bg)]/50">
+        {/* Avatar Component with Instagram-style neon ring */}
+        <div className="relative p-1.5 rounded-full bg-gradient-to-tr shadow-2xl group-hover:scale-105 transition-transform duration-500 cursor-pointer" onClick={() => router.push('/settings')} style={{ backgroundImage: `linear-gradient(to top right, ${currentTheme.color}, ${currentTheme.color}88, transparent, ${currentTheme.color})`, boxShadow: `0 0 30px ${currentTheme.color}50` }}>
+          <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-zinc-100/80 dark:bg-white/10 backdrop-blur-md p-1 overflow-hidden flex items-center justify-center border border-black/20 dark:border-white/10 shadow-inner">
             {mounted && profile?.avatar_url ? (
-             <img 
-               src={profile.avatar_url} 
-               alt="User" 
-               className="w-12 h-12 rounded-full border transition-all" 
-               style={{ 
-                 borderColor: `${currentTheme.color}4d`, 
-                 boxShadow: `0 0 10px ${currentTheme.color}33` 
-               }}
-             />
-           ) : (
-               <div className="w-12 h-12 rounded-full bg-[var(--input-bg)] border border-[var(--card-border)] flex items-center justify-center group-hover/avatar:border-zinc-300 dark:group-hover/avatar:border-white/20 transition-all">
-                 <span className="material-symbols-outlined text-[var(--text-secondary)]">person</span>
-               </div>
-             )}
-           <div className="flex flex-col">
-              <span className="text-[9px] font-space tracking-widest uppercase font-black opacity-40" style={{ color: currentTheme.color }}>
-                {mounted ? (isRTL ? 'حالة المستخدم' : 'USER_STATUS') : 'USER_STATUS'}
+              <img src={profile.avatar_url} alt="User" className="w-[90%] h-[90%] mx-auto object-contain p-1 rounded-full shadow-md" />
+            ) : (
+              <span className="material-symbols-outlined text-[var(--text-secondary)] text-4xl">person</span>
+            )}
+          </div>
+          {/* Visual Role Icon Overlay Badge at bottom-right */}
+          {mounted && profile?.avatar_url && (
+            <div 
+              className="absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center border-2 border-[var(--sidebar-bg)] shadow-lg z-20 backdrop-blur-md"
+              style={{ 
+                backgroundColor: currentTheme.color, 
+                color: '#000000',
+                boxShadow: `0 0 15px ${currentTheme.color}` 
+              }}
+              title="Active Persona Role"
+            >
+              <span className="material-symbols-outlined text-sm font-black">
+                {getRoleIcon(profile.avatar_url)}
               </span>
-              <span className="text-sm font-space font-black text-[var(--text-primary)] truncate max-w-[120px] transition-colors" style={{ color: currentTheme.color }}>
-                {mounted ? (profile?.full_name?.toUpperCase() || cachedName?.toUpperCase() || (t ? t('operator') : 'USER')) : 'USER'}
-              </span>
-              <div className="mt-1 flex items-center gap-2">
-                 <span className="px-1.5 py-0.5 rounded-[2px] bg-[var(--input-bg)] border border-[var(--card-border)] text-[7px] font-space font-black text-[var(--text-secondary)] tracking-widest uppercase">
-                   {mounted ? (profile?.rank || 'RECRUIT') : 'RECRUIT'}
-                 </span>
-               </div>
-           </div>
-        </Link>
+            </div>
+          )}
+        </div>
+
+        {/* User Full Name */}
+        <span className="text-base font-space font-black text-zinc-900 dark:text-zinc-100 truncate max-w-[220px] transition-colors tracking-wide mt-4">
+          {mounted ? (profile?.full_name || cachedName || (t ? t('operator') : 'USER')) : 'USER'}
+        </span>
+
+        {/* Current Rank Text */}
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className="text-xs font-space font-black tracking-widest uppercase" style={{ color: currentTheme.color }}>
+            ◆ {mounted ? (profile?.rank || 'SILVER I') : 'SILVER I'}
+          </span>
+        </div>
 
         {/* XP Progress Bar */}
-        <div id="hud-xp-bar" className="w-full space-y-1.5">
-          <div className="flex justify-between items-end text-sm font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
-            <span>{mounted ? (isRTL ? 'نقاط الخبرة' : 'SYSTEM_XP') : 'SYSTEM_XP'}</span>
-            <span className="text-3xl" style={{ color: currentTheme.color }}>{mounted ? (profile?.xp || 0) : 0}</span>
+        <div className="w-full space-y-1.5 mt-5 px-2">
+          <div className="flex justify-between items-center text-[11px] font-space tracking-wider font-black">
+            <span className="text-zinc-500 dark:text-zinc-400 uppercase">
+              {mounted ? (isRTL ? `░░░░ ${xpNeeded} نقطة إلى ${nextRankName === 'MAX RANK' ? 'أعلى رتبة' : nextRankName}` : `░░░░ ${xpNeeded}xp to ${nextRankName}`) : `░░░░ 800xp to PLATINUM`}
+            </span>
+            <span className="text-xs font-bold" style={{ color: currentTheme.color }}>{progressPct.toFixed(0)}%</span>
           </div>
-          <div className="w-full h-[6px] bg-[var(--input-bg)] rounded-full overflow-hidden mt-2">
+          <div className="w-full h-2 bg-zinc-200 dark:bg-white/10 rounded-full overflow-hidden p-0.5 border border-zinc-300 dark:border-white/5 shadow-inner">
             <motion.div 
               initial={{ width: 0 }}
-              animate={{ width: `${(() => {
-                const currentXp = profile?.xp || 0
-                const currentRankIdx = Math.max(0, RANK_THRESHOLDS.findIndex(r => r.rank === profile?.rank))
-                const nextRank = RANK_THRESHOLDS[currentRankIdx + 1]
-                if (!nextRank) return 100
-                const prevXp = RANK_THRESHOLDS[currentRankIdx].xp
-                const range = nextRank.xp - prevXp
-                const relativeXp = currentXp - prevXp
-                return Math.min(100, Math.max(0, (relativeXp / range) * 100))
-              })()}%` }}
-              className="h-full"
+              animate={{ width: `${progressPct}%` }}
+              transition={{ duration: 1, ease: 'easeOut' }}
+              className="h-full rounded-full"
               style={{ 
                 backgroundColor: currentTheme.color,
-                boxShadow: `0 0 10px ${currentTheme.color}88`
+                boxShadow: `0 0 10px ${currentTheme.color}`
               }}
             />
           </div>
         </div>
-        
-        <h1 className="font-space font-black text-2xl tracking-tighter uppercase italic relative z-10 text-[var(--text-primary)]">
-          GROWTH<span style={{ color: currentTheme.color }}>_HUB</span>
-        </h1>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-grow px-4 py-16 space-y-2">
-        <h3 className="px-10 text-[9px] font-space tracking-[0.8em] text-[var(--text-secondary)]/50 uppercase mb-10 font-black">
+      {/* ── NAVIGATION MATRIX ── */}
+      <nav className="flex-grow px-4 py-8 space-y-2 overflow-y-auto">
+        <h3 className="px-6 text-[9px] font-space tracking-[0.8em] text-[var(--text-secondary)]/50 uppercase mb-6 font-black">
           {mounted ? (isRTL ? 'القائمة' : 'MENU') : 'MENU'}
         </h3>
         {MENU_ITEMS.map((item, idx) => {
@@ -161,9 +154,9 @@ export default function Sidebar({ isRTL = false }: { isRTL?: boolean }) {
               onMouseEnter={() => setHoveredIndex(idx)}
               onMouseLeave={() => setHoveredIndex(null)}
               className={cn(
-                "flex items-center p-3 px-8 rounded-sm transition-all duration-300 relative group overflow-hidden min-h-[44px]",
+                "flex items-center p-3 px-6 rounded-xl transition-all duration-300 relative group overflow-hidden min-h-[44px]",
                  isActive 
-                   ? "bg-[var(--input-bg)] text-[var(--text-primary)] border border-[var(--card-border)]" 
+                   ? "bg-[var(--input-bg)] text-[var(--text-primary)] border border-[var(--card-border)] shadow-sm" 
                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-[var(--card-border)] hover:bg-[var(--input-bg)]"
               )}
             >
@@ -171,7 +164,7 @@ export default function Sidebar({ isRTL = false }: { isRTL?: boolean }) {
                 <motion.div 
                   layoutId="active-nav"
                   className={cn(
-                    "absolute w-1 h-6 shadow-[0_0_20px_currentcolor]",
+                    "absolute w-1.5 h-6 shadow-[0_0_20px_currentcolor]",
                     "inset-inline-start-0 rounded-full"
                   )}
                   style={{ backgroundColor: currentTheme.color, color: currentTheme.color }}
@@ -218,35 +211,77 @@ export default function Sidebar({ isRTL = false }: { isRTL?: boolean }) {
             </Link>
           )
         })}
+
+        {/* ── PROMINENT GLOWING AI COACH BLOCK ── */}
+        <div className="pt-6 px-2">
+          <button
+            type="button"
+            onClick={() => onOpenCoach?.()}
+            className="w-full group relative flex items-center justify-between p-4 rounded-xl border transition-all duration-300 overflow-hidden cursor-pointer shadow-lg active:scale-98"
+            style={{
+              backgroundColor: `${currentTheme.color}15`,
+              borderColor: `${currentTheme.color}50`,
+              boxShadow: `0 0 25px ${currentTheme.color}26, inset 0 0 15px ${currentTheme.color}15`
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 pointer-events-none" />
+            <div className="flex items-center gap-3 relative z-10">
+              <motion.span 
+                animate={{ opacity: [1, 0.4, 1], scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                className="material-symbols-outlined text-xl"
+                style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }}
+              >
+                bolt
+              </motion.span>
+              <span className="font-space font-black text-xs tracking-[0.3em] uppercase text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors">
+                {mounted ? (isRTL ? 'المدرب الذكي' : 'COACH') : 'COACH'}
+              </span>
+            </div>
+            <span className="px-2 py-0.5 rounded border text-[9px] font-space font-black tracking-widest uppercase relative z-10" style={{ color: currentTheme.color, borderColor: `${currentTheme.color}40`, backgroundColor: `${currentTheme.color}20` }}>
+              AI // 05
+            </span>
+          </button>
+        </div>
       </nav>
 
-      {/* Sidebar Footer */}
-      <div className="p-10 mt-auto space-y-4">
+      {/* ── DOCKED SETTINGS & THEME TOGGLE ── */}
+      <div className="p-4 mt-auto border-t border-[var(--card-border)] flex items-center gap-2 bg-[var(--sidebar-bg)]/50 shrink-0">
         <Link 
           href="/settings" 
           onClick={playBlip}
           onMouseEnter={() => setIsSettingsHovered(true)}
           onMouseLeave={() => setIsSettingsHovered(false)}
-          className="w-full flex items-center justify-start gap-4 p-4 glass-panel border rounded-sm transition-all font-space text-[11px] tracking-[0.4em] font-black min-h-[44px]"
+          className="flex-1 flex items-center justify-start gap-3 p-3.5 glass-panel border rounded-xl transition-all font-space text-xs tracking-[0.2em] font-black min-h-[44px]"
           style={{
             color: isSettingsHovered ? currentTheme.color : 'var(--text-secondary)',
-            borderColor: isSettingsHovered ? `${currentTheme.color}33` : 'var(--card-border)',
-            backgroundColor: isSettingsHovered ? `${currentTheme.color}0d` : 'transparent',
-            boxShadow: isSettingsHovered ? `0 0 15px ${currentTheme.color}1a` : 'none'
+            borderColor: isSettingsHovered ? `${currentTheme.color}40` : 'var(--card-border)',
+            backgroundColor: isSettingsHovered ? `${currentTheme.color}10` : 'transparent',
+            boxShadow: isSettingsHovered ? `0 0 20px ${currentTheme.color}20` : 'none'
           }}
         >
-          <span 
-            className="material-symbols-outlined text-xl transition-colors duration-300"
-            style={{ color: isSettingsHovered ? currentTheme.color : undefined }}
-          >
+          <span className="material-symbols-outlined text-lg transition-colors duration-300" style={{ color: isSettingsHovered ? currentTheme.color : undefined }}>
             settings
           </span>
-          <span className="transition-colors duration-300">
+          <span className="transition-colors duration-300 text-zinc-900 dark:text-zinc-100">
             {mounted ? (isRTL ? 'الإعدادات' : 'Settings') : 'Settings'}
           </span>
         </Link>
+
+        <button
+          onClick={() => {
+            playBlip()
+            const isDark = document.documentElement.classList.toggle('dark')
+            localStorage.setItem('theme', isDark ? 'dark' : 'light')
+          }}
+          className="w-12 h-12 flex items-center justify-center rounded-xl bg-[var(--input-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border)] transition-all group relative shrink-0 cursor-pointer shadow-sm"
+          title={mounted ? (isRTL ? 'الوضع الليلي/النهاري' : 'Toggle Theme') : 'Toggle Theme'}
+        >
+          <div className="absolute inset-0 bg-black/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"></div>
+          <span className="material-symbols-outlined text-lg group-hover:rotate-180 transition-transform duration-500">contrast</span>
+        </button>
       </div>
     </aside>
-    </>
   )
 }
+

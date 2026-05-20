@@ -4,7 +4,7 @@ import Shell from '@/components/layout/Shell'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
 import { cn } from '@/lib/utils'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useToast } from '@/components/ui/Toast'
 import { useRouter } from 'next/navigation'
@@ -22,7 +22,7 @@ const SIZES = [
 ]
 
 export default function MissionsPage() {
-  const { profile, t, calculateAccountability, isRTL, mounted, currentTheme } = useGrowth()
+  const { profile, t, calculateAccountability, isRTL, mounted, currentTheme, setShowAuthModal } = useGrowth()
   const { showToast } = useToast()
   const router = useRouter()
   const { playDeploy, playBlip, playError } = useSound()
@@ -38,6 +38,7 @@ export default function MissionsPage() {
   const [showWarningModal, setShowWarningModal] = useState(false)
   const [warningSlots, setWarningSlots] = useState(0)
   const [warningCriticalCount, setWarningCriticalCount] = useState(0)
+  const [activeTab, setActiveTab] = useState<'ALL' | string>('ALL')
   const supabase = createClient()
 
   // ── Attachments state ─────────────────────────────────────────────────
@@ -45,6 +46,7 @@ export default function MissionsPage() {
   const [attachmentCounts, setAttachmentCounts] = useState<Record<string, number>>({})
   const [activeAttachments, setActiveAttachments] = useState<any[]>([])
   const [modalLoading, setModalLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => { 
     if (mounted) {
@@ -56,9 +58,29 @@ export default function MissionsPage() {
     }
   }, [mounted])
 
+  // Close all modals event listener from global Shell ESC matrix
+  useEffect(() => {
+    const handleCloseAll = () => {
+      setShowCreate(false)
+      setShowGuide(false)
+      setShowWarningModal(false)
+      setAttachmentMissionId(null)
+      setActiveAttachments([])
+    }
+    window.addEventListener('close-all-modals', handleCloseAll)
+    return () => window.removeEventListener('close-all-modals', handleCloseAll)
+  }, [])
+
   async function fetchMissions() {
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user) {
+      if (typeof window !== 'undefined') {
+        const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+        setMissions(guestGoals)
+      }
+      setLoading(false)
+      return
+    }
     const { data } = await supabase
       .from('cups')
       .select('*, tasks(*)')
@@ -71,6 +93,64 @@ export default function MissionsPage() {
       fetchAllAttachmentCounts(user.id, data.map((m: any) => m.id))
     }
     setLoading(false)
+  }
+
+  const allTasks = useMemo(() => {
+    const list: any[] = []
+    missions.forEach(m => {
+      if (m.tasks) {
+        m.tasks.forEach((t: any) => {
+          list.push({ ...t, missionTitle: m.title, missionColor: m.color || currentTheme.color })
+        })
+      }
+    })
+    return list
+  }, [missions, currentTheme.color])
+
+  const filteredTasks = useMemo(() => {
+    if (activeTab === 'ALL') return allTasks
+    return allTasks.filter(t => t.cup_id === activeTab)
+  }, [allTasks, activeTab])
+
+  async function toggleTask(task: any) {
+    const updatedStatus = !task.is_completed
+    setMissions(prev => prev.map(m => ({
+      ...m,
+      tasks: m.tasks?.map((t: any) => t.id === task.id ? { ...t, is_completed: updatedStatus } : t)
+    })))
+
+    // Support guest goals locally
+    if (task.cup_id?.startsWith('local_')) {
+      const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+      const updatedGoals = guestGoals.map((m: any) => {
+        if (m.id === task.cup_id) {
+          return {
+            ...m,
+            tasks: m.tasks?.map((t: any) => t.id === task.id ? { ...t, is_completed: updatedStatus } : t)
+          }
+        }
+        return m
+      })
+      localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+      return
+    }
+
+    const { error } = await supabase.from('tasks').update({ is_completed: updatedStatus }).eq('id', task.id)
+    if (error) {
+      fetchMissions()
+    } else {
+      if (updatedStatus) {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          await supabase.from('task_completion_log').insert([{
+            user_id: user.id,
+            task_id: task.id,
+            cup_id: task.cup_id,
+            completed_at: new Date().toISOString()
+          }])
+        }
+      }
+    }
   }
 
   const fetchAllAttachmentCounts = useCallback(async (userId: string, missionIds: string[]) => {
@@ -116,23 +196,73 @@ export default function MissionsPage() {
   const SIZE_SLOTS: Record<string, number> = { sm: 1, md: 1.5, lg: 3, s: 1, m: 1.5, l: 3 }
 
   const addMission = async (bypassWarning: boolean = false) => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
 
-    const titleToCheck = newTitle.trim() || (isRTL ? 'هدف جديد' : 'New Goal')
-    const { isValid } = validateContent(titleToCheck)
-    if (!isValid) {
-      showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')
-      playError()
-      return
-    }
+      const titleToCheck = newTitle.trim()
+      if (!titleToCheck) {
+        showToast(isRTL ? 'يجب إدخال اسم للهدف' : 'Goal title is required', 'warning')
+        playError()
+        return
+      }
 
-    const isAiValid = await aiProfanityCheck(titleToCheck)
-    if (!isAiValid) {
-      showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')
-      playError()
-      return
-    }
+      const { isValid } = validateContent(titleToCheck)
+      if (!isValid) {
+        showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')
+        playError()
+        return
+      }
+
+      const isAiValid = await aiProfanityCheck(titleToCheck)
+      if (!isAiValid) {
+        showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')
+        playError()
+        return
+      }
+
+      // Guest Flow Support
+      if (!user) {
+        const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+        if (guestGoals.length >= 1) {
+          setShowAuthModal(true)
+          playError()
+          setIsSubmitting(false)
+          return
+        }
+
+        const fakeId = 'local_' + Math.random().toString(36).substring(2, 9)
+        const newLocalGoal = {
+          id: fakeId,
+          user_id: 'guest',
+          title: titleToCheck,
+          status: 'active',
+          size: newSize,
+          is_archived: false,
+          sync_to_dashboard: syncOnCreate,
+          start_date: startDate || null,
+          end_date: endDate || null,
+          created_at: new Date().toISOString(),
+          tasks: []
+        }
+
+        const updated = [newLocalGoal, ...guestGoals]
+        localStorage.setItem('guest_goals', JSON.stringify(updated))
+        setMissions(updated)
+        
+        setShowCreate(false)
+        setShowWarningModal(false)
+        setNewTitle('')
+        setNewSize('md')
+        setStartDate('')
+        setEndDate('')
+        showToast(isRTL ? 'تم حفظ الهدف محلياً' : 'Goal saved locally!', 'success')
+        playDeploy()
+        router.push(`/missions/${fakeId}`)
+        return
+      }
 
     // 1. Get synced cups to check capacity
     const { data: synced } = await supabase
@@ -189,30 +319,33 @@ export default function MissionsPage() {
       }
     }
 
-    const insertData: any = {
-      user_id: user.id,
-      title: newTitle.trim() || (isRTL ? 'هدف جديد' : 'New Goal'),
-      status: 'active',
-      size: newSize,
-      is_archived: false,
-      sync_to_dashboard: syncOnCreate
-    }
+      const insertData: any = {
+        user_id: user.id,
+        title: titleToCheck,
+        status: 'active',
+        size: newSize,
+        is_archived: false,
+        sync_to_dashboard: syncOnCreate
+      }
     if (startDate) insertData.start_date = startDate
     if (endDate) insertData.end_date = endDate
 
-    const { data, error } = await supabase.from('cups').insert(insertData).select().single()
-    
-    if (data) {
-      setMissions([data, ...missions])
-      setShowCreate(false)
-      setShowWarningModal(false)
-      setNewTitle('')
-      setNewSize('md')
-      setStartDate('')
-      setEndDate('')
-      showToast(isRTL ? 'تم إنشاء الهدف' : 'Goal activated!', 'success')
-      playDeploy()
-      router.push(`/missions/${data.id}`)
+      const { data, error } = await supabase.from('cups').insert(insertData).select().single()
+      
+      if (data) {
+        setMissions([data, ...missions])
+        setShowCreate(false)
+        setShowWarningModal(false)
+        setNewTitle('')
+        setNewSize('md')
+        setStartDate('')
+        setEndDate('')
+        showToast(isRTL ? 'تم إنشاء الهدف' : 'Goal activated!', 'success')
+        playDeploy()
+        router.push(`/missions/${data.id}`)
+      }
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -249,7 +382,7 @@ export default function MissionsPage() {
           </div>
           <button
             onClick={() => { playBlip(); setShowCreate(true); }}
-            className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-xl font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg"
+            className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-sm font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg"
             style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
           >
             <span className="material-symbols-outlined text-[16px] leading-none">add</span>
@@ -272,38 +405,38 @@ export default function MissionsPage() {
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9 }}
                 onClick={e => e.stopPropagation()}
-                className="w-full max-w-2xl bg-[var(--card-bg)] border border-[var(--card-border)] p-8 md:p-12 space-y-8 rounded-sm shadow-2xl my-8 relative"
+                className="w-[calc(100%-2rem)] mx-auto md:max-w-2xl bg-[var(--card-bg)]/90 backdrop-blur-xl border border-[var(--card-border)] p-5 md:p-8 space-y-6 rounded-2xl shadow-2xl my-auto max-h-[90vh] overflow-y-auto relative"
               >
                 <button 
                   onClick={() => setShowGuide(false)} 
-                  className="absolute top-6 right-6 rtl:left-6 rtl:right-auto material-symbols-outlined text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  className="absolute top-4 right-4 rtl:left-4 rtl:right-auto material-symbols-outlined text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 >
                   close
                 </button>
-                <div className="space-y-6">
-                  <div className="space-y-2 border-l-4 pl-4 rtl:pl-0 rtl:pr-4 rtl:border-l-0 rtl:border-r-4" style={{ borderColor: currentTheme.color }}>
-                    <p className="text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-4">
-                      أهلاً بيك في ساحة المعركة يا وحش! ده مش مجرد جدول مهام، ده سيستم (Battle Royale) لحياتك.
-                    </p>
-                    <ol className="list-decimal list-inside space-y-3 text-lg text-[var(--text-primary)]/80 font-bold">
-                      <li><span style={{ color: currentTheme.color }}>ميزان القوة (الـ HUD):</span> عقلك والداشبورد بيشيلوا ٩ وحدات بس. الصغير (Small) بـ ١، المتوسط (Medium) بـ ١.٥، والكبير (Large) بـ ٣ أماكن.</li>
-                      <li><span style={{ color: currentTheme.color }}>عقود الاشتباك (XP):</span> كل شرطة مجهود بـ ١٠ XP. والمهمات الكبيرة ليها "بونص" ٥٠ نقطة لما تقفلها.</li>
-                      <li><span style={{ color: currentTheme.color }}>نزيف الطاقة (XP Bleed):</span> لو اتأخرت عن ميعادك، السيستم هيسحب منك ٥ XP كل يوم. ولو كسلت أسبوع، فيه غرامة ١٠ XP.</li>
-                    </ol>
-                  </div>
-                  
-                  <div className="h-px w-full bg-[var(--card-border)] my-8"></div>
-
-                  <div className="space-y-2 border-l-4 pl-4 rtl:pl-0 rtl:pr-4 rtl:border-l-0 rtl:border-r-4" style={{ borderColor: currentTheme.color }}>
-                    <p className="text-xl md:text-2xl font-black font-space text-[var(--text-primary)] uppercase italic tracking-tighter mb-4">
-                      "Welcome, Soldier. This is your Tactical Life OS."
-                    </p>
-                    <ol className="list-decimal list-inside space-y-3 text-base md:text-lg text-[var(--text-primary)]/80 font-bold font-space">
-                      <li><span className="uppercase tracking-widest" style={{ color: currentTheme.color }}>Grid Slots:</span> Your HUD has 9 slots total. Small = 1, Medium = 1.5, Large = 3.</li>
-                      <li><span className="uppercase tracking-widest" style={{ color: currentTheme.color }}>XP Logic:</span> 1 Task Bar = 10 XP. Large missions give +50 XP bonus.</li>
-                      <li><span className="uppercase tracking-widest" style={{ color: currentTheme.color }}>The Penalties:</span> Delay costs -5 XP/day. Inactivity for 7 days costs -10 XP.</li>
-                    </ol>
-                  </div>
+                <div className="space-y-4">
+                  {isRTL ? (
+                    <div className="space-y-2 border-r-4 pr-4 border-l-0 rtl:border-l-0 rtl:border-r-4 text-right" style={{ borderColor: currentTheme.color }}>
+                      <p className="text-xl md:text-2xl lg:text-3xl font-black text-[var(--text-primary)] mb-3 leading-snug">
+                        مرحباً بك في منصتك الشخصية لإدارة الأهداف والإنتاجية. هذا النظام مصمم لمساعدتك على تنظيم يومك وبناء عادات مستدامة.
+                      </p>
+                      <ol className="list-decimal list-inside space-y-2 text-sm md:text-base text-[var(--text-primary)]/80 font-bold">
+                        <li><span style={{ color: currentTheme.color }}>سعة التركيز (Focus Capacity):</span> تدعم واجهة العمل بحد أقصى 9 مهام نشطة في نفس الوقت لضمان تركيزك الكامل وتجنب تشتت الانتباه.</li>
+                        <li><span style={{ color: currentTheme.color }}>نقاط الإنجاز (XP System):</span> إكمال المهام يمنحك نقاط خبرة لتوثيق حجم مجهودك ومراقبة تزايد معدل إنتاجيتك بشكل ملموس.</li>
+                        <li><span style={{ color: currentTheme.color }}>مؤشر الالتزام:</span> التراجع عن متابعة أهدافك اليومية أو التكاسل لفترات طويلة يؤدي إلى انخفاض نقاطك تدريجياً، لتنبيهك بضرورة العودة للمسار الصحيح.</li>
+                      </ol>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 border-l-4 pl-4 rtl:pl-0 rtl:pr-4 rtl:border-l-0 rtl:border-r-4 text-left" style={{ borderColor: currentTheme.color }}>
+                      <p className="text-lg md:text-xl lg:text-2xl font-black font-space text-[var(--text-primary)] uppercase italic tracking-tighter mb-3">
+                        "Welcome, Soldier. This is your Tactical Life OS."
+                      </p>
+                      <ol className="list-decimal list-inside space-y-2 text-sm md:text-base text-[var(--text-primary)]/80 font-bold font-space">
+                        <li><span className="uppercase tracking-widest" style={{ color: currentTheme.color }}>Grid Slots:</span> Your HUD has 9 slots total. Small = 1, Medium = 1.5, Large = 3.</li>
+                        <li><span className="uppercase tracking-widest" style={{ color: currentTheme.color }}>XP Logic:</span> 1 Task Bar = 10 XP. Large missions give +50 XP bonus.</li>
+                        <li><span className="uppercase tracking-widest" style={{ color: currentTheme.color }}>The Penalties:</span> Delay costs -5 XP/day. Inactivity for 7 days costs -10 XP.</li>
+                      </ol>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             </motion.div>
@@ -327,46 +460,46 @@ export default function MissionsPage() {
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9 }}
                 onClick={e => e.stopPropagation()}
-                className="w-full max-w-xl bg-[var(--card-bg)] border border-[var(--card-border)] p-8 md:p-12 space-y-10 rounded-sm shadow-2xl my-8"
+                className="w-[calc(100%-2rem)] mx-auto md:max-w-xl bg-[var(--card-bg)]/90 backdrop-blur-xl border border-[var(--card-border)] p-5 md:p-8 space-y-6 rounded-2xl shadow-2xl my-auto max-h-[90vh] overflow-y-auto"
               >
-                <h2 className="text-2xl md:text-3xl font-space font-black uppercase italic text-black dark:text-white tracking-tighter">
+                <h2 className="text-xl md:text-2xl font-space font-black uppercase italic text-black dark:text-white tracking-tighter">
                   {isRTL ? 'إنشاء هدف جديد' : 'Create New Goal'}
                 </h2>
 
                 {/* Title */}
-                <div className="space-y-3">
-                  <label className="text-sm md:text-base font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'عنوان الهدف' : 'Goal Title'}</label>
+                <div className="space-y-2">
+                  <label className="text-xs md:text-sm font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'عنوان الهدف' : 'Goal Title'}</label>
                   <input
                     autoFocus
                     value={newTitle}
                     placeholder={isRTL ? 'اسم هدفك...' : 'Name your goal...'}
                     onChange={e => setNewTitle(e.target.value)}
-                    className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] p-4 font-space text-lg md:text-xl font-black text-[var(--text-primary)] italic outline-none transition-all"
+                    className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] py-2.5 px-4 rounded-xl font-space text-base md:text-lg font-black text-[var(--text-primary)] italic outline-none transition-all"
                     onFocus={e => e.currentTarget.style.borderColor = currentTheme.color}
                     onBlur={e => e.currentTarget.style.borderColor = ''}
                   />
                 </div>
 
                 {/* Size Selection */}
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <label className="text-sm md:text-base font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'حجم الهدف' : 'Goal Size'}</label>
+                    <label className="text-xs md:text-sm font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'حجم الهدف' : 'Goal Size'}</label>
                     <div className="group relative flex items-center cursor-help">
-                      <span className="material-symbols-outlined text-[var(--text-secondary)] text-sm md:text-base transition-colors group-hover:text-white">info</span>
-                      <div className="pointer-events-none absolute bottom-full mb-2 w-64 md:w-80 rounded bg-[var(--card-bg)] border border-[var(--card-border)] p-3 md:p-4 text-xs md:text-sm text-[var(--text-primary)] shadow-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-[300]">
+                      <span className="material-symbols-outlined text-sm transition-colors group-hover:text-white">info</span>
+                      <div className="pointer-events-none absolute bottom-full mb-2 w-64 md:w-80 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] p-3 md:p-4 text-xs md:text-sm text-[var(--text-primary)] shadow-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-[300]">
                         {isRTL 
                           ? "حجم الهدف يحدد سعة الـ Slots المستهلكة في لوحة القيادة، وسقف نقاط الـ XP المكتسبة (Small: 4 مهام، Medium: 8 مهام، Large: 20 مهمة). يمكنك إضافة مهام إضافية بعد السقف للتنظيم فقط."
                           : "Goal size determines Focus Slots consumed on the dashboard and the XP reward ceiling (Small: 4 tasks, Medium: 8 tasks, Large: 20 tasks). Extra tasks can be added freely for organization."}
                       </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-3 gap-3">
                     {SIZES.map(s => (
                       <button
                         key={s.key}
                         onClick={() => setNewSize(s.key)}
                         className={cn(
-                          "p-4 border flex flex-col items-center gap-2 transition-all rounded-sm",
+                          "p-3 md:p-4 border flex flex-col items-center gap-2 transition-all rounded-xl",
                           newSize === s.key 
                             ? "text-black border-transparent shadow-lg" 
                             : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-transparent"
@@ -375,8 +508,8 @@ export default function MissionsPage() {
                         onMouseEnter={e => { if (newSize !== s.key) e.currentTarget.style.borderColor = `${currentTheme.color}60` }}
                         onMouseLeave={e => { if (newSize !== s.key) e.currentTarget.style.borderColor = '' }}
                       >
-                        <span className="material-symbols-outlined text-2xl">{s.icon}</span>
-                        <span className="text-sm font-space font-black uppercase tracking-tighter">{isRTL ? (s.key === 'lg' ? 'كبيرة' : s.key === 'md' ? 'متوسطة' : 'صغيرة') : s.label}</span>
+                        <span className="material-symbols-outlined text-xl md:text-2xl">{s.icon}</span>
+                        <span className="text-xs md:text-sm font-space font-black uppercase tracking-tighter">{isRTL ? (s.key === 'lg' ? 'كبيرة' : s.key === 'md' ? 'متوسطة' : 'صغيرة') : s.label}</span>
                       </button>
                     ))}
                   </div>
@@ -385,30 +518,30 @@ export default function MissionsPage() {
                 {/* ══════════════════════════════════════ */}
                 {/* ██ START DATE & END DATE — RESTORED ██ */}
                 {/* ══════════════════════════════════════ */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <label className="text-sm md:text-base font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs md:text-sm font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>
                       {t('start_date')}
                     </label>
                     <input
                       type="date"
                       value={startDate}
                       onChange={e => setStartDate(e.target.value)}
-                      className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] p-4 font-space text-sm md:text-base font-black text-[var(--text-primary)] outline-none transition-all uppercase rounded-sm date-input-tactical"
+                      className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] py-2.5 px-4 font-space text-xs md:text-sm font-black text-[var(--text-primary)] outline-none transition-all uppercase rounded-xl date-input-tactical"
                       style={{ colorScheme: 'dark' }}
                       onFocus={e => e.currentTarget.style.borderColor = currentTheme.color}
                       onBlur={e => e.currentTarget.style.borderColor = ''}
                     />
                   </div>
-                  <div className="space-y-3">
-                    <label className="text-sm md:text-base font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>
+                  <div className="space-y-2">
+                    <label className="text-xs md:text-sm font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>
                       {t('end_date')}
                     </label>
                     <input
                       type="date"
                       value={endDate}
                       onChange={e => setEndDate(e.target.value)}
-                      className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] p-4 font-space text-sm md:text-base font-black text-[var(--text-primary)] outline-none transition-all uppercase rounded-sm date-input-tactical"
+                      className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] py-2.5 px-4 font-space text-xs md:text-sm font-black text-[var(--text-primary)] outline-none transition-all uppercase rounded-xl date-input-tactical"
                       style={{ colorScheme: 'dark' }}
                       onFocus={e => e.currentTarget.style.borderColor = currentTheme.color}
                       onBlur={e => e.currentTarget.style.borderColor = ''}
@@ -417,12 +550,12 @@ export default function MissionsPage() {
                 </div>
 
                 {/* HUD Visibility */}
-                <div className="flex flex-col md:flex-row gap-8">
-                  <div className="space-y-3 flex-1">
-                     <label className="text-sm md:text-base font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'عرض في اللوحة' : 'Show on Dashboard'}</label>
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="space-y-2 flex-1">
+                     <label className="text-xs md:text-sm font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'عرض في اللوحة' : 'Show on Dashboard'}</label>
                      <button 
                        onClick={() => setSyncOnCreate(!syncOnCreate)}
-                       className="w-full p-4 border font-space text-sm md:text-base font-black uppercase tracking-widest transition-all duration-300 rounded-sm flex items-center justify-between gap-4"
+                       className="w-full py-2.5 px-4 border font-space text-xs md:text-sm font-black uppercase tracking-widest transition-all duration-300 rounded-xl flex items-center justify-between gap-4"
                        style={syncOnCreate ? {
                          backgroundColor: currentTheme.color,
                          borderColor: currentTheme.color,
@@ -461,15 +594,134 @@ export default function MissionsPage() {
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex justify-end gap-6 pt-4 border-t border-black/5 dark:border-white/5">
-                  <button onClick={() => setShowCreate(false)} className="text-[var(--text-secondary)] font-space text-sm md:text-base uppercase tracking-widest hover:text-[var(--text-primary)] font-black">{isRTL ? 'إلغاء' : 'Cancel'}</button>
-                  <button onClick={() => addMission()} className="px-10 py-4 font-space font-black text-sm md:text-base uppercase tracking-widest shadow-lg rounded-xl" style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 0 20px ${currentTheme.color}4d` }}>{isRTL ? 'تفعيل' : 'Activate'}</button>
+                  <button onClick={() => setShowCreate(false)} className="px-6 py-4 border border-[var(--card-border)] rounded-sm text-[var(--text-secondary)] font-space text-sm md:text-base uppercase tracking-widest hover:text-[var(--text-primary)] hover:border-[var(--text-primary)] transition-all font-black">{isRTL ? 'إلغاء' : 'Cancel'}</button>
+                  <button 
+                    onClick={() => addMission()} 
+                    disabled={isSubmitting}
+                    className={cn(
+                      "px-10 py-4 font-space font-black text-sm md:text-base uppercase tracking-widest shadow-lg rounded-sm transition-all hover:brightness-110 flex items-center justify-center gap-2",
+                      isSubmitting && "opacity-50 cursor-not-allowed"
+                    )}
+                    style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 0 20px ${currentTheme.color}4d` }}
+                  >
+                    {isSubmitting && <span className="material-symbols-outlined animate-spin text-sm">refresh</span>}
+                    {isRTL ? 'تفعيل' : 'Activate'}
+                  </button>
                 </div>
               </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* ═════════════════════════════════════════ */}
+        {/* ██           MY TASKS SECTION            ██ */}
+        {/* ═════════════════════════════════════════ */}
+        <div className="w-full bg-zinc-50/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/80 rounded-2xl p-6 md:p-8 space-y-6 shadow-md transition-all duration-300 hover:shadow-[0_0_0_1px_rgba(161,161,170,0.3)] backdrop-blur-md">
+          <div className="flex flex-row justify-between items-center border-b border-zinc-200 dark:border-zinc-800 pb-4">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-2xl text-zinc-500" style={{ color: currentTheme.color }}>task</span>
+              <h2 className="text-xl font-space font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-wide">
+                {isRTL ? 'مهامي' : 'My Tasks'}
+              </h2>
+            </div>
+            <span className="px-3 py-1 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-xs font-space font-black">
+              {allTasks.length} {isRTL ? 'مهام' : 'tasks'}
+            </span>
+          </div>
+
+          {/* Mission Filter Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+            <button
+              onClick={() => setActiveTab('ALL')}
+              className={cn(
+                "px-4 py-2 rounded-xl border font-space font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap shrink-0 cursor-pointer",
+                activeTab === 'ALL'
+                  ? "bg-zinc-200/60 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-300 dark:border-zinc-700 shadow-sm"
+                  : "border-transparent text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800/50"
+              )}
+              style={activeTab === 'ALL' ? { borderColor: currentTheme.color } : undefined}
+            >
+              {isRTL ? 'جميع المهام' : 'ALL TASKS'} ({allTasks.length})
+            </button>
+            {missions.map(m => (
+              <button
+                key={m.id}
+                onClick={() => setActiveTab(m.id)}
+                className={cn(
+                  "px-4 py-2 rounded-xl border font-space font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap shrink-0 cursor-pointer max-w-[200px] truncate",
+                  activeTab === m.id
+                    ? "bg-zinc-200/60 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-300 dark:border-zinc-700 shadow-sm"
+                    : "border-transparent text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800/50"
+                )}
+                style={activeTab === m.id ? { borderColor: (m.color || currentTheme.color) } : undefined}
+              >
+                {m.title}
+              </button>
+            ))}
+          </div>
+
+          {/* Task List */}
+          <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-2">
+            {filteredTasks.map((task) => (
+              <motion.div
+                key={task.id}
+                layout
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className={cn(
+                  "flex items-center justify-between p-4 rounded-xl border transition-all duration-300 group",
+                  "bg-white/50 dark:bg-zinc-950/20 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700/80",
+                  task.is_completed ? "opacity-60" : ""
+                )}
+              >
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <button
+                    onClick={() => toggleTask(task)}
+                    className={cn(
+                      "w-6 h-6 rounded-lg border flex items-center justify-center transition-all duration-300 shrink-0 cursor-pointer shadow-sm",
+                      task.is_completed 
+                        ? "text-white" 
+                        : "border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 bg-transparent"
+                    )}
+                    style={task.is_completed ? { backgroundColor: task.missionColor, borderColor: task.missionColor } : {}}
+                  >
+                    {task.is_completed && <span className="material-symbols-outlined text-sm font-black">check</span>}
+                  </button>
+
+                  <div className="space-y-1 truncate flex-1">
+                    <p className={cn(
+                      "text-sm font-space font-bold text-zinc-900 dark:text-zinc-100 truncate transition-all duration-300",
+                      task.is_completed ? "line-through text-zinc-400 dark:text-zinc-500" : ""
+                    )}>
+                      {task.title}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: task.missionColor }} />
+                      <span className="text-[10px] font-space text-zinc-500 dark:text-zinc-400 uppercase tracking-wider truncate">
+                        {task.missionTitle}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <span className="px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-[10px] font-space font-black tracking-widest uppercase text-zinc-500 dark:text-zinc-400 shrink-0 ml-4">
+                  {task.weight || 3} {isRTL ? 'نقطة' : 'XP'}
+                </span>
+              </motion.div>
+            ))}
+
+            {filteredTasks.length === 0 && (
+              <div className="py-16 text-center space-y-3">
+                <span className="material-symbols-outlined text-4xl text-zinc-300 dark:text-white/20">task</span>
+                <p className="text-sm font-space text-zinc-500 dark:text-white/40">
+                  {isRTL ? 'لا توجد مهام في هذه القائمة.' : 'No tasks in this view.'}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* ═════════════════════════════════════════ */}
         {/* ██  MISSION GRID — STRICT 3-COL LAYOUT ██ */}
@@ -688,7 +940,7 @@ export default function MissionsPage() {
                           : 'Multiple cognitive focus slots are active, or critical missions are near their deadline. Adding a new goal will degrade execution quality.'}
                       </p>
                       
-                      <div className="p-3 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-sm space-y-2">
+                      <div className="p-3 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl space-y-2">
                         {warningSlots >= 7 && (
                           <div className="flex justify-between items-center text-[10px] uppercase font-bold text-[var(--text-secondary)] font-space">
                             <span>{isRTL ? 'سعة التركيز النشطة:' : 'Active Focus Capacity:'}</span>
@@ -710,7 +962,7 @@ export default function MissionsPage() {
                           localStorage.setItem('context_warning_cooldown', Date.now().toString());
                           addMission(true);
                         }}
-                        className="flex-1 py-2.5 bg-[#FF0055]/10 text-[#FF0055] border border-[#FF0055]/30 hover:bg-[#FF0055]/20 font-space font-black text-xs uppercase tracking-widest transition-all"
+                        className="flex-1 py-2.5 bg-[#FF0055]/10 text-[#FF0055] border border-[#FF0055]/30 hover:bg-[#FF0055]/20 font-space font-black text-xs uppercase tracking-widest transition-all rounded-xl"
                       >
                         {isRTL ? 'استبدال المهمة' : 'FORCE SWAP'}
                       </button>
@@ -719,7 +971,7 @@ export default function MissionsPage() {
                           playBlip();
                           setShowWarningModal(false);
                         }}
-                        className="flex-1 py-2.5 text-black font-space font-black text-xs uppercase tracking-widest transition-all shadow-lg"
+                        className="flex-1 py-2.5 text-black font-space font-black text-xs uppercase tracking-widest transition-all shadow-lg rounded-xl"
                         style={{ backgroundColor: currentTheme.color }}
                       >
                         {isRTL ? 'الاستمرار بالتركيز' : 'KEEP FOCUSING'}

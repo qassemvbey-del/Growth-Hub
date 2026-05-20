@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useGrowth } from '@/context/GrowthContext'
 import { cn } from '@/lib/utils'
 
-const GUIDE_CONTENT: Record<string, { title: string; tips: string[] }> = {
+const GUIDE_CONTENT_EN: Record<string, { title: string; tips: string[] }> = {
   '/': {
     title: 'DASHBOARD_TACTICS',
     tips: [
@@ -49,14 +49,60 @@ const GUIDE_CONTENT: Record<string, { title: string; tips: string[] }> = {
   }
 }
 
+const GUIDE_CONTENT_AR: Record<string, { title: string; tips: string[] }> = {
+  '/': {
+    title: 'دليل لوحة التحكم',
+    tips: [
+      'سعة التركيز محدودة بـ 9 وحدات. ركّز على الأهداف ذات الأولوية العالية.',
+      'الأهداف المعرضة للتأخر تتطلب مراجعة عاجلة.',
+      'مؤشر الطاقة يعرض مستوى التقدم الفعلي لأهدافك النشطة.'
+    ]
+  },
+  '/missions': {
+    title: 'إدارة الأهداف',
+    tips: [
+      'قسّم الأهداف الكبيرة إلى مهام صغيرة يسهل إنجازها.',
+      'استخدم أيقونة التقويم لمزامنة أهدافك مع تقويم جوجل.',
+      'قم بأرشفة الأهداف المكتملة لتفريغ سعة التركيز المتوفرة.'
+    ]
+  },
+  '/notes': {
+    title: 'الملاحظات والأفكار',
+    tips: [
+      'سجّل أفكارك فوراً قبل أن تتلاشى في الفراغ.',
+      'استخدم وسوماً مثل #مهمة أو #فكرة لتصفية أرشيفك العقلي.',
+      'البحث في شريط الذاكرة يسترجع أي سجل في أجزاء من الثانية.'
+    ]
+  },
+  '/vault': {
+    title: 'مستويات التصنيف',
+    tips: [
+      'المستويات المتقدمة تتيح سمات واجهة فريدة وتوجيهات أكثر دقة من المساعد الذكي.',
+      'تكتسب نقاط الخبرة (XP) بإنجاز مهام الأهداف وتحقيق النتائج.',
+      'صل إلى رتبة التميز الفائقة (CONQUEROR) لتفعيل كافة توجيهات المساعد الذكي.'
+    ]
+  },
+  '/achievements': {
+    title: 'سجل الإنجازات',
+    tips: [
+      'الميداليات توثق استمرارية أدائك المتميز في الإنجاز.',
+      'أكمل الأهداف المتتالية لفتح شارات تقديرية مميزة.',
+      'كل إنجاز تسجله هنا يدعم تقدم رتبتك العامة.'
+    ]
+  }
+}
+
 export default function OperatorGuide() {
   const pathname = usePathname()
   const { isRTL, currentTheme } = useGrowth()
   const [isOpen, setIsOpen] = useState(false)
 
+  const GUIDE_CONTENT = isRTL ? GUIDE_CONTENT_AR : GUIDE_CONTENT_EN
   const content = GUIDE_CONTENT[pathname] || {
-    title: 'SYSTEM_READY',
-    tips: ['Execute your objectives. Maintain high-fidelity focus. No excuses.']
+    title: isRTL ? 'النظام جاهز' : 'SYSTEM_READY',
+    tips: isRTL
+      ? ['ابدأ العمل على أهدافك اليوم. حافظ على تركيزك لتحقيق أفضل النتائج.']
+      : ['Execute your objectives. Maintain high-fidelity focus. No excuses.']
   }
 
   return (
@@ -95,7 +141,7 @@ export default function OperatorGuide() {
               <div className="space-y-4">
                 <header className="flex justify-between items-center border-b border-black/10 dark:border-white/10 pb-3">
                   <span className="text-[10px] font-space tracking-[0.3em] font-black uppercase opacity-60" style={{ color: currentTheme.color }}>
-                    OPERATOR_GUIDE // {content.title}
+                    {isRTL ? 'دليل المشغل' : 'MEMBER_GUIDE'} // {content.title}
                   </span>
                 </header>
 

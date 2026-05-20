@@ -111,10 +111,10 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
           rank.id === 'ACE' ? 'text-orange-500' : 'text-red-500'
         )} style={{ color: rank.color }}>
           {isRTL ? (
-            rank.id === 'SILVER' ? 'سيلفر' :
-            rank.id === 'PLATINUM' ? 'بلاتينوم' :
-            rank.id === 'CROWN' ? 'كراون' :
-            rank.id === 'ACE' ? 'ايس' : 'كونكر'
+          rank.id === 'SILVER' ? 'سيلفر' :
+          rank.id === 'PLATINUM' ? 'بلاتينوم' :
+          rank.id === 'CROWN' ? 'كراون' :
+          rank.id === 'ACE' ? 'ايس' : 'كونكر'
           ) : rank.name}
         </h2>
         
@@ -127,8 +127,8 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
           }
         >
           {isRTL ? (
-            status === 'EQUIPPED' ? 'متفعّل' :
-            status === 'AVAILABLE' ? 'متاح' : 'مقفول'
+            status === 'EQUIPPED' ? 'نشط' :
+            status === 'AVAILABLE' ? 'متاح' : 'غير متاح'
           ) : status}
         </div>
 
@@ -196,7 +196,7 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
                   {isRTL ? (
                     rank.id === 'SILVER' ? 'الوصول لصفحة الملاحظات والإعدادات' :
                     rank.id === 'PLATINUM' ? 'إمكانية اختيار لون مظهر النظام' :
-                    rank.id === 'CROWN' ? 'استشارات ورؤى فورية من مدرب الذكاء الاصطناعي' :
+                    rank.id === 'CROWN' ? 'استشارات ورؤى فورية من المساعد الذكي' :
                     rank.id === 'ACE' ? 'لوحة تحليلات تفصيلية للوقت والتركيز' : 'الحصول على كافة ترقيات المظهر المميزة'
                   ) : rank.unlocks}
                 </p>
@@ -237,7 +237,7 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
         {isLocked && (
           <div className="absolute inset-0 z-50 bg-white/90 dark:bg-black/85 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-6 text-center border border-zinc-200 dark:border-white/5 transition-opacity duration-300 group-hover:opacity-95">
             <span className="material-symbols-outlined text-zinc-400 dark:text-white/30 text-5xl mb-3 group-hover:scale-110 group-hover:text-zinc-600 dark:group-hover:text-white/55 transition-all duration-300">lock</span>
-            <p className="text-zinc-500 dark:text-white/40 font-black font-space text-2xl tracking-widest uppercase">{isRTL ? 'مقفول' : 'LOCKED'}</p>
+            <p className="text-zinc-500 dark:text-white/40 font-black font-space text-2xl tracking-widest uppercase">{isRTL ? 'غير متاح' : 'LOCKED'}</p>
             
             <motion.div
               animate={{ opacity: isHovered ? 1.0 : 0.3 }}
@@ -245,7 +245,7 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
               className="w-full mt-4 space-y-1"
             >
               <p className="font-space text-[11px] tracking-[0.2em] font-black uppercase" style={{ color: rank.color }}>
-                {rank.threshold - xp} {isRTL ? 'خبرة مطلوبة للفتح' : 'XP REQUIRED TO UNLOCK'}
+                {rank.threshold - xp} {isRTL ? 'نقطة خبرة مطلوبة للتفعيل' : 'XP REQUIRED TO UNLOCK'}
               </p>
               <p className="text-[9px] font-space text-zinc-500 dark:text-white/40 tracking-wider uppercase">
                 {isRTL ? 'استمر في إنجاز أهدافك' : 'CONTINUE ACHIEVING GOALS'}
@@ -268,9 +268,10 @@ export function VaultContent() {
     if (!container) return
 
     const handleWheel = (e: WheelEvent) => {
-      if (e.deltaY !== 0) {
+      // Only hijack vertical scroll if there's no horizontal scroll (e.g. standard mouse wheel)
+      if (e.deltaY !== 0 && Math.abs(e.deltaX) === 0) {
         e.preventDefault()
-        container.scrollLeft += e.deltaY
+        container.scrollBy({ left: e.deltaY > 0 ? 300 : -300, behavior: 'smooth' })
       }
     }
 
