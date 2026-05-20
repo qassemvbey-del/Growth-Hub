@@ -21,7 +21,7 @@ interface Props {
   onTasksAdded: (tasks: any[]) => void
 }
 
-const YOUTUBE_API_KEY = 'AIzaSyAcS6t0jQivhoXePWTajpocP0upKX313hk'
+const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || 'AIzaSyAcS6t0jQivhoXePWTajpocP0upKX313hk'
 
 export default function PlaylistImportModal({ isOpen, onClose, missionId, themeColor, onTasksAdded }: Props) {
   const [playlistUrl, setPlaylistUrl] = useState('')
@@ -82,7 +82,7 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
         if (itemsData.error.errors?.[0]?.reason === 'playlistNotFound' || itemsData.error.code === 404) {
           setError('ACCESS_DENIED // PRIVATE_FEED')
         } else {
-          setError('CONNECTION ERROR // RETRY_SEQUENCE')
+          setError(`API_ERROR // ${itemsData.error.message?.toUpperCase() || 'UNKNOWN_REASON'}`)
         }
         setLoading(false)
         return
@@ -122,8 +122,8 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
       })
 
       setPreviewTasks(mapped)
-    } catch (err) {
-      setError('CONNECTION ERROR // RETRY_SEQUENCE')
+    } catch (err: any) {
+      setError(`NETWORK_ERROR // ${err.message?.toUpperCase() || 'RETRY_SEQUENCE'}`)
     } finally {
       setLoading(false)
     }
