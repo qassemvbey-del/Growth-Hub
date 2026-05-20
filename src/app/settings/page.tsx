@@ -80,6 +80,12 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     setSaving(true)
+
+    // Apply theme on save
+    const themeKey = isDarkMode ? 'dark' : 'light'
+    document.documentElement.classList.toggle('dark', isDarkMode)
+    localStorage.setItem('theme', themeKey)
+
     const { data: { user } } = await supabase.auth.getUser()
     
     // ── GUEST MODE INTERCEPT ──
@@ -631,8 +637,6 @@ export default function SettingsPage() {
                                   onClick={() => {
                                     playBlip()
                                     const setDark = theme.key === 'dark'
-                                    document.documentElement.classList.toggle('dark', setDark)
-                                    localStorage.setItem('theme', theme.key)
                                     setIsDarkMode(setDark)
                                   }}
                                   className={cn(
