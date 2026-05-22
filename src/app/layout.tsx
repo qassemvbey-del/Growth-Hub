@@ -29,29 +29,31 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="dark">
       <head>
-        <Script id="theme-lang-script" strategy="beforeInteractive" dangerouslySetInnerHTML={{
-          __html: `
-            (function() {
-              try {
-                document.documentElement.classList.add('dark');
-                var lang = localStorage.getItem('language') || 'en';
-                var isRTL = lang === 'ar';
-                document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
-                document.documentElement.lang = isRTL ? 'ar' : 'en';
-                var targetSize = isRTL ? '140%' : '100%';
-                var targetLH = isRTL ? '1.8' : 'normal';
-                document.documentElement.style.fontSize = targetSize;
-                document.documentElement.style.lineHeight = targetLH;
-                var cachedColor = localStorage.getItem('cached_theme_color') || '#22c55e';
-                document.documentElement.style.setProperty('--color-neon-green', cachedColor);
-                document.documentElement.style.setProperty('--color-primary', cachedColor);
-                document.documentElement.style.setProperty('--theme-color', cachedColor);
-                var metaThemeColor = document.querySelector('meta[name="theme-color"]');
-                if (metaThemeColor) metaThemeColor.setAttribute('content', cachedColor);
-              } catch (e) {}
-            })();
-          `
-        }} />
+        {typeof window === 'undefined' && (
+          <script id="theme-lang-script" dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  document.documentElement.classList.add('dark');
+                  var lang = localStorage.getItem('language') || 'en';
+                  var isRTL = lang === 'ar';
+                  document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+                  document.documentElement.lang = isRTL ? 'ar' : 'en';
+                  var targetSize = isRTL ? '140%' : '100%';
+                  var targetLH = isRTL ? '1.8' : 'normal';
+                  document.documentElement.style.fontSize = targetSize;
+                  document.documentElement.style.lineHeight = targetLH;
+                  var cachedColor = localStorage.getItem('cached_theme_color') || '#22c55e';
+                  document.documentElement.style.setProperty('--color-neon-green', cachedColor);
+                  document.documentElement.style.setProperty('--color-primary', cachedColor);
+                  document.documentElement.style.setProperty('--theme-color', cachedColor);
+                  var metaThemeColor = document.querySelector('meta[name="theme-color"]');
+                  if (metaThemeColor) metaThemeColor.setAttribute('content', cachedColor);
+                } catch (e) {}
+              })();
+            `
+          }} />
+        )}
         <link rel="manifest" href="/manifest.json" />
         <link
           rel="stylesheet"

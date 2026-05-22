@@ -49,7 +49,7 @@
   --card-bg: #1a1a1a;
   --card-border: rgba(255,255,255,0.1);
   --text-primary: #ffffff;
-  --text-secondary: rgba(255,255,255,0.6);
+  --text-secondary: #ffffff;
   --input-bg: rgba(255,255,255,0.05);
   --sidebar-bg: #0a0a0a;
 }
@@ -296,3 +296,28 @@ input, textarea {
   -webkit-user-select: auto;
   user-select: auto;
 }
+
+/* ==========================================
+   V26.0 ACCESSIBILITY & CONTRAST OVERRIDES 
+   ========================================== */
+
+/* 1. Global High Contrast Color Reset in Dark Mode */
+.dark [class*="text-white/"],
+.dark [class*="text-zinc-"],
+.dark [class*="text-black/"],
+.dark [class*="text-neutral-"],
+.dark [class*="text-slate-"],
+.dark [class*="text-gray-"],
+.dark .text-\[var\(--text-secondary\)\] {
+  color: #ffffff !important;
+}
+
+/* 2. Global Font Scaling: scale base sizes up by 2px */
+.text-\[8px\] { font-size: 10px !important; }
+.text-\[9px\] { font-size: 11px !important; }
+.text-\[10px\] { font-size: 12px !important; }
+.text-\[11px\] { font-size: 13px !important; }
+.text-xs { font-size: 14px !important; }
+.text-sm { font-size: 16px !important; }
+.text-base { font-size: 18px !important; }
+

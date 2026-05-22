@@ -10,6 +10,7 @@ interface SmartTaskPlayerProps {
   isGuest: boolean
   themeColor: string
   onComplete: () => void
+  onProgressUpdate?: (currentTime: number, duration: number) => void
 }
 
 export default function SmartTaskPlayer({ 
@@ -18,7 +19,8 @@ export default function SmartTaskPlayer({
   initialProgress, 
   isGuest, 
   themeColor,
-  onComplete
+  onComplete,
+  onProgressUpdate
 }: SmartTaskPlayerProps) {
   const [player, setPlayer] = useState<YouTubePlayer | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -50,15 +52,30 @@ export default function SmartTaskPlayer({
   }
 
   const saveProgress = useCallback(async (currentTime: number) => {
+    let duration = 0
+    if (playerRef.current) {
+      try {
+        duration = playerRef.current.getDuration()
+      } catch (e) {}
+    }
     if (isGuest) {
       localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
+      if (duration > 0) {
+        localStorage.setItem(`growth_hub_video_duration_${taskId}`, duration.toString())
+      }
     } else {
       await supabase
         .from('tasks')
         .update({ video_progress: currentTime })
         .eq('id', taskId)
+      if (duration > 0) {
+        localStorage.setItem(`growth_hub_video_duration_${taskId}`, duration.toString())
+      }
     }
-  }, [isGuest, taskId, supabase])
+    if (onProgressUpdate) {
+      onProgressUpdate(currentTime, duration)
+    }
+  }, [isGuest, taskId, supabase, onProgressUpdate])
 
   // --- V25.1 HOTFIX: Instant save helper using refs (safe for beforeunload) ---
   const saveCurrentTime = useCallback(() => {
@@ -66,26 +83,36 @@ export default function SmartTaskPlayer({
     if (p && isPlayingRef.current) {
       try {
         const currentTime = p.getCurrentTime()
-        // Use synchronous localStorage write — guaranteed to flush before tab dies
+        const duration = p.getDuration()
         localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
-        // Also fire async Supabase save (best-effort, may not complete)
+        if (duration > 0) {
+          localStorage.setItem(`growth_hub_video_duration_${taskId}`, duration.toString())
+        }
         if (!isGuest) {
           supabase
             .from('tasks')
             .update({ video_progress: currentTime })
             .eq('id', taskId)
         }
+        if (onProgressUpdate) {
+          onProgressUpdate(currentTime, duration)
+        }
       } catch (_e) {
         // Player may already be destroyed — silently ignore
       }
     }
-  }, [taskId, isGuest, supabase])
+  }, [taskId, isGuest, supabase, onProgressUpdate])
 
   const onReady = (event: YouTubeEvent) => {
     const p = event.target
     setPlayer(p)
     // V25.1: We no longer seekTo here — it races with YouTube buffering.
     // The seek is deferred to the first PLAYING state in onStateChange.
+    if (onProgressUpdate) {
+      try {
+        onProgressUpdate(p.getCurrentTime(), p.getDuration())
+      } catch (e) {}
+    }
   }
 
   // --- V25.1 HOTFIX: Unified onStateChange handles PLAYING seek + PAUSED instant save ---

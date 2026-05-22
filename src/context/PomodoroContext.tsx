@@ -57,6 +57,46 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   const { playSuccess, playBlip } = useSound()
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
+  const triggerWarningNotification = () => {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      const origin = window.location.origin
+      const title = "⚡ SYSTEM ALERT: 1 Min Remaining!"
+      const options: any = {
+        body: `Focus session for task: "${taskName || 'Active Task'}" has 1 minute remaining.`,
+        icon: `${origin}/icons/icon-512.png`,
+        badge: `${origin}/icons/icon-192.png`,
+        vibrate: [200, 100, 200]
+      }
+      try {
+        new Notification(title, options)
+      } catch (err) {
+        console.error('Failed to trigger warning notification:', err)
+      }
+    }
+  }
+
+  const triggerCompletionNotification = () => {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      const origin = window.location.origin
+      const isFocus = sessionType === 'FOCUS'
+      const title = isFocus ? "🏆 MISSION ACCOMPLISHED" : "☕ BREAK OVER // RESUME FOCUS"
+      const options: any = {
+        body: isFocus 
+          ? `Completed focus session for task: "${taskName || 'Active Task'}".`
+          : "Your break has ended. Ready to deploy back to work?",
+        icon: `${origin}/icons/icon-512.png`,
+        badge: `${origin}/icons/icon-192.png`,
+        vibrate: [200, 100, 200],
+        requireInteraction: true
+      }
+      try {
+        new Notification(title, options)
+      } catch (err) {
+        console.error('Failed to trigger completion notification:', err)
+      }
+    }
+  }
+
   // Load from localStorage
   useEffect(() => {
     const savedConfig = localStorage.getItem('pomodoro_config')
@@ -132,6 +172,13 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isActive, isPaused, timeRemaining])
 
+  // Trigger warning notification 1 minute before FOCUS timer finishes
+  useEffect(() => {
+    if (timeRemaining === 60 && isActive && !isPaused && sessionType === 'FOCUS') {
+      triggerWarningNotification()
+    }
+  }, [timeRemaining, isActive, isPaused, sessionType])
+
   const saveTimeLog = async (durationSecs: number, endedAt: string) => {
     if (!taskId || !cupId || durationSecs <= 0) return
 
@@ -166,6 +213,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   }
 
   const handleSessionComplete = () => {
+    triggerCompletionNotification()
     playSuccess()
     if (sessionType === 'FOCUS') {
       showToast('FOCUS_SESSION_COMPLETE // TAKE A BREAK', 'success')
@@ -208,6 +256,11 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   }
 
   const startFocus = (name: string, tId?: string, cId?: string) => {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(permission => {
+        console.log('Notification permission status on startFocus gesture:', permission)
+      })
+    }
     if (isActive && sessionType === 'FOCUS' && taskId && taskId !== tId) {
       setPendingSwitchTask({ name, taskId: tId, cupId: cId })
       setShowSwitchWarning(true)
@@ -238,6 +291,11 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   }
 
   const startTimer = () => {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(permission => {
+        console.log('Notification permission status on startTimer gesture:', permission)
+      })
+    }
     setIsActive(true)
     setIsPaused(false)
     playBlip()
@@ -257,6 +315,11 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   }
 
   const resume = () => {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(permission => {
+        console.log('Notification permission status on resume gesture:', permission)
+      })
+    }
     setIsPaused(false)
     playBlip()
   }

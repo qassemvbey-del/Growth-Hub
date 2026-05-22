@@ -67,19 +67,20 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
       return
     }
 
-    const payload = extractedTasks.map(title => ({
+    const now = Date.now()
+    const payload = extractedTasks.map((title, index) => ({
       cup_id: missionId,
       title,
       weight: 3,
       is_completed: false,
       type: 'standard',
+      created_at: new Date(now + index * 10).toISOString()
     }))
 
     if (isLocal) {
       const generatedTasks = payload.map(p => ({
         ...p,
-        id: 'task_' + Math.random().toString(36).substring(2, 9),
-        created_at: new Date().toISOString()
+        id: 'task_' + Math.random().toString(36).substring(2, 9)
       }))
 
       // Save to localStorage under guest_goals

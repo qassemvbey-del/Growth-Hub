@@ -170,12 +170,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
     }
     return true // default to true on SSR (no overlay shown)
   })
-  const [shellIsRTL, setShellIsRTL] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('language') === 'ar'
-    }
-    return false
-  })
+  const [shellIsRTL, setShellIsRTL] = useState(false)
 
   useEffect(() => {
     setMounted(true)

@@ -518,17 +518,30 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
               if (Array.isArray(guestGoals) && guestGoals.length > 0) {
                 console.log('POST_AUTH_MERGE: Migrating guest goals to user DB...', guestGoals)
                 // Filter out the local IDs and set the correct user_id
-                const localGoals = guestGoals.map((g: any) => {
-                  const { id, ...rest } = g
-                  return { ...rest, user_id: user.id }
-                })
-                const { error: mergeError } = await supabase.from('cups').insert(localGoals)
-                if (!mergeError) {
-                  localStorage.removeItem('guest_goals')
-                  console.log('POST_AUTH_MERGE: Success.')
-                } else {
-                  console.error('POST_AUTH_MERGE: Failed to insert.', mergeError)
+                for (const g of guestGoals) {
+                  const { id: oldCupId, tasks, ...rest } = g
+                  const { data: newCup, error: mergeError } = await supabase
+                    .from('cups')
+                    .insert({ ...rest, user_id: user.id })
+                    .select()
+                    .single()
+
+                  if (newCup && tasks && tasks.length > 0) {
+                    const taskPayloads = tasks.map((t: any) => ({
+                      cup_id: newCup.id,
+                      title: t.title,
+                      original_title: t.original_title,
+                      weight: t.weight,
+                      is_completed: t.is_completed,
+                      type: t.type,
+                      video_id: t.video_id,
+                      video_progress: t.video_progress || 0
+                    }))
+                    await supabase.from('tasks').insert(taskPayloads)
+                  }
                 }
+                localStorage.removeItem('guest_goals')
+                console.log('POST_AUTH_MERGE: Success.')
               }
             } catch (e) {}
           }
@@ -592,19 +605,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
             return
           }
 
-          // Intelligent Gatekeeper Redirection
-          const hasName = !!data.full_name
-          const isOnboarded = data.onboarded || localStorage.getItem('onboarding_complete') === 'true'
-          const isAtOnboarding = window.location.pathname === '/onboarding'
-          const isAtAuth = window.location.pathname.startsWith('/auth')
 
-          if (!isAtAuth) {
-            if (!isOnboarded && !isAtOnboarding) {
-              router.push('/onboarding')
-            } else if (isOnboarded && isAtOnboarding) {
-              router.push('/')
-            }
-          }
         } else {
           console.log('PROFILE_MISSING: Auto-creating profile for', user.id)
           const gender = user.user_metadata?.gender || null;
@@ -728,6 +729,27 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
     const interval = setInterval(updateLastSeen, 5 * 60 * 1000)
     return () => clearInterval(interval)
   }, [profile?.id])
+  // ── ROUTE GUARD PROTECTION ──────────────────────────────────────────────
+  useEffect(() => {
+    if (!mounted || !profile || profile.id === 'guest') return
+    
+    // SAFE PROPERTY CHECK: Safely resolve onboarding status from profile
+    // Defaults to false without throwing uncaught exceptions.
+    const isComplete = profile?.onboarded ?? (profile as any)?.onboarding_complete ?? false;
+    
+    const isAtOnboarding = window.location.pathname === '/onboarding'
+    const isAtAuth = window.location.pathname.startsWith('/auth')
+    const isLocalComplete = localStorage.getItem('onboarding_complete') === 'true'
+
+    if (!isAtAuth) {
+      if (!isComplete && !isLocalComplete && !isAtOnboarding) {
+        router.push('/onboarding')
+      } else if ((isComplete || isLocalComplete) && isAtOnboarding) {
+        router.push('/')
+      }
+    }
+  }, [profile, mounted, router])
+
 
   useEffect(() => {
     if (!mounted || !profile) return

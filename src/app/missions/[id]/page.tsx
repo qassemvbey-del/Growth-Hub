@@ -17,6 +17,7 @@ import MissionAttachmentsModal from '@/components/ui/MissionAttachmentsModal'
 import SmartImportModal from '@/components/ui/SmartImportModal'
 import { validateContent } from '@/lib/profanityFilter'
 import { aiProfanityCheck } from '@/app/actions/profanityCheck'
+import SmartTaskPlayer from '@/components/ui/SmartTaskPlayer'
 
 // --- HELPER COMPONENT: CYBERPUNK WEIGHT BARS ---
 const WeightVisualizer = ({ weight, color, isCompleted = false, onSelect }: { weight: number, color: string, isCompleted?: boolean, onSelect?: (w: number) => void }) => {
@@ -54,6 +55,22 @@ const WeightVisualizer = ({ weight, color, isCompleted = false, onSelect }: { we
   )
 }
 
+// --- HELPER COMPONENT: COMPLEXITY DASHES ---
+const ComplexityDashes = ({ weight, color }: { weight: number; color: string }) => {
+  const activeCount = Math.min(5, Math.max(1, weight))
+  return (
+    <div className="flex gap-[3px] items-center">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div
+          key={i}
+          className={`w-3 h-[2px] rounded-sm transition-all duration-300 ${i < activeCount ? '' : 'bg-white/10'}`}
+          style={i < activeCount ? { backgroundColor: color, boxShadow: `0 0 5px ${color}` } : {}}
+        />
+      ))}
+    </div>
+  )
+}
+
 export default function MissionDetailPage() {
   const { id } = useParams()
   const router = useRouter()
@@ -62,6 +79,7 @@ export default function MissionDetailPage() {
   const { playSuccess, playError, playBlip } = useSound()
   const [mission, setMission] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null)
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [newTaskWeight, setNewTaskWeight] = useState(3)
   const [linkedNotes, setLinkedNotes] = useState<any[]>([])
@@ -299,7 +317,11 @@ export default function MissionDetailPage() {
       const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
       const goal = guestGoals.find((g: any) => g.id === id)
       if (goal) {
-        goal.tasks = (goal.tasks || []).sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+        goal.tasks = (goal.tasks || []).sort((a: any, b: any) => {
+          const diff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          if (diff !== 0) return diff
+          return a.id.localeCompare(b.id)
+        })
         setMission(goal)
       } else {
         router.push('/missions')
@@ -315,7 +337,11 @@ export default function MissionDetailPage() {
       .single()
 
     if (data) {
-      data.tasks = (data.tasks || []).sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      data.tasks = (data.tasks || []).sort((a: any, b: any) => {
+        const diff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        if (diff !== 0) return diff
+        return a.id.localeCompare(b.id)
+      })
       setMission(data)
     } else {
       router.push('/missions')
@@ -368,6 +394,23 @@ export default function MissionDetailPage() {
 
     checkCompletionStatus()
   }, [mission?.tasks])
+
+  const updateTaskProgress = useCallback((taskId: string, progress: number, duration: number) => {
+    setMission((prev: any) => {
+      if (!prev || !prev.tasks) return prev
+      const nextTasks = prev.tasks.map((t: any) =>
+        t.id === taskId ? { ...t, video_progress: progress, video_duration: duration } : t
+      )
+      const next = { ...prev, tasks: nextTasks }
+      const isLocal = typeof id === 'string' && id.startsWith('local_')
+      if (isLocal) {
+        const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+        const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g)
+        localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+      }
+      return next
+    })
+  }, [id])
 
   const toggleTask = async (taskId: string, currentStatus: boolean) => {
     const nextStatus = !currentStatus
@@ -803,84 +846,181 @@ export default function MissionDetailPage() {
               
            </div>
 
-           {/* Task List */}
+           {/* Task List — V27.1 Symmetric Card Layout */}
            <div className="space-y-4">
               <AnimatePresence mode='popLayout'>
-                 {(mission.tasks || []).map((task: any) => (
-                    <motion.div
-                      key={task.id}
-                      layout
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      className={cn(
-                        "group flex items-center justify-between py-4 border-b border-[var(--card-border)] transition-all",
-                        task.is_completed ? "opacity-40" : "opacity-100"
-                      )}
-                    >
-                       <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0">
-                          <button 
-                            onClick={() => toggleTask(task.id, task.is_completed)}
-                            className={cn(
-                              "shrink-0 w-7 h-7 flex items-center justify-center transition-all border-2",
-                               task.is_completed 
-                                 ? "shadow-[0_0_15px_rgba(57,255,20,0.4)]" 
-                                 : "border-black/20 dark:border-white/20"
-                             )}
-                             style={{ 
-                               backgroundColor: task.is_completed ? missionColor : 'transparent',
-                               borderColor: task.is_completed ? missionColor : undefined 
+                 {(mission.tasks || []).map((task: any, index: number) => {
+                   const taskMinutes = timeStatsMap[task.id] || 0
+                   const timeFormatted = taskMinutes >= 60
+                     ? `${Math.floor(taskMinutes / 60)}h ${taskMinutes % 60}m`
+                     : taskMinutes > 0 ? `${taskMinutes}m` : null
+
+                   const getYouTubeId = (urlOrId: string) => {
+                     if (!urlOrId) return ''
+                     if (urlOrId.length === 11 && !urlOrId.includes('/') && !urlOrId.includes('?')) return urlOrId
+                     try {
+                       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/
+                       const match = urlOrId.match(regExp)
+                       return (match && match[2].length === 11) ? match[2] : urlOrId
+                     } catch (e) { return urlOrId }
+                   }
+
+                   const storedProgress = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`growth_hub_video_progress_${task.id}`) || '0') : 0
+                   const storedDuration = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`growth_hub_video_duration_${task.id}`) || '0') : 0
+                   const videoProgress = task.video_progress ?? storedProgress
+                   const videoDuration = task.video_duration ?? storedDuration
+                   const hasVideo = !!(task.video_id || task.video_url)
+
+                   const formatVideoTime = (secs: number) => {
+                     const h = Math.floor(secs / 3600)
+                     const m = Math.floor((secs % 3600) / 60)
+                     const s = Math.floor(secs % 60)
+                     if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+                     return `${m}:${String(s).padStart(2,'0')}`
+                   }
+
+                   const videoProgressPct = videoDuration > 0 ? (videoProgress / videoDuration) * 100 : 0
+
+                   return (
+                     <motion.div
+                       key={task.id}
+                       layout
+                       initial={{ opacity: 0, y: 10 }}
+                       animate={{ opacity: 1, y: 0 }}
+                       exit={{ opacity: 0, scale: 0.95 }}
+                       className={cn(
+                         "group flex flex-col p-4 md:p-5 border border-[var(--card-border)] rounded-xl hover:bg-white/[0.02] transition-all shadow-sm space-y-3",
+                         task.is_completed ? "opacity-40" : "opacity-100"
+                       )}
+                     >
+                       {/* Main Row: Right = index+check, Center = title+details, Left = actions */}
+                       <div className={cn(
+                         "flex items-center justify-between gap-4 w-full",
+                         isRTL ? "flex-row" : "flex-row-reverse"
+                       )}>
+                         {/* RIGHT SIDE: Index + Completion Check */}
+                         <div className="flex items-center gap-3 shrink-0">
+                           <span className="font-space font-black text-[11px] text-white/30 w-5 text-right select-none">
+                             {String(index + 1).padStart(2, '0')}
+                           </span>
+                           <button
+                             onClick={() => toggleTask(task.id, task.is_completed)}
+                             className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all border-2"
+                             style={{
+                               backgroundColor: task.is_completed ? currentTheme.color : 'transparent',
+                               borderColor: task.is_completed ? currentTheme.color : 'rgba(255,255,255,0.2)',
+                               boxShadow: task.is_completed ? `0 0 14px ${currentTheme.color}73` : undefined
                              }}
-                          >
-                             {task.is_completed && <span className="material-symbols-outlined text-black font-black text-lg">check</span>}
-                          </button>
-                          
-                          <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                             <span className={cn(
-                                "text-base md:text-xl font-space font-bold tracking-tight transition-all uppercase truncate max-w-full",
-                                task.is_completed ? "text-[var(--text-secondary)] opacity-55 line-through" : "text-[var(--text-primary)]"
-                             )}>
-                                {task.title}
-                             </span>
-                             {(() => {
-                               const taskMinutes = timeStatsMap[task.id] || 0;
-                               if (taskMinutes === 0) return null;
-                               const timeFormatted = taskMinutes >= 60 
-                                 ? `${Math.floor(taskMinutes / 60)}h ${taskMinutes % 60}m` 
-                                 : `${taskMinutes}m`;
-                               return (
-                                 <span className="ml-2 font-mono text-[11px] text-white/40 bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-md tracking-wider inline-flex items-center gap-1 shrink-0">
-                                   <span className="material-symbols-outlined text-[10px]" style={{ color: currentTheme.color }}>schedule</span>
-                                   {timeFormatted}
+                           >
+                             {task.is_completed && (
+                               <span className="material-symbols-outlined text-black font-black text-base">check</span>
+                             )}
+                           </button>
+                         </div>
+
+                         {/* CENTER: Title + Detail Row (metrics + dashes) */}
+                         <div className="flex-1 min-w-0 flex flex-col items-center justify-center text-center">
+                           <span className={cn(
+                             "text-base md:text-[17px] font-space font-bold tracking-tight text-[#FFFFFF] transition-all uppercase truncate max-w-full block",
+                             task.is_completed && "text-[var(--text-secondary)] opacity-55 line-through"
+                           )}>
+                             {task.title}
+                           </span>
+                           <div className="flex items-center justify-center gap-3 mt-1 w-full">
+                             {hasVideo ? (
+                               <>
+                                 <svg width="13" height="13" viewBox="0 0 24 24" fill={currentTheme.color} className="shrink-0">
+                                   <path d="M19.59 6.69a4.83 4.83 0 0 0-3.39-3.39C14.76 3 12 3 12 3s-2.76 0-4.2.3a4.83 4.83 0 0 0-3.39 3.39A48.6 48.6 0 0 0 4 12a48.6 48.6 0 0 0 .41 5.31 4.83 4.83 0 0 0 3.39 3.39C9.24 21 12 21 12 21s2.76 0 4.2-.3a4.83 4.83 0 0 0 3.39-3.39A48.6 48.6 0 0 0 20 12a48.6 48.6 0 0 0-.41-5.31zM10 15V9l5 3z"/>
+                                 </svg>
+                                 <span className="font-mono text-[11px] text-[#FFFFFF] tracking-wider">
+                                   {formatVideoTime(videoProgress)} / {formatVideoTime(videoDuration)}
                                  </span>
-                               );
-                             })()}
+                               </>
+                             ) : timeFormatted ? (
+                               <span className="font-mono text-[11px] text-white/50 bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-md tracking-wider inline-flex items-center gap-1">
+                                 <span className="material-symbols-outlined text-[10px]" style={{ color: currentTheme.color }}>schedule</span>
+                                 {timeFormatted}
+                               </span>
+                             ) : (
+                               <span className="font-mono text-[10px] text-white/20 tracking-wider">—</span>
+                             )}
+                             <div className="h-3 w-[1px] bg-white/10 shrink-0" />
+                             <ComplexityDashes weight={task.weight} color={currentTheme.color} />
                            </div>
+                         </div>
+
+                         {/* LEFT SIDE: Utility Actions */}
+                         <div className="flex items-center gap-x-1 shrink-0 opacity-40 group-hover:opacity-100 transition-opacity">
+                           {hasVideo && (
+                             <button
+                               onClick={() => setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
+                               className="p-2 transition-all"
+                               style={{ color: expandedTaskId === task.id ? currentTheme.color : 'var(--text-secondary)' }}
+                               onMouseEnter={e => { if (expandedTaskId !== task.id) e.currentTarget.style.color = currentTheme.color }}
+                               onMouseLeave={e => { if (expandedTaskId !== task.id) e.currentTarget.style.color = '' }}
+                               title={expandedTaskId === task.id ? 'CLOSE_VIDEO' : 'PLAY_VIDEO'}
+                             >
+                               <span className="material-symbols-outlined text-lg">
+                                 {expandedTaskId === task.id ? 'smart_display' : 'play_circle'}
+                               </span>
+                             </button>
+                           )}
+                           <button
+                             onClick={() => startFocus(task.title, task.id, id as string)}
+                             className="p-2 text-[var(--text-secondary)] transition-all"
+                             onMouseEnter={e => e.currentTarget.style.color = currentTheme.color}
+                             onMouseLeave={e => e.currentTarget.style.color = ''}
+                             title="START_FOCUS_SESSION"
+                           >
+                             <span className="material-symbols-outlined text-lg">timer</span>
+                           </button>
+
+                           <button
+                             onClick={() => deleteTask(task.id)}
+                             className="p-2 text-[var(--text-secondary)] hover:text-red-500 transition-all"
+                             title="DELETE_TASK"
+                           >
+                             <span className="material-symbols-outlined text-lg">delete_sweep</span>
+                           </button>
+                         </div>
                        </div>
 
-                       <div className="flex items-center gap-2 md:gap-4 shrink-0">
-                          <WeightVisualizer weight={task.weight} color={missionColor} isCompleted={task.is_completed} />
-                          
-                          {/* POMODORO BUTTON */}
-                          <button
-                            onClick={() => startFocus(task.title, task.id, id as string)}
-                            className="opacity-0 group-hover:opacity-100 text-[var(--text-secondary)] transition-all p-2"
-                            onMouseEnter={e => e.currentTarget.style.color = currentTheme.color}
-                            onMouseLeave={e => e.currentTarget.style.color = ''}
-                            title="START_FOCUS_SESSION"
-                          >
-                             <span className="material-symbols-outlined text-lg md:text-xl">timer</span>
-                          </button>
+                       {/* Full-width progress line (rank color) */}
+                       {(hasVideo && videoDuration > 0) && (
+                         <div className="relative h-[2px] bg-white/5 rounded-full overflow-hidden w-full">
+                           <motion.div
+                             initial={{ width: 0 }}
+                             animate={{ width: `${videoProgressPct}%` }}
+                             transition={{ duration: 0.4 }}
+                             className="h-full absolute top-0 left-0 rounded-full"
+                             style={{ backgroundColor: currentTheme.color, boxShadow: `0 0 6px ${currentTheme.color}` }}
+                           />
+                         </div>
+                       )}
 
-                          <button
-                            onClick={() => deleteTask(task.id)}
-                            className="opacity-0 group-hover:opacity-100 text-[var(--text-secondary)] hover:text-red-500 transition-all p-2"
-                          >
-                             <span className="material-symbols-outlined text-xl">delete_sweep</span>
-                          </button>
-                       </div>
-                    </motion.div>
-                 ))}
+                       {/* Collapsible SmartTaskPlayer */}
+                       {expandedTaskId === task.id && hasVideo && (
+                         <motion.div
+                           initial={{ opacity: 0, height: 0 }}
+                           animate={{ opacity: 1, height: 'auto' }}
+                           exit={{ opacity: 0, height: 0 }}
+                           transition={{ duration: 0.3 }}
+                           className="w-full overflow-hidden"
+                         >
+                           <SmartTaskPlayer
+                             taskId={task.id}
+                             videoId={task.video_id || getYouTubeId(task.video_url || '')}
+                             initialProgress={videoProgress}
+                             isGuest={typeof id === 'string' && id.startsWith('local_')}
+                             themeColor={currentTheme.color}
+                             onComplete={() => { if (!task.is_completed) toggleTask(task.id, false) }}
+                             onProgressUpdate={(currentTime, duration) => updateTaskProgress(task.id, currentTime, duration)}
+                           />
+                         </motion.div>
+                       )}
+                     </motion.div>
+                   )
+                 })}
               </AnimatePresence>
            </div>
 

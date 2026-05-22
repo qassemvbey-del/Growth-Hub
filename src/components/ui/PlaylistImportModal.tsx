@@ -11,6 +11,7 @@ interface PreviewTask {
   seconds: number
   weight: number
   originalTitle: string
+  videoId: string
 }
 
 interface Props {
@@ -117,11 +118,25 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
           originalTitle: it.snippet.title,
           duration,
           seconds,
-          weight: calculateWeight(seconds)
+          weight: 1, // Will be computed relatively below
+          videoId: it.contentDetails.videoId
         }
       })
 
-      setPreviewTasks(mapped)
+      const maxDuration = Math.max(...mapped.map((t: any) => t.seconds), 0)
+      const relativeMapped = mapped.map((t: any) => {
+        let weight = 1
+        if (maxDuration > 0 && t.seconds > 0) {
+          weight = Math.ceil((t.seconds / maxDuration) * 5)
+          weight = Math.max(1, Math.min(5, weight))
+        }
+        return {
+          ...t,
+          weight
+        }
+      })
+
+      setPreviewTasks(relativeMapped)
     } catch (err: any) {
       setError(`NETWORK_ERROR // ${err.message?.toUpperCase() || 'RETRY_SEQUENCE'}`)
     } finally {
@@ -140,20 +155,23 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
       return
     }
 
-    const payload = previewTasks.map(t => ({
+    const now = Date.now()
+    const payload = previewTasks.map((t, index) => ({
       cup_id: missionId,
       title: t.title,
       original_title: t.originalTitle,
       weight: t.weight,
       is_completed: false,
-      type: 'standard'
+      type: 'standard',
+      video_id: t.videoId,
+      video_progress: 0,
+      created_at: new Date(now + index * 10).toISOString()
     }))
 
     if (isLocal) {
       const generatedTasks = payload.map(p => ({
         ...p,
-        id: 'task_' + Math.random().toString(36).substring(2, 9),
-        created_at: new Date().toISOString()
+        id: 'task_' + Math.random().toString(36).substring(2, 9)
       }))
 
       // Save to localStorage under guest_goals
@@ -259,7 +277,7 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
                         <p className="font-space text-[9px] text-zinc-500 dark:text-white/40 uppercase tracking-tighter">DURATION: {formatSeconds(t.seconds)}</p>
                       </div>
                       <div className="flex gap-1 shrink-0">
-                        {[1,2,3].map(w => (
+                        {[1,2,3,4,5].map(w => (
                           <div key={w} className={`w-1.5 h-4 rounded-[1px] ${w <= t.weight ? 'bg-neon-green shadow-[0_0_8px_rgba(57,255,20,0.5)]' : 'bg-black/10 dark:bg-white/5'}`} style={w <= t.weight ? { backgroundColor: themeColor } : {}} />
                         ))}
                       </div>

@@ -770,7 +770,7 @@ export default function MissionsPage() {
                            {mission.sync_to_dashboard ? (isRTL ? 'نشط' : 'ACTIVE') : (isRTL ? 'استعداد' : 'STANDBY')}
                         </p>
                       </div>
-                      <h3 className="text-base md:text-lg font-space font-black uppercase italic text-[var(--text-primary)] truncate">
+                      <h3 className="text-lg md:text-xl font-space font-black uppercase not-italic text-[var(--text-primary)] truncate mt-1">
                          {mission.title}
                       </h3>
                     </div>
