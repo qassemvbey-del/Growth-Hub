@@ -454,6 +454,8 @@ export default function SettingsPage() {
                                 type="button"
                                 onClick={async () => {
                                   playBlip()
+                                  // Save current page so user returns here after auth
+                                  sessionStorage.setItem('auth_redirect_url', window.location.href)
                                   const { error } = await supabase.auth.signInWithOAuth({
                                     provider: 'google',
                                     options: { redirectTo: `${window.location.origin}/` },

@@ -22,6 +22,8 @@ export default function EntryGateModal() {
 
   const handleGoogleLogin = async () => {
     setLoading(true)
+    // Save current URL (e.g. /goals/squad?join=CODE) so we can restore after auth
+    sessionStorage.setItem('auth_redirect_url', window.location.href)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/` },

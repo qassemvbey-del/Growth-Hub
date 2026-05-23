@@ -1,40 +1,40 @@
 import { ImageResponse } from 'next/og'
 import { createAdminClient } from '@/lib/supabase-admin'
-import fs from 'fs'
-import path from 'path'
+import { OMAR_AVATAR_B64, MENNA_AVATAR_B64 } from '@/lib/og-avatar-data'
 
-// Helper to convert avatar path/URL to base64, avoiding localhost network requests in Satori
-async function getAvatarDataUrl(avatarUrl: string, origin: string): Promise<string | null> {
+// Map default local avatar paths to their embedded base64 data
+// (Vercel does NOT expose public/ via fs at runtime — must be embedded)
+const LOCAL_AVATAR_MAP: Record<string, string> = {
+  '/avatars/omar.svg': OMAR_AVATAR_B64,
+  '/avatars/menna.svg': MENNA_AVATAR_B64,
+}
+
+// Resolve avatar to a usable src for Satori img rendering.
+// Priority: local embedded map → remote URL fetch → null (fallback to initial)
+async function getAvatarDataUrl(avatarUrl: string): Promise<string | null> {
+  if (!avatarUrl) return null
+
+  // 1. Local default avatar — use pre-embedded base64 (no network needed)
+  if (avatarUrl.startsWith('/')) {
+    const cleanPath = avatarUrl.split('?')[0]
+    return LOCAL_AVATAR_MAP[cleanPath] ?? null
+  }
+
+  // 2. External URL (e.g. Google avatar) — plain fetch, no RSC options
   try {
-    if (!avatarUrl) return null
-
-    // 1. If it's a local avatar path in public/
-    if (avatarUrl.startsWith('/')) {
-      const cleanPath = avatarUrl.split('?')[0] // remove query params
-      const filePath = path.join(process.cwd(), 'public', cleanPath)
-      if (fs.existsSync(filePath)) {
-        const fileBuffer = fs.readFileSync(filePath)
-        const ext = path.extname(cleanPath).replace('.', '')
-        const mime = ext === 'svg' ? 'image/svg+xml' : `image/${ext}`
-        return `data:${mime};base64,${fileBuffer.toString('base64')}`
-      }
-    }
-
-    // 2. If it's an absolute URL
-    const absoluteUrl = avatarUrl.startsWith('http') ? avatarUrl : `${origin}${avatarUrl}`
-    // On localhost, we want to try to fetch it, but wrap it in a safe try/catch
-    const res = await fetch(absoluteUrl, { next: { revalidate: 60 } })
+    const res = await fetch(avatarUrl, { cache: 'no-store' })
     if (res.ok) {
       const buffer = await res.arrayBuffer()
       const contentType = res.headers.get('content-type') || 'image/png'
-      const base64 = Buffer.from(buffer).toString('base64')
-      return `data:${contentType};base64,${base64}`
+      return `data:${contentType};base64,${Buffer.from(buffer).toString('base64')}`
     }
   } catch (err) {
-    console.error('Failed to resolve avatar data URL:', err)
+    console.error('[OG] Avatar fetch failed:', err)
   }
   return null
 }
+
+
 
 
 
@@ -255,7 +255,7 @@ export async function GET(
     const googleAvatar = profile?.avatar_url?.startsWith('http') ? profile.avatar_url : null
     const defaultAvatar = (profile?.gender === 'female' || profile?.gender === 'أنثى' || profile?.gender === 'Female') ? '/avatars/menna.svg' : '/avatars/omar.svg'
     const resolvedAvatarUrl = customAvatar || googleAvatar || defaultAvatar
-    const avatarDataUrl = await getAvatarDataUrl(resolvedAvatarUrl, origin)
+    const avatarDataUrl = await getAvatarDataUrl(resolvedAvatarUrl)
 
 
     // -------------------------------------------------------------------------

@@ -13,6 +13,15 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     setLoading(true)
+    // Preserve the page user came from (if any) so we can restore it after auth
+    const pendingUrl = sessionStorage.getItem('auth_redirect_url')
+    if (!pendingUrl) {
+      // Only store if nothing is already queued (e.g. invite link)
+      const ref = document.referrer
+      if (ref && !ref.includes('/auth/')) {
+        sessionStorage.setItem('auth_redirect_url', ref)
+      }
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/` },

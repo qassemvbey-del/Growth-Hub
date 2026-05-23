@@ -511,6 +511,15 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
           setIsLoading(true)
         }
         refreshProfile()
+        // Restore the page the user was trying to visit before login
+        if (typeof window !== 'undefined') {
+          const pendingUrl = sessionStorage.getItem('auth_redirect_url')
+          if (pendingUrl) {
+            sessionStorage.removeItem('auth_redirect_url')
+            // Use replace so the user can't "back" to the login page
+            router.replace(pendingUrl)
+          }
+        }
       }
     })
 

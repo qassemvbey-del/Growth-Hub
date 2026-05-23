@@ -12,6 +12,8 @@ export default function AuthModal() {
 
   const handleGoogleLogin = async () => {
     setLoading(true)
+    // Save current URL so we can restore after auth
+    sessionStorage.setItem('auth_redirect_url', window.location.href)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/` },
