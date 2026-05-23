@@ -530,34 +530,81 @@ export default function MissionDetailPage() {
     if (data) setLinkedNotes(data)
   }
 
-  // --- REAL-TIME CHANNEL SYNCHRONIZATION ---
+  // --- REAL-TIME CHANNEL SYNCHRONIZATION (squad goals only) ---
   useEffect(() => {
     if (!id || typeof id !== 'string' || id.startsWith('local_')) return
+    if (!mission || mission.metadata?.type !== 'squad') return
+
+    // Targeted squad members refetch (avoids full mission reload)
+    const refetchSquadMembers = async () => {
+      const { data: members } = await supabase
+        .from('goal_members')
+        .select('*, profiles(*)')
+        .eq('goal_id', id)
+      if (members) {
+        setSquadMembers(
+          members.map((m: any) => ({
+            id: m.profiles?.id || m.user_id,
+            member_row_id: m.id,
+            full_name: m.profiles?.full_name || 'Unknown Operator',
+            avatar_url: m.profiles?.avatar_url || null,
+            rank: m.profiles?.rank || 'ROOKIE',
+            role: m.role,
+            last_seen: m.profiles?.last_seen || null,
+          }))
+        )
+      }
+    }
 
     const channel = supabase
-      .channel(`squad-goal:${id}`)
+      .channel(`squad-tasks:${id}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'tasks', filter: `cup_id=eq.${id}` },
         (payload) => {
-          console.log('Real-time task update:', payload)
-          fetchMission()
+          if (payload.eventType === 'INSERT') {
+            setMission((prev: any) => {
+              if (!prev) return prev
+              // Avoid duplicates (own mutations already applied optimistically)
+              const exists = prev.tasks?.some((t: any) => t.id === payload.new.id)
+              if (exists) return prev
+              return { ...prev, tasks: [...(prev.tasks || []), payload.new] }
+            })
+          }
+          if (payload.eventType === 'UPDATE') {
+            setMission((prev: any) => {
+              if (!prev) return prev
+              return {
+                ...prev,
+                tasks: (prev.tasks || []).map((t: any) =>
+                  t.id === payload.new.id ? { ...t, ...payload.new } : t
+                ),
+              }
+            })
+          }
+          if (payload.eventType === 'DELETE') {
+            setMission((prev: any) => {
+              if (!prev) return prev
+              return {
+                ...prev,
+                tasks: (prev.tasks || []).filter((t: any) => t.id !== payload.old.id),
+              }
+            })
+          }
         }
       )
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'goal_members', filter: `goal_id=eq.${id}` },
-        (payload) => {
-          console.log('Real-time goal_members update:', payload)
-          fetchMission()
+        () => {
+          refetchSquadMembers()
           fetchPendingRequests()
         }
       )
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'squad_join_requests', filter: `goal_id=eq.${id}` },
-        (payload) => {
-          console.log('Real-time squad_join_requests update:', payload)
+        () => {
           fetchPendingRequests()
         }
       )
@@ -566,7 +613,7 @@ export default function MissionDetailPage() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [id, fetchMission, fetchPendingRequests, supabase])
+  }, [id, mission?.metadata?.type, fetchPendingRequests, supabase])
 
   // --- REAL-TIME PRESENCE ---
   useEffect(() => {
