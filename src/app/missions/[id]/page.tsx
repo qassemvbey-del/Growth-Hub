@@ -97,6 +97,7 @@ export default function MissionDetailPage() {
   const [linkedNotes, setLinkedNotes] = useState<any[]>([])
   const [showIntelModal, setShowIntelModal] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
+  const [copiedRow, setCopiedRow] = useState<'invite' | 'public' | null>(null)
   const [isGeneratingCard, setIsGeneratingCard] = useState(false)
   const [showPlaylistModal, setShowPlaylistModal] = useState(false)
   const [showSmartImportModal, setShowSmartImportModal] = useState(false)
@@ -147,8 +148,9 @@ export default function MissionDetailPage() {
       setShowShareModal(false)
     } catch (err) {
       console.error('Failed to copy image blob:', err)
-      showToast(isRTL ? 'خطأ في نسخ الصورة' : 'IMAGE_COPY_ERROR', 'warning')
+      showToast(isRTL ? 'الكارت غير متوفر حالياً // يعمل في البيئة الإنتاجية' : 'CARD_UNAVAILABLE // Works on production', 'warning')
       playError()
+      setShowShareModal(false)
     } finally {
       setIsGeneratingCard(false)
     }
@@ -168,13 +170,14 @@ export default function MissionDetailPage() {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      showToast(isRTL ? 'تم تحميل الكارت بنجاح!' : 'MISSION CARD DOWNLOADED SUCCESSFULLY', 'success')
+      showToast(isRTL ? 'تم تحميل الكارت بنجاح!' : 'GOAL CARD DOWNLOADED SUCCESSFULLY', 'success')
       playSuccess()
       setShowShareModal(false)
     } catch (err) {
       console.error('Failed to download image blob:', err)
-      showToast(isRTL ? 'خطأ في تحميل الكارت' : 'DOWNLOAD_ERROR', 'warning')
+      showToast(isRTL ? 'الكارت غير متوفر حالياً // يعمل في البيئة الإنتاجية' : 'CARD_UNAVAILABLE // Works on production', 'warning')
       playError()
+      setShowShareModal(false)
     } finally {
       setIsGeneratingCard(false)
     }
@@ -759,7 +762,7 @@ export default function MissionDetailPage() {
           showToast(
             isRTL
               ? `سعة المحطة ممتلئة (${usedSlots.toFixed(1).replace('.0','')}/9 فتحات) - أتمم أو أزل مهمات موجودة.`
-              : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0','')}/9 SLOTS) — Complete or un-equip existing missions.`,
+              : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0','')}/9 SLOTS) — Complete or un-equip existing goals.`,
             'warning'
           )
           playError()
@@ -776,7 +779,7 @@ export default function MissionDetailPage() {
   }
 
   const deleteMission = async () => {
-    if (!confirm(isRTL ? 'هل أنت متأكد من حذف هذه المهمة؟' : 'CONFIRM MISSION TERMINATION?')) return
+    if (!confirm(isRTL ? 'هل أنت متأكد من حذف هذه المهمة؟' : 'CONFIRM GOAL TERMINATION?')) return
     const isLocal = typeof id === 'string' && id.startsWith('local_')
 
     if (isLocal) {
@@ -810,9 +813,48 @@ export default function MissionDetailPage() {
     </Shell>
   )
 
+  if (!mission) {
+    return (
+      <Shell>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center font-space">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="w-full max-w-lg bg-black/60 border border-[#FF0055]/30 backdrop-blur-xl p-8 md:p-12 rounded-2xl shadow-[0_0_50px_rgba(255,0,85,0.15)] relative overflow-hidden"
+          >
+            <div className="absolute top-0 inset-x-0 h-1 bg-[#FF0055]" />
+
+            <div className="flex flex-col items-center gap-6">
+              <span className="material-symbols-outlined text-5xl text-[#FF0055] animate-pulse">lock</span>
+              <div className="space-y-2">
+                <h2 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-[#FF0055]">
+                  CLASSIFIED_GOAL // ACCESS DENIED
+                </h2>
+                <p className="text-xs md:text-sm font-bold text-zinc-400 max-w-sm leading-relaxed">
+                  This is a Squad goal. Join with an invite code to access.
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  playBlip()
+                  router.push('/goals/squad?join=true')
+                }}
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-95 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-base">link</span>
+                JOIN WITH CODE
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </Shell>
+    )
+  }
+
   const missionColor = currentTheme.color
-  const completedCount = mission.tasks?.filter((t: any) => t.is_completed).length || 0
-  const totalCount = mission.tasks?.length || 0
+  const completedCount = mission?.tasks?.filter((t: any) => t.is_completed).length || 0
+  const totalCount = mission?.tasks?.length || 0
 
   return (
     <Shell>
@@ -833,7 +875,7 @@ export default function MissionDetailPage() {
                       <button 
                          onClick={deleteMission}
                          className="p-2 text-black/20 dark:text-white/10 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-full"
-                         title={isRTL ? 'حذف المهمة' : 'DELETE_MISSION'}
+                         title={isRTL ? 'حذف المهمة' : 'DELETE_GOAL'}
                       >
                          <span className="material-symbols-outlined text-xl">delete_forever</span>
                       </button>
@@ -931,6 +973,15 @@ export default function MissionDetailPage() {
                  </span>
                )}
              </button>
+
+             {/* SHARE button */}
+             <button
+                onClick={handleShare}
+                className="px-4 md:px-6 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-sm uppercase flex items-center gap-3 border-[var(--card-border)] text-[var(--text-secondary)] hover:opacity-85"
+             >
+                <span className="material-symbols-outlined text-base">share</span>
+                {isRTL ? 'مشاركة' : 'SHARE'}
+             </button>
            </div>
 
            {/* Row 2: Secondary Action Icons (Right Aligned) */}
@@ -957,7 +1008,7 @@ export default function MissionDetailPage() {
                     dtEnd = d.toISOString().split('T')[0].replace(/-/g, '');
                   }
 
-                  const details = encodeURIComponent(`Growth Hub Mission | Progress: ${percentage}% | Tasks: ${completed}/${total}`);
+                  const details = encodeURIComponent(`Growth Hub Goal | Progress: ${percentage}% | Tasks: ${completed}/${total}`);
                   const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(mission.title)}&dates=${dtStart}/${dtEnd}&details=${details}&location=Growth_Hub`;
                   
                   window.open(googleUrl, '_blank');
@@ -981,7 +1032,7 @@ export default function MissionDetailPage() {
              <button
                 onClick={openAttachments}
                 className="w-10 h-10 border border-[var(--card-border)] text-[var(--text-secondary)] hover:opacity-85 flex items-center justify-center rounded-sm relative transition-all"
-                title="MISSION_ATTACHMENTS"
+                title="GOAL_ATTACHMENTS"
              >
                 <span className="material-symbols-outlined text-xl">attach_file</span>
                 {attachmentCount > 0 && (
@@ -989,18 +1040,6 @@ export default function MissionDetailPage() {
                     {attachmentCount}
                   </span>
                 )}
-             </button>
-
-             <button
-                onClick={handleShare}
-                className="w-10 h-10 border border-[var(--card-border)] text-[var(--text-secondary)] bg-white/5 backdrop-blur-md hover:bg-white/10 hover:text-white flex items-center justify-center rounded-xl transition-all animate-[pulse_3s_infinite]"
-                style={{
-                  boxShadow: `0 0 10px ${missionColor}22`,
-                  borderColor: `${missionColor}33`
-                }}
-                title={isRTL ? 'مشاركة المهمة' : 'SHARE_MISSION'}
-             >
-                <span className="material-symbols-outlined text-xl" style={{ color: missionColor }}>share</span>
              </button>
            </div>
          </div>
@@ -1315,7 +1354,7 @@ export default function MissionDetailPage() {
                       {isRTL ? 'الملاحظات' : 'NOTES'}
                     </h2>
                     <p className="text-[12px] font-space text-[var(--text-secondary)] tracking-widest uppercase font-black mt-1">
-                      {linkedNotes.length} {isRTL ? 'سجل مرتبط' : 'RECORDS LINKED TO THIS MISSION'}
+                      {linkedNotes.length} {isRTL ? 'سجل مرتبط' : 'RECORDS LINKED TO THIS GOAL'}
                     </p>
                   </div>
                   <button
@@ -1333,7 +1372,7 @@ export default function MissionDetailPage() {
                       {isRTL ? 'لا توجد سجلات مرتبطة' : 'NO_INTEL_LINKED'}
                     </p>
                     <p className="text-[14px] font-space text-[var(--text-primary)] tracking-wider">
-                      {isRTL ? 'اذهب إلى العقل وأنشئ ملاحظة مرتبطة بهذه المهمة' : 'Go to NOTES → NEW_LOG and link it to this mission'}
+                      {isRTL ? 'اذهب إلى العقل وأنشئ ملاحظة مرتبطة بهذه المهمة' : 'Go to NOTES → NEW_LOG and link it to this goal'}
                     </p>
                   </div>
                 ) : (
@@ -1438,21 +1477,6 @@ export default function MissionDetailPage() {
         />
       )}
 
-      {/* Task Detail Slide-out Drawer */}
-      <AnimatePresence>
-        {selectedTask && (
-          <TaskDrawer
-            task={selectedTask}
-            onClose={() => setSelectedTask(null)}
-            isGuest={typeof id === 'string' && id.startsWith('local_')}
-            themeColor={currentTheme.color}
-            onComplete={() => { if (!selectedTask.is_completed) toggleTask(selectedTask.id, false) }}
-            onProgressUpdate={(currentTime, duration) => updateTaskProgress(selectedTask.id, currentTime, duration)}
-            onUpdateTask={onUpdateTask}
-          />
-        )}
-      </AnimatePresence>
-
       {/* Premium Centered Glassmorphic Share Modal */}
       <AnimatePresence>
         {showShareModal && (
@@ -1460,7 +1484,7 @@ export default function MissionDetailPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 dark:bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-white/80 dark:bg-black/85 backdrop-blur-md"
             onClick={() => { playBlip(); setShowShareModal(false); }}
           >
             <motion.div
@@ -1468,163 +1492,215 @@ export default function MissionDetailPage() {
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.95, y: 15, opacity: 0 }}
               onClick={e => e.stopPropagation()}
-              className="bg-white/95 dark:bg-zinc-950/70 backdrop-blur-xl border border-zinc-200 dark:border-white/10 rounded-2xl p-6 max-w-sm w-full relative overflow-hidden shadow-2xl space-y-6"
+              className="bg-white/95 dark:bg-zinc-950/80 border border-zinc-200 dark:border-white/10 rounded-2xl p-6 max-w-md w-full relative overflow-hidden shadow-2xl space-y-6"
               style={{
-                boxShadow: `0 0 40px ${missionColor}15`
+                boxShadow: `0 0 45px ${missionColor}15`
               }}
             >
+              {/* Decorative top neon bar */}
+              <div className="absolute top-0 inset-x-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${missionColor}, transparent)` }} />
+
               {/* Header */}
               <div className="flex justify-between items-center pb-3 border-b border-zinc-200 dark:border-white/5">
                 <div>
-                  <h3 className="font-space text-[12px] font-black tracking-[0.2em] uppercase" style={{ color: missionColor }}>
-                    {isRTL ? 'مشاركة المهمة' : 'SHARE MISSION'}
+                  <h3 className="font-space text-lg font-black tracking-widest uppercase italic text-white flex items-center gap-2">
+                    <span className="material-symbols-outlined text-lg" style={{ color: missionColor }}>share</span>
+                    {isRTL ? 'SHARE_GOAL // مشاركة الهدف' : 'SHARE_GOAL'}
                   </h3>
-                  <p className="text-[9px] text-[var(--text-secondary)] font-space tracking-wider uppercase mt-0.5">
-                    {isRTL ? 'خيارات مشاركة المهمة' : 'MISSION SHARE OPTIONS'}
+                  <p className="text-[10px] text-[var(--text-secondary)] font-space tracking-widest uppercase mt-1">
+                    {isRTL ? 'اختر طريقة مشاركة هذه المهمة' : 'Choose how to share this mission'}
                   </p>
                 </div>
                 <button
                   onClick={() => { playBlip(); setShowShareModal(false); }}
-                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
+                  className="text-[var(--text-secondary)] hover:text-white transition-all cursor-pointer bg-transparent border-0"
                 >
                   <span className="material-symbols-outlined text-xl">close</span>
                 </button>
               </div>
 
-              {/* Premium Cyberpunk Micro-Preview Card */}
-              <div
-                className="border bg-black/60 rounded-xl p-4 relative overflow-hidden flex flex-col justify-between h-36"
-                style={{
-                  borderColor: `${missionColor}33`,
-                  boxShadow: `inset 0 0 15px ${missionColor}05`
-                }}
-              >
-                <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ backgroundColor: missionColor }} />
-                
-                <div className="flex justify-between items-start">
-                  <div>
-                    <span className="text-[7px] font-space font-bold tracking-widest opacity-40 uppercase block text-white">
-                      المهمة // MISSION
-                    </span>
-                    <h4 className="text-white text-xs font-bold truncate max-w-[160px] uppercase font-space tracking-wide mt-1">
-                      {mission?.title || 'Mission'}
-                    </h4>
-                    <span className="text-[8px] text-zinc-400 font-space tracking-wider uppercase block mt-0.5">
-                      {(mission?.size || 'md').toUpperCase()} GOAL
-                    </span>
-                  </div>
-                  
-                  <div className="text-right">
-                    <div className="text-xl font-black font-space tracking-tighter" style={{ color: missionColor }}>
-                      {Math.round(calculateAccountability(mission).progress)}%
-                    </div>
-                    <span className="text-[7px] text-white/30 font-space font-black tracking-widest uppercase">
-                      {isRTL ? 'مكتمل' : 'COMPLETE'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-2 mt-auto">
-                  <div className="flex justify-between items-center text-[7px] font-space tracking-wider text-white/40">
-                    <span>PROGRESS</span>
-                    <span style={{ color: missionColor }}>{Math.round(calculateAccountability(mission).progress)}%</span>
-                  </div>
-                  <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${calculateAccountability(mission).progress}%`,
-                        backgroundColor: missionColor,
-                        boxShadow: `0 0 8px ${missionColor}`
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Exact 3 Row Buttons */}
-              <div className="space-y-3 relative">
-                {/* Generating Overlay */}
+              {/* Share Options Rows */}
+              <div className="space-y-4 relative">
+                {/* Generating Overlay for Achievement Card */}
                 {isGeneratingCard && (
-                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white/90 dark:bg-black/70 backdrop-blur-sm rounded-xl">
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white/95 dark:bg-black/80 backdrop-blur-md rounded-xl border border-white/5">
                     <div className="relative w-12 h-12">
                       <div className="absolute inset-0 rounded-full border-t-2 border-l-2 border-transparent animate-spin" style={{ borderTopColor: missionColor, borderLeftColor: missionColor, filter: `drop-shadow(0 0 6px ${missionColor})` }} />
                       <div className="absolute inset-2 rounded-full border-b-2 border-r-2 border-transparent animate-spin" style={{ borderBottomColor: missionColor, borderRightColor: missionColor, opacity: 0.5, animationDirection: 'reverse' }} />
                     </div>
-                    <span className="font-space text-[8px] tracking-[0.3em] uppercase animate-pulse" style={{ color: missionColor }}>
+                    <span className="font-space text-[9px] tracking-[0.3em] uppercase animate-pulse" style={{ color: missionColor }}>
                       {isRTL ? 'جارٍ توليد الكارت...' : 'GENERATING CARD...'}
                     </span>
                   </div>
                 )}
 
-                {/* Option 1: Copy Link */}
+                {/* Row 1: Invite to Squad (Only Squad Goals) */}
+                {mission?.metadata?.type === 'squad' && (
+                  <button
+                    onClick={() => {
+                      playBlip()
+                      const inviteUrl = `${window.location.origin}/goals/squad?join=${mission.metadata?.invite_code || ''}`
+                      navigator.clipboard.writeText(inviteUrl)
+                      setCopiedRow('invite')
+                      setTimeout(() => setCopiedRow(null), 2000)
+                      showToast(isRTL ? 'تم نسخ رابط الدعوة!' : 'SQUAD INVITE URL COPIED', 'success')
+                      playSuccess()
+                    }}
+                    className="w-full flex items-center justify-between p-4 border border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-white/[0.02] hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl transition-all duration-300 group text-left cursor-pointer relative overflow-hidden"
+                    style={copiedRow === 'invite' ? {
+                      backgroundColor: 'rgba(20, 184, 166, 0.25)',
+                      borderColor: '#14b8a6',
+                      boxShadow: '0 0 20px rgba(20, 184, 166, 0.4)'
+                    } : {}}
+                    onMouseEnter={e => {
+                      if (copiedRow !== 'invite') {
+                        e.currentTarget.style.borderColor = `${missionColor}40`
+                        e.currentTarget.style.boxShadow = `0 0 15px ${missionColor}10`
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      if (copiedRow !== 'invite') {
+                        e.currentTarget.style.borderColor = ''
+                        e.currentTarget.style.boxShadow = ''
+                      }
+                    }}
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className="material-symbols-outlined text-2xl transition-all duration-300" style={{
+                        color: copiedRow === 'invite' ? '#14b8a6' : missionColor,
+                        textShadow: copiedRow === 'invite' ? '0 0 10px #14b8a6' : 'none'
+                      }}>group_add</span>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-space text-xs font-black text-white uppercase tracking-wider">
+                            {isRTL ? 'دعوة للانضمام للفريق' : 'INVITE TO SQUAD'}
+                          </span>
+                          <span className="px-1.5 py-0.5 text-[8px] font-space font-black tracking-widest bg-zinc-800 border border-zinc-700 text-zinc-400 rounded-sm">
+                            PRIVATE
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-[var(--text-secondary)] font-space tracking-wide">
+                          {isRTL ? 'دعوة شخص للانضمام والتعاون معك' : 'Invite someone to join and collaborate'}
+                        </p>
+                      </div>
+                    </div>
+                    <span className={cn(
+                      "font-space font-black text-xs tracking-widest shrink-0 select-none flex items-center gap-1.5 transition-all duration-300",
+                      copiedRow === 'invite' ? "text-[#14b8a6] scale-110 drop-shadow-[0_0_8px_#14b8a6]" : "text-zinc-500 hover:text-white"
+                    )}>
+                      {copiedRow === 'invite' ? (
+                        <>
+                          <span className="text-sm font-black">✓</span>
+                          <span>{isRTL ? 'تم النسخ' : 'COPIED'}</span>
+                        </>
+                      ) : (
+                        isRTL ? 'نسخ ➔' : 'COPY ➔'
+                      )}
+                    </span>
+                  </button>
+                )}
+
+                {/* Row 2: Public View Link (Solo & Squad Goals) */}
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     playBlip()
-                    navigator.clipboard.writeText(window.location.href)
-                    showToast(isRTL ? 'تم نسخ رابط المهمة!' : 'MISSION LINK COPIED TO CLIPBOARD', 'success')
+                    const publicUrl = `${window.location.origin}/goals/public/${id}`
+                    navigator.clipboard.writeText(publicUrl)
+                    setCopiedRow('public')
+                    setTimeout(() => setCopiedRow(null), 2000)
+                    showToast(isRTL ? 'تم نسخ الرابط العام!' : 'PUBLIC VIEW LINK COPIED', 'success')
                     playSuccess()
-                    setShowShareModal(false)
+
+                    // Silent database public_share update
+                    if (!mission?.metadata?.public_share) {
+                      const newMetadata = { ...mission.metadata, public_share: true }
+                      setMission((prev: any) => ({ ...prev, metadata: newMetadata }))
+                      await supabase.from('cups').update({ metadata: newMetadata }).eq('id', id)
+                    }
                   }}
-                  className="w-full flex items-center justify-between p-3 border border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-white/[0.02] hover:bg-zinc-100 dark:hover:bg-white/5 hover:border-zinc-300 dark:hover:border-white/10 rounded-xl transition-all group text-left"
+                  className="w-full flex items-center justify-between p-4 border border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-white/[0.02] hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl transition-all duration-300 group text-left cursor-pointer relative overflow-hidden"
+                  style={copiedRow === 'public' ? {
+                    backgroundColor: 'rgba(20, 184, 166, 0.25)',
+                    borderColor: '#14b8a6',
+                    boxShadow: '0 0 20px rgba(20, 184, 166, 0.4)'
+                  } : {}}
+                  onMouseEnter={e => {
+                    if (copiedRow !== 'public') {
+                      e.currentTarget.style.borderColor = 'rgba(6,182,212,0.4)'
+                      e.currentTarget.style.boxShadow = '0 0 15px rgba(6,182,212,0.1)'
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (copiedRow !== 'public') {
+                      e.currentTarget.style.borderColor = ''
+                      e.currentTarget.style.boxShadow = ''
+                    }
+                  }}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-lg transition-transform group-hover:scale-110" style={{ color: missionColor }}>link</span>
-                    <div>
-                      <span className="block font-space text-[10px] font-bold text-zinc-900 dark:text-white leading-none">
-                        {isRTL ? 'نسخ رابط المهمة' : 'Copy Link'}
-                      </span>
-                      <span className="block text-[7px] text-zinc-600 dark:text-zinc-400 font-space tracking-widest uppercase mt-1">
-                        {isRTL ? 'رابط الصفحة المباشر' : 'DIRECT PAGE URL'}
-                      </span>
+                  <div className="flex items-center gap-4">
+                    <span className="material-symbols-outlined text-2xl transition-all duration-300" style={{
+                      color: copiedRow === 'public' ? '#14b8a6' : '#22d3ee',
+                      textShadow: copiedRow === 'public' ? '0 0 10px #14b8a6' : 'none'
+                    }}>visibility</span>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-space text-xs font-black text-white uppercase tracking-wider">
+                          {isRTL ? 'رابط عرض عام' : 'PUBLIC VIEW LINK'}
+                        </span>
+                        <span className="px-1.5 py-0.5 text-[8px] font-space font-black tracking-widest bg-cyan-950/30 border border-cyan-800/40 text-cyan-400 rounded-sm">
+                          PUBLIC
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-[var(--text-secondary)] font-space tracking-wide">
+                        {isRTL ? 'أي شخص لديه الرابط يمكنه رؤية تقدمك (للقراءة فقط)' : 'Anyone with this link can view progress (read-only)'}
+                      </p>
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-sm opacity-30 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5">chevron_right</span>
+                  <span className={cn(
+                    "font-space font-black text-xs tracking-widest shrink-0 select-none flex items-center gap-1.5 transition-all duration-300",
+                    copiedRow === 'public' ? "text-[#14b8a6] scale-110 drop-shadow-[0_0_8px_#14b8a6]" : "text-zinc-500 hover:text-white"
+                  )}>
+                    {copiedRow === 'public' ? (
+                      <>
+                        <span className="text-sm font-black">✓</span>
+                        <span>{isRTL ? 'تم النسخ' : 'COPIED'}</span>
+                      </>
+                    ) : (
+                      isRTL ? 'نسخ ➔' : 'COPY ➔'
+                    )}
+                  </span>
                 </button>
 
-                {/* Option 2: Download Story Card */}
+                {/* Row 3: Share Achievement (Solo & Squad Goals) */}
                 <button
                   onClick={downloadCardImage}
                   disabled={isGeneratingCard}
-                  className="w-full flex items-center justify-between p-3 border border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-white/[0.02] hover:bg-zinc-100 dark:hover:bg-white/5 hover:border-zinc-300 dark:hover:border-white/10 rounded-xl transition-all group text-left disabled:opacity-50"
+                  className="w-full flex items-center justify-between p-4 border border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-white/[0.02] hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl transition-all group text-left cursor-pointer disabled:opacity-50 relative overflow-hidden"
+                  onMouseEnter={e => { if(!isGeneratingCard) { e.currentTarget.style.borderColor = 'rgba(245,158,11,0.4)'; e.currentTarget.style.boxShadow = '0 0 15px rgba(245,158,11,0.1)' } }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = ''; e.currentTarget.style.boxShadow = '' }}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-lg transition-transform group-hover:scale-110" style={{ color: missionColor }}>download</span>
-                    <div>
-                      <span className="block font-space text-[10px] font-bold text-zinc-900 dark:text-white leading-none">
-                        {isRTL ? 'تحميل كارت الاستوري (PNG)' : 'Download Story Card'}
-                      </span>
-                      <span className="block text-[7px] text-zinc-600 dark:text-zinc-400 font-space tracking-widest uppercase mt-1">
-                        {isRTL ? 'حفظ الصورة بالجهاز' : 'SAVE PNG LOCAL FILE'}
-                      </span>
+                  <div className="flex items-center gap-4">
+                    <span className="material-symbols-outlined text-2xl text-amber-500">military_tech</span>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-space text-xs font-black text-white uppercase tracking-wider">
+                          {isRTL ? 'تحميل كارت الإنجاز' : 'SHARE ACHIEVEMENT'}
+                        </span>
+                        <span className="px-1.5 py-0.5 text-[8px] font-space font-black tracking-widest bg-amber-950/30 border border-amber-800/40 text-amber-500 rounded-sm">
+                          FLEX
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-[var(--text-secondary)] font-space tracking-wide">
+                        {isRTL ? 'شارك تقدمك في العمل ككارت استوري مميز' : 'Share your progress as a story card'}
+                      </p>
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-sm opacity-30 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5">chevron_right</span>
-                </button>
-
-                {/* Option 3: Copy Card to Clipboard */}
-                <button
-                  onClick={copyCardImageToClipboard}
-                  disabled={isGeneratingCard}
-                  className="w-full flex items-center justify-between p-3 border border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-white/[0.02] hover:bg-zinc-100 dark:hover:bg-white/5 hover:border-zinc-300 dark:hover:border-white/10 rounded-xl transition-all group text-left disabled:opacity-50"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-lg transition-transform group-hover:scale-110" style={{ color: missionColor }}>content_copy</span>
-                    <div>
-                      <span className="block font-space text-[10px] font-bold text-zinc-900 dark:text-white leading-none">
-                        {isRTL ? 'نسخ الكارت كصورة' : 'Copy Card to Clipboard'}
-                      </span>
-                      <span className="block text-[7px] text-zinc-600 dark:text-zinc-400 font-space tracking-widest uppercase mt-1">
-                        {isRTL ? 'نسخ الحافظة للمشاركة السريعة' : 'COPY MEMORY TO CLIPBOARD'}
-                      </span>
-                    </div>
-                  </div>
-                  <span className="material-symbols-outlined text-sm opacity-30 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5">chevron_right</span>
+                  <span className="material-symbols-outlined text-zinc-500 shrink-0">download</span>
                 </button>
               </div>
 
               {/* Status Footer */}
-              <div className="p-3 bg-zinc-50 dark:bg-white/[0.02] rounded-lg border border-zinc-200 dark:border-white/5 text-center flex items-center justify-center gap-2">
+              <div className="p-3 bg-zinc-50 dark:bg-white/[0.02] rounded-xl border border-zinc-200 dark:border-white/5 text-center flex items-center justify-center gap-2">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: missionColor }}></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ backgroundColor: missionColor }}></span>

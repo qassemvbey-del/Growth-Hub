@@ -11,16 +11,16 @@ const GUIDE_CONTENT_EN: Record<string, { title: string; tips: string[] }> = {
     title: 'DASHBOARD_TACTICS',
     tips: [
       'Focus Capacity is limited to 9 units. Prioritize big wins.',
-      'Missions in RED_ZONE need immediate intervention.',
+      'Goals in RED_ZONE need immediate intervention.',
       'The EnergyCell shows real-time progress for your active goals.'
     ]
   },
   '/missions': {
-    title: 'MISSION_CONTROL',
+    title: 'GOAL_CONTROL',
     tips: [
       'Break large goals into smaller, manageable tasks.',
       'Use the Calendar icon to sync targets with your Google Calendar.',
-      'Archive completed missions to declutter your focus capacity.'
+      'Archive completed goals to declutter your focus capacity.'
     ]
   },
   '/notes': {
@@ -35,7 +35,7 @@ const GUIDE_CONTENT_EN: Record<string, { title: string; tips: string[] }> = {
     title: 'RANKING_PROTOCOL',
     tips: [
       'Higher ranks unlock premium interface themes and AI behaviors.',
-      'XP is earned by completing mission tasks and hitting milestones.',
+      'XP is earned by completing goal tasks and hitting milestones.',
       'Reach CONQUEROR rank to unlock the full SAVAGE coach protocol.'
     ]
   },

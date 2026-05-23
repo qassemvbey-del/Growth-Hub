@@ -155,7 +155,7 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, themeC
                   ) : (
                     isRTL 
                       ? `اكتملت المهمة: ${report.content.mission_title || report.content.mission_name}` 
-                      : `Mission completed: ${report.content.mission_title || report.content.mission_name}`
+                      : `Goal completed: ${report.content.mission_title || report.content.mission_name}`
                   )}
                 </p>
               </motion.button>

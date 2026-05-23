@@ -298,7 +298,7 @@ export default function WinsPage() {
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = currentTheme.color; (e.currentTarget as HTMLElement).style.color = '#000'; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = `${currentTheme.color}08`; (e.currentTarget as HTMLElement).style.color = currentTheme.color; }}
                 >
-                  {isRTL ? 'استعادة المهمة إلى الوضع النشط' : 'RESTORE_MISSION_TO_ACTIVE'}
+                  {isRTL ? 'استعادة المهمة إلى الوضع النشط' : 'RESTORE_GOAL_TO_ACTIVE'}
                 </button>
               </motion.div>
             </motion.div>

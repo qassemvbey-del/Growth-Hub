@@ -79,7 +79,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
       const origin = window.location.origin
       const isFocus = sessionType === 'FOCUS'
-      const title = isFocus ? "🏆 MISSION ACCOMPLISHED" : "☕ BREAK OVER // RESUME FOCUS"
+      const title = isFocus ? "🏆 GOAL ACCOMPLISHED" : "☕ BREAK OVER // RESUME FOCUS"
       const options: any = {
         body: isFocus 
           ? `Completed focus session for task: "${taskName || 'Active Task'}".`

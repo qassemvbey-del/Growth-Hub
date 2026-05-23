@@ -1,0 +1,654 @@
+﻿src/app/achievements/page.tsx:17:  const [selectedMission, setSelectedMission] = useState<any | null>(null)
+src/app/achievements/page.tsx:83:    if (selectedMission?.id === id) setSelectedMission(null)
+src/app/achievements/page.tsx:168:            {archived.map((mission, i) => {
+src/app/achievements/page.tsx:169:              const color = mission.color || '#39FF14'
+src/app/achievements/page.tsx:173:                  key={mission.id}
+src/app/achievements/page.tsx:174:                  onClick={() => setSelectedMission(mission)}
+src/app/achievements/page.tsx:211:                    {mission.title}
+src/app/achievements/page.tsx:215:                    onClick={(e) => { e.preventDefault(); unarchive(mission.id, e as any) }}
+src/app/achievements/page.tsx:226:        {/* Mission Detail Modal */}
+src/app/achievements/page.tsx:228:          {selectedMission && (
+src/app/achievements/page.tsx:234:              onClick={() => setSelectedMission(null)}
+src/app/achievements/page.tsx:250:                      {selectedMission.title}
+src/app/achievements/page.tsx:253:                  <button onClick={() => setSelectedMission(null)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all">
+src/app/achievements/page.tsx:261:                    <p className="text-sm md:text-base font-space font-black text-[var(--text-primary)]">{calculateDuration(selectedMission.start_date, selectedMission.end_date)}</p>
+src/app/achievements/page.tsx:265:                    <p className="text-sm md:text-base font-space font-black text-[var(--text-primary)]">{selectedMission.totalTasks}</p>
+src/app/achievements/page.tsx:274:                      {new Date(selectedMission.created_at).toISOString().split('T')[0].replace(/-/g, '.')}
+src/app/achievements/page.tsx:282:                     {selectedMission.tasks?.map((task: any) => (
+src/app/achievements/page.tsx:295:                  onClick={(e) => unarchive(selectedMission.id, e)}
+src/app/achievements/page.tsx:301:                  {isRTL ? 'استعادة المهمة إلى الوضع النشط' : 'RESTORE_MISSION_TO_ACTIVE'}
+src/app/actions/adminActions.ts:30:  // 2. Total Active Missions
+src/app/actions/adminActions.ts:31:  const { count: activeMissions } = await supabase.from('cups').select('*', { count: 'exact', head: true }).eq('is_archived', false).eq('sync_to_dashboard', true)
+src/app/actions/adminActions.ts:33:  // 3. Missions Completed Today
+src/app/actions/adminActions.ts:39:    .ilike('reason', 'MISSION_COMPLETE%')
+src/app/actions/adminActions.ts:63:    activeMissions,
+src/app/actions/adminActions.ts:84:  // Fetch all missions to count
+src/app/actions/adminActions.ts:85:  const { data: missions } = await supabase.from('cups').select('id, user_id, status')
+src/app/actions/adminActions.ts:89:    const userMissions = missions?.filter(m => m.user_id === p.id) || []
+src/app/actions/adminActions.ts:101:      active_mission_count: userMissions.filter(m => m.status !== 'complete').length,
+src/app/actions/adminActions.ts:102:      completed_mission_count: userMissions.filter(m => m.status === 'complete').length,
+src/app/actions/adminActions.ts:174:  const { data: allMissions } = await supabase.from('cups').select('title, is_archived, tasks_count:tasks(count)')
+src/app/actions/adminActions.ts:177:  const topics = allMissions?.reduce((acc: any, m) => {
+src/app/actions/adminActions.ts:190:    totalMissions: allMissions?.length || 0
+src/app/actions/ai-magic.ts:14:interface CoachMission {
+src/app/actions/ai-magic.ts:28:  missions: CoachMission[]
+src/app/actions/ai-magic.ts:29:  critical_missions: CoachMission[]
+src/app/actions/ai-magic.ts:39:  const missionsList = userData.missions
+src/app/actions/ai-magic.ts:43:  const criticalList = userData.critical_missions
+src/app/actions/ai-magic.ts:89:      ACTIVE_MISSIONS:
+src/app/actions/ai-magic.ts:90:      ${missionsList || 'NO ACTIVE MISSIONS DETECTED.'}
+src/app/actions/ai-magic.ts:96:      1. Context: Use real mission/task names from the data provided.
+src/app/actions/ai-magic.ts:97:      2. Actionable: Always give specific advice based on the data. Mention specific missions and their next_task names.
+src/app/actions/ai-magic.ts:106:      ✓ [mission اللي كويسة]
+src/app/actions/ai-magic.ts:107:      ⚠ [mission اللي محتاج تركز فيها]
+src/app/actions/ai-magic.ts:108:      ❌ [mission اللي في خطر]
+src/app/actions/ai-magic.ts:124:      If user input implies BRIEF_MISSION (بريف عن المهام):
+src/app/actions/ai-magic.ts:125:      "[اسم أهم Mission]:
+src/app/admin/page.tsx:131:          <StatsCard title="ACTIVE_GOALS" value={stats?.activeMissions} icon="target" />
+src/app/admin/page.tsx:202:                               <p className="text-[11px] font-bold text-white">{u.active_mission_count}</p>
+src/app/admin/page.tsx:206:                               <p className="text-[11px] font-bold text-green-500">{u.completed_mission_count}</p>
+src/app/admin/page.tsx:254:                    TOP_MISSION_VECTORS
+src/app/admin/page.tsx:281:                      <p className="text-[9px] text-white/30 font-black uppercase mt-1">TASKS_PER_MISSION</p>
+src/app/admin/page.tsx:301:                          {act.type === 'mission_complete' ? 'verified' : act.type === 'task_complete' ? 'task_alt' : 'person_add'}
+src/app/admin/page.tsx:308:                          {act.type === 'mission_complete' ? 'completed mission' : act.type === 'task_complete' ? 'completed task' : 'joined the system'}
+src/app/admin/page.tsx:310:                          <span className="text-white font-bold">{act.content?.title || act.content?.mission_title || ''}</span>
+src/app/api/missions/[id]/og/route.tsx:24:    const { data: mission, error } = await supabase
+src/app/api/missions/[id]/og/route.tsx:30:    if (error || !mission) {
+src/app/api/missions/[id]/og/route.tsx:51:              المهمة غير موجودة // MISSION NOT FOUND
+src/app/api/missions/[id]/og/route.tsx:63:      .eq('id', mission.user_id)
+src/app/api/missions/[id]/og/route.tsx:88:    const tasks = mission.tasks || []
+src/app/api/missions/[id]/og/route.tsx:169:              اكتملت المهمة // MISSION COMPLETED
+src/app/api/missions/[id]/og/route.tsx:188:              {mission.title}
+src/app/api/missions/[id]/og/route.tsx:206:    const isRTL = /[\u0600-\u06FF]/.test(mission.title || '')
+src/app/api/missions/[id]/og/route.tsx:294:                  <span style={{ color: '#FFFFFF', fontSize: '28px', fontWeight: 'bold', maxWidth: '350px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: isRTL ? 'left' : 'right' }}>{mission.title}</span>
+src/app/api/missions/[id]/og/route.tsx:341:                  {/* Highlight line at top of liquid for pure fluid emission */}
+src/app/api/weather/route.ts:94:        messageEn = 'Hot out there! Grab some ice water and tackle your missions.'
+src/app/missions/[id]/layout.tsx:16:    const { data: mission } = await supabase
+src/app/missions/[id]/layout.tsx:22:    const title = mission?.title ? `Mission: ${mission.title}` : 'Mission Tracker'
+src/app/missions/[id]/layout.tsx:23:    const imageUrl = `/api/missions/${id}/og`
+src/app/missions/[id]/layout.tsx:27:      description: 'Track my operational growth on this mission in real-time.',
+src/app/missions/[id]/layout.tsx:30:        description: 'Track my operational growth on this mission in real-time.',
+src/app/missions/[id]/layout.tsx:44:        description: 'Track my operational growth on this mission in real-time.',
+src/app/missions/[id]/layout.tsx:51:      title: 'Mission Tracker',
+src/app/missions/[id]/layout.tsx:56:export default function MissionLayout({ children }: { children: React.ReactNode }) {
+src/app/missions/[id]/page.tsx:16:import MissionAttachmentsModal from '@/components/ui/MissionAttachmentsModal'
+src/app/missions/[id]/page.tsx:76:export default function MissionDetailPage() {
+src/app/missions/[id]/page.tsx:82:  const [mission, setMission] = useState<any>(null)
+src/app/missions/[id]/page.tsx:89:    return mission?.tasks?.find((t: any) => t.id === selectedTaskState.id) || selectedTaskState
+src/app/missions/[id]/page.tsx:90:  }, [mission?.tasks, selectedTaskState])
+src/app/missions/[id]/page.tsx:107:  const [attachmentMissionId, setAttachmentMissionId] = useState<string | null>(null)
+src/app/missions/[id]/page.tsx:128:      const response = await fetch(`${window.location.origin}/api/missions/${id}/og?t=${Date.now()}`)
+src/app/missions/[id]/page.tsx:166:      a.download = `mission-${id}.png`
+src/app/missions/[id]/page.tsx:171:      showToast(isRTL ? 'تم تحميل الكارت بنجاح!' : 'MISSION CARD DOWNLOADED SUCCESSFULLY', 'success')
+src/app/missions/[id]/page.tsx:218:      fetchMission()
+src/app/missions/[id]/page.tsx:229:    if (mission && !activeViewInitialized) {
+src/app/missions/[id]/page.tsx:230:      const defaultView = mission.metadata?.defaultView || 'list'
+src/app/missions/[id]/page.tsx:234:  }, [mission, activeViewInitialized])
+src/app/missions/[id]/page.tsx:243:      setAttachmentMissionId(null)
+src/app/missions/[id]/page.tsx:265:      .from('mission_attachments')
+src/app/missions/[id]/page.tsx:267:      .eq('mission_id', id)
+src/app/missions/[id]/page.tsx:276:      .from('mission_attachments')
+src/app/missions/[id]/page.tsx:278:      .eq('mission_id', id)
+src/app/missions/[id]/page.tsx:284:    setAttachmentMissionId(id as string)
+src/app/missions/[id]/page.tsx:289:    if (!mission?.tasks?.length) return
+src/app/missions/[id]/page.tsx:292:      const originalTitles = mission.tasks.map((t: any) => t.original_title || t.title)
+src/app/missions/[id]/page.tsx:297:        setMission((prev: any) => {
+src/app/missions/[id]/page.tsx:308:        for (let i = 0; i < mission.tasks.length; i++) {
+src/app/missions/[id]/page.tsx:309:          if (mission.tasks[i].title !== cleanedTitles[i]) {
+src/app/missions/[id]/page.tsx:313:              .eq('id', mission.tasks[i].id)
+src/app/missions/[id]/page.tsx:317:        setMission((prev: any) => ({
+src/app/missions/[id]/page.tsx:339:  async function fetchMission() {
+src/app/missions/[id]/page.tsx:349:        setMission(goal)
+src/app/missions/[id]/page.tsx:351:        router.push('/missions')
+src/app/missions/[id]/page.tsx:369:      setMission(data)
+src/app/missions/[id]/page.tsx:371:      router.push('/missions')
+src/app/missions/[id]/page.tsx:382:      .eq('mission_id', id)
+src/app/missions/[id]/page.tsx:388:  // MISSION PERSISTENCE ENGINE
+src/app/missions/[id]/page.tsx:390:    if (!mission || !mission.tasks || mission.tasks.length === 0) return
+src/app/missions/[id]/page.tsx:393:      const { progress } = calculateAccountability(mission)
+src/app/missions/[id]/page.tsx:396:      if (roundedProgress === 100 && !mission.is_archived) {
+src/app/missions/[id]/page.tsx:403:          setMission((prev: any) => ({ ...prev, is_archived: true, status: 'completed' }))
+src/app/missions/[id]/page.tsx:407:      } else if (roundedProgress < 100 && mission.is_archived) {
+src/app/missions/[id]/page.tsx:414:          setMission((prev: any) => ({ ...prev, is_archived: false, status: 'active' }))
+src/app/missions/[id]/page.tsx:420:  }, [mission?.tasks])
+src/app/missions/[id]/page.tsx:423:    setMission((prev: any) => {
+src/app/missions/[id]/page.tsx:443:      setMission((prev: any) => {
+src/app/missions/[id]/page.tsx:463:      setMission((prev: any) => {
+src/app/missions/[id]/page.tsx:482:      setMission((prev: any) => {
+src/app/missions/[id]/page.tsx:503:      setMission((prev: any) => ({
+src/app/missions/[id]/page.tsx:517:          const taskIndex = mission.tasks.findIndex((t: any) => t.id === taskId)
+src/app/missions/[id]/page.tsx:518:          const task = mission.tasks[taskIndex]
+src/app/missions/[id]/page.tsx:520:            const sizeStr = mission.size?.toLowerCase() || 'md'
+src/app/missions/[id]/page.tsx:536:          const taskIndex = mission.tasks.findIndex((t: any) => t.id === taskId)
+src/app/missions/[id]/page.tsx:537:          const task = mission.tasks[taskIndex]
+src/app/missions/[id]/page.tsx:539:            const sizeStr = mission.size?.toLowerCase() || 'md'
+src/app/missions/[id]/page.tsx:559:    const taskIndex = mission?.tasks?.findIndex((t: any) => t.id === taskId)
+src/app/missions/[id]/page.tsx:561:    const task = mission.tasks[taskIndex]
+src/app/missions/[id]/page.tsx:573:      setMission((prev: any) => {
+src/app/missions/[id]/page.tsx:598:      setMission((prev: any) => ({
+src/app/missions/[id]/page.tsx:613:            const sizeStr = mission.size?.toLowerCase() || 'md'
+src/app/missions/[id]/page.tsx:626:            const sizeStr = mission.size?.toLowerCase() || 'md'
+src/app/missions/[id]/page.tsx:679:      setMission((prev: any) => {
+src/app/missions/[id]/page.tsx:694:      setMission((prev: any) => ({ ...prev, tasks: [...prev.tasks, data] }))
+src/app/missions/[id]/page.tsx:703:      setMission((prev: any) => {
+src/app/missions/[id]/page.tsx:715:      setMission((prev: any) => ({
+src/app/missions/[id]/page.tsx:725:  const updateMission = async (updates: any) => {
+src/app/missions/[id]/page.tsx:729:      setMission((prev: any) => {
+src/app/missions/[id]/page.tsx:754:        const thisMissionSlots = SIZE_SLOTS[mission.size?.toLowerCase()] ?? 1
+src/app/missions/[id]/page.tsx:755:        const totalAfter = usedSlots + thisMissionSlots
+src/app/missions/[id]/page.tsx:762:              : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0','')}/9 SLOTS) — Complete or un-equip existing missions.`,
+src/app/missions/[id]/page.tsx:773:      setMission((prev: any) => ({ ...prev, ...updates }))
+src/app/missions/[id]/page.tsx:778:  const deleteMission = async () => {
+src/app/missions/[id]/page.tsx:779:    if (!confirm(isRTL ? 'هل أنت متأكد من حذف هذه المهمة؟' : 'CONFIRM MISSION TERMINATION?')) return
+src/app/missions/[id]/page.tsx:787:      router.push('/missions')
+src/app/missions/[id]/page.tsx:794:      router.push('/missions')
+src/app/missions/[id]/page.tsx:799:    if (!mission) return { progress: 0, isInRedZone: false, status: 'ON_TRACK' }
+src/app/missions/[id]/page.tsx:800:    return calculateAccountability(mission)
+src/app/missions/[id]/page.tsx:801:  }, [mission])
+src/app/missions/[id]/page.tsx:813:  const missionColor = currentTheme.color
+src/app/missions/[id]/page.tsx:814:  const completedCount = mission.tasks?.filter((t: any) => t.is_completed).length || 0
+src/app/missions/[id]/page.tsx:815:  const totalCount = mission.tasks?.length || 0
+src/app/missions/[id]/page.tsx:821:        {/* Mission Header Overview */}
+src/app/missions/[id]/page.tsx:823:            <div className="absolute top-0 inset-x-0 h-[2.5px]" style={{ background: missionColor }} />
+src/app/missions/[id]/page.tsx:828:                     {mission.title}
+src/app/missions/[id]/page.tsx:834:                         onClick={deleteMission}
+src/app/missions/[id]/page.tsx:836:                         title={isRTL ? 'حذف المهمة' : 'DELETE_MISSION'}
+src/app/missions/[id]/page.tsx:840:                      <span className="text-3xl md:text-6xl font-black font-space italic" style={{ color: missionColor }}>{roundedProgress}%</span>
+src/app/missions/[id]/page.tsx:849:                  <span className="material-symbols-outlined text-sm mr-1.5" style={{ color: missionColor }}>schedule</span>
+src/app/missions/[id]/page.tsx:853:                  <span className="material-symbols-outlined text-sm mr-1.5" style={{ color: missionColor }}>radar</span>
+src/app/missions/[id]/page.tsx:857:                  <span className="material-symbols-outlined text-sm mr-1.5" style={{ color: missionColor }}>checklist</span>
+src/app/missions/[id]/page.tsx:867:                 style={{ backgroundColor: missionColor, boxShadow: `0 0 15px ${missionColor}` }}
+src/app/missions/[id]/page.tsx:872:         {/* Mission Configuration */}
+src/app/missions/[id]/page.tsx:877:                onClick={() => updateMission({ sync_to_dashboard: !mission.sync_to_dashboard })}
+src/app/missions/[id]/page.tsx:880:                   mission.sync_to_dashboard 
+src/app/missions/[id]/page.tsx:884:                style={mission.sync_to_dashboard ? { 
+src/app/missions/[id]/page.tsx:885:                   borderColor: missionColor, color: missionColor,
+src/app/missions/[id]/page.tsx:886:                   backgroundColor: `${missionColor}11`,
+src/app/missions/[id]/page.tsx:887:                   boxShadow: `0 0 20px ${missionColor}22`
+src/app/missions/[id]/page.tsx:891:                   {mission.sync_to_dashboard ? 'grid_view' : 'visibility_off'}
+src/app/missions/[id]/page.tsx:893:                {mission.sync_to_dashboard ? (isRTL ? 'في الواجهة' : 'PINNED TO DASHBOARD') : (isRTL ? 'مخفي' : 'UNPINNED')}
+src/app/missions/[id]/page.tsx:910:                  borderColor: `${missionColor}55`,
+src/app/missions/[id]/page.tsx:911:                  color: missionColor,
+src/app/missions/[id]/page.tsx:912:                  backgroundColor: `${missionColor}10`,
+src/app/missions/[id]/page.tsx:914:                onMouseEnter={e => { e.currentTarget.style.backgroundColor = `${missionColor}20` }}
+src/app/missions/[id]/page.tsx:915:                onMouseLeave={e => { e.currentTarget.style.backgroundColor = `${missionColor}10` }}
+src/app/missions/[id]/page.tsx:929:                 <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center text-black" style={{ backgroundColor: missionColor }}>
+src/app/missions/[id]/page.tsx:940:                  const { progress } = calculateAccountability(mission);
+src/app/missions/[id]/page.tsx:942:                  const completed = mission.tasks?.filter((t: any) => t.is_completed).length || 0;
+src/app/missions/[id]/page.tsx:943:                  const total = mission.tasks?.length || 0;
+src/app/missions/[id]/page.tsx:950:                  const dtStart = formatDate(mission.start_date);
+src/app/missions/[id]/page.tsx:952:                  if (mission.end_date) {
+src/app/missions/[id]/page.tsx:953:                    dtEnd = formatDate(mission.end_date);
+src/app/missions/[id]/page.tsx:955:                    const d = mission.start_date ? new Date(mission.start_date) : new Date();
+src/app/missions/[id]/page.tsx:960:                  const details = encodeURIComponent(`Growth Hub Mission | Progress: ${percentage}% | Tasks: ${completed}/${total}`);
+src/app/missions/[id]/page.tsx:961:                  const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(mission.title)}&dates=${dtStart}/${dtEnd}&details=${details}&location=Growth_Hub`;
+src/app/missions/[id]/page.tsx:984:                title="MISSION_ATTACHMENTS"
+src/app/missions/[id]/page.tsx:988:                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center text-black" style={{ backgroundColor: missionColor }}>
+src/app/missions/[id]/page.tsx:998:                  boxShadow: `0 0 10px ${missionColor}22`,
+src/app/missions/[id]/page.tsx:999:                  borderColor: `${missionColor}33`
+src/app/missions/[id]/page.tsx:1001:                title={isRTL ? 'مشاركة المهمة' : 'SHARE_MISSION'}
+src/app/missions/[id]/page.tsx:1003:                <span className="material-symbols-outlined text-xl" style={{ color: missionColor }}>share</span>
+src/app/missions/[id]/page.tsx:1026:                  style={activeView === 'list' ? { color: missionColor, backgroundColor: `${missionColor}15`, borderColor: `${missionColor}30` } : {}}
+src/app/missions/[id]/page.tsx:1040:                  style={activeView === 'board' ? { color: missionColor, backgroundColor: `${missionColor}15`, borderColor: `${missionColor}30` } : {}}
+src/app/missions/[id]/page.tsx:1048:           <InlineGuideTip hasTasks={(mission.tasks || []).length > 0} />
+src/app/missions/[id]/page.tsx:1054:                   {(mission.tasks || []).map((task: any, index: number) => {
+src/app/missions/[id]/page.tsx:1210:               tasks={mission.tasks || []}
+src/app/missions/[id]/page.tsx:1212:               themeColor={missionColor}
+src/app/missions/[id]/page.tsx:1257:                     color={missionColor} 
+src/app/missions/[id]/page.tsx:1265:               const sizeStr = mission.size?.toLowerCase() || 'md'
+src/app/missions/[id]/page.tsx:1266:               const tCount = mission.tasks?.length || 0
+src/app/missions/[id]/page.tsx:1290:      {/* ── INTEL MODAL: Notes linked to this mission ── */}
+src/app/missions/[id]/page.tsx:1306:              style={{ borderColor: `${missionColor}30` }}
+src/app/missions/[id]/page.tsx:1309:              <div className="absolute top-0 inset-x-0 h-[1px]" style={{ background: `linear-gradient(90deg, transparent, ${missionColor}, transparent)` }} />
+src/app/missions/[id]/page.tsx:1314:                    <h2 className="text-xl md:text-2xl font-black font-space uppercase italic" style={{ color: missionColor }}>
+src/app/missions/[id]/page.tsx:1318:                      {linkedNotes.length} {isRTL ? 'سجل مرتبط' : 'RECORDS LINKED TO THIS MISSION'}
+src/app/missions/[id]/page.tsx:1336:                      {isRTL ? 'اذهب إلى العقل وأنشئ ملاحظة مرتبطة بهذه المهمة' : 'Go to NOTES → NEW_LOG and link it to this mission'}
+src/app/missions/[id]/page.tsx:1348:                        style={{ borderColor: `${missionColor}20`, backgroundColor: `${missionColor}05` }}
+src/app/missions/[id]/page.tsx:1350:                        <div className="absolute top-0 left-0 right-0 h-[1px]" style={{ background: `linear-gradient(90deg, ${missionColor}60, transparent)` }} />
+src/app/missions/[id]/page.tsx:1363:                            <span className="material-symbols-outlined text-xs" style={{ color: missionColor }}>push_pin</span>
+src/app/missions/[id]/page.tsx:1380:        missionId={id as string}
+src/app/missions/[id]/page.tsx:1381:        themeColor={missionColor}
+src/app/missions/[id]/page.tsx:1383:          setMission((prev: any) => ({
+src/app/missions/[id]/page.tsx:1392:          const updatedMetadata = { ...(mission?.metadata || {}), defaultView: 'list' }
+src/app/missions/[id]/page.tsx:1393:          updateMission({ metadata: updatedMetadata })
+src/app/missions/[id]/page.tsx:1401:        missionId={id as string}
+src/app/missions/[id]/page.tsx:1402:        themeColor={missionColor}
+src/app/missions/[id]/page.tsx:1404:          setMission((prev: any) => ({
+src/app/missions/[id]/page.tsx:1418:          const updatedMetadata = { ...(mission?.metadata || {}), defaultView: 'list' }
+src/app/missions/[id]/page.tsx:1419:          updateMission({ metadata: updatedMetadata })
+src/app/missions/[id]/page.tsx:1424:      {attachmentMissionId && (
+src/app/missions/[id]/page.tsx:1425:        <MissionAttachmentsModal
+src/app/missions/[id]/page.tsx:1426:          missionId={attachmentMissionId}
+src/app/missions/[id]/page.tsx:1427:          missionTitle={mission?.title ?? ''}
+src/app/missions/[id]/page.tsx:1428:          themeColor={missionColor}
+src/app/missions/[id]/page.tsx:1429:          isOpen={!!attachmentMissionId}
+src/app/missions/[id]/page.tsx:1434:            setAttachmentMissionId(null)
+src/app/missions/[id]/page.tsx:1473:                boxShadow: `0 0 40px ${missionColor}15`
+src/app/missions/[id]/page.tsx:1479:                  <h3 className="font-space text-[12px] font-black tracking-[0.2em] uppercase" style={{ color: missionColor }}>
+src/app/missions/[id]/page.tsx:1480:                    {isRTL ? 'مشاركة المهمة' : 'SHARE MISSION'}
+src/app/missions/[id]/page.tsx:1483:                    {isRTL ? 'خيارات مشاركة المهمة' : 'MISSION SHARE OPTIONS'}
+src/app/missions/[id]/page.tsx:1498:                  borderColor: `${missionColor}33`,
+src/app/missions/[id]/page.tsx:1499:                  boxShadow: `inset 0 0 15px ${missionColor}05`
+src/app/missions/[id]/page.tsx:1502:                <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ backgroundColor: missionColor }} />
+src/app/missions/[id]/page.tsx:1507:                      المهمة // MISSION
+src/app/missions/[id]/page.tsx:1510:                      {mission?.title || 'Mission'}
+src/app/missions/[id]/page.tsx:1513:                      {(mission?.size || 'md').toUpperCase()} GOAL
+src/app/missions/[id]/page.tsx:1518:                    <div className="text-xl font-black font-space tracking-tighter" style={{ color: missionColor }}>
+src/app/missions/[id]/page.tsx:1519:                      {Math.round(calculateAccountability(mission).progress)}%
+src/app/missions/[id]/page.tsx:1530:                    <span style={{ color: missionColor }}>{Math.round(calculateAccountability(mission).progress)}%</span>
+src/app/missions/[id]/page.tsx:1536:                        width: `${calculateAccountability(mission).progress}%`,
+src/app/missions/[id]/page.tsx:1537:                        backgroundColor: missionColor,
+src/app/missions/[id]/page.tsx:1538:                        boxShadow: `0 0 8px ${missionColor}`
+src/app/missions/[id]/page.tsx:1551:                      <div className="absolute inset-0 rounded-full border-t-2 border-l-2 border-transparent animate-spin" style={{ borderTopColor: missionColor, borderLeftColor: missionColor, filter: `drop-shadow(0 0 6px ${missionColor})` }} />
+src/app/missions/[id]/page.tsx:1552:                      <div className="absolute inset-2 rounded-full border-b-2 border-r-2 border-transparent animate-spin" style={{ borderBottomColor: missionColor, borderRightColor: missionColor, opacity: 0.5, animationDirection: 'reverse' }} />
+src/app/missions/[id]/page.tsx:1554:                    <span className="font-space text-[8px] tracking-[0.3em] uppercase animate-pulse" style={{ color: missionColor }}>
+src/app/missions/[id]/page.tsx:1565:                    showToast(isRTL ? 'تم نسخ رابط المهمة!' : 'MISSION LINK COPIED TO CLIPBOARD', 'success')
+src/app/missions/[id]/page.tsx:1572:                    <span className="material-symbols-outlined text-lg transition-transform group-hover:scale-110" style={{ color: missionColor }}>link</span>
+src/app/missions/[id]/page.tsx:1592:                    <span className="material-symbols-outlined text-lg transition-transform group-hover:scale-110" style={{ color: missionColor }}>download</span>
+src/app/missions/[id]/page.tsx:1612:                    <span className="material-symbols-outlined text-lg transition-transform group-hover:scale-110" style={{ color: missionColor }}>content_copy</span>
+src/app/missions/[id]/page.tsx:1629:                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: missionColor }}></span>
+src/app/missions/[id]/page.tsx:1630:                  <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ backgroundColor: missionColor }}></span>
+src/app/missions/page.tsx:14:import MissionAttachmentsModal from '@/components/ui/MissionAttachmentsModal'
+src/app/missions/page.tsx:31:export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'squad' } = {}) {
+src/app/missions/page.tsx:36:  const [missions, setMissions] = useState<any[]>([])
+src/app/missions/page.tsx:64:  const [attachmentMissionId, setAttachmentMissionId] = useState<string | null>(null)
+src/app/missions/page.tsx:72:      fetchMissions() 
+src/app/missions/page.tsx:75:        window.history.replaceState({}, '', '/missions')
+src/app/missions/page.tsx:177:          fetchMissions()
+src/app/missions/page.tsx:204:  const toggleSquadRule = async (mission: any, ruleKey: string) => {
+src/app/missions/page.tsx:205:    const newMetadata = { ...mission.metadata }
+src/app/missions/page.tsx:208:    const { error } = await supabase.from('cups').update({ metadata: newMetadata }).eq('id', mission.id)
+src/app/missions/page.tsx:210:      setMissions(prev => prev.map(m => m.id === mission.id ? { ...m, metadata: newMetadata } : m))
+src/app/missions/page.tsx:225:      setAttachmentMissionId(null)
+src/app/missions/page.tsx:235:  async function fetchMissions() {
+src/app/missions/page.tsx:240:        setMissions(guestGoals)
+src/app/missions/page.tsx:271:      setMissions(data)
+src/app/missions/page.tsx:323:    missions.forEach(m => {
+src/app/missions/page.tsx:326:          list.push({ ...t, missionTitle: m.title, missionColor: m.color || currentTheme.color })
+src/app/missions/page.tsx:331:  }, [missions, currentTheme.color])
+src/app/missions/page.tsx:340:    setMissions(prev => prev.map(m => ({
+src/app/missions/page.tsx:363:      fetchMissions()
+src/app/missions/page.tsx:365:      const mission = missions.find(m => m.id === task.cup_id)
+src/app/missions/page.tsx:366:      if (mission && mission.tasks) {
+src/app/missions/page.tsx:367:        const taskIndex = mission.tasks.findIndex((t: any) => t.id === task.id)
+src/app/missions/page.tsx:369:          const sizeStr = mission.size?.toLowerCase() || 'md'
+src/app/missions/page.tsx:394:  const fetchAllAttachmentCounts = useCallback(async (userId: string, missionIds: string[]) => {
+src/app/missions/page.tsx:395:    if (!missionIds.length) return
+src/app/missions/page.tsx:397:      .from('mission_attachments')
+src/app/missions/page.tsx:398:      .select('mission_id')
+src/app/missions/page.tsx:400:      .in('mission_id', missionIds)
+src/app/missions/page.tsx:404:        counts[row.mission_id] = (counts[row.mission_id] || 0) + 1
+src/app/missions/page.tsx:411:  const handleAttachmentCountChange = useCallback((missionId: string, count: number) => {
+src/app/missions/page.tsx:412:    setAttachmentCounts(prev => ({ ...prev, [missionId]: count }))
+src/app/missions/page.tsx:415:  const openAttachments = async (missionId: string) => {
+src/app/missions/page.tsx:420:      .from('mission_attachments')
+src/app/missions/page.tsx:422:      .eq('mission_id', missionId)
+src/app/missions/page.tsx:427:      setAttachmentCounts(prev => ({ ...prev, [missionId]: data.length }))
+src/app/missions/page.tsx:430:    setAttachmentMissionId(missionId)
+src/app/missions/page.tsx:436:  const addMission = async (bypassWarning: boolean = false) => {
+src/app/missions/page.tsx:492:        setMissions(updated)
+src/app/missions/page.tsx:503:        router.push(`/missions/${fakeId}`)
+src/app/missions/page.tsx:526:            : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0','')}/9 SLOTS) — Complete or un-equip existing missions.`,
+src/app/missions/page.tsx:543:        // Condition B: Are there critical missions? (end_date <= 5 days remaining AND progress < 50%)
+src/app/missions/page.tsx:544:        const criticalMissions = missions.filter(m => {
+src/app/missions/page.tsx:550:        const hasCriticalMissions = criticalMissions.length > 0
+src/app/missions/page.tsx:552:        if (isCapacityHeavy || hasCriticalMissions) {
+src/app/missions/page.tsx:554:          setWarningCriticalCount(criticalMissions.length)
+src/app/missions/page.tsx:596:        setMissions([data, ...missions])
+src/app/missions/page.tsx:606:        router.push(`/missions/${data.id}`)
+src/app/missions/page.tsx:635:                  <>{isRTL ? 'مهمات' : 'SOLO'}<span style={{ color: currentTheme.color }}>{isRTL ? ' فردية' : '_MISSIONS'}</span></>
+src/app/missions/page.tsx:648:                 <>{isRTL ? 'أهداف شخصية نشطة' : 'PERSONAL GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
+src/app/missions/page.tsx:650:                 <>{isRTL ? 'أهداف تعاونية نشطة' : 'COLLABORATIVE GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
+src/app/missions/page.tsx:652:                 <>{isRTL ? 'الأهداف الأساسية النشطة' : 'Active Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'هدف نشط' : 'total'}</>
+src/app/missions/page.tsx:753:                        <li><span className="uppercase tracking-widest" style={{ color: currentTheme.color }}>XP Logic:</span> 1 Task Bar = 10 XP. Large missions give +50 XP bonus.</li>
+src/app/missions/page.tsx:960:                    onClick={() => addMission()} 
+src/app/missions/page.tsx:1004:              {missions.map(m => (
+src/app/missions/page.tsx:1044:                      style={task.is_completed ? { backgroundColor: task.missionColor, borderColor: task.missionColor } : {}}
+src/app/missions/page.tsx:1057:                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: task.missionColor }} />
+src/app/missions/page.tsx:1059:                          {task.missionTitle}
+src/app/missions/page.tsx:1085:            {missions.map((mission, idx) => {
+src/app/missions/page.tsx:1086:              const { progress, isInRedZone } = calculateAccountability(mission)
+src/app/missions/page.tsx:1089:              const completedTasks = mission.tasks?.filter((t: any) => t.is_completed).length || 0
+src/app/missions/page.tsx:1090:              const totalTasks = mission.tasks?.length || 0
+src/app/missions/page.tsx:1091:              const kasaSize = mission.size === 'lg' ? 'md' : mission.size === 'md' ? 'sm' : 'sm'
+src/app/missions/page.tsx:1092:              const sizeIcon = SIZES.find(s => s.key === mission.size)?.icon || 'layers'
+src/app/missions/page.tsx:1100:                  key={mission.id}
+src/app/missions/page.tsx:1105:                  onClick={() => { playBlip(); router.push(`/missions/${mission.id}`); }}
+src/app/missions/page.tsx:1114:                  style={typeFilter === 'squad' ? { borderLeftColor: mission.color || color } : {}}
+src/app/missions/page.tsx:1116:                  <div className="absolute top-0 inset-x-0 h-[2.5px]" style={{ backgroundColor: isInRedZone ? '#FF0055' : (mission.color || color) }} />
+src/app/missions/page.tsx:1121:                        <span className="material-symbols-outlined text-xs opacity-40" style={{ color: isInRedZone ? '#FF0055' : (mission.color || color) }}>{sizeIcon}</span>
+src/app/missions/page.tsx:1123:                           {mission.sync_to_dashboard ? (isRTL ? 'نشط' : 'ACTIVE') : (isRTL ? 'استعداد' : 'STANDBY')}
+src/app/missions/page.tsx:1131:                          mission.user_id === profile?.id ? (
+src/app/missions/page.tsx:1143:                         {mission.title}
+src/app/missions/page.tsx:1148:                      <span className="text-xl md:text-2xl font-black font-space italic shrink-0" style={{ color: isInRedZone ? '#FF0055' : (mission.color || color) }}>{percentage}%</span>
+src/app/missions/page.tsx:1149:                      {typeFilter === 'squad' && mission.user_id === profile?.id && (
+src/app/missions/page.tsx:1155:                              setActiveRulesGoalId(activeRulesGoalId === mission.id ? null : mission.id);
+src/app/missions/page.tsx:1163:                            {activeRulesGoalId === mission.id && (
+src/app/missions/page.tsx:1179:                                    checked={!!mission.metadata?.rules?.no_date_changes}
+src/app/missions/page.tsx:1180:                                    onChange={() => toggleSquadRule(mission, 'no_date_changes')}
+src/app/missions/page.tsx:1189:                                    checked={!!mission.metadata?.rules?.xp_multiplier}
+src/app/missions/page.tsx:1190:                                    onChange={() => toggleSquadRule(mission, 'xp_multiplier')}
+src/app/missions/page.tsx:1199:                                    checked={!!mission.metadata?.rules?.no_delete}
+src/app/missions/page.tsx:1200:                                    onChange={() => toggleSquadRule(mission, 'no_delete')}
+src/app/missions/page.tsx:1215:                      color={isInRedZone ? '#FF0055' : (mission.color || color)}
+src/app/missions/page.tsx:1225:                          {(goalMembersMap[mission.id] || []).slice(0, 4).map((member: any) => (
+src/app/missions/page.tsx:1247:                          {(goalMembersMap[mission.id] || []).length > 4 && (
+src/app/missions/page.tsx:1249:                              +{(goalMembersMap[mission.id] || []).length - 4}
+src/app/missions/page.tsx:1256:                            {(goalMembersMap[mission.id] || []).length} MEMBER{((goalMembersMap[mission.id] || []).length !== 1) ? 'S' : ''}
+src/app/missions/page.tsx:1262:                              {goalActiveTodayMap[mission.id] || 0} ACTIVE TODAY
+src/app/missions/page.tsx:1276:                        style={{ backgroundColor: isInRedZone ? '#FF0055' : (mission.color || color), boxShadow: `0 0 10px ${isInRedZone ? '#FF0055' : (mission.color || color)}` }}
+src/app/missions/page.tsx:1285:                          {(mission.start_date || mission.end_date) && (
+src/app/missions/page.tsx:1287:                              {fmtDate(mission.start_date)} → {fmtDate(mission.end_date)}
+src/app/missions/page.tsx:1292:                          {typeFilter === 'squad' && mission.metadata?.invite_code && (
+src/app/missions/page.tsx:1294:                              onClick={(e) => handleCopyInviteLink(e, mission.metadata.invite_code)}
+src/app/missions/page.tsx:1305:                              const { progress } = calculateAccountability(mission);
+src/app/missions/page.tsx:1307:                              const completed = mission.tasks?.filter((t: any) => t.is_completed).length || 0;
+src/app/missions/page.tsx:1308:                              const total = mission.tasks?.length || 0;
+src/app/missions/page.tsx:1315:                              const dtStart = formatDate(mission.start_date);
+src/app/missions/page.tsx:1317:                              if (mission.end_date) {
+src/app/missions/page.tsx:1318:                                dtEnd = formatDate(mission.end_date);
+src/app/missions/page.tsx:1320:                                const d = mission.start_date ? new Date(mission.start_date) : new Date();
+src/app/missions/page.tsx:1325:                              const details = encodeURIComponent(`Growth Hub Mission | Progress: ${percentage}% | Tasks: ${completed}/${total}`);
+src/app/missions/page.tsx:1326:                              const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(mission.title)}&dates=${dtStart}/${dtEnd}&details=${details}&location=Growth_Hub`;
+src/app/missions/page.tsx:1332:                            onMouseEnter={e => e.currentTarget.style.borderColor = `${(mission.color || color)}60`}
+src/app/missions/page.tsx:1342:                              openAttachments(mission.id);
+src/app/missions/page.tsx:1345:                            onMouseEnter={e => e.currentTarget.style.borderColor = `${(mission.color || color)}60`}
+src/app/missions/page.tsx:1349:                              borderColor: (attachmentCounts[mission.id] || 0) > 0 ? `${(mission.color || color)}44` : undefined,
+src/app/missions/page.tsx:1350:                              boxShadow: (attachmentCounts[mission.id] || 0) > 0 ? `0 0 10px ${(mission.color || color)}22` : undefined
+src/app/missions/page.tsx:1354:                              color: (attachmentCounts[mission.id] || 0) > 0 ? (mission.color || color) : 'inherit',
+src/app/missions/page.tsx:1355:                              textShadow: (attachmentCounts[mission.id] || 0) > 0 ? `0 0 8px ${(mission.color || color)}` : 'none'
+src/app/missions/page.tsx:1357:                            {(attachmentCounts[mission.id] || 0) > 0 && (
+src/app/missions/page.tsx:1359:                                style={{ backgroundColor: (mission.color || color), boxShadow: `0 0 10px ${(mission.color || color)}` }}
+src/app/missions/page.tsx:1361:                                {attachmentCounts[mission.id]}
+src/app/missions/page.tsx:1375:          {attachmentMissionId && (
+src/app/missions/page.tsx:1376:            <MissionAttachmentsModal
+src/app/missions/page.tsx:1377:              missionId={attachmentMissionId}
+src/app/missions/page.tsx:1378:              missionTitle={missions.find(m => m.id === attachmentMissionId)?.title ?? ''}
+src/app/missions/page.tsx:1380:              isOpen={!!attachmentMissionId}
+src/app/missions/page.tsx:1385:                setAttachmentMissionId(null)
+src/app/missions/page.tsx:1388:              onCountChange={count => handleAttachmentCountChange(attachmentMissionId, count)}
+src/app/missions/page.tsx:1428:                          : 'Multiple cognitive focus slots are active, or critical missions are near their deadline. Adding a new goal will degrade execution quality.'}
+src/app/missions/page.tsx:1441:                            <span className="text-[#FF0055] font-black">{warningCriticalCount} {isRTL ? 'مهام' : 'Missions'}</span>
+src/app/missions/page.tsx:1451:                          addMission(true);
+src/app/missions/page.tsx:1474:          {missions.length === 0 && !loading && (
+src/app/missions/page.tsx:1480:                      NO SOLO MISSIONS YET
+src/app/missions/page.tsx:1500:                      NO SQUAD MISSIONS YET
+src/app/notes/page.tsx:91:  const [missions, setMissions] = useState<any[]>([])
+src/app/notes/page.tsx:98:  const [newMissionId, setNewMissionId] = useState<string>('')
+src/app/notes/page.tsx:101:  const [selectedMissionId, setSelectedMissionId] = useState<string | null>(null)
+src/app/notes/page.tsx:106:  const uniqueMissions = useMemo(() => {
+src/app/notes/page.tsx:107:    const missionsMap = new Map<string, string>()
+src/app/notes/page.tsx:109:      const missionId = note.cups?.id || note.mission_id || note.cup_id
+src/app/notes/page.tsx:110:      const missionTitle = note.cups?.title || note.cups_title
+src/app/notes/page.tsx:111:      if (missionId && missionTitle) {
+src/app/notes/page.tsx:112:        missionsMap.set(missionId, missionTitle)
+src/app/notes/page.tsx:115:    return Array.from(missionsMap.entries()).map(([id, title]) => ({ id, title }))
+src/app/notes/page.tsx:120:    fetchMissions()
+src/app/notes/page.tsx:152:        // 2. Fetch all user cups (missions) with tasks
+src/app/notes/page.tsx:159:          cupsData.forEach((mission: any) => {
+src/app/notes/page.tsx:160:            const tasks = mission.tasks || []
+src/app/notes/page.tsx:178:                    color: mission.color || currentTheme.color,
+src/app/notes/page.tsx:184:                    mission_id: mission.id,
+src/app/notes/page.tsx:188:                      id: mission.id,
+src/app/notes/page.tsx:189:                      title: mission.title
+src/app/notes/page.tsx:203:        guestGoals.forEach((mission: any) => {
+src/app/notes/page.tsx:204:          const tasks = mission.tasks || []
+src/app/notes/page.tsx:219:                color: mission.color || currentTheme.color,
+src/app/notes/page.tsx:225:                mission_id: mission.id,
+src/app/notes/page.tsx:229:                  id: mission.id,
+src/app/notes/page.tsx:230:                  title: mission.title
+src/app/notes/page.tsx:252:  async function fetchMissions() {
+src/app/notes/page.tsx:261:      if (data) setMissions(data)
+src/app/notes/page.tsx:265:      setMissions(formatted)
+src/app/notes/page.tsx:277:        const { task_id, mission_id, _noteIndex } = noteToDelete
+src/app/notes/page.tsx:278:        if (mission_id && mission_id.startsWith('local_')) {
+src/app/notes/page.tsx:281:          const goal = guestGoals.find((g: any) => g.id === mission_id)
+src/app/notes/page.tsx:330:      const { task_id, mission_id, _noteIndex } = noteToUpdate
+src/app/notes/page.tsx:331:      if (mission_id && mission_id.startsWith('local_')) {
+src/app/notes/page.tsx:334:        const goal = guestGoals.find((g: any) => g.id === mission_id)
+src/app/notes/page.tsx:412:    const missionId = n.cups?.id || n.mission_id || n.cup_id
+src/app/notes/page.tsx:413:    const matchesMission = selectedMissionId === null || missionId === selectedMissionId
+src/app/notes/page.tsx:414:    return matchesSearch && matchesTag && matchesMission
+src/app/notes/page.tsx:433:    if (newMissionId) newNote.mission_id = newMissionId
+src/app/notes/page.tsx:442:      setNewMissionId('')
+src/app/notes/page.tsx:566:              {/* Mission Link Dropdown */}
+src/app/notes/page.tsx:567:              {missions.length > 0 && (
+src/app/notes/page.tsx:573:                    value={newMissionId}
+src/app/notes/page.tsx:574:                    onChange={val => setNewMissionId(val)}
+src/app/notes/page.tsx:577:                      ...missions.map(m => ({ value: m.id, label: m.title.toUpperCase() }))
+src/app/notes/page.tsx:589:                  <button onClick={() => { setIsCreating(false); setNewContent(''); setNewTitle(''); setNewTag(''); setNewMissionId('') }} className="text-[var(--text-secondary)] font-space uppercase text-[10px] tracking-widest hover:text-[var(--text-primary)] transition-all">{isRTL ? 'إلغاء' : 'CANCEL'}</button>
+src/app/notes/page.tsx:605:        {uniqueMissions.length > 0 && (
+src/app/notes/page.tsx:612:                onClick={() => setSelectedMissionId(null)}
+src/app/notes/page.tsx:615:                  selectedMissionId === null
+src/app/notes/page.tsx:619:                style={selectedMissionId === null ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
+src/app/notes/page.tsx:623:              {uniqueMissions.map(m => (
+src/app/notes/page.tsx:626:                  onClick={() => setSelectedMissionId(selectedMissionId === m.id ? null : m.id)}
+src/app/notes/page.tsx:629:                    selectedMissionId === m.id
+src/app/notes/page.tsx:633:                  style={selectedMissionId === m.id ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
+src/app/notes/page.tsx:688:                const linkedMission = note.cups
+src/app/notes/page.tsx:726:                    {/* Mission badge */}
+src/app/notes/page.tsx:727:                    {linkedMission && (
+src/app/notes/page.tsx:731:                          const mId = linkedMission.id || note.mission_id || note.cup_id
+src/app/notes/page.tsx:732:                          if (mId) router.push(`/missions/${mId}`)
+src/app/notes/page.tsx:738:                        <span className="max-w-[80px] truncate">{linkedMission.title}</span>
+src/app/notes/page.tsx:828:                        const mId = editingNote.cups.id || editingNote.mission_id || editingNote.cup_id
+src/app/notes/page.tsx:831:                          router.push(`/missions/${mId}`)
+src/app/notes/page.tsx:896:                {missions.length > 0 && (
+src/app/notes/page.tsx:898:                    value={editingNote.mission_id || ''}
+src/app/notes/page.tsx:899:                    onChange={val => updateNote(editingNote.id, { mission_id: val || null })}
+src/app/notes/page.tsx:902:                      ...missions.map(m => ({ value: m.id, label: m.title.toUpperCase() }))
+src/app/page.tsx:121:  const [missions, setMissions] = useState<any[]>([])
+src/app/page.tsx:125:  const [selectedImportMissionId, setSelectedImportMissionId] = useState<string>('')
+src/app/page.tsx:142:      fetchDashboardMissions()
+src/app/page.tsx:147:  async function fetchDashboardMissions() {
+src/app/page.tsx:160:      setMissions(data)
+src/app/page.tsx:161:      if (data.length > 0 && !selectedImportMissionId) {
+src/app/page.tsx:162:        setSelectedImportMissionId(data[0].id)
+src/app/page.tsx:197:    missions.forEach(m => {
+src/app/page.tsx:200:          list.push({ ...t, missionTitle: m.title, missionColor: m.color || currentTheme.color })
+src/app/page.tsx:206:  }, [missions, currentTheme.color])
+src/app/page.tsx:212:    const redZoneMission = missions.find(m => calculateAccountability(m).isInRedZone)
+src/app/page.tsx:213:    if (redZoneMission) {
+src/app/page.tsx:215:        ? `لديك أهداف في المنطقة الحمراء! ركّز جهودك اليوم على "${redZoneMission.title}" لتفادي خسارة النقاط.`
+src/app/page.tsx:216:        : `You have goals in the Red Zone! Direct your energy to "${redZoneMission.title}" today to avoid XP penalties.`
+src/app/page.tsx:240:  }, [missions, weeklyMinutes, completedTasksCount, pendingTasksCount, isRTL, calculateAccountability])
+src/app/page.tsx:245:    <Shell syncedMissions={missions} onMissionsRefresh={fetchDashboardMissions}>
+src/app/page.tsx:285:          const usedSlots = missions.reduce((acc: number, m: any) => acc + (SIZE_SLOTS[m.size?.toLowerCase()] ?? 1), 0)
+src/app/page.tsx:353:                      : 'WARNING: You have exceeded the elite focus constraint (9 slots). Archiving or completing active missions is strongly recommended.'}
+src/app/page.tsx:362:        {/* ██  ACTIVE MISSIONS GRID (CRYSTALS UNDER FOCUS)  ██ */}
+src/app/page.tsx:368:              {isRTL ? 'الأهداف النشطة' : 'ACTIVE MISSIONS'}
+src/app/page.tsx:373:            {missions.map((mission, idx) => {
+src/app/page.tsx:374:              const { progress, isInRedZone } = calculateAccountability(mission)
+src/app/page.tsx:376:              const customColor = mission.color || currentTheme.color
+src/app/page.tsx:380:              const kasaSize: 'sm' | 'md' | 'lg' = SIZE_MAP[mission.size?.toUpperCase?.()] ?? SIZE_MAP[mission.size] ?? 'sm'
+src/app/page.tsx:387:              const startStr = fmtDate(mission.start_date)
+src/app/page.tsx:388:              const endStr = fmtDate(mission.end_date)
+src/app/page.tsx:392:                  key={mission.id}
+src/app/page.tsx:396:                  onClick={() => router.push(`/missions/${mission.id}`)}
+src/app/page.tsx:420:                      {isInRedZone ? (isRTL ? 'تنبيه خطير' : '⚠ RED_ZONE') : (isRTL ? 'هدف نشط' : 'ACTIVE MISSION')}
+src/app/page.tsx:423:                      {mission.title}
+src/app/page.tsx:470:            {missions.length === 0 && !loading && (
+src/app/page.tsx:473:                  {isRTL ? 'لا توجد أهداف نشطة حالياً. ابدأ بإنشاء هدف جديد!' : 'No active goals synced. Initiate a new mission to begin execution.'}
+src/app/page.tsx:502:                  onClick={() => router.push('/missions')}
+src/components/auth/AuthModal.tsx:57:                : 'Your first mission has been saved locally. To sync your progress, secure your streak, and save your data permanently to the server, please sign in with a Google account.'}
+src/components/layout/Shell.tsx:30:  syncedMissions?: any[]
+src/components/layout/Shell.tsx:31:  onMissionsRefresh?: () => void
+src/components/layout/Shell.tsx:34:export default function Shell({ children, syncedMissions = [], onMissionsRefresh }: ShellProps) {
+src/components/layout/Shell.tsx:420:  const hasRedZoneMission = useMemo(() => {
+src/components/layout/Shell.tsx:421:    return (syncedMissions || []).some(m => calculateAccountability(m).isInRedZone)
+src/components/layout/Shell.tsx:422:  }, [syncedMissions, calculateAccountability])
+src/components/layout/Shell.tsx:426:    if (hasRedZoneMission && !hasShown && !aiOpen) {
+src/components/layout/Shell.tsx:431:  }, [hasRedZoneMission, aiOpen])
+src/components/layout/Shell.tsx:434:    if (!syncedMissions || syncedMissions.length === 0) return 0
+src/components/layout/Shell.tsx:436:    syncedMissions.forEach(m => {
+src/components/layout/Shell.tsx:439:    return Math.round(totalPct / syncedMissions.length)
+src/components/layout/Shell.tsx:440:  }, [syncedMissions, calculateAccountability])
+src/components/layout/Shell.tsx:747:          { label: isRTL ? 'الأهداف' : 'Goals', icon: 'flag', href: '/missions' },
+src/components/layout/Shell.tsx:791:        missions={syncedMissions}
+src/components/layout/Shell.tsx:813:        missions={syncedMissions} 
+src/components/layout/Sidebar.tsx:73:    { icon: 'target', label: mounted ? (isRTL ? 'أهدافي' : 'Goals') : 'Goals', href: '/missions', shortcut: '02', exact: false },
+src/components/layout/Sidebar.tsx:155:            const isGoalsActive = pathname.startsWith('/goals') || pathname.startsWith('/missions')
+src/components/ui/CoachPanel.tsx:13:  missions: any[]
+src/components/ui/CoachPanel.tsx:16:export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProps) {
+src/components/ui/CoachPanel.tsx:33:  const activeMissions = missions.filter(m => !m.is_archived && m.sync_to_dashboard)
+src/components/ui/CoachPanel.tsx:43:        prompt = 'Give me a full tactical status report of all my missions and overall performance'
+src/components/ui/CoachPanel.tsx:46:        prompt = 'Based on my missions and deadlines, what exactly should I focus on today? Give me a priority order.'
+src/components/ui/CoachPanel.tsx:49:        prompt = 'Which of my missions are in danger? What do I need to do immediately?'
+src/components/ui/CoachPanel.tsx:51:      case 'brief_mission':
+src/components/ui/CoachPanel.tsx:52:        prompt = 'Brief me on my most critical mission. Give me a tactical breakdown of what I need to do next.'
+src/components/ui/CoachPanel.tsx:66:      capacity_used: activeMissions.length,
+src/components/ui/CoachPanel.tsx:67:      missions: activeMissions.map(m => ({
+src/components/ui/CoachPanel.tsx:75:      critical_missions: activeMissions.filter(m => {
+src/components/ui/CoachPanel.tsx:197:                  subtitle={profile?.language === 'ar' ? 'تنبيهات خطيرة' : 'Missions in danger'} 
+src/components/ui/CoachPanel.tsx:205:                  title="BRIEF_MISSION" 
+src/components/ui/CoachPanel.tsx:206:                  subtitle={profile?.language === 'ar' ? 'بريف عن أهم هدف' : 'Tactical mission breakdown'} 
+src/components/ui/CoachPanel.tsx:207:                  onClick={() => handleAction('brief_mission')}
+src/components/ui/CommandPalette.tsx:14:  missions?: any[]
+src/components/ui/CommandPalette.tsx:17:export default function CommandPalette({ isOpen, onClose, missions = [] }: CommandPaletteProps) {
+src/components/ui/CommandPalette.tsx:52:        const activeMission = missions.length > 0 ? missions[0] : null
+src/components/ui/CommandPalette.tsx:54:        if (!activeMission) {
+src/components/ui/CommandPalette.tsx:55:          showToast(isRTL ? 'لا توجد مهمة نشطة لإضافة الهدف إليها' : 'No active mission to append task to', 'warning')
+src/components/ui/CommandPalette.tsx:62:          cup_id: activeMission.id,
+src/components/ui/CommandPalette.tsx:73:        showToast(isRTL ? 'تم إضافة الهدف للمهمة النشطة' : 'Task added to active mission', 'success')
+src/components/ui/EnergyCell.tsx:19:  sm: { w: 40, h: 55 },    // Create Mission Modal
+src/components/ui/EnergyCell.tsx:20:  md: { w: 60, h: 80 },    // Mission Card
+src/components/ui/GlobalActionMenu.tsx:37:              onClick={() => handleAction('/missions?create=true')}
+src/components/ui/InboxDropdown.tsx:10:  type: 'daily_brief' | 'deadline_alert' | 'mission_complete' | 'weekly_review'
+src/components/ui/InboxDropdown.tsx:149:                      ? `اقتراب الموعد النهائي: ${report.content.mission_title}` 
+src/components/ui/InboxDropdown.tsx:150:                      : `Deadline approaching: ${report.content.mission_title}`
+src/components/ui/InboxDropdown.tsx:157:                      ? `اكتملت المهمة: ${report.content.mission_title || report.content.mission_name}` 
+src/components/ui/InboxDropdown.tsx:158:                      : `Mission completed: ${report.content.mission_title || report.content.mission_name}`
+src/components/ui/MissionAttachmentsModal.tsx:12:  mission_id: string
+src/components/ui/MissionAttachmentsModal.tsx:21:  missionId: string
+src/components/ui/MissionAttachmentsModal.tsx:22:  missionTitle: string
+src/components/ui/MissionAttachmentsModal.tsx:174:const MissionAttachmentsModal = ({
+src/components/ui/MissionAttachmentsModal.tsx:175:  missionId,
+src/components/ui/MissionAttachmentsModal.tsx:176:  missionTitle,
+src/components/ui/MissionAttachmentsModal.tsx:371:        .from('mission_attachments')
+src/components/ui/MissionAttachmentsModal.tsx:373:          mission_id: missionId,
+src/components/ui/MissionAttachmentsModal.tsx:412:        .from('mission_attachments')
+src/components/ui/MissionAttachmentsModal.tsx:414:          mission_id: missionId,
+src/components/ui/MissionAttachmentsModal.tsx:443:      await supabase.from('mission_attachments').delete().eq('id', id)
+src/components/ui/MissionAttachmentsModal.tsx:475:                <p className="font-space font-black uppercase italic text-sm truncate max-w-[260px]" style={{ color: themeColor }}>{missionTitle}</p>
+src/components/ui/MissionAttachmentsModal.tsx:658:export default React.memo(MissionAttachmentsModal)
+src/components/ui/OperatorGuide.tsx:14:      'Missions in RED_ZONE need immediate intervention.',
+src/components/ui/OperatorGuide.tsx:18:  '/missions': {
+src/components/ui/OperatorGuide.tsx:19:    title: 'MISSION_CONTROL',
+src/components/ui/OperatorGuide.tsx:23:      'Archive completed missions to declutter your focus capacity.'
+src/components/ui/OperatorGuide.tsx:38:      'XP is earned by completing mission tasks and hitting milestones.',
+src/components/ui/OperatorGuide.tsx:61:  '/missions': {
+src/components/ui/PlaylistImportModal.tsx:20:  missionId: string
+src/components/ui/PlaylistImportModal.tsx:27:export default function PlaylistImportModal({ isOpen, onClose, missionId, themeColor, onTasksAdded }: Props) {
+src/components/ui/PlaylistImportModal.tsx:150:    const isLocal = typeof missionId === 'string' && missionId.startsWith('local_')
+src/components/ui/PlaylistImportModal.tsx:160:      cup_id: missionId,
+src/components/ui/PlaylistImportModal.tsx:180:        if (g.id === missionId) {
+src/components/ui/ReportModal.tsx:9:  type: 'daily_brief' | 'deadline_alert' | 'mission_complete'
+src/components/ui/ReportModal.tsx:107:              {report.type === 'mission_complete' && (
+src/components/ui/ReportModal.tsx:111:                    <p className="text-sm font-black uppercase tracking-[0.4em] italic" style={{ color: themeColor }}>MISSION_ACCOMPLISHED</p>
+src/components/ui/SmartImportModal.tsx:12:  missionId: string
+src/components/ui/SmartImportModal.tsx:19:export default function SmartImportModal({ isOpen, onClose, missionId, themeColor, onTasksAdded }: Props) {
+src/components/ui/SmartImportModal.tsx:62:    const isLocal = typeof missionId === 'string' && missionId.startsWith('local_')
+src/components/ui/SmartImportModal.tsx:72:      cup_id: missionId,
+src/components/ui/SmartImportModal.tsx:89:        if (g.id === missionId) {
+src/components/ui/TaskDrawer.tsx:334:            mission_id: task.cup_id || null,
+src/components/ui/Tutorial.tsx:32:    text: 'Access your mission canvas, brain notes, and achievements here.', 
+src/context/GrowthContext.tsx:19:  mission_goal: string | null
+src/context/GrowthContext.tsx:188:export interface MissionTask {
+src/context/GrowthContext.tsx:195:export interface Mission {
+src/context/GrowthContext.tsx:203:  tasks?: MissionTask[]
+src/context/GrowthContext.tsx:209:    mission: 'MISSIONS',
+src/context/GrowthContext.tsx:218:    createMission: 'CREATE MISSION',
+src/context/GrowthContext.tsx:246:    tapToEnter: 'TAP TO ENTER MISSION',
+src/context/GrowthContext.tsx:249:    missionColor: 'MISSION COLOR',
+src/context/GrowthContext.tsx:250:    missionScale: 'MISSION SCALE',
+src/context/GrowthContext.tsx:281:    mission: 'الأهداف النشطة',
+src/context/GrowthContext.tsx:290:    createMission: 'إنشاء هدف جديد',
+src/context/GrowthContext.tsx:321:    missionColor: 'لون المهمة',
+src/context/GrowthContext.tsx:322:    missionScale: 'حجم المهمة',
+src/context/GrowthContext.tsx:373:  calculateAccountability: (mission: Mission) => {
+src/context/GrowthContext.tsx:745:            mission_goal: null,
+src/context/GrowthContext.tsx:849:      calculateAccountability: (mission: Mission) => {
+src/context/GrowthContext.tsx:850:        const tasks = mission.tasks || []
+src/context/GrowthContext.tsx:855:        if (!mission.start_date || !mission.end_date) {
+src/context/GrowthContext.tsx:859:        const start = new Date(mission.start_date).getTime()
+src/context/GrowthContext.tsx:860:        const end = new Date(mission.end_date).getTime()
+src/context/PomodoroContext.tsx:61:    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+src/context/PomodoroContext.tsx:79:    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+src/context/PomodoroContext.tsx:82:      const title = isFocus ? "🏆 MISSION ACCOMPLISHED" : "☕ BREAK OVER // RESUME FOCUS"
+src/context/PomodoroContext.tsx:259:    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+src/context/PomodoroContext.tsx:260:      Notification.requestPermission().then(permission => {
+src/context/PomodoroContext.tsx:261:        console.log('Notification permission status on startFocus gesture:', permission)
+src/context/PomodoroContext.tsx:294:    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+src/context/PomodoroContext.tsx:295:      Notification.requestPermission().then(permission => {
+src/context/PomodoroContext.tsx:296:        console.log('Notification permission status on startTimer gesture:', permission)
+src/context/PomodoroContext.tsx:318:    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+src/context/PomodoroContext.tsx:319:      Notification.requestPermission().then(permission => {
+src/context/PomodoroContext.tsx:320:        console.log('Notification permission status on resume gesture:', permission)
+src/context/SoundContext.tsx:104:  // 4. Mission Initialize (Power-up)
+src/hooks/useInbox.ts:9:  type: 'daily_brief' | 'deadline_alert' | 'mission_complete' | 'weekly_review'
+src/hooks/useInbox.ts:75:      // 2. Get active missions & nearest deadline
+src/hooks/useInbox.ts:76:      const { data: missions } = await supabase
+src/hooks/useInbox.ts:84:      const activeMissionsCount = missions?.length || 0
+src/hooks/useInbox.ts:85:      const nearestMission = missions?.[0]
+src/hooks/useInbox.ts:87:      let nearestMissionTitle = lang === 'ar' ? "لا يوجد" : "None"
+src/hooks/useInbox.ts:90:      if (nearestMission?.end_date) {
+src/hooks/useInbox.ts:91:        const days = Math.ceil((new Date(nearestMission.end_date).getTime() - new Date().getTime()) / (1000 * 3600 * 24))
+src/hooks/useInbox.ts:93:        nearestMissionTitle = nearestMission.title
+src/hooks/useInbox.ts:94:        nearestDeadlineStr = lang === 'ar' ? `${nearestMission.title} متبقي ${days} أيام` : `${nearestMission.title} in ${days} days`
+src/hooks/useInbox.ts:99:      if (missions && missions.length > 0) {
+src/hooks/useInbox.ts:101:        missions.forEach(m => {
+src/hooks/useInbox.ts:106:        totalProgress = Math.round(sumPct / missions.length)
+src/hooks/useInbox.ts:121:- الأهداف النشطة: [${activeMissionsCount}]
+src/hooks/useInbox.ts:122:- أقرب موعد نهائي: [${nearestMissionTitle}] متبقي [${nearestDays}] أيام
+src/hooks/useInbox.ts:125:- Active Missions: [${activeMissionsCount}]
+src/hooks/useInbox.ts:126:- Nearest deadline: [${nearestMissionTitle}] in [${nearestDays}] days
+src/hooks/useInbox.ts:137:          active_count: activeMissionsCount,
+src/hooks/useInbox.ts:138:          nearest_deadline_title: nearestMissionTitle,
+src/hooks/useInbox.ts:158:      const { data: missions } = await supabase
+src/hooks/useInbox.ts:163:      if (!missions) return
+src/hooks/useInbox.ts:165:      for (const mission of missions) {
+src/hooks/useInbox.ts:167:        const totalTasksCount = mission.tasks?.length || 0
+src/hooks/useInbox.ts:168:        const doneTasksCount = mission.tasks?.filter((t: any) => t.is_completed).length || 0
+src/hooks/useInbox.ts:171:        const belongsToUser = mission.user_id === userId
+src/hooks/useInbox.ts:174:        if (mission.end_date && !mission.is_archived && mission.status !== 'complete' && belongsToUser && currentProgress < 80) {
+src/hooks/useInbox.ts:175:          const days = Math.ceil((new Date(mission.end_date).getTime() - new Date().getTime()) / (1000 * 3600 * 24))
+src/hooks/useInbox.ts:184:              .contains('content', { mission_id: mission.id })
+src/hooks/useInbox.ts:191:              const title = lang === 'ar' ? `⚠️ تنبيه الموعد النهائي: ${mission.title}` : `⚠️ Warning: ${mission.title}`
+src/hooks/useInbox.ts:192:              const content = lang === 'ar' ? `[${mission.title}] متبقي [${days}] أيام فقط!
+src/hooks/useInbox.ts:194:معدل العمل المطلوب: إكمال [${tasksPerDay}] مهام يومياً للوفاء بالموعد المحدد.` : `[${mission.title}] only [${days}] days left!
+src/hooks/useInbox.ts:204:                  mission_id: mission.id,
+src/hooks/useInbox.ts:205:                  mission_title: mission.title,
+src/hooks/useInbox.ts:208:                  end_date: mission.end_date,
+src/hooks/useInbox.ts:216:        // 2. Check Mission Complete
+src/hooks/useInbox.ts:220:        const isCompleted = totalTasks > 0 && totalTasks === doneTasks && mission.status === 'complete'
+src/hooks/useInbox.ts:221:        const isArchived = mission.is_archived === true
+src/hooks/useInbox.ts:225:          const lastModified = (mission as any).updated_at || mission.end_date || mission.created_at
+src/hooks/useInbox.ts:234:            .eq('type', 'mission_complete')
+src/hooks/useInbox.ts:236:            .eq('content->>cup_id', mission.id)
+src/hooks/useInbox.ts:242:          const startDate = new Date(mission.start_date || mission.created_at).toLocaleDateString('en-US')
+src/hooks/useInbox.ts:247:          const content = lang === 'ar' ? `تهانينا! لقد أكملت العمل على هدف: [${mission.title}]
+src/hooks/useInbox.ts:250:الخطوة التالية: يمكنك زيارة معرض الإنجازات لاستعراض الكأس الذهبي الموثق باسمك.` : `Congrats! You finished [${mission.title}]
+src/hooks/useInbox.ts:257:            type: 'mission_complete',
+src/hooks/useInbox.ts:261:              cup_id: mission.id,
+src/hooks/useInbox.ts:262:              mission_id: mission.id,
+src/hooks/useInbox.ts:263:              mission_name: mission.title,
+src/hooks/useInbox.ts:264:              mission_title: mission.title,
+src/hooks/useInbox.ts:309:      const { data: completedMissions } = await supabase
+src/hooks/useInbox.ts:316:      let missionXp = 0
+src/hooks/useInbox.ts:317:      if (completedMissions) {
+src/hooks/useInbox.ts:318:        completedMissions.forEach((m: any) => {
+src/hooks/useInbox.ts:320:          missionXp += total * 10 + 50
+src/hooks/useInbox.ts:323:      const totalWeeklyXp = gainedXp + missionXp
+src/hooks/useInbox.ts:325:      const { data: activeMissions } = await supabase
+src/hooks/useInbox.ts:331:      let activeMissionsList: string[] = []
+src/hooks/useInbox.ts:332:      let activeMissionsTextAr = ""
+src/hooks/useInbox.ts:333:      let activeMissionsTextEn = ""
+src/hooks/useInbox.ts:340:      if (activeMissions) {
+src/hooks/useInbox.ts:341:        activeMissions.forEach((m: any) => {
+src/hooks/useInbox.ts:345:          activeMissionsList.push(`${m.title} (${progress}%)`)
+src/hooks/useInbox.ts:346:          activeMissionsTextAr += `- [${m.title}]: بنسبة إنجاز [${progress}%]\n`
+src/hooks/useInbox.ts:347:          activeMissionsTextEn += `- [${m.title}]: at [${progress}%] progress\n`
+src/hooks/useInbox.ts:392:${activeMissionsTextAr || '- لا توجد أهداف نشطة حالياً.'}
+src/hooks/useInbox.ts:404:- Active Missions Status:
+src/hooks/useInbox.ts:405:${activeMissionsTextEn || '- No active missions currently.'}
+src/hooks/useInbox.ts:422:          active_missions: activeMissionsList,

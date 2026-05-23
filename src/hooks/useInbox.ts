@@ -122,7 +122,7 @@ export function useInbox() {
 - أقرب موعد نهائي: [${nearestMissionTitle}] متبقي [${nearestDays}] أيام
 - نسبة التقدم العام: [${totalProgress}]%
 - إجمالي نقاط الإنجاز (XP): [${totalXp}]` : `Today's Status:
-- Active Missions: [${activeMissionsCount}]
+- Active Goals: [${activeMissionsCount}]
 - Nearest deadline: [${nearestMissionTitle}] in [${nearestDays}] days
 - Overall Progress: [${totalProgress}]%
 - Total XP: [${totalXp}]`
@@ -401,8 +401,8 @@ ${recommendationsAr}` : `📊 WEEKLY INTELLIGENCE REPORT
 📅 LAST WEEK:
 - Tasks Completed: [${completedCount}] tasks
 - XP Gained: +[${totalWeeklyXp}] XP
-- Active Missions Status:
-${activeMissionsTextEn || '- No active missions currently.'}
+- Active Goals Status:
+${activeMissionsTextEn || '- No active goals currently.'}
 
 🚀 NEXT WEEK:
 - Current Station Capacity: ${usedSlots}/9 focus slots.

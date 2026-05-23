@@ -29,7 +29,7 @@ const STEPS = [
   { 
     id: 'sidebar', 
     title: 'NEURAL_INDEX', 
-    text: 'Access your mission canvas, brain notes, and achievements here.', 
+    text: 'Access your goal canvas, brain notes, and achievements here.', 
     target: '.sidebar-target',
     position: 'right'
   },

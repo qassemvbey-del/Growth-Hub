@@ -108,7 +108,7 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                 <div className="space-y-6">
                    <div className="flex flex-col items-center justify-center py-6 bg-neon-green/10 border border-neon-green/30 rounded-xl" style={{ backgroundColor: `${themeColor}10`, borderColor: `${themeColor}30` }}>
                     <span className="material-symbols-outlined text-5xl mb-2" style={{ color: themeColor }}>workspace_premium</span>
-                    <p className="text-sm font-black uppercase tracking-[0.4em] italic" style={{ color: themeColor }}>MISSION_ACCOMPLISHED</p>
+                    <p className="text-sm font-black uppercase tracking-[0.4em] italic" style={{ color: themeColor }}>GOAL_ACCOMPLISHED</p>
                   </div>
                   <div className="py-2.5 px-4 bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-center w-full">
                      <p className="text-[9px] font-black tracking-widest uppercase opacity-40 mb-1">XP_REWARD_COLLECTED</p>

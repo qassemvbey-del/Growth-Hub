@@ -194,7 +194,7 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
                 <ActionButton 
                   icon="warning" 
                   title="CRITICAL_ALERT" 
-                  subtitle={profile?.language === 'ar' ? 'تنبيهات خطيرة' : 'Missions in danger'} 
+                  subtitle={profile?.language === 'ar' ? 'تنبيهات خطيرة' : 'Goals in danger'} 
                   onClick={() => handleAction('critical_alert')}
                   disabled={isLoading}
                   color={coachColor}
@@ -202,8 +202,8 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
                 />
                 <ActionButton 
                   icon="target" 
-                  title="BRIEF_MISSION" 
-                  subtitle={profile?.language === 'ar' ? 'بريف عن أهم هدف' : 'Tactical mission breakdown'} 
+                  title="BRIEF_GOAL" 
+                  subtitle={profile?.language === 'ar' ? 'بريف عن أهم هدف' : 'Tactical goal breakdown'} 
                   onClick={() => handleAction('brief_mission')}
                   disabled={isLoading}
                   color={coachColor}

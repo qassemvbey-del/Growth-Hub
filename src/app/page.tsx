@@ -350,7 +350,7 @@ export default function Dashboard() {
                   <p>
                     {isRTL 
                       ? 'تحذير: لقد تجاوزت سعة التركيز القصوى (9 خانات). يوصى بأرشفة أو إنهاء بعض الأهداف لتجنب تشتت الجهد.' 
-                      : 'WARNING: You have exceeded the elite focus constraint (9 slots). Archiving or completing active missions is strongly recommended.'}
+                      : 'WARNING: You have exceeded the elite focus constraint (9 slots). Archiving or completing active goals is strongly recommended.'}
                   </p>
                 </div>
               )}
@@ -365,7 +365,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-3 px-2">
             <span className="material-symbols-outlined text-2xl" style={{ color: currentTheme.color }}>flag</span>
             <h2 className="text-xl font-space font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-wide">
-              {isRTL ? 'الأهداف النشطة' : 'ACTIVE MISSIONS'}
+              {isRTL ? 'الأهداف النشطة' : 'ACTIVE GOALS'}
             </h2>
           </div>
 
@@ -417,7 +417,7 @@ export default function Dashboard() {
                       )}
                       style={(!isInRedZone && customColor) ? { color: customColor } : {}}
                     >
-                      {isInRedZone ? (isRTL ? 'تنبيه خطير' : '⚠ RED_ZONE') : (isRTL ? 'هدف نشط' : 'ACTIVE MISSION')}
+                      {isInRedZone ? (isRTL ? 'تنبيه خطير' : '⚠ RED_ZONE') : (isRTL ? 'هدف نشط' : 'ACTIVE GOAL')}
                     </p>
                     <h3 className="text-base font-space font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-wide truncate leading-tight italic">
                       {mission.title}
@@ -470,7 +470,7 @@ export default function Dashboard() {
             {missions.length === 0 && !loading && (
               <div className="col-span-full py-16 text-center bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-8">
                 <p className="text-zinc-500 dark:text-white/40 text-sm font-space">
-                  {isRTL ? 'لا توجد أهداف نشطة حالياً. ابدأ بإنشاء هدف جديد!' : 'No active goals synced. Initiate a new mission to begin execution.'}
+                  {isRTL ? 'لا توجد أهداف نشطة حالياً. ابدأ بإنشاء هدف جديد!' : 'No active goals synced. Initiate a new goal to begin execution.'}
                 </p>
               </div>
             )}

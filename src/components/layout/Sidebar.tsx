@@ -20,6 +20,13 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [isSettingsHovered, setIsSettingsHovered] = useState(false)
+  const [isGoalsExpanded, setIsGoalsExpanded] = useState(false)
+
+  useEffect(() => {
+    if (pathname.startsWith('/goals')) {
+      setIsGoalsExpanded(true)
+    }
+  }, [pathname])
 
   useEffect(() => {
     setMounted(true)
@@ -144,6 +151,162 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
           {mounted ? (isRTL ? 'القائمة' : 'MENU') : 'MENU'}
         </h3>
         {MENU_ITEMS.map((item, idx) => {
+          if (item.shortcut === '02') {
+            const isGoalsActive = pathname.startsWith('/goals') || pathname.startsWith('/missions')
+            const isHovered = hoveredIndex === idx
+            return (
+              <div key={item.href} className="flex flex-col w-full">
+                <button
+                  type="button"
+                  onClick={() => {
+                    playBlip()
+                    setIsGoalsExpanded(!isGoalsExpanded)
+                  }}
+                  onMouseEnter={() => setHoveredIndex(idx)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                  className={cn(
+                    "flex items-center p-3 px-6 rounded-xl transition-all duration-300 relative group overflow-hidden min-h-[44px] w-full text-left cursor-pointer",
+                     isGoalsActive && !pathname.startsWith('/goals/')
+                       ? "bg-[var(--input-bg)] text-[var(--text-primary)] border border-[var(--card-border)] shadow-sm" 
+                       : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-[var(--card-border)] hover:bg-[var(--input-bg)]"
+                  )}
+                >
+                  {isGoalsActive && !pathname.startsWith('/goals/') && (
+                    <motion.div 
+                      layoutId="active-nav"
+                      className={cn(
+                        "absolute w-1.5 h-6 shadow-[0_0_20px_currentcolor]",
+                        "inset-inline-start-0 rounded-full"
+                      )}
+                      style={{ backgroundColor: currentTheme.color, color: currentTheme.color }}
+                    />
+                  )}
+                  
+                  <motion.span 
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: Math.random() * 2 }}
+                    className={cn(
+                      "material-symbols-outlined transition-all duration-300 text-lg",
+                      isRTL ? "ml-4" : "mr-4"
+                    )}
+                    style={{ 
+                      color: (isGoalsActive && !pathname.startsWith('/goals/'))
+                        ? currentTheme.color 
+                        : (isHovered ? `${currentTheme.color}cc` : undefined)
+                    }}
+                  >
+                    {item.icon}
+                  </motion.span>
+                  
+                  <span className={cn(
+                    "font-space tracking-[0.2em] font-black flex-grow transition-colors duration-300 text-[14px]"
+                  )}
+                  style={{ 
+                    color: (isGoalsActive && !pathname.startsWith('/goals/'))
+                      ? currentTheme.color 
+                      : (isHovered ? currentTheme.color : undefined)
+                  }}
+                  >
+                    {item.label}
+                  </span>
+
+                  <div className="flex items-center gap-2 shrink-0 select-none">
+                    <span 
+                      className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black transition-colors duration-300"
+                      style={{ 
+                        color: isHovered ? `${currentTheme.color}66` : undefined 
+                      }}
+                    >
+                      {item.shortcut}
+                    </span>
+                    <motion.span
+                      animate={{ rotate: isGoalsExpanded ? 90 : 0 }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
+                      className="text-sm font-space text-[var(--text-secondary)]/50 font-black transition-colors inline-block relative -top-[1.5px]"
+                      style={{
+                        color: isHovered ? currentTheme.color : undefined
+                      }}
+                    >
+                      ›
+                    </motion.span>
+                  </div>
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {isGoalsExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: "easeInOut" }}
+                      className="overflow-hidden flex flex-col gap-1.5 mt-1.5 pl-4"
+                    >
+                      {[
+                        { label: mounted ? (isRTL ? 'فردي' : 'Solo') : 'Solo', icon: '◆', href: '/goals/solo' },
+                        { label: mounted ? (isRTL ? 'فريق' : 'Squad') : 'Squad', icon: '⚔', href: '/goals/squad' }
+                      ].map((subItem, subIdx) => {
+                        const isSubActive = pathname === subItem.href
+                        const isSubHovered = hoveredIndex === (100 + subIdx)
+                        return (
+                          <Link
+                            key={subItem.href}
+                            href={subItem.href}
+                            onClick={playBlip}
+                            onMouseEnter={() => setHoveredIndex(100 + subIdx)}
+                            onMouseLeave={() => setHoveredIndex(null)}
+                            className={cn(
+                              "flex items-center p-2.5 px-4 rounded-xl transition-all duration-300 relative group overflow-hidden min-h-[38px] border border-transparent",
+                              isSubActive 
+                                ? "bg-[var(--input-bg)] text-[var(--text-primary)] border-[var(--card-border)] shadow-sm" 
+                                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--input-bg)]"
+                            )}
+                          >
+                            {isSubActive && (
+                              <motion.div 
+                                layoutId="active-nav"
+                                className={cn(
+                                  "absolute w-1.5 h-5 shadow-[0_0_20px_currentcolor]",
+                                  "inset-inline-start-0 rounded-full"
+                                )}
+                                style={{ backgroundColor: currentTheme.color, color: currentTheme.color }}
+                              />
+                            )}
+
+                            <span 
+                              className={cn(
+                                "font-space text-base transition-all duration-300 flex items-center justify-center w-[18px]",
+                                isRTL ? "ml-4" : "mr-4"
+                              )}
+                              style={{ 
+                                color: isSubActive 
+                                  ? currentTheme.color 
+                                  : (isSubHovered ? `${currentTheme.color}cc` : undefined)
+                              }}
+                            >
+                              {subItem.icon}
+                            </span>
+
+                            <span className={cn(
+                              "font-space tracking-[0.2em] font-black flex-grow transition-colors duration-300 text-[12px]"
+                            )}
+                            style={{ 
+                              color: isSubActive 
+                                ? currentTheme.color 
+                                : (isSubHovered ? currentTheme.color : undefined)
+                            }}
+                            >
+                              {subItem.label}
+                            </span>
+                          </Link>
+                        )
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )
+          }
+
           const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
           const isHovered = hoveredIndex === idx
           return (

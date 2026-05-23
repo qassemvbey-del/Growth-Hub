@@ -52,7 +52,7 @@ export default function CommandPalette({ isOpen, onClose, missions = [] }: Comma
         const activeMission = missions.length > 0 ? missions[0] : null
         
         if (!activeMission) {
-          showToast(isRTL ? 'لا توجد مهمة نشطة لإضافة الهدف إليها' : 'No active mission to append task to', 'warning')
+          showToast(isRTL ? 'لا توجد مهمة نشطة لإضافة الهدف إليها' : 'No active goal to append task to', 'warning')
           setLoading(false)
           playError()
           return
@@ -70,7 +70,7 @@ export default function CommandPalette({ isOpen, onClose, missions = [] }: Comma
         const { error } = await supabase.from('tasks').insert(payload)
         
         if (error) throw error
-        showToast(isRTL ? 'تم إضافة الهدف للمهمة النشطة' : 'Task added to active mission', 'success')
+        showToast(isRTL ? 'تم إضافة الهدف للمهمة النشطة' : 'Task added to active goal', 'success')
       } else {
         const newNote = {
           user_id: user.id,

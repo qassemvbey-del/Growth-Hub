@@ -1,5 +1,41 @@
 import { ImageResponse } from 'next/og'
 import { createAdminClient } from '@/lib/supabase-admin'
+import fs from 'fs'
+import path from 'path'
+
+// Helper to convert avatar path/URL to base64, avoiding localhost network requests in Satori
+async function getAvatarDataUrl(avatarUrl: string, origin: string): Promise<string | null> {
+  try {
+    if (!avatarUrl) return null
+
+    // 1. If it's a local avatar path in public/
+    if (avatarUrl.startsWith('/')) {
+      const cleanPath = avatarUrl.split('?')[0] // remove query params
+      const filePath = path.join(process.cwd(), 'public', cleanPath)
+      if (fs.existsSync(filePath)) {
+        const fileBuffer = fs.readFileSync(filePath)
+        const ext = path.extname(cleanPath).replace('.', '')
+        const mime = ext === 'svg' ? 'image/svg+xml' : `image/${ext}`
+        return `data:${mime};base64,${fileBuffer.toString('base64')}`
+      }
+    }
+
+    // 2. If it's an absolute URL
+    const absoluteUrl = avatarUrl.startsWith('http') ? avatarUrl : `${origin}${avatarUrl}`
+    // On localhost, we want to try to fetch it, but wrap it in a safe try/catch
+    const res = await fetch(absoluteUrl, { next: { revalidate: 60 } })
+    if (res.ok) {
+      const buffer = await res.arrayBuffer()
+      const contentType = res.headers.get('content-type') || 'image/png'
+      const base64 = Buffer.from(buffer).toString('base64')
+      return `data:${contentType};base64,${base64}`
+    }
+  } catch (err) {
+    console.error('Failed to resolve avatar data URL:', err)
+  }
+  return null
+}
+
 
 
 const RANK_THEMES: Record<string, { name: string; color: string; glow: string }> = {
@@ -48,7 +84,7 @@ export async function GET(
               خطأ // ERROR 404
             </div>
             <div style={{ display: 'flex', color: '#FFFFFF', fontSize: '56px', fontWeight: '900', textTransform: 'uppercase', fontStyle: 'italic' }}>
-              المهمة غير موجودة // MISSION NOT FOUND
+              المهمة غير موجودة // GOAL NOT FOUND
             </div>
           </div>
         ),
@@ -62,6 +98,16 @@ export async function GET(
       .select('*')
       .eq('id', mission.user_id)
       .single()
+
+    // Get squad members count if squad goal
+    let squadMemberCount = 0
+    if (mission.metadata?.type === 'squad') {
+      const { count } = await supabase
+        .from('goal_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('goal_id', id)
+      squadMemberCount = count || 0
+    }
 
     const xp = profile?.xp || 0
     let userRank = 'SILVER'
@@ -166,7 +212,7 @@ export async function GET(
                 textShadow: `0 0 20px ${rankColor}`,
               }}
             >
-              اكتملت المهمة // MISSION COMPLETED
+              اكتملت المهمة // GOAL COMPLETED
             </div>
             <h1
               style={{
@@ -209,7 +255,8 @@ export async function GET(
     const googleAvatar = profile?.avatar_url?.startsWith('http') ? profile.avatar_url : null
     const defaultAvatar = (profile?.gender === 'female' || profile?.gender === 'أنثى' || profile?.gender === 'Female') ? '/avatars/menna.svg' : '/avatars/omar.svg'
     const resolvedAvatarUrl = customAvatar || googleAvatar || defaultAvatar
-    const absoluteAvatarUrl = resolvedAvatarUrl?.startsWith('http') ? resolvedAvatarUrl : `${origin}${resolvedAvatarUrl}`
+    const avatarDataUrl = await getAvatarDataUrl(resolvedAvatarUrl, origin)
+
 
     // -------------------------------------------------------------------------
     // V18.4 CYBERPUNK PLAYER ID CARD (NEON BORDER)
@@ -269,15 +316,19 @@ export async function GET(
             >
               {/* User Header */}
               <div style={{ display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: '24px', marginBottom: '40px' }}>
-                {absoluteAvatarUrl ? (
-                  <img src={absoluteAvatarUrl} style={{ width: '90px', height: '90px', borderRadius: '50%', border: `3px solid ${rankColor}`, objectFit: 'cover' }} />
+                {avatarDataUrl ? (
+                  <img src={avatarDataUrl} style={{ width: '90px', height: '90px', borderRadius: '50%', border: `3px solid ${rankColor}`, objectFit: 'cover' }} />
                 ) : (
                   <div style={{ width: '90px', height: '90px', borderRadius: '50%', border: `3px solid ${rankColor}`, backgroundColor: `${rankColor}33`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', fontSize: '36px', fontWeight: 'bold' }}>
                     {userFullName.charAt(0).toUpperCase()}
                   </div>
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: isRTL ? 'flex-end' : 'flex-start' }}>
-                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '18px', letterSpacing: '0.2em', fontFamily: 'monospace' }}>MEMBER PROFILE</span>
+                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '15px', letterSpacing: '0.15em', fontFamily: 'monospace' }}>
+                    {mission.metadata?.type === 'squad' 
+                      ? `SQUAD OF ${squadMemberCount} // MISSION IN PROGRESS` 
+                      : 'MISSION IN PROGRESS // GROWTH HUB'}
+                  </span>
                   <span style={{ color: '#FFFFFF', fontSize: '42px', fontWeight: '900', textTransform: 'uppercase', textShadow: '0 0 10px rgba(255,255,255,0.3)' }}>{userFullName}</span>
                 </div>
               </div>
