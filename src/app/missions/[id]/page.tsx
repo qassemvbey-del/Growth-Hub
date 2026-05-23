@@ -84,6 +84,7 @@ export default function MissionDetailPage() {
   const [showSquadPanel, setShowSquadPanel] = useState(false)
   const [pendingRequests, setPendingRequests] = useState<any[]>([])
   const [isReviewing, setIsReviewing] = useState<string | null>(null)
+  const [activeAssignPopover, setActiveAssignPopover] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeView, setActiveView] = useState<'list' | 'board'>('list')
   const [activeViewInitialized, setActiveViewInitialized] = useState(false)
@@ -122,6 +123,90 @@ export default function MissionDetailPage() {
     }
     return false
   })
+
+  // --- SQUAD HELPERS & EVENT HANDLERS ---
+  const getRankRingClass = (rank: string) => {
+    const r = rank?.toUpperCase()
+    if (r === 'CONQUEROR') return 'border-2 border-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]'
+    if (r === 'ACE') return 'border-2 border-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.5)] font-bold'
+    return 'border border-zinc-500'
+  }
+
+  const canToggleTask = (task: any) => {
+    if (mission?.metadata?.type !== 'squad') return true
+    
+    const currentUserMember = squadMembers.find(m => m.id === profile?.id)
+    const currentUserRole = currentUserMember?.role
+    const isOwner = mission?.user_id === profile?.id || currentUserRole === 'owner'
+    const isCoAdmin = currentUserRole === 'co-admin'
+    const isPrivileged = isOwner || isCoAdmin
+    
+    if (!task.assigned_to) {
+      return isPrivileged
+    } else {
+      return task.assigned_to === profile?.id || isPrivileged
+    }
+  }
+
+  const handleAssignClick = async (e: React.MouseEvent, task: any) => {
+    e.stopPropagation()
+    if (mission?.metadata?.type !== 'squad') return
+    
+    const currentUserMember = squadMembers.find(m => m.id === profile?.id)
+    const currentUserRole = currentUserMember?.role
+    const isOwner = mission?.user_id === profile?.id || currentUserRole === 'owner'
+    const isCoAdmin = currentUserRole === 'co-admin'
+    const isPrivileged = isOwner || isCoAdmin
+    
+    if (isPrivileged) {
+      setActiveAssignPopover(activeAssignPopover === task.id ? null : task.id)
+    } else {
+      if (!task.assigned_to) {
+        const { error } = await supabase
+          .from('tasks')
+          .update({ assigned_to: profile?.id })
+          .eq('id', task.id)
+        if (!error) {
+          const userProfile = {
+            id: profile?.id,
+            full_name: profile?.full_name || 'Unknown Operator',
+            avatar_url: profile?.avatar_url || null,
+            rank: profile?.rank || 'ROOKIE'
+          }
+          setMission((prev: any) => ({
+            ...prev,
+            tasks: prev.tasks.map((t: any) => t.id === task.id ? { ...t, assigned_to: profile?.id, assignee: userProfile } : t)
+          }))
+          showToast(isRTL ? "تم تعيين المهمة لك" : "TASK ASSIGNED TO YOU", "success")
+          playSuccess()
+        }
+      } else if (task.assigned_to === profile?.id) {
+        const { error } = await supabase
+          .from('tasks')
+          .update({ assigned_to: null })
+          .eq('id', task.id)
+        if (!error) {
+          setMission((prev: any) => ({
+            ...prev,
+            tasks: prev.tasks.map((t: any) => t.id === task.id ? { ...t, assigned_to: null, assignee: null } : t)
+          }))
+          showToast(isRTL ? "تم إلغاء التعيين" : "TASK UNASSIGNED", "success")
+          playSuccess()
+        }
+      } else {
+        showToast(isRTL ? "هذه المهمة معينة بالفعل لشخص آخر" : "TASK ALREADY ASSIGNED TO ANOTHER MEMBER", "warning")
+        playError()
+      }
+    }
+  }
+
+  useEffect(() => {
+    const handleGlobalClick = () => {
+      setActiveAssignPopover(null)
+    }
+    window.addEventListener('click', handleGlobalClick)
+    return () => window.removeEventListener('click', handleGlobalClick)
+  }, [])
 
   const handleShare = () => {
     playBlip()
@@ -390,7 +475,7 @@ export default function MissionDetailPage() {
 
     const { data } = await supabase
       .from('cups')
-      .select('*, tasks(*)')
+      .select('*, tasks(*, assignee:profiles!assigned_to(*))')
       .eq('id', id)
       .single()
 
@@ -417,7 +502,8 @@ export default function MissionDetailPage() {
               full_name: m.profiles?.full_name || 'Unknown Operator',
               avatar_url: m.profiles?.avatar_url || null,
               rank: m.profiles?.rank || 'ROOKIE',
-              role: m.role
+              role: m.role,
+              last_seen: m.profiles?.last_seen || null
             }))
           )
         }
@@ -439,6 +525,44 @@ export default function MissionDetailPage() {
       .order('created_at', { ascending: false })
     if (data) setLinkedNotes(data)
   }
+
+  // --- REAL-TIME CHANNEL SYNCHRONIZATION ---
+  useEffect(() => {
+    if (!id || typeof id !== 'string' || id.startsWith('local_')) return
+
+    const channel = supabase
+      .channel(`squad-goal:${id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tasks', filter: `cup_id=eq.${id}` },
+        (payload) => {
+          console.log('Real-time task update:', payload)
+          fetchMission()
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'goal_members', filter: `goal_id=eq.${id}` },
+        (payload) => {
+          console.log('Real-time goal_members update:', payload)
+          fetchMission()
+          fetchPendingRequests()
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'squad_join_requests', filter: `goal_id=eq.${id}` },
+        (payload) => {
+          console.log('Real-time squad_join_requests update:', payload)
+          fetchPendingRequests()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [id, fetchMission, fetchPendingRequests, supabase])
 
   // MISSION PERSISTENCE ENGINE
   useEffect(() => {
@@ -857,6 +981,14 @@ export default function MissionDetailPage() {
 
   const roundedProgress = Math.round(progress)
 
+  const activeTodayCount = useMemo(() => {
+    return squadMembers.filter(m => {
+      if (!m.last_seen) return false
+      const diff = Date.now() - new Date(m.last_seen).getTime()
+      return diff < 24 * 60 * 60 * 1000
+    }).length
+  }, [squadMembers])
+
   if (loading || !mounted) return (
     <Shell>
       <div className="p-16 font-space animate-pulse tracking-widest text-sm uppercase" style={{ color: currentTheme.color }}>
@@ -905,6 +1037,7 @@ export default function MissionDetailPage() {
   }
 
   const missionColor = currentTheme.color
+  const isCurrentUserOwner = mission?.user_id === profile?.id
   const completedCount = mission?.tasks?.filter((t: any) => t.is_completed).length || 0
   const totalCount = mission?.tasks?.length || 0
 
@@ -951,34 +1084,62 @@ export default function MissionDetailPage() {
                   <span className="material-symbols-outlined text-sm mr-1.5" style={{ color: missionColor }}>checklist</span>
                   <span>{isRTL ? 'المهام الإجمالية:' : 'Total Tasks:'} <strong className="text-white font-black ml-1">{totalCount}</strong></span>
                </div>
-               {mission?.metadata?.type === 'squad' && squadMembers.length > 0 && (
-                 <div className="inline-flex items-center text-xs font-mono text-white/50 border-r border-white/10 pr-3 mr-3 last:border-0">
-                    <span className="material-symbols-outlined text-sm mr-1.5" style={{ color: missionColor }}>group</span>
-                    <span className="mr-2">{isRTL ? 'الفريق:' : 'Squad:'}</span>
-                    <div className="flex items-center -space-x-2">
-                       {squadMembers.slice(0, 4).map((m: any, i: number) => (
-                          <div key={m.id || i} className="relative group cursor-default shrink-0">
-                             {m.avatar_url ? (
-                                <img src={m.avatar_url} alt={m.full_name} className="w-6 h-6 rounded-full border border-black/80 object-cover relative z-10" />
-                             ) : (
-                                <div className="w-6 h-6 rounded-full bg-zinc-800 border border-black/80 flex items-center justify-center relative z-10 text-[9px] font-black text-white">
-                                   {m.full_name?.charAt(0) || '?'}
-                                </div>
-                             )}
-                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 w-max px-2 py-1 bg-black/90 backdrop-blur-md rounded border border-white/10 text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none text-white font-space">
-                                {m.full_name}
-                             </div>
-                          </div>
-                       ))}
-                       {squadMembers.length > 4 && (
-                          <div className="w-6 h-6 rounded-full bg-white/10 border border-black/80 flex items-center justify-center relative z-10 text-[8px] font-black shrink-0 text-white">
-                             +{squadMembers.length - 4}
-                          </div>
-                       )}
-                    </div>
-                 </div>
-               )}
             </div>
+
+            {/* Overhauled Squad Avatars Row */}
+            {mission?.metadata?.type === 'squad' && (
+              <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-white/5">
+                <span className="text-[10px] font-mono text-white/40 tracking-widest uppercase font-black">
+                  {isRTL ? 'الفريق:' : 'SQUAD:'}
+                </span>
+                <div className="flex items-center -space-x-2.5">
+                  {squadMembers.map((m: any) => {
+                    const isOwner = m.role === 'owner'
+                    return (
+                      <div key={m.id} className="relative group cursor-default shrink-0 z-10 hover:z-20">
+                        <div className={cn(
+                          "w-7 h-7 rounded-full overflow-hidden bg-zinc-950 flex items-center justify-center relative",
+                          isOwner ? "border-2 border-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]" : "border-2 border-teal-500"
+                        )}>
+                          {m.avatar_url ? (
+                            <img src={m.avatar_url} alt={m.full_name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-[10px] font-bold text-white">
+                              {m.full_name?.charAt(0) || '?'}
+                            </span>
+                          )}
+                        </div>
+                        {isOwner && (
+                          <div className="absolute -top-2 -right-1.5 text-[10px] drop-shadow-[0_0_4px_rgba(0,0,0,0.8)] z-30 select-none">
+                            👑
+                          </div>
+                        )}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 w-max px-2 py-1 bg-black/90 backdrop-blur-md rounded border border-white/10 text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity z-40 pointer-events-none text-white font-space">
+                          {m.full_name} ({m.role?.toUpperCase()})
+                        </div>
+                      </div>
+                    )
+                  })}
+
+                  {/* Pending Requests Circle */}
+                  {pendingRequests.length > 0 && (
+                    <div 
+                      onClick={() => { playBlip(); setShowSquadPanel(true); }}
+                      className="w-7 h-7 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center text-[9px] font-black text-white cursor-pointer hover:bg-zinc-700 transition-colors z-30 shadow-[0_0_10px_rgba(0,0,0,0.5)]"
+                      title={isRTL ? "طلبات انضمام معلقة" : "Pending Join Requests"}
+                    >
+                      +{pendingRequests.length}
+                    </div>
+                  )}
+                </div>
+
+                <span className="text-xs font-mono text-white/50 ml-2">
+                  {isRTL 
+                    ? `${squadMembers.length} أعضاء • ${activeTodayCount} نشط اليوم`
+                    : `${squadMembers.length} members • ${activeTodayCount} active today`}
+                </span>
+              </div>
+            )}
 
             <div className="w-full h-[1.5px] bg-[var(--input-bg)] relative">
                <motion.div
@@ -1141,8 +1302,14 @@ export default function MissionDetailPage() {
            </div>
          </div>
 
-        {/* Task Management Section */}
-        <section className="space-y-8">
+        {/* Two-Column Cyberpunk Grid for Squad / Personal goals */}
+        <div className={cn(
+          "flex flex-col gap-6 items-stretch w-full",
+          mission?.metadata?.type === 'squad' ? (isRTL ? "md:flex-row-reverse" : "md:flex-row") : ""
+        )}>
+          {/* LEFT COLUMN: Tasks panel (flex: 1) */}
+          <div className="flex-1 min-w-0 space-y-8">
+            <section className="space-y-8">
            <div className="flex justify-between items-center border-b border-[var(--card-border)] pb-4">
               <div className="flex items-center gap-4">
                 <h2 className="text-[10px] font-black font-space text-[var(--text-secondary)] tracking-[0.5em] uppercase">{isRTL ? 'قائمة المهام' : 'TASKS'}</h2>
@@ -1243,7 +1410,15 @@ export default function MissionDetailPage() {
                                {String(index + 1).padStart(2, '0')}
                              </span>
                              <button
-                               onClick={(e) => { e.stopPropagation(); toggleTask(task.id, task.is_completed); }}
+                               onClick={(e) => { 
+                                 e.stopPropagation(); 
+                                 if (!canToggleTask(task)) {
+                                   showToast(isRTL ? "غير مسموح // ليست مهمتك" : "RESTRICTED // NOT YOUR TASK", "warning");
+                                   playError();
+                                   return;
+                                 }
+                                 toggleTask(task.id, task.is_completed); 
+                               }}
                                className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all border-2"
                                style={{
                                  backgroundColor: task.is_completed ? currentTheme.color : 'transparent',
@@ -1276,51 +1451,178 @@ export default function MissionDetailPage() {
                                    </span>
                                  </>
                                ) : timeFormatted ? (
-                                 <span className="font-mono text-[11px] text-white/50 bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-md tracking-wider inline-flex items-center gap-1">
-                                   <span className="material-symbols-outlined text-[10px]" style={{ color: currentTheme.color }}>schedule</span>
+                                 <span className="font-mono text-[11px] text-white/50 bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-md tracking-wider inline-flex items-center">
                                    {timeFormatted}
                                  </span>
-                               ) : (
-                                 <span className="font-mono text-[10px] text-white/20 tracking-wider">—</span>
-                               )}
-                               <div className="h-3 w-[1px] bg-white/10 shrink-0" />
+                               ) : null}
                                <ComplexityDashes weight={task.weight} color={currentTheme.color} />
                              </div>
                            </div>
 
-                           {/* LEFT SIDE: Utility Actions */}
-                           <div className="flex items-center gap-x-1 shrink-0 opacity-40 group-hover:opacity-100 transition-opacity">
-                             {hasVideo && (
-                               <button
-                                 onClick={(e) => { e.stopPropagation(); setSelectedTask(task); }}
-                                 className="p-2 transition-all"
-                                 style={{ color: selectedTask?.id === task.id ? currentTheme.color : 'var(--text-secondary)' }}
-                                 onMouseEnter={e => { if (selectedTask?.id !== task.id) e.currentTarget.style.color = currentTheme.color }}
-                                 onMouseLeave={e => { if (selectedTask?.id !== task.id) e.currentTarget.style.color = '' }}
-                                 title={selectedTask?.id === task.id ? 'CLOSE_VIDEO' : 'PLAY_VIDEO'}
-                               >
-                                 <span className="material-symbols-outlined text-lg">
-                                   {selectedTask?.id === task.id ? 'smart_display' : 'play_circle'}
-                                 </span>
-                               </button>
-                             )}
-                             <button
-                               onClick={(e) => { e.stopPropagation(); startFocus(task.title, task.id, id as string); }}
-                               className="p-2 text-[var(--text-secondary)] transition-all"
-                               onMouseEnter={e => e.currentTarget.style.color = currentTheme.color}
-                               onMouseLeave={e => e.currentTarget.style.color = ''}
-                               title="START_FOCUS_SESSION"
-                             >
-                               <span className="material-symbols-outlined text-lg">timer</span>
-                             </button>
+                           {/* LEFT SIDE: Assignee, XP, and Utility Actions */}
+                           <div className="flex items-center gap-3 shrink-0 relative">
+                             {/* Assignee Area (Squad only) */}
+                             {mission?.metadata?.type === 'squad' && (
+                               <div className="relative">
+                                 {task.assigned_to && task.assignee ? (
+                                   <button
+                                     onClick={(e) => handleAssignClick(e, task)}
+                                     className={cn(
+                                       "w-7 h-7 rounded-full overflow-hidden shrink-0 flex items-center justify-center relative hover:opacity-80 transition-opacity",
+                                       getRankRingClass(task.assignee.rank)
+                                     )}
+                                     title={isRTL ? `assigned_to_${task.assignee.full_name}` : `Assigned to ${task.assignee.full_name}`}
+                                   >
+                                     {task.assignee.avatar_url ? (
+                                       <img src={task.assignee.avatar_url} className="w-full h-full object-cover" />
+                                     ) : (
+                                       <span className="text-[10px] font-bold text-white">
+                                         {task.assignee.full_name?.charAt(0) || '?'}
+                                       </span>
+                                     )}
+                                   </button>
+                                 ) : (
+                                   <button
+                                     onClick={(e) => handleAssignClick(e, task)}
+                                     className="px-2 py-1 border border-dashed border-white/25 hover:border-teal-500 hover:text-teal-400 text-white/40 text-[9px] font-mono tracking-wider rounded transition-colors"
+                                   >
+                                     [ + ASSIGN ]
+                                   </button>
+                                 )}
 
-                             <button
-                               onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }}
-                               className="p-2 text-[var(--text-secondary)] hover:text-red-500 transition-all"
-                               title="DELETE_TASK"
-                             >
-                               <span className="material-symbols-outlined text-lg">delete_sweep</span>
-                             </button>
+                                 {/* Assignee Popover dropdown */}
+                                 {activeAssignPopover === task.id && (
+                                   <div 
+                                     className="absolute right-0 bottom-full mb-2 w-48 bg-[#0a0a0f] border border-white/10 rounded-lg shadow-2xl z-[150] p-2 space-y-1 font-space text-left"
+                                     onClick={e => e.stopPropagation()}
+                                   >
+                                     <div className="text-[9px] font-black text-zinc-500 tracking-widest uppercase p-1.5 border-b border-white/5">
+                                       {isRTL ? "ASSIGN" : "ASSIGN OPERATOR"}
+                                     </div>
+                                     <div className="max-h-40 overflow-y-auto py-1">
+                                       {squadMembers.map((member: any) => (
+                                         <button
+                                           key={member.id}
+                                           onClick={async (e) => {
+                                             e.stopPropagation()
+                                             setActiveAssignPopover(null)
+                                             const { error } = await supabase
+                                               .from('tasks')
+                                               .update({ assigned_to: member.id })
+                                               .eq('id', task.id)
+                                             if (!error) {
+                                               const memberProfile = {
+                                                 id: member.id,
+                                                 full_name: member.full_name,
+                                                 avatar_url: member.avatar_url,
+                                                 rank: member.rank
+                                               }
+                                               setMission((prev: any) => ({
+                                                 ...prev,
+                                                 tasks: prev.tasks.map((t: any) => t.id === task.id ? { ...t, assigned_to: member.id, assignee: memberProfile } : t)
+                                               }))
+                                               showToast(isRTL ? `ASSIGNED` : `ASSIGNED TO ${member.full_name.toUpperCase()}`, "success")
+                                               playSuccess()
+                                             }
+                                           }}
+                                           className={cn(
+                                             "w-full flex items-center gap-2 p-1.5 hover:bg-white/5 rounded text-left transition-colors text-xs text-white",
+                                             task.assigned_to === member.id ? "bg-white/5 font-bold" : ""
+                                           )}
+                                         >
+                                           {member.avatar_url ? (
+                                             <img src={member.avatar_url} className="w-5 h-5 rounded-full object-cover" />
+                                           ) : (
+                                             <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center text-[8px] font-bold text-white">
+                                               {member.full_name?.charAt(0) || '?'}
+                                             </div>
+                                           )}
+                                           <span className="truncate">{member.full_name}</span>
+                                         </button>
+                                       ))}
+                                     </div>
+                                     {task.assigned_to && (
+                                       <button
+                                         onClick={async (e) => {
+                                           e.stopPropagation()
+                                           setActiveAssignPopover(null)
+                                           const { error } = await supabase
+                                             .from('tasks')
+                                             .update({ assigned_to: null })
+                                             .eq('id', task.id)
+                                           if (!error) {
+                                             setMission((prev: any) => ({
+                                               ...prev,
+                                               tasks: prev.tasks.map((t: any) => t.id === task.id ? { ...t, assigned_to: null, assignee: null } : t)
+                                             }))
+                                             showToast(isRTL ? "UNASSIGN" : "TASK UNASSIGNED", "success")
+                                             playSuccess()
+                                           }
+                                         }}
+                                         className="w-full text-center py-1.5 hover:bg-red-500/10 text-red-400 hover:text-red-300 font-black tracking-widest text-[9px] uppercase border-t border-white/5 mt-1 rounded transition-colors"
+                                       >
+                                         {isRTL ? "UNASSIGN" : "UNASSIGN"}
+                                       </button>
+                                     )}
+                                   </div>
+                                 )}
+                               </div>
+                             )}
+
+                             {/* XP Reward Badge */}
+                             <div className="flex items-center gap-1 bg-[#14b8a6]/10 border border-[#14b8a6]/20 px-2 py-0.5 rounded text-[10px] font-mono text-[#14b8a6] tracking-wider shrink-0 font-bold">
+                               +{task.weight * 10} XP
+                             </div>
+
+                             {/* Utility Actions */}
+                             <div className="flex items-center gap-x-1 shrink-0 opacity-40 group-hover:opacity-100 transition-opacity">
+                               {hasVideo && (
+                                 <button
+                                   onClick={(e) => { e.stopPropagation(); setSelectedTask(task); }}
+                                   className="p-2 transition-all"
+                                   style={{ color: selectedTask?.id === task.id ? currentTheme.color : 'var(--text-secondary)' }}
+                                   onMouseEnter={e => { if (selectedTask?.id !== task.id) e.currentTarget.style.color = currentTheme.color }}
+                                   onMouseLeave={e => { if (selectedTask?.id !== task.id) e.currentTarget.style.color = '' }}
+                                   title={selectedTask?.id === task.id ? 'CLOSE_VIDEO' : 'PLAY_VIDEO'}
+                                 >
+                                   <span className="material-symbols-outlined text-lg">
+                                     {selectedTask?.id === task.id ? 'smart_display' : 'play_circle'}
+                                   </span>
+                                 </button>
+                               )}
+                               <button
+                                 onClick={(e) => { e.stopPropagation(); startFocus(task.title, task.id, id as string); }}
+                                 className="p-2 text-[var(--text-secondary)] transition-all"
+                                 onMouseEnter={e => e.currentTarget.style.color = currentTheme.color}
+                                 onMouseLeave={e => e.currentTarget.style.color = ''}
+                                 title="START_FOCUS_SESSION"
+                               >
+                                 <span className="material-symbols-outlined text-lg">timer</span>
+                               </button>
+
+                               <button
+                                 onClick={(e) => { 
+                                   e.stopPropagation(); 
+                                   if (mission?.metadata?.type === 'squad') {
+                                     const currentUserMember = squadMembers.find(m => m.id === profile?.id)
+                                     const currentUserRole = currentUserMember?.role
+                                     const isOwner = mission?.user_id === profile?.id || currentUserRole === 'owner'
+                                     const isCoAdmin = currentUserRole === 'co-admin'
+                                     const isPrivileged = isOwner || isCoAdmin
+                                     if (!isPrivileged) {
+                                       showToast(isRTL ? "RESTRICTED" : "RESTRICTED // SQUAD ADMINS ONLY", "warning")
+                                       playError()
+                                       return
+                                     }
+                                   }
+                                   deleteTask(task.id); 
+                                 }}
+                                 className="p-2 text-[var(--text-secondary)] hover:text-red-500 transition-all"
+                                 title="DELETE_TASK"
+                               >
+                                 <span className="material-symbols-outlined text-lg">delete_sweep</span>
+                               </button>
+                             </div>
                            </div>
                          </div>
 
@@ -1419,8 +1721,268 @@ export default function MissionDetailPage() {
                }
                return null
              })()}
-           </div>
-        </section>
+            </div>
+         </section>
+          </div>
+
+        {/* RIGHT COLUMN: Persistent Squad Management Panel */}
+        {mission?.metadata?.type === 'squad' && (
+          <div className="w-full md:w-[260px] shrink-0 space-y-6 font-space text-white">
+            <div className="bg-[#050505]/60 border border-white/10 p-5 rounded-xl backdrop-blur-xl relative space-y-6">
+              <div className="absolute top-0 inset-x-0 h-[1.5px]" style={{ background: 'linear-gradient(90deg, transparent, #14b8a6, transparent)' }} />
+              
+              {/* Panel Title */}
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[#14b8a6] flex items-center gap-2 border-b border-white/10 pb-3">
+                <span className="material-symbols-outlined text-sm">shield</span>
+                {isRTL ? 'إدارة الفريق // ⚔' : '⚔ SQUAD MANAGEMENT'}
+              </h3>
+
+              {/* SECTION 1: MEMBERS */}
+              <div className="space-y-3">
+                <h4 className="text-[9px] font-black tracking-[0.2em] uppercase text-zinc-500">
+                  {isRTL ? 'أعضاء الفريق' : 'SQUAD MEMBERS'} ({squadMembers.length})
+                </h4>
+                <div className="space-y-2">
+                  {squadMembers.map((member: any) => {
+                    const isMemberOwner = member.role === 'owner'
+                    const isMemberCoAdmin = member.role === 'co-admin'
+                    const isCurrentUserOwner = mission?.user_id === profile?.id
+                    
+                    return (
+                      <div key={member.id} className="flex flex-col gap-2 p-2.5 border border-white/5 bg-white/[0.01] rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className={cn(
+                              "w-7 h-7 rounded-full overflow-hidden shrink-0 flex items-center justify-center",
+                              getRankRingClass(member.rank)
+                            )}>
+                              {member.avatar_url ? (
+                                <img src={member.avatar_url} alt={member.full_name} className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="text-[10px] font-bold text-white">
+                                  {member.full_name?.charAt(0) || '?'}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-xs font-bold truncate text-white">{member.full_name}</span>
+                              <span className="text-[8px] font-black text-white/40 tracking-wider">
+                                {member.rank || 'ROOKIE'}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {/* Role Badge / Remove Button */}
+                          <div className="flex items-center gap-1 shrink-0">
+                            {isMemberOwner ? (
+                              <span className="px-1 py-0.5 text-[7px] font-black tracking-widest bg-amber-950/30 border border-amber-500/30 text-amber-400 rounded-sm">
+                                OWNER
+                              </span>
+                            ) : isCurrentUserOwner ? (
+                              <button
+                                onClick={async () => {
+                                  if (confirm(isRTL ? `هل أنت متأكد من إزالة ${member.full_name} من الفريق؟` : `Are you sure you want to remove ${member.full_name} from the squad?`)) {
+                                    playBlip()
+                                    const { error } = await supabase
+                                      .from('goal_members')
+                                      .delete()
+                                      .eq('id', member.member_row_id)
+                                    
+                                    if (error) {
+                                      showToast(isRTL ? 'فشل إزالة العضو' : 'FAILED TO REMOVE MEMBER', 'warning')
+                                      playError()
+                                    } else {
+                                      showToast(isRTL ? 'تم إزالة العضو من الفريق' : 'MEMBER REMOVED FROM SQUAD', 'success')
+                                      playSuccess()
+                                      await fetchMission() // Reload members
+                                    }
+                                  }
+                                }}
+                                className="w-5 h-5 rounded border border-red-500/20 hover:border-red-500/50 bg-red-500/5 hover:bg-red-500/15 flex items-center justify-center text-red-400 hover:text-red-300 transition-all cursor-pointer"
+                                title="REMOVE_MEMBER"
+                              >
+                                <span className="material-symbols-outlined text-[12px]">close</span>
+                              </button>
+                            ) : isMemberCoAdmin ? (
+                              <span className="px-1 py-0.5 text-[7px] font-black tracking-widest bg-teal-950/30 border border-teal-500/30 text-teal-400 rounded-sm">
+                                CO-ADMIN
+                              </span>
+                            ) : (
+                              <span className="px-1 py-0.5 text-[7px] font-black tracking-widest bg-zinc-900 border border-white/10 text-zinc-400 rounded-sm">
+                                MEMBER
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Role Switcher for Owner only */}
+                        {isCurrentUserOwner && !isMemberOwner && (
+                          <div className="flex gap-1 bg-black/40 border border-white/10 p-0.5 rounded-sm">
+                            <button
+                              onClick={async () => {
+                                if (member.role === 'member') return
+                                playBlip()
+                                const { error } = await supabase
+                                  .from('goal_members')
+                                  .update({ role: 'member' })
+                                  .eq('id', member.member_row_id)
+                                if (error) {
+                                  showToast(isRTL ? 'فشل تحديث الدور' : 'FAILED TO UPDATE ROLE', 'warning')
+                                  playError()
+                                } else {
+                                  showToast(isRTL ? 'تم تحديث الدور إلى عضو!' : 'ROLE UPDATED TO MEMBER', 'success')
+                                  playSuccess()
+                                  await fetchMission()
+                                }
+                              }}
+                              className={cn(
+                                "flex-1 py-0.5 text-[7px] font-black tracking-widest uppercase text-center rounded-sm transition-all cursor-pointer",
+                                member.role === 'member'
+                                  ? "bg-zinc-800 text-zinc-300 border border-white/10 font-bold"
+                                  : "text-zinc-600 hover:text-zinc-400"
+                              )}
+                            >
+                              MEMBER
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (member.role === 'co-admin') return
+                                playBlip()
+                                const { error } = await supabase
+                                  .from('goal_members')
+                                  .update({ role: 'co-admin' })
+                                  .eq('id', member.member_row_id)
+                                if (error) {
+                                  showToast(isRTL ? 'فشل تحديث الدور' : 'FAILED TO UPDATE ROLE', 'warning')
+                                  playError()
+                                } else {
+                                  showToast(isRTL ? 'تم تحديث الدور إلى مشرف!' : 'ROLE UPDATED TO CO-ADMIN', 'success')
+                                  playSuccess()
+                                  await fetchMission()
+                                }
+                              }}
+                              className={cn(
+                                "flex-1 py-0.5 text-[7px] font-black tracking-widest uppercase text-center rounded-sm transition-all cursor-pointer",
+                                member.role === 'co-admin'
+                                  ? "bg-teal-950/50 text-[#14b8a6] border border-[#14b8a6]/30 font-bold"
+                                  : "text-zinc-600 hover:text-zinc-400"
+                              )}
+                            >
+                              CO-ADMIN
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* SECTION 2: PENDING REQUESTS */}
+              {isCurrentUserOwner && (
+                <div className="space-y-3">
+                  <h4 className="text-[9px] font-black tracking-[0.2em] uppercase text-zinc-500">
+                    {isRTL ? 'طلبات معلقة' : 'PENDING REQUESTS'}
+                  </h4>
+                  {pendingRequests.length === 0 ? (
+                    <div className="text-center py-4 border border-dashed border-white/5 rounded-lg bg-white/[0.01]">
+                      <p className="text-[9px] font-black tracking-widest text-zinc-600 uppercase">
+                        {isRTL ? 'لا توجد طلبات' : 'NO REQUESTS'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {pendingRequests.map((req: any) => {
+                        const reqProfile = req.profiles || {}
+                        return (
+                          <div key={req.id} className="flex flex-col gap-2 p-2.5 border border-amber-500/10 bg-amber-500/[0.02] rounded-lg">
+                            <div className="flex items-center gap-2">
+                              {reqProfile.avatar_url ? (
+                                <img src={reqProfile.avatar_url} className="w-6 h-6 rounded-full object-cover" />
+                              ) : (
+                                <div className="w-6 h-6 rounded-full bg-zinc-800 flex items-center justify-center text-[9px] font-bold">
+                                  {reqProfile.full_name?.charAt(0) || '?'}
+                                </div>
+                              )}
+                              <span className="text-xs font-bold truncate flex-1">{reqProfile.full_name || 'Unknown'}</span>
+                            </div>
+                            
+                            {/* Action buttons with optimistic updates */}
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <button
+                                disabled={isReviewing !== null}
+                                onClick={async () => {
+                                  setIsReviewing(req.id)
+                                  playBlip()
+                                  // Optimistic state update: remove request instantly from pendingRequests
+                                  setPendingRequests(prev => prev.filter(r => r.id !== req.id))
+                                  const { error } = await supabase.rpc('review_squad_join_request', { p_request_id: req.id, p_action: 'approve' })
+                                  if (error) {
+                                    showToast(isRTL ? 'فشل قبول الطلب' : 'FAILED TO APPROVE', 'warning')
+                                    playError()
+                                    await fetchPendingRequests()
+                                  } else {
+                                    showToast(isRTL ? 'تم قبول العضو الجديد!' : 'MEMBER APPROVED', 'success')
+                                    playSuccess()
+                                    await fetchPendingRequests()
+                                    await fetchMission() // Reload members list
+                                  }
+                                  setIsReviewing(null)
+                                }}
+                                className="flex-1 py-1 border border-teal-500/40 hover:border-teal-400 text-teal-400 text-[8px] font-black uppercase tracking-widest bg-teal-500/5 rounded transition-colors text-center cursor-pointer"
+                              >
+                                {isRTL ? 'قبول' : 'APPROVE'}
+                              </button>
+                              <button
+                                disabled={isReviewing !== null}
+                                onClick={async () => {
+                                  setIsReviewing(req.id)
+                                  playBlip()
+                                  setPendingRequests(prev => prev.filter(r => r.id !== req.id))
+                                  const { error } = await supabase.rpc('review_squad_join_request', { p_request_id: req.id, p_action: 'reject' })
+                                  if (error) {
+                                    showToast(isRTL ? 'فشل رفض الطلب' : 'FAILED TO REJECT', 'warning')
+                                    playError()
+                                    await fetchPendingRequests()
+                                  } else {
+                                    showToast(isRTL ? 'تم رفض طلب الانضمام' : 'MEMBER REJECTED', 'success')
+                                    playSuccess()
+                                    await fetchPendingRequests()
+                                  }
+                                  setIsReviewing(null)
+                                }}
+                                className="flex-1 py-1 border border-red-500/40 hover:border-red-400 text-red-400 text-[8px] font-black uppercase tracking-widest bg-red-500/5 rounded transition-colors text-center cursor-pointer"
+                              >
+                                {isRTL ? 'رفض' : 'REJECT'}
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* SECTION 3: INVITE LINK */}
+              <div className="pt-2 border-t border-white/5">
+                <button
+                  onClick={() => {
+                    playBlip()
+                    const inviteUrl = `${window.location.origin}/goals/squad?join=${mission.metadata?.invite_code || ''}`
+                    navigator.clipboard.writeText(inviteUrl)
+                    showToast(isRTL ? 'تم نسخ رابط الدعوة!' : 'COPIED ✓', 'success')
+                    playSuccess()
+                  }}
+                  className="w-full py-2 bg-teal-500/5 border border-teal-500/30 hover:border-teal-500 hover:bg-teal-500/10 text-[#14b8a6] hover:text-teal-300 font-mono text-[9px] font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_15px_rgba(20,184,166,0.05)] hover:shadow-[0_0_15px_rgba(20,184,166,0.2)]"
+                >
+                  <span className="material-symbols-outlined text-[11px]">link</span>
+                  {isRTL ? 'نسخ رابط الدعوة' : '🔗 COPY INVITE LINK'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── INTEL MODAL: Notes linked to this mission ── */}
@@ -2131,6 +2693,19 @@ export default function MissionDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Task Drawer */}
+      {selectedTask && (
+        <TaskDrawer
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+          isGuest={typeof id === 'string' && id.startsWith('local_')}
+          themeColor={missionColor}
+          onComplete={() => toggleTask(selectedTask.id, selectedTask.is_completed)}
+          onProgressUpdate={(currentTime, duration) => updateTaskProgress(selectedTask.id, currentTime, duration)}
+          onUpdateTask={onUpdateTask}
+        />
+      )}
+      </div>
     </Shell>
   )
 }
