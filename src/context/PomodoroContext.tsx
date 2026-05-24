@@ -256,10 +256,8 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   }
 
   const startFocus = (name: string, tId?: string, cId?: string) => {
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission().then(permission => {
-        console.log('Notification permission status on startFocus gesture:', permission)
-      })
+        if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+      Notification.requestPermission();
     }
     if (isActive && sessionType === 'FOCUS' && taskId && taskId !== tId) {
       setPendingSwitchTask({ name, taskId: tId, cupId: cId })
@@ -291,10 +289,8 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   }
 
   const startTimer = () => {
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission().then(permission => {
-        console.log('Notification permission status on startTimer gesture:', permission)
-      })
+        if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+      Notification.requestPermission();
     }
     setIsActive(true)
     setIsPaused(false)
@@ -315,10 +311,8 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   }
 
   const resume = () => {
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission().then(permission => {
-        console.log('Notification permission status on resume gesture:', permission)
-      })
+        if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+      Notification.requestPermission();
     }
     setIsPaused(false)
     playBlip()

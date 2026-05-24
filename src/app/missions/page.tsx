@@ -67,6 +67,306 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
   const [modalLoading, setModalLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const getUserRole = (mission: any) => {
+    if (mission.user_id === profile?.id) return 'OWNER'
+    const members = goalMembersMap[mission.id] || []
+    const me = members.find((m: any) => m.id === profile?.id)
+    if (me) {
+      if (me.role?.toLowerCase() === 'owner') return 'OWNER'
+      if (me.role?.toLowerCase() === 'co-admin' || me.role?.toLowerCase() === 'co_admin') return 'CO-ADMIN'
+      return 'MEMBER'
+    }
+    return 'MEMBER'
+  }
+
+  const renderMissionCard = (mission: any, idx: number) => {
+    const { progress, isInRedZone } = calculateAccountability(mission)
+    const percentage = Math.round(progress)
+    const color = currentTheme.color
+    const completedTasks = mission.tasks?.filter((t: any) => t.is_completed).length || 0
+    const totalTasks = mission.tasks?.length || 0
+    const kasaSize = mission.size === 'lg' ? 'md' : mission.size === 'md' ? 'sm' : 'sm'
+    const sizeIcon = SIZES.find(s => s.key === mission.size)?.icon || 'layers'
+    const fmtDate = (d: string | null) => {
+      if (!d) return '—'
+      try { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) } catch { return '—' }
+    }
+
+    return (
+      <motion.div
+        key={mission.id}
+        layout
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: idx * 0.05 }}
+        onClick={() => { playBlip(); router.push(`/missions/${mission.id}`); }}
+        className={cn(
+          "group relative flex flex-col bg-[var(--card-bg)] border border-[var(--card-border)] hover:border-[var(--card-border)]/50 cursor-pointer transition-all rounded-sm shadow-xl overflow-hidden",
+          typeFilter === 'squad'
+            ? "min-h-[290px] max-h-[380px]"
+            : "min-h-[240px] max-h-[340px]",
+          typeFilter === 'squad' && "border-l-4",
+          "p-5 md:p-6"
+        )}
+        style={typeFilter === 'squad' ? { borderLeftColor: mission.color || color } : {}}
+      >
+        <div className="absolute top-0 inset-x-0 h-[2.5px]" style={{ backgroundColor: isInRedZone ? '#FF0055' : (mission.color || color) }} />
+        
+        <div className="flex justify-between items-start mb-auto">
+          <div className="flex flex-col gap-1 flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="material-symbols-outlined text-xs opacity-40" style={{ color: isInRedZone ? '#FF0055' : (mission.color || color) }}>{sizeIcon}</span>
+              <p className="text-[8px] font-space tracking-[0.3em] uppercase font-black opacity-40">
+                 {mission.sync_to_dashboard ? (isRTL ? 'نشط' : 'ACTIVE') : (isRTL ? 'استعداد' : 'STANDBY')}
+              </p>
+              {typeFilter === 'solo' && (
+                <span className="text-[8px] font-space tracking-widest font-black uppercase text-zinc-500 opacity-60 bg-zinc-500/10 border border-zinc-500/20 px-1.5 py-0.5 rounded-sm">
+                  ◆ SOLO
+                </span>
+              )}
+              {typeFilter === 'squad' && (
+                mission.user_id === profile?.id ? (
+                  <span className="text-[8px] font-space tracking-widest font-black uppercase text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-sm flex items-center gap-0.5 shadow-[0_0_8px_rgba(245,158,11,0.1)]">
+                    👑 ADMIN
+                  </span>
+                ) : (
+                  <span className="text-[8px] font-space tracking-widest font-black uppercase text-zinc-400 bg-zinc-400/10 border border-zinc-400/20 px-1.5 py-0.5 rounded-sm">
+                    MEMBER
+                  </span>
+                )
+              )}
+            </div>
+            <h3 className="text-lg md:text-xl font-space font-black uppercase text-[var(--text-primary)] truncate mt-1">
+               {mission.title}
+            </h3>
+          </div>
+          
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-xl md:text-2xl font-black font-space shrink-0" style={{ color: isInRedZone ? '#FF0055' : (mission.color || color) }}>{percentage}%</span>
+            {typeFilter === 'squad' && mission.user_id === profile?.id && (
+              <div className="relative">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    playBlip();
+                    setActiveRulesGoalId(activeRulesGoalId === mission.id ? null : mission.id);
+                  }}
+                  className="material-symbols-outlined text-sm text-[var(--text-secondary)] hover:text-white transition-colors p-1"
+                >
+                  settings
+                </button>
+                
+                <AnimatePresence>
+                  {activeRulesGoalId === mission.id && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                      className="absolute right-0 top-full mt-2 w-64 bg-zinc-950/95 border border-zinc-800 rounded-xl p-4 shadow-2xl backdrop-blur-md z-[150] space-y-3 font-space text-left"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <p className="text-[10px] font-black tracking-widest text-zinc-500 uppercase border-b border-zinc-800/80 pb-1.5">
+                        SQUAD RULES // OWNER ONLY
+                      </p>
+                      
+                      <label className="flex items-center justify-between text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer select-none">
+                        <span>No date changes for members</span>
+                        <input
+                          type="checkbox"
+                          checked={!!mission.metadata?.rules?.no_date_changes}
+                          onChange={() => toggleSquadRule(mission, 'no_date_changes')}
+                          className="accent-teal-400 cursor-pointer"
+                        />
+                      </label>
+
+                      <label className="flex items-center justify-between text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer select-none">
+                        <span>XP penalty 2x for late tasks</span>
+                        <input
+                          type="checkbox"
+                          checked={!!mission.metadata?.rules?.xp_multiplier}
+                          onChange={() => toggleSquadRule(mission, 'xp_multiplier')}
+                          className="accent-teal-400 cursor-pointer"
+                        />
+                      </label>
+
+                      <label className="flex items-center justify-between text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer select-none">
+                        <span>Members cannot delete tasks</span>
+                        <input
+                          type="checkbox"
+                          checked={!!mission.metadata?.rules?.no_delete}
+                          onChange={() => toggleSquadRule(mission, 'no_delete')}
+                          className="accent-teal-400 cursor-pointer"
+                        />
+                      </label>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex justify-center items-center py-3">
+          <EnergyCell
+            percentage={percentage}
+            color={isInRedZone ? '#FF0055' : (mission.color || color)}
+            size={kasaSize as 'sm' | 'md'}
+            isInRedZone={isInRedZone}
+          />
+        </div>
+
+        {typeFilter === 'squad' && (
+          <div className="flex flex-col gap-2 my-2 py-1.5 border-y border-zinc-800/40 select-none">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center -space-x-2">
+                {(goalMembersMap[mission.id] || []).slice(0, 4).map((member: any) => (
+                  <div
+                    key={member.id}
+                    className={cn(
+                      "w-6 h-6 rounded-full border-2 bg-zinc-900 flex items-center justify-center text-[8px] font-space font-black uppercase text-white shadow-md relative overflow-hidden shrink-0",
+                      getRankBorderClass(member.rank)
+                    )}
+                    title={`${member.full_name} (${member.rank || 'MEMBER'}) - ${member.role}`}
+                  >
+                    {member.avatar_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={member.avatar_url}
+                        alt={member.full_name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span>{member.full_name?.substring(0, 2) || 'OP'}</span>
+                    )}
+                  </div>
+                ))}
+                
+                {(goalMembersMap[mission.id] || []).length > 4 && (
+                  <div className="w-6 h-6 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[7px] font-space font-black text-teal-400 shadow-md shrink-0">
+                    +{(goalMembersMap[mission.id] || []).length - 4}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <span className="text-[8px] font-space font-black text-zinc-400 uppercase tracking-wider">
+                  {(goalMembersMap[mission.id] || []).length} MEMBER{((goalMembersMap[mission.id] || []).length !== 1) ? 'S' : ''}
+                </span>
+                <span className="text-zinc-600 text-[8px] font-space font-black">•</span>
+                <div className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[8px] font-space font-black text-emerald-400 uppercase tracking-wider">
+                    {goalActiveTodayMap[mission.id] || 0} ACTIVE TODAY
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-auto space-y-3">
+          <div className="w-full h-[1.5px] bg-[var(--input-bg)] relative">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${percentage}%` }}
+              className="h-full absolute top-0 start-0"
+              style={{ backgroundColor: isInRedZone ? '#FF0055' : (mission.color || color), boxShadow: `0 0 10px ${isInRedZone ? '#FF0055' : (mission.color || color)}` }}
+            />
+          </div>
+
+          <div className="flex justify-between items-center">
+             <div className="flex items-center gap-3">
+                <p className="text-[8px] font-space text-[var(--text-secondary)] uppercase font-black tracking-widest">
+                  {completedTasks}/{totalTasks} {isRTL ? 'المهام' : 'TASKS'}
+                </p>
+                {(mission.start_date || mission.end_date) && (
+                  <p className="text-[7px] font-space text-[var(--text-secondary)]/50 uppercase tracking-wider">
+                    {fmtDate(mission.start_date)} → {fmtDate(mission.end_date)}
+                  </p>
+                )}
+             </div>
+             <div className="flex items-center gap-2">
+                {typeFilter === 'squad' && mission.metadata?.invite_code && (
+                  <button
+                    onClick={(e) => handleCopyInviteLink(e, mission.metadata.invite_code)}
+                    className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] hover:border-teal-400/50 hover:bg-teal-500/5 transition-all rounded-sm shrink-0 animate-pulse"
+                    title="COPY_INVITE_CODE"
+                  >
+                    <span className="material-symbols-outlined text-sm text-teal-400">link</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const { progress } = calculateAccountability(mission);
+                    const percentage = Math.round(progress);
+                    const completed = mission.tasks?.filter((t: any) => t.is_completed).length || 0;
+                    const total = mission.tasks?.length || 0;
+                    
+                    const formatDate = (dateStr: string | null, fallbackDate?: Date) => {
+                      const d = dateStr ? new Date(dateStr) : (fallbackDate || new Date());
+                      return d.toISOString().split('T')[0].replace(/-/g, '');
+                    };
+
+                    const dtStart = formatDate(mission.start_date);
+                    let dtEnd;
+                    if (mission.end_date) {
+                      dtEnd = formatDate(mission.end_date);
+                    } else {
+                      const d = mission.start_date ? new Date(mission.start_date) : new Date();
+                      d.setDate(d.getDate() + 30);
+                      dtEnd = d.toISOString().split('T')[0].replace(/-/g, '');
+                    }
+
+                    const details = encodeURIComponent(`Growth Hub Goal | Progress: ${percentage}% | Tasks: ${completed}/${total}`);
+                    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(mission.title)}&dates=${dtStart}/${dtEnd}&details=${details}&location=Growth_Hub`;
+                    
+                    window.open(googleUrl, '_blank');
+                    playBlip();
+                  }}
+                  className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] transition-all rounded-sm shrink-0"
+                  onMouseEnter={e => e.currentTarget.style.borderColor = `${(mission.color || color)}60`}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = ''}
+                  title="ADD_TO_GOOGLE_CALENDAR"
+                >
+                  <span className="material-symbols-outlined text-sm">calendar_month</span>
+                </button>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openAttachments(mission.id);
+                  }}
+                  className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] transition-all rounded-sm shrink-0"
+                  onMouseEnter={e => e.currentTarget.style.borderColor = `${(mission.color || color)}60`}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = ''}
+                  title="ATTACHMENTS"
+                  style={{
+                    borderColor: (attachmentCounts[mission.id] || 0) > 0 ? `${(mission.color || color)}44` : undefined,
+                    boxShadow: (attachmentCounts[mission.id] || 0) > 0 ? `0 0 10px ${(mission.color || color)}22` : undefined
+                  }}
+                >
+                  <span className="material-symbols-outlined text-sm" style={{ 
+                    color: (attachmentCounts[mission.id] || 0) > 0 ? (mission.color || color) : 'inherit',
+                    textShadow: (attachmentCounts[mission.id] || 0) > 0 ? `0 0 8px ${(mission.color || color)}` : 'none'
+                  }}>attach_file</span>
+                  {(attachmentCounts[mission.id] || 0) > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 text-black text-[8px] font-black flex items-center justify-center rounded-full shadow-lg"
+                      style={{ backgroundColor: (mission.color || color), boxShadow: `0 0 10px ${(mission.color || color)}` }}
+                    >
+                      {attachmentCounts[mission.id]}
+                    </span>
+                  )}
+                </button>
+               <span className="material-symbols-outlined text-[var(--text-secondary)]/35 group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform text-lg">arrow_forward</span>
+             </div>
+          </div>
+        </div>
+      </motion.div>
+    )
+  }
+
   useEffect(() => { 
     if (mounted) {
       fetchMissions() 
@@ -623,6 +923,16 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
     }
   }
 
+  const commandingMissions = missions.filter(m => {
+    const role = getUserRole(m)
+    return role === 'OWNER' || role === 'CO-ADMIN'
+  })
+
+  const assignedMissions = missions.filter(m => {
+    const role = getUserRole(m)
+    return role === 'MEMBER'
+  })
+
   if (loading || !mounted) return (
     <Shell>
       <div className="max-w-7xl mx-auto p-6 md:p-12 space-y-12">
@@ -1106,293 +1416,53 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <AnimatePresence mode='popLayout'>
-            {missions.map((mission, idx) => {
-              const { progress, isInRedZone } = calculateAccountability(mission)
-              const percentage = Math.round(progress)
-              const color = currentTheme.color
-              const completedTasks = mission.tasks?.filter((t: any) => t.is_completed).length || 0
-              const totalTasks = mission.tasks?.length || 0
-              const kasaSize = mission.size === 'lg' ? 'md' : mission.size === 'md' ? 'sm' : 'sm'
-              const sizeIcon = SIZES.find(s => s.key === mission.size)?.icon || 'layers'
-              const fmtDate = (d: string | null) => {
-                if (!d) return '—'
-                try { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) } catch { return '—' }
-              }
-
-              return (
-                <motion.div
-                  key={mission.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: idx * 0.05 }}
-                  onClick={() => { playBlip(); router.push(`/missions/${mission.id}`); }}
-                  className={cn(
-                    "group relative flex flex-col bg-[var(--card-bg)] border border-[var(--card-border)] hover:border-[var(--card-border)]/50 cursor-pointer transition-all rounded-sm shadow-xl overflow-hidden",
-                    typeFilter === 'squad'
-                      ? "min-h-[290px] max-h-[380px]"
-                      : "min-h-[240px] max-h-[340px]",
-                    typeFilter === 'squad' && "border-l-4",
-                    "p-5 md:p-6"
-                  )}
-                  style={typeFilter === 'squad' ? { borderLeftColor: mission.color || color } : {}}
-                >
-                  <div className="absolute top-0 inset-x-0 h-[2.5px]" style={{ backgroundColor: isInRedZone ? '#FF0055' : (mission.color || color) }} />
-                  
-                  <div className="flex justify-between items-start mb-auto">
-                    <div className="flex flex-col gap-1 flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="material-symbols-outlined text-xs opacity-40" style={{ color: isInRedZone ? '#FF0055' : (mission.color || color) }}>{sizeIcon}</span>
-                        <p className="text-[8px] font-space tracking-[0.3em] uppercase font-black opacity-40">
-                           {mission.sync_to_dashboard ? (isRTL ? 'نشط' : 'ACTIVE') : (isRTL ? 'استعداد' : 'STANDBY')}
-                        </p>
-                        {typeFilter === 'solo' && (
-                          <span className="text-[8px] font-space tracking-widest font-black uppercase text-zinc-500 opacity-60 bg-zinc-500/10 border border-zinc-500/20 px-1.5 py-0.5 rounded-sm">
-                            ◆ SOLO
-                          </span>
-                        )}
-                        {typeFilter === 'squad' && (
-                          mission.user_id === profile?.id ? (
-                            <span className="text-[8px] font-space tracking-widest font-black uppercase text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-sm flex items-center gap-0.5 shadow-[0_0_8px_rgba(245,158,11,0.1)]">
-                              👑 ADMIN
-                            </span>
-                          ) : (
-                            <span className="text-[8px] font-space tracking-widest font-black uppercase text-zinc-400 bg-zinc-400/10 border border-zinc-400/20 px-1.5 py-0.5 rounded-sm">
-                              MEMBER
-                            </span>
-                          )
-                        )}
-                      </div>
-                      <h3 className="text-lg md:text-xl font-space font-black uppercase not- text-[var(--text-primary)] truncate mt-1">
-                         {mission.title}
-                      </h3>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xl md:text-2xl font-black font-space shrink-0" style={{ color: isInRedZone ? '#FF0055' : (mission.color || color) }}>{percentage}%</span>
-                      {typeFilter === 'squad' && mission.user_id === profile?.id && (
-                        <div className="relative">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              playBlip();
-                              setActiveRulesGoalId(activeRulesGoalId === mission.id ? null : mission.id);
-                            }}
-                            className="material-symbols-outlined text-sm text-[var(--text-secondary)] hover:text-white transition-colors p-1"
-                          >
-                            settings
-                          </button>
-                          
-                          <AnimatePresence>
-                            {activeRulesGoalId === mission.id && (
-                              <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                className="absolute right-0 top-full mt-2 w-64 bg-zinc-950/95 border border-zinc-800 rounded-xl p-4 shadow-2xl backdrop-blur-md z-[150] space-y-3 font-space text-left"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <p className="text-[10px] font-black tracking-widest text-zinc-500 uppercase border-b border-zinc-800/80 pb-1.5">
-                                  SQUAD RULES // OWNER ONLY
-                                </p>
-                                
-                                <label className="flex items-center justify-between text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer select-none">
-                                  <span>No date changes for members</span>
-                                  <input
-                                    type="checkbox"
-                                    checked={!!mission.metadata?.rules?.no_date_changes}
-                                    onChange={() => toggleSquadRule(mission, 'no_date_changes')}
-                                    className="accent-teal-400 cursor-pointer"
-                                  />
-                                </label>
-
-                                <label className="flex items-center justify-between text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer select-none">
-                                  <span>XP penalty 2x for late tasks</span>
-                                  <input
-                                    type="checkbox"
-                                    checked={!!mission.metadata?.rules?.xp_multiplier}
-                                    onChange={() => toggleSquadRule(mission, 'xp_multiplier')}
-                                    className="accent-teal-400 cursor-pointer"
-                                  />
-                                </label>
-
-                                <label className="flex items-center justify-between text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer select-none">
-                                  <span>Members cannot delete tasks</span>
-                                  <input
-                                    type="checkbox"
-                                    checked={!!mission.metadata?.rules?.no_delete}
-                                    onChange={() => toggleSquadRule(mission, 'no_delete')}
-                                    className="accent-teal-400 cursor-pointer"
-                                  />
-                                </label>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      )}
-                    </div>
+            {typeFilter === 'squad' ? (
+              <>
+                {/* COMMANDING SECTION */}
+                <div className="col-span-full flex items-center gap-3 border-b border-white/5 pb-2 mt-2">
+                  <span className="material-symbols-outlined text-lg text-amber-500" style={{ color: currentTheme.color }}>shield</span>
+                  <h3 className="text-xs font-black font-space tracking-[0.2em] uppercase text-white/95">
+                    {isRTL ? 'إدارة العمليات // COMMANDING' : 'COMMANDING'}
+                  </h3>
+                  <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[9px] font-space font-black text-zinc-400">
+                    {commandingMissions.length}
+                  </span>
+                </div>
+                
+                {commandingMissions.length === 0 ? (
+                  <div className="col-span-full py-12 text-center border border-dashed border-white/5 rounded-xl bg-white/[0.01]">
+                    <p className="text-[10px] font-space font-black tracking-widest text-zinc-500 uppercase">
+                      {isRTL ? 'لا توجد أهداف تقودها حالياً' : 'NO COMMANDING SQUAD GOALS'}
+                    </p>
                   </div>
+                ) : (
+                  commandingMissions.map((m, idx) => renderMissionCard(m, idx))
+                )}
 
-                  <div className="flex justify-center items-center py-3">
-                    <EnergyCell
-                      percentage={percentage}
-                      color={isInRedZone ? '#FF0055' : (mission.color || color)}
-                      size={kasaSize as 'sm' | 'md'}
-                      isInRedZone={isInRedZone}
-                    />
+                {/* ASSIGNED SECTION */}
+                <div className="col-span-full flex items-center gap-3 border-b border-white/5 pb-2 mt-8">
+                  <span className="material-symbols-outlined text-lg text-teal-400">group</span>
+                  <h3 className="text-xs font-black font-space tracking-[0.2em] uppercase text-white/95">
+                    {isRTL ? 'المهام المعينة // ASSIGNED' : 'ASSIGNED'}
+                  </h3>
+                  <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[9px] font-space font-black text-teal-400">
+                    {assignedMissions.length}
+                  </span>
+                </div>
+                
+                {assignedMissions.length === 0 ? (
+                  <div className="col-span-full py-12 text-center border border-dashed border-white/5 rounded-xl bg-white/[0.01]">
+                    <p className="text-[10px] font-space font-black tracking-widest text-zinc-500 uppercase">
+                      {isRTL ? 'لا توجد أهداف معينة لك حالياً' : 'NO ASSIGNED SQUAD GOALS'}
+                    </p>
                   </div>
-
-                  {typeFilter === 'squad' && (
-                    <div className="flex flex-col gap-2 my-2 py-1.5 border-y border-zinc-800/40 select-none">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center -space-x-2">
-                          {(goalMembersMap[mission.id] || []).slice(0, 4).map((member: any) => (
-                            <div
-                              key={member.id}
-                              className={cn(
-                                "w-6 h-6 rounded-full border-2 bg-zinc-900 flex items-center justify-center text-[8px] font-space font-black uppercase text-white shadow-md relative overflow-hidden shrink-0",
-                                getRankBorderClass(member.rank)
-                              )}
-                              title={`${member.full_name} (${member.rank || 'MEMBER'}) - ${member.role}`}
-                            >
-                              {member.avatar_url ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                  src={member.avatar_url}
-                                  alt={member.full_name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <span>{member.full_name?.substring(0, 2) || 'OP'}</span>
-                              )}
-                            </div>
-                          ))}
-                          
-                          {(goalMembersMap[mission.id] || []).length > 4 && (
-                            <div className="w-6 h-6 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[7px] font-space font-black text-teal-400 shadow-md shrink-0">
-                              +{(goalMembersMap[mission.id] || []).length - 4}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[8px] font-space font-black text-zinc-400 uppercase tracking-wider">
-                            {(goalMembersMap[mission.id] || []).length} MEMBER{((goalMembersMap[mission.id] || []).length !== 1) ? 'S' : ''}
-                          </span>
-                          <span className="text-zinc-600 text-[8px] font-space font-black">•</span>
-                          <div className="flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            <span className="text-[8px] font-space font-black text-emerald-400 uppercase tracking-wider">
-                              {goalActiveTodayMap[mission.id] || 0} ACTIVE TODAY
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="mt-auto space-y-3">
-                    <div className="w-full h-[1.5px] bg-[var(--input-bg)] relative">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${percentage}%` }}
-                        className="h-full absolute top-0 start-0"
-                        style={{ backgroundColor: isInRedZone ? '#FF0055' : (mission.color || color), boxShadow: `0 0 10px ${isInRedZone ? '#FF0055' : (mission.color || color)}` }}
-                      />
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                       <div className="flex items-center gap-3">
-                          <p className="text-[8px] font-space text-[var(--text-secondary)] uppercase font-black tracking-widest">
-                            {completedTasks}/{totalTasks} {isRTL ? 'المهام' : 'TASKS'}
-                          </p>
-                          {(mission.start_date || mission.end_date) && (
-                            <p className="text-[7px] font-space text-[var(--text-secondary)]/50 uppercase tracking-wider">
-                              {fmtDate(mission.start_date)} → {fmtDate(mission.end_date)}
-                            </p>
-                          )}
-                       </div>
-                       <div className="flex items-center gap-2">
-                          {typeFilter === 'squad' && mission.metadata?.invite_code && (
-                            <button
-                              onClick={(e) => handleCopyInviteLink(e, mission.metadata.invite_code)}
-                              className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] hover:border-teal-400/50 hover:bg-teal-500/5 transition-all rounded-sm shrink-0 animate-pulse"
-                              title="COPY_INVITE_CODE"
-                            >
-                              <span className="material-symbols-outlined text-sm text-teal-400">link</span>
-                            </button>
-                          )}
-
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const { progress } = calculateAccountability(mission);
-                              const percentage = Math.round(progress);
-                              const completed = mission.tasks?.filter((t: any) => t.is_completed).length || 0;
-                              const total = mission.tasks?.length || 0;
-                              
-                              const formatDate = (dateStr: string | null, fallbackDate?: Date) => {
-                                const d = dateStr ? new Date(dateStr) : (fallbackDate || new Date());
-                                return d.toISOString().split('T')[0].replace(/-/g, '');
-                              };
-
-                              const dtStart = formatDate(mission.start_date);
-                              let dtEnd;
-                              if (mission.end_date) {
-                                dtEnd = formatDate(mission.end_date);
-                              } else {
-                                const d = mission.start_date ? new Date(mission.start_date) : new Date();
-                                d.setDate(d.getDate() + 30);
-                                dtEnd = d.toISOString().split('T')[0].replace(/-/g, '');
-                              }
-
-                              const details = encodeURIComponent(`Growth Hub Goal | Progress: ${percentage}% | Tasks: ${completed}/${total}`);
-                              const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(mission.title)}&dates=${dtStart}/${dtEnd}&details=${details}&location=Growth_Hub`;
-                              
-                              window.open(googleUrl, '_blank');
-                              playBlip();
-                            }}
-                            className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] transition-all rounded-sm shrink-0"
-                            onMouseEnter={e => e.currentTarget.style.borderColor = `${(mission.color || color)}60`}
-                            onMouseLeave={e => e.currentTarget.style.borderColor = ''}
-                            title="ADD_TO_GOOGLE_CALENDAR"
-                          >
-                            <span className="material-symbols-outlined text-sm">calendar_month</span>
-                          </button>
-
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openAttachments(mission.id);
-                            }}
-                            className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] transition-all rounded-sm shrink-0"
-                            onMouseEnter={e => e.currentTarget.style.borderColor = `${(mission.color || color)}60`}
-                            onMouseLeave={e => e.currentTarget.style.borderColor = ''}
-                            title="ATTACHMENTS"
-                            style={{
-                              borderColor: (attachmentCounts[mission.id] || 0) > 0 ? `${(mission.color || color)}44` : undefined,
-                              boxShadow: (attachmentCounts[mission.id] || 0) > 0 ? `0 0 10px ${(mission.color || color)}22` : undefined
-                            }}
-                          >
-                            <span className="material-symbols-outlined text-sm" style={{ 
-                              color: (attachmentCounts[mission.id] || 0) > 0 ? (mission.color || color) : 'inherit',
-                              textShadow: (attachmentCounts[mission.id] || 0) > 0 ? `0 0 8px ${(mission.color || color)}` : 'none'
-                            }}>attach_file</span>
-                            {(attachmentCounts[mission.id] || 0) > 0 && (
-                              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 text-black text-[8px] font-black flex items-center justify-center rounded-full shadow-lg"
-                                style={{ backgroundColor: (mission.color || color), boxShadow: `0 0 10px ${(mission.color || color)}` }}
-                              >
-                                {attachmentCounts[mission.id]}
-                              </span>
-                            )}
-                          </button>
-                         <span className="material-symbols-outlined text-[var(--text-secondary)]/35 group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform text-lg">arrow_forward</span>
-                       </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )
-            })}
+                ) : (
+                  assignedMissions.map((m, idx) => renderMissionCard(m, idx))
+                )}
+              </>
+            ) : (
+              missions.map((mission, idx) => renderMissionCard(mission, idx))
+            )}
           </AnimatePresence>
 
           {/* ── ATTACHMENTS MODAL (rendered once, outside cards) ── */}

@@ -45,6 +45,10 @@ export default function TaskDrawer({
   const { isRTL, t, addXp } = useGrowth()
   const { startFocus } = usePomodoro()
   const [activeTab, setActiveTab] = useState<'details' | 'time' | 'notes' | 'attachments'>('details')
+  const [taskTitle, setTaskTitle] = useState(task.title || '')
+  useEffect(() => {
+    setTaskTitle(task.title || '')
+  }, [task.title, task.id])
 
   // --- DATE STATE ---
   const [startDate, setStartDate] = useState<string>(task.metadata?.startDate || '')
@@ -423,9 +427,23 @@ export default function TaskDrawer({
             >
               {t('taskDetail')}
             </span>
-            <h2 className="text-2xl font-bold font-space text-[#FFFFFF] tracking-tight uppercase truncate mt-1">
-              {task.title}
-            </h2>
+            <input
+              type="text"
+              value={taskTitle}
+              onChange={(e) => setTaskTitle(e.target.value)}
+              onBlur={() => {
+                if (taskTitle.trim() && taskTitle !== task.title) {
+                  onUpdateTask(task.id, { title: taskTitle.trim() })
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.currentTarget.blur()
+                }
+              }}
+              className="text-2xl font-bold font-space text-[#FFFFFF] tracking-tight uppercase bg-transparent w-full border-none focus:outline-none focus:ring-0 p-0 mt-1"
+              placeholder={isRTL ? "اسم المهمة..." : "Task Name..."}
+            />
           </div>
           
           <button
@@ -490,7 +508,7 @@ export default function TaskDrawer({
                     onBlur={() => onUpdateTask(task.id, { description })}
                     placeholder={t('writeDescriptionPlaceholder')}
                     dir={isRTL ? 'rtl' : 'ltr'}
-                    className="w-full bg-transparent border-0 p-0 font-space text-lg text-white/80 leading-relaxed outline-none focus:ring-0 placeholder-white/30 resize-none overflow-hidden"
+                    className="w-full bg-transparent border-0 p-0 font-space text-lg text-white/80 leading-relaxed outline-none focus:ring-0 placeholder:text-zinc-500 resize-none overflow-hidden"
                     rows={4}
                   />
                 </div>
@@ -715,27 +733,7 @@ export default function TaskDrawer({
                   </div>
                 )}
 
-                {/* 3. POMODORO FOCUS TIMER */}
-                <div className="p-5 border border-white/5 bg-zinc-900/40 rounded-xl space-y-3">
-                  <h4 className="text-[10px] font-black uppercase tracking-widest font-mono text-zinc-500">
-                    {isRTL ? 'التركيز على المهمة // FOCUS TIME' : 'FOCUS CONSOLE // POMODORO TIMER'}
-                  </h4>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      startFocus(task.title, task.id, cupId || task.cup_id);
-                      onClose();
-                    }}
-                    className="w-full flex items-center justify-center gap-2.5 py-3 px-4 font-space font-black text-xs uppercase tracking-widest text-black transition-all duration-300 rounded-xl cursor-pointer hover:scale-[1.02]"
-                    style={{
-                      backgroundColor: themeColor,
-                      boxShadow: `0 0 15px ${themeColor}44`
-                    }}
-                  >
-                    <span className="material-symbols-outlined text-sm font-black">timer</span>
-                    <span>{isRTL ? 'بدء جلسة تركيز' : 'START FOCUS SESSION'}</span>
-                  </button>
-                </div>
+
               </motion.div>
             )}
 
@@ -1004,13 +1002,8 @@ export default function TaskDrawer({
                     onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/Google_Drive_icon_(2020).svg" alt="Google Drive" className="w-5 h-5 shrink-0" />
-                    <span>
-                      {isDriveConnected
-                        ? `[ ${isRTL ? 'فتح جوجل درايف' : 'OPEN GOOGLE DRIVE'} ]`
-                        : `[ ${isRTL ? 'ربط جوجل درايف' : 'CONNECT GOOGLE DRIVE'} ]`
-                      }
-                    </span>
+                    <img src="/Google_Drive_icon_(2020).svg" alt="Drive" className="w-5 h-5 mr-2" />
+                    <span>{isDriveConnected ? '[ OPEN ]' : '[ CONNECT ]'}</span>
                   </button>
 
                   {/* Manual Link accordion */}
