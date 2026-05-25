@@ -533,6 +533,10 @@ export default function MissionDetailPage() {
   // --- REAL-TIME CHANNEL SYNCHRONIZATION (squad goals only) ---
   useEffect(() => {
     console.log('🚀 REALTIME HOOK MOUNTED');
+    if (!profile?.id) {
+      console.log('Realtime hook waiting: profile session is not yet loaded');
+      return;
+    }
     if (!id || typeof id !== 'string' || id.startsWith('local_')) {
       console.log('Realtime hook returning early because id is invalid or local:', id);
       return;
@@ -606,6 +610,13 @@ export default function MissionDetailPage() {
           fetchPendingRequests()
         }
       )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: '*' },
+        (payload) => {
+          console.log('🔥 GLOBAL CATCH-ALL PAYLOAD:', payload)
+        }
+      )
       .subscribe((status) => {
         console.log('📡 CHANNEL STATUS:', status)
       })
@@ -614,7 +625,7 @@ export default function MissionDetailPage() {
       console.log('UNSUBSCRIBING FROM REALTIME EVENTS FOR WORKSPACE:', id)
       supabase.removeChannel(channel)
     }
-  }, [id, supabase, fetchPendingRequests])
+  }, [id, supabase, fetchPendingRequests, profile?.id])
 
   // --- REAL-TIME PRESENCE ---
   useEffect(() => {

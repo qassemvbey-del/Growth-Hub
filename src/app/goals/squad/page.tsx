@@ -397,6 +397,10 @@ export default function SquadGoalsPage() {
   // --- REAL-TIME SUBSCRIPTION FOR SQUAD CANVAS UPDATES ---
   useEffect(() => {
     console.log('🚀 REALTIME HOOK MOUNTED');
+    if (!profile?.id) {
+      console.log('Realtime hook waiting: profile session is not yet loaded');
+      return;
+    }
     if (!mounted) {
       console.log('Realtime hook returning early because page is not mounted');
       return;
@@ -425,6 +429,13 @@ export default function SquadGoalsPage() {
           fetchMissions()
         }
       )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: '*' },
+        (payload) => {
+          console.log('🔥 GLOBAL CATCH-ALL PAYLOAD:', payload)
+        }
+      )
       .subscribe((status) => {
         console.log('📡 CHANNEL STATUS:', status)
       })
@@ -432,7 +443,7 @@ export default function SquadGoalsPage() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [mounted])
+  }, [mounted, profile?.id])
 
   const extractCode = (input: string) => {
     let clean = input.trim().toUpperCase()
