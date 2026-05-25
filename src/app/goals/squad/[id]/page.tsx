@@ -1691,9 +1691,7 @@ const { progress, isInRedZone } = useMemo(() => {
                                  </span>
                                ) : null}
                                <ComplexityDashes weight={task.weight} color={currentTheme.color} />
-                                <div className="px-2 py-0.5 font-mono text-[9px] rounded border bg-cyan-500/10 border-cyan-500/20 text-cyan-400 font-bold shadow-[0_0_8px_rgba(34,211,238,0.2)] tracking-wider shrink-0">
-                                  +{ (task.weight || 1) * 10 } XP
-                                </div>
+                                
                              </div>
                            </div>
 

@@ -674,18 +674,6 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                   </span>
                 )}
               </button>
-
-              <InboxDropdown 
-                isOpen={inboxOpen}
-                reports={reports}
-                onClose={() => setInboxOpen(false)}
-                onRead={(report) => {
-                  markAsRead(report.id)
-                  setSelectedReport(report)
-                  setInboxOpen(false)
-                }}
-                themeColor={currentTheme.color}
-              />
             </div>
 
             {/* 🤖 Instant AI Coach Chat trigger */}
@@ -830,6 +818,21 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       />
       <AuthModal />
       <EntryGateModal />
+
+      {/* Mobile fullscreen overlay for notification list to prevent containing block issue */}
+      <div className="lg:hidden">
+        <InboxDropdown 
+          isOpen={inboxOpen}
+          reports={reports}
+          onClose={() => setInboxOpen(false)}
+          onRead={(report) => {
+            markAsRead(report.id)
+            setSelectedReport(report)
+            setInboxOpen(false)
+          }}
+          themeColor={currentTheme.color}
+        />
+      </div>
     </div>
   )
 }

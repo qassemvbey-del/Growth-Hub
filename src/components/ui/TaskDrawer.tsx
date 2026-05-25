@@ -52,6 +52,69 @@ export default function TaskDrawer({
 }: TaskDrawerProps) {
   const { isRTL, t, addXp, profile } = useGrowth()
   const { startFocus } = usePomodoro()
+
+  const updateTask = async (taskId: string, updates: any) => {
+    await onUpdateTask(taskId, updates)
+    
+    // Send notification to the assignee if they are not the current user
+    const assigneeId = task.assigned_to
+    if (assigneeId && assigneeId !== currentUserId) {
+      let actionTextEn = "updated the task"
+      let actionTextAr = "تحديث المهمة"
+      
+      if ('title' in updates) {
+        actionTextEn = `renamed the task to "${updates.title}"`
+        actionTextAr = `تغيير اسم المهمة إلى "${updates.title}"`
+      } else if ('description' in updates) {
+        actionTextEn = "updated the task description"
+        actionTextAr = "تحديث وصف المهمة"
+      } else if ('metadata' in updates) {
+        const oldMeta = task.metadata || {}
+        const newMeta = updates.metadata || {}
+        
+        if (JSON.stringify(oldMeta.subtasks) !== JSON.stringify(newMeta.subtasks)) {
+          actionTextEn = "updated the checklist"
+          actionTextAr = "تحديث قائمة المهام الفرعية"
+        } else if (JSON.stringify(oldMeta.notes) !== JSON.stringify(newMeta.notes)) {
+          if ((oldMeta.notes?.length || 0) < (newMeta.notes?.length || 0)) {
+            actionTextEn = "added a new comment"
+            actionTextAr = "إضافة تعليق جديد"
+          } else {
+            actionTextEn = "deleted a comment"
+            actionTextAr = "حذف تعليق"
+          }
+        } else if (JSON.stringify(oldMeta.attachments) !== JSON.stringify(newMeta.attachments)) {
+          actionTextEn = "updated attachments"
+          actionTextAr = "تحديث المرفقات"
+        }
+      }
+      
+      const senderName = profile?.full_name || 'Operator'
+      const notifTitle = isRTL
+        ? `⚙️ ${senderName} قام بـ ${actionTextAr}`
+        : `⚙️ ${senderName} ${actionTextEn}`
+      const notifContent = isRTL
+        ? `${senderName} قام بـ ${actionTextAr} في مهمتك المعينة "${task.title}"`
+        : `${senderName} ${actionTextEn} on your assigned task "${task.title}"`
+        
+      await sendNotification(assigneeId, 'reaction', notifTitle, notifContent)
+    }
+  }
+
+  const formatNoteContent = (text: string) => {
+    if (!text) return ''
+    const parts = text.split(/(@\S+)/g)
+    return parts.map((part, i) => {
+      if (part.startsWith('@')) {
+        return (
+          <span key={i} className="text-cyan-400 font-bold font-space" style={{ textShadow: `0 0 8px ${themeColor}44` }}>
+            {part}
+          </span>
+        )
+      }
+      return part
+    })
+  }
   const [taskTitle, setTaskTitle] = useState(task.title || '')
   useEffect(() => {
     setTaskTitle(task.title || '')
@@ -387,7 +450,7 @@ export default function TaskDrawer({
             const newAttachment = { id: fileId, name: fileName, url: fileUrl, type: fileType }
             const updatedAttachments = [newAttachment, ...attachments]
             const updatedMetadata = { ...task.metadata, attachments: updatedAttachments }
-            await onUpdateTask(task.id, { metadata: updatedMetadata })
+            await updateTask(task.id, { metadata: updatedMetadata })
           }
         })
 
@@ -419,7 +482,7 @@ export default function TaskDrawer({
     const attachments = task.metadata?.attachments || []
     const updatedAttachments = [newAttachment, ...attachments]
     const updatedMetadata = { ...task.metadata, attachments: updatedAttachments }
-    await onUpdateTask(task.id, { metadata: updatedMetadata })
+    await updateTask(task.id, { metadata: updatedMetadata })
     setManualLinkName('')
     setManualLinkUrl('')
     setShowManualLink(false)
@@ -486,25 +549,32 @@ export default function TaskDrawer({
       is_completed: false
     }
     const updatedSubtasks = [...subtasks, newSub]
-    await onUpdateTask(task.id, { metadata: { ...task.metadata, subtasks: updatedSubtasks } })
+    await updateTask(task.id, { metadata: { ...task.metadata, subtasks: updatedSubtasks } })
     setNewSubtaskText('')
   }
 
   const handleToggleSubtask = async (subId: string, currentStatus: boolean) => {
     const updatedSubtasks = subtasks.map((s: any) => s.id === subId ? { ...s, is_completed: !currentStatus } : s)
-    await onUpdateTask(task.id, { metadata: { ...task.metadata, subtasks: updatedSubtasks } })
+    await updateTask(task.id, { metadata: { ...task.metadata, subtasks: updatedSubtasks } })
   }
 
   const handleDeleteSubtask = async (subId: string) => {
     const updatedSubtasks = subtasks.filter((s: any) => s.id !== subId)
-    await onUpdateTask(task.id, { metadata: { ...task.metadata, subtasks: updatedSubtasks } })
+    await updateTask(task.id, { metadata: { ...task.metadata, subtasks: updatedSubtasks } })
   }
 
   const handleAddNote = async (e?: FormEvent) => {
     if (e) e.preventDefault()
     if (!noteInput.trim()) return
 
-    const noteText = noteInput.trim()
+    const rawText = noteInput.trim()
+    const mentionIds = Array.from(selectedMentions)
+    const mentionTags = mentionIds.map(memberId => {
+      const member = squadMembers.find(m => m.id === memberId)
+      return member ? `@${member.full_name || member.user_name}` : ''
+    }).filter(Boolean).join(' ')
+    
+    const noteText = mentionTags ? `${rawText} ${mentionTags}` : rawText
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     
@@ -573,7 +643,7 @@ export default function TaskDrawer({
       }
     }
 
-    await onUpdateTask(task.id, { metadata: updatedMetadata })
+    await updateTask(task.id, { metadata: updatedMetadata })
     setNoteInput('')
     setSelectedMentions(new Set())
     setMentionPickerMode(false)
@@ -605,7 +675,7 @@ export default function TaskDrawer({
       }
     }
 
-    await onUpdateTask(task.id, { metadata: updatedMetadata })
+    await updateTask(task.id, { metadata: updatedMetadata })
   }
 
   const handleToggleReaction = async (noteIdOrIndex: string | number, emoji: string) => {
@@ -655,7 +725,7 @@ export default function TaskDrawer({
     })
 
     const updatedMetadata = { ...task.metadata, notes: updatedNotes }
-    await onUpdateTask(task.id, { metadata: updatedMetadata })
+    await updateTask(task.id, { metadata: updatedMetadata })
   }
 
   const handleCopyLink = () => {
@@ -720,7 +790,7 @@ export default function TaskDrawer({
               onChange={(e) => setTaskTitle(e.target.value)}
               onBlur={() => {
                 if (taskTitle.trim() && taskTitle !== task.title) {
-                  onUpdateTask(task.id, { title: taskTitle.trim() })
+                  updateTask(task.id, { title: taskTitle.trim() })
                 }
               }}
               onKeyDown={(e) => {
@@ -755,6 +825,24 @@ export default function TaskDrawer({
               type="button"
               onClick={() => {
                 onComplete()
+                
+                // Send completion notification to assignee
+                const assigneeId = task.assigned_to
+                if (assigneeId && assigneeId !== currentUserId) {
+                  const senderName = profile?.full_name || 'Operator'
+                  const nextStatusEn = task.is_completed ? "set your task to incomplete" : "completed your task"
+                  const nextStatusAr = task.is_completed ? "تغيير مهمتك لغير مكتملة" : "أكمل مهمتك المعينة"
+                  
+                  const notifTitle = isRTL
+                    ? `✅ ${senderName} قام بـ ${nextStatusAr}`
+                    : `✅ ${senderName} ${nextStatusEn}`
+                  const notifContent = isRTL
+                    ? `${senderName} قام بـ ${nextStatusAr} في مهمتك المعينة "${task.title}"`
+                    : `${senderName} ${nextStatusEn} "${task.title}"`
+                    
+                  sendNotification(assigneeId, 'reaction', notifTitle, notifContent)
+                }
+                
                 onClose()
               }}
               className="px-3.5 py-2 rounded-lg text-[9px] font-space font-black tracking-widest cursor-pointer transition-all border flex items-center gap-1.5 hover:scale-105"
@@ -847,7 +935,7 @@ export default function TaskDrawer({
                     {(currentUserId === missionOwnerId) && (
                     <button
                       type="button"
-                      onClick={() => onUpdateTask(task.id, { assigned_to: null, assignee: null })}
+                      onClick={() => updateTask(task.id, { assigned_to: null, assignee: null })}
                       className="px-3 py-1.5 border border-red-500/30 hover:border-red-500 hover:bg-red-500/10 text-red-400 hover:text-red-300 font-black tracking-widest text-[9px] uppercase rounded-lg transition-colors cursor-pointer"
                     >
                       {isRTL ? 'إلغاء التعيين' : 'UNASSIGN'}
@@ -875,7 +963,7 @@ export default function TaskDrawer({
                           type="button"
                           onClick={() => {
                             if (isAssigned) return
-                            onUpdateTask(task.id, {
+                            updateTask(task.id, {
                               assigned_to: member.id,
                               assignee: {
                                 id: member.id,
@@ -884,6 +972,18 @@ export default function TaskDrawer({
                                 rank: member.rank
                               }
                             })
+                            
+                            // Send custom assignee notification
+                            if (member.id !== currentUserId) {
+                              const senderName = profile?.full_name || 'Operator'
+                              const notifTitle = isRTL
+                                ? `👤 تم تعيين مهمة جديدة لك`
+                                : `👤 New task assigned to you`
+                              const notifContent = isRTL
+                                ? `${senderName} قام بتعيين مهمة "${task.title}" لك`
+                                : `${senderName} assigned you to the task "${task.title}"`
+                              sendNotification(member.id, 'reaction', notifTitle, notifContent)
+                            }
                           }}
                           className={`flex items-center gap-3 p-2.5 border rounded-xl text-left transition-all duration-300 cursor-pointer min-w-0 w-full ${
                             isAssigned
@@ -923,7 +1023,7 @@ export default function TaskDrawer({
                 onChange={(e) => setDescription(e.target.value)}
                 onBlur={() => {
                   if (description !== task.description) {
-                    onUpdateTask(task.id, { description })
+                    updateTask(task.id, { description })
                   }
                 }}
                 className="w-full min-h-[120px] bg-transparent border-none p-4 font-space text-sm text-white outline-none focus:ring-0 placeholder-white/20 resize-y"
@@ -1080,7 +1180,7 @@ export default function TaskDrawer({
                           onClick={async (e) => {
                             e.stopPropagation()
                             const updated = attachments.filter((_: any, i: number) => i !== idx)
-                            await onUpdateTask(task.id, { metadata: { ...task.metadata, attachments: updated } })
+                            await updateTask(task.id, { metadata: { ...task.metadata, attachments: updated } })
                           }}
                           className="w-7 h-7 flex items-center justify-center border border-white/5 text-white/25 hover:border-red-500/50 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-lg shrink-0 cursor-pointer"
                         >
@@ -1137,7 +1237,7 @@ export default function TaskDrawer({
                         
                         <div className="mt-1 flex items-start justify-between gap-3 p-3 border bg-zinc-900/20 border-white/5 rounded-xl rounded-tl-none">
                           <p className="text-xs text-white/80 leading-relaxed font-space break-words flex-1">
-                            {noteContent}
+                            {formatNoteContent(noteContent)}
                           </p>
                           <button
                             onClick={() => handleDeleteNote(noteUser?.id, index)}

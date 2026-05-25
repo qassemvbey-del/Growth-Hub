@@ -274,18 +274,7 @@ export default function KanbanBoard({
                          {/* Footer Row: Power, Timer or complexity metrics */}
                          <div className="flex items-center justify-between gap-2 border-t border-white/5 pt-2.5">
                            <div className="flex items-center gap-3">
-                             {!task.is_completed && (
-                               <button
-                                 onClick={(e) => {
-                                   e.stopPropagation()
-                                   startFocus(task.title, task.id, cupId)
-                                 }}
-                                 className="w-6 h-6 rounded-full bg-orange-500/10 hover:bg-orange-500/25 border border-orange-500/30 text-orange-500 flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer z-10 shrink-0"
-                                 title={isRTL ? "بدء جلسة التركيز" : "START FOCUS SESSION"}
-                               >
-                                 <Play className="w-3 h-3 text-orange-500 fill-current" />
-                               </button>
-                             )}
+
                              
                              {timeFormatted && (
                                <div className="flex items-center gap-1 text-[10px] font-mono text-white/45">
