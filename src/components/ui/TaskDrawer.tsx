@@ -6,6 +6,10 @@ import { useGrowth } from '@/context/GrowthContext'
 import { createClient } from '@/lib/supabase'
 import { usePomodoro } from '@/context/PomodoroContext'
 import SmartTaskPlayer from './SmartTaskPlayer'
+import { 
+  X, ChevronDown, ChevronUp, Check, Calendar, Lock, Zap, Plus, 
+  Trash2, Loader2, RefreshCw, FolderOpen, Paperclip, ExternalLink, StickyNote 
+} from 'lucide-react'
 
 interface TaskDrawerProps {
   task: any
@@ -451,138 +455,8 @@ export default function TaskDrawer({
             className="w-10 h-10 rounded-full flex items-center justify-center border border-white/10 hover:border-white/20 bg-white/[0.02] text-[var(--text-secondary)] hover:text-white transition-all shrink-0 ml-4 cursor-pointer"
             title="CLOSE"
           >
-            <span className="material-symbols-outlined text-lg">close</span>
+            <X className="w-4.5 h-4.5" />
           </button>
-        </div>
-
-        {/* Drawer Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* SmartTaskPlayer Section (Strict aspect-video container with dynamic rendering) */}
-          {hasVideo ? (
-            <div className="space-y-3">
-              <div className="w-full aspect-video rounded-xl overflow-hidden shadow-lg relative border bg-black/40" style={{ borderColor: `${themeColor}20` }}>
-                <SmartTaskPlayer
-                  taskId={task.id}
-                  videoId={videoId}
-                  initialProgress={videoProgress}
-                  isGuest={isGuest}
-                  themeColor={themeColor}
-                  onComplete={onComplete}
-                  onProgressUpdate={onProgressUpdate}
-                />
-              </div>
-              {/* Mini video meta bar */}
-              <div className="flex justify-between items-center text-[11px] font-mono text-white/55 px-1 bg-white/[0.02] py-2 rounded-lg border border-white/5">
-                <span className="flex items-center gap-1.5 px-2">
-                  <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: themeColor }} />
-                  {t('savedProgress')}
-                </span>
-                <span className="px-2 tracking-widest">
-                  {formatVideoTime(videoProgress)} / {formatVideoTime(videoDuration)}
-                </span>
-              </div>
-            </div>
-          ) : (
-            /* Premium Task Info Header for non-video tasks */
-            <div 
-              className="bg-white/5 rounded-xl p-6 border border-white/5 space-y-4 relative overflow-hidden"
-            >
-              {/* Decorative side accent stripe */}
-              <div 
-                className="absolute top-0 bottom-0 w-[4px]" 
-                style={{ 
-                  backgroundColor: themeColor, 
-                  left: isRTL ? undefined : 0, 
-                  right: isRTL ? 0 : undefined 
-                }} 
-              />
-              
-              <div className="flex justify-between items-start gap-4">
-                <div className="space-y-2 pl-3 pr-3 w-full">
-                  <span className="text-[10px] uppercase font-mono tracking-wider text-white/40 block">
-                    {t('coreTaskStatement')}
-                  </span>
-                  <textarea
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                    onBlur={() => onUpdateTask(task.id, { description })}
-                    placeholder={t('writeDescriptionPlaceholder')}
-                    dir={isRTL ? 'rtl' : 'ltr'}
-                    className="w-full bg-transparent border-0 p-0 font-space text-lg text-white/80 leading-relaxed outline-none focus:ring-0 placeholder:text-zinc-500 resize-none overflow-hidden"
-                    rows={4}
-                  />
-                </div>
-              </div>
-
-              {/* Status and priority badges row */}
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/5 pl-3 pr-3">
-                {/* Status Dropdown */}
-                <div className="relative flex items-center">
-                  <span className={`absolute left-2.5 w-2 h-2 rounded-full ${task.is_completed ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} style={!task.is_completed ? { backgroundColor: themeColor } : {}} />
-                  <select
-                    value={task.is_completed ? 'true' : 'false'}
-                    onChange={(e) => {
-                      const val = e.target.value === 'true';
-                      onUpdateTask(task.id, { is_completed: val });
-                    }}
-                    className="text-[10px] font-space font-black uppercase pl-6 pr-7 py-1 rounded-md border bg-zinc-950/80 cursor-pointer outline-none appearance-none transition-all hover:bg-zinc-900/80"
-                    style={{ 
-                      borderColor: task.is_completed ? '#10B98133' : `${themeColor}33`,
-                      color: task.is_completed ? '#10B981' : themeColor,
-                      boxShadow: `0 0 8px ${task.is_completed ? '#10B98115' : `${themeColor}15`}`
-                    }}
-                  >
-                    <option value="false" className="bg-zinc-950 text-amber-500 font-bold">{t('inProgress')}</option>
-                    <option value="true" className="bg-zinc-950 text-emerald-500 font-bold">{t('completed')}</option>
-                  </select>
-                  <span 
-                    className="absolute right-1.5 pointer-events-none material-symbols-outlined text-[12px] font-black"
-                    style={{ color: task.is_completed ? '#10B981' : themeColor }}
-                  >
-                    arrow_drop_down
-                  </span>
-                </div>
-
-                {/* Priority Dropdown */}
-                <div className="relative">
-                  <select
-                    value={task.weight >= 4 ? 'high' : 'regular'}
-                    onChange={(e) => {
-                      const nextWeight = e.target.value === 'high' ? 4 : 3;
-                      onUpdateTask(task.id, { weight: nextWeight });
-                    }}
-                    className="text-[10px] font-space font-black uppercase pl-2.5 pr-7 py-1 rounded-md border text-white/70 bg-zinc-950/80 border-white/10 hover:bg-zinc-900/80 hover:text-white cursor-pointer outline-none appearance-none transition-all"
-                  >
-                    <option value="regular" className="bg-zinc-950 text-white/70">{t('priority')} {t('regular')}</option>
-                    <option value="high" className="bg-zinc-950 text-white/70">{t('priority')} {t('high')}</option>
-                  </select>
-                  <span className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none material-symbols-outlined text-[12px] text-white/40 font-black">
-                    arrow_drop_down
-                  </span>
-                </div>
-
-                {/* Power Bar Badge Dropdown */}
-                <div className="relative">
-                  <select
-                    value={task.weight || 1}
-                    onChange={(e) => {
-                      onUpdateTask(task.id, { weight: Number(e.target.value) });
-                    }}
-                    className="text-[10px] font-mono pl-2.5 pr-7 py-1 rounded-md bg-zinc-950/80 border border-white/5 text-white/40 hover:bg-zinc-900/80 hover:text-white/60 cursor-pointer outline-none appearance-none transition-all"
-                  >
-                    {[1, 2, 3, 4, 5, 6].map((num) => (
-                      <option key={num} value={num} className="bg-zinc-950 text-white/60 font-mono">
-                        ⚡ {num} / 6 Power
-                      </option>
-                    ))}
-                  </select>
-                  <span className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none material-symbols-outlined text-[12px] text-white/30 font-black">
-                    arrow_drop_down
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Underline Tab Navigation - Strictly labeled in Arabic */}
           <div className="grid grid-cols-4 w-full border-b border-white/5 bg-zinc-950/40 px-1 relative">
@@ -898,7 +772,7 @@ export default function TaskDrawer({
 
                 {/* XP Warning Banner */}
                 <div className="flex items-start gap-3 p-4 rounded-xl bg-orange-500/5 border border-orange-500/15">
-                  <span className="material-symbols-outlined text-orange-500/70 text-base shrink-0 mt-0.5">bolt</span>
+                  <Zap className="w-3.5 h-3.5 text-orange-500/70 shrink-0 mt-0.5" />
                   <p className="text-[10px] font-mono text-white/40 leading-relaxed">
                     {isRTL
                       ? 'تحذير: تعديل التواريخ بعد تحديدها يُقلّص نقاط XP بمقدار 5. ضبط التواريخ لأول مرة مجاني.'
@@ -937,7 +811,7 @@ export default function TaskDrawer({
                         boxShadow: !noteInput.trim() ? 'none' : `0 0 10px ${themeColor}40`
                       }}
                     >
-                      <span className="material-symbols-outlined text-sm font-black">add</span>
+                      <Plus className="w-3.5 h-3.5 stroke-[3px]" />
                       {t('addNote')}
                     </button>
                   </div>
@@ -972,7 +846,7 @@ export default function TaskDrawer({
                               className="p-1 text-white/30 hover:text-red-400 transition-colors shrink-0 cursor-pointer"
                               title="DELETE"
                             >
-                              <span className="material-symbols-outlined text-sm">delete</span>
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </motion.div>
@@ -1012,7 +886,7 @@ export default function TaskDrawer({
                     className="w-full flex items-center justify-between py-2 px-1 text-[10px] font-space font-black uppercase tracking-widest text-white/40 hover:text-white/70 transition-colors"
                   >
                     <span>{isRTL ? 'إضافة رابط يدوياً' : 'Add Manual Link'}</span>
-                    <span className="material-symbols-outlined text-sm">{showManualLink ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}</span>
+                    {showManualLink ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                   </button>
 
                   <AnimatePresence>
@@ -1047,7 +921,7 @@ export default function TaskDrawer({
                             style={{ backgroundColor: themeColor, boxShadow: `0 0 16px ${themeColor}44` }}
                           >
                             {isAddingLink
-                              ? <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
+                              ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto text-black" />
                               : (isRTL ? 'إضافة' : 'ADD')}
                           </button>
                         </div>
@@ -1059,20 +933,20 @@ export default function TaskDrawer({
                 {/* ── Attachment Cards ──────────────────────────── */}
                 {(() => {
                   const attachments: any[] = task.metadata?.attachments || []
-                  const typeIcons: Record<string, { icon: string; color: string }> = {
-                    pdf:   { icon: 'picture_as_pdf', color: '#EF4444' },
-                    excel: { icon: 'table_chart',    color: '#22C55E' },
-                    image: { icon: 'image',          color: '#E2E8F0' },
-                    doc:   { icon: 'description',    color: '#3B82F6' },
-                    video: { icon: 'videocam',       color: '#F97316' },
-                    audio: { icon: 'music_note',     color: '#A855F7' },
-                    link:  { icon: 'link',           color: themeColor },
+                  const typeIcons: Record<string, { icon: React.ComponentType<any>; color: string }> = {
+                    pdf:   { icon: StickyNote,   color: '#EF4444' },
+                    excel: { icon: StickyNote,   color: '#22C55E' },
+                    image: { icon: FolderOpen,   color: '#E2E8F0' },
+                    doc:   { icon: StickyNote,   color: '#3B82F6' },
+                    video: { icon: ExternalLink, color: '#F97316' },
+                    audio: { icon: ExternalLink, color: '#A855F7' },
+                    link:  { icon: Paperclip,    color: themeColor },
                   }
 
                   if (attachments.length === 0) {
                     return (
                       <div className="flex flex-col items-center justify-center py-10 gap-3 border border-dashed border-white/5 rounded-xl bg-white/[0.01] text-white/20">
-                        <span className="material-symbols-outlined text-3xl" style={{ color: themeColor, opacity: 0.25 }}>cloud_sync</span>
+                        <RefreshCw className="w-6 h-6 animate-pulse" style={{ color: themeColor, opacity: 0.25 }} />
                         <span className="text-[10px] font-space tracking-widest uppercase">
                           {isRTL ? 'لا توجد مرفقات بعد' : 'NO ATTACHMENTS SYNCD'}
                         </span>
@@ -1085,7 +959,7 @@ export default function TaskDrawer({
                       <AnimatePresence initial={false}>
                         {attachments.map((att: any, idx: number) => {
                           const typeKey = att.type || 'link'
-                          const { icon, color } = typeIcons[typeKey] || typeIcons.link
+                          const { icon: IconComponent, color } = typeIcons[typeKey] || typeIcons.link
                           return (
                             <motion.div
                               key={att.id || idx}
@@ -1098,12 +972,10 @@ export default function TaskDrawer({
                               {/* Left accent bar */}
                               <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ backgroundColor: color }} />
                               <div className="flex items-center gap-3 min-w-0 pl-1">
-                                <span
-                                  className="material-symbols-outlined text-xl shrink-0"
-                                  style={{ color, textShadow: `0 0 10px ${color}44` }}
-                                >
-                                  {icon}
-                                </span>
+                                <IconComponent
+                                  className="w-4.5 h-4.5 shrink-0"
+                                  style={{ color, filter: `drop-shadow(0 0 5px ${color}44)` }}
+                                />
                                 <div className="min-w-0">
                                   <p className="font-space font-black text-xs text-white/90 uppercase truncate tracking-wide">{att.name}</p>
                                   <p className="font-space text-[9px] uppercase tracking-widest text-white/30 mt-0.5">{typeKey.toUpperCase()}</p>
@@ -1117,7 +989,7 @@ export default function TaskDrawer({
                                 }}
                                 className="w-7 h-7 flex items-center justify-center border border-white/5 text-white/25 hover:border-red-500/50 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-lg shrink-0 cursor-pointer"
                               >
-                                <span className="material-symbols-outlined text-xs">close</span>
+                                <X className="w-3 h-3" />
                               </button>
                               {/* Bottom accent on hover */}
                               <div
@@ -1152,9 +1024,11 @@ export default function TaskDrawer({
               boxShadow: task.is_completed ? 'none' : `0 0 14px ${themeColor}60`
             }}
           >
-            <span className="material-symbols-outlined text-sm">
-              {task.is_completed ? 'undo' : 'check'}
-            </span>
+            {task.is_completed ? (
+              <RefreshCw className="w-3.5 h-3.5" />
+            ) : (
+              <Check className="w-3.5 h-3.5 stroke-[3px]" />
+            )}
             {task.is_completed 
               ? t('markIncomplete') 
               : t('markCompleted')}

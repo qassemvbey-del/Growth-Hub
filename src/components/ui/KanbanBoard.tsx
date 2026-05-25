@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { usePomodoro } from '@/context/PomodoroContext'
+import { Check, Play, Clock, FolderOpen } from 'lucide-react'
 
 interface KanbanBoardProps {
   tasks: any[]
@@ -16,6 +17,8 @@ interface KanbanBoardProps {
   selectedTask: any | null
   timeStatsMap: Record<string, number>
   cupId?: string
+  onlineUsers?: any[]
+  currentUserId?: string
 }
 
 // --- LOCAL HELPER COMPONENT: CYBERPUNK WEIGHT BARS ---
@@ -68,7 +71,9 @@ export default function KanbanBoard({
   setSelectedTask,
   selectedTask,
   timeStatsMap,
-  cupId
+  cupId,
+  onlineUsers = [],
+  currentUserId
 }: KanbanBoardProps) {
   const { startFocus } = usePomodoro()
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null)
@@ -185,6 +190,8 @@ export default function KanbanBoard({
                   const videoDuration = task.video_duration ?? storedDuration
                   const hasVideo = !!(task.video_id || task.video_url)
 
+                  const taskViewers = onlineUsers?.filter((u: any) => u.cursor_task_id === task.id && u.user_id !== currentUserId) || []
+
                   return (
                     <motion.div
                       key={task.id}
@@ -208,33 +215,64 @@ export default function KanbanBoard({
                           style={{ backgroundColor: task.is_completed ? 'var(--text-secondary)' : col.color }}
                         />
 
-                        {/* Header row: Checkbox + Title */}
-                        <div className="flex items-start gap-2.5 min-w-0">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              toggleTask(task.id, task.is_completed)
-                            }}
-                            className="shrink-0 w-5.5 h-5.5 rounded-full flex items-center justify-center transition-all border-2 mt-0.5 cursor-pointer"
-                            style={{
-                              backgroundColor: task.is_completed ? themeColor : 'transparent',
-                              borderColor: task.is_completed ? themeColor : 'rgba(255,255,255,0.2)',
-                              boxShadow: task.is_completed ? `0 0 8px ${themeColor}40` : undefined
-                            }}
-                          >
-                            {task.is_completed && (
-                              <span className="material-symbols-outlined text-black font-black text-[12px]">check</span>
-                            )}
-                          </button>
-                          
-                          <p 
-                            className={cn(
-                              "text-sm font-space font-bold text-white/90 leading-tight uppercase truncate flex-1",
-                              task.is_completed && "text-[var(--text-secondary)] opacity-50 line-through"
-                            )}
-                          >
-                            {task.title}
-                          </p>
+                        {/* Header row: Checkbox + Title + Presence avatars */}
+                        <div className="flex items-start justify-between gap-2.5 min-w-0">
+                          <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                toggleTask(task.id, task.is_completed)
+                              }}
+                              className="shrink-0 w-5.5 h-5.5 rounded-full flex items-center justify-center transition-all border-2 mt-0.5 cursor-pointer"
+                              style={{
+                                backgroundColor: task.is_completed ? themeColor : 'transparent',
+                                borderColor: task.is_completed ? themeColor : 'rgba(255,255,255,0.2)',
+                                boxShadow: task.is_completed ? `0 0 8px ${themeColor}40` : undefined
+                              }}
+                            >
+                              {task.is_completed && (
+                                <Check className="w-3 h-3 text-black stroke-[3px]" />
+                              )}
+                            </button>
+                            
+                            <p 
+                              className={cn(
+                                "text-sm font-space font-bold text-white/90 leading-tight uppercase truncate",
+                                task.is_completed && "text-[var(--text-secondary)] opacity-50 line-through"
+                              )}
+                            >
+                              {task.title}
+                            </p>
+                          </div>
+
+                          {/* Task Viewers Overlapping Avatar Pile */}
+                          {taskViewers.length > 0 && (
+                            <div className="flex items-center -space-x-1.5 shrink-0 select-none">
+                              {taskViewers.map((viewer: any) => (
+                                <div
+                                  key={viewer.user_id}
+                                  className="w-5 h-5 rounded-full border bg-zinc-950 flex items-center justify-center text-[7px] font-space font-black uppercase text-white shadow-md relative overflow-hidden shrink-0 animate-pulse"
+                                  style={{ borderColor: viewer.session_color || 'cyan', boxShadow: `0 0 8px ${viewer.session_color || 'cyan'}55` }}
+                                  title={`${viewer.full_name || 'CO-OPERATIVE'} is viewing this task`}
+                                >
+                                  {viewer.avatar_url ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                      src={viewer.avatar_url}
+                                      alt={viewer.full_name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <span>{viewer.full_name?.substring(0, 2) || 'OP'}</span>
+                                  )}
+                                  <span 
+                                    className="absolute bottom-0 right-0 w-1.5 h-1.5 rounded-full border border-black" 
+                                    style={{ backgroundColor: viewer.session_color || 'cyan' }} 
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
 
                          {/* Footer Row: Power, Timer or complexity metrics */}
@@ -249,13 +287,13 @@ export default function KanbanBoard({
                                  className="w-6 h-6 rounded-full bg-orange-500/10 hover:bg-orange-500/25 border border-orange-500/30 text-orange-500 flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer z-10 shrink-0"
                                  title={isRTL ? "بدء جلسة التركيز" : "START FOCUS SESSION"}
                                >
-                                 <span className="material-symbols-outlined text-[12px] leading-none">play_arrow</span>
+                                 <Play className="w-3 h-3 text-orange-500 fill-current" />
                                </button>
                              )}
                              
                              {timeFormatted && (
                                <div className="flex items-center gap-1 text-[10px] font-mono text-white/45">
-                                 <span className="material-symbols-outlined text-[11px]" style={{ color: themeColor }}>schedule</span>
+                                 <Clock className="w-3 h-3" style={{ color: themeColor }} />
                                  {timeFormatted}
                                </div>
                              )}
@@ -279,7 +317,7 @@ export default function KanbanBoard({
                     exit={{ opacity: 0 }}
                     className="py-12 flex flex-col items-center justify-center text-center border border-dashed border-white/5 rounded-xl bg-white/[0.01] text-white/20 select-none"
                   >
-                    <span className="material-symbols-outlined text-xl mb-1 opacity-45">folder_open</span>
+                    <FolderOpen className="w-5 h-5 mb-1 opacity-45" />
                     <span className="text-[10px] font-space tracking-widest uppercase">EMPTY</span>
                   </motion.div>
                 )}

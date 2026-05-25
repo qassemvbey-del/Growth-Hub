@@ -14,12 +14,26 @@ import { useSound } from '@/context/SoundContext'
 import MissionAttachmentsModal from '@/components/ui/MissionAttachmentsModal'
 import { validateContent } from '@/lib/profanityFilter'
 import { aiProfanityCheck } from '@/app/actions/profanityCheck'
+import { 
+  Trophy, Medal, Award, Layers, Settings, Link as LinkIcon, Calendar, Paperclip, 
+  ArrowRight, Search, Shield, Users, CheckCircle2, XCircle, Plus, 
+  HelpCircle, Eye, Info, List, Kanban, Loader2, Sparkles, Check, 
+  AlertTriangle, FolderClosed, UserPlus, Users2, Network, X, BookOpen, 
+  Settings2, Zap
+} from 'lucide-react'
+
 
 const SIZES = [
   { key: 'lg', label: 'LARGE GOAL',  desc: 'Macro Objective', icon: 'trophy' },
   { key: 'md', label: 'MEDIUM GOAL', desc: 'Standard Focus',  icon: 'military_tech' },
   { key: 'sm', label: 'SMALL GOAL',  desc: 'Micro Focus',     icon: 'workspace_premium' },
 ]
+
+const renderSizeIcon = (iconName: string, className?: string, style?: any) => {
+  const LucideIcon = iconName === 'trophy' ? Trophy : iconName === 'military_tech' ? Medal : iconName === 'workspace_premium' ? Award : Layers
+  return <LucideIcon className={className} style={style} />
+}
+
 
 const getRankBorderClass = (rank: string) => {
   const r = rank?.toLowerCase() || ''
@@ -116,7 +130,7 @@ export default function SquadGoalsPage() {
         <div className="flex justify-between items-start mb-auto">
           <div className="flex flex-col gap-1 flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="material-symbols-outlined text-xs opacity-40" style={{ color: isInRedZone ? '#FF0055' : (mission.color || color) }}>{sizeIcon}</span>
+              {renderSizeIcon(sizeIcon, "w-3 h-3 opacity-40 shrink-0", { color: isInRedZone ? '#FF0055' : (mission.color || color) })}
               <p className="text-[8px] font-space tracking-[0.3em] uppercase font-black opacity-40">
                  {mission.sync_to_dashboard ? (isRTL ? 'نشط' : 'ACTIVE') : (isRTL ? 'استعداد' : 'STANDBY')}
               </p>
@@ -152,9 +166,9 @@ export default function SquadGoalsPage() {
                     playBlip();
                     setActiveRulesGoalId(activeRulesGoalId === mission.id ? null : mission.id);
                   }}
-                  className="material-symbols-outlined text-sm text-[var(--text-secondary)] hover:text-white transition-colors p-1"
+                  className="text-[var(--text-secondary)] hover:text-white transition-colors p-1 flex items-center justify-center cursor-pointer"
                 >
-                  settings
+                  <Settings className="w-3.5 h-3.5" />
                 </button>
                 
                 <AnimatePresence>
@@ -290,10 +304,10 @@ export default function SquadGoalsPage() {
                 {typeFilter === 'squad' && mission.metadata?.invite_code && (
                   <button
                     onClick={(e) => handleCopyInviteLink(e, mission.metadata.invite_code)}
-                    className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] hover:border-teal-400/50 hover:bg-teal-500/5 transition-all rounded-sm shrink-0 animate-pulse"
+                    className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] hover:border-teal-400/50 hover:bg-teal-500/5 transition-all rounded-sm shrink-0 animate-pulse cursor-pointer"
                     title="COPY_INVITE_CODE"
                   >
-                    <span className="material-symbols-outlined text-sm text-teal-400">link</span>
+                    <LinkIcon className="w-3.5 h-3.5 text-teal-400" />
                   </button>
                 )}
 
@@ -326,12 +340,12 @@ export default function SquadGoalsPage() {
                     window.open(googleUrl, '_blank');
                     playBlip();
                   }}
-                  className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] transition-all rounded-sm shrink-0"
+                  className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] transition-all rounded-sm shrink-0 cursor-pointer"
                   onMouseEnter={e => e.currentTarget.style.borderColor = `${(mission.color || color)}60`}
                   onMouseLeave={e => e.currentTarget.style.borderColor = ''}
                   title="ADD_TO_GOOGLE_CALENDAR"
                 >
-                  <span className="material-symbols-outlined text-sm">calendar_month</span>
+                  <Calendar className="w-3.5 h-3.5" />
                 </button>
 
                 <button
@@ -339,7 +353,7 @@ export default function SquadGoalsPage() {
                     e.stopPropagation();
                     openAttachments(mission.id);
                   }}
-                  className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] transition-all rounded-sm shrink-0"
+                  className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] transition-all rounded-sm shrink-0 cursor-pointer"
                   onMouseEnter={e => e.currentTarget.style.borderColor = `${(mission.color || color)}60`}
                   onMouseLeave={e => e.currentTarget.style.borderColor = ''}
                   title="ATTACHMENTS"
@@ -348,10 +362,9 @@ export default function SquadGoalsPage() {
                     boxShadow: (attachmentCounts[mission.id] || 0) > 0 ? `0 0 10px ${(mission.color || color)}22` : undefined
                   }}
                 >
-                  <span className="material-symbols-outlined text-sm" style={{ 
+                  <Paperclip className="w-3.5 h-3.5" style={{ 
                     color: (attachmentCounts[mission.id] || 0) > 0 ? (mission.color || color) : 'inherit',
-                    textShadow: (attachmentCounts[mission.id] || 0) > 0 ? `0 0 8px ${(mission.color || color)}` : 'none'
-                  }}>attach_file</span>
+                  }} />
                   {(attachmentCounts[mission.id] || 0) > 0 && (
                     <span className="absolute -top-1.5 -right-1.5 w-4 h-4 text-black text-[8px] font-black flex items-center justify-center rounded-full shadow-lg"
                       style={{ backgroundColor: (mission.color || color), boxShadow: `0 0 10px ${(mission.color || color)}` }}
@@ -360,7 +373,7 @@ export default function SquadGoalsPage() {
                     </span>
                   )}
                 </button>
-               <span className="material-symbols-outlined text-[var(--text-secondary)]/35 group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform text-lg">arrow_forward</span>
+               <ArrowRight className="w-4.5 h-4.5 text-[var(--text-secondary)]/35 group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform shrink-0" />
              </div>
           </div>
         </div>
@@ -1032,7 +1045,7 @@ export default function SquadGoalsPage() {
         <header className="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-black/5 dark:border-white/5 pb-8">
           <div className="space-y-4 text-center md:text-start">
             <div className="flex items-center gap-4 justify-center md:justify-start">
-              <span className="material-symbols-outlined text-3xl md:text-4xl" style={{ color: currentTheme.color }}>layers</span>
+              <Layers className="w-8 h-8 md:w-10 md:h-10 shrink-0" style={{ color: currentTheme.color }} />
               <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase not- text-black dark:text-white leading-none">
                 {typeFilter === 'solo' ? (
                   <>{isRTL ? 'مهمات' : 'SOLO'}<span style={{ color: currentTheme.color }}>{isRTL ? ' فردية' : '_MISSIONS'}</span></>
@@ -1042,8 +1055,8 @@ export default function SquadGoalsPage() {
                   <>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الأهداف' : '_CANVAS'}</span></>
                 )}
               </h1>
-              <button onClick={() => setShowGuide(true)} className="material-symbols-outlined text-[var(--text-secondary)]/40 hover:text-[var(--text-secondary)] transition-colors duration-300 text-xl" title="Guide">
-                info
+              <button onClick={() => setShowGuide(true)} className="text-[var(--text-secondary)]/40 hover:text-[var(--text-secondary)] transition-colors duration-300 flex items-center justify-center cursor-pointer" title="Guide">
+                <Info className="w-5 h-5" />
               </button>
             </div>
             <p className={cn("text-[11px] font-space tracking-[0.35em] uppercase font-bold", isRTL ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]")}>
@@ -1063,25 +1076,25 @@ export default function SquadGoalsPage() {
                 onClick={() => { playBlip(); setShowJoinGoal(true); }}
                 className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-sm border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-95 shadow-lg cursor-pointer animate-pulse"
               >
-                <span className="material-symbols-outlined text-[16px] leading-none">link</span>
+                <LinkIcon className="w-4 h-4" />
                 {isRTL ? 'الانضمام لهدف' : 'JOIN GOAL'}
               </button>
               <button
                 onClick={() => { playBlip(); setShowCreate(true); }}
-                className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-sm font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg"
+                className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-sm font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg cursor-pointer"
                 style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
-                <span className="material-symbols-outlined text-[16px] leading-none">add</span>
+                <Plus className="w-4 h-4" />
                 {isRTL ? 'إنشاء هدف فريق' : 'CREATE SQUAD GOAL'}
               </button>
             </div>
           ) : (
             <button
               onClick={() => { playBlip(); setShowCreate(true); }}
-              className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-sm font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg"
+              className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-sm font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg cursor-pointer"
               style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
             >
-              <span className="material-symbols-outlined text-[16px] leading-none">add</span>
+              <Plus className="w-4 h-4" />
               {typeFilter === 'solo' ? (isRTL ? 'إنشاء هدف فردي' : 'CREATE GOAL') : (isRTL ? 'إنشاء هدف' : 'Create Goal')}
             </button>
           )}
@@ -1091,9 +1104,9 @@ export default function SquadGoalsPage() {
         {typeFilter && (
           <div className="w-full h-12 bg-white/5 dark:bg-zinc-900/30 border border-zinc-200/50 dark:border-zinc-800/80 rounded-xl px-4 flex items-center justify-between backdrop-blur-md shadow-sm">
             {/* Left side: Rank Badge */}
-            <div className="flex items-center gap-2 border border-amber-500/20 bg-amber-500/5 px-3 py-1 rounded-lg">
-              <span className="material-symbols-outlined text-xs text-amber-500 animate-pulse">bolt</span>
-              <span className="text-[10px] font-space font-black text-amber-500 uppercase tracking-widest select-none">
+            <div className="flex items-center gap-2 border border-amber-500/20 bg-amber-500/5 px-3 py-1 rounded-lg text-amber-500">
+              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+              <span className="text-[10px] font-space font-black uppercase tracking-widest select-none">
                 {profile?.rank || 'SILVER'} • {profile?.xp || 0} XP
               </span>
             </div>
@@ -1104,7 +1117,7 @@ export default function SquadGoalsPage() {
                 onClick={() => { playBlip(); setShowJoinGoal(true); }}
                 className="flex items-center gap-1.5 px-3 h-8 border border-teal-500/40 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 rounded-lg font-space text-[10px] font-black uppercase tracking-widest transition-all duration-300 active:scale-95 cursor-pointer"
               >
-                <span className="material-symbols-outlined text-sm">link</span>
+                <LinkIcon className="w-3.5 h-3.5" />
                 {isRTL ? 'الانضمام للفريق' : 'JOIN A SQUAD GOAL'}
               </button>
             )}
@@ -1130,9 +1143,9 @@ export default function SquadGoalsPage() {
               >
                 <button 
                   onClick={() => setShowGuide(false)} 
-                  className="absolute top-4 right-4 rtl:left-4 rtl:right-auto material-symbols-outlined text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  className="absolute top-4 right-4 rtl:left-4 rtl:right-auto text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer flex items-center justify-center"
                 >
-                  close
+                  <X className="w-5 h-5" />
                 </button>
                 <div className="space-y-4">
                   {isRTL ? (
@@ -1212,7 +1225,7 @@ export default function SquadGoalsPage() {
                   <div className="flex items-center gap-2">
                     <label className="text-xs md:text-sm font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'حجم الهدف' : 'Goal Size'}</label>
                     <div className="group relative flex items-center cursor-help">
-                      <span className="material-symbols-outlined text-sm transition-colors group-hover:text-white">info</span>
+                      <Info className="w-3.5 h-3.5 transition-colors group-hover:text-white" />
                       <div className="pointer-events-none absolute bottom-full mb-2 w-64 md:w-80 rounded-xl bg-zinc-900 border border-white/10 p-3 md:p-4 text-xs md:text-sm text-zinc-200 shadow-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-[300]">
                         {isRTL 
                           ? "حجم الهدف يحدد سعة الـ Slots المستهلكة في لوحة القيادة، وسقف نقاط الـ XP المكتسبة (Small: 4 مهام، Medium: 8 مهام، Large: 20 مهمة). يمكنك إضافة مهام إضافية بعد السقف للتنظيم فقط."
@@ -1236,7 +1249,7 @@ export default function SquadGoalsPage() {
                         onMouseEnter={e => { if (newSize !== s.key) e.currentTarget.style.borderColor = `${currentTheme.color}60` }}
                         onMouseLeave={e => { if (newSize !== s.key) e.currentTarget.style.borderColor = '' }}
                       >
-                        <span className="material-symbols-outlined text-base md:text-lg">{s.icon}</span>
+                        {renderSizeIcon(s.icon, "w-4 h-4 md:w-4.5 md:h-4.5")}
                         <span className="text-xs md:text-sm font-space font-black uppercase tracking-tighter">{isRTL ? (s.key === 'lg' ? 'كبيرة' : s.key === 'md' ? 'متوسطة' : 'صغيرة') : (s.key === 'lg' ? 'Large' : s.key === 'md' ? 'Medium' : 'Small')}</span>
                       </button>
                     ))}
@@ -1261,7 +1274,7 @@ export default function SquadGoalsPage() {
                       onMouseEnter={e => { if (defaultView !== 'list') e.currentTarget.style.borderColor = `${currentTheme.color}60` }}
                       onMouseLeave={e => { if (defaultView !== 'list') e.currentTarget.style.borderColor = '' }}
                     >
-                      <span className="material-symbols-outlined text-base md:text-lg">list</span>
+                      <List className="w-4 h-4 md:w-4.5 md:h-4.5" />
                       <span className="text-xs md:text-sm font-space font-black uppercase tracking-tighter">
                         {isRTL ? 'قائمة (المناهج)' : 'List View'}
                       </span>
@@ -1280,7 +1293,7 @@ export default function SquadGoalsPage() {
                       onMouseEnter={e => { if (defaultView !== 'board') e.currentTarget.style.borderColor = `${currentTheme.color}60` }}
                       onMouseLeave={e => { if (defaultView !== 'board') e.currentTarget.style.borderColor = '' }}
                     >
-                      <span className="material-symbols-outlined text-base md:text-lg">view_kanban</span>
+                      <Kanban className="w-4 h-4 md:w-4.5 md:h-4.5" />
                       <span className="text-xs md:text-sm font-space font-black uppercase tracking-tighter">
                         {isRTL ? 'لوحة (المشاريع)' : 'Board View'}
                       </span>
@@ -1343,9 +1356,7 @@ export default function SquadGoalsPage() {
                        }}
                      >
                        <span className="flex items-center gap-3">
-                         <span className="material-symbols-outlined text-xl">
-                           hub
-                         </span>
+                         <Network className="w-5 h-5 shrink-0" />
                          {syncOnCreate
                            ? (isRTL ? 'مرئي في اللوحة' : 'SHOW ON DASHBOARD')
                            : (isRTL ? 'مخفي من اللوحة' : 'STAY OFF-GRID')}
@@ -1379,7 +1390,7 @@ export default function SquadGoalsPage() {
                     )}
                     style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 0 20px ${currentTheme.color}4d` }}
                   >
-                    {isSubmitting && <span className="material-symbols-outlined animate-spin text-sm">refresh</span>}
+                    {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                     {isRTL ? 'تفعيل' : 'Activate'}
                   </button>
                 </div>
@@ -1392,7 +1403,7 @@ export default function SquadGoalsPage() {
           <div className="w-full bg-zinc-50/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/80 rounded-2xl p-6 md:p-8 space-y-6 shadow-md transition-all duration-300 hover:shadow-[0_0_0_1px_rgba(161,161,170,0.3)] backdrop-blur-md">
             <div className="flex flex-row justify-between items-center border-b border-zinc-200 dark:border-zinc-800 pb-4">
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-2xl text-zinc-500" style={{ color: currentTheme.color }}>task</span>
+                <CheckCircle2 className="w-5 h-5 text-zinc-500 shrink-0" style={{ color: currentTheme.color }} />
                 <h2 className="text-xl font-space font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-wide">
                   {isRTL ? 'مهامي' : 'My Tasks'}
                 </h2>
@@ -1457,7 +1468,7 @@ export default function SquadGoalsPage() {
                       )}
                       style={task.is_completed ? { backgroundColor: task.missionColor, borderColor: task.missionColor } : {}}
                     >
-                      {task.is_completed && <span className="material-symbols-outlined text-sm font-black">check</span>}
+                      {task.is_completed && <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />}
                     </button>
 
                     <div className="space-y-1 truncate flex-1">
@@ -1484,7 +1495,7 @@ export default function SquadGoalsPage() {
 
               {filteredTasks.length === 0 && (
                 <div className="py-16 text-center space-y-3">
-                  <span className="material-symbols-outlined text-4xl text-zinc-300 dark:text-white/20">task</span>
+                  <CheckCircle2 className="w-9 h-9 text-zinc-300 dark:text-white/20 mx-auto" />
                   <p className="text-sm font-space text-zinc-500 dark:text-white/40">
                     {isRTL ? 'لا توجد مهام في هذه القائمة.' : 'No tasks in this view.'}
                   </p>
@@ -1580,7 +1591,7 @@ export default function SquadGoalsPage() {
                   
                   <div className="space-y-6">
                     <div className="flex items-center gap-3 text-[#FF0055]">
-                      <span className="material-symbols-outlined text-3xl animate-pulse">warning</span>
+                      <AlertTriangle className="w-7 h-7 animate-pulse text-[#FF0055]" />
                       <h3 className="text-lg font-black tracking-widest uppercase font-space">
                         {isRTL ? 'تحذير: تشتيت التركيز' : 'WARNING: CONTEXT SWITCHING'}
                       </h3>
@@ -1658,14 +1669,14 @@ export default function SquadGoalsPage() {
                     className="flex flex-row items-center justify-center gap-2 h-11 px-6 rounded-sm font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg cursor-pointer"
                     style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
                   >
-                    <span className="material-symbols-outlined text-[16px] leading-none">add</span>
+                    <Plus className="w-4 h-4 text-black" />
                     CREATE GOAL
                   </button>
                 </>
               ) : typeFilter === 'squad' ? (
                 <>
                   <div className="space-y-2 flex flex-col items-center justify-center select-none">
-                    <span className="material-symbols-outlined text-5xl text-zinc-600 dark:text-zinc-500 mb-2 animate-pulse">groups</span>
+                    <Users className="w-12 h-12 text-zinc-500 mb-2 animate-pulse" />
                     <h3 className="text-2xl font-black font-space tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
                       NO SQUAD GOALS YET
                     </h3>
@@ -1678,7 +1689,7 @@ export default function SquadGoalsPage() {
                       onClick={() => { playBlip(); setShowJoinGoal(true); }}
                       className="flex flex-row items-center justify-center gap-2 h-11 px-6 rounded-sm border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-95 shadow-lg cursor-pointer animate-pulse"
                     >
-                      <span className="material-symbols-outlined text-[16px] leading-none">link</span>
+                      <LinkIcon className="w-4 h-4" />
                       JOIN WITH CODE
                     </button>
                     <button
@@ -1686,7 +1697,7 @@ export default function SquadGoalsPage() {
                       className="flex flex-row items-center justify-center gap-2 h-11 px-6 rounded-sm font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg cursor-pointer"
                       style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
                     >
-                      <span className="material-symbols-outlined text-[16px] leading-none">add</span>
+                      <Plus className="w-4 h-4 text-black" />
                       CREATE SQUAD GOAL
                     </button>
                   </div>
@@ -1733,14 +1744,14 @@ export default function SquadGoalsPage() {
                   setJoinStatus('idle');
                   setJoinCodeInput('');
                 }} 
-                className="absolute top-4 right-4 rtl:left-4 rtl:right-auto material-symbols-outlined text-[var(--text-secondary)] hover:text-white cursor-pointer"
+                className="absolute top-4 right-4 rtl:left-4 rtl:right-auto text-[var(--text-secondary)] hover:text-white cursor-pointer"
               >
-                close
+                <X className="w-5 h-5" />
               </button>
 
               <div className="space-y-6">
                 <div className="flex items-center gap-3 text-teal-400">
-                  <span className="material-symbols-outlined text-2xl animate-pulse">group_add</span>
+                  <UserPlus className="w-6 h-6 animate-pulse text-teal-400" />
                   <h2 className="text-xl font-space font-black uppercase tracking-widest">
                     {isRTL ? 'الانضمام للفريق' : 'JOIN_A_SQUAD'}
                   </h2>
@@ -1796,7 +1807,7 @@ export default function SquadGoalsPage() {
                       onClick={handleConfirmJoin}
                       className="w-full h-11 bg-emerald-500 hover:bg-emerald-400 text-black font-space font-black text-xs uppercase tracking-widest transition-all duration-300 rounded-sm cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center justify-center gap-1.5"
                     >
-                      <span className="material-symbols-outlined text-base">check_circle</span>
+                      <CheckCircle2 className="w-4 h-4 text-black" />
                       [ ✓ CONFIRM JOIN ]
                     </button>
                   ) : (
@@ -1810,12 +1821,12 @@ export default function SquadGoalsPage() {
                     >
                       {joinStatus === 'scanning' ? (
                         <>
-                          <span className="material-symbols-outlined text-base animate-spin">sync</span>
+                          <Loader2 className="w-4 h-4 animate-spin text-teal-400" />
                           SCANNING...
                         </>
                       ) : (
                         <>
-                          <span className="material-symbols-outlined text-base">bolt</span>
+                          <Zap className="w-4 h-4 text-black fill-current" />
                           [ ⚡ JOIN NOW ]
                         </>
                       )}

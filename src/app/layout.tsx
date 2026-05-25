@@ -55,10 +55,6 @@ export default function RootLayout({
           }} />
         )}
         <link rel="manifest" href="/manifest.json" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-        />
         <meta name="theme-color" content="#B0C4DE" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

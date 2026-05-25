@@ -20,6 +20,13 @@ import { aiProfanityCheck } from '@/app/actions/profanityCheck'
 import TaskDrawer from '@/components/ui/TaskDrawer'
 import InlineGuideTip from '@/components/ui/InlineGuideTip'
 import KanbanBoard from '@/components/ui/KanbanBoard'
+import { 
+  Lock, Link as LinkIcon, Trash2, Clock, Radio, CheckSquare, 
+  Plus, List, Kanban, Check, Timer, HelpCircle, X, Pin, 
+  Shield, CheckCircle2, Award, Download, Clipboard, FileText, 
+  Share2, Calendar, Paperclip, Users2, Medal, EyeOff, ListPlus, LayoutGrid, Eye
+} from 'lucide-react'
+
 
 // --- HELPER COMPONENT: CYBERPUNK WEIGHT BARS ---
 const WeightVisualizer = ({ weight, color, isCompleted = false, onSelect }: { weight: number, color: string, isCompleted?: boolean, onSelect?: (w: number) => void }) => {
@@ -1225,7 +1232,7 @@ const { progress, isInRedZone } = useMemo(() => {
             <div className="absolute top-0 inset-x-0 h-1 bg-[#FF0055]" />
 
             <div className="flex flex-col items-center gap-6">
-              <span className="material-symbols-outlined text-5xl text-[#FF0055] animate-pulse">lock</span>
+              <Lock className="w-12 h-12 text-[#FF0055] animate-pulse" />
               <div className="space-y-2">
                 <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-[#FF0055]">
                   CLASSIFIED_GOAL // ACCESS DENIED
@@ -1242,7 +1249,7 @@ const { progress, isInRedZone } = useMemo(() => {
                 }}
                 className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-95 cursor-pointer"
               >
-                <span className="material-symbols-outlined text-base">link</span>
+                <LinkIcon className="w-4 h-4 text-teal-400" />
                 JOIN WITH CODE
               </button>
             </div>
@@ -1278,7 +1285,7 @@ const { progress, isInRedZone } = useMemo(() => {
                          className="p-2 text-black/20 dark:text-white/10 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-full"
                          title={isRTL ? 'حذف المهمة' : 'DELETE_GOAL'}
                       >
-                         <span className="material-symbols-outlined text-xl">delete_forever</span>
+                         <Trash2 className="w-5 h-5 text-zinc-400 hover:text-red-500" />
                       </button>
                       <span className="text-3xl md:text-6xl font-black font-space" style={{ color: missionColor }}>{roundedProgress}%</span>
                    </div>
@@ -1289,15 +1296,15 @@ const { progress, isInRedZone } = useMemo(() => {
             {/* Horizontal Stats Row */}
             <div className="flex flex-wrap items-center pt-4 border-t border-white/5 gap-y-2">
                <div className="inline-flex items-center text-xs font-mono text-white/50 border-r border-white/10 pr-3 mr-3 last:border-0">
-                  <span className="material-symbols-outlined text-sm mr-1.5" style={{ color: missionColor }}>schedule</span>
+                  <Clock className="w-4 h-4 mr-1.5" style={{ color: missionColor }} />
                   <span>{isRTL ? 'إجمالي التركيز:' : 'Total Focus:'} <strong className="text-white font-black ml-1">{Math.floor(totalTimeInvested / 60)}h {totalTimeInvested % 60}m</strong></span>
                </div>
                <div className="inline-flex items-center text-xs font-mono text-white/50 border-r border-white/10 pr-3 mr-3 last:border-0">
-                  <span className="material-symbols-outlined text-sm mr-1.5" style={{ color: missionColor }}>radar</span>
+                  <Radio className="w-4 h-4 mr-1.5" style={{ color: missionColor }} />
                   <span>{isRTL ? 'مكتمل:' : 'Done:'} <strong className="text-white font-black ml-1">{completedCount}</strong></span>
                </div>
                <div className="inline-flex items-center text-xs font-mono text-white/50 border-r border-white/10 pr-3 mr-3 last:border-0">
-                  <span className="material-symbols-outlined text-sm mr-1.5" style={{ color: missionColor }}>checklist</span>
+                  <CheckSquare className="w-4 h-4 mr-1.5" style={{ color: missionColor }} />
                   <span>{isRTL ? 'المهام الإجمالية:' : 'Total Tasks:'} <strong className="text-white font-black ml-1">{totalCount}</strong></span>
                </div>
             </div>
@@ -1396,9 +1403,11 @@ const { progress, isInRedZone } = useMemo(() => {
                    boxShadow: `0 0 20px ${missionColor}22`
                 } : {}}
              >
-                <span className="material-symbols-outlined text-base">
-                   {mission.sync_to_dashboard ? 'grid_view' : 'visibility_off'}
-                </span>
+                {mission.sync_to_dashboard ? (
+                    <LayoutGrid className="w-4 h-4" />
+                 ) : (
+                    <EyeOff className="w-4 h-4" />
+                 )}
                 {mission.sync_to_dashboard ? (isRTL ? 'في الواجهة' : 'PINNED TO DASHBOARD') : (isRTL ? 'مخفي' : 'UNPINNED')}
              </button>
              
@@ -1407,7 +1416,7 @@ const { progress, isInRedZone } = useMemo(() => {
                 onClick={() => { playBlip(); setShowPlaylistModal(true); }}
                 className="px-4 md:px-6 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-sm uppercase flex items-center gap-3 border-[var(--card-border)] text-[var(--text-secondary)] hover:opacity-85"
              >
-                <span className="material-symbols-outlined text-base">playlist_add</span>
+                <ListPlus className="w-4 h-4 text-[var(--text-secondary)]" />
                 {isRTL ? 'استيراد قائمة تشغيل' : 'IMPORT PLAYLIST'}
              </button>
 
@@ -1423,7 +1432,7 @@ const { progress, isInRedZone } = useMemo(() => {
                 onMouseEnter={e => { e.currentTarget.style.backgroundColor = `${missionColor}20` }}
                 onMouseLeave={e => { e.currentTarget.style.backgroundColor = `${missionColor}10` }}
              >
-                <span className="material-symbols-outlined text-base">content_paste</span>
+                <Clipboard className="w-4 h-4" style={{ color: missionColor }} />
                 {isRTL ? 'استيراد ذكي' : 'SMART IMPORT'}
              </button>
 
@@ -1533,7 +1542,7 @@ const { progress, isInRedZone } = useMemo(() => {
                   )}
                   style={activeView === 'list' ? { color: missionColor, backgroundColor: `${missionColor}15`, borderColor: `${missionColor}30` } : {}}
                 >
-                  <span className="material-symbols-outlined text-[14px]">format_list_bulleted</span>
+                  <List className="w-3.5 h-3.5" />
                   {isRTL ? 'قائمة' : 'LIST VIEW'}
                 </button>
                 <button
@@ -1547,7 +1556,7 @@ const { progress, isInRedZone } = useMemo(() => {
                   )}
                   style={activeView === 'board' ? { color: missionColor, backgroundColor: `${missionColor}15`, borderColor: `${missionColor}30` } : {}}
                 >
-                  <span className="material-symbols-outlined text-[14px]">dashboard</span>
+                  <Kanban className="w-3.5 h-3.5" />
                   {isRTL ? 'كانبان' : 'BOARD VIEW'}
                 </button>
                </div>
@@ -1861,6 +1870,8 @@ const { progress, isInRedZone } = useMemo(() => {
                selectedTask={selectedTask}
                timeStatsMap={timeStatsMap}
                cupId={id as string}
+               onlineUsers={onlineUsers}
+               currentUserId={profile?.id}
              />
            )}
 
@@ -2124,7 +2135,7 @@ const { progress, isInRedZone } = useMemo(() => {
                             <div className="flex items-center justify-between p-6 border-b border-white/10 bg-white/[0.01]">
                               <div className="space-y-1">
                                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[#14b8a6] flex items-center gap-2">
-                                  <span className="material-symbols-outlined text-sm">shield</span>
+                                  <Shield className="w-3.5 h-3.5" />
                                   {isRTL ? 'إدارة الفريق // العمليات' : 'SQUAD_CONTROL // OPERATIONS'}
                                 </h3>
                                 <p className="text-[10px] text-[var(--text-secondary)] font-bold tracking-wider uppercase">
@@ -2135,7 +2146,7 @@ const { progress, isInRedZone } = useMemo(() => {
                                 onClick={() => { playBlip(); setShowSquadPanel(false); }}
                                 className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-zinc-500 hover:text-white hover:border-white/20 transition-all cursor-pointer bg-white/5"
                               >
-                                <span className="material-symbols-outlined text-sm">close</span>
+                                <X className="w-3.5 h-3.5" />
                               </button>
                             </div>
 
@@ -2173,7 +2184,7 @@ const { progress, isInRedZone } = useMemo(() => {
                                           <div className="flex flex-col">
                                             <span className="text-xs font-bold">{member.full_name}</span>
                                             <span className="text-[8px] font-black text-white/40 tracking-wider flex items-center gap-1">
-                                              <span className="material-symbols-outlined text-[8px]">verified</span>
+                                              <CheckCircle2 className="w-2 h-2 text-[#14b8a6]" />
                                               {member.rank || 'ROOKIE'}
                                             </span>
                                           </div>
@@ -2348,7 +2359,7 @@ const { progress, isInRedZone } = useMemo(() => {
                                                   className="w-7 h-7 rounded border border-red-500/20 hover:border-red-500/50 bg-red-500/5 hover:bg-red-500/15 flex items-center justify-center text-red-400 hover:text-red-300 transition-all cursor-pointer"
                                                   title="KICK"
                                                 >
-                                                  <span className="material-symbols-outlined text-[15px]">delete</span>
+                                                  <Trash2 className="w-[15px] h-[15px]" />
                                                 </button>
                                               )}
                                             </div>
@@ -2512,7 +2523,7 @@ const { progress, isInRedZone } = useMemo(() => {
               <div className="flex justify-between items-center pb-3 border-b border-zinc-200 dark:border-white/5">
                 <div>
                   <h3 className="font-space text-lg font-black tracking-widest uppercase text-white flex items-center gap-2">
-                    <span className="material-symbols-outlined text-lg" style={{ color: missionColor }}>share</span>
+                    <Share2 className="w-[18px] h-[18px]" style={{ color: missionColor }} />
                     {isRTL ? 'SHARE_GOAL // مشاركة الهدف' : 'SHARE_GOAL'}
                   </h3>
                   <p className="text-[10px] text-[var(--text-secondary)] font-space tracking-widest uppercase mt-1">
@@ -2523,7 +2534,7 @@ const { progress, isInRedZone } = useMemo(() => {
                   onClick={() => { playBlip(); setShowShareModal(false); }}
                   className="text-[var(--text-secondary)] hover:text-white transition-all cursor-pointer bg-transparent border-0"
                 >
-                  <span className="material-symbols-outlined text-xl">close</span>
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
@@ -2574,10 +2585,10 @@ const { progress, isInRedZone } = useMemo(() => {
                     }}
                   >
                     <div className="flex items-center gap-4">
-                      <span className="material-symbols-outlined text-2xl transition-all duration-300" style={{
+                      <Users2 className="w-6 h-6 transition-all duration-300" style={{
                         color: copiedRow === 'invite' ? '#14b8a6' : missionColor,
-                        textShadow: copiedRow === 'invite' ? '0 0 10px #14b8a6' : 'none'
-                      }}>group_add</span>
+                        filter: copiedRow === 'invite' ? 'drop-shadow(0 0 6px #14b8a6)' : 'none'
+                      }} />
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <span className="font-space text-xs font-black text-white uppercase tracking-wider">
@@ -2656,10 +2667,10 @@ const { progress, isInRedZone } = useMemo(() => {
                   }}
                 >
                   <div className="flex items-center gap-4">
-                    <span className="material-symbols-outlined text-2xl transition-all duration-300" style={{
+                    <Eye className="w-6 h-6 transition-all duration-300" style={{
                       color: copiedRow === 'public' ? '#14b8a6' : '#22d3ee',
-                      textShadow: copiedRow === 'public' ? '0 0 10px #14b8a6' : 'none'
-                    }}>visibility</span>
+                      filter: copiedRow === 'public' ? 'drop-shadow(0 0 6px #14b8a6)' : 'none'
+                    }} />
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="font-space text-xs font-black text-white uppercase tracking-wider">
@@ -2698,7 +2709,7 @@ const { progress, isInRedZone } = useMemo(() => {
                   onMouseLeave={e => { e.currentTarget.style.borderColor = ''; e.currentTarget.style.boxShadow = '' }}
                 >
                   <div className="flex items-center gap-4">
-                    <span className="material-symbols-outlined text-2xl text-amber-500">military_tech</span>
+                    <Medal className="w-6 h-6 text-amber-500" />
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="font-space text-xs font-black text-white uppercase tracking-wider">
@@ -2713,7 +2724,7 @@ const { progress, isInRedZone } = useMemo(() => {
                       </p>
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-zinc-500 shrink-0">download</span>
+                  <Download className="w-5 h-5 text-zinc-500 shrink-0" />
                 </button>
               </div>
 
