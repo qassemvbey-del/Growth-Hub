@@ -396,7 +396,11 @@ export default function SquadGoalsPage() {
 
   // --- REAL-TIME SUBSCRIPTION FOR SQUAD CANVAS UPDATES ---
   useEffect(() => {
-    if (!mounted) return
+    console.log('🚀 REALTIME HOOK MOUNTED');
+    if (!mounted) {
+      console.log('Realtime hook returning early because page is not mounted');
+      return;
+    }
 
     const channel = supabase
       .channel('squad-goals-canvas-realtime')
@@ -421,7 +425,9 @@ export default function SquadGoalsPage() {
           fetchMissions()
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log('📡 CHANNEL STATUS:', status)
+      })
 
     return () => {
       supabase.removeChannel(channel)

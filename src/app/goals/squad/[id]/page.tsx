@@ -532,7 +532,11 @@ export default function MissionDetailPage() {
 
   // --- REAL-TIME CHANNEL SYNCHRONIZATION (squad goals only) ---
   useEffect(() => {
-    if (!id || typeof id !== 'string' || id.startsWith('local_')) return
+    console.log('🚀 REALTIME HOOK MOUNTED');
+    if (!id || typeof id !== 'string' || id.startsWith('local_')) {
+      console.log('Realtime hook returning early because id is invalid or local:', id);
+      return;
+    }
 
     // Targeted squad members refetch (avoids full mission reload)
     const refetchSquadMembers = async () => {
@@ -603,7 +607,7 @@ export default function MissionDetailPage() {
         }
       )
       .subscribe((status) => {
-        console.log(`REALTIME SUBSCRIPTION STATUS FOR WORKSPACE ${id}:`, status)
+        console.log('📡 CHANNEL STATUS:', status)
       })
 
     return () => {
