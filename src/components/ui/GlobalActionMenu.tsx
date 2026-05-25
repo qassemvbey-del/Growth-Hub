@@ -1,5 +1,6 @@
 'use client'
 
+import { FileText, HelpCircle, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
@@ -37,7 +38,7 @@ export default function GlobalActionMenu() {
               onClick={() => handleAction('/missions?create=true')}
               className="flex items-center gap-3 w-full p-3 rounded-lg text-left transition-all hover:bg-black/5 dark:hover:bg-white/10 group"
             >
-              <span className="material-symbols-outlined text-lg" style={{ color: currentTheme.color }}>target</span>
+              <HelpCircle />
               <span className="text-xs font-black font-space tracking-widest uppercase group-hover:text-[var(--text-primary)] transition-colors text-[var(--text-secondary)]">
                 {isRTL ? 'إضافة هدف' : 'CREATE GOAL'}
               </span>
@@ -46,7 +47,7 @@ export default function GlobalActionMenu() {
               onClick={() => handleAction('/notes?create=true')}
               className="flex items-center gap-3 w-full p-3 rounded-lg text-left transition-all hover:bg-black/5 dark:hover:bg-white/10 group"
             >
-              <span className="material-symbols-outlined text-lg" style={{ color: currentTheme.color }}>edit_document</span>
+              <FileText className="text-lg w-[18px] h-[18px]" style={{ color: currentTheme.color }} />
               <span className="text-xs font-black font-space tracking-widest uppercase group-hover:text-[var(--text-primary)] transition-colors text-[var(--text-secondary)]">
                 {isRTL ? 'إضافة ملاحظة' : 'CREATE NOTE'}
               </span>
@@ -70,9 +71,7 @@ export default function GlobalActionMenu() {
           boxShadow: isOpen ? `0 0 20px ${currentTheme.color}44` : 'none'
         }}
       >
-        <span className="material-symbols-outlined text-3xl font-black transition-transform duration-300" style={{ transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}>
-          add
-        </span>
+        <Plus className="text-3xl font-black transition-transform duration-300 w-8 h-8" style={{ transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)' }} />
       </motion.button>
     </div>
   )

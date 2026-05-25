@@ -1,5 +1,6 @@
 'use client'
 
+import { HelpCircle, TrendingUp, User } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -105,7 +106,7 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
             <div className="flex items-center gap-3 text-red-500 mb-1">
-              <span className="material-symbols-outlined text-3xl">security</span>
+              <HelpCircle />
               <h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase">ADMIN_CONTROL_CENTER</h1>
             </div>
             <p className="text-[10px] md:text-xs font-black tracking-[0.5em] text-red-500/40 uppercase">SYSTEM_OVERSIGHT // CLASSIFIED // LEVEL_BLACK</p>
@@ -117,7 +118,7 @@ export default function AdminDashboard() {
               <p className="text-sm font-bold text-red-500">{profile?.full_name}</p>
             </div>
             <div className="w-12 h-12 border border-red-500/30 rounded-sm bg-red-500/10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-red-500">admin_panel_settings</span>
+              <HelpCircle />
             </div>
           </div>
         </div>
@@ -173,7 +174,7 @@ export default function AdminDashboard() {
                           <div className="flex items-center gap-3">
                              <div className="relative">
                                <div className="w-10 h-10 bg-red-500/10 border border-white/10 rounded-sm flex items-center justify-center">
-                                 <span className="material-symbols-outlined text-red-500/50">person</span>
+                                 <User className="text-red-500/50" />
                                </div>
                                {/* Status Dot */}
                                <div className={cn(
@@ -250,7 +251,7 @@ export default function AdminDashboard() {
               >
                 <div className="bg-white/[0.02] border border-white/5 p-6 rounded-sm">
                   <h3 className="text-red-500 font-black text-xs tracking-widest uppercase mb-6 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-sm">trending_up</span>
+                    <TrendingUp className="text-sm w-3.5 h-3.5" />
                     TOP_MISSION_VECTORS
                   </h3>
                   <div className="space-y-4">
@@ -268,7 +269,7 @@ export default function AdminDashboard() {
 
                 <div className="bg-white/[0.02] border border-white/5 p-6 rounded-sm">
                    <h3 className="text-red-500 font-black text-xs tracking-widest uppercase mb-6 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-sm">pie_chart</span>
+                    <HelpCircle />
                     SYSTEM_PERFORMANCE
                   </h3>
                   <div className="grid grid-cols-2 gap-4">

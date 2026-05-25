@@ -1,5 +1,6 @@
 'use client'
 
+import { CheckSquare, HelpCircle } from 'lucide-react'
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
@@ -154,7 +155,7 @@ export default function CommandPalette({ isOpen, onClose, missions = [] }: Comma
                   )}
                   style={mode === 'task' ? { backgroundColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}66` } : {}}
                 >
-                  <span className="material-symbols-outlined text-sm">checklist</span>
+                  <CheckSquare className="text-sm w-3.5 h-3.5" />
                   {isRTL ? 'مهمة' : 'Task'}
                 </button>
 
@@ -169,7 +170,7 @@ export default function CommandPalette({ isOpen, onClose, missions = [] }: Comma
                   )}
                   style={mode === 'note' ? { backgroundColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}66` } : {}}
                 >
-                  <span className="material-symbols-outlined text-sm">notes</span>
+                  <HelpCircle />
                   {isRTL ? 'ملاحظة' : 'Note'}
                 </button>
 

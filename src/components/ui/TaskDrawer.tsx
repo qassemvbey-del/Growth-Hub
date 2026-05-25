@@ -596,7 +596,7 @@ export default function TaskDrawer({
                                 )}
                                 <span className="text-xs font-bold truncate flex-1">{member.full_name}</span>
                                 {isAssigned && (
-                                  <span className="material-symbols-outlined text-sm font-black shrink-0 text-[#14b8a6]">done</span>
+                                  <Check className="text-sm font-black shrink-0 text-[#14b8a6] w-3.5 h-3.5" />
                                 )}
                               </button>
                             )
@@ -624,7 +624,7 @@ export default function TaskDrawer({
                     className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                     style={{ backgroundColor: `${themeColor}15`, border: `1px solid ${themeColor}30` }}
                   >
-                    <span className="material-symbols-outlined text-base" style={{ color: themeColor }}>calendar_month</span>
+                    <Calendar className="text-base w-4 h-4" style={{ color: themeColor }} />
                   </div>
                   <div>
                     <h4 className="text-sm font-black font-space uppercase tracking-widest text-white/90">
@@ -654,7 +654,7 @@ export default function TaskDrawer({
                           </label>
                           {isStartLocked && (
                             <span className="flex items-center gap-1 text-[9px] font-mono text-amber-500/80 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
-                              <span className="material-symbols-outlined text-[10px]">lock</span>
+                              <Lock className="text-[10px]" />
                               {isRTL ? 'مقفل' : 'LOCKED'}
                             </span>
                           )}

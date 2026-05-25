@@ -1,5 +1,6 @@
 'use client'
 
+import { ArrowLeft, HelpCircle, XCircle } from 'lucide-react'
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
@@ -147,9 +148,7 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
           <div className="flex items-center gap-3">
             {/* Glowing accent bar */}
             <div className="w-1 h-6 rounded-full" style={{ backgroundColor: themeColor, boxShadow: `0 0 10px ${themeColor}` }} />
-            <span className="material-symbols-outlined text-xl" style={{ color: themeColor }}>
-              content_paste
-            </span>
+            <HelpCircle />
             <h2
               className="font-space font-black uppercase tracking-widest text-sm"
               style={{ color: themeColor }}
@@ -226,7 +225,7 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                       exit={{ opacity: 0 }}
                       className="text-[10px] font-space font-black text-[#FF0055] tracking-widest flex items-center gap-2"
                     >
-                      <span className="material-symbols-outlined text-sm">error</span>
+                      <XCircle className="text-sm w-3.5 h-3.5" />
                       {errorMessages[error] || error}
                     </motion.p>
                   )}
@@ -269,9 +268,7 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                   className="flex items-center gap-3 px-4 py-3 border rounded-sm"
                   style={{ backgroundColor: `${themeColor}12`, borderColor: `${themeColor}33` }}
                 >
-                  <span className="material-symbols-outlined text-xl" style={{ color: themeColor }}>
-                    task_alt
-                  </span>
+                  <HelpCircle />
                   <div>
                     <p className="text-[13px] font-space font-black uppercase tracking-widest" style={{ color: themeColor }}>
                       {isRTL ? `تم استخراج ${extractedTasks.length} مهمة بنجاح` : `✓ FOUND ${extractedTasks.length} TASKS`}
@@ -318,7 +315,7 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                       exit={{ opacity: 0 }}
                       className="text-[10px] font-space font-black text-[#FF0055] tracking-widest flex items-center gap-2"
                     >
-                      <span className="material-symbols-outlined text-sm">error</span>
+                      <XCircle className="text-sm w-3.5 h-3.5" />
                       {errorMessages[error] || error}
                     </motion.p>
                   )}
@@ -330,7 +327,7 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                     onClick={handleBack}
                     className="flex items-center gap-2 text-[10px] font-space font-black uppercase tracking-widest text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                   >
-                    <span className="material-symbols-outlined text-sm">arrow_back</span>
+                    <ArrowLeft className="text-sm w-3.5 h-3.5" />
                     {isRTL ? 'رجوع' : 'BACK'}
                   </button>
 

@@ -1,5 +1,6 @@
 'use client'
 
+import { CheckCircle2, Lock, Medal, X } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import Shell from '@/components/layout/Shell'
 import EnergyCell from '@/components/ui/EnergyCell'
@@ -129,7 +130,7 @@ export default function WinsPage() {
             <div className="text-center space-y-4 relative">
               <div className="flex items-center justify-center gap-6 mb-2">
                 <div className="w-20 h-[1px] opacity-30" style={{ background: `linear-gradient(to right, transparent, ${currentTheme.color})` }} />
-                <span className="material-symbols-outlined text-3xl md:text-4xl" style={{ color: currentTheme.color }}>military_tech</span>
+                <Medal className="text-3xl md:text-4xl w-8 h-8" style={{ color: currentTheme.color }} />
                 <div className="w-20 h-[1px] opacity-30" style={{ background: `linear-gradient(to left, transparent, ${currentTheme.color})` }} />
               </div>
               <h1 className="text-4xl md:text-7xl font-black font-space tracking-wider uppercase not- text-[var(--text-primary)] leading-none">
@@ -156,7 +157,7 @@ export default function WinsPage() {
             <div className="relative">
               <div className="w-32 h-32 border-2 border-[var(--card-border)] flex items-center justify-center animate-pulse"
                 style={{ clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)' }}>
-                <span className="material-symbols-outlined text-5xl text-black/20 dark:text-white/10">lock</span>
+                <Lock className="text-5xl text-black/20 dark:text-white/10 w-12 h-12" />
               </div>
             </div>
             <p className="text-[11px] md:text-xs font-space text-[var(--text-secondary)] tracking-[0.5em] uppercase font-black text-center leading-relaxed">
@@ -243,7 +244,7 @@ export default function WinsPage() {
                 <div className="flex justify-between items-start">
                   <div className="space-y-4">
                     <div className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-sm" style={{ color: currentTheme.color }}>military_tech</span>
+                      <Medal className="text-sm w-3.5 h-3.5" style={{ color: currentTheme.color }} />
                       <span className="text-[10px] md:text-xs font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'إنجاز مكتمل' : 'COMPLETED WIN'}</span>
                     </div>
                     <h2 className="text-2xl md:text-4xl font-space font-black uppercase text-[var(--text-primary)] tracking-tighter">
@@ -251,7 +252,7 @@ export default function WinsPage() {
                     </h2>
                   </div>
                   <button onClick={() => setSelectedMission(null)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all">
-                    <span className="material-symbols-outlined text-3xl">close</span>
+                    <X className="text-3xl w-8 h-8" />
                   </button>
                 </div>
 
@@ -282,7 +283,7 @@ export default function WinsPage() {
                      {selectedMission.tasks?.map((task: any) => (
                        <div key={task.id} className="flex items-center justify-between py-2.5 px-4 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl">
                          <div className="flex items-center gap-4">
-                           <span className="material-symbols-outlined text-sm" style={{ color: currentTheme.color }}>check_circle</span>
+                           <CheckCircle2 className="text-sm w-3.5 h-3.5" style={{ color: currentTheme.color }} />
                            <span className="text-sm md:text-base font-space font-bold text-[var(--text-primary)]">{task.title}</span>
                          </div>
                          <span className="text-[10px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">{isRTL ? 'الثقل' : 'WEIGHT'}: {task.weight}</span>

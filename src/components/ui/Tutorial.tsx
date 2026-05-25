@@ -1,5 +1,6 @@
 'use client'
 
+import { AlertOctagon, MoveRight } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
@@ -20,7 +21,7 @@ const PinkArrow = ({ position }: { position: string }) => {
         position === 'top' && "left-1/2 -translate-x-1/2 -bottom-12 -rotate-90"
       )}
     >
-      <span className="material-symbols-outlined text-4xl">trending_flat</span>
+      <MoveRight className="text-4xl w-10 h-10" />
     </motion.div>
   )
 }
@@ -118,7 +119,7 @@ export default function Tutorial() {
             <PinkArrow position={STEPS[currentStep].position} />
             <header className="flex justify-between items-center mb-6">
                <div className="flex items-center gap-3">
-                 <span className="material-symbols-outlined text-neon-green animate-pulse">emergency</span>
+                 <AlertOctagon className="text-neon-green animate-pulse" />
                  <h3 className="text-2xl font-black font-space tracking-tighter text-primary uppercase">
                    {STEPS[currentStep].title}
                  </h3>

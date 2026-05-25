@@ -1,5 +1,6 @@
 'use client'
 
+import { ChevronsRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
 import EnergyCell from './EnergyCell'
@@ -85,7 +86,7 @@ export default function LevelUpModal() {
               className="mt-3 inline-flex items-center gap-3 py-2.5 px-4 rounded-xl bg-cyan-500/10 dark:bg-cyan-950/40 border border-cyan-800/30 text-[10px] md:text-xs font-space font-black tracking-widest text-zinc-700 dark:text-[#B0C4DE]"
             >
               <span>{oldRank}</span>
-              <span className="material-symbols-outlined text-sm text-[#00CED1]">double_arrow</span>
+              <ChevronsRight className="text-sm text-[#00CED1] w-3.5 h-3.5" />
               <span className="text-zinc-900 dark:text-white font-bold">{newRank}</span>
             </motion.div>
 

@@ -1,5 +1,6 @@
 'use client'
 
+import { HelpCircle, X } from 'lucide-react'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
@@ -44,9 +45,7 @@ export default function AuthModal() {
           >
             {/* Header / Brand */}
             <div className="space-y-2">
-              <span className="material-symbols-outlined text-4xl" style={{ color: currentTheme.color }}>
-                sync_lock
-              </span>
+              <HelpCircle />
               <h2 className="text-2xl font-black font-space text-white tracking-widest uppercase">
                 {isRTL ? 'مزامنة حسابك' : 'Sync Your Account'}
               </h2>
@@ -84,7 +83,7 @@ export default function AuthModal() {
               onClick={() => setShowAuthModal(false)}
               className="absolute top-4 right-4 rtl:left-4 rtl:right-auto opacity-30 hover:opacity-100 transition-opacity cursor-pointer"
             >
-              <span className="material-symbols-outlined text-white">close</span>
+              <X className="text-white" />
             </button>
           </motion.div>
         </motion.div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { Check, HelpCircle, RefreshCw, Save, User, X } from 'lucide-react'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
@@ -116,9 +117,7 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
             <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/10 pb-6">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-sm animate-pulse" style={{ color: currentTheme.color }}>
-                    badge
-                  </span>
+                  <HelpCircle />
                   <p className="text-[10px] font-space tracking-[0.4em] uppercase font-black" style={{ color: currentTheme.color }}>
                     {isRTL ? 'تخصيص الملف الشخصي والهوية' : 'USER_PROFILE // PERSONA SELECTION'}
                   </p>
@@ -131,7 +130,7 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                 onClick={onClose}
                 className="w-11 h-11 rounded-full bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex items-center justify-center text-zinc-600 dark:text-white/60 hover:text-zinc-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 hover:scale-105 active:scale-95 transition-all shadow-lg cursor-pointer"
               >
-                <span className="material-symbols-outlined text-xl font-bold">close</span>
+                <X className="text-xl font-bold w-5 h-5" />
               </button>
             </div>
 
@@ -173,7 +172,7 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                     {profile?.google_avatar_url ? (
                       <img src={profile.google_avatar_url} alt="Google Auth" className="w-[90%] h-[90%] mx-auto object-contain p-1 rounded-full" />
                     ) : (
-                      <span className="material-symbols-outlined text-zinc-400 dark:text-white/40 text-5xl font-light">account_circle</span>
+                      <User className="text-zinc-400 dark:text-white/40 text-5xl font-light w-12 h-12" />
                     )}
                   </div>
                   {/* Visual Role Icon Overlay Badge at bottom-right */}
@@ -185,9 +184,7 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                       boxShadow: selected === null ? `0 0 15px ${currentTheme.color}` : undefined
                     }}
                   >
-                    <span className="material-symbols-outlined text-xs md:text-sm font-black">
-                      cloud_sync
-                    </span>
+                    <RefreshCw className="text-xs md:text-sm font-black w-3 h-3" />
                   </div>
                 </div>
 
@@ -209,7 +206,7 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                   >
-                    <span className="material-symbols-outlined text-black text-sm font-black">check</span>
+                    <Check className="text-black text-sm font-black w-3.5 h-3.5" />
                   </motion.div>
                 )}
               </button>
@@ -287,7 +284,7 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                       >
-                        <span className="material-symbols-outlined text-black text-sm font-black">check</span>
+                        <Check className="text-black text-sm font-black w-3.5 h-3.5" />
                       </motion.div>
                     )}
                   </button>
@@ -310,12 +307,12 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
               >
                 {isSaving ? (
                   <>
-                    <span className="material-symbols-outlined text-lg animate-spin font-bold">sync</span>
+                    <HelpCircle />
                     <span className="font-bold">{isRTL ? 'جارٍ الحفظ والمزامنة التكتيكية...' : 'SAVING & SYNCING CALIBRATION...'}</span>
                   </>
                 ) : (
                   <>
-                    <span className="material-symbols-outlined text-lg font-bold">save</span>
+                    <Save className="text-lg font-bold w-[18px] h-[18px]" />
                     <span className="font-bold">{isRTL ? 'حفظ الشخصية وتفعيل المزامنة' : 'CONFIRM AVATAR SELECTION'}</span>
                   </>
                 )}

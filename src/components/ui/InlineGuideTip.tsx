@@ -1,5 +1,6 @@
 'use client'
 
+import { Info, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
@@ -54,7 +55,7 @@ export default function InlineGuideTip({ hasTasks }: InlineGuideTipProps) {
             className="absolute top-4 right-4 rtl:left-4 rtl:right-auto text-white/50 hover:text-white transition-colors cursor-pointer z-20 p-1"
             title="Dismiss tip"
           >
-            <span className="material-symbols-outlined text-sm sm:text-base">close</span>
+            <X className="text-sm sm:text-base w-3.5 h-3.5" />
           </button>
 
           <div className="relative z-10 space-y-4">
@@ -62,7 +63,7 @@ export default function InlineGuideTip({ hasTasks }: InlineGuideTipProps) {
               className="text-sm font-space font-black tracking-widest uppercase flex items-center gap-2"
               style={{ color: currentTheme.color }}
             >
-              <span className="material-symbols-outlined text-lg">info</span>
+              <Info className="text-lg w-[18px] h-[18px]" />
               {isRTL ? 'دليل سريع' : 'Quick Guide'}
             </h3>
             

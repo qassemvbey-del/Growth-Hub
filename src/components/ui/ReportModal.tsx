@@ -1,5 +1,6 @@
 'use client'
 
+import { Award, Check, CheckCircle2, FileText, Lock, Timer, X, XCircle, Zap } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -91,13 +92,13 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
           {/* Top Neon Header */}
           <div className="px-6 py-5 border-b flex justify-between items-center border-zinc-200 dark:border-white/10" style={{ borderColor: `${themeColor}20` }}>
             <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined" style={{ color: themeColor }}>description</span>
+              <FileText className="" style={{ color: themeColor }} />
               <h2 className="font-space font-black uppercase tracking-widest text-sm" style={{ color: themeColor }}>
                 {report.title}
               </h2>
             </div>
             <button onClick={onClose} className="text-zinc-400 dark:text-white/20 hover:text-zinc-900 dark:hover:text-white transition-colors">
-              <span className="material-symbols-outlined">close</span>
+              <X className="" />
             </button>
           </div>
 
@@ -142,7 +143,7 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
               {report.type === 'deadline_alert' && (
                 <div className="space-y-6">
                   <div className="flex flex-col items-center justify-center py-4 border-2 border-dashed border-[#FF0055]/30 bg-[#FF0055]/5 rounded-xl">
-                    <span className="material-symbols-outlined text-4xl text-[#FF0055] animate-pulse">timer</span>
+                    <Timer className="text-4xl text-[#FF0055] animate-pulse w-10 h-10" />
                     <p className="mt-2 text-xs font-black text-[#FF0055] uppercase tracking-widest">CRITICAL_DEADLINE</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -161,7 +162,7 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
               {report.type === 'mission_complete' && (
                 <div className="space-y-6">
                   <div className="flex flex-col items-center justify-center py-6 bg-neon-green/10 border border-neon-green/30 rounded-xl" style={{ backgroundColor: `${themeColor}10`, borderColor: `${themeColor}30` }}>
-                    <span className="material-symbols-outlined text-5xl mb-2" style={{ color: themeColor }}>workspace_premium</span>
+                    <Award className="text-5xl mb-2 w-12 h-12" style={{ color: themeColor }} />
                     <p className="text-sm font-black uppercase tracking-[0.4em]" style={{ color: themeColor }}>GOAL_ACCOMPLISHED</p>
                   </div>
                   <div className="py-2.5 px-4 bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-center w-full">
@@ -204,7 +205,7 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                           disabled={loading}
                           className="h-11 border border-red-500/30 hover:border-red-500/80 bg-red-950/15 hover:bg-red-500/10 text-red-400 font-space font-black text-xs uppercase tracking-widest transition-all duration-300 rounded-xl flex items-center justify-center gap-1.5 disabled:opacity-40 cursor-pointer"
                         >
-                          <span className="material-symbols-outlined text-base">close</span>
+                          <X className="text-base w-4 h-4" />
                           {isRTL ? '[ ✗ رفض ]' : '[ ✗ REJECT ]'}
                         </button>
                         <button
@@ -212,20 +213,20 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                           disabled={loading}
                           className="h-11 bg-teal-500 hover:bg-teal-400 text-black hover:shadow-[0_0_20px_rgba(20,184,166,0.4)] font-space font-black text-xs uppercase tracking-widest transition-all duration-300 rounded-xl flex items-center justify-center gap-1.5 disabled:opacity-40 cursor-pointer"
                         >
-                          <span className="material-symbols-outlined text-base">done</span>
+                          <Check className="text-base w-4 h-4" />
                           {isRTL ? '[ ✓ قبول ]' : '[ ✓ APPROVE ]'}
                         </button>
                       </div>
                     ) : actionStatus === 'approved' ? (
                       <div className="py-4 bg-teal-500/10 border border-teal-500/30 rounded-xl flex items-center justify-center gap-2">
-                        <span className="material-symbols-outlined text-teal-400">check_circle</span>
+                        <CheckCircle2 className="text-teal-400" />
                         <p className="text-xs font-space font-black text-teal-400 uppercase tracking-widest">
                           {isRTL ? 'APPROVED // تم قبول العضو للفريق' : 'APPROVED // MEMBER ADDED'}
                         </p>
                       </div>
                     ) : (
                       <div className="py-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center justify-center gap-2">
-                        <span className="material-symbols-outlined text-red-400">cancel</span>
+                        <XCircle className="text-red-400" />
                         <p className="text-xs font-space font-black text-red-400 uppercase tracking-widest">
                           {isRTL ? 'REJECTED // تم رفض طلب الوصول' : 'REJECTED // ACCESS CLASSIFIED'}
                         </p>
@@ -239,7 +240,7 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
               {report.type === 'squad_join_approved' && (
                 <div className="space-y-6">
                   <div className="flex flex-col items-center justify-center py-6 bg-teal-500/10 border border-teal-500/30 rounded-xl text-center">
-                    <span className="material-symbols-outlined text-5xl text-teal-400 mb-2 animate-bounce">workspace_premium</span>
+                    <Award className="text-5xl text-teal-400 mb-2 animate-bounce w-12 h-12" />
                     <p className="text-sm font-black uppercase tracking-[0.4em] text-teal-400">
                       {isRTL ? 'تم منح الإذن // الفريق جاهز' : 'ACCESS GRANTED // SQUAD READY'}
                     </p>
@@ -251,7 +252,7 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                     }}
                     className="w-full h-12 bg-teal-500 hover:bg-teal-400 text-black font-space font-black text-xs uppercase tracking-widest transition-all duration-300 rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.3)] flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-base">bolt</span>
+                    <Zap className="text-base w-4 h-4" />
                     {isRTL ? '[ ⚡ دخول لوحة الفريق ]' : '[ ⚡ ENTER SQUAD CANVAS ]'}
                   </button>
                 </div>
@@ -261,7 +262,7 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
               {report.type === 'squad_join_rejected' && (
                 <div className="space-y-6">
                   <div className="flex flex-col items-center justify-center py-6 bg-red-500/10 border border-red-500/30 rounded-xl text-center">
-                    <span className="material-symbols-outlined text-5xl text-red-500 mb-2">lock</span>
+                    <Lock className="text-5xl text-red-500 mb-2 w-12 h-12" />
                     <p className="text-sm font-black uppercase tracking-[0.4em] text-red-500">
                       {isRTL ? 'الوصول مرفوض // هدف مصنف' : 'ACCESS DENIED // CLASSIFIED'}
                     </p>

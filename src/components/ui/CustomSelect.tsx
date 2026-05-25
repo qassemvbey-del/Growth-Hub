@@ -1,5 +1,6 @@
 'use client'
 
+import { Check, HelpCircle } from 'lucide-react'
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -58,12 +59,7 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
         <span className={cn(!selectedOption && "opacity-40")}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
-        <span 
-          className={cn("material-symbols-outlined transition-transform duration-300", isOpen && "rotate-180")}
-          style={{ color: isOpen ? currentTheme.color : undefined }}
-        >
-          expand_more
-        </span>
+        <HelpCircle />
       </button>
 
       <AnimatePresence>
@@ -109,7 +105,7 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
                 >
                   <span>{option.label}</span>
                   {option.value === value && (
-                    <span className="material-symbols-outlined text-sm" style={{ color: currentTheme.color }}>check</span>
+                    <Check className="text-sm w-3.5 h-3.5" style={{ color: currentTheme.color }} />
                   )}
                 </button>
               ))}

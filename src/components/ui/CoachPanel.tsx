@@ -1,5 +1,6 @@
 'use client'
 
+import { X, Zap } from 'lucide-react'
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -117,13 +118,13 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
             {/* Header */}
             <div className="p-6 border-b flex justify-between items-center" style={{ borderColor: `${coachColor}22` }}>
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined animate-pulse" style={{ color: coachColor }}>bolt</span>
+                <Zap className="animate-pulse" style={{ color: coachColor }} />
                 <span className="text-sm font-black tracking-[0.2em] uppercase whitespace-nowrap overflow-hidden" style={{ color: coachColor }}>
                   COACH: {coachName} // ONLINE
                 </span>
               </div>
               <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
-                <span className="material-symbols-outlined">close</span>
+                <X className="" />
               </button>
             </div>
 

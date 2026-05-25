@@ -1,5 +1,6 @@
 'use client'
 
+import { Inbox } from 'lucide-react'
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -55,7 +56,7 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, themeC
       <div className="px-5 py-4 border-b border-black/5 dark:border-white/5 flex flex-col gap-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-sm" style={{ color: themeColor }}>inbox</span>
+            <Inbox className="text-sm w-3.5 h-3.5" style={{ color: themeColor }} />
             <span className="text-[10px] font-space font-black tracking-[0.2em] uppercase opacity-50">
               {isRTL ? 'صندوق الوارد // الإشعارات' : 'NOTIFICATION INBOX'}
             </span>
@@ -97,7 +98,7 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, themeC
               animate={{ opacity: 1 }}
               className="py-12 flex flex-col items-center justify-center gap-3 opacity-20"
             >
-              <span className="material-symbols-outlined text-4xl">inbox_customize</span>
+              <Inbox className="text-4xl w-10 h-10" />
               <p className="text-[10px] font-space font-black uppercase tracking-widest text-center px-4">
                 {isRTL 
                   ? `لا يوجد إشعارات في قسم ${filter === 'all' ? 'الكل' : filter === 'unread' ? 'غير المقروء' : 'المقروء'}` 

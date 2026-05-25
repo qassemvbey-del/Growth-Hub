@@ -1,5 +1,6 @@
 'use client'
 
+import { AlertTriangle, CheckCircle2, FileText, HelpCircle, Lock, LogOut, Star, User } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Shell from '@/components/layout/Shell'
@@ -322,7 +323,7 @@ export default function SettingsPage() {
                   {activeTab === 'ACCOUNT' && (
                     <div className="space-y-6">
                       <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-                        <span className="material-symbols-outlined text-2xl" style={{ color: currentTheme.color }}>person</span>
+                        <User className="text-2xl w-6 h-6" style={{ color: currentTheme.color }} />
                         <h3 className="font-space font-black tracking-widest text-sm uppercase text-white">
                           {isRTL ? 'إعدادات الحساب الشخصي' : 'ACCOUNT CONFIGURATION'}
                         </h3>
@@ -336,10 +337,10 @@ export default function SettingsPage() {
                               {profile?.avatar_url ? (
                                 <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover rounded-full" />
                               ) : (
-                                <span className="material-symbols-outlined text-white/40 text-4xl">person</span>
+                                <User className="text-white/40 text-4xl w-10 h-10" />
                               )}
                               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                                <span className="material-symbols-outlined text-white text-xl">edit</span>
+                                <FileText className="text-white text-xl w-5 h-5" />
                               </div>
                             </div>
                             <div className="space-y-1 text-center sm:text-start">
@@ -436,7 +437,7 @@ export default function SettingsPage() {
                         {/* Connected User Email Security / Guest Link Fallback */}
                         <div className="space-y-2 pt-2">
                           <label className="text-[10px] font-space text-[var(--text-secondary)] tracking-widest uppercase font-black flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-xs">lock</span>
+                            <Lock className="text-xs w-3 h-3" />
                             {isRTL ? 'البريد الإلكتروني المتصل' : 'CONNECTED SECURITY EMAIL'}
                           </label>
                           {userEmail ? (
@@ -511,7 +512,7 @@ export default function SettingsPage() {
                   {activeTab === 'AI_COACH' && (
                     <div className="space-y-6">
                       <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-                        <span className="material-symbols-outlined text-2xl" style={{ color: currentTheme.color }}>psychology</span>
+                        <HelpCircle />
                         <h3 className="font-space font-black tracking-widest text-sm uppercase text-white">
                           {aiNameHeader}
                         </h3>
@@ -584,7 +585,7 @@ export default function SettingsPage() {
                   {activeTab === 'SYSTEM' && (
                     <div className="space-y-6">
                       <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-                        <span className="material-symbols-outlined text-2xl" style={{ color: currentTheme.color }}>settings_system_daydream</span>
+                        <HelpCircle />
                         <h3 className="font-space font-black tracking-widest text-sm uppercase text-white">
                           {isRTL ? 'إعدادات النظام والصوت' : 'SYSTEM & AUDIO CALIBRATION'}
                         </h3>
@@ -810,7 +811,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="p-4 bg-red-500/5 border border-red-500/10 flex gap-4 items-center rounded-xl">
-                  <span className="material-symbols-outlined text-red-500 text-sm">warning</span>
+                  <AlertTriangle className="text-red-500 text-sm w-3.5 h-3.5" />
                   <p className="text-[9px] font-space text-red-500/60 leading-relaxed uppercase tracking-wider">
                     WARNING: MANUAL_XP_OVERRIDE WILL TRIGGER IMMEDIATE RANK_RECALCULATION. USE ONLY FOR DEVELOPMENT_TESTING.
                   </p>
@@ -836,7 +837,7 @@ export default function SettingsPage() {
             >
               <div className="flex justify-center">
                 <div className="w-14 h-14 rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-3xl font-bold" style={{ color: currentTheme.color }}>logout</span>
+                  <LogOut className="text-3xl font-bold w-8 h-8" style={{ color: currentTheme.color }} />
                 </div>
               </div>
 
@@ -899,7 +900,7 @@ export default function SettingsPage() {
               {/* Header */}
               <div className="flex items-center gap-4 border-b border-white/5 pb-4">
                 <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center flex-shrink-0">
-                  <span className="material-symbols-outlined text-red-500 text-2xl font-bold">warning</span>
+                  <AlertTriangle className="text-red-500 text-2xl font-bold w-6 h-6" />
                 </div>
                 <div className="text-start">
                   <h3 className="font-space font-black text-lg text-red-500 uppercase tracking-widest leading-tight">
@@ -953,7 +954,7 @@ export default function SettingsPage() {
                       >
                         <span>{isRTL ? opt.ar : opt.en}</span>
                         {surveyBothered === opt.key && (
-                          <span className="material-symbols-outlined text-sm text-red-500">check_circle</span>
+                          <CheckCircle2 className="text-sm text-red-500 w-3.5 h-3.5" />
                         )}
                       </button>
                     ))}
@@ -979,14 +980,8 @@ export default function SettingsPage() {
                           }}
                           className="p-2 transition-transform duration-200 active:scale-90"
                         >
-                          <span 
-                            className={cn(
-                              "material-symbols-outlined text-3xl font-black transition-all",
-                              isActive ? "fill-1 text-red-500 scale-110 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]" : "text-white/20 hover:text-white/40"
-                            )}
-                          >
-                            star
-                          </span>
+                          <Star className={cn(" text-3xl font-black transition-all",
+                              isActive ? "fill-1 text-red-500 scale-110 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]" : "text-white/20 hover:text-white/40")} />
                         </button>
                       )
                     })}

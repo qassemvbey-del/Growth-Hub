@@ -1,5 +1,6 @@
 'use client'
 
+import { X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useState, createContext, useContext } from 'react'
 
@@ -110,7 +111,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                       onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
                       className="w-[26px] h-[26px] rounded-md flex items-center justify-center hover:bg-white/10 text-white/30 hover:text-white/80 transition-all cursor-pointer shrink-0 opacity-40 hover:opacity-100"
                     >
-                      <span className="material-symbols-outlined text-[15px]">close</span>
+                      <X className="text-[15px]" />
                     </button>
 
                     {/* Symmetrical animated progress timer bar */}

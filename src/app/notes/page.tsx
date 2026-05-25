@@ -1,5 +1,6 @@
 'use client'
 
+import { Keyboard, Layers, Link, Pin, Plus, Save, Search, Trash2, X } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
 import Shell from '@/components/layout/Shell'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -473,7 +474,7 @@ export default function NotesPage() {
           <div className="flex flex-row items-center gap-3 w-full md:w-auto">
             {/* Search Bar */}
             <div className="relative group flex-1 md:flex-none">
-              <span className={cn("material-symbols-outlined absolute top-1/2 -translate-y-1/2 text-[var(--text-secondary)]/40 group-focus-within:text-[var(--text-secondary)] transition-colors text-[18px]", isRTL ? "right-3.5" : "left-3.5")}>search</span>
+              <Search className={cn(" absolute top-1/2 -translate-y-1/2 text-[var(--text-secondary)]/40 group-focus-within:text-[var(--text-secondary)] transition-colors text-[18px]", isRTL ? "right-3.5" : "left-3.5")} />
               <input
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
@@ -489,7 +490,7 @@ export default function NotesPage() {
               onClick={() => setIsCreating(true)}
               className="flex flex-row items-center justify-center gap-2 h-11 px-5 bg-white/5 border border-white/10 text-white/70 font-space font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all duration-300 text-xs rounded-xl shrink-0"
             >
-              <span className="material-symbols-outlined text-[16px] leading-none">add</span>
+              <Plus className="text-[16px] leading-none" />
               {isRTL ? 'إضافة ملاحظة' : 'Add Note'}
             </button>
           </div>
@@ -582,7 +583,7 @@ export default function NotesPage() {
 
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2 text-[9px] font-space text-black/30 dark:text-white/20 tracking-widest uppercase">
-                  <span className="material-symbols-outlined text-sm">keyboard</span>
+                  <Keyboard className="text-sm w-3.5 h-3.5" />
                   {isRTL ? 'اضغط ⌘+Enter للحفظ' : '⌘+Enter to save'}
                 </div>
                 <div className="flex gap-6">
@@ -734,7 +735,7 @@ export default function NotesPage() {
                         className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-sm text-[8px] font-space font-black tracking-wider uppercase hover:bg-zinc-800 hover:scale-105 transition-all cursor-pointer z-10"
                         style={{ backgroundColor: `${noteColor}15`, color: noteColor, border: `1px solid ${noteColor}30` }}
                       >
-                        <span className="material-symbols-outlined text-[10px]">link</span>
+                        <Link className="text-[10px]" />
                         <span className="max-w-[80px] truncate">{linkedMission.title}</span>
                       </div>
                     )}
@@ -742,7 +743,7 @@ export default function NotesPage() {
                     {/* Pin indicator */}
                     {note.is_locked && (
                       <div className="absolute top-3 left-3 opacity-50">
-                        <span className="material-symbols-outlined text-sm" style={{ color: noteColor }}>push_pin</span>
+                        <Pin className="text-sm w-3.5 h-3.5" style={{ color: noteColor }} />
                       </div>
                     )}
 
@@ -774,7 +775,7 @@ export default function NotesPage() {
                             className="flex items-center gap-1 text-[8px] font-mono text-indigo-400 font-bold uppercase tracking-wider bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20"
                             title="Embedded Task Note"
                           >
-                            <span className="material-symbols-outlined text-[10px]">layers</span>
+                            <Layers className="text-[10px]" />
                             {isRTL ? 'مدمج' : 'NESTED'}
                           </span>
                         )}
@@ -787,7 +788,7 @@ export default function NotesPage() {
                         onClick={(e) => { e.stopPropagation(); deleteNote(note.id) }}
                         className="text-[var(--text-secondary)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
                       >
-                        <span className="material-symbols-outlined text-base">delete</span>
+                        <Trash2 className="text-base w-4 h-4" />
                       </button>
                     </div>
                   </motion.div>
@@ -834,7 +835,7 @@ export default function NotesPage() {
                       className="flex items-center gap-2 text-[10px] font-space font-black tracking-widest uppercase hover:underline cursor-pointer transition-all" 
                       style={{ color: currentTheme.color }}
                     >
-                      <span className="material-symbols-outlined text-sm">link</span>
+                      <Link className="text-sm w-3.5 h-3.5" />
                       {isRTL ? `مرتبط بـ: ${editingNote.cups.title}` : `Linked to: ${editingNote.cups.title}`}
                     </div>
                  )}
@@ -859,7 +860,7 @@ export default function NotesPage() {
                 onClick={() => setEditingNote(null)}
                  className="absolute top-5 right-5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
               >
-                <span className="material-symbols-outlined text-2xl">close</span>
+                <X className="text-2xl w-6 h-6" />
               </button>
 
                <div className="flex gap-3 flex-wrap border-b border-[var(--card-border)] pb-6 mb-8">
@@ -890,7 +891,7 @@ export default function NotesPage() {
                   className={cn('p-2.5 border rounded-xl transition-all', editingNote.is_locked ? 'text-black border-transparent' : 'bg-[var(--input-bg)] border border-[var(--card-border)] hover:opacity-80')}
                   style={editingNote.is_locked ? { backgroundColor: currentTheme.color, boxShadow: `0 0 10px ${currentTheme.color}55` } : {}}
                 >
-                  <span className="material-symbols-outlined text-base">push_pin</span>
+                  <Pin className="text-base w-4 h-4" />
                 </button>
 
                 {missions.length > 0 && (
@@ -954,7 +955,7 @@ export default function NotesPage() {
                    <span className="text-[9px] font-space tracking-widest uppercase font-black">
                      {isRTL ? 'حفظ تلقائي' : 'Auto-saved'}
                    </span>
-                  <span className="material-symbols-outlined text-xl">save</span>
+                  <Save className="text-xl w-5 h-5" />
                 </div>
               </div>
             </motion.div>

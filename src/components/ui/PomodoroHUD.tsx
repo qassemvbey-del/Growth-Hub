@@ -1,5 +1,6 @@
 'use client'
 
+import { AlertTriangle } from 'lucide-react'
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { usePomodoro } from '@/context/PomodoroContext'
@@ -249,7 +250,7 @@ export default function PomodoroHUD() {
               
               <div className="space-y-6">
                 <div className="flex items-center gap-3 text-[#FF0055]">
-                  <span className="material-symbols-outlined text-3xl animate-pulse">warning</span>
+                  <AlertTriangle className="text-3xl animate-pulse w-8 h-8" />
                   <h3 className="text-lg font-black tracking-widest uppercase font-space">
                     {isRTL ? 'تحذير: تشتيت التركيز' : 'WARNING: CONTEXT SWITCHING'}
                   </h3>

@@ -1,5 +1,6 @@
 'use client'
 
+import { HelpCircle, Paperclip, RefreshCw, X } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
@@ -467,7 +468,7 @@ const MissionAttachmentsModal = ({
           {/* ── Modal Header ─────────────────────────────────────── */}
           <div className="flex items-center justify-between px-6 py-5 border-b shrink-0 border-zinc-200 dark:border-white/10" style={{ borderColor: `${themeColor}22` }}>
             <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-xl" style={{ color: themeColor, textShadow: `0 0 12px ${themeColor}` }}>attach_file</span>
+              <Paperclip className="text-xl w-5 h-5" style={{ color: themeColor, textShadow: `0 0 12px ${themeColor}` }} />
               <div>
                 <p className="font-space font-black uppercase tracking-widest text-[10px] text-zinc-500 dark:text-white/30">
                   {isRTL ? 'المرفقات المزامنة' : 'Synced Attachments'}
@@ -555,7 +556,7 @@ const MissionAttachmentsModal = ({
                         className="py-2.5 px-4 font-space font-black uppercase tracking-widest text-[10px] text-black transition-all rounded-xl shrink-0 cursor-pointer"
                         style={{ backgroundColor: themeColor, boxShadow: `0 0 16px ${themeColor}44` }}
                       >
-                        {adding ? <span className="material-symbols-outlined text-base animate-spin">progress_activity</span> : (isRTL ? 'إضافة' : 'ADD')}
+                        {adding ? <HelpCircle /> : (isRTL ? 'إضافة' : 'ADD')}
                       </button>
                     </div>
                   </motion.div>
@@ -568,12 +569,12 @@ const MissionAttachmentsModal = ({
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-3 scrollbar-thin">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-12 gap-4">
-                <span className="material-symbols-outlined text-3xl animate-spin" style={{ color: themeColor }}>progress_activity</span>
+                <HelpCircle />
                 <p className="font-space font-black uppercase tracking-[0.2em] text-[9px] text-zinc-400 dark:text-white/20">FETCHING_DATA...</p>
               </div>
             ) : attachments.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 gap-4">
-                <span className="material-symbols-outlined text-4xl opacity-20" style={{ color: themeColor }}>cloud_sync</span>
+                <RefreshCw className="text-4xl opacity-20 w-10 h-10" style={{ color: themeColor }} />
                 <p className="font-space font-black uppercase tracking-[0.4em] text-[9px] text-zinc-400 dark:text-white/20">
                   {isRTL ? 'لا توجد مرفقات مضافة بعد' : 'NO ATTACHMENTS SYNCD'}
                 </p>
@@ -608,9 +609,9 @@ const MissionAttachmentsModal = ({
                             className="w-7 h-7 flex items-center justify-center border border-zinc-200 dark:border-white/5 text-zinc-500 dark:text-white/25 hover:border-red-500/60 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-lg cursor-pointer"
                           >
                             {deletingId === att.id ? (
-                              <span className="material-symbols-outlined text-xs animate-spin">progress_activity</span>
+                              <HelpCircle />
                             ) : (
-                              <span className="material-symbols-outlined text-xs">close</span>
+                              <X className="text-xs w-3 h-3" />
                             )}
                           </button>
                         </div>

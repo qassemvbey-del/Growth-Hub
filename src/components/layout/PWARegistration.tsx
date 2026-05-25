@@ -1,5 +1,6 @@
 'use client'
 
+import { HelpCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
@@ -132,15 +133,7 @@ export default function PWARegistration() {
                   borderColor: `${currentTheme.color}30` 
                 }}
               >
-                <span
-                  className="material-symbols-outlined text-xl"
-                  style={{ 
-                    color: currentTheme.color, 
-                    textShadow: `0 0 8px ${currentTheme.color}` 
-                  }}
-                >
-                  cell_tower
-                </span>
+                <HelpCircle />
               </div>
               <div className="flex-1 min-w-0">
                 <h3

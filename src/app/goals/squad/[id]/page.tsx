@@ -1448,7 +1448,7 @@ const { progress, isInRedZone } = useMemo(() => {
                onClick={() => { playBlip(); setShowIntelModal(true); }}
                className="px-4 md:px-6 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-sm uppercase flex items-center gap-3 relative border-[var(--card-border)] text-[var(--text-secondary)] hover:opacity-85"
              >
-               <span className="material-symbols-outlined text-base">notes</span>
+               <HelpCircle />
                {isRTL ? 'الملاحظات' : 'NOTES'}
                {linkedNotes.length > 0 && (
                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center text-black" style={{ backgroundColor: missionColor }}>
@@ -1463,7 +1463,7 @@ const { progress, isInRedZone } = useMemo(() => {
                 onClick={handleShare}
                 className="px-4 md:px-6 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-sm uppercase flex items-center gap-3 border-[var(--card-border)] text-[var(--text-secondary)] hover:opacity-85"
              >
-                <span className="material-symbols-outlined text-base">share</span>
+                <Share2 className="text-base w-4 h-4" />
                 {isRTL ? 'مشاركة' : 'SHARE'}
              </button>
            </div>
@@ -1510,7 +1510,7 @@ const { progress, isInRedZone } = useMemo(() => {
                 }}
                 title="ADD_TO_GOOGLE_CALENDAR"
              >
-                <span className="material-symbols-outlined text-xl">calendar_month</span>
+                <Calendar className="text-xl w-5 h-5" />
              </button>
 
              <button
@@ -1518,7 +1518,7 @@ const { progress, isInRedZone } = useMemo(() => {
                 className="w-10 h-10 border border-[var(--card-border)] text-[var(--text-secondary)] hover:opacity-85 flex items-center justify-center rounded-sm relative transition-all"
                 title="GOAL_ATTACHMENTS"
              >
-                <span className="material-symbols-outlined text-xl">attach_file</span>
+                <Paperclip className="text-xl w-5 h-5" />
                 {attachmentCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center text-black" style={{ backgroundColor: missionColor }}>
                     {attachmentCount}
@@ -1649,7 +1649,7 @@ const { progress, isInRedZone } = useMemo(() => {
                                }}
                              >
                                {task.is_completed && (
-                                 <span className="material-symbols-outlined text-black font-black text-base">check</span>
+                                 <Check className="text-black font-black text-base w-4 h-4" />
                                )}
                              </button>
                            </div>
@@ -1819,7 +1819,7 @@ const { progress, isInRedZone } = useMemo(() => {
                                  onMouseLeave={e => e.currentTarget.style.color = ''}
                                  title="START_FOCUS_SESSION"
                                >
-                                 <span className="material-symbols-outlined text-lg">timer</span>
+                                 <Timer className="text-lg w-[18px] h-[18px]" />
                                </button>
 
                                <button
@@ -1842,7 +1842,7 @@ const { progress, isInRedZone } = useMemo(() => {
                                  className="p-2 text-[var(--text-secondary)] hover:text-red-500 transition-all"
                                  title="DELETE_TASK"
                                >
-                                 <span className="material-symbols-outlined text-lg">delete_sweep</span>
+                                 <Trash2 className="text-lg w-[18px] h-[18px]" />
                                </button>
                              </div>
                            </div>
@@ -1906,7 +1906,7 @@ const { progress, isInRedZone } = useMemo(() => {
                    <div className="flex items-center gap-2">
                      <span className="text-[8px] font-space text-[var(--text-secondary)] uppercase tracking-widest font-black">SET_POWER</span>
                      <div className="group relative flex items-center cursor-help">
-                       <span className="material-symbols-outlined text-[12px] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">help</span>
+                       <HelpCircle className="text-[12px] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
                        <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 rounded bg-[var(--card-bg)] border border-[var(--card-border)] p-2 text-[10px] md:text-xs text-[var(--text-primary)] shadow-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-[300] text-center">
                          {isRTL 
                            ? "هذه الأشرطة تحدد وزن أو حجم المهمة. المهمة الأكبر تمنحك نقاط خبرة أكثر وتأخذ وقتاً أطول."
@@ -1985,13 +1985,13 @@ const { progress, isInRedZone } = useMemo(() => {
                     onClick={() => setShowIntelModal(false)}
                     className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
                   >
-                    <span className="material-symbols-outlined text-2xl">close</span>
+                    <X className="text-2xl w-6 h-6" />
                   </button>
                 </div>
 
                 {linkedNotes.length === 0 ? (
                   <div className="py-16 text-center space-y-4">
-                    <span className="material-symbols-outlined text-4xl text-[var(--text-secondary)]/20">notes</span>
+                    <HelpCircle />
                     <p className="text-[11px] font-space text-[var(--text-secondary)] tracking-[0.4em] uppercase font-black">
                       {isRTL ? 'لا توجد سجلات مرتبطة' : 'NO_INTEL_LINKED'}
                     </p>
@@ -2023,7 +2023,7 @@ const { progress, isInRedZone } = useMemo(() => {
                             {new Date(note.created_at).toLocaleDateString()}
                           </span>
                           {note.is_locked && (
-                            <span className="material-symbols-outlined text-xs" style={{ color: missionColor }}>push_pin</span>
+                            <Pin className="text-xs w-3 h-3" style={{ color: missionColor }} />
                           )}
                         </div>
                       </motion.div>

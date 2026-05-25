@@ -1,5 +1,6 @@
 'use client'
 
+import { Lock } from 'lucide-react'
 import React from 'react'
 import { motion, useMotionValue, useSpring, useMotionTemplate } from 'framer-motion'
 import Shell from '@/components/layout/Shell'
@@ -236,7 +237,7 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
         {/* Locked Overlay with Premium Hover Specs - No dynamic expansion */}
         {isLocked && (
           <div className="absolute inset-0 z-50 bg-white/90 dark:bg-black/85 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-6 text-center border border-zinc-200 dark:border-white/5 transition-opacity duration-300 group-hover:opacity-95">
-            <span className="material-symbols-outlined text-zinc-400 dark:text-white/30 text-5xl mb-3 group-hover:scale-110 group-hover:text-zinc-600 dark:group-hover:text-white/55 transition-all duration-300">lock</span>
+            <Lock className="text-zinc-400 dark:text-white/30 text-5xl mb-3 group-hover:scale-110 group-hover:text-zinc-600 dark:group-hover:text-white/55 transition-all duration-300 w-12 h-12" />
             <p className="text-zinc-500 dark:text-white/40 font-black font-space text-2xl tracking-widest uppercase">{isRTL ? 'غير متاح' : 'LOCKED'}</p>
             
             <motion.div

@@ -1,5 +1,6 @@
 'use client'
 
+import { ListPlus } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
@@ -226,7 +227,7 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
         {/* Header */}
         <div className="px-6 py-4 border-b flex justify-between items-center border-zinc-200 dark:border-white/10" style={{ borderColor: `${themeColor}22` }}>
           <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-neon-green" style={{ color: themeColor }}>playlist_add</span>
+            <ListPlus className="text-neon-green" style={{ color: themeColor }} />
             <h2 className="font-space font-black uppercase tracking-widest text-sm" style={{ color: themeColor }}>PLAYLIST_IMPORT</h2>
           </div>
           <button onClick={onClose} className="material-symbols-outlined text-zinc-400 dark:text-white/30 hover:text-zinc-900 dark:hover:text-white">close</button>

@@ -1,5 +1,6 @@
 'use client'
 
+import { ArrowRight, Check, CheckSquare, HelpCircle, Home, Lock, Shield, User, Zap } from 'lucide-react'
 import React, { useEffect, useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -136,7 +137,7 @@ export default function PublicGoalPage() {
         >
           <div className="absolute top-0 inset-x-0 h-1 bg-[#FF0055]" />
           <div className="flex flex-col items-center gap-6">
-            <span className="material-symbols-outlined text-5xl text-[#FF0055] animate-pulse">lock</span>
+            <Lock className="text-5xl text-[#FF0055] animate-pulse w-12 h-12" />
             <div className="space-y-2">
               <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-[#FF0055]">
                 CLASSIFIED_GOAL // ACCESS DENIED
@@ -149,7 +150,7 @@ export default function PublicGoalPage() {
               onClick={() => router.push('/')}
               className="mt-4 flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300"
             >
-              <span className="material-symbols-outlined text-base">home</span>
+              <Home className="text-base w-4 h-4" />
               RETURN TO BASE
             </button>
           </div>
@@ -184,13 +185,13 @@ export default function PublicGoalPage() {
               <img src={goal.profiles.avatar_url} alt="Owner" className="w-8 h-8 rounded-full border border-white/20 object-cover" />
             ) : (
               <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[16px] opacity-50">person</span>
+                <User className="text-[16px] opacity-50" />
               </div>
             )}
             <div className="flex flex-col items-start text-left">
               <span className="text-[11px] font-bold uppercase tracking-wider">{goal.profiles?.full_name || 'UNKNOWN OPERATOR'}</span>
               <span className="text-[9px] font-black tracking-[0.2em] text-white/50 uppercase flex items-center gap-1">
-                <span className="material-symbols-outlined text-[10px]">shield</span>
+                <Shield className="text-[10px]" />
                 {goal.profiles?.rank || 'ROOKIE'}
               </span>
             </div>
@@ -217,17 +218,17 @@ export default function PublicGoalPage() {
         {/* Stats Row */}
         <div className="grid grid-cols-3 gap-2 md:gap-4 p-4 md:p-6 rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-md shadow-xl">
           <div className="flex flex-col items-center text-center space-y-1 border-r border-white/10">
-            <span className="material-symbols-outlined text-lg mb-1" style={{ color: themeColor }}>checklist</span>
+            <CheckSquare className="text-lg mb-1 w-[18px] h-[18px]" style={{ color: themeColor }} />
             <span className="text-xl md:text-2xl font-black">{totalCount}</span>
             <span className="text-[8px] md:text-[9px] uppercase tracking-[0.2em] opacity-40 font-bold">Total Tasks</span>
           </div>
           <div className="flex flex-col items-center text-center space-y-1 border-r border-white/10">
-            <span className="material-symbols-outlined text-lg mb-1" style={{ color: themeColor }}>radar</span>
+            <HelpCircle />
             <span className="text-xl md:text-2xl font-black">{completedCount}</span>
             <span className="text-[8px] md:text-[9px] uppercase tracking-[0.2em] opacity-40 font-bold">Completed</span>
           </div>
           <div className="flex flex-col items-center text-center space-y-1">
-            <span className="material-symbols-outlined text-lg mb-1" style={{ color: themeColor }}>schedule</span>
+            <HelpCircle />
             <span className="text-xl md:text-2xl font-black">{Math.floor(timeInvested / 60)}h {timeInvested % 60}m</span>
             <span className="text-[8px] md:text-[9px] uppercase tracking-[0.2em] opacity-40 font-bold">Invested</span>
           </div>
@@ -290,7 +291,7 @@ export default function PublicGoalPage() {
                       backgroundColor: task.is_completed ? themeColor : 'transparent'
                     }}
                   >
-                    {task.is_completed && <span className="material-symbols-outlined text-black text-sm font-black">check</span>}
+                    {task.is_completed && <Check className="text-black text-sm font-black w-3.5 h-3.5" />}
                   </div>
                 </div>
 
@@ -331,9 +332,9 @@ export default function PublicGoalPage() {
               boxShadow: `0 10px 40px -10px ${themeColor}`
             }}
           >
-            <span className="material-symbols-outlined">bolt</span>
+            <Zap className="" />
             JOIN GROWTH HUB
-            <span className="material-symbols-outlined opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all">arrow_forward</span>
+            <ArrowRight className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" />
           </button>
         </div>
       </div>

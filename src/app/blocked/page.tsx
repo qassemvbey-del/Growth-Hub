@@ -1,5 +1,6 @@
 'use client'
 
+import { HelpCircle } from 'lucide-react'
 import React from 'react'
 import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
@@ -34,7 +35,7 @@ export default function BlockedPage() {
 
         <div className="text-center space-y-6">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-500/10 border border-red-500/30 mb-4">
-            <span className="material-symbols-outlined text-4xl text-red-500 animate-pulse">lock_open</span>
+            <HelpCircle />
           </div>
 
           <h1 className="text-3xl font-black text-red-500 tracking-tighter uppercase">

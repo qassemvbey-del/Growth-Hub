@@ -1,5 +1,6 @@
 'use client'
 
+import { Activity, AlertTriangle, BarChart3, Lightbulb, Target, Zap } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Shell from '@/components/layout/Shell'
@@ -293,7 +294,7 @@ export default function Dashboard() {
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="material-symbols-outlined text-sm" style={{ color: isOverCap ? '#FF0055' : currentTheme.color }}>bolt</span>
+                    <Zap className="text-sm w-3.5 h-3.5" style={{ color: isOverCap ? '#FF0055' : currentTheme.color }} />
                     <h2 className="text-xs md:text-sm font-space text-[var(--text-secondary)] uppercase tracking-wider font-bold">
                       {isRTL ? 'سعة التركيز' : 'FOCUS CAPACITY'}
                     </h2>
@@ -346,7 +347,7 @@ export default function Dashboard() {
 
               {isOverCap && (
                 <div className="p-4 rounded-xl bg-[#FF0055]/10 border border-[#FF0055]/30 flex items-center gap-3 text-[#FF0055] text-xs font-space font-bold">
-                  <span className="material-symbols-outlined text-lg shrink-0 animate-bounce">warning</span>
+                  <AlertTriangle className="text-lg shrink-0 animate-bounce w-[18px] h-[18px]" />
                   <p>
                     {isRTL 
                       ? 'تحذير: لقد تجاوزت سعة التركيز القصوى (9 خانات). يوصى بأرشفة أو إنهاء بعض الأهداف لتجنب تشتت الجهد.' 
@@ -363,7 +364,7 @@ export default function Dashboard() {
         {/* ═══════════════════════════════════════════════════ */}
         <div className="w-full max-w-7xl mx-auto space-y-6 pt-4">
           <div className="flex items-center gap-3 px-2">
-            <span className="material-symbols-outlined text-2xl" style={{ color: currentTheme.color }}>flag</span>
+            <Target className="text-2xl w-6 h-6" style={{ color: currentTheme.color }} />
             <h2 className="text-xl font-space font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-wide">
               {isRTL ? 'الأهداف النشطة' : 'ACTIVE GOALS'}
             </h2>
@@ -486,7 +487,7 @@ export default function Dashboard() {
           <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-6 md:p-8 space-y-6 shadow-xl relative overflow-hidden h-full">
             <div className="absolute top-0 inset-x-0 h-1" style={{ background: `linear-gradient(to right, ${currentTheme.color}, ${currentTheme.color}88, transparent)` }} />
             <div className="flex items-center gap-2 mb-4">
-              <span className="material-symbols-outlined text-sm" style={{ color: currentTheme.color }}>monitoring</span>
+              <Activity className="text-sm w-3.5 h-3.5" style={{ color: currentTheme.color }} />
               <h2 className="text-xs md:text-sm font-space text-[var(--text-secondary)] uppercase tracking-wider font-bold">
                 {isRTL ? 'أسبوعي' : 'This Week'}
               </h2>
@@ -494,7 +495,7 @@ export default function Dashboard() {
 
             {weeklyMinutes === 0 && completedTasksCount === 0 ? (
               <div className="flex flex-col items-center justify-center text-center py-8 space-y-5">
-                <span className="material-symbols-outlined text-5xl text-zinc-300 dark:text-zinc-600 animate-pulse">insights</span>
+                <BarChart3 className="text-5xl text-zinc-300 dark:text-zinc-600 animate-pulse w-12 h-12" />
                 <p className="text-sm font-space text-zinc-500 dark:text-zinc-400 max-w-xs leading-relaxed">
                   {isRTL ? 'ابدأ أول task وهنبدأ نتتبع أسبوعك' : 'Complete your first task to start tracking your week'}
                 </p>
@@ -560,7 +561,7 @@ export default function Dashboard() {
             <div className="absolute top-0 inset-x-0 h-1" style={{ background: `linear-gradient(to right, ${currentTheme.color}, ${currentTheme.color}88, transparent)` }} />
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-4">
-                <span className="material-symbols-outlined text-sm text-amber-500">lightbulb</span>
+                <Lightbulb className="text-sm text-amber-500 w-3.5 h-3.5" />
                 <h2 className="text-xs md:text-sm font-space text-[var(--text-secondary)] uppercase tracking-wider font-bold">
                   {isRTL ? 'نصيحة المدرب' : 'Coach Tip'}
                 </h2>

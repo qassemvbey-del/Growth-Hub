@@ -1,5 +1,6 @@
 'use client'
 
+import { HelpCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
@@ -57,9 +58,7 @@ export default function EntryGateModal() {
           >
             {/* Header / Brand */}
             <div className="space-y-2">
-              <span className="material-symbols-outlined text-4xl" style={{ color: currentTheme.color }}>
-                hub
-              </span>
+              <HelpCircle />
               <h2 className="text-2xl font-black font-space text-white tracking-widest uppercase">
                 {isRTL ? 'مرحباً بك في Growth Hub' : 'Welcome to Growth Hub'}
               </h2>

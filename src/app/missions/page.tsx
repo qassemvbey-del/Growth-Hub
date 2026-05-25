@@ -1,5 +1,6 @@
 'use client'
 
+import { AlertTriangle, ArrowRight, Calendar, Check, CheckCircle2, HelpCircle, Info, Kanban, Layers, Link, List, Plus, RefreshCw, Users2, Zap } from 'lucide-react'
 import Shell from '@/components/layout/Shell'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
@@ -292,7 +293,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] hover:border-teal-400/50 hover:bg-teal-500/5 transition-all rounded-sm shrink-0 animate-pulse"
                     title="COPY_INVITE_CODE"
                   >
-                    <span className="material-symbols-outlined text-sm text-teal-400">link</span>
+                    <Link className="text-sm text-teal-400 w-3.5 h-3.5" />
                   </button>
                 )}
 
@@ -330,7 +331,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                   onMouseLeave={e => e.currentTarget.style.borderColor = ''}
                   title="ADD_TO_GOOGLE_CALENDAR"
                 >
-                  <span className="material-symbols-outlined text-sm">calendar_month</span>
+                  <Calendar className="text-sm w-3.5 h-3.5" />
                 </button>
 
                 <button
@@ -347,10 +348,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     boxShadow: (attachmentCounts[mission.id] || 0) > 0 ? `0 0 10px ${(mission.color || color)}22` : undefined
                   }}
                 >
-                  <span className="material-symbols-outlined text-sm" style={{ 
-                    color: (attachmentCounts[mission.id] || 0) > 0 ? (mission.color || color) : 'inherit',
-                    textShadow: (attachmentCounts[mission.id] || 0) > 0 ? `0 0 8px ${(mission.color || color)}` : 'none'
-                  }}>attach_file</span>
+                  <HelpCircle />
                   {(attachmentCounts[mission.id] || 0) > 0 && (
                     <span className="absolute -top-1.5 -right-1.5 w-4 h-4 text-black text-[8px] font-black flex items-center justify-center rounded-full shadow-lg"
                       style={{ backgroundColor: (mission.color || color), boxShadow: `0 0 10px ${(mission.color || color)}` }}
@@ -359,7 +357,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     </span>
                   )}
                 </button>
-               <span className="material-symbols-outlined text-[var(--text-secondary)]/35 group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform text-lg">arrow_forward</span>
+               <ArrowRight className="text-[var(--text-secondary)]/35 group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform text-lg w-[18px] h-[18px]" />
              </div>
           </div>
         </div>
@@ -952,7 +950,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
         <header className="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-black/5 dark:border-white/5 pb-8">
           <div className="space-y-4 text-center md:text-start">
             <div className="flex items-center gap-4 justify-center md:justify-start">
-              <span className="material-symbols-outlined text-3xl md:text-4xl" style={{ color: currentTheme.color }}>layers</span>
+              <Layers className="text-3xl md:text-4xl w-8 h-8" style={{ color: currentTheme.color }} />
               <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase not- text-black dark:text-white leading-none">
                 {typeFilter === 'solo' ? (
                   <>{isRTL ? 'مهمات' : 'SOLO'}<span style={{ color: currentTheme.color }}>{isRTL ? ' فردية' : '_MISSIONS'}</span></>
@@ -983,7 +981,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 onClick={() => { playBlip(); setShowJoinGoal(true); }}
                 className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-sm border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-95 shadow-lg cursor-pointer animate-pulse"
               >
-                <span className="material-symbols-outlined text-[16px] leading-none">link</span>
+                <Link className="text-[16px] leading-none" />
                 {isRTL ? 'الانضمام لهدف' : 'JOIN GOAL'}
               </button>
               <button
@@ -991,7 +989,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-sm font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg"
                 style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
-                <span className="material-symbols-outlined text-[16px] leading-none">add</span>
+                <Plus className="text-[16px] leading-none" />
                 {isRTL ? 'إنشاء هدف فريق' : 'CREATE SQUAD GOAL'}
               </button>
             </div>
@@ -1001,7 +999,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
               className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-sm font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg"
               style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
             >
-              <span className="material-symbols-outlined text-[16px] leading-none">add</span>
+              <Plus className="text-[16px] leading-none" />
               {typeFilter === 'solo' ? (isRTL ? 'إنشاء هدف فردي' : 'CREATE GOAL') : (isRTL ? 'إنشاء هدف' : 'Create Goal')}
             </button>
           )}
@@ -1012,7 +1010,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
           <div className="w-full h-12 bg-white/5 dark:bg-zinc-900/30 border border-zinc-200/50 dark:border-zinc-800/80 rounded-xl px-4 flex items-center justify-between backdrop-blur-md shadow-sm">
             {/* Left side: Rank Badge */}
             <div className="flex items-center gap-2 border border-amber-500/20 bg-amber-500/5 px-3 py-1 rounded-lg">
-              <span className="material-symbols-outlined text-xs text-amber-500 animate-pulse">bolt</span>
+              <Zap className="text-xs text-amber-500 animate-pulse w-3 h-3" />
               <span className="text-[10px] font-space font-black text-amber-500 uppercase tracking-widest select-none">
                 {profile?.rank || 'SILVER'} • {profile?.xp || 0} XP
               </span>
@@ -1024,7 +1022,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 onClick={() => { playBlip(); setShowJoinGoal(true); }}
                 className="flex items-center gap-1.5 px-3 h-8 border border-teal-500/40 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 rounded-lg font-space text-[10px] font-black uppercase tracking-widest transition-all duration-300 active:scale-95 cursor-pointer"
               >
-                <span className="material-symbols-outlined text-sm">link</span>
+                <Link className="text-sm w-3.5 h-3.5" />
                 {isRTL ? 'الانضمام للفريق' : 'JOIN A SQUAD GOAL'}
               </button>
             )}
@@ -1132,7 +1130,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                   <div className="flex items-center gap-2">
                     <label className="text-xs md:text-sm font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'حجم الهدف' : 'Goal Size'}</label>
                     <div className="group relative flex items-center cursor-help">
-                      <span className="material-symbols-outlined text-sm transition-colors group-hover:text-white">info</span>
+                      <Info className="text-sm transition-colors group-hover:text-white w-3.5 h-3.5" />
                       <div className="pointer-events-none absolute bottom-full mb-2 w-64 md:w-80 rounded-xl bg-zinc-900 border border-white/10 p-3 md:p-4 text-xs md:text-sm text-zinc-200 shadow-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-[300]">
                         {isRTL 
                           ? "حجم الهدف يحدد سعة الـ Slots المستهلكة في لوحة القيادة، وسقف نقاط الـ XP المكتسبة (Small: 4 مهام، Medium: 8 مهام، Large: 20 مهمة). يمكنك إضافة مهام إضافية بعد السقف للتنظيم فقط."
@@ -1181,7 +1179,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       onMouseEnter={e => { if (defaultView !== 'list') e.currentTarget.style.borderColor = `${currentTheme.color}60` }}
                       onMouseLeave={e => { if (defaultView !== 'list') e.currentTarget.style.borderColor = '' }}
                     >
-                      <span className="material-symbols-outlined text-base md:text-lg">list</span>
+                      <List className="text-base md:text-lg w-4 h-4" />
                       <span className="text-xs md:text-sm font-space font-black uppercase tracking-tighter">
                         {isRTL ? 'قائمة (المناهج)' : 'List View'}
                       </span>
@@ -1200,7 +1198,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       onMouseEnter={e => { if (defaultView !== 'board') e.currentTarget.style.borderColor = `${currentTheme.color}60` }}
                       onMouseLeave={e => { if (defaultView !== 'board') e.currentTarget.style.borderColor = '' }}
                     >
-                      <span className="material-symbols-outlined text-base md:text-lg">view_kanban</span>
+                      <Kanban className="text-base md:text-lg w-4 h-4" />
                       <span className="text-xs md:text-sm font-space font-black uppercase tracking-tighter">
                         {isRTL ? 'لوحة (المشاريع)' : 'Board View'}
                       </span>
@@ -1263,9 +1261,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                        }}
                      >
                        <span className="flex items-center gap-3">
-                         <span className="material-symbols-outlined text-xl">
-                           hub
-                         </span>
+                         <HelpCircle />
                          {syncOnCreate
                            ? (isRTL ? 'مرئي في اللوحة' : 'SHOW ON DASHBOARD')
                            : (isRTL ? 'مخفي من اللوحة' : 'STAY OFF-GRID')}
@@ -1299,7 +1295,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     )}
                     style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 0 20px ${currentTheme.color}4d` }}
                   >
-                    {isSubmitting && <span className="material-symbols-outlined animate-spin text-sm">refresh</span>}
+                    {isSubmitting && <RefreshCw className="animate-spin text-sm w-3.5 h-3.5" />}
                     {isRTL ? 'تفعيل' : 'Activate'}
                   </button>
                 </div>
@@ -1312,7 +1308,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
           <div className="w-full bg-zinc-50/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/80 rounded-2xl p-6 md:p-8 space-y-6 shadow-md transition-all duration-300 hover:shadow-[0_0_0_1px_rgba(161,161,170,0.3)] backdrop-blur-md">
             <div className="flex flex-row justify-between items-center border-b border-zinc-200 dark:border-zinc-800 pb-4">
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-2xl text-zinc-500" style={{ color: currentTheme.color }}>task</span>
+                <HelpCircle />
                 <h2 className="text-xl font-space font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-wide">
                   {isRTL ? 'مهامي' : 'My Tasks'}
                 </h2>
@@ -1377,7 +1373,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       )}
                       style={task.is_completed ? { backgroundColor: task.missionColor, borderColor: task.missionColor } : {}}
                     >
-                      {task.is_completed && <span className="material-symbols-outlined text-sm font-black">check</span>}
+                      {task.is_completed && <Check className="text-sm font-black w-3.5 h-3.5" />}
                     </button>
 
                     <div className="space-y-1 truncate flex-1">
@@ -1404,7 +1400,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
 
               {filteredTasks.length === 0 && (
                 <div className="py-16 text-center space-y-3">
-                  <span className="material-symbols-outlined text-4xl text-zinc-300 dark:text-white/20">task</span>
+                  <HelpCircle />
                   <p className="text-sm font-space text-zinc-500 dark:text-white/40">
                     {isRTL ? 'لا توجد مهام في هذه القائمة.' : 'No tasks in this view.'}
                   </p>
@@ -1500,7 +1496,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                   
                   <div className="space-y-6">
                     <div className="flex items-center gap-3 text-[#FF0055]">
-                      <span className="material-symbols-outlined text-3xl animate-pulse">warning</span>
+                      <AlertTriangle className="text-3xl animate-pulse w-8 h-8" />
                       <h3 className="text-lg font-black tracking-widest uppercase font-space">
                         {isRTL ? 'تحذير: تشتيت التركيز' : 'WARNING: CONTEXT SWITCHING'}
                       </h3>
@@ -1578,14 +1574,14 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     className="flex flex-row items-center justify-center gap-2 h-11 px-6 rounded-sm font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg cursor-pointer"
                     style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
                   >
-                    <span className="material-symbols-outlined text-[16px] leading-none">add</span>
+                    <Plus className="text-[16px] leading-none" />
                     CREATE GOAL
                   </button>
                 </>
               ) : typeFilter === 'squad' ? (
                 <>
                   <div className="space-y-2 flex flex-col items-center justify-center select-none">
-                    <span className="material-symbols-outlined text-5xl text-zinc-600 dark:text-zinc-500 mb-2 animate-pulse">groups</span>
+                    <Users2 className="text-5xl text-zinc-600 dark:text-zinc-500 mb-2 animate-pulse w-12 h-12" />
                     <h3 className="text-2xl font-black font-space tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
                       NO SQUAD GOALS YET
                     </h3>
@@ -1598,7 +1594,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       onClick={() => { playBlip(); setShowJoinGoal(true); }}
                       className="flex flex-row items-center justify-center gap-2 h-11 px-6 rounded-sm border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-95 shadow-lg cursor-pointer animate-pulse"
                     >
-                      <span className="material-symbols-outlined text-[16px] leading-none">link</span>
+                      <Link className="text-[16px] leading-none" />
                       JOIN WITH CODE
                     </button>
                     <button
@@ -1606,7 +1602,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       className="flex flex-row items-center justify-center gap-2 h-11 px-6 rounded-sm font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg cursor-pointer"
                       style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
                     >
-                      <span className="material-symbols-outlined text-[16px] leading-none">add</span>
+                      <Plus className="text-[16px] leading-none" />
                       CREATE SQUAD GOAL
                     </button>
                   </div>
@@ -1660,7 +1656,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
 
               <div className="space-y-6">
                 <div className="flex items-center gap-3 text-teal-400">
-                  <span className="material-symbols-outlined text-2xl animate-pulse">group_add</span>
+                  <Users2 className="text-2xl animate-pulse w-6 h-6" />
                   <h2 className="text-xl font-space font-black uppercase tracking-widest">
                     {isRTL ? 'الانضمام للفريق' : 'JOIN_A_SQUAD'}
                   </h2>
@@ -1716,7 +1712,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       onClick={handleConfirmJoin}
                       className="w-full h-11 bg-emerald-500 hover:bg-emerald-400 text-black font-space font-black text-xs uppercase tracking-widest transition-all duration-300 rounded-sm cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center justify-center gap-1.5"
                     >
-                      <span className="material-symbols-outlined text-base">check_circle</span>
+                      <CheckCircle2 className="text-base w-4 h-4" />
                       [ ✓ CONFIRM JOIN ]
                     </button>
                   ) : (
@@ -1730,12 +1726,12 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     >
                       {joinStatus === 'scanning' ? (
                         <>
-                          <span className="material-symbols-outlined text-base animate-spin">sync</span>
+                          <HelpCircle />
                           SCANNING...
                         </>
                       ) : (
                         <>
-                          <span className="material-symbols-outlined text-base">bolt</span>
+                          <Zap className="text-base w-4 h-4" />
                           [ ⚡ JOIN NOW ]
                         </>
                       )}
