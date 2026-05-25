@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { usePathname } from 'next/navigation'
 import { useGrowth } from '@/context/GrowthContext'
 import { cn } from '@/lib/utils'
+import { X, HelpCircle } from 'lucide-react'
 
 const GUIDE_CONTENT_EN: Record<string, { title: string; tips: string[] }> = {
   '/': {
@@ -121,9 +122,7 @@ export default function OperatorGuide() {
             boxShadow: isOpen ? `0 0 20px ${currentTheme.color}44` : 'none'
           }}
         >
-          <span className="material-symbols-outlined text-2xl md:text-3xl">
-            {isOpen ? 'close' : 'help'}
-          </span>
+          {isOpen ? <X className="w-5 h-5 md:w-6 md:h-6" /> : <HelpCircle className="w-5 h-5 md:w-6 md:h-6" />}
         </motion.button>
 
         <AnimatePresence>

@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Settings, Minimize2 } from 'lucide-react'
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { usePomodoro } from '@/context/PomodoroContext'
@@ -106,17 +106,17 @@ export default function PomodoroHUD() {
                     {!isMinimized && (
                       <button 
                         onClick={(e) => { e.stopPropagation(); setShowSettings(!showSettings); }} 
-                        className={cn("material-symbols-outlined text-xs transition-colors hover:text-orange-400 pomodoro-btn")}
+                        className={cn("transition-colors hover:text-orange-400 pomodoro-btn cursor-pointer")}
                         style={{ color: showSettings ? '#F97316' : 'var(--text-secondary)' }}
                       >
-                        settings
+                        <Settings className="w-3.5 h-3.5" />
                       </button>
                     )}
                     <button 
                       onClick={(e) => { e.stopPropagation(); toggleMinimize(); }} 
-                      className="material-symbols-outlined text-xs hover:text-orange-400 pomodoro-btn"
+                      className="hover:text-orange-400 pomodoro-btn cursor-pointer"
                     >
-                      unfold_less
+                      <Minimize2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>

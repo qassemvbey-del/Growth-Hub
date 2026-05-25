@@ -1,6 +1,6 @@
 'use client'
 
-import { X, Zap } from 'lucide-react'
+import { X, Zap, BarChart2, Calendar, AlertTriangle, Target, Flame, ChevronLeft, ChevronRight } from 'lucide-react'
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -12,6 +12,15 @@ interface CoachPanelProps {
   isOpen: boolean
   onClose: () => void
   missions: any[]
+}
+
+const IconMap: Record<string, React.ComponentType<any>> = {
+  analytics: BarChart2,
+  event_note: Calendar,
+  warning: AlertTriangle,
+  target: Target,
+  local_fire_department: Flame,
+  bolt: Zap
 }
 
 export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProps) {
@@ -249,37 +258,41 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
 
 function ActionButton({ icon, title, subtitle, onClick, disabled, color, lang }: any) {
   const isRTL = lang === 'ar'
+  const IconComponent = IconMap[icon] || Zap
+  const ChevronIcon = isRTL ? ChevronLeft : ChevronRight
+  const { playBlip } = useSound()
+
   return (
     <button
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "w-full p-3 px-4 bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 transition-all duration-300 group flex items-start gap-4 text-start relative overflow-hidden",
+        "w-full p-4 bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 transition-all duration-300 group flex items-start gap-4 text-start relative overflow-hidden rounded-xl cursor-pointer hover:scale-[1.02]",
         disabled && "opacity-50 cursor-not-allowed"
       )}
-      style={{
-        ':hover': {
-          borderColor: `${color}66`,
-          backgroundColor: `${color}11`
-        }
-      } as any}
       onMouseEnter={e => {
         if (!disabled) {
-          e.currentTarget.style.borderColor = `${color}66`
-          e.currentTarget.style.backgroundColor = `${color}11`
+          playBlip()
+          e.currentTarget.style.borderColor = `${color}88`
+          e.currentTarget.style.backgroundColor = `${color}15`
+          e.currentTarget.style.boxShadow = `0 0 15px -3px ${color}33`
         }
       }}
       onMouseLeave={e => {
         if (!disabled) {
           e.currentTarget.style.borderColor = ''
           e.currentTarget.style.backgroundColor = ''
+          e.currentTarget.style.boxShadow = ''
         }
       }}
     >
       <div className="absolute top-0 right-0 w-16 h-16 opacity-5 blur-2xl group-hover:opacity-20 transition-colors" style={{ backgroundColor: color }}></div>
-      <span className="material-symbols-outlined text-[var(--text-secondary)] transition-colors mt-1" style={{ color: 'var(--text-secondary)' }} onMouseEnter={e => { if(!disabled) e.currentTarget.style.color = color }} onMouseLeave={e => { if(!disabled) e.currentTarget.style.color = 'var(--text-secondary)' }}>
-        {icon}
-      </span>
+      <div 
+        className="p-2 bg-white/5 border border-white/5 rounded-lg text-[var(--text-secondary)] group-hover:text-white transition-colors duration-300 shrink-0"
+        style={{ color: 'var(--text-secondary)' }}
+      >
+        <IconComponent className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" style={{ color }} />
+      </div>
       <div className="flex flex-col flex-1">
         <span className="text-[11px] font-black tracking-widest text-[var(--text-primary)] transition-colors">
           {title}
@@ -288,9 +301,9 @@ function ActionButton({ icon, title, subtitle, onClick, disabled, color, lang }:
           {subtitle}
         </span>
       </div>
-      <span className="material-symbols-outlined text-xs text-[var(--text-secondary)]/30 mt-1 transition-colors">
-        {isRTL ? 'arrow_back_ios_new' : 'arrow_forward_ios'}
-      </span>
+      <div className="text-[var(--text-secondary)]/30 group-hover:text-white/85 transition-colors mt-2">
+        <ChevronIcon className="w-4 h-4" />
+      </div>
     </button>
   )
 }

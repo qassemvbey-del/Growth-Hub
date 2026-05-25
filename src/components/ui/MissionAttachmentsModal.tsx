@@ -1,6 +1,10 @@
 'use client'
 
-import { HelpCircle, Paperclip, RefreshCw, X } from 'lucide-react'
+import { 
+  HelpCircle, Paperclip, RefreshCw, X, 
+  FileText, FileSpreadsheet, Image, FileVideo, Music, FolderArchive, Link2, 
+  ChevronUp, ChevronDown, Loader2 
+} from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
@@ -56,24 +60,22 @@ function detectFileType(url: string): string {
 
 // ── Icon renderer per type ─────────────────────────────────────────────────
 const FileIcon = React.memo(({ type, color }: { type: string; color: string }) => {
-  const icons: Record<string, { icon: string; glow: string }> = {
-    pdf:     { icon: 'picture_as_pdf', glow: '#EF4444' }, // Red for PDF
-    excel:   { icon: 'table_chart',    glow: '#22C55E' }, // Green for Google Sheets
-    image:   { icon: 'image',          glow: '#E2E8F0' },
-    doc:     { icon: 'description',    glow: '#3B82F6' }, // Blue for Google Docs
-    video:   { icon: 'videocam',       glow: '#F97316' },
-    audio:   { icon: 'music_note',     glow: '#A855F7' },
-    archive: { icon: 'folder_zip',     glow: '#EAB308' },
-    link:    { icon: 'link',           glow: color },
+  const icons: Record<string, { icon: React.ComponentType<any>; glow: string }> = {
+    pdf:     { icon: FileText,        glow: '#EF4444' }, // Red for PDF
+    excel:   { icon: FileSpreadsheet, glow: '#22C55E' }, // Green for Google Sheets
+    image:   { icon: Image,           glow: '#E2E8F0' },
+    doc:     { icon: FileText,        glow: '#3B82F6' }, // Blue for Google Docs
+    video:   { icon: FileVideo,       glow: '#F97316' },
+    audio:   { icon: Music,           glow: '#A855F7' },
+    archive: { icon: FolderArchive,   glow: '#EAB308' },
+    link:    { icon: Link2,           glow: color },
   }
-  const { icon, glow } = icons[type] ?? icons.link
+  const { icon: IconComponent, glow } = icons[type] ?? icons.link
   return (
-    <span
-      className="material-symbols-outlined text-2xl shrink-0"
-      style={{ color: glow, textShadow: `0 0 10px ${glow}44` }}
-    >
-      {icon}
-    </span>
+    <IconComponent
+      className="w-6 h-6 shrink-0"
+      style={{ color: glow, filter: `drop-shadow(0 0 4px ${glow}44)` }}
+    />
   )
 })
 FileIcon.displayName = 'FileIcon'
@@ -127,7 +129,7 @@ const PreviewModal = React.memo(({
           
           <button
             onClick={onClose}
-            className="px-4 py-2 font-space font-black uppercase text-[10px] tracking-widest text-zinc-600 dark:text-white/50 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-white/30 rounded-lg transition-all active:scale-95 shrink-0"
+            className="px-4 py-2 font-space font-black uppercase text-[10px] tracking-widest text-zinc-600 dark:text-white/50 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-white/30 rounded-lg transition-all active:scale-95 shrink-0 cursor-pointer"
           >
             {isRTL ? '[ إغلاق المعاينة // Close Preview ]' : '[ Close Preview ]'}
           </button>
@@ -456,19 +458,19 @@ const MissionAttachmentsModal = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-[300] flex items-center justify-center bg-white/60 dark:bg-black/90 backdrop-blur-md p-4" onClick={onClose}>
+      <div className="fixed inset-0 z-[300] flex items-center justify-center bg-white/60 dark:bg-black/90 backdrop-blur-md p-4" onClick={onClose} dir={isRTL ? 'rtl' : 'ltr'}>
         <div
           onClick={e => e.stopPropagation()}
-          className="w-[calc(100%-2rem)] mx-auto md:max-w-xl flex flex-col bg-white/95 dark:bg-[#080808] border rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] my-auto"
+          className="w-full max-w-[95vw] md:max-w-xl flex flex-col bg-white/95 dark:bg-[#080808] border rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh] my-auto p-4 md:p-6"
           style={{
             borderColor: `${themeColor}33`,
             boxShadow: `0 0 60px ${themeColor}18`,
           }}
         >
           {/* ── Modal Header ─────────────────────────────────────── */}
-          <div className="flex items-center justify-between px-6 py-5 border-b shrink-0 border-zinc-200 dark:border-white/10" style={{ borderColor: `${themeColor}22` }}>
+          <div className="flex items-center justify-between pb-4 border-b shrink-0 border-zinc-200 dark:border-white/10" style={{ borderColor: `${themeColor}22` }}>
             <div className="flex items-center gap-3">
-              <Paperclip className="text-xl w-5 h-5" style={{ color: themeColor, textShadow: `0 0 12px ${themeColor}` }} />
+              <Paperclip className="text-xl w-5 h-5" style={{ color: themeColor, filter: `drop-shadow(0 0 4px ${themeColor})` }} />
               <div>
                 <p className="font-space font-black uppercase tracking-widest text-[10px] text-zinc-500 dark:text-white/30">
                   {isRTL ? 'المرفقات المزامنة' : 'Synced Attachments'}
@@ -480,12 +482,14 @@ const MissionAttachmentsModal = ({
               <span className="font-space font-black text-xs px-2 py-1 rounded-xl" style={{ color: themeColor, backgroundColor: `${themeColor}18`, border: `1px solid ${themeColor}33` }}>
                 {attachments.length}
               </span>
-              <button onClick={onClose} className="material-symbols-outlined text-zinc-400 dark:text-white/30 hover:text-zinc-900 dark:hover:text-white transition-colors text-xl">close</button>
+              <button onClick={onClose} className="text-zinc-400 dark:text-white/30 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
             </div>
           </div>
 
           {/* ── Main Actions Panel ───────────────────────────────── */}
-          <div className="px-6 py-5 border-b shrink-0 bg-black/[0.01] dark:bg-white/[0.01] border-zinc-200 dark:border-white/10" style={{ borderColor: `${themeColor}15` }}>
+          <div className="py-4 border-b shrink-0 bg-black/[0.01] dark:bg-white/[0.01] border-zinc-200 dark:border-white/10" style={{ borderColor: `${themeColor}15` }}>
             {/* Google Drive Primary Button with signature dark glass style */}
             <button
               onClick={handleConnectGoogleDrive}
@@ -517,12 +521,10 @@ const MissionAttachmentsModal = ({
             <div className="mt-4">
               <button 
                 onClick={() => setShowManual(!showManual)}
-                className="w-full flex items-center justify-between py-2 text-[10px] font-space font-black uppercase tracking-widest text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white/80 transition-colors"
+                className="w-full flex items-center justify-between py-2 text-[10px] font-space font-black uppercase tracking-widest text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white/80 transition-colors cursor-pointer"
               >
                 <span>{isRTL ? 'ربط يدوي بالرابط' : 'Connect Manual Link'}</span>
-                <span className="material-symbols-outlined text-sm">
-                  {showManual ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
-                </span>
+                {showManual ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
 
               <AnimatePresence>
@@ -556,7 +558,7 @@ const MissionAttachmentsModal = ({
                         className="py-2.5 px-4 font-space font-black uppercase tracking-widest text-[10px] text-black transition-all rounded-xl shrink-0 cursor-pointer"
                         style={{ backgroundColor: themeColor, boxShadow: `0 0 16px ${themeColor}44` }}
                       >
-                        {adding ? <HelpCircle /> : (isRTL ? 'إضافة' : 'ADD')}
+                        {adding ? <Loader2 className="w-4 h-4 animate-spin" /> : (isRTL ? 'إضافة' : 'ADD')}
                       </button>
                     </div>
                   </motion.div>
@@ -566,15 +568,15 @@ const MissionAttachmentsModal = ({
           </div>
 
           {/* ── Attachment Grid / Cards ────────────────────────────── */}
-          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-3 scrollbar-thin">
+          <div className="flex-1 px-2 py-4 space-y-3">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-12 gap-4">
-                <HelpCircle />
+                <Loader2 className="w-8 h-8 animate-spin" style={{ color: themeColor }} />
                 <p className="font-space font-black uppercase tracking-[0.2em] text-[9px] text-zinc-400 dark:text-white/20">FETCHING_DATA...</p>
               </div>
             ) : attachments.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 gap-4">
-                <RefreshCw className="text-4xl opacity-20 w-10 h-10" style={{ color: themeColor }} />
+                <RefreshCw className="text-4xl opacity-20 w-10 h-10 animate-spin-slow" style={{ color: themeColor }} />
                 <p className="font-space font-black uppercase tracking-[0.4em] text-[9px] text-zinc-400 dark:text-white/20">
                   {isRTL ? 'لا توجد مرفقات مضافة بعد' : 'NO ATTACHMENTS SYNCD'}
                 </p>
@@ -609,7 +611,7 @@ const MissionAttachmentsModal = ({
                             className="w-7 h-7 flex items-center justify-center border border-zinc-200 dark:border-white/5 text-zinc-500 dark:text-white/25 hover:border-red-500/60 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-lg cursor-pointer"
                           >
                             {deletingId === att.id ? (
-                              <HelpCircle />
+                              <Loader2 className="w-3 h-3 animate-spin" />
                             ) : (
                               <X className="text-xs w-3 h-3" />
                             )}
@@ -630,7 +632,7 @@ const MissionAttachmentsModal = ({
           </div>
 
           {/* Modal Footer */}
-          <div className="px-6 py-4 border-t shrink-0 flex items-center justify-between border-zinc-200 dark:border-white/10" style={{ borderColor: `${themeColor}15` }}>
+          <div className="py-4 border-t shrink-0 flex items-center justify-between border-zinc-200 dark:border-white/10" style={{ borderColor: `${themeColor}15` }}>
             <p className="font-space text-[8px] uppercase tracking-[0.4em] text-zinc-400 dark:text-white/15">
               {isRTL ? 'مزامنة جوجل درايف // Google Drive Sync' : 'Google Drive Sync // Web Integration'}
             </p>

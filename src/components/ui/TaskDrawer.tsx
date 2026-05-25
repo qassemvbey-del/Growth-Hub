@@ -78,6 +78,81 @@ export default function TaskDrawer({
   }, [])
 
   const [noteInput, setNoteInput] = useState('')
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [showMentionsDropdown, setShowMentionsDropdown] = useState(false)
+  const [mentionsSearch, setMentionsSearch] = useState('')
+  const [filteredMembers, setFilteredMembers] = useState<any[]>([])
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  const insertEmoji = (emoji: string) => {
+    const textarea = textareaRef.current
+    if (textarea) {
+      const start = textarea.selectionStart
+      const end = textarea.selectionEnd
+      const text = textarea.value
+      const before = text.substring(0, start)
+      const after = text.substring(end, text.length)
+      setNoteInput(before + emoji + after)
+      
+      setTimeout(() => {
+        textarea.focus()
+        textarea.selectionStart = textarea.selectionEnd = start + emoji.length
+      }, 0)
+    } else {
+      setNoteInput(prev => prev + emoji)
+    }
+    setShowEmojiPicker(false)
+  }
+
+  const handleNoteInputChange = (val: string) => {
+    setNoteInput(val)
+
+    const textarea = textareaRef.current
+    if (!textarea) return
+
+    const cursorPosition = textarea.selectionStart
+    const textBeforeCursor = val.substring(0, cursorPosition)
+    
+    const match = textBeforeCursor.match(/@(\w*)$/)
+    if (match) {
+      setShowMentionsDropdown(true)
+      const query = match[1].toLowerCase()
+      setMentionsSearch(query)
+      
+      const filtered = squadMembers.filter(member => {
+        const name = (member.full_name || member.user_name || '').toLowerCase()
+        return name.includes(query)
+      })
+      setFilteredMembers(filtered)
+    } else {
+      setShowMentionsDropdown(false)
+      setFilteredMembers([])
+    }
+  }
+
+  const insertMention = (member: any) => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+
+    const cursorPosition = textarea.selectionStart
+    const textBeforeCursor = noteInput.substring(0, cursorPosition)
+    const textAfterCursor = noteInput.substring(cursorPosition)
+
+    const lastAtIdx = textBeforeCursor.lastIndexOf('@')
+    if (lastAtIdx !== -1) {
+      const name = member.full_name || member.user_name || 'Operator'
+      const mentionText = `@${name} `
+      const before = textBeforeCursor.substring(0, lastAtIdx)
+      const newText = before + mentionText + textAfterCursor
+      setNoteInput(newText)
+      
+      setTimeout(() => {
+        textarea.focus()
+        textarea.selectionStart = textarea.selectionEnd = lastAtIdx + mentionText.length
+      }, 0)
+    }
+    setShowMentionsDropdown(false)
+  }
 
   // Supabase Sync description state
   const [description, setDescription] = useState(task.description || '')
@@ -944,12 +1019,13 @@ export default function TaskDrawer({
         </div>
 
         {/* 3. STICKY INPUT FOOTER AT BOTTOM */}
-        <div className="p-4 border-t border-white/5 bg-zinc-950/60 shrink-0 space-y-3">
+        <div className="p-4 border-t border-white/5 bg-zinc-950/60 shrink-0 space-y-3 relative">
           <form onSubmit={handleAddNote} className="flex flex-col gap-2.5">
             <div className="relative flex items-center bg-zinc-900/60 border border-white/5 rounded-xl focus-within:border-white/15 px-3 py-2">
               <textarea
+                ref={textareaRef}
                 value={noteInput}
-                onChange={e => setNoteInput(e.target.value)}
+                onChange={e => handleNoteInputChange(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={isRTL ? 'اكتب تعليقاً أو فكرة...' : 'Secure transmission / enter message...'}
                 className="flex-grow bg-transparent border-none outline-none focus:ring-0 text-xs text-white placeholder-white/20 resize-none max-h-16 font-space pr-12"
@@ -960,18 +1036,34 @@ export default function TaskDrawer({
               <div className="absolute right-3 flex items-center gap-2 text-zinc-500">
                 <button
                   type="button"
-                  className="hover:text-white transition-colors"
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  className="hover:text-white transition-colors cursor-pointer"
                   title="EMOJI"
                 >
-                  <Smile className="w-4 h-4" />
+                  <Smile className="w-4 h-4" style={{ color: showEmojiPicker ? themeColor : 'inherit' }} />
                 </button>
-                <button
-                  type="button"
-                  className="hover:text-white transition-colors"
-                  title="MENTION"
-                >
-                  <AtSign className="w-4 h-4" />
-                </button>
+                {isSquad && squadMembers && squadMembers.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const textarea = textareaRef.current
+                      if (textarea) {
+                        const start = textarea.selectionStart
+                        const text = textarea.value
+                        const newText = text.substring(0, start) + '@' + text.substring(start)
+                        handleNoteInputChange(newText)
+                        setTimeout(() => {
+                          textarea.focus()
+                          textarea.selectionStart = textarea.selectionEnd = start + 1
+                        }, 0)
+                      }
+                    }}
+                    className="hover:text-white transition-colors cursor-pointer"
+                    title="MENTION"
+                  >
+                    <AtSign className="w-4 h-4" />
+                  </button>
+                )}
                 <button
                   type="submit"
                   disabled={!noteInput.trim()}
@@ -982,6 +1074,53 @@ export default function TaskDrawer({
                 </button>
               </div>
             </div>
+
+            {/* Mentions Dropdown Popover */}
+            {showMentionsDropdown && filteredMembers.length > 0 && (
+              <div className="absolute bottom-full mb-2 left-3 bg-zinc-950/95 border border-white/10 rounded-xl max-h-48 overflow-y-auto w-56 shadow-2xl p-1 z-50 backdrop-blur-md">
+                <div className="text-[8px] font-mono tracking-[0.2em] font-black uppercase text-zinc-500 px-3 py-1.5 border-b border-white/5 mb-1">
+                  {isRTL ? 'إشارة إلى عضو // SQUAD_MEMBERS' : 'MENTION SQUAD MEMBER'}
+                </div>
+                {filteredMembers.map((member) => (
+                  <button
+                    key={member.id}
+                    type="button"
+                    onClick={() => insertMention(member)}
+                    className="w-full text-left px-3 py-2 hover:bg-white/5 rounded-lg flex items-center gap-2.5 transition-colors cursor-pointer group"
+                  >
+                    {member.avatar_url ? (
+                      <img src={member.avatar_url} className="w-6 h-6 rounded-full object-cover border border-white/10" />
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white uppercase">
+                        {member.full_name?.charAt(0) || member.user_name?.charAt(0) || 'OP'}
+                      </div>
+                    )}
+                    <span className="text-xs text-white/80 group-hover:text-white font-space font-semibold uppercase">{member.full_name || member.user_name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Emoji Picker Popover */}
+            {showEmojiPicker && (
+              <div className="absolute bottom-full mb-2 right-3 bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl p-2.5 z-50 max-w-[240px] backdrop-blur-md">
+                <div className="text-[8px] font-mono tracking-[0.2em] font-black uppercase text-zinc-500 px-1 py-1 border-b border-white/5 mb-2">
+                  {isRTL ? 'اختر رمز تعبيري // SELECT_EMOJI' : 'SELECT EMOJI'}
+                </div>
+                <div className="grid grid-cols-6 gap-1.5">
+                  {['⚡', '☕', '🔥', '🚀', '🎯', '👾', '💻', '🧠', '✅', '❌', '👍', '😂', '🎉', '👀', '✨', '🙌', '💯', '❤️'].map((emoji) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      onClick={() => insertEmoji(emoji)}
+                      className="w-8 h-8 text-sm hover:bg-white/15 active:scale-90 transition-all rounded-lg flex items-center justify-center cursor-pointer"
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="flex items-center justify-between">
               <span className="text-[9px] font-mono text-zinc-500">

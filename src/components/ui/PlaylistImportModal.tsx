@@ -1,10 +1,11 @@
 'use client'
 
-import { ListPlus } from 'lucide-react'
-import React, { useState, useEffect } from 'react'
+import { ListPlus, X, Loader2 } from 'lucide-react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
 import { cleanPlaylistTitles } from '@/app/actions/ai-magic'
+import { useGrowth } from '@/context/GrowthContext'
 
 interface PreviewTask {
   title: string
@@ -26,6 +27,7 @@ interface Props {
 const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || 'AIzaSyAcS6t0jQivhoXePWTajpocP0upKX313hk'
 
 export default function PlaylistImportModal({ isOpen, onClose, missionId, themeColor, onTasksAdded }: Props) {
+  const { isRTL } = useGrowth()
   const [playlistUrl, setPlaylistUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -70,7 +72,7 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
     setPreviewTasks([])
     const playlistId = extractPlaylistId(playlistUrl)
     if (!playlistId) {
-      setError('INVALID_SIGNAL // NOT A PLAYLIST')
+      setError(isRTL ? 'إشارة غير صالحة // ليس قائمة تشغيل' : 'INVALID_SIGNAL // NOT A PLAYLIST')
       return
     }
 
@@ -82,7 +84,7 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
 
       if (itemsData.error) {
         if (itemsData.error.errors?.[0]?.reason === 'playlistNotFound' || itemsData.error.code === 404) {
-          setError('ACCESS_DENIED // PRIVATE_FEED')
+          setError(isRTL ? 'تم رفض الوصول // قائمة خاصة' : 'ACCESS_DENIED // PRIVATE_FEED')
         } else {
           setError(`API_ERROR // ${itemsData.error.message?.toUpperCase() || 'UNKNOWN_REASON'}`)
         }
@@ -92,7 +94,7 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
 
       const items = itemsData.items || []
       if (items.length === 0) {
-        setError('EMPTY_FEED // NO_VIDEOS_FOUND')
+        setError(isRTL ? 'خلاصة فارغة // لم يتم العثور على فيديوهات' : 'EMPTY_FEED // NO_VIDEOS_FOUND')
         setLoading(false)
         return
       }
@@ -216,27 +218,33 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
   const totalDuration = previewTasks.reduce((acc, t) => acc + t.seconds, 0)
 
   return (
-    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-white/60 dark:bg-black/90 backdrop-blur-md" onClick={onClose}>
+    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-white/60 dark:bg-black/90 backdrop-blur-md" onClick={onClose} dir={isRTL ? 'rtl' : 'ltr'}>
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-[calc(100%-2rem)] mx-auto md:max-w-2xl bg-white/95 dark:bg-[#080808]/90 backdrop-blur-xl border rounded-2xl overflow-hidden flex flex-col shadow-2xl max-h-[90vh] my-auto"
+        className="w-full max-w-[95vw] md:max-w-2xl bg-white/95 dark:bg-[#080808]/90 backdrop-blur-xl border rounded-2xl overflow-y-auto flex flex-col shadow-2xl max-h-[90vh] my-auto p-4 md:p-6"
         style={{ borderColor: `${themeColor}33` }}
       >
         {/* Header */}
-        <div className="px-6 py-4 border-b flex justify-between items-center border-zinc-200 dark:border-white/10" style={{ borderColor: `${themeColor}22` }}>
+        <div className="pb-4 border-b flex justify-between items-center border-zinc-200 dark:border-white/10" style={{ borderColor: `${themeColor}22` }}>
           <div className="flex items-center gap-3">
             <ListPlus className="text-neon-green" style={{ color: themeColor }} />
-            <h2 className="font-space font-black uppercase tracking-widest text-sm" style={{ color: themeColor }}>PLAYLIST_IMPORT</h2>
+            <h2 className="font-space font-black uppercase tracking-widest text-sm" style={{ color: themeColor }}>
+              {isRTL ? 'استيراد قائمة التشغيل' : 'PLAYLIST_IMPORT'}
+            </h2>
           </div>
-          <button onClick={onClose} className="material-symbols-outlined text-zinc-400 dark:text-white/30 hover:text-zinc-900 dark:hover:text-white">close</button>
+          <button onClick={onClose} className="text-zinc-400 dark:text-white/30 hover:text-zinc-900 dark:hover:text-white cursor-pointer transition-colors">
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* URL Input Area */}
-        <div className="p-6 space-y-4">
+        <div className="py-4 space-y-4">
           <div className="space-y-2">
-            <label className="text-[10px] font-space font-black text-zinc-600 dark:text-white/40 uppercase tracking-widest">YOUTUBE_PLAYLIST_URL</label>
+            <label className="text-[10px] font-space font-black text-zinc-600 dark:text-white/40 uppercase tracking-widest">
+              {isRTL ? 'رابط قائمة تشغيل يوتيوب' : 'YOUTUBE_PLAYLIST_URL'}
+            </label>
             <div className="flex gap-2">
               <input 
                 value={playlistUrl}
@@ -248,10 +256,10 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
               <button 
                 onClick={handleFetch}
                 disabled={loading || !playlistUrl.trim()}
-                className="py-2.5 px-4 font-space font-black text-[10px] uppercase tracking-widest transition-all bg-neon-green text-black disabled:opacity-30 rounded-xl shadow-lg hover:brightness-110 shrink-0"
+                className="py-2.5 px-4 font-space font-black text-[10px] uppercase tracking-widest transition-all bg-neon-green text-black disabled:opacity-30 rounded-xl shadow-lg hover:brightness-110 shrink-0 cursor-pointer"
                 style={{ backgroundColor: themeColor }}
               >
-                {loading ? 'PROCESSING...' : 'SCAN'}
+                {loading ? (isRTL ? 'جاري المعالجة...' : 'PROCESSING...') : (isRTL ? 'فحص' : 'SCAN')}
               </button>
             </div>
             {error && <p className="text-[10px] font-space font-black text-[#FF0055] tracking-widest mt-2">{error}</p>}
@@ -267,7 +275,10 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
               >
                 <div className="flex justify-between items-end border-b border-zinc-200 dark:border-white/5 pb-2">
                   <p className="text-[10px] font-space font-black text-zinc-600 dark:text-white/40 uppercase tracking-widest">
-                    FOUND: {previewTasks.length} VIDEOS // TOTAL: {formatSeconds(totalDuration)}
+                    {isRTL 
+                      ? `تم العثور على: ${previewTasks.length} فيديو // المجموع: ${formatSeconds(totalDuration)}`
+                      : `FOUND: ${previewTasks.length} VIDEOS // TOTAL: ${formatSeconds(totalDuration)}`
+                    }
                   </p>
                 </div>
                 <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2 scrollbar-thin">
@@ -275,7 +286,9 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
                     <div key={i} className="flex justify-between items-center py-2.5 px-4 border border-zinc-200 dark:border-white/5 bg-black/5 dark:bg-white/5 rounded-xl">
                       <div className="flex-1 min-w-0 pr-4">
                         <p className="font-space text-[11px] font-bold text-zinc-900 dark:text-white uppercase truncate">{t.title}</p>
-                        <p className="font-space text-[9px] text-zinc-500 dark:text-white/40 uppercase tracking-tighter">DURATION: {formatSeconds(t.seconds)}</p>
+                        <p className="font-space text-[9px] text-zinc-500 dark:text-white/40 uppercase tracking-tighter">
+                          {isRTL ? `المدة: ${formatSeconds(t.seconds)}` : `DURATION: ${formatSeconds(t.seconds)}`}
+                        </p>
                       </div>
                       <div className="flex gap-1 shrink-0">
                         {[1,2,3,4,5].map(w => (
@@ -290,17 +303,17 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
                 <div className="flex justify-end gap-4 pt-4 border-t border-zinc-200 dark:border-white/5">
                   <button 
                     onClick={onClose}
-                    className="py-2.5 px-4 font-space font-black text-[10px] uppercase tracking-widest text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white rounded-xl transition-all"
+                    className="py-2.5 px-4 font-space font-black text-[10px] uppercase tracking-widest text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white rounded-xl transition-all cursor-pointer"
                   >
-                    CANCEL
+                    {isRTL ? 'إلغاء' : 'CANCEL'}
                   </button>
                   <button 
                     onClick={handleDeploy}
                     disabled={confirming}
-                    className="py-2.5 px-6 font-space font-black text-[10px] uppercase tracking-widest bg-neon-green text-black shadow-lg rounded-xl transition-all hover:brightness-110"
+                    className="py-2.5 px-6 font-space font-black text-[10px] uppercase tracking-widest bg-neon-green text-black shadow-lg rounded-xl transition-all hover:brightness-110 cursor-pointer"
                     style={{ backgroundColor: themeColor, boxShadow: `0 0 20px ${themeColor}44` }}
                   >
-                    {confirming ? 'CREATING...' : 'CREATE'}
+                    {confirming ? (isRTL ? 'جاري الإنشاء...' : 'CREATING...') : (isRTL ? 'إنشاء' : 'CREATE')}
                   </button>
                 </div>
               </motion.div>

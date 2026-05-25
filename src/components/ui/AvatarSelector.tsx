@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, HelpCircle, RefreshCw, Save, User, X } from 'lucide-react'
+import { Check, HelpCircle, RefreshCw, Save, User, X, Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
@@ -15,6 +15,15 @@ const CUSTOM_SVGS = [
   { id: 'menna', label: 'Menna', arLabel: 'منة', gender: 'female', sub: 'Content Creator', arSub: 'صانعة محتوى', icon: 'videocam' },
   { id: 'nour', label: 'Nour', arLabel: 'نور', gender: 'female', sub: 'Professional', arSub: 'موظف', icon: 'trending_up' },
 ]
+
+const IconMap: Record<string, React.ComponentType<any>> = {
+  laptop_mac: Laptop,
+  school: GraduationCap,
+  work: Briefcase,
+  rocket_launch: Rocket,
+  videocam: Video,
+  trending_up: TrendingUp
+}
 
 interface Props {
   onClose: () => void
@@ -260,9 +269,10 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                           boxShadow: isActive ? `0 0 15px ${currentTheme.color}` : undefined
                         }}
                       >
-                        <span className="material-symbols-outlined text-xs md:text-sm font-black">
-                          {avatar.icon}
-                        </span>
+                        {(() => {
+                          const IconComponent = IconMap[avatar.icon] || User
+                          return <IconComponent className="w-3.5 h-3.5" />
+                        })()}
                       </div>
                     </div>
 

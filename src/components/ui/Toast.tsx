@@ -1,6 +1,6 @@
 'use client'
 
-import { X } from 'lucide-react'
+import { X, Brain, CheckCircle, AlertTriangle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useState, createContext, useContext } from 'react'
 
@@ -36,21 +36,22 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {mounted && (
         <div 
           className={`fixed top-4 z-[99999] flex flex-col gap-2 w-full px-4 pointer-events-none left-1/2 -translate-x-1/2 md:top-6 md:left-auto md:translate-x-0 ${isRTL ? 'md:left-6' : 'md:right-6'} max-w-[310px] md:max-w-[350px]`}
+          dir={isRTL ? 'rtl' : 'ltr'}
         >
           <AnimatePresence>
             {toasts.map(toast => {
               // Dynamic themes based on type
               let color = currentTheme.color
-              let icon = 'cognition'
+              let IconComponent = Brain
               let label = isRTL ? 'إشعار النظام' : 'AI_FEEDBACK'
               
               if (toast.type === 'success') {
                 color = currentTheme.color
-                icon = 'check_circle'
+                IconComponent = CheckCircle
                 label = isRTL ? 'اكتملت العملية' : 'SYSTEM_SUCCESS'
               } else if (toast.type === 'warning') {
                 color = '#ef4444' // alert red-orange
-                icon = 'warning'
+                IconComponent = AlertTriangle
                 label = isRTL ? 'تنبيه النظام' : 'SYSTEM_WARNING'
               }
 
@@ -66,7 +67,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   <div 
                     className="relative bg-zinc-950/80 dark:bg-black/85 backdrop-blur-xl border border-white/5 rounded-xl py-2.5 px-3.5 shadow-2xl flex items-center gap-3 overflow-hidden group select-none"
                     style={{ 
-                      boxShadow: `0 8px 30px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.05), 0 0 12px -3px ${color}20`
+                       boxShadow: `0 8px 30px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.05), 0 0 12px -3px ${color}20`
                     }}
                   >
                     {/* Symmetrical glowing accent strip */}
@@ -90,7 +91,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                       className="w-[30px] h-[30px] rounded-lg flex items-center justify-center flex-shrink-0 border border-white/5 bg-white/[0.02]"
                       style={{ color }}
                     >
-                      <span className="material-symbols-outlined text-base font-bold">{icon}</span>
+                      <IconComponent className="w-4 h-4" />
                     </div>
 
                     {/* Main content body */}

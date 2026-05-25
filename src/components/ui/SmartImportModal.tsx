@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, HelpCircle, XCircle } from 'lucide-react'
+import { ArrowLeft, HelpCircle, XCircle, X, Loader2, Sparkles, Plus } from 'lucide-react'
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
@@ -131,18 +131,18 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-white/60 dark:bg-black/90 backdrop-blur-md" onClick={handleClose}>
+    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-white/60 dark:bg-black/90 backdrop-blur-md" onClick={handleClose} dir={isRTL ? 'rtl' : 'ltr'}>
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-[calc(100%-2rem)] mx-auto md:max-w-2xl bg-[var(--card-bg)]/90 backdrop-blur-xl border rounded-2xl overflow-hidden flex flex-col shadow-2xl"
+        className="w-full max-w-[95vw] md:max-w-2xl bg-[var(--card-bg)]/90 backdrop-blur-xl border rounded-2xl overflow-y-auto flex flex-col shadow-2xl p-4 md:p-6"
         style={{ borderColor: `${themeColor}44`, boxShadow: `0 0 60px ${themeColor}15`, maxHeight: '90vh', margin: 'auto' }}
       >
         {/* ── HEADER ── */}
         <div
-          className="px-6 py-4 border-b flex justify-between items-center"
+          className="pb-4 border-b flex justify-between items-center"
           style={{ borderColor: `${themeColor}22` }}
         >
           <div className="flex items-center gap-3">
@@ -168,14 +168,14 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
           </div>
           <button
             onClick={handleClose}
-            className="material-symbols-outlined text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           >
-            close
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* ── BODY ── */}
-        <div className="p-6 space-y-5">
+        <div className="py-4 space-y-5">
           <AnimatePresence mode="wait">
 
             {/* Phase: INPUT */}
@@ -236,16 +236,18 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                   <button
                     onClick={handleAnalyze}
                     disabled={analyzing || !pastedText.trim()}
-                    className="flex items-center gap-3 py-2.5 px-6 font-space font-black text-[11px] uppercase tracking-[0.2em] transition-all disabled:opacity-30 rounded-xl"
+                    className="flex items-center gap-3 py-2.5 px-6 font-space font-black text-[11px] uppercase tracking-[0.2em] transition-all disabled:opacity-30 rounded-xl cursor-pointer"
                     style={{
                       backgroundColor: themeColor,
                       color: '#000',
                       boxShadow: analyzing ? `0 0 25px ${themeColor}66` : `0 0 15px ${themeColor}44`,
                     }}
                   >
-                    <span className={`material-symbols-outlined text-sm ${analyzing ? 'animate-spin' : ''}`}>
-                      {analyzing ? 'sync' : 'manage_search'}
-                    </span>
+                    {analyzing ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-4 h-4" />
+                    )}
                     {analyzing
                       ? (isRTL ? 'جاري التحليل...' : 'ANALYZING...')
                       : (isRTL ? 'استخراج المهام ←' : 'FIND TASKS →')}
@@ -325,7 +327,7 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                 <div className="flex justify-between items-center pt-3 border-t border-[var(--card-border)]">
                   <button
                     onClick={handleBack}
-                    className="flex items-center gap-2 text-[10px] font-space font-black uppercase tracking-widest text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                    className="flex items-center gap-2 text-[10px] font-space font-black uppercase tracking-widest text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                   >
                     <ArrowLeft className="text-sm w-3.5 h-3.5" />
                     {isRTL ? 'رجوع' : 'BACK'}
@@ -334,23 +336,25 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                   <div className="flex items-center gap-3">
                     <button
                       onClick={handleClose}
-                      className="py-2.5 px-4 font-space font-black text-[10px] uppercase tracking-widest text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors rounded-xl"
+                      className="py-2.5 px-4 font-space font-black text-[10px] uppercase tracking-widest text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors rounded-xl cursor-pointer"
                     >
                       {isRTL ? 'إلغاء' : 'CANCEL'}
                     </button>
                     <button
                       onClick={handleDeploy}
                       disabled={deploying}
-                      className="flex items-center gap-2 py-2.5 px-6 font-space font-black text-[11px] uppercase tracking-[0.2em] transition-all disabled:opacity-40 rounded-xl"
+                      className="flex items-center gap-2 py-2.5 px-6 font-space font-black text-[11px] uppercase tracking-[0.2em] transition-all disabled:opacity-40 rounded-xl cursor-pointer"
                       style={{
                         backgroundColor: themeColor,
                         color: '#000',
                         boxShadow: `0 0 20px ${themeColor}44`,
                       }}
                     >
-                      <span className={`material-symbols-outlined text-sm ${deploying ? 'animate-spin' : ''}`}>
-                        {deploying ? 'sync' : 'add_task'}
-                      </span>
+                      {deploying ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Plus className="w-4 h-4" />
+                      )}
                       {deploying
                         ? (isRTL ? 'جاري الإضافة...' : 'ADDING...')
                         : (isRTL ? 'إضافة المهام ✓' : 'ADD TASKS ✓')}
