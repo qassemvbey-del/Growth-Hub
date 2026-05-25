@@ -245,13 +245,13 @@ export default function KanbanBoard({
                             </p>
                           </div>
 
-                          {/* Task Viewers Overlapping Avatar Pile */}
+                          {/* Task Viewers Overlapping Avatar Pile (Absolute Positioning in Top-Right) */}
                           {taskViewers.length > 0 && (
-                            <div className="flex items-center -space-x-1.5 shrink-0 select-none">
+                            <div className="absolute -top-2 -right-2 flex items-center -space-x-1 shrink-0 select-none z-20">
                               {taskViewers.map((viewer: any) => (
                                 <div
                                   key={viewer.user_id}
-                                  className="w-5 h-5 rounded-full border bg-zinc-950 flex items-center justify-center text-[7px] font-space font-black uppercase text-white shadow-md relative overflow-hidden shrink-0 animate-pulse"
+                                  className="w-6 h-6 rounded-full border bg-zinc-950 flex items-center justify-center text-[7px] font-space font-black uppercase text-white shadow-md relative overflow-hidden shrink-0 ring-2 ring-cyan-500 animate-pulse z-10"
                                   style={{ borderColor: viewer.session_color || 'cyan', boxShadow: `0 0 8px ${viewer.session_color || 'cyan'}55` }}
                                   title={`${viewer.full_name || 'CO-OPERATIVE'} is viewing this task`}
                                 >
@@ -265,10 +265,6 @@ export default function KanbanBoard({
                                   ) : (
                                     <span>{viewer.full_name?.substring(0, 2) || 'OP'}</span>
                                   )}
-                                  <span 
-                                    className="absolute bottom-0 right-0 w-1.5 h-1.5 rounded-full border border-black" 
-                                    style={{ backgroundColor: viewer.session_color || 'cyan' }} 
-                                  />
                                 </div>
                               ))}
                             </div>
