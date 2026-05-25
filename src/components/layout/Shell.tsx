@@ -11,7 +11,8 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useSound } from '@/context/SoundContext'
 import { 
   LayoutGrid, Trophy, Target, FileText, User, Settings, Zap, Bell, Flame, Bot, X, Home,
-  Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp, CloudLightning
+  Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp, CloudLightning,
+  Crosshair, Shield
 } from 'lucide-react'
 
 
@@ -754,9 +755,11 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       </main>
 
       {/* ── MOBILE BOTTOM NAVIGATION ── */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 h-16 bg-[var(--sidebar-bg)] border-t border-[var(--card-border)] z-[200] flex items-center justify-around px-2 backdrop-blur-2xl">
+      <nav className="lg:hidden fixed bottom-0 w-full bg-[var(--sidebar-bg)] border-t border-[var(--card-border)] z-[200] flex items-center justify-around px-2 backdrop-blur-2xl">
         {[
           { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
+          { label: isRTL ? 'فردي' : 'Solo', icon: Crosshair, href: '/goals/solo' },
+          { label: isRTL ? 'فريق' : 'Squad', icon: Shield, href: '/goals/squad' },
           { label: isRTL ? 'الأهداف' : 'Goals', icon: Target, href: '/missions' },
           { label: isRTL ? 'الملاحظات' : 'Notes', icon: FileText, href: '/notes' },
           { label: isRTL ? 'الإنجازات' : 'Wins', icon: Trophy, href: '/achievements' },

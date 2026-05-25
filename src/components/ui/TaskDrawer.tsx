@@ -47,7 +47,7 @@ export default function TaskDrawer({
   squadMembers = [],
   isSquad = false
 }: TaskDrawerProps) {
-  const { isRTL, t, addXp } = useGrowth()
+  const { isRTL, t, addXp, profile } = useGrowth()
   const { startFocus } = usePomodoro()
   const [taskTitle, setTaskTitle] = useState(task.title || '')
   useEffect(() => {
@@ -83,6 +83,30 @@ export default function TaskDrawer({
   const [mentionsSearch, setMentionsSearch] = useState('')
   const [filteredMembers, setFilteredMembers] = useState<any[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Click outside to dismiss Emoji Picker and Mentions Dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement
+      if (showEmojiPicker || showMentionsDropdown) {
+        const clickedSmileBtn = target.closest('button[title="EMOJI"]')
+        const clickedMentionBtn = target.closest('button[title="MENTION"]')
+        const clickedInsideEmoji = target.closest('.emoji-picker-container')
+        const clickedInsideMentions = target.closest('.mentions-dropdown-container')
+        
+        if (!clickedSmileBtn && !clickedMentionBtn && !clickedInsideEmoji && !clickedInsideMentions) {
+          setShowEmojiPicker(false)
+          setShowMentionsDropdown(false)
+        }
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('touchstart', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('touchstart', handleClickOutside)
+    }
+  }, [showEmojiPicker, showMentionsDropdown])
 
   const insertEmoji = (emoji: string) => {
     const textarea = textareaRef.current
@@ -436,8 +460,8 @@ export default function TaskDrawer({
       content: noteText,
       created_at: new Date().toISOString(),
       user_id: user?.id || null,
-      user_name: user ? (squadMembers.find(m => m.id === user.id)?.full_name || 'Operator') : 'Operator',
-      avatar_url: user ? (squadMembers.find(m => m.id === user.id)?.avatar_url || null) : null
+      user_name: profile?.full_name || (user ? squadMembers.find(m => m.id === user.id)?.full_name : null) || 'Operator',
+      avatar_url: profile?.avatar_url || (user ? squadMembers.find(m => m.id === user.id)?.avatar_url : null) || null
     }
 
     const updatedNotes = [newLocalNote, ...notes]
