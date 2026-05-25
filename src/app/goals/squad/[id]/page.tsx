@@ -594,49 +594,27 @@ export default function MissionDetailPage() {
           { event: '*', schema: 'public', table: 'tasks' },
           async (payload: any) => {
             console.log('REALTIME PAYLOAD:', payload)
-            
-            // Client-side filter to resolve Replica Identity DEFAULT WAL replication limits
-            if (payload.new && payload.new.cup_id && payload.new.cup_id !== id) {
-              return
-            }
-            
-            // Re-fetch the fully joined tasks list to guarantee assignee profiles are correct
-            const { data: updatedTasks } = await supabase
-              .from('tasks')
-              .select('*, assignee:profiles!assigned_to(*)')
-              .eq('cup_id', id)
-            
-            if (updatedTasks) {
-              setMission((prev: any) => {
-                if (!prev) return prev
-                const sortedTasks = [...updatedTasks].sort((a: any, b: any) => {
-                  const diff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-                  if (diff !== 0) return diff
-                  return a.id.localeCompare(b.id)
-                })
-                // Return new cloned state object to trigger 100% clean re-render
-                return { ...prev, tasks: sortedTasks }
-              })
-            }
+            // Re-fetch clean state from DB to guarantee 100% accurate state update and React re-render
+            await fetchMission()
           }
         )
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'goal_members' },
-          (payload: any) => {
+          async (payload: any) => {
             console.log('REALTIME GOAL MEMBERS PAYLOAD:', payload)
-            if (payload.new && payload.new.goal_id && payload.new.goal_id !== id) return
             refetchSquadMembers()
             fetchPendingRequests()
+            await fetchMission()
           }
         )
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'squad_join_requests' },
-          (payload: any) => {
+          async (payload: any) => {
             console.log('REALTIME JOIN REQUESTS PAYLOAD:', payload)
-            if (payload.new && payload.new.goal_id && payload.new.goal_id !== id) return
             fetchPendingRequests()
+            await fetchMission()
           }
         )
         .on(
@@ -669,7 +647,7 @@ export default function MissionDetailPage() {
 
     const PALETTE = ['#1D9E75', '#BA7517', '#7F77DD', '#D85A30', '#378ADD']
 
-    const channel = supabase.channel(`goal:${id}`, {
+    const channel = supabase.channel('workspace', {
       config: {
         presence: {
           key: profile.id,

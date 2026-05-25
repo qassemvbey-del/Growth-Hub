@@ -561,53 +561,30 @@ export default function MissionDetailPage() {
       .channel(`squad-tasks:${id}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'tasks', filter: `cup_id=eq.${id}` },
-        (payload: any) => {
-          if (payload.eventType === 'INSERT') {
-            setMission((prev: any) => {
-              if (!prev) return prev
-              // Avoid duplicates (own mutations already applied optimistically)
-              const exists = prev.tasks?.some((t: any) => t.id === payload.new.id)
-              if (exists) return prev
-              return { ...prev, tasks: [...(prev.tasks || []), payload.new] }
-            })
-          }
-          if (payload.eventType === 'UPDATE') {
-            setMission((prev: any) => {
-              if (!prev) return prev
-              return {
-                ...prev,
-                shadow: undefined,
-                tasks: (prev.tasks || []).map((t: any) =>
-                  t.id === payload.new.id ? { ...t, ...payload.new } : t
-                ),
-              }
-            })
-          }
-          if (payload.eventType === 'DELETE') {
-            setMission((prev: any) => {
-              if (!prev) return prev
-              return {
-                ...prev,
-                tasks: (prev.tasks || []).filter((t: any) => t.id !== payload.old.id),
-              }
-            })
-          }
+        { event: '*', schema: 'public', table: 'tasks' },
+        async (payload: any) => {
+          console.log('REALTIME MISSION TASKS PAYLOAD:', payload)
+          // Re-query database clean state to trigger a full clean React state update and UI re-render
+          await fetchMission()
         }
       )
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'goal_members', filter: `goal_id=eq.${id}` },
-        () => {
+        { event: '*', schema: 'public', table: 'goal_members' },
+        async (payload: any) => {
+          console.log('REALTIME MISSION GOAL MEMBERS PAYLOAD:', payload)
           refetchSquadMembers()
           fetchPendingRequests()
+          await fetchMission()
         }
       )
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'squad_join_requests', filter: `goal_id=eq.${id}` },
-        () => {
+        { event: '*', schema: 'public', table: 'squad_join_requests' },
+        async (payload: any) => {
+          console.log('REALTIME MISSION JOIN REQUESTS PAYLOAD:', payload)
           fetchPendingRequests()
+          await fetchMission()
         }
       )
       .subscribe()
@@ -624,7 +601,7 @@ export default function MissionDetailPage() {
 
     const PALETTE = ['#1D9E75', '#BA7517', '#7F77DD', '#D85A30', '#378ADD']
 
-    const channel = supabase.channel(`goal:${id}`, {
+    const channel = supabase.channel('workspace', {
       config: {
         presence: {
           key: profile.id,

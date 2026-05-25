@@ -87,6 +87,51 @@ export default function TaskDrawer({
     setDescription(task.description || '')
   }, [task.description, task.id])
 
+  // --- REAL-TIME WORKSPACE PRESENCE FOR TASK DRAWER ---
+  useEffect(() => {
+    if (isGuest || !task?.id) return
+
+    const supabase = createClient()
+    const channel = supabase.channel('workspace', {
+      config: {
+        presence: {
+          key: task.id
+        }
+      }
+    })
+
+    const run = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      channel.subscribe(async (status: string) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({
+            user_id: user.id,
+            full_name: profile?.full_name || 'Anonymous',
+            avatar_url: profile?.avatar_url || null,
+            cursor_task_id: task.id,
+            task_id: task.id,
+            session_color: '#1D9E75'
+          })
+        }
+      })
+    }
+
+    run()
+
+    return () => {
+      channel.untrack()
+      supabase.removeChannel(channel)
+    }
+  }, [task?.id, isGuest])
+
   // Google API & Picker Loading States
   const [gapiLoaded, setGapiLoaded] = useState(false)
   const [pickerApiLoaded, setPickerApiLoaded] = useState(false)
@@ -457,36 +502,39 @@ export default function TaskDrawer({
           >
             <X className="w-4.5 h-4.5" />
           </button>
+        </div>
 
-          {/* Underline Tab Navigation - Strictly labeled in Arabic */}
-          <div className="grid grid-cols-4 w-full border-b border-white/5 bg-zinc-950/40 px-1 relative">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.id
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`py-4 text-center text-base font-space font-bold transition-all relative cursor-pointer ${
- isActive
- ? 'text-[#FFFFFF]'
- : 'text-[var(--text-secondary)] hover:text-white/80'
- }`}
-                  style={isActive ? { color: themeColor } : {}}
-                >
-                  <span className="relative z-10">{tab.label}</span>
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeUnderlineIndicator"
-                      className="absolute bottom-0 left-0 right-0 h-[2px] z-20"
-                      style={{ backgroundColor: themeColor, boxShadow: `0 2px 8px ${themeColor}` }}
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                </button>
-              )
-            })}
-          </div>
+        {/* Underline Tab Navigation - Strictly labeled in Arabic */}
+        <div className="grid grid-cols-4 w-full border-b border-white/5 bg-zinc-950/40 px-1 relative shrink-0">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`py-4 text-center text-base font-space font-bold transition-all relative cursor-pointer ${
+                  isActive
+                    ? 'text-[#FFFFFF]'
+                    : 'text-[var(--text-secondary)] hover:text-white/80'
+                }`}
+                style={isActive ? { color: themeColor } : {}}
+              >
+                <span className="relative z-10">{tab.label}</span>
+                {isActive && (
+                  <motion.div
+                    layoutId="activeUnderlineIndicator"
+                    className="absolute bottom-0 left-0 right-0 h-[2px] z-20"
+                    style={{ backgroundColor: themeColor, boxShadow: `0 2px 8px ${themeColor}` }}
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
+              </button>
+            )
+          })}
+        </div>
 
+        {/* Real-time Workspace Presence and Scrollable Content Wrapper */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Dynamic Content Panel based on Underline Tabs */}
           <div className="mt-4">
             {activeTab === 'details' && (
@@ -501,7 +549,7 @@ export default function TaskDrawer({
                   <h3 className="text-base font-bold text-white/90 font-space tracking-wide uppercase border-b border-white/5 pb-2">
                     {t('statusComplexity')}
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                     <div className="flex flex-col space-y-1.5">
                       <span className="text-xs text-white/40 uppercase">{t('currentStatus')}</span>
                       <span className="text-base font-bold font-space flex items-center gap-1.5" style={{ color: task.is_completed ? '#10B981' : themeColor }}>
