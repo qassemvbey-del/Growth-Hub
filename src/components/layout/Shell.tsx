@@ -9,6 +9,10 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSound } from '@/context/SoundContext'
+import { 
+  LayoutGrid, Trophy, Target, FileText, User, Settings, Zap, Bell, Flame, Bot, X, Home,
+  Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp, CloudLightning
+} from 'lucide-react'
 
 
 import { useInbox } from '@/hooks/useInbox'
@@ -201,6 +205,17 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
     if (url.includes('menna')) return 'videocam'
     if (url.includes('nour')) return 'trending_up'
     return 'cloud_sync'
+  }
+  
+  const getRoleIconComponent = (url?: string | null) => {
+    if (!url) return User
+    if (url.includes('omar')) return Laptop
+    if (url.includes('maya')) return GraduationCap
+    if (url.includes('ismail')) return Briefcase
+    if (url.includes('zain')) return Rocket
+    if (url.includes('menna')) return Video
+    if (url.includes('nour')) return TrendingUp
+    return CloudLightning
   }
 
   const { reports, markAsRead } = useInbox()
@@ -457,7 +472,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
             <div className="absolute inset-0 rounded-full border-t-4 border-l-4 border-transparent border-t-[var(--theme-color)] border-l-[var(--theme-color)] animate-spin" style={{ opacity: 0.8, filter: 'drop-shadow(0 0 10px var(--theme-color))' }} />
             <div className="absolute inset-2 rounded-full border-b-4 border-r-4 border-transparent border-b-[var(--theme-color)] border-r-[var(--theme-color)] animate-spin-reverse" style={{ opacity: 0.5 }} />
             <div className="absolute inset-4 rounded-full bg-[var(--theme-color)]/10 backdrop-blur-md flex items-center justify-center animate-pulse">
-              <span className="material-symbols-outlined text-[var(--theme-color)] text-3xl">token</span>
+              <LayoutGrid className="w-8 h-8 text-[var(--theme-color)]" style={{ filter: 'drop-shadow(0 0 8px var(--theme-color))' }} />
             </div>
           </div>
           <p className="font-monospace text-[var(--theme-color)] tracking-[0.3em] text-sm animate-pulse">
@@ -516,12 +531,11 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
             {/* ⚡ XP: {xp_value} */}
             <div className="flex items-center gap-2 border-e border-[var(--card-border)] pe-6 shrink-0" title={isRTL ? 'نقاط الخبرة' : 'XP Readout'}>
               <motion.span
-                className="material-symbols-outlined text-xl shrink-0"
-                style={{ color: currentTheme.color, filter: `drop-shadow(0 0 6px ${currentTheme.color})` }}
+                className="shrink-0"
                 animate={{ opacity: [0.3, 1, 0.3] }}
                 transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
               >
-                bolt
+                <Zap className="w-5 h-5" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 6px ${currentTheme.color})` }} />
               </motion.span>
               <span className="text-sm md:text-base font-space font-black tracking-widest uppercase text-zinc-900 dark:text-zinc-100">
                 XP: <span style={{ color: currentTheme.color }}>{profile?.xp || 0}</span>
@@ -530,15 +544,13 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
             {/* 🔥 {streak_days}d */}
             <div className="flex items-center gap-2 border-e border-[var(--card-border)] pe-6 shrink-0" title={isRTL ? 'سلسلة الأيام' : 'Streak'}>
-              <span
-                className={cn('material-symbols-outlined text-lg md:text-xl transition-all duration-500', streak > 0 ? 'scale-110 animate-pulse' : 'opacity-20')}
+              <Flame
+                className={cn('w-5 h-5 transition-all duration-500', streak > 0 ? 'scale-110 animate-pulse' : 'opacity-20')}
                 style={{
                   color: streak > 0 ? (personality === 'SAVAGE' ? '#FF0055' : '#FF5F00') : undefined,
                   filter: streak > 0 ? `drop-shadow(0 0 6px ${personality === 'SAVAGE' ? '#FF0055' : '#FF5F00'})` : 'none'
                 }}
-              >
-                local_fire_department
-              </span>
+              />
               <span
                 className="text-sm md:text-base font-space tracking-wider font-black uppercase text-zinc-900 dark:text-zinc-100 flex items-center gap-1"
                 style={{ opacity: streak > 0 ? 1 : 0.4 }}
@@ -564,7 +576,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                 )}
                 title={isRTL ? 'الإشعارات' : 'Notifications'}
               >
-                <span className="material-symbols-outlined text-[20px]">notifications</span>
+                <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
                   <span 
                     className="absolute -top-1 -right-1 w-4 h-4 bg-[#FF0055] text-white text-[8px] font-black flex items-center justify-center rounded-full shadow-[0_0_10px_#FF0055]"
@@ -605,7 +617,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
               {mounted && profile?.avatar_url ? (
                 <img src={profile.avatar_url} alt="User" className="w-[90%] h-[90%] mx-auto object-contain p-1 rounded-full" />
               ) : (
-                <span className="material-symbols-outlined text-[var(--text-secondary)] text-lg">person</span>
+                <User className="w-5 h-5 text-[var(--text-secondary)]" />
               )}
             </div>
             {/* Visual Role Icon Overlay Badge at bottom-right */}
@@ -618,9 +630,10 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                   boxShadow: `0 0 8px ${currentTheme.color}` 
                 }}
               >
-                <span className="material-symbols-outlined text-[9px] font-black">
-                  {getRoleIcon(profile.avatar_url)}
-                </span>
+                {(() => {
+                  const IconComponent = getRoleIconComponent(profile.avatar_url)
+                  return <IconComponent className="w-2.5 h-2.5 text-black stroke-[2.5]" />
+                })()}
               </div>
             )}
           </div>
@@ -651,7 +664,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                 )}
                 title={isRTL ? 'الإشعارات' : 'Notifications'}
               >
-                <span className="material-symbols-outlined text-[18px]">notifications</span>
+                <Bell className="w-[18px] h-[18px]" />
                 {unreadCount > 0 && (
                   <span 
                     className="absolute -top-1 -right-1 w-4 h-4 bg-[#FF0055] text-white text-[8px] font-black flex items-center justify-center rounded-full shadow-[0_0_10px_#FF0055]"
@@ -694,9 +707,9 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
               <motion.span 
                 animate={{ opacity: [1, 1, 0.2, 1, 1], rotate: [0, -5, 5, 0] }}
                 transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
-                className="material-symbols-outlined text-[18px] relative z-10"
+                className="relative z-10"
               >
-                {personality === 'SAVAGE' ? 'whatshot' : 'smart_toy'}
+                {personality === 'SAVAGE' ? <Flame className="w-[18px] h-[18px]" /> : <Bot className="w-[18px] h-[18px]" />}
               </motion.span>
             </button>
           </div>
@@ -724,7 +737,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                   {profile?.ai_name || (isRTL ? 'المدرب' : 'COACH')} // {profile?.ai_personality === 'SAVAGE' ? (isRTL ? 'نمط شرس' : 'SAVAGE_MODE') : (isRTL ? 'متصل' : 'ONLINE')}
                 </span>
                 <button onClick={() => setAiOpen(false)} className="text-black/30 dark:text-white/30 hover:text-black dark:hover:text-white transition-all close-btn">
-                  <span className="material-symbols-outlined text-lg md:text-xl">close</span>
+                  <X className="w-4.5 h-4.5 md:w-5 md:h-5" />
                 </button>
               </div>
               <p className="text-[13px] md:text-[15px] font-space font-bold text-black/90 dark:text-white/90 leading-relaxed" dir="auto">
@@ -743,10 +756,10 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       {/* ── MOBILE BOTTOM NAVIGATION ── */}
       <nav className="lg:hidden fixed bottom-0 inset-x-0 h-16 bg-[var(--sidebar-bg)] border-t border-[var(--card-border)] z-[200] flex items-center justify-around px-2 backdrop-blur-2xl">
         {[
-          { label: isRTL ? 'الرئيسية' : 'Home', icon: 'home', href: '/' },
-          { label: isRTL ? 'الأهداف' : 'Goals', icon: 'flag', href: '/missions' },
-          { label: isRTL ? 'الملاحظات' : 'Notes', icon: 'notes', href: '/notes' },
-          { label: isRTL ? 'الإنجازات' : 'Wins', icon: 'trophy', href: '/achievements' },
+          { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
+          { label: isRTL ? 'الأهداف' : 'Goals', icon: Target, href: '/missions' },
+          { label: isRTL ? 'الملاحظات' : 'Notes', icon: FileText, href: '/notes' },
+          { label: isRTL ? 'الإنجازات' : 'Wins', icon: Trophy, href: '/achievements' },
         ].map(item => {
           const isActive = pathname === item.href
           return (
@@ -758,9 +771,10 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                 isActive ? "text-[var(--text-primary)] scale-105" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               )}
             >
-              <span className="material-symbols-outlined text-xl" style={{ color: isActive ? currentTheme.color : undefined }}>
-                {item.icon}
-              </span>
+              {(() => {
+                const IconComponent = item.icon
+                return <IconComponent className="w-5 h-5" style={{ color: isActive ? currentTheme.color : undefined }} />
+              })()}
               <span className="text-[9px] font-space font-bold tracking-wider uppercase">
                 {item.label}
               </span>

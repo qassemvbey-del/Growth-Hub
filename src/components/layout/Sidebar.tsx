@@ -8,6 +8,10 @@ import { useGrowth, RANK_THRESHOLDS } from '@/context/GrowthContext'
 import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useSound } from '@/context/SoundContext'
+import { 
+  LayoutGrid, Target, FileText, Trophy, User, Settings, Zap,
+  Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp, CloudLightning
+} from 'lucide-react'
 
 export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolean, onOpenCoach?: () => void }) {
   const pathname = usePathname()
@@ -57,22 +61,22 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
     return { currentXp: xp, nextRankName: nextRank.rank, xpNeeded: needed > 0 ? needed : 0, progressPct: pct }
   }, [profile])
 
-  const getRoleIcon = (url?: string | null) => {
-    if (!url) return 'account_circle'
-    if (url.includes('omar')) return 'laptop_mac'
-    if (url.includes('maya')) return 'school'
-    if (url.includes('ismail')) return 'work'
-    if (url.includes('zain')) return 'rocket_launch'
-    if (url.includes('menna')) return 'videocam'
-    if (url.includes('nour')) return 'trending_up'
-    return 'cloud_sync'
+  const getRoleIconComponent = (url?: string | null) => {
+    if (!url) return User
+    if (url.includes('omar')) return Laptop
+    if (url.includes('maya')) return GraduationCap
+    if (url.includes('ismail')) return Briefcase
+    if (url.includes('zain')) return Rocket
+    if (url.includes('menna')) return Video
+    if (url.includes('nour')) return TrendingUp
+    return CloudLightning
   }
 
   const MENU_ITEMS = [
-    { icon: 'dashboard', label: mounted ? (isRTL ? 'الرئيسية' : "Home") : "Home", href: '/', shortcut: '01', exact: true },
-    { icon: 'target', label: mounted ? (isRTL ? 'أهدافي' : 'Goals') : 'Goals', href: '/missions', shortcut: '02', exact: false },
-    { icon: 'edit_document', label: mounted ? (isRTL ? 'ملاحظاتي' : 'Notes') : 'Notes', href: '/notes', shortcut: '03', exact: false },
-    { icon: 'inventory_2', label: mounted ? (isRTL ? 'إنجازاتي' : 'Wins') : 'Wins', href: '/achievements', shortcut: '04', exact: false },
+    { icon: LayoutGrid, label: mounted ? (isRTL ? 'الرئيسية' : "Home") : "Home", href: '/', shortcut: '01', exact: true },
+    { icon: Target, label: mounted ? (isRTL ? 'أهدافي' : 'Goals') : 'Goals', href: '/missions', shortcut: '02', exact: false },
+    { icon: FileText, label: mounted ? (isRTL ? 'ملاحظاتي' : 'Notes') : 'Notes', href: '/notes', shortcut: '03', exact: false },
+    { icon: Trophy, label: mounted ? (isRTL ? 'إنجازاتي' : 'Wins') : 'Wins', href: '/achievements', shortcut: '04', exact: false },
   ]
 
   return (
@@ -89,7 +93,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
             {mounted && profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="User" className="w-[90%] h-[90%] mx-auto object-contain p-1 rounded-full shadow-md" />
             ) : (
-              <span className="material-symbols-outlined text-[var(--text-secondary)] text-4xl">person</span>
+              <User className="w-12 h-12 text-[var(--text-secondary)]" />
             )}
           </div>
           {/* Visual Role Icon Overlay Badge at bottom-right */}
@@ -103,9 +107,10 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               }}
               title="Active Persona Role"
             >
-              <span className="material-symbols-outlined text-sm font-black">
-                {getRoleIcon(profile.avatar_url)}
-              </span>
+              {(() => {
+                const IconComponent = getRoleIconComponent(profile.avatar_url)
+                return <IconComponent className="w-4 h-4 text-black stroke-[2.5]" />
+              })()}
             </div>
           )}
         </div>
@@ -182,21 +187,22 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                     />
                   )}
                   
-                  <motion.span 
-                    animate={{ scale: [1, 1.05, 1] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: Math.random() * 2 }}
-                    className={cn(
-                      "material-symbols-outlined transition-all duration-300 text-lg",
-                      isRTL ? "ml-4" : "mr-4"
-                    )}
-                    style={{ 
-                      color: (isGoalsActive && !pathname.startsWith('/goals/'))
-                        ? currentTheme.color 
-                        : (isHovered ? `${currentTheme.color}cc` : undefined)
-                    }}
-                  >
-                    {item.icon}
-                  </motion.span>
+                  {(() => {
+                    const IconComponent = item.icon
+                    return (
+                      <IconComponent
+                        className={cn(
+                          "w-5 h-5 transition-all duration-300",
+                          isRTL ? "ml-4" : "mr-4"
+                        )}
+                        style={{ 
+                          color: (isGoalsActive && !pathname.startsWith('/goals/'))
+                            ? currentTheme.color 
+                            : (isHovered ? `${currentTheme.color}cc` : undefined)
+                        }}
+                      />
+                    )
+                  })()}
                   
                   <span className={cn(
                     "font-space tracking-[0.2em] font-black flex-grow transition-colors duration-300 text-[14px]"
@@ -334,21 +340,22 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                 />
               )}
               
-              <motion.span 
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: Math.random() * 2 }}
-                className={cn(
-                  "material-symbols-outlined transition-all duration-300 text-lg",
-                  isRTL ? "ml-4" : "mr-4"
-                )}
-                style={{ 
-                  color: isActive 
-                    ? currentTheme.color 
-                    : (isHovered ? `${currentTheme.color}cc` : undefined)
-                }}
-              >
-                {item.icon}
-              </motion.span>
+              {(() => {
+                const IconComponent = item.icon
+                return (
+                  <IconComponent
+                    className={cn(
+                      "w-5 h-5 transition-all duration-300",
+                      isRTL ? "ml-4" : "mr-4"
+                    )}
+                    style={{ 
+                      color: isActive 
+                        ? currentTheme.color 
+                        : (isHovered ? `${currentTheme.color}cc` : undefined)
+                    }}
+                  />
+                )
+              })()}
               
               <span className={cn(
                 "font-space tracking-[0.2em] font-black flex-grow transition-colors duration-300",
@@ -392,10 +399,8 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               <motion.span 
                 animate={{ opacity: [1, 0.4, 1], scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                className="material-symbols-outlined text-xl"
-                style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }}
               >
-                bolt
+                <Zap className="w-5 h-5" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }} />
               </motion.span>
               <span className="font-space font-black text-xs tracking-[0.3em] uppercase text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors">
                 {mounted ? (isRTL ? 'المدرب الذكي' : 'COACH') : 'COACH'}
@@ -423,9 +428,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
             boxShadow: isSettingsHovered ? `0 0 20px ${currentTheme.color}20` : 'none'
           }}
         >
-          <span className="material-symbols-outlined text-lg transition-colors duration-300" style={{ color: isSettingsHovered ? currentTheme.color : undefined }}>
-            settings
-          </span>
+          <Settings className="w-4.5 h-4.5 transition-colors duration-300" style={{ color: isSettingsHovered ? currentTheme.color : undefined }} />
           <span className="transition-colors duration-300 text-zinc-900 dark:text-zinc-100">
             {mounted ? (isRTL ? 'الإعدادات' : 'Settings') : 'Settings'}
           </span>
