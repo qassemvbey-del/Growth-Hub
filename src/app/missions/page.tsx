@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, ArrowRight, Calendar, Check, CheckCircle2, HelpCircle, Info, Kanban, Layers, Link, List, Plus, RefreshCw, Users2, Zap } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Calendar, Check, CheckCircle2, HelpCircle, Info, Kanban, Layers, Link, List, Plus, RefreshCw, Users2, Zap, Trophy, Award, Shield, Settings, Star, X } from 'lucide-react'
 import Shell from '@/components/layout/Shell'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
@@ -17,9 +17,9 @@ import { validateContent } from '@/lib/profanityFilter'
 import { aiProfanityCheck } from '@/app/actions/profanityCheck'
 
 const SIZES = [
-  { key: 'lg', label: 'LARGE GOAL',  desc: 'Macro Objective', icon: 'trophy' },
-  { key: 'md', label: 'MEDIUM GOAL', desc: 'Standard Focus',  icon: 'military_tech' },
-  { key: 'sm', label: 'SMALL GOAL',  desc: 'Micro Focus',     icon: 'workspace_premium' },
+  { key: 'lg', label: 'LARGE GOAL',  desc: 'Macro Objective', icon: Trophy },
+  { key: 'md', label: 'MEDIUM GOAL', desc: 'Standard Focus',  icon: Shield },
+  { key: 'sm', label: 'SMALL GOAL',  desc: 'Micro Focus',     icon: Star },
 ]
 
 const getRankBorderClass = (rank: string) => {
@@ -87,7 +87,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
     const completedTasks = mission.tasks?.filter((t: any) => t.is_completed).length || 0
     const totalTasks = mission.tasks?.length || 0
     const kasaSize = mission.size === 'lg' ? 'md' : mission.size === 'md' ? 'sm' : 'sm'
-    const sizeIcon = SIZES.find(s => s.key === mission.size)?.icon || 'layers'
+    const SizeIconComp = SIZES.find(s => s.key === mission.size)?.icon || Layers
     const fmtDate = (d: string | null) => {
       if (!d) return '—'
       try { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) } catch { return '—' }
@@ -116,7 +116,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
         <div className="flex justify-between items-start mb-auto">
           <div className="flex flex-col gap-1 flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="material-symbols-outlined text-xs opacity-40" style={{ color: isInRedZone ? '#FF0055' : (mission.color || color) }}>{sizeIcon}</span>
+              <SizeIconComp className="w-3.5 h-3.5 opacity-40 shrink-0" style={{ color: isInRedZone ? '#FF0055' : (mission.color || color) }} />
               <p className="text-[8px] font-space tracking-[0.3em] uppercase font-black opacity-40">
                  {mission.sync_to_dashboard ? (isRTL ? 'نشط' : 'ACTIVE') : (isRTL ? 'استعداد' : 'STANDBY')}
               </p>
@@ -152,9 +152,9 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     playBlip();
                     setActiveRulesGoalId(activeRulesGoalId === mission.id ? null : mission.id);
                   }}
-                  className="material-symbols-outlined text-sm text-[var(--text-secondary)] hover:text-white transition-colors p-1"
+                  className="text-[var(--text-secondary)] hover:text-white transition-colors p-1 flex items-center justify-center shrink-0"
                 >
-                  settings
+                  <Settings className="w-4 h-4" />
                 </button>
                 
                 <AnimatePresence>
@@ -960,8 +960,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                   <>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الأهداف' : '_CANVAS'}</span></>
                 )}
               </h1>
-              <button onClick={() => setShowGuide(true)} className="material-symbols-outlined text-[var(--text-secondary)]/40 hover:text-[var(--text-secondary)] transition-colors duration-300 text-xl" title="Guide">
-                info
+              <button onClick={() => setShowGuide(true)} className="text-[var(--text-secondary)]/40 hover:text-[var(--text-secondary)] transition-colors duration-300 flex items-center justify-center shrink-0" title="Guide">
+                <Info className="w-5 h-5" />
               </button>
             </div>
             <p className={cn("text-[11px] font-space tracking-[0.35em] uppercase font-bold", isRTL ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]")}>
@@ -1048,9 +1048,9 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
               >
                 <button 
                   onClick={() => setShowGuide(false)} 
-                  className="absolute top-4 right-4 rtl:left-4 rtl:right-auto material-symbols-outlined text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  className="absolute top-4 right-4 rtl:left-4 rtl:right-auto text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors p-1 flex items-center justify-center shrink-0"
                 >
-                  close
+                  <X className="w-5 h-5" />
                 </button>
                 <div className="space-y-4">
                   {isRTL ? (
@@ -1154,7 +1154,10 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                         onMouseEnter={e => { if (newSize !== s.key) e.currentTarget.style.borderColor = `${currentTheme.color}60` }}
                         onMouseLeave={e => { if (newSize !== s.key) e.currentTarget.style.borderColor = '' }}
                       >
-                        <span className="material-symbols-outlined text-base md:text-lg">{s.icon}</span>
+                        {(() => {
+                          const IconComp = s.icon;
+                          return <IconComp className="w-4 h-4 md:w-5 md:h-5 shrink-0" />;
+                        })()}
                         <span className="text-xs md:text-sm font-space font-black uppercase tracking-tighter">{isRTL ? (s.key === 'lg' ? 'كبيرة' : s.key === 'md' ? 'متوسطة' : 'صغيرة') : (s.key === 'lg' ? 'Large' : s.key === 'md' ? 'Medium' : 'Small')}</span>
                       </button>
                     ))}
@@ -1649,9 +1652,9 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                   setJoinStatus('idle');
                   setJoinCodeInput('');
                 }} 
-                className="absolute top-4 right-4 rtl:left-4 rtl:right-auto material-symbols-outlined text-[var(--text-secondary)] hover:text-white cursor-pointer"
+                className="absolute top-4 right-4 rtl:left-4 rtl:right-auto text-[var(--text-secondary)] hover:text-white transition-colors p-1 flex items-center justify-center shrink-0 cursor-pointer"
               >
-                close
+                <X className="w-5 h-5" />
               </button>
 
               <div className="space-y-6">

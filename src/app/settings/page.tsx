@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, CheckCircle2, FileText, HelpCircle, Lock, LogOut, Star, User } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, FileText, HelpCircle, Lock, LogOut, Star, User, Brain, Settings as SettingsIcon, Moon, Sun } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Shell from '@/components/layout/Shell'
@@ -213,10 +213,16 @@ export default function SettingsPage() {
     </Shell>
   )
 
+  const getTabIcon = (id: 'ACCOUNT' | 'AI_COACH' | 'SYSTEM', className?: string) => {
+    if (id === 'ACCOUNT') return <User className={className} />
+    if (id === 'AI_COACH') return <Brain className={className} />
+    return <SettingsIcon className={className} />
+  }
+
   const tabOptions = [
-    { id: 'ACCOUNT', label: isRTL ? 'الحساب' : 'ACCOUNT', icon: 'person' },
-    { id: 'AI_COACH', label: aiNameHeader, icon: 'psychology' },
-    { id: 'SYSTEM', label: isRTL ? 'النظام' : 'SYSTEM', icon: 'settings_system_daydream' }
+    { id: 'ACCOUNT', label: isRTL ? 'الحساب' : 'ACCOUNT' },
+    { id: 'AI_COACH', label: aiNameHeader },
+    { id: 'SYSTEM', label: isRTL ? 'النظام' : 'SYSTEM' }
   ] as const
 
   return (
@@ -258,7 +264,7 @@ export default function SettingsPage() {
                     boxShadow: `0 0 15px ${currentTheme.color}33`
                   } : {}}
                 >
-                  <span className="material-symbols-outlined text-sm">{tab.icon}</span>
+                  {getTabIcon(tab.id, "w-4 h-4")}
                   {tab.label}
                 </button>
               ))}
@@ -290,12 +296,10 @@ export default function SettingsPage() {
                   {activeTab === tab.id && (
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-white" />
                   )}
-                  <span className={cn(
-                    "material-symbols-outlined text-lg transition-transform duration-300 group-hover:scale-110",
+                  {getTabIcon(tab.id, cn(
+                    "w-5 h-5 transition-transform duration-300 group-hover:scale-110",
                     activeTab === tab.id ? "text-black" : "text-white/40"
-                  )}>
-                    {tab.icon}
-                  </span>
+                  ))}
                   <span>{tab.label}</span>
                 </button>
               ))}
@@ -629,8 +633,8 @@ export default function SettingsPage() {
                           </label>
                           <div className="grid grid-cols-2 gap-4">
                             {[
-                              { key: 'dark', label: isRTL ? 'ليلي' : 'DARK', icon: 'dark_mode' },
-                              { key: 'light', label: isRTL ? 'نهاري' : 'LIGHT', icon: 'light_mode' }
+                              { key: 'dark', label: isRTL ? 'ليلي' : 'DARK' },
+                              { key: 'light', label: isRTL ? 'نهاري' : 'LIGHT' }
                             ].map(theme => {
                               const isActive = (theme.key === 'dark' && isDarkMode) || (theme.key === 'light' && !isDarkMode)
                               return (
@@ -650,7 +654,7 @@ export default function SettingsPage() {
                                   )}
                                   style={isActive ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
                                 >
-                                  <span className="material-symbols-outlined text-sm">{theme.icon}</span>
+                                  {theme.key === 'dark' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
                                   {theme.label}
                                 </button>
                               )

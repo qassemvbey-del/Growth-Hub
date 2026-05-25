@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, FormEvent, KeyboardEvent, useEffect, useRef } from 'react'
+import React, { useState, FormEvent, KeyboardEvent, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
 import { createClient } from '@/lib/supabase'
@@ -11,6 +11,7 @@ import {
   Trash2, Loader2, RefreshCw, FolderOpen, Paperclip, ExternalLink, 
   StickyNote, Link as LinkIcon, Smile, AtSign, Send, MessageSquare, Play
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface TaskDrawerProps {
   task: any
@@ -78,11 +79,52 @@ export default function TaskDrawer({
   }, [])
 
   const [noteInput, setNoteInput] = useState('')
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  useEffect(() => {
+    async function getUserId() {
+      const sb = createClient()
+      const { data: { user } } = await sb.auth.getUser()
+      if (user) {
+        setCurrentUserId(user.id)
+      }
+    }
+    getUserId()
+  }, [])
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [showMentionsDropdown, setShowMentionsDropdown] = useState(false)
   const [mentionsSearch, setMentionsSearch] = useState('')
   const [filteredMembers, setFilteredMembers] = useState<any[]>([])
+  const [selectedMentions, setSelectedMentions] = useState<Set<string>>(new Set())
+  const [mentionPickerMode, setMentionPickerMode] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // --- NOTIFICATION SENDER ---
+  const sendNotification = useCallback(async (
+    targetUserId: string,
+    type: 'mention' | 'reaction',
+    title: string,
+    contentText: string
+  ) => {
+    if (!targetUserId || targetUserId === currentUserId) return
+    try {
+      const supabase = createClient()
+      await supabase.from('inbox_reports').insert({
+        user_id: targetUserId,
+        type: 'daily_brief',
+        title,
+        content: {
+          text: contentText,
+          notification_type: type,
+          task_id: task?.id,
+          task_title: task?.title,
+          sender_id: currentUserId,
+          sender_name: profile?.full_name || 'Operator'
+        }
+      })
+    } catch (err) {
+      console.error('Failed to send notification:', err)
+    }
+  }, [currentUserId, profile?.full_name, task?.id, task?.title])
 
   // Click outside to dismiss Emoji Picker and Mentions Dropdown
   useEffect(() => {
@@ -455,13 +497,28 @@ export default function TaskDrawer({
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     
+    // Build mentions list from selectedMentions + inline @mentions
+    const mentionedIds = new Set<string>(selectedMentions)
+    // Also parse inline @Name mentions
+    const mentionRegex = /@([\w\s]+?)(?=\s@|$|\s[^@])/g
+    let match
+    while ((match = mentionRegex.exec(noteText)) !== null) {
+      const mentionedName = match[1].trim().toLowerCase()
+      const found = squadMembers.find(m => 
+        (m.full_name || '').toLowerCase() === mentionedName ||
+        (m.user_name || '').toLowerCase() === mentionedName
+      )
+      if (found) mentionedIds.add(found.id)
+    }
+
     const newLocalNote = {
       id: `note_${Date.now()}`,
       content: noteText,
       created_at: new Date().toISOString(),
       user_id: user?.id || null,
       user_name: profile?.full_name || (user ? squadMembers.find(m => m.id === user.id)?.full_name : null) || 'Operator',
-      avatar_url: profile?.avatar_url || (user ? squadMembers.find(m => m.id === user.id)?.avatar_url : null) || null
+      avatar_url: profile?.avatar_url || (user ? squadMembers.find(m => m.id === user.id)?.avatar_url : null) || null,
+      mentioned_ids: Array.from(mentionedIds)
     }
 
     const updatedNotes = [newLocalNote, ...notes]
@@ -488,10 +545,27 @@ export default function TaskDrawer({
       } catch (err) {
         console.error('Error syncing note to global notes:', err)
       }
+
+      // Send mention notifications to all mentioned users
+      const senderName = profile?.full_name || 'Operator'
+      for (const mentionedId of mentionedIds) {
+        if (mentionedId !== user.id) {
+          const mentionedMember = squadMembers.find(m => m.id === mentionedId)
+          const notifTitle = isRTL
+            ? `💬 ${senderName} ذكرك في تعليق`
+            : `💬 ${senderName} mentioned you`
+          const notifContent = isRTL
+            ? `${senderName} ذكرك في تعليق على مهمة "${task.title}": "${noteText.substring(0, 100)}${noteText.length > 100 ? '...' : ''}"`
+            : `${senderName} mentioned you in a comment on task "${task.title}": "${noteText.substring(0, 100)}${noteText.length > 100 ? '...' : ''}"`
+          await sendNotification(mentionedId, 'mention', notifTitle, notifContent)
+        }
+      }
     }
 
     await onUpdateTask(task.id, { metadata: updatedMetadata })
     setNoteInput('')
+    setSelectedMentions(new Set())
+    setMentionPickerMode(false)
   }
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -520,6 +594,56 @@ export default function TaskDrawer({
       }
     }
 
+    await onUpdateTask(task.id, { metadata: updatedMetadata })
+  }
+
+  const handleToggleReaction = async (noteIdOrIndex: string | number, emoji: string) => {
+    const userId = currentUserId || profile?.id
+    if (!userId) return
+
+    let noteAuthorId: string | null = null
+    let noteAuthorName: string | null = null
+
+    const updatedNotes = notes.map((note: any, idx: number) => {
+      const isMatch = typeof noteIdOrIndex === 'string' 
+        ? note.id === noteIdOrIndex 
+        : idx === noteIdOrIndex
+
+      if (isMatch) {
+        noteAuthorId = note.user_id || null
+        noteAuthorName = note.user_name || null
+        const reactions = { ...(note.reactions || {}) }
+        const userIds = [...(reactions[emoji] || [])]
+
+        const alreadyReacted = userIds.includes(userId)
+        if (alreadyReacted) {
+          reactions[emoji] = userIds.filter((id: string) => id !== userId)
+        } else {
+          reactions[emoji] = [...userIds, userId]
+        }
+        
+        if (reactions[emoji].length === 0) {
+          delete reactions[emoji]
+        }
+
+        // Send notification on new reaction (not on un-react)
+        if (!alreadyReacted && noteAuthorId && noteAuthorId !== userId) {
+          const senderName = profile?.full_name || 'Operator'
+          const notifTitle = isRTL
+            ? `${emoji} ${senderName} تفاعل على تعليقك`
+            : `${emoji} ${senderName} reacted to your comment`
+          const notifContent = isRTL
+            ? `${senderName} تفاعل بـ ${emoji} على تعليقك في مهمة "${task.title}"`
+            : `${senderName} reacted with ${emoji} to your comment on task "${task.title}"`
+          sendNotification(noteAuthorId, 'reaction', notifTitle, notifContent)
+        }
+
+        return { ...note, reactions }
+      }
+      return note
+    })
+
+    const updatedMetadata = { ...task.metadata, notes: updatedNotes }
     await onUpdateTask(task.id, { metadata: updatedMetadata })
   }
 
@@ -1027,6 +1151,55 @@ export default function TaskDrawer({
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
+
+                        {/* Note Actions & Reactions */}
+                        <div className="mt-1.5 flex flex-wrap items-center gap-2 px-1">
+                          {/* Active reactions list */}
+                          {noteUser?.reactions && Object.entries(noteUser.reactions).map(([emoji, userIds]: [string, any]) => {
+                            if (!Array.isArray(userIds) || userIds.length === 0) return null
+                            const hasReacted = currentUserId ? userIds.includes(currentUserId) : false
+                            return (
+                              <button
+                                key={emoji}
+                                onClick={() => handleToggleReaction(noteUser.id || index, emoji)}
+                                className={cn(
+                                  "flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] border transition-all duration-300 font-space cursor-pointer",
+                                  hasReacted
+                                    ? "bg-teal-500/10 border-teal-500/40 text-teal-400 font-bold"
+                                    : "bg-white/5 border-white/5 text-white/50 hover:text-white hover:border-white/10"
+                                )}
+                              >
+                                <span>{emoji}</span>
+                                <span>{userIds.length}</span>
+                              </button>
+                            )
+                          })}
+
+                          {/* Add Reaction Button */}
+                          <div className="relative group/react">
+                            <button
+                              type="button"
+                              className="flex items-center justify-center p-1 rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 transition-all text-[10px] cursor-pointer"
+                              title="React"
+                            >
+                              <Smile className="w-3 h-3" />
+                            </button>
+                            
+                            {/* Hover Reaction Panel */}
+                            <div className="absolute bottom-full left-0 mb-1 hidden group-hover/react:flex items-center gap-1.5 p-1.5 bg-zinc-950/95 border border-white/10 rounded-full shadow-2xl z-30 animate-in fade-in slide-in-from-bottom-1 duration-200 backdrop-blur-md">
+                              {['👍', '❤️', '😂', '🎉', '😢', '🔥'].map((emoji) => (
+                                <button
+                                  key={emoji}
+                                  type="button"
+                                  onClick={() => handleToggleReaction(noteUser?.id || index, emoji)}
+                                  className="w-6 h-6 flex items-center justify-center text-xs hover:bg-white/10 active:scale-75 transition-all rounded-full cursor-pointer"
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </motion.div>
                   )
@@ -1060,7 +1233,7 @@ export default function TaskDrawer({
               <div className="absolute right-3 flex items-center gap-2 text-zinc-500">
                 <button
                   type="button"
-                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  onClick={() => { setShowEmojiPicker(!showEmojiPicker); setMentionPickerMode(false) }}
                   className="hover:text-white transition-colors cursor-pointer"
                   title="EMOJI"
                 >
@@ -1070,22 +1243,22 @@ export default function TaskDrawer({
                   <button
                     type="button"
                     onClick={() => {
-                      const textarea = textareaRef.current
-                      if (textarea) {
-                        const start = textarea.selectionStart
-                        const text = textarea.value
-                        const newText = text.substring(0, start) + '@' + text.substring(start)
-                        handleNoteInputChange(newText)
-                        setTimeout(() => {
-                          textarea.focus()
-                          textarea.selectionStart = textarea.selectionEnd = start + 1
-                        }, 0)
-                      }
+                      setMentionPickerMode(!mentionPickerMode)
+                      setShowEmojiPicker(false)
+                      setShowMentionsDropdown(false)
                     }}
-                    className="hover:text-white transition-colors cursor-pointer"
+                    className="relative hover:text-white transition-colors cursor-pointer"
                     title="MENTION"
                   >
-                    <AtSign className="w-4 h-4" />
+                    <AtSign className="w-4 h-4" style={{ color: mentionPickerMode ? themeColor : 'inherit' }} />
+                    {selectedMentions.size > 0 && (
+                      <span 
+                        className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] rounded-full text-[8px] font-black flex items-center justify-center text-black"
+                        style={{ backgroundColor: themeColor }}
+                      >
+                        {selectedMentions.size}
+                      </span>
+                    )}
                   </button>
                 )}
                 <button
@@ -1099,9 +1272,143 @@ export default function TaskDrawer({
               </div>
             </div>
 
-            {/* Mentions Dropdown Popover */}
-            {showMentionsDropdown && filteredMembers.length > 0 && (
-              <div className="absolute bottom-full mb-2 left-3 bg-zinc-950/95 border border-white/10 rounded-xl max-h-48 overflow-y-auto w-56 shadow-2xl p-1 z-50 backdrop-blur-md">
+            {/* Selected mentions tags */}
+            {selectedMentions.size > 0 && (
+              <div className="flex flex-wrap gap-1.5 px-1">
+                {Array.from(selectedMentions).map(memberId => {
+                  const member = squadMembers.find(m => m.id === memberId)
+                  if (!member) return null
+                  return (
+                    <span
+                      key={memberId}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold font-space border transition-all"
+                      style={{ backgroundColor: `${themeColor}15`, borderColor: `${themeColor}40`, color: themeColor }}
+                    >
+                      @{member.full_name || member.user_name}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const next = new Set(selectedMentions)
+                          next.delete(memberId)
+                          setSelectedMentions(next)
+                        }}
+                        className="ml-0.5 hover:opacity-70 cursor-pointer"
+                      >
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Mention Picker Dropdown (multi-select with Select All) */}
+            <AnimatePresence>
+              {mentionPickerMode && squadMembers.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.15 }}
+                  className="mentions-dropdown-container absolute bottom-full mb-2 left-3 right-3 bg-zinc-950/98 border border-white/10 rounded-xl max-h-64 overflow-y-auto shadow-2xl p-1.5 z-50 backdrop-blur-xl"
+                >
+                  <div className="text-[8px] font-mono tracking-[0.2em] font-black uppercase text-zinc-500 px-3 py-1.5 border-b border-white/5 mb-1 flex items-center justify-between">
+                    <span>{isRTL ? 'اختر أعضاء للإشارة' : 'SELECT MEMBERS TO MENTION'}</span>
+                    <span className="text-[9px]" style={{ color: themeColor }}>{selectedMentions.size}/{squadMembers.length}</span>
+                  </div>
+
+                  {/* Select All / Deselect All */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (selectedMentions.size === squadMembers.length) {
+                        setSelectedMentions(new Set())
+                      } else {
+                        setSelectedMentions(new Set(squadMembers.map(m => m.id)))
+                      }
+                    }}
+                    className="w-full text-left px-3 py-2 hover:bg-white/5 rounded-lg flex items-center gap-2.5 transition-colors cursor-pointer group border-b border-white/5 mb-1"
+                  >
+                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                      selectedMentions.size === squadMembers.length
+                        ? 'border-teal-500 bg-teal-500'
+                        : selectedMentions.size > 0
+                          ? 'border-teal-500/50 bg-teal-500/20'
+                          : 'border-white/20 bg-transparent'
+                    }`}>
+                      {selectedMentions.size === squadMembers.length && <Check className="w-3 h-3 text-black stroke-[3px]" />}
+                      {selectedMentions.size > 0 && selectedMentions.size < squadMembers.length && (
+                        <div className="w-2 h-0.5 bg-teal-400 rounded-full" />
+                      )}
+                    </div>
+                    <span className="text-xs font-space font-black uppercase tracking-wider" style={{ color: themeColor }}>
+                      {selectedMentions.size === squadMembers.length
+                        ? (isRTL ? 'إلغاء تحديد الكل' : 'DESELECT ALL')
+                        : (isRTL ? 'تحديد الكل' : 'SELECT ALL')}
+                    </span>
+                  </button>
+
+                  {squadMembers.map((member) => {
+                    const isSelected = selectedMentions.has(member.id)
+                    return (
+                      <button
+                        key={member.id}
+                        type="button"
+                        onClick={() => {
+                          const next = new Set(selectedMentions)
+                          if (isSelected) {
+                            next.delete(member.id)
+                          } else {
+                            next.add(member.id)
+                          }
+                          setSelectedMentions(next)
+                        }}
+                        className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 transition-all cursor-pointer group ${
+                          isSelected ? 'bg-white/[0.04]' : 'hover:bg-white/[0.03]'
+                        }`}
+                      >
+                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
+                          isSelected ? 'border-teal-500 bg-teal-500' : 'border-white/20 bg-transparent'
+                        }`}>
+                          {isSelected && <Check className="w-3 h-3 text-black stroke-[3px]" />}
+                        </div>
+                        {member.avatar_url ? (
+                          <img src={member.avatar_url} className="w-6 h-6 rounded-full object-cover border border-white/10" />
+                        ) : (
+                          <div className="w-6 h-6 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white uppercase">
+                            {member.full_name?.charAt(0) || member.user_name?.charAt(0) || 'OP'}
+                          </div>
+                        )}
+                        <span className={`text-xs font-space font-semibold uppercase truncate ${
+                          isSelected ? 'text-white' : 'text-white/60 group-hover:text-white/80'
+                        }`}>
+                          {member.full_name || member.user_name}
+                        </span>
+                        {isSelected && (
+                          <AtSign className="w-3 h-3 ml-auto shrink-0" style={{ color: themeColor }} />
+                        )}
+                      </button>
+                    )
+                  })}
+
+                  {/* Done button */}
+                  <div className="pt-1.5 mt-1 border-t border-white/5">
+                    <button
+                      type="button"
+                      onClick={() => setMentionPickerMode(false)}
+                      className="w-full py-2 rounded-lg text-[10px] font-black font-space uppercase tracking-widest transition-all cursor-pointer text-black"
+                      style={{ backgroundColor: themeColor }}
+                    >
+                      {isRTL ? `تم (${selectedMentions.size})` : `DONE (${selectedMentions.size} SELECTED)`}
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Inline Mentions Dropdown (triggered by typing @) */}
+            {showMentionsDropdown && !mentionPickerMode && filteredMembers.length > 0 && (
+              <div className="mentions-dropdown-container absolute bottom-full mb-2 left-3 bg-zinc-950/95 border border-white/10 rounded-xl max-h-48 overflow-y-auto w-56 shadow-2xl p-1 z-50 backdrop-blur-md">
                 <div className="text-[8px] font-mono tracking-[0.2em] font-black uppercase text-zinc-500 px-3 py-1.5 border-b border-white/5 mb-1">
                   {isRTL ? 'إشارة إلى عضو // SQUAD_MEMBERS' : 'MENTION SQUAD MEMBER'}
                 </div>

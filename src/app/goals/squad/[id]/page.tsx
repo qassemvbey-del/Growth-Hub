@@ -24,7 +24,7 @@ import {
   Lock, Link as LinkIcon, Trash2, Clock, Radio, CheckSquare, 
   Plus, List, Kanban, Check, Timer, HelpCircle, X, Pin, 
   Shield, CheckCircle2, Award, Download, Clipboard as ClipboardIcon, FileText, 
-  Share2, Calendar, Paperclip, Users2, Medal, EyeOff, ListPlus, LayoutGrid, Eye, ChevronDown
+  Share2, Calendar, Paperclip, Users2, Medal, EyeOff, ListPlus, LayoutGrid, Eye, ChevronDown, Play, Tv
 } from 'lucide-react'
 
 
@@ -1824,9 +1824,11 @@ const { progress, isInRedZone } = useMemo(() => {
                                    onMouseLeave={e => { if (selectedTask?.id !== task.id) e.currentTarget.style.color = '' }}
                                    title={selectedTask?.id === task.id ? 'CLOSE_VIDEO' : 'PLAY_VIDEO'}
                                  >
-                                   <span className="material-symbols-outlined text-lg">
-                                     {selectedTask?.id === task.id ? 'smart_display' : 'play_circle'}
-                                   </span>
+                                   {selectedTask?.id === task.id ? (
+                                      <Tv className="w-4 h-4 mx-auto" />
+                                    ) : (
+                                      <Play className="w-4 h-4 mx-auto" />
+                                    )}
                                  </button>
                                )}
                                <button
@@ -2705,6 +2707,9 @@ const { progress, isInRedZone } = useMemo(() => {
           onComplete={() => toggleTask(selectedTask.id, selectedTask.is_completed)}
           onProgressUpdate={(currentTime, duration) => updateTaskProgress(selectedTask.id, currentTime, duration)}
           onUpdateTask={onUpdateTask}
+          cupId={typeof id === 'string' ? id : undefined}
+          squadMembers={squadMembers}
+          isSquad={mission?.metadata?.type === 'squad'}
         />
       )}
       </div>

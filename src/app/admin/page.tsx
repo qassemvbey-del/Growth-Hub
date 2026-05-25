@@ -1,6 +1,6 @@
 'use client'
 
-import { HelpCircle, TrendingUp, User } from 'lucide-react'
+import { HelpCircle, TrendingUp, User, Users, Target, Activity, Zap, Calendar, Award, CheckSquare, History } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -298,9 +298,13 @@ export default function AdminDashboard() {
                   <div key={act.id} className="flex items-center justify-between p-4 bg-white/[0.02] border-l-2 border-l-red-500 border-white/5">
                     <div className="flex items-center gap-4">
                       <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center">
-                        <span className="material-symbols-outlined text-sm text-red-500">
-                          {act.type === 'mission_complete' ? 'verified' : act.type === 'task_complete' ? 'task_alt' : 'person_add'}
-                        </span>
+                        {act.type === 'mission_complete' ? (
+                          <Award className="w-4 h-4 text-red-500" />
+                        ) : act.type === 'task_complete' ? (
+                          <CheckSquare className="w-4 h-4 text-red-500" />
+                        ) : (
+                          <User className="w-4 h-4 text-red-500" />
+                        )}
                       </div>
                       <div>
                         <p className="text-sm text-white/80">
@@ -328,13 +332,27 @@ export default function AdminDashboard() {
 }
 
 function StatsCard({ title, value, icon, trend, isOnline, color = 'white' }: any) {
+  const getStatsIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'groups': return <Users className="text-red-500 text-xl" />
+      case 'target': return <Target className="text-red-500 text-xl" />
+      case 'sensors': return <Activity className="text-red-500 text-xl" />
+      case 'bolt': return <Zap className="text-red-500 text-xl" />
+      case 'today': return <Calendar className="text-red-500 text-xl" />
+      case 'calendar_view_week': return <Calendar className="text-red-500 text-xl" />
+      case 'verified': return <Award className="text-red-500 text-xl" />
+      case 'task_alt': return <CheckSquare className="text-red-500 text-xl" />
+      default: return <HelpCircle className="text-red-500 text-xl" />
+    }
+  }
+
   return (
     <div className="relative group overflow-hidden">
       <div className="absolute inset-0 bg-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
       <div className="p-6 bg-black/40 border border-red-500/20 backdrop-blur-sm rounded-sm relative">
         <div className="flex justify-between items-start mb-4">
           <div className="w-10 h-10 border border-red-500/30 rounded-sm flex items-center justify-center bg-red-500/5">
-            <span className="material-symbols-outlined text-red-500 text-xl">{icon}</span>
+            {getStatsIcon(icon)}
           </div>
           {isOnline && <div className="px-2 py-0.5 bg-green-500/10 text-green-500 text-[8px] font-black tracking-widest border border-green-500/20 rounded-full animate-pulse">LIVE</div>}
         </div>
@@ -351,6 +369,15 @@ function StatsCard({ title, value, icon, trend, isOnline, color = 'white' }: any
 }
 
 function TabButton({ active, onClick, label, icon }: any) {
+  const getTabIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'badge': return <User className="w-4 h-4" />
+      case 'analytics': return <TrendingUp className="w-4 h-4" />
+      case 'history': return <History className="w-4 h-4" />
+      default: return <HelpCircle className="w-4 h-4" />
+    }
+  }
+
   return (
     <button
       onClick={onClick}
@@ -360,7 +387,7 @@ function TabButton({ active, onClick, label, icon }: any) {
       )}
     >
       {active && <div className="absolute inset-x-0 bottom-0 h-4 bg-red-600/10 blur-xl" />}
-      <span className="material-symbols-outlined text-sm">{icon}</span>
+      {getTabIcon(icon)}
       <span className="text-[10px] font-black tracking-[0.2em] uppercase">{label}</span>
     </button>
   )

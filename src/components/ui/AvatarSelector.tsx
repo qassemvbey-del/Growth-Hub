@@ -55,7 +55,8 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
       }
 
       // 2. Attempt to update avatar_url in profiles table (non-blocking fallback)
-      const targetAvatarUrl = selected || profile.google_avatar_url || '/avatars/omar.svg'
+      const defaultAvatar = (profile?.gender === 'female' || profile?.gender === 'أنثى' || profile?.gender === 'Female') ? '/avatars/menna.svg' : '/avatars/omar.svg'
+      const targetAvatarUrl = selected || profile.google_avatar_url || defaultAvatar
       await supabase
         .from('profiles')
         .update({ avatar_url: targetAvatarUrl, custom_avatar: selected })

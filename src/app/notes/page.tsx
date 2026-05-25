@@ -1,6 +1,6 @@
 'use client'
 
-import { Keyboard, Layers, Link, Pin, Plus, Save, Search, Trash2, X } from 'lucide-react'
+import { Keyboard, Layers, Link, Pin, Plus, Save, Search, Trash2, X, Bold, Italic } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
 import Shell from '@/components/layout/Shell'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -856,28 +856,28 @@ export default function NotesPage() {
                  onBlur={e => e.currentTarget.style.color = ''}
                />
 
-              <button
-                onClick={() => setEditingNote(null)}
+               <button
+                 onClick={() => setEditingNote(null)}
                  className="absolute top-5 right-5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
-              >
-                <X className="text-2xl w-6 h-6" />
-              </button>
+               >
+                 <X className="text-2xl w-6 h-6" />
+               </button>
 
                <div className="flex gap-3 flex-wrap border-b border-[var(--card-border)] pb-6 mb-8">
-                {[
-                  { icon: 'format_bold', field: 'weight', active: 'bold', inactive: 'normal' },
-                  { icon: 'format_italic', field: 'style', active: 'italic', inactive: 'normal' },
-                ].map(({ icon, field, active, inactive }) => (
-                  <button
-                    key={field}
-                    onClick={() => updateNote(editingNote.id, {
-                      font_settings: { ...editingNote.font_settings, [field]: editingNote.font_settings?.[field] === active ? inactive : active }
-                    })}
-                    className={cn('p-2.5 border rounded-xl transition-all', editingNote.font_settings?.[field] === active ? 'bg-[var(--input-bg)] border-[var(--card-border)]' : 'bg-[var(--input-bg)] border border-[var(--card-border)] hover:opacity-80')}
-                  >
-                    <span className="material-symbols-outlined text-[var(--text-primary)] text-base">{icon}</span>
-                  </button>
-                ))}
+                 {[
+                   { component: Bold, field: 'weight', active: 'bold', inactive: 'normal' },
+                   { component: Italic, field: 'style', active: 'italic', inactive: 'normal' },
+                 ].map(({ component: IconComp, field, active, inactive }) => (
+                   <button
+                     key={field}
+                     onClick={() => updateNote(editingNote.id, {
+                       font_settings: { ...editingNote.font_settings, [field]: editingNote.font_settings?.[field] === active ? inactive : active }
+                     })}
+                     className={cn('p-2.5 border rounded-xl transition-all', editingNote.font_settings?.[field] === active ? 'bg-[var(--input-bg)] border-[var(--card-border)]' : 'bg-[var(--input-bg)] border border-[var(--card-border)] hover:opacity-80')}
+                   >
+                     <IconComp className="w-4 h-4 text-[var(--text-primary)]" />
+                   </button>
+                 ))}
                 <button
                   onClick={() => updateNote(editingNote.id, {
                     font_settings: { ...editingNote.font_settings, family: editingNote.font_settings?.family === 'tajawal' ? 'space' : 'tajawal' }

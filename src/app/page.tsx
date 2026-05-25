@@ -251,12 +251,11 @@ export default function Dashboard() {
           <div className="flex items-center gap-6">
             <div className="h-[1px] w-20 md:w-32" style={{ background: `linear-gradient(to right, transparent, ${currentTheme.color}40)` }} />
             <motion.span
-              className="material-symbols-outlined text-xl md:text-2xl"
               style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }}
               animate={{ opacity: [0.3, 1, 0.3] }}
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             >
-              bolt
+              <Zap className="w-5 h-5 md:w-6 md:h-6" />
             </motion.span>
             <div className="h-[1px] w-20 md:w-32" style={{ background: `linear-gradient(to left, transparent, ${currentTheme.color}40)` }} />
           </div>

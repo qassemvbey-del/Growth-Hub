@@ -1,6 +1,6 @@
 'use client'
 
-import { Calendar, Check, CheckCircle2, CheckSquare, Download, Eye, HelpCircle, Link, ListPlus, Lock, Medal, Paperclip, Pin, Share2, Shield, Timer, Trash2, Users2, X, ChevronDown, Clipboard as ClipboardIcon } from 'lucide-react'
+import { Calendar, Check, CheckCircle2, CheckSquare, Download, Eye, HelpCircle, Link, ListPlus, Lock, Medal, Paperclip, Pin, Share2, Shield, Timer, Trash2, Users2, X, ChevronDown, Clipboard as ClipboardIcon, Play, Tv } from 'lucide-react'
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Shell from '@/components/layout/Shell'
@@ -1778,9 +1778,11 @@ const { progress, isInRedZone } = useMemo(() => {
                                    onMouseLeave={e => { if (selectedTask?.id !== task.id) e.currentTarget.style.color = '' }}
                                    title={selectedTask?.id === task.id ? 'CLOSE_VIDEO' : 'PLAY_VIDEO'}
                                  >
-                                   <span className="material-symbols-outlined text-lg">
-                                     {selectedTask?.id === task.id ? 'smart_display' : 'play_circle'}
-                                   </span>
+                                   {selectedTask?.id === task.id ? (
+                                      <Tv className="w-4 h-4 mx-auto" />
+                                    ) : (
+                                      <Play className="w-4 h-4 mx-auto" />
+                                    )}
                                  </button>
                                )}
                                <button
