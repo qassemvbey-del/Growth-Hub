@@ -1,6 +1,7 @@
 'use client'
 
 import Shell from '@/components/layout/Shell'
+import { NeonIcon } from '@/components/ui/NeonIcon'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
 import { cn } from '@/lib/utils'
@@ -16,10 +17,10 @@ import { validateContent } from '@/lib/profanityFilter'
 import { aiProfanityCheck } from '@/app/actions/profanityCheck'
 import { 
   Trophy, Medal, Award, Layers, Settings, Link as LinkIcon, Calendar, Paperclip, 
-  ArrowRight, Search, Shield, Users, CheckCircle2, XCircle, Plus, 
+  ArrowRight, Search, Shield, Users, CheckCircle2, XCircle, Plus, Zap, Crosshair,
   HelpCircle, Eye, Info, List, Kanban, Loader2, Sparkles, Check, 
   AlertTriangle, FolderClosed, UserPlus, Users2, Network, X, BookOpen, 
-  Settings2, Zap, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard
+  Settings2, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard
 } from 'lucide-react'
 
 
@@ -1461,15 +1462,13 @@ export default function SquadGoalsPage() {
                   <div className="flex items-center gap-4 flex-1 min-w-0">
                     <button
                       onClick={() => toggleTask(task)}
-                      className={cn(
-                        "w-6 h-6 rounded-lg border flex items-center justify-center transition-all duration-300 shrink-0 cursor-pointer shadow-sm",
-                        task.is_completed 
-                          ? "text-white" 
-                          : "border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 bg-transparent"
-                      )}
-                      style={task.is_completed ? { backgroundColor: task.missionColor, borderColor: task.missionColor } : {}}
+                      className="shrink-0 cursor-pointer flex items-center justify-center"
                     >
-                      {task.is_completed && <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />}
+                      {task.is_completed ? (
+                        <NeonIcon icon={Zap} interactive size={18} style={{ color: task.missionColor }} />
+                      ) : (
+                        <NeonIcon icon={Crosshair} interactive size={18} className="text-zinc-400 hover:text-white" />
+                      )}
                     </button>
 
                     <div className="space-y-1 truncate flex-1">

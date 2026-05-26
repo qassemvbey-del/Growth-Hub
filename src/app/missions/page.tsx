@@ -1,6 +1,7 @@
 'use client'
 
-import { AlertTriangle, ArrowRight, Calendar, Check, CheckCircle2, HelpCircle, Info, Kanban, Layers, Link, List, Plus, RefreshCw, Users2, Zap, Trophy, Award, Shield, Settings, Star, X, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Calendar, Check, CheckCircle2, HelpCircle, Info, Kanban, Layers, Link, List, Plus, RefreshCw, Users2, Zap, Trophy, Award, Shield, Settings, Star, X, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard, Crosshair } from 'lucide-react'
+import { NeonIcon } from '@/components/ui/NeonIcon'
 import Shell from '@/components/layout/Shell'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
@@ -1358,15 +1359,13 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                   <div className="flex items-center gap-4 flex-1 min-w-0">
                     <button
                       onClick={() => toggleTask(task)}
-                      className={cn(
-                        "w-6 h-6 rounded-lg border flex items-center justify-center transition-all duration-300 shrink-0 cursor-pointer shadow-sm",
-                        task.is_completed 
-                          ? "text-white" 
-                          : "border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 bg-transparent"
-                      )}
-                      style={task.is_completed ? { backgroundColor: task.missionColor, borderColor: task.missionColor } : {}}
+                      className="shrink-0 cursor-pointer flex items-center justify-center"
                     >
-                      {task.is_completed && <Check className="text-sm font-black w-3.5 h-3.5" />}
+                      {task.is_completed ? (
+                        <NeonIcon icon={Zap} interactive size={18} style={{ color: task.missionColor }} />
+                      ) : (
+                        <NeonIcon icon={Crosshair} interactive size={18} className="text-zinc-400 hover:text-white" />
+                      )}
                     </button>
 
                     <div className="space-y-1 truncate flex-1">

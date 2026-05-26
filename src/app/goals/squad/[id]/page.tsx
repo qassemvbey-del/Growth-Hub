@@ -1,5 +1,6 @@
 'use client'
 
+import { NeonIcon } from '@/components/ui/NeonIcon'
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Shell from '@/components/layout/Shell'
@@ -24,7 +25,7 @@ import {
   Lock, Link as LinkIcon, Trash2, Clock, Radio, CheckSquare, 
   Plus, List, Kanban, Check, Timer, HelpCircle, X, Pin, 
   Shield, CheckCircle2, Award, Download, Clipboard as ClipboardIcon, FileText, 
-  Share2, Calendar, Paperclip, Users2, Medal, EyeOff, ListPlus, LayoutGrid, Eye, ChevronDown, Play, Tv
+  Share2, Calendar, Paperclip, Users2, Medal, EyeOff, ListPlus, LayoutGrid, Eye, ChevronDown, Play, Tv, Zap, Crosshair
 } from 'lucide-react'
 
 
@@ -1715,26 +1716,23 @@ const { progress, isInRedZone } = useMemo(() => {
                                {String(index + 1).padStart(2, '0')}
                              </span>
                              <button
-                               onClick={(e) => { 
-                                 e.stopPropagation(); 
-                                 if (!canToggleTask(task)) {
-                                   showToast(isRTL ? "غير مسموح // ليست مهمتك" : "RESTRICTED // NOT YOUR TASK", "warning");
-                                   playError();
-                                   return;
-                                 }
-                                 toggleTask(task.id, task.is_completed); 
-                               }}
-                               className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all border-2"
-                               style={{
-                                 backgroundColor: task.is_completed ? currentTheme.color : 'transparent',
-                                 borderColor: task.is_completed ? currentTheme.color : 'rgba(255,255,255,0.2)',
-                                 boxShadow: task.is_completed ? `0 0 14px ${currentTheme.color}73` : undefined
-                               }}
-                             >
-                               {task.is_completed && (
-                                 <Check className="text-black font-black text-base w-4 h-4" />
-                               )}
-                             </button>
+                                onClick={(e) => { 
+                                  e.stopPropagation(); 
+                                  if (!canToggleTask(task)) {
+                                    showToast(isRTL ? "غير مسموح // ليست مهمتك" : "RESTRICTED // NOT YOUR TASK", "warning");
+                                    playError();
+                                    return;
+                                  }
+                                  toggleTask(task.id, task.is_completed); 
+                                }}
+                                className="shrink-0 cursor-pointer flex items-center justify-center"
+                              >
+                                {task.is_completed ? (
+                                  <NeonIcon icon={Zap} interactive size={22} style={{ color: currentTheme.color }} />
+                                ) : (
+                                  <NeonIcon icon={Crosshair} interactive size={22} className="text-white/30 hover:text-white" />
+                                )}
+                              </button>
                            </div>
 
                            {/* CENTER: Title + Detail Row (metrics + dashes) */}

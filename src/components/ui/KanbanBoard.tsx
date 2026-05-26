@@ -4,7 +4,8 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { usePomodoro } from '@/context/PomodoroContext'
-import { Check, Play, Clock, FolderOpen } from 'lucide-react'
+import { Check, Play, Clock, FolderOpen, Zap, Crosshair } from 'lucide-react'
+import { NeonIcon } from './NeonIcon'
 
 interface KanbanBoardProps {
   tasks: any[]
@@ -223,15 +224,12 @@ export default function KanbanBoard({
                                 e.stopPropagation()
                                 toggleTask(task.id, task.is_completed)
                               }}
-                              className="shrink-0 w-5.5 h-5.5 rounded-full flex items-center justify-center transition-all border-2 mt-0.5 cursor-pointer"
-                              style={{
-                                backgroundColor: task.is_completed ? themeColor : 'transparent',
-                                borderColor: task.is_completed ? themeColor : 'rgba(255,255,255,0.2)',
-                                boxShadow: task.is_completed ? `0 0 8px ${themeColor}40` : undefined
-                              }}
+                              className="shrink-0 cursor-pointer flex items-center justify-center"
                             >
-                              {task.is_completed && (
-                                <Check className="w-3 h-3 text-black stroke-[3px]" />
+                              {task.is_completed ? (
+                                <NeonIcon icon={Zap} interactive size={18} style={{ color: themeColor }} />
+                              ) : (
+                                <NeonIcon icon={Crosshair} interactive size={18} className="text-white/30 hover:text-white" />
                               )}
                             </button>
                             
