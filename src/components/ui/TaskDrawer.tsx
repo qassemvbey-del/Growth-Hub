@@ -9,8 +9,10 @@ import SmartTaskPlayer from './SmartTaskPlayer'
 import { 
   X, ChevronDown, ChevronUp, Check, Calendar, Lock, Zap, Plus, 
   Trash2, Loader2, RefreshCw, FolderOpen, Paperclip, ExternalLink, 
-  StickyNote, Link as LinkIcon, Smile, AtSign, Send, MessageSquare, Play
+  StickyNote, Link as LinkIcon, Smile, AtSign, Send, MessageSquare, Play,
+  PlusSquare, Crosshair, Target
 } from 'lucide-react'
+import { NeonIcon } from './NeonIcon'
 import { cn } from '@/lib/utils'
 
 interface TaskDrawerProps {
@@ -937,7 +939,7 @@ export default function TaskDrawer({
                 boxShadow: task.is_completed ? 'none' : `0 0 10px ${themeColor}40`
               }}
             >
-              {task.is_completed ? <RefreshCw className="w-3 h-3" /> : <Check className="w-3 h-3 stroke-[3px]" />}
+               {task.is_completed ? <NeonIcon icon={RefreshCw} className="w-3 h-3 animate-spin" /> : <NeonIcon icon={Crosshair} className="w-3 h-3" />}
               <span className="hidden sm:inline">{task.is_completed ? t('markIncomplete') : t('markCompleted')}</span>
             </button>
 
@@ -1084,7 +1086,7 @@ export default function TaskDrawer({
                           )}
                           <span className="text-xs font-bold truncate flex-1">{member.full_name}</span>
                           {isAssigned && (
-                            <Check className="text-sm font-black shrink-0 text-[#14b8a6] w-3.5 h-3.5" />
+                            <NeonIcon icon={Crosshair} className="shrink-0 w-3.5 h-3.5" style={{ color: '#14b8a6' }} />
                           )}
                         </button>
                       )
@@ -1134,7 +1136,7 @@ export default function TaskDrawer({
                 type="submit"
                 className="p-2 border rounded-lg bg-teal-500/10 border-teal-500/30 text-teal-400 hover:bg-teal-500/20 transition-all cursor-pointer flex items-center justify-center shrink-0"
               >
-                <Plus className="w-4 h-4" />
+                <NeonIcon icon={PlusSquare} className="w-4 h-4" />
               </button>
             </form>
 
@@ -1154,7 +1156,7 @@ export default function TaskDrawer({
                         backgroundColor: sub.is_completed ? '#10B981' : 'transparent'
                       }}
                     >
-                      {sub.is_completed && <Check className="w-2.5 h-2.5 text-black stroke-[3px]" />}
+                      {sub.is_completed && <NeonIcon icon={Crosshair} className="w-2.5 h-2.5 text-black" />}
                     </button>
                     <span
                       className={`text-xs font-space truncate ${
@@ -1169,7 +1171,7 @@ export default function TaskDrawer({
                     onClick={() => handleDeleteSubtask(sub.id)}
                     className="p-1 text-white/35 hover:text-red-400 transition-colors shrink-0"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <NeonIcon icon={Trash2} interactive intent="danger" className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ))}
@@ -1328,7 +1330,7 @@ export default function TaskDrawer({
                             className="p-1 text-white/20 hover:text-red-400 transition-colors shrink-0"
                             title="DELETE"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <NeonIcon icon={Trash2} interactive intent="danger" className="w-3.5 h-3.5" />
                           </button>
                         </div>
 
@@ -1530,7 +1532,7 @@ export default function TaskDrawer({
                           ? 'border-teal-500/50 bg-teal-500/20'
                           : 'border-white/20 bg-transparent'
                     }`}>
-                      {selectedMentions.size === squadMembers.length && <Check className="w-3 h-3 text-black stroke-[3px]" />}
+                      {selectedMentions.size === squadMembers.length && <NeonIcon icon={Crosshair} className="w-3 h-3 text-black" />}
                       {selectedMentions.size > 0 && selectedMentions.size < squadMembers.length && (
                         <div className="w-2 h-0.5 bg-teal-400 rounded-full" />
                       )}
@@ -1564,7 +1566,7 @@ export default function TaskDrawer({
                         <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
                           isSelected ? 'border-teal-500 bg-teal-500' : 'border-white/20 bg-transparent'
                         }`}>
-                          {isSelected && <Check className="w-3 h-3 text-black stroke-[3px]" />}
+                          {isSelected && <NeonIcon icon={Crosshair} className="w-3 h-3 text-black" />}
                         </div>
                         {member.avatar_url ? (
                           <img src={member.avatar_url} className="w-6 h-6 rounded-full object-cover border border-white/10" />

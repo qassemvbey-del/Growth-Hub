@@ -9,10 +9,11 @@ import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useSound } from '@/context/SoundContext'
 import { 
-  LayoutGrid, Target, FileText, Trophy, User, Settings, Zap,
+  LayoutGrid, Target, FileText, Trophy, UserCircle2, Sliders, Zap,
   Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp, CloudLightning,
   Crosshair, Shield
 } from 'lucide-react'
+import { NeonIcon } from '../ui/NeonIcon'
 
 export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolean, onOpenCoach?: () => void }) {
   const pathname = usePathname()
@@ -63,7 +64,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
   }, [profile])
 
   const getRoleIconComponent = (url?: string | null) => {
-    if (!url) return User
+    if (!url) return UserCircle2
     if (url.includes('omar')) return Laptop
     if (url.includes('maya')) return GraduationCap
     if (url.includes('ismail')) return Briefcase
@@ -97,7 +98,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
             {mounted && profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="User" className="w-[90%] h-[90%] mx-auto object-contain p-1 rounded-full shadow-md" />
             ) : (
-              <User className="w-12 h-12 text-[var(--text-secondary)]" />
+              <NeonIcon icon={UserCircle2} size={48} className="text-[var(--text-secondary)]" />
             )}
           </div>
           {/* Visual Role Icon Overlay Badge at bottom-right */}
@@ -113,7 +114,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
             >
               {(() => {
                 const IconComponent = getRoleIconComponent(profile.avatar_url)
-                return <IconComponent className="w-4 h-4 text-black stroke-[2.5]" />
+                return <NeonIcon icon={IconComponent} size={16} className="text-black" />
               })()}
             </div>
           )}
@@ -177,8 +178,8 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
       </div>
 
       {/* ── NAVIGATION MATRIX ── */}
-      <nav className="flex-grow px-4 py-8 space-y-2 overflow-y-auto">
-        <h3 className="px-6 text-[9px] font-space tracking-[0.8em] text-[var(--text-secondary)]/50 uppercase mb-6 font-black">
+      <nav className="flex-grow px-4 py-8 space-y-2 overflow-y-auto font-space">
+        <h3 className="px-6 text-[9px] font-space tracking-[0.8em] text-[var(--text-secondary)]/50 uppercase mb-6 font-black font-space">
           {mounted ? (isRTL ? 'القائمة' : 'MENU') : 'MENU'}
         </h3>
         {MENU_ITEMS.map((item, idx) => {
@@ -213,22 +214,19 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                     />
                   )}
                   
-                  {(() => {
-                    const IconComponent = item.icon
-                    return (
-                      <IconComponent
-                        className={cn(
-                          "w-5 h-5 transition-all duration-300",
-                          isRTL ? "ml-4" : "mr-4"
-                        )}
-                        style={{ 
-                          color: (isGoalsActive && !pathname.startsWith('/goals/'))
-                            ? currentTheme.color 
-                            : (isHovered ? `${currentTheme.color}cc` : undefined)
-                        }}
-                      />
-                    )
-                  })()}
+                  <NeonIcon
+                    icon={item.icon}
+                    interactive
+                    className={cn(
+                      "w-5 h-5 transition-all duration-300",
+                      isRTL ? "ml-4" : "mr-4"
+                    )}
+                    style={{ 
+                      color: (isGoalsActive && !pathname.startsWith('/goals/'))
+                        ? currentTheme.color 
+                        : (isHovered ? `${currentTheme.color}cc` : undefined)
+                    }}
+                  />
                   
                   <span className={cn(
                     "font-space tracking-[0.2em] font-black flex-grow transition-colors duration-300 text-[14px]"
@@ -295,7 +293,9 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                               />
                             )}
 
-                            <IconComponent 
+                            <NeonIcon 
+                              icon={subItem.icon}
+                              interactive
                               className={cn(
                                 "w-4 h-4 transition-all duration-300",
                                 isRTL ? "ml-4" : "mr-4"
@@ -355,22 +355,19 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                 />
               )}
               
-              {(() => {
-                const IconComponent = item.icon
-                return (
-                  <IconComponent
-                    className={cn(
-                      "w-5 h-5 transition-all duration-300",
-                      isRTL ? "ml-4" : "mr-4"
-                    )}
-                    style={{ 
-                      color: isActive 
-                        ? currentTheme.color 
-                        : (isHovered ? `${currentTheme.color}cc` : undefined)
-                    }}
-                  />
-                )
-              })()}
+              <NeonIcon
+                icon={item.icon}
+                interactive
+                className={cn(
+                  "w-5 h-5 transition-all duration-300",
+                  isRTL ? "ml-4" : "mr-4"
+                )}
+                style={{ 
+                  color: isActive 
+                    ? currentTheme.color 
+                    : (isHovered ? `${currentTheme.color}cc` : undefined)
+                }}
+              />
               
               <span className={cn(
                 "font-space tracking-[0.2em] font-black flex-grow transition-colors duration-300",
@@ -415,9 +412,9 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                 animate={{ opacity: [1, 0.4, 1], scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <Zap className="w-5 h-5" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }} />
+                <NeonIcon icon={Zap} className="w-5 h-5" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }} />
               </motion.span>
-              <span className="font-space font-black text-xs tracking-[0.3em] uppercase text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors">
+              <span className="font-space font-black text-xs tracking-[0.3em] uppercase text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors font-space">
                 {mounted ? (isRTL ? 'المدرب الذكي' : 'COACH') : 'COACH'}
               </span>
             </div>
@@ -443,8 +440,8 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
             boxShadow: isSettingsHovered ? `0 0 20px ${currentTheme.color}20` : 'none'
           }}
         >
-          <Settings className="w-4.5 h-4.5 transition-colors duration-300" style={{ color: isSettingsHovered ? currentTheme.color : undefined }} />
-          <span className="transition-colors duration-300 text-zinc-900 dark:text-zinc-100">
+          <NeonIcon icon={Sliders} interactive className="w-4.5 h-4.5 transition-colors duration-300" style={{ color: isSettingsHovered ? currentTheme.color : undefined }} />
+          <span className="transition-colors duration-300 text-zinc-900 dark:text-zinc-100 font-space font-black tracking-widest">
             {mounted ? (isRTL ? 'الإعدادات' : 'Settings') : 'Settings'}
           </span>
         </Link>

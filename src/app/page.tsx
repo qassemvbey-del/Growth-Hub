@@ -1,6 +1,7 @@
 'use client'
 
-import { Activity, AlertTriangle, BarChart3, Lightbulb, Target, Zap, Check, Calendar, Users } from 'lucide-react'
+import { Activity, AlertTriangle, BarChart3, Lightbulb, Target, Zap, Crosshair, Calendar, Users } from 'lucide-react'
+import { NeonIcon } from '@/components/ui/NeonIcon'
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Shell from '@/components/layout/Shell'
@@ -312,7 +313,7 @@ export default function Dashboard() {
               
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 shrink-0" style={{ color: isOverCap ? '#FF0055' : currentTheme.color }} />
+                  <NeonIcon icon={Zap} className="w-4 h-4 shrink-0" style={{ color: isOverCap ? '#FF0055' : currentTheme.color }} />
                   <span className="text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase">
                     {isRTL ? 'خط تدفق التركيز اليومي' : 'DAILY FOCUS PIPELINE'}
                   </span>
@@ -365,7 +366,7 @@ export default function Dashboard() {
             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-red-500 to-transparent" />
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-red-500 shrink-0" />
+                <NeonIcon icon={Activity} intent="danger" className="w-4 h-4 shrink-0" />
                 <h2 className="text-sm font-black tracking-widest text-[var(--text-secondary)] uppercase">
                   {isRTL ? 'الوارد التكتيكي العاجل' : 'ACTION INBOX // CRITICAL'}
                 </h2>
@@ -392,10 +393,15 @@ export default function Dashboard() {
                     <div className="flex items-center gap-3.5 min-w-0 flex-1">
                       <button
                         onClick={() => toggleTask(task)}
-                        className="w-6 h-6 rounded-full border flex items-center justify-center bg-transparent hover:bg-white/5 transition-all shrink-0 cursor-pointer animate-none"
+                        className="w-6 h-6 rounded-full border flex items-center justify-center bg-transparent hover:bg-white/5 transition-all shrink-0 cursor-pointer animate-none group/btn"
                         style={{ borderColor: task.missionColor || currentTheme.color }}
                       >
-                        <Check className="w-3.5 h-3.5 opacity-0 hover:opacity-100 transition-opacity" style={{ color: task.missionColor || currentTheme.color }} />
+                        <NeonIcon 
+                          icon={Crosshair} 
+                          interactive 
+                          className="w-3.5 h-3.5 opacity-0 group-hover/btn:opacity-100 transition-opacity" 
+                          style={{ color: task.missionColor || currentTheme.color }} 
+                        />
                       </button>
 
                       <div className="flex flex-col min-w-0 flex-1">
@@ -447,7 +453,7 @@ export default function Dashboard() {
             
             <div className="flex justify-between items-center gap-4 flex-wrap">
               <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 shrink-0" style={{ color: currentTheme.color }} />
+                <NeonIcon icon={Users} className="w-4 h-4 shrink-0" style={{ color: currentTheme.color }} />
                 <h2 className="text-sm font-black tracking-widest text-[var(--text-secondary)] uppercase">
                   {isRTL ? 'متتبع المنافسة' : 'THE RIVALRY TRACKER'}
                 </h2>
@@ -491,7 +497,7 @@ export default function Dashboard() {
         {/* ── PINNED GOALS (Bottom Section - Full Width Grid) ── */}
         <div className="w-full space-y-6 pt-8 border-t border-[var(--card-border)]">
           <div className="flex items-center gap-3">
-            <Target className="text-2xl w-6 h-6 shrink-0" style={{ color: currentTheme.color }} />
+            <NeonIcon icon={Target} className="text-2xl w-6 h-6 shrink-0" style={{ color: currentTheme.color }} />
             <h2 className="text-sm font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">
               {isRTL ? 'الأهداف المثبتة // مصفوفة التركيز' : 'PINNED GOALS // FOCUS MATRIX'}
             </h2>

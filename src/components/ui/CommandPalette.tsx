@@ -8,7 +8,8 @@ import { useToast } from '@/components/ui/Toast'
 import { useSound } from '@/context/SoundContext'
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
-import { Plus, Users, LayoutGrid, Trophy, Bot, Sun, Moon, CornerDownLeft, Sparkles, History, Search } from 'lucide-react'
+import { Plus, Users, LayoutGrid, Trophy, Bot, Sun, Moon, CornerDownLeft, Sparkles, History, Search, Swords, PlusSquare } from 'lucide-react'
+import { NeonIcon } from './NeonIcon'
 
 interface CommandPaletteProps {
   isOpen: boolean
@@ -209,7 +210,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
               >
                 {/* Input wrapper */}
                 <div className="flex items-center gap-3 px-4 py-4 border-b border-white/[0.08]">
-                  <Sparkles className="w-5 h-5 shrink-0 animate-pulse" style={{ color: currentTheme.color }} />
+                  <NeonIcon icon={Sparkles} className="w-5 h-5 shrink-0 animate-pulse" style={{ color: currentTheme.color }} />
                   <Command.Input
                     value={search}
                     onValueChange={setSearch}
@@ -236,7 +237,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                       >
                         <div className="flex items-center gap-3">
                           <div className="p-1.5 bg-cyan-500/10 border border-cyan-500/30 rounded">
-                            <Plus className="w-4 h-4 text-cyan-400" />
+                            <NeonIcon icon={PlusSquare} intent="primary" className="w-4 h-4" />
                           </div>
                           <span className="font-semibold tracking-wide text-cyan-400">{isRTL ? `إنشاء هدف فرعي: "${search}"` : `Create Goal: "${search}"`}</span>
                         </div>
@@ -266,7 +267,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                         >
                           <div className="flex items-center gap-3 min-w-0 flex-1">
                             <div className="p-1.5 bg-white/[0.03] border border-white/10 rounded shrink-0">
-                              <Search className="w-4 h-4" style={{ color: currentTheme.color }} />
+                              <NeonIcon icon={Search} className="w-4 h-4" style={{ color: currentTheme.color }} />
                             </div>
                             <div className="flex flex-col min-w-0 flex-1">
                               <span className="font-semibold tracking-wide text-[#FFFFFF] truncate uppercase">{res.title}</span>
@@ -295,7 +296,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                         >
                           <div className="flex items-center gap-3 min-w-0 flex-1">
                             <div className="p-1.5 bg-white/[0.03] border border-white/10 rounded shrink-0">
-                              <History className="w-4 h-4 text-zinc-400" />
+                              <NeonIcon icon={History} className="w-4 h-4 text-zinc-400" />
                             </div>
                             <div className="flex flex-col min-w-0 flex-1">
                               <span className="font-semibold tracking-wide text-[#FFFFFF] truncate uppercase">{item.title}</span>
@@ -326,7 +327,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                     >
                       <div className="flex items-center gap-3">
                         <div className="p-1.5 bg-white/[0.03] border border-white/10 rounded">
-                          <Plus className="w-4 h-4" style={{ color: currentTheme.color }} />
+                          <NeonIcon icon={Swords} className="w-4 h-4" style={{ color: currentTheme.color }} />
                         </div>
                         <span className="font-semibold tracking-wide">{isRTL ? "إنشاء هدف جديد" : "Create New Goal"}</span>
                       </div>
@@ -344,7 +345,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                     >
                       <div className="flex items-center gap-3">
                         <div className="p-1.5 bg-white/[0.03] border border-white/10 rounded">
-                          <Users className="w-4 h-4" style={{ color: currentTheme.color }} />
+                          <NeonIcon icon={Users} className="w-4 h-4" style={{ color: currentTheme.color }} />
                         </div>
                         <span className="font-semibold tracking-wide">{isRTL ? "إنشاء مساحة عمل جماعية" : "Create Team Workspace"}</span>
                       </div>
@@ -370,7 +371,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                     >
                       <div className="flex items-center gap-3">
                         <div className="p-1.5 bg-white/[0.03] border border-white/10 rounded">
-                          <LayoutGrid className="w-4 h-4" style={{ color: currentTheme.color }} />
+                          <NeonIcon icon={LayoutGrid} className="w-4 h-4" style={{ color: currentTheme.color }} />
                         </div>
                         <span className="font-semibold tracking-wide">{isRTL ? "الذهاب للوحة التحكم" : "Go to Dashboard"}</span>
                       </div>
@@ -388,7 +389,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                     >
                       <div className="flex items-center gap-3">
                         <div className="p-1.5 bg-white/[0.03] border border-white/10 rounded">
-                          <Trophy className="w-4 h-4" style={{ color: currentTheme.color }} />
+                          <NeonIcon icon={Trophy} className="w-4 h-4" style={{ color: currentTheme.color }} />
                         </div>
                         <span className="font-semibold tracking-wide">{isRTL ? "الذهاب إلى الخزنة (الرتب)" : "Go to Vault (Ranks)"}</span>
                       </div>
@@ -406,7 +407,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                     >
                       <div className="flex items-center gap-3">
                         <div className="p-1.5 bg-white/[0.03] border border-white/10 rounded">
-                          <Bot className="w-4 h-4" style={{ color: currentTheme.color }} />
+                          <NeonIcon icon={Bot} className="w-4 h-4" style={{ color: currentTheme.color }} />
                         </div>
                         <span className="font-semibold tracking-wide">{isRTL ? "الذهاب إلى المدرب الشخصي" : "Go to Coach"}</span>
                       </div>
@@ -432,8 +433,8 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                     >
                       <div className="flex items-center gap-3">
                         <div className="p-1.5 bg-white/[0.03] border border-white/10 rounded flex items-center justify-center">
-                          <Sun className="w-4.5 h-4.5 text-amber-400 dark:hidden" />
-                          <Moon className="w-4.5 h-4.5 text-cyan-400 hidden dark:block" />
+                          <NeonIcon icon={Sun} className="w-4.5 h-4.5 text-amber-400 dark:hidden" />
+                          <NeonIcon icon={Moon} className="w-4.5 h-4.5 text-cyan-400 hidden dark:block" />
                         </div>
                         <span className="font-semibold tracking-wide">{isRTL ? "تبديل المظهر الداكن / المضيء" : "Toggle Dark/Light Mode"}</span>
                       </div>
