@@ -264,17 +264,17 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
     return () => clearTimeout(timer)
   }, [aiOpen])
 
-  // Ctrl+G / Cmd+G Global Quick-Add Interception
+  // Ctrl+K / Cmd+K Global Quick-Add Interception
   useEffect(() => {
-    const handleCtrlG = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyG') {
+    const handleCtrlK = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyK') {
         e.preventDefault()
         e.stopPropagation()
         setCommandPaletteOpen(prev => !prev)
       }
     }
-    window.addEventListener('keydown', handleCtrlG, { capture: true })
-    return () => window.removeEventListener('keydown', handleCtrlG, { capture: true })
+    window.addEventListener('keydown', handleCtrlK, { capture: true })
+    return () => window.removeEventListener('keydown', handleCtrlK, { capture: true })
   }, [])
 
   // Global Escape & Enter keys listener to manage popups, modals, and actions
@@ -814,7 +814,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       <CommandPalette 
         isOpen={commandPaletteOpen} 
         onClose={() => setCommandPaletteOpen(false)} 
-        missions={syncedMissions} 
+        onOpenCoach={() => setCoachPanelOpen(true)}
       />
       <AuthModal />
       <EntryGateModal />
