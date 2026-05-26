@@ -241,7 +241,9 @@ export default function TaskDrawer({
           taskId: task?.id,
           taskTitle: task?.title,
           senderId: currentUserId,
-          senderName: profile?.full_name || 'Operator'
+          senderName: profile?.full_name || 'Operator',
+          cupId: task?.cup_id || cupId,
+          isSquad: isSquad || false
         })
       })
 
@@ -272,7 +274,7 @@ export default function TaskDrawer({
     } catch (err) {
       console.error('Failed to send notification:', err)
     }
-  }, [currentUserId, profile?.full_name, task?.id, task?.title])
+  }, [currentUserId, profile?.full_name, task?.id, task?.title, cupId, isSquad])
 
   // Click outside to dismiss Emoji Picker, Mentions Dropdown, and Reaction Picker
   useEffect(() => {

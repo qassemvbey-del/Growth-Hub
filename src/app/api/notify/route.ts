@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 
 export async function POST(request: Request) {
   try {
-    const { targetUserId, type, title, contentText, taskId, taskTitle, senderId, senderName } = await request.json()
+    const { targetUserId, type, title, contentText, taskId, taskTitle, senderId, senderName, cupId, isSquad } = await request.json()
 
     if (!targetUserId) {
       return NextResponse.json({ error: 'Missing targetUserId' }, { status: 400 })
@@ -28,7 +28,9 @@ export async function POST(request: Request) {
         task_id: taskId,
         task_title: taskTitle,
         sender_id: senderId,
-        sender_name: senderName
+        sender_name: senderName,
+        cup_id: cupId,
+        isSquad
       }
     }).select().single()
 

@@ -125,7 +125,7 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                 </div>
               )}
 
-              {report.type === 'daily_brief' && (
+              {report.type === 'daily_brief' && !report.content.notification_type && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="py-2.5 px-4 bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl">
@@ -137,6 +137,26 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                       <p className="text-2xl font-black text-cyan-400">{report.content.overall_progress}%</p>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* Real-time comment mention or reaction CTA */}
+              {report.content.notification_type && report.content.cup_id && (
+                <div className="space-y-4 pt-2">
+                  <button
+                    onClick={() => {
+                      onClose()
+                      const isSquadGoal = report.content.isSquad ?? false
+                      const path = isSquadGoal
+                        ? `/goals/squad/${report.content.cup_id}?task=${report.content.task_id}`
+                        : `/missions/${report.content.cup_id}?task=${report.content.task_id}`
+                      router.push(path)
+                    }}
+                    className="w-full h-11 text-zinc-950 font-black text-xs uppercase tracking-widest transition-all duration-300 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] border border-cyan-400 bg-cyan-500 hover:bg-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                  >
+                    <Zap className="text-base w-4 h-4 fill-current text-zinc-950" />
+                    {isRTL ? '[ ⚡ الذهاب للمهمة ورؤية التعليق ]' : '[ ⚡ GO TO TASK / VIEW COMMENT ]'}
+                  </button>
                 </div>
               )}
 

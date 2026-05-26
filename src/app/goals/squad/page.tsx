@@ -19,18 +19,18 @@ import {
   ArrowRight, Search, Shield, Users, CheckCircle2, XCircle, Plus, 
   HelpCircle, Eye, Info, List, Kanban, Loader2, Sparkles, Check, 
   AlertTriangle, FolderClosed, UserPlus, Users2, Network, X, BookOpen, 
-  Settings2, Zap
+  Settings2, Zap, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard
 } from 'lucide-react'
 
 
 const SIZES = [
-  { key: 'lg', label: 'LARGE GOAL',  desc: 'Macro Objective', icon: 'trophy' },
-  { key: 'md', label: 'MEDIUM GOAL', desc: 'Standard Focus',  icon: 'military_tech' },
-  { key: 'sm', label: 'SMALL GOAL',  desc: 'Micro Focus',     icon: 'workspace_premium' },
+  { key: 'lg', label: 'LARGE GOAL',  desc: 'Macro Objective', icon: Flame },
+  { key: 'md', label: 'MEDIUM GOAL', desc: 'Standard Focus',  icon: SignalMedium },
+  { key: 'sm', label: 'SMALL GOAL',  desc: 'Micro Focus',     icon: SignalLow },
 ]
 
-const renderSizeIcon = (iconName: string, className?: string, style?: any) => {
-  const LucideIcon = iconName === 'trophy' ? Trophy : iconName === 'military_tech' ? Medal : iconName === 'workspace_premium' ? Award : Layers
+const renderSizeIcon = (key: string, className?: string, style?: any) => {
+  const LucideIcon = key === 'lg' ? Flame : key === 'md' ? SignalMedium : SignalLow
   return <LucideIcon className={className} style={style} />
 }
 
@@ -101,7 +101,7 @@ export default function SquadGoalsPage() {
     const completedTasks = mission.tasks?.filter((t: any) => t.is_completed).length || 0
     const totalTasks = mission.tasks?.length || 0
     const kasaSize = mission.size === 'lg' ? 'md' : mission.size === 'md' ? 'sm' : 'sm'
-    const sizeIcon = SIZES.find(s => s.key === mission.size)?.icon || 'layers'
+    const sizeIcon = mission.size || 'md'
     const fmtDate = (d: string | null) => {
       if (!d) return '—'
       try { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) } catch { return '—' }
@@ -1193,8 +1193,8 @@ export default function SquadGoalsPage() {
                 <div className="flex flex-col gap-1.5">
                   <h2 className="text-xl md:text-2xl font-space font-black uppercase text-black dark:text-white tracking-tighter">
                     {typeFilter === 'squad'
-                      ? (isRTL ? 'إنشاء هدف فريق' : 'CREATE SQUAD GOAL')
-                      : (isRTL ? 'إنشاء هدف جديد' : 'Create New Goal')}
+                      ? (isRTL ? 'إنشاء هدف فريق' : 'Create Squad Goal')
+                      : (isRTL ? 'إنشاء هدف فردي جديد' : 'Create Solo Goal')}
                   </h2>
                   {typeFilter === 'squad' && (
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-teal-500/10 border border-teal-500/25 rounded-md self-start">
@@ -1246,7 +1246,7 @@ export default function SquadGoalsPage() {
                         onMouseEnter={e => { if (newSize !== s.key) e.currentTarget.style.borderColor = `${currentTheme.color}60` }}
                         onMouseLeave={e => { if (newSize !== s.key) e.currentTarget.style.borderColor = '' }}
                       >
-                        {renderSizeIcon(s.icon, "w-4 h-4 md:w-4.5 md:h-4.5")}
+                        {renderSizeIcon(s.key, "w-4 h-4 md:w-4.5 md:h-4.5")}
                         <span className="text-xs md:text-sm font-space font-black uppercase tracking-tighter">{isRTL ? (s.key === 'lg' ? 'كبيرة' : s.key === 'md' ? 'متوسطة' : 'صغيرة') : (s.key === 'lg' ? 'Large' : s.key === 'md' ? 'Medium' : 'Small')}</span>
                       </button>
                     ))}
@@ -1353,7 +1353,7 @@ export default function SquadGoalsPage() {
                        }}
                      >
                        <span className="flex items-center gap-3">
-                         <Network className="w-5 h-5 shrink-0" />
+                         <LayoutDashboard className="w-5 h-5 shrink-0" />
                          {syncOnCreate
                            ? (isRTL ? 'مرئي في اللوحة' : 'SHOW ON DASHBOARD')
                            : (isRTL ? 'مخفي من اللوحة' : 'STAY OFF-GRID')}
@@ -1382,10 +1382,9 @@ export default function SquadGoalsPage() {
                     onClick={() => addMission()} 
                     disabled={isSubmitting}
                     className={cn(
-                      "px-10 py-4 font-space font-black text-base uppercase tracking-widest shadow-lg rounded-xl transition-all hover:brightness-110 flex items-center justify-center gap-2 cursor-pointer",
+                      "px-10 py-4 font-space font-black text-base uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 cursor-pointer bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-black shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all",
                       isSubmitting && "opacity-50 cursor-not-allowed"
                     )}
-                    style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 0 20px ${currentTheme.color}4d` }}
                   >
                     {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                     {isRTL ? 'تفعيل' : 'Activate'}

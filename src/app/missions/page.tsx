@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, ArrowRight, Calendar, Check, CheckCircle2, HelpCircle, Info, Kanban, Layers, Link, List, Plus, RefreshCw, Users2, Zap, Trophy, Award, Shield, Settings, Star, X } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Calendar, Check, CheckCircle2, HelpCircle, Info, Kanban, Layers, Link, List, Plus, RefreshCw, Users2, Zap, Trophy, Award, Shield, Settings, Star, X, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard } from 'lucide-react'
 import Shell from '@/components/layout/Shell'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
@@ -17,9 +17,9 @@ import { validateContent } from '@/lib/profanityFilter'
 import { aiProfanityCheck } from '@/app/actions/profanityCheck'
 
 const SIZES = [
-  { key: 'lg', label: 'LARGE GOAL',  desc: 'Macro Objective', icon: Trophy },
-  { key: 'md', label: 'MEDIUM GOAL', desc: 'Standard Focus',  icon: Shield },
-  { key: 'sm', label: 'SMALL GOAL',  desc: 'Micro Focus',     icon: Star },
+  { key: 'lg', label: 'LARGE GOAL',  desc: 'Macro Objective', icon: Flame },
+  { key: 'md', label: 'MEDIUM GOAL', desc: 'Standard Focus',  icon: SignalMedium },
+  { key: 'sm', label: 'SMALL GOAL',  desc: 'Micro Focus',     icon: SignalLow },
 ]
 
 const getRankBorderClass = (rank: string) => {
@@ -1087,8 +1087,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 <div className="flex flex-col gap-1.5">
                   <h2 className="text-xl md:text-2xl font-space font-black uppercase text-black dark:text-white tracking-tighter">
                     {typeFilter === 'squad'
-                      ? (isRTL ? 'إنشاء هدف فريق' : 'CREATE SQUAD GOAL')
-                      : (isRTL ? 'إنشاء هدف جديد' : 'Create New Goal')}
+                      ? (isRTL ? 'إنشاء هدف فريق' : 'Create Squad Goal')
+                      : (isRTL ? 'إنشاء هدف فردي جديد' : 'Create Solo Goal')}
                   </h2>
                   {typeFilter === 'squad' && (
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-teal-500/10 border border-teal-500/25 rounded-md self-start">
@@ -1250,7 +1250,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                        }}
                      >
                        <span className="flex items-center gap-3">
-                         <HelpCircle />
+                         <LayoutDashboard />
                          {syncOnCreate
                            ? (isRTL ? 'مرئي في اللوحة' : 'SHOW ON DASHBOARD')
                            : (isRTL ? 'مخفي من اللوحة' : 'STAY OFF-GRID')}
@@ -1279,10 +1279,9 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     onClick={() => addMission()} 
                     disabled={isSubmitting}
                     className={cn(
-                      "px-10 py-4 font-space font-black text-base uppercase tracking-widest shadow-lg rounded-xl transition-all hover:brightness-110 flex items-center justify-center gap-2 cursor-pointer",
+                      "px-10 py-4 font-space font-black text-base uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 cursor-pointer bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-black shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all",
                       isSubmitting && "opacity-50 cursor-not-allowed"
                     )}
-                    style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 0 20px ${currentTheme.color}4d` }}
                   >
                     {isSubmitting && <RefreshCw className="animate-spin text-sm w-3.5 h-3.5" />}
                     {isRTL ? 'تفعيل' : 'Activate'}

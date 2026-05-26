@@ -389,6 +389,19 @@ export default function MissionDetailPage() {
     }
   }, [fetchTimeStats])
 
+  useEffect(() => {
+    if (mission?.tasks && mission.tasks.length > 0) {
+      const params = new URLSearchParams(window.location.search)
+      const taskId = params.get('task')
+      if (taskId) {
+        const found = mission.tasks.find((t: any) => t.id === taskId)
+        if (found) {
+          setSelectedTask(found)
+        }
+      }
+    }
+  }, [mission?.tasks])
+
   async function fetchAttachmentCount() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
