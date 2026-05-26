@@ -1167,16 +1167,16 @@ export default function MissionDetailPage() {
       .eq('id', id)
     
     if (error) {
-      showToast(isRTL ? "فشل تحديث القواعد" : "FAILED TO UPDATE SQUAD RULES", "warning")
+      showToast(isRTL ? "فشل تحديث القواعد" : "FAILED TO UPDATE TEAM RULES", "warning")
       playError()
     } else {
-      showToast(isRTL ? "تم تحديث قواعد الفريق!" : "SQUAD RULES UPDATED", "success")
+      showToast(isRTL ? "تم تحديث قواعد الفريق!" : "TEAM RULES UPDATED", "success")
       playSuccess()
     }
   }
 
   const leaveSquad = async () => {
-    if (confirm(isRTL ? 'هل أنت متأكد من مغادرة الفريق؟' : 'Are you sure you want to leave the squad?')) {
+    if (confirm(isRTL ? 'هل أنت متأكد من مغادرة الفريق؟' : 'Are you sure you want to leave the team?')) {
       playBlip()
       const { error } = await supabase
         .from('goal_members')
@@ -1185,10 +1185,10 @@ export default function MissionDetailPage() {
         .eq('user_id', profile?.id)
       
       if (error) {
-        showToast(isRTL ? 'فشل مغادرة الفريق' : 'FAILED TO LEAVE SQUAD', 'warning')
+        showToast(isRTL ? 'فشل مغادرة الفريق' : 'FAILED TO LEAVE TEAM', 'warning')
         playError()
       } else {
-        showToast(isRTL ? 'لقد غادرت الفريق بنجاح' : 'YOU HAVE LEFT THE SQUAD', 'success')
+        showToast(isRTL ? 'لقد غادرت الفريق بنجاح' : 'YOU HAVE LEFT THE TEAM', 'success')
         playSuccess()
         setShowSquadPanel(false)
         router.push('/goals/squad')
@@ -1237,7 +1237,7 @@ const { progress, isInRedZone } = useMemo(() => {
                   CLASSIFIED_GOAL // ACCESS DENIED
                 </h2>
                 <p className="text-xs md:text-sm font-bold text-zinc-400 max-w-sm leading-relaxed">
-                  This is a Squad goal. Join with an invite code to access.
+                  This is a Team goal. Join with an invite code to access.
                 </p>
               </div>
 
@@ -1312,14 +1312,14 @@ const { progress, isInRedZone } = useMemo(() => {
             {mission?.metadata?.type === 'squad' && squadMembers.length > 0 && (
               <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-white/5">
                 <span className="text-[10px] font-mono text-white/40 tracking-widest uppercase font-black">
-                  {isRTL ? '\u0627\u0644\u0641\u0631\u064a\u0642:' : 'SQUAD:'}
+                  {isRTL ? '\u0627\u0644\u0641\u0631\u064a\u0642:' : 'TEAM:'}
                 </span>
 
                 {/* Clickable Facepile */}
                 <button
                   onClick={() => { playBlip(); setShowSquadPanel(true); }}
                   className="flex items-center group cursor-pointer"
-                  title={isRTL ? '\u0625\u062f\u0627\u0631\u0629 \u0627\u0644\u0641\u0631\u064a\u0642' : 'Manage Squad'}
+                  title={isRTL ? '\u0625\u062f\u0627\u0631\\u0629 \u0627\u0644\u0641\u0631\u064a\u0642' : 'Manage Team'}
                 >
                   <div className="flex items-center -space-x-2.5">
                     {squadMembers.slice(0, 3).map((m: any) => {

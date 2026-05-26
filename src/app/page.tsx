@@ -265,7 +265,7 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             className="text-2xl md:text-4xl lg:text-5xl font-black font-space tracking-tight uppercase leading-none text-zinc-900 dark:text-white"
           >
-            {isRTL ? 'مساحة' : 'WORK'}<span style={{ color: currentTheme.color }}>{isRTL ? ' العمل' : '_SPACE'}</span>
+            {isRTL ? 'لوحة' : 'DASH'}<span style={{ color: currentTheme.color }}>{isRTL ? ' التحكم' : 'BOARD'}</span>
           </motion.h1>
 
           <p className="text-xs font-space text-zinc-500 dark:text-white/40 tracking-[0.5em] uppercase font-black">

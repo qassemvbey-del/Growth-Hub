@@ -1048,9 +1048,9 @@ export default function SquadGoalsPage() {
               <Layers className="w-8 h-8 md:w-10 md:h-10 shrink-0" style={{ color: currentTheme.color }} />
               <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase not- text-black dark:text-white leading-none">
                 {typeFilter === 'solo' ? (
-                  <>{isRTL ? 'مهمات' : 'SOLO'}<span style={{ color: currentTheme.color }}>{isRTL ? ' فردية' : '_MISSIONS'}</span></>
+                  <>{isRTL ? 'أهداف' : 'PERSONAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' شخصية' : '_GOALS'}</span></>
                 ) : typeFilter === 'squad' ? (
-                  <>{isRTL ? 'عمليات' : 'SQUAD'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الفريق' : '_OPS'}</span></>
+                  <>{isRTL ? 'أهداف' : 'TEAM'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الفريق' : '_GOALS'}</span></>
                 ) : (
                   <>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الأهداف' : '_CANVAS'}</span></>
                 )}
@@ -1082,7 +1082,7 @@ export default function SquadGoalsPage() {
                 style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
                 <Plus className="w-4 h-4" />
-                {isRTL ? 'إنشاء هدف فريق' : 'CREATE SQUAD GOAL'}
+                {isRTL ? 'إنشاء هدف فريق' : 'CREATE TEAM GOAL'}
               </button>
             </div>
           ) : (
@@ -1115,7 +1115,7 @@ export default function SquadGoalsPage() {
                 className="flex items-center gap-1.5 px-3 h-8 border border-teal-500/40 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 rounded-lg font-space text-[10px] font-black uppercase tracking-widest transition-all duration-300 active:scale-95 cursor-pointer"
               >
                 <LinkIcon className="w-3.5 h-3.5" />
-                {isRTL ? 'الانضمام للفريق' : 'JOIN A SQUAD GOAL'}
+                {isRTL ? 'الانضمام للفريق' : 'JOIN A TEAM GOAL'}
               </button>
             )}
           </div>
@@ -1193,13 +1193,13 @@ export default function SquadGoalsPage() {
                 <div className="flex flex-col gap-1.5">
                   <h2 className="text-xl md:text-2xl font-space font-black uppercase text-black dark:text-white tracking-tighter">
                     {typeFilter === 'squad'
-                      ? (isRTL ? 'إنشاء هدف فريق' : 'Create Squad Goal')
+                      ? (isRTL ? 'إنشاء هدف فريق' : 'Create Team Goal')
                       : (isRTL ? 'إنشاء هدف فردي جديد' : 'Create Solo Goal')}
                   </h2>
                   {typeFilter === 'squad' && (
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-teal-500/10 border border-teal-500/25 rounded-md self-start">
                       <span className="text-[10px] font-space font-black text-teal-400 uppercase tracking-widest">
-                        ⚔ SQUAD GOAL — Collaborative
+                        ⚔ TEAM GOAL — Collaborative
                       </span>
                     </div>
                   )}
@@ -1506,11 +1506,11 @@ export default function SquadGoalsPage() {
             <div className="space-y-10 w-full">
               {/* COMMANDING SECTION */}
               <div>
-                <h2 className="text-xl font-bold text-teal-400 mb-4">COMMANDING</h2>
+                <h2 className="text-xl font-bold text-teal-400 mb-4">LEADING</h2>
                 {commandingMissions.length === 0 ? (
                   <div className="py-12 text-center border border-dashed border-white/5 rounded-xl bg-white/[0.01]">
                     <p className="text-[10px] font-space font-black tracking-widest text-zinc-500 uppercase">
-                      {isRTL ? 'لا توجد أهداف تقودها حالياً' : 'NO COMMANDING SQUAD GOALS'}
+                      {isRTL ? 'لا توجد أهداف تقودها حالياً' : 'NO LEADING TEAM GOALS'}
                     </p>
                   </div>
                 ) : (
@@ -1528,7 +1528,7 @@ export default function SquadGoalsPage() {
                 {assignedMissions.length === 0 ? (
                   <div className="py-12 text-center border border-dashed border-white/5 rounded-xl bg-white/[0.01]">
                     <p className="text-[10px] font-space font-black tracking-widest text-zinc-500 uppercase">
-                      {isRTL ? 'لا توجد أهداف معينة لك حالياً' : 'NO ASSIGNED SQUAD GOALS'}
+                      {isRTL ? 'لا توجد أهداف معينة لك حالياً' : 'NO ASSIGNED TEAM GOALS'}
                     </p>
                   </div>
                 ) : (
@@ -1674,10 +1674,10 @@ export default function SquadGoalsPage() {
                   <div className="space-y-2 flex flex-col items-center justify-center select-none">
                     <Users className="w-12 h-12 text-zinc-500 mb-2 animate-pulse" />
                     <h3 className="text-2xl font-black font-space tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
-                      NO SQUAD GOALS YET
+                      NO TEAM GOALS YET
                     </h3>
                     <p className="text-zinc-500 dark:text-zinc-600 text-sm font-space">
-                      Lead a squad or join one with an invite code
+                      Lead a team or join one with an invite code
                     </p>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-4">
@@ -1694,7 +1694,7 @@ export default function SquadGoalsPage() {
                       style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
                     >
                       <Plus className="w-4 h-4 text-black" />
-                      CREATE SQUAD GOAL
+                      CREATE TEAM GOAL
                     </button>
                   </div>
                 </>
@@ -1708,7 +1708,7 @@ export default function SquadGoalsPage() {
         </div>
       </div>
 
-      {/* JOIN SQUAD GOAL MODAL (Part 4) */}
+      {/* JOIN TEAM GOAL MODAL (Part 4) */}
       <AnimatePresence>
         {showJoinGoal && (
           <motion.div

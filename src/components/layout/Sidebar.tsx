@@ -239,8 +239,8 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                       className="overflow-hidden flex flex-col gap-1.5 mt-1.5 pl-4"
                     >
                       {[
-                        { label: mounted ? (isRTL ? 'فردي' : 'Solo') : 'Solo', icon: Crosshair, href: '/goals/solo' },
-                        { label: mounted ? (isRTL ? 'فريق' : 'Squad') : 'Squad', icon: Shield, href: '/goals/squad' }
+                        { label: mounted ? (isRTL ? 'شخصي' : 'Personal Goals') : 'Personal Goals', icon: Crosshair, href: '/goals/solo' },
+                        { label: mounted ? (isRTL ? 'فريق' : 'Team Goals') : 'Team Goals', icon: Shield, href: '/goals/squad' }
                       ].map((subItem, subIdx) => {
                         const isSubActive = pathname === subItem.href
                         const isSubHovered = hoveredIndex === (100 + subIdx)
