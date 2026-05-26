@@ -186,13 +186,10 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, themeC
 
       <div className="px-5 py-3 border-t border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] flex justify-center">
         <button 
-          onClick={() => {
-            router.push('/achievements')
-            onClose()
-          }} 
+          onClick={onClose} 
           className="text-[9px] font-space font-black uppercase tracking-widest text-black/30 dark:text-white/20 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
         >
-          {isRTL ? 'عرض جميع الإشعارات والتقارير' : 'VIEW ALL NOTIFICATIONS & REPORTS'}
+          {isRTL ? 'إغلاق صندوق الإشعارات' : 'CLOSE NOTIFICATIONS'}
         </button>
       </div>
     </motion.div>

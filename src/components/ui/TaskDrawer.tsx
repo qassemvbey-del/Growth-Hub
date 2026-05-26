@@ -103,17 +103,72 @@ export default function TaskDrawer({
 
   const formatNoteContent = (text: string) => {
     if (!text) return ''
-    const parts = text.split(/(@\S+)/g)
-    return parts.map((part, i) => {
-      if (part.startsWith('@')) {
-        return (
-          <span key={i} className="text-cyan-400 font-bold font-space" style={{ textShadow: `0 0 8px ${themeColor}44` }}>
-            {part}
-          </span>
-        )
+    let elements: React.ReactNode[] = [text]
+
+    if (squadMembers && squadMembers.length > 0) {
+      squadMembers.forEach(member => {
+        const name = member.full_name || member.user_name
+        if (!name) return
+
+        const tag = `@${name}`
+        const nextElements: React.ReactNode[] = []
+
+        elements.forEach(el => {
+          if (typeof el !== 'string') {
+            nextElements.push(el)
+            return
+          }
+
+          const parts = el.split(new RegExp(`(${tag})`, 'g'))
+          parts.forEach((part, idx) => {
+            if (part === tag) {
+              nextElements.push(
+                <span 
+                  key={`${member.id}-${idx}`}
+                  onClick={() => {
+                    alert(isRTL ? `الملف الشخصي: ${name} • الرتبة: ${member.rank || 'عضو'}` : `Member Profile: ${name} • Rank: ${member.rank || 'ROOKIE'}`)
+                  }}
+                  className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 font-bold border border-blue-500/25 shadow-[0_0_8px_rgba(59,130,246,0.2)] transition-all cursor-pointer mx-0.5 relative z-10 font-space text-[11px]"
+                  title={isRTL ? `عرض الملف الشخصي لـ ${name}` : `View ${name}'s profile`}
+                >
+                  {part}
+                </span>
+              )
+            } else if (part) {
+              nextElements.push(part)
+            }
+          })
+        })
+        elements = nextElements
+      })
+    }
+
+    // Fallback formatting for any other @mentions
+    const finalElements: React.ReactNode[] = []
+    elements.forEach(el => {
+      if (typeof el !== 'string') {
+        finalElements.push(el)
+        return
       }
-      return part
+
+      const parts = el.split(/(@\S+)/g)
+      parts.forEach((part, idx) => {
+        if (part.startsWith('@')) {
+          finalElements.push(
+            <span 
+              key={idx}
+              className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-cyan-500/10 text-cyan-400 font-bold border border-cyan-500/20 shadow-[0_0_8px_rgba(6,182,212,0.2)] mx-0.5 font-space text-[11px]"
+            >
+              {part}
+            </span>
+          )
+        } else if (part) {
+          finalElements.push(part)
+        }
+      })
     })
+
+    return finalElements
   }
   const [taskTitle, setTaskTitle] = useState(task.title || '')
   useEffect(() => {
@@ -171,7 +226,7 @@ export default function TaskDrawer({
     title: string,
     contentText: string
   ) => {
-    if (!targetUserId || targetUserId === currentUserId) return
+    if (!targetUserId) return
     try {
       const supabase = createClient()
       await supabase.from('inbox_reports').insert({

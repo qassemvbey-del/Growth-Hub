@@ -433,9 +433,32 @@ ${recommendationsEn}`
   }
 
   useEffect(() => {
+    let channel: any
+
     async function init() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
+
+      // Set up real-time postgres changes subscription
+      channel = supabase
+        .channel(`realtime-inbox-${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'inbox_reports',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload: any) => {
+            console.log('Realtime notification received:', payload.new)
+            setReports(prev => {
+              if (prev.some(r => r.id === payload.new.id)) return prev
+              return [payload.new as Report, ...prev]
+            })
+          }
+        )
+        .subscribe()
 
       // FIX 1: No notifications for brand new users
       const { data: cups } = await supabase
@@ -465,6 +488,12 @@ ${recommendationsEn}`
       await checkDeadlinesAndCompletions(user.id, lang)
     }
     init()
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel)
+      }
+    }
   }, [fetchReports, supabase])
 
   return { reports, loading, markAsRead, fetchReports }

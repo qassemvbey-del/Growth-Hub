@@ -226,16 +226,6 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                     >
                       {item.shortcut}
                     </span>
-                    <motion.span
-                      animate={{ rotate: isGoalsExpanded ? 90 : 0 }}
-                      transition={{ duration: 0.2, ease: "easeOut" }}
-                      className="text-sm font-space text-[var(--text-secondary)]/50 font-black transition-colors inline-block relative -top-[1.5px]"
-                      style={{
-                        color: isHovered ? currentTheme.color : undefined
-                      }}
-                    >
-                      ›
-                    </motion.span>
                   </div>
                 </button>
 
