@@ -180,6 +180,36 @@ export default function Dashboard() {
     })
   }, [allTasks])
 
+  const { totalTasksDueToday, completedTasksToday } = useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0]
+    let total = 0
+    let completed = 0
+
+    allTasks.forEach((task: any) => {
+      const dateStr = task.metadata?.endDate || task.metadata?.dueDate
+      if (dateStr) {
+        try {
+          const taskDateStr = new Date(dateStr).toISOString().split('T')[0]
+          if (taskDateStr === todayStr) {
+            total++
+            if (task.is_completed) {
+              completed++
+            }
+          }
+        } catch {
+          if (dateStr.includes(todayStr)) {
+            total++
+            if (task.is_completed) {
+              completed++
+            }
+          }
+        }
+      }
+    })
+
+    return { totalTasksDueToday: total, completedTasksToday: completed }
+  }, [allTasks])
+
   const completedTasksCount = useMemo(() => allTasks.filter(t => t.is_completed).length, [allTasks])
   const pendingTasksCount = useMemo(() => allTasks.filter(t => !t.is_completed).length, [allTasks])
 
@@ -313,56 +343,51 @@ export default function Dashboard() {
         </div>
 
         {/* ── THE FOCUS PIPELINE (Top Section - Full Width) ── */}
-        {(() => {
-          const isOverCap = tasksCompletedToday > 9
-          return (
-            <div className="w-full bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-6 md:p-8 space-y-4 shadow-xl relative overflow-hidden">
-              <div className="absolute top-0 inset-x-0 h-1" style={{ background: `linear-gradient(to right, ${isOverCap ? '#FF0055' : currentTheme.color}, transparent)` }} />
-              
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <NeonIcon icon={Zap} className="w-4 h-4 shrink-0" style={{ color: isOverCap ? '#FF0055' : currentTheme.color }} />
-                  <span className="text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase">
-                    {isRTL ? 'معدل التركيز اليومي' : 'DAILY FOCUS STATS'}
-                  </span>
-                </div>
-                <div className="text-lg font-black tracking-tight">
-                  <span style={{ color: isOverCap ? '#FF0055' : currentTheme.color }}>{tasksCompletedToday}</span>
-                  <span className="text-zinc-500"> / 9</span>
-                </div>
-              </div>
-
-              {/* Segmented 9-slot Energy Bar */}
-              <div 
-                className="flex gap-2 h-7 p-1 rounded-xl border bg-zinc-100 dark:bg-[#050505] overflow-hidden shadow-inner"
-                style={{ borderColor: `${currentTheme.color}30` }}
-              >
-                {Array.from({ length: 9 }).map((_, i) => {
-                  const isActive = i < tasksCompletedToday
-                  return (
-                    <div
-                      key={i}
-                      className="flex-1 rounded transition-all duration-500 relative overflow-hidden"
-                      style={{
-                        backgroundColor: isActive
-                          ? (isOverCap ? '#FF0055' : currentTheme.color)
-                          : 'transparent',
-                        border: isActive ? 'none' : '1px solid rgba(255, 255, 255, 0.05)',
-                        boxShadow: isActive 
-                          ? `0 0 15px ${isOverCap ? '#FF0055' : currentTheme.color}`
-                          : 'none',
-                      }}
-                    >
-                      {isActive && (
-                        <div className="absolute inset-0 bg-white/20 animate-pulse" />
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
+        <div className="w-full bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-6 md:p-8 space-y-4 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 inset-x-0 h-1" style={{ background: `linear-gradient(to right, ${currentTheme.color}, transparent)` }} />
+          
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <NeonIcon icon={Zap} className="w-4 h-4 shrink-0" style={{ color: currentTheme.color }} />
+              <span className="text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase">
+                {isRTL ? 'معدل التركيز اليومي' : 'DAILY FOCUS STATS'}
+              </span>
             </div>
-          )
-        })()}
+            <div className="text-lg font-black tracking-tight">
+              <span style={{ color: currentTheme.color }}>{completedTasksToday}</span>
+              <span className="text-zinc-500"> / {totalTasksDueToday}</span>
+            </div>
+          </div>
+
+          {/* Segmented Energy Bar based on total tasks due today */}
+          <div 
+            className="flex gap-2 h-7 p-1 rounded-xl border bg-zinc-100 dark:bg-[#050505] overflow-hidden shadow-inner w-full"
+            style={{ borderColor: `${currentTheme.color}30` }}
+          >
+            {totalTasksDueToday === 0 ? (
+              <div className="flex-1 rounded border border-zinc-200 dark:border-white/5 bg-zinc-200/50 dark:bg-white/[0.02]" />
+            ) : (
+              Array.from({ length: totalTasksDueToday }).map((_, i) => {
+                const isActive = i < completedTasksToday
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 rounded transition-all duration-500 relative overflow-hidden"
+                    style={{
+                      backgroundColor: isActive ? currentTheme.color : 'transparent',
+                      border: isActive ? 'none' : '1px solid rgba(255, 255, 255, 0.05)',
+                      boxShadow: isActive ? `0 0 15px ${currentTheme.color}` : 'none',
+                    }}
+                  >
+                    {isActive && (
+                      <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                    )}
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </div>
 
         <InlineGuideTip hasTasks={allTasks.length > 0} />
 
