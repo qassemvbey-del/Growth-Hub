@@ -28,7 +28,6 @@ import EntryGateModal from '@/components/auth/EntryGateModal'
 import LevelUpModal from '@/components/ui/LevelUpModal'
 import GlitchOverlay from '@/components/ui/GlitchOverlay'
 import CommandPalette from '@/components/ui/CommandPalette'
-import Tutorial from '@/components/ui/Tutorial'
 
 
 interface ShellProps {
@@ -495,16 +494,16 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
   if (isLoading || !mounted) {
     const EN_LOGS = [
-      'Establishing secure link to Supabase Cloud...',
-      'Calibrating neural core & focus matrix...',
-      'Synchronizing squad telemetry & databases...',
+      'Establishing secure link to Cloud Database...',
+      'Calibrating productivity core & focus matrix...',
+      'Synchronizing team workspaces & databases...',
       'Applying custom premium aesthetics system...',
-      'Workspace components fully compiled. Booting...'
+      'Workspace components fully compiled. Launching...'
     ]
     const AR_LOGS = [
       'جاري الاتصال السحابي المشفر بقاعدة البيانات...',
-      'معايرة النواة العصبية ومصفوفة التنبؤ...',
-      'تزامن إحصائيات الفريق وتدفق البيانات...',
+      'معايرة محرك الإنتاجية ومصفوفة التركيز...',
+      'تزامن مساحات العمل الجماعية وقواعد البيانات...',
       'تطبيق المظهر الفاخر وعناصر الواجهة الفنية...',
       'مساحة العمل جاهزة تماماً. جاري الإطلاق...'
     ]
@@ -564,7 +563,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
               {shellIsRTL ? 'تهيئة مساحة العمل' : 'SYSTEM LOADING'}
             </h2>
             <p className="text-[10px] tracking-[0.4em] uppercase font-bold text-white/40">
-              GROWTH HUB COMPILING / SECURE TUNNEL ACTIVE
+              GROWTH HUB COMPILING / WORKSPACE ACTIVE
             </p>
           </div>
 
@@ -581,7 +580,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                 <span className="w-2 h-2 rounded-full bg-green-500/40" />
               </div>
               <div className="font-monospace text-[9px] text-white/50">
-                {shellIsRTL ? 'بروتوكول الفحص الآمن // نشط' : 'SECURE_VAULT_TUNNEL_MODE'}
+                {shellIsRTL ? 'تأمين مساحة العمل // نشط' : 'SECURE_WORKSPACE_MODE'}
               </div>
             </div>
 
@@ -615,8 +614,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
             {/* Telemetry Footer */}
             <div className="mt-6 border-t border-white/5 pt-4 flex items-center justify-between text-[9px] font-monospace text-white/30 uppercase tracking-widest">
               <div>LATENCY: 18ms</div>
-              <div>ENCRYPTION: AES-256</div>
-              <div>CORE: HYPER-S</div>
+              <div>SECURITY: PROTECTED</div>
+              <div>CORE: DISCIPLINE</div>
             </div>
           </div>
 
@@ -978,7 +977,6 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       />
       <AuthModal />
       <EntryGateModal />
-      <Tutorial />
 
       {/* Mobile fullscreen overlay for notification list to prevent containing block issue */}
       <div className="lg:hidden">

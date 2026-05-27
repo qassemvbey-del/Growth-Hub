@@ -54,7 +54,15 @@ export default function Dashboard() {
 
   async function fetchDashboardMissions() {
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user) {
+      if (typeof window !== 'undefined') {
+        const guestGoalsStr = localStorage.getItem('guest_goals')
+        const guestGoals = guestGoalsStr ? JSON.parse(guestGoalsStr) : []
+        setMissions(guestGoals)
+      }
+      setLoading(false)
+      return
+    }
 
     const { data } = await supabase
       .from('cups')
@@ -296,11 +304,11 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tight uppercase leading-none text-zinc-900 dark:text-white"
           >
-            {isRTL ? 'منظومة' : 'COMMAND'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التحكم' : 'CENTER'}</span>
+            {isRTL ? 'منصة' : 'FOCUS'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'HUB'}</span>
           </motion.h1>
 
           <p className="text-[10px] text-zinc-500 dark:text-white/40 tracking-[0.4em] uppercase font-black">
-            {isRTL ? 'لوحة القيادة التكتيكية' : 'TACTICAL DECISION PLATFORM'} // {profile?.rank || 'MEMBER'}
+            {isRTL ? 'لوحة الإنتاجية والتركيز' : 'PRODUCTIVITY FOCUS MATRIX'} // {profile?.rank || 'MEMBER'}
           </p>
         </div>
 
@@ -315,7 +323,7 @@ export default function Dashboard() {
                 <div className="flex items-center gap-2">
                   <NeonIcon icon={Zap} className="w-4 h-4 shrink-0" style={{ color: isOverCap ? '#FF0055' : currentTheme.color }} />
                   <span className="text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase">
-                    {isRTL ? 'خط تدفق التركيز اليومي' : 'DAILY FOCUS PIPELINE'}
+                    {isRTL ? 'معدل التركيز اليومي' : 'DAILY FOCUS STATS'}
                   </span>
                 </div>
                 <div className="text-lg font-black tracking-tight">
@@ -552,7 +560,7 @@ export default function Dashboard() {
             {pinnedGoals.length === 0 && (
               <div className="col-span-full py-12 text-center border border-dashed border-white/5 rounded-xl">
                 <p className="text-xs uppercase tracking-widest text-zinc-500 font-bold">
-                  {isRTL ? 'لا توجد أهداف مثبتة. افتح هدفاً وثبّته في لوحة التحكم.' : 'No goals pinned. Open a goal and pin it to your HUD.'}
+                  {isRTL ? 'لا توجد أهداف مثبتة. افتح هدفاً وثبّته في لوحة التحكم.' : 'No goals pinned. Open a goal and pin it to your Dashboard.'}
                 </p>
               </div>
             )}
