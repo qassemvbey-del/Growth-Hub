@@ -73,11 +73,11 @@ export default function InlineGuideTip({ hasTasks }: InlineGuideTipProps) {
                 <span>
                   {isRTL ? (
                     <>
-                      <strong>إضافة سريعة:</strong> اضغط على <kbd className="bg-white/10 px-1.5 py-0.5 rounded text-xs font-mono border border-white/20 mx-1">Ctrl + G</kbd> (أو Cmd + G للماك) في أي مكان بالمنصة لفتح لوحة الإنزال السريع. ضيف مهمة طائرة أو اكتب ملحوظة في ثواني من غير ما تسيب صفحتك الحالية.
+                      <strong>إضافة سريعة:</strong> اضغط على <kbd className="bg-white/10 px-1.5 py-0.5 rounded text-xs font-mono border border-white/20 mx-1">Ctrl + K</kbd> (أو Cmd + K) في أي مكان لفتح لوحة التحكم السريعة (Command Palette) وإضافة مهمة بلمح البصر.
                     </>
                   ) : (
                     <>
-                      <strong>QUICK ADD:</strong> Press <kbd className="bg-white/10 px-1.5 py-0.5 rounded text-xs font-mono border border-white/20 mx-1">Ctrl + G</kbd> (or Cmd + G) anywhere to instantly drop a quick task or raw note.
+                      <strong>QUICK ADD:</strong> Press <kbd className="bg-white/10 px-1.5 py-0.5 rounded text-xs font-mono border border-white/20 mx-1">Ctrl + K</kbd> (or Cmd + K) anywhere to open the Command Palette and drop a quick task.
                     </>
                   )}
                 </span>

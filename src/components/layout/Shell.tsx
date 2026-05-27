@@ -28,6 +28,7 @@ import EntryGateModal from '@/components/auth/EntryGateModal'
 import LevelUpModal from '@/components/ui/LevelUpModal'
 import GlitchOverlay from '@/components/ui/GlitchOverlay'
 import CommandPalette from '@/components/ui/CommandPalette'
+import Tutorial from '@/components/ui/Tutorial'
 
 
 interface ShellProps {
@@ -675,7 +676,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         'lg:ps-72 lg:max-w-none'
       )}>
         {/* ── DESKTOP TOP BAR (TRANSIENT TELEMETRY ONLY) ── */}
-        <header className="hidden lg:flex w-full px-8 h-16 justify-end items-center border-b border-[var(--card-border)] bg-[var(--sidebar-bg)]/95 backdrop-blur-2xl z-[150] sticky top-0 transition-colors duration-500 relative">
+        <header className="hidden lg:flex w-full px-8 h-16 justify-end items-center border-b border-[var(--card-border)] bg-[var(--sidebar-bg)]/95 backdrop-blur-2xl z-[150] sticky top-0 transition-colors duration-500 relative header-target">
           <div className="absolute -bottom-[1px] inset-inline-start-12 w-48 h-[1px] shadow-[0_0_15px_currentcolor]" style={{ backgroundColor: currentTheme.color, color: currentTheme.color }} />
 
           {/* CENTER: Core Brand Text */}
@@ -977,6 +978,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       />
       <AuthModal />
       <EntryGateModal />
+      <Tutorial />
 
       {/* Mobile fullscreen overlay for notification list to prevent containing block issue */}
       <div className="lg:hidden">

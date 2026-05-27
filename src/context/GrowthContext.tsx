@@ -896,6 +896,8 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
                   size: 'md',
                   is_archived: false,
                   sync_to_dashboard: true,
+                  is_pinned: true,
+                  isPinned: true,
                   metadata: { defaultView: 'list', is_tutorial: true }
                 })
                 .select()
@@ -927,6 +929,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
                   metadata: idx === 2 ? { is_tutorial_import: true } : {}
                 }))
                 await supabase.from('tasks').insert(taskPayloads)
+                setTutorialActive(true)
               }
             }
           } catch (seedErr) {
@@ -1076,6 +1079,8 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
                 size: 'md',
                 is_archived: false,
                 sync_to_dashboard: true,
+                isPinned: true,
+                is_pinned: true,
                 created_at: new Date().toISOString(),
                 metadata: { defaultView: 'list', is_tutorial: true },
                 tasks: steps.map((step, idx) => ({
@@ -1088,6 +1093,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
                 }))
               }
               localStorage.setItem('guest_goals', JSON.stringify([newLocalGoal]))
+              setTutorialActive(true)
             }
           }
         }

@@ -26,34 +26,60 @@ const PinkArrow = ({ position }: { position: string }) => {
   )
 }
 
-const STEPS = [
+const STEPS_EN = [
   { 
     id: 'sidebar', 
-    title: 'NEURAL_INDEX', 
-    text: 'Access your goal canvas, brain notes, and achievements here.', 
+    title: 'NAVIGATION INDEX', 
+    text: 'Access your goal canvas, brain notes, achievements, and settings directly from this sidebar control hub.', 
     target: '.sidebar-target',
     position: 'right'
   },
   { 
     id: 'header', 
-    title: 'TELEMETRY_SYNC', 
-    text: 'Monitor your global goal progress and neural streak in real-time.', 
+    title: 'TELEMETRY STATUS', 
+    text: 'Monitor your real-time XP accumulation, streak counter, and current system sync status at a glance.', 
     target: '.header-target',
     position: 'bottom'
   },
   { 
     id: 'cells', 
-    title: 'ENERGY_CORES', 
-    text: 'Your goals manifest as liquid energy. Keep them filled to maintain peak performance.', 
+    title: 'PINNED TARGETS', 
+    text: 'Your most important active goals are locked in this grid. Tap any target to complete tasks and earn XP.', 
+    target: '.cells-target',
+    position: 'top'
+  }
+]
+
+const STEPS_AR = [
+  { 
+    id: 'sidebar', 
+    title: 'مؤشر التنقل الرئيسي', 
+    text: 'من هنا يمكنك الوصول إلى لوحة الأهداف، الملاحظات الذكية، الإنجازات وإعدادات الحساب بسهولة.', 
+    target: '.sidebar-target',
+    position: 'right'
+  },
+  { 
+    id: 'header', 
+    title: 'لوحة القياسات الحية', 
+    text: 'راقب مستوى نقاط الخبرة (XP)، عداد الأيام المتتالية المشتعل، وحالة التزامن المباشر في الوقت الفعلي.', 
+    target: '.header-target',
+    position: 'bottom'
+  },
+  { 
+    id: 'cells', 
+    title: 'مصفوفة الأهداف المثبتة', 
+    text: 'هنا تظهر أهدافك الرئيسية كخلايا طاقة. اضغط على أي هدف لمشاهدة المهام وإكمالها لترقية مستواك.', 
     target: '.cells-target',
     position: 'top'
   }
 ]
 
 export default function Tutorial() {
-  const { tutorialActive, setTutorialActive, profile } = useGrowth()
+  const { tutorialActive, setTutorialActive, profile, isRTL } = useGrowth()
   const [currentStep, setCurrentStep] = useState(0)
   const [spotlightRect, setSpotlightRect] = useState<DOMRect | null>(null)
+
+  const steps = isRTL ? STEPS_AR : STEPS_EN
 
   useEffect(() => {
     if (tutorialActive) {
@@ -64,7 +90,8 @@ export default function Tutorial() {
   }, [tutorialActive, currentStep])
 
   const updateSpotlight = () => {
-    const target = document.querySelector(STEPS[currentStep].target)
+    const activeSteps = isRTL ? STEPS_AR : STEPS_EN
+    const target = document.querySelector(activeSteps[currentStep].target)
     if (target) {
       setSpotlightRect(target.getBoundingClientRect())
     }
@@ -76,13 +103,11 @@ export default function Tutorial() {
     setTutorialActive(false)
     if (profile) {
       localStorage.setItem(`tutorial_done_${profile.id}`, 'true')
-      // First contact trigger logic can be handled in Shell or GrowthContext
-      // For now, we signal completion
     }
   }
 
   const next = () => {
-    if (currentStep < STEPS.length - 1) {
+    if (currentStep < steps.length - 1) {
       setCurrentStep(prev => prev + 1)
     } else {
       finish()
@@ -110,40 +135,45 @@ export default function Tutorial() {
             animate={{ 
               opacity: 1, 
               scale: 1, 
-              x: spotlightRect && (STEPS[currentStep].position === 'right' || STEPS[currentStep].position === 'left') ? 0 : '-50%',
-              y: spotlightRect && (STEPS[currentStep].position === 'bottom' || STEPS[currentStep].position === 'top') ? 0 : '-50%'
+              x: spotlightRect && (steps[currentStep].position === 'right' || steps[currentStep].position === 'left') ? 0 : '-50%',
+              y: spotlightRect && (steps[currentStep].position === 'bottom' || steps[currentStep].position === 'top') ? 0 : '-50%'
             }}
             exit={{ opacity: 0, scale: 0.9 }}
             className="absolute w-full max-w-md p-8 glass-panel border-neon-green/30 pointer-events-auto shadow-[0_0_50px_rgba(57,255,20,0.1)] z-[700]"
           >
-            <PinkArrow position={STEPS[currentStep].position} />
+            <PinkArrow position={steps[currentStep].position} />
             <header className="flex justify-between items-center mb-6">
                <div className="flex items-center gap-3">
                  <AlertOctagon className="text-neon-green animate-pulse" />
                  <h3 className="text-2xl font-black font-space tracking-tighter text-primary uppercase">
-                   {STEPS[currentStep].title}
+                   {steps[currentStep].title}
                  </h3>
                </div>
-               <span className="text-[10px] font-space text-foreground/40 font-black">STEP_0{currentStep + 1}</span>
+               <span className="text-[10px] font-space text-foreground/40 font-black">
+                 {isRTL ? `الخطوة 0${currentStep + 1}` : `STEP_0${currentStep + 1}`}
+               </span>
             </header>
 
             <p className="text-xl font-space font-bold mb-10 text-foreground/80 leading-snug">
-               "{STEPS[currentStep].text}"
+               "{steps[currentStep].text}"
             </p>
 
             <div className="flex justify-between items-center pt-6 border-t border-black/5 dark:border-white/5">
                <button 
                  onClick={finish}
-                 className="text-[10px] font-space tracking-[0.3em] uppercase font-black text-foreground/20 hover:text-red-500 transition-colors"
+                 className="text-[10px] font-space tracking-[0.3em] uppercase font-black text-foreground/20 hover:text-red-500 transition-colors cursor-pointer"
                >
-                 SKIP_PROTOCOL
+                 {isRTL ? 'تخطي الجولة' : 'SKIP_TUTORIAL'}
                </button>
                
                <button 
                  onClick={next}
-                 className="bg-neon-green text-[#131313] px-8 py-3 rounded-sm font-space text-[10px] tracking-widest uppercase font-black hover:scale-105 transition-all"
+                 className="bg-neon-green text-[#131313] px-8 py-3 rounded-sm font-space text-[10px] tracking-widest uppercase font-black hover:scale-105 transition-all cursor-pointer"
                >
-                 {currentStep === STEPS.length - 1 ? 'INITIALIZE_HUD' : 'NEXT_STATION'}
+                 {currentStep === steps.length - 1 
+                   ? (isRTL ? 'ابدأ الاستخدام' : 'INITIALIZE_HUD') 
+                   : (isRTL ? 'الخطوة التالية' : 'NEXT_STATION')
+                 }
                </button>
             </div>
          </motion.div>

@@ -503,7 +503,7 @@ export default function Dashboard() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 cells-target">
             {pinnedGoals.map((mission, idx) => {
               const { progress, isInRedZone } = calculateAccountability(mission)
               const roundedProgress = Math.round(progress)

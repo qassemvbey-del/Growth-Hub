@@ -55,36 +55,36 @@ export default function LoginPage() {
   // Translation Dictionaries
   const t = {
     ar: {
-      title: 'بوابة الإنتاجية الفائقة',
+      title: 'منصة الإنتاجية والنمو الشخصي',
       subtitle: 'GROWTH HUB',
       welcome: 'مرحباً بك مجدداً',
-      desc: 'سجل الدخول فوراً للوصول إلى لوحة التحكم الشخصية والتكامل العصبي للذكاء الاصطناعي.',
-      button: 'الدخول الآمن بواسطة Google',
-      signingIn: 'جاري المصادقة الآمنة...',
-      tagline: 'مساحة العمل المتكاملة لرواد التميز والإنتاجية السيبرانية.',
+      desc: 'سجل الدخول فوراً للوصول إلى لوحة التحكم الشخصية ومساعد الذكاء الاصطناعي الذكي لتحقيق أهدافك.',
+      button: 'الدخول بواسطة Google',
+      signingIn: 'جاري تسجيل الدخول...',
+      tagline: 'مساحة العمل المتكاملة لإدارة الأهداف والمهام بإنتاجية عالية.',
       feature1Title: 'محرك الأهداف الذكي',
-      feature1Desc: 'تخطيط الأهداف الاستراتيجية الفردية والجماعية بدقة فائقة.',
+      feature1Desc: 'تخطيط الأهداف الاستراتيجية الفردية والجماعية بدقة ووضوح.',
       feature2Title: 'التوجيه بالذكاء الاصطناعي',
-      feature2Desc: 'مدربك السيبراني المرافق لك على مدار الساعة لشحذ همتك.',
+      feature2Desc: 'مدربك الشخصي بالذكاء الاصطناعي المرافق لك على مدار الساعة لشحذ همتك.',
       feature3Title: 'نظام النقاط والرتب السلوكية',
       feature3Desc: 'اكتسب رتباً مرموقة ونقاط OXP مستمرة مع كل إنجاز مكتمل.',
-      footer: 'نظام مشفر ومحمي بالكامل · AES-256',
+      footer: 'منصة نمو وتطوير احترافية · جميع الحقوق محفوظة',
     },
     en: {
-      title: 'HIGH-PERFORMANCE GATEWAY',
+      title: 'Productivity & Growth Platform',
       subtitle: 'GROWTH HUB',
       welcome: 'Welcome Back',
-      desc: 'Sign in to instantly access your quantum workspace & AI neural link.',
-      button: 'Secure Sign in with Google',
-      signingIn: 'Securing connection...',
-      tagline: 'The ultimate immersive platform for elite performance & hyper-growth.',
+      desc: 'Sign in to instantly access your workspace & smart AI coach to achieve your goals.',
+      button: 'Sign in with Google',
+      signingIn: 'Signing in...',
+      tagline: 'Growth Hub - Tactical Productivity & Goal Tracking',
       feature1Title: 'Tactical Objectives',
       feature1Desc: 'Map out personal and squad missions with sub-task precision.',
       feature2Title: 'AI Savage Coach',
       feature2Desc: 'A hyper-direct AI mentor that challenges you to remain disciplined.',
       feature3Title: 'Gamified Growth Ranks',
       feature3Desc: 'Gain OXP and level up through interactive ranks from Bronze to Conqueror.',
-      footer: 'Fully Encrypted Quantum Interface · AES-256',
+      footer: 'Professional Growth Platform · All Rights Reserved',
     }
   }
 
@@ -237,7 +237,7 @@ export default function LoginPage() {
           {/* Secure lock telemetry indicator */}
           <div className="flex items-center justify-center gap-2 text-[9px] font-monospace text-white/30 uppercase tracking-widest pt-4 border-t border-white/5">
             <Shield className="w-3.5 h-3.5 text-emerald-500/60" />
-            <span>{lang === 'ar' ? 'نظام حماية التوقيع المزدوج مفعل' : 'DOUBLE-SIGNATURE TUNNEL SYSTEM'}</span>
+            <span>{lang === 'ar' ? 'بيئة عمل آمنة ومحمية' : 'SECURE & PROTECTED WORKSPACE'}</span>
           </div>
 
         </motion.div>
