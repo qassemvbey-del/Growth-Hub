@@ -121,8 +121,58 @@ export default function WinsPage() {
             </div>
 
         {loading ? (
-          <div className="text-center font-space animate-pulse tracking-widest text-sm" style={{ color: currentTheme.color }}>
-            {isRTL ? 'جاري فتح الخزنة...' : 'ACCESSING_VAULT...'}
+          <div className="space-y-12 animate-pulse">
+            {/* Elegant Subtitle with subtle holographic scan effect */}
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--theme-color)]/5 border border-[var(--theme-color)]/10 backdrop-blur-md">
+                <div className="w-2 h-2 rounded-full bg-[var(--theme-color)] animate-ping" />
+                <span className="font-space text-[10px] tracking-[0.3em] font-black uppercase" style={{ color: currentTheme.color }}>
+                  {isRTL ? 'جاري الاتصال بالخزانة المشفرة...' : 'SECURE_VAULT_DECRYPTING...'}
+                </span>
+              </div>
+            </div>
+
+            {/* Premium holographic skeleton grid matching the actual cards layout */}
+            <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8 items-end justify-items-center">
+              {[1, 2, 3, 4, 5].map((idx) => (
+                <div key={idx} className="flex flex-col items-center gap-3 w-full max-w-[150px]">
+                  {/* Fake Star and Status */}
+                  <div className="w-16 h-3 rounded bg-[var(--theme-color)]/10" />
+
+                  {/* Projector and Holographic Cylinder Skeleton */}
+                  <div className="relative flex flex-col items-center pb-8 pt-4 w-full">
+                    {/* Beam base ellipse */}
+                    <div 
+                      className="absolute bottom-0 w-24 h-6 rounded-[100%] border border-[var(--theme-color)]/10 flex items-center justify-center bg-[var(--theme-color)]/5"
+                      style={{ boxShadow: `0 0 10px ${currentTheme.color}15` }}
+                    />
+                    
+                    {/* Rising Beam Sweep */}
+                    <div 
+                      className="absolute bottom-2 w-16 h-28 blur-[4px] opacity-10 pointer-events-none"
+                      style={{
+                        background: `linear-gradient(to top, ${currentTheme.color}, transparent)`,
+                        clipPath: 'polygon(20% 100%, 80% 100%, 95% 0, 5% 0)'
+                      }}
+                    />
+
+                    {/* Spinning Hollow EnergyCell Outline Shimmer */}
+                    <div 
+                      className="w-20 h-20 rounded-full border-2 border-dashed flex items-center justify-center animate-[spin_20s_linear_infinite]"
+                      style={{ borderColor: `${currentTheme.color}30` }}
+                    >
+                      <div className="w-12 h-12 rounded-full border border-dotted" style={{ borderColor: `${currentTheme.color}20` }} />
+                    </div>
+                  </div>
+
+                  {/* Goal title placeholder */}
+                  <div className="w-20 h-3 rounded bg-[var(--theme-color)]/10" />
+                  
+                  {/* Restore button placeholder */}
+                  <div className="w-12 h-2.5 rounded bg-[var(--theme-color)]/5 mt-1" />
+                </div>
+              ))}
+            </div>
           </div>
         ) : archived.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 space-y-6">
