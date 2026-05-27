@@ -1484,7 +1484,7 @@ const { progress, isInRedZone } = useMemo(() => {
                 onClick={() => { playBlip(); setShowIntelModal(true); }}
                 className="px-4 md:px-5 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-lg uppercase flex items-center gap-2.5 relative border-[var(--card-border)] text-[var(--text-secondary)] hover:opacity-85 hover:border-white/20 cursor-pointer"
               >
-                <HelpCircle className="w-4 h-4" />
+                <FileText className="w-4 h-4" />
                 {isRTL ? 'الملاحظات' : 'NOTES'}
                 {linkedNotes.length > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center text-black" style={{ backgroundColor: missionColor }}>

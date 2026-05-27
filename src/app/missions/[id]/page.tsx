@@ -1,6 +1,6 @@
 'use client'
 
-import { Calendar, Check, CheckCircle2, CheckSquare, Download, Eye, HelpCircle, Link, ListPlus, Lock, Medal, Paperclip, Pin, Share2, Shield, Timer, Trash2, Users2, X, ChevronDown, Clipboard as ClipboardIcon, Play, Tv, Circle } from 'lucide-react'
+import { Calendar, Check, CheckCircle2, CheckSquare, Download, Eye, HelpCircle, Link, ListPlus, Lock, Medal, Paperclip, Pin, Share2, Shield, Timer, Trash2, Users2, X, ChevronDown, Clipboard as ClipboardIcon, Play, Tv, Circle, FileText, Clock } from 'lucide-react'
 import { NeonIcon } from '@/components/ui/NeonIcon'
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -1270,7 +1270,7 @@ const { progress, isInRedZone } = useMemo(() => {
                          className="p-2 text-black/20 dark:text-white/10 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-full"
                          title={isRTL ? 'حذف المهمة' : 'DELETE_GOAL'}
                       >
-                         <HelpCircle />
+                         <Trash2 className="w-5 h-5 text-zinc-400 hover:text-red-500" />
                       </button>
                       <span className="text-3xl md:text-6xl font-black font-space" style={{ color: missionColor }}>{roundedProgress}%</span>
                    </div>
@@ -1281,11 +1281,11 @@ const { progress, isInRedZone } = useMemo(() => {
             {/* Horizontal Stats Row */}
             <div className="flex flex-wrap items-center pt-4 border-t border-white/5 gap-y-2">
                <div className="inline-flex items-center text-xs font-mono text-white/50 border-r border-white/10 pr-3 mr-3 last:border-0">
-                  <HelpCircle />
+                  <Clock className="w-4 h-4 mr-1.5" style={{ color: missionColor }} />
                   <span>{isRTL ? 'إجمالي التركيز:' : 'Total Focus:'} <strong className="text-white font-black ml-1">{Math.floor(totalTimeInvested / 60)}h {totalTimeInvested % 60}m</strong></span>
                </div>
                <div className="inline-flex items-center text-xs font-mono text-white/50 border-r border-white/10 pr-3 mr-3 last:border-0">
-                  <HelpCircle />
+                  <CheckSquare className="w-4 h-4 mr-1.5" style={{ color: missionColor }} />
                   <span>{isRTL ? 'مكتمل:' : 'Done:'} <strong className="text-white font-black ml-1">{completedCount}</strong></span>
                </div>
                <div className="inline-flex items-center text-xs font-mono text-white/50 border-r border-white/10 pr-3 mr-3 last:border-0">
@@ -1438,7 +1438,7 @@ const { progress, isInRedZone } = useMemo(() => {
                 onClick={() => { playBlip(); setShowIntelModal(true); }}
                 className="px-4 md:px-5 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-lg uppercase flex items-center gap-2.5 relative border-[var(--card-border)] text-[var(--text-secondary)] hover:opacity-85 hover:border-white/20 cursor-pointer"
               >
-                <HelpCircle className="w-4 h-4" />
+                <FileText className="w-4 h-4" />
                 {isRTL ? 'الملاحظات' : 'NOTES'}
                 {linkedNotes.length > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center text-black" style={{ backgroundColor: missionColor }}>
