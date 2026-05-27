@@ -34,7 +34,8 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
   React.useEffect(() => {
     if (typeof window === 'undefined') return
     const checkEnergy = () => {
-      const todayStr = new Date().toISOString().split('T')[0]
+      const d = new Date()
+      const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
       const lastScanDate = localStorage.getItem('last_scan_date')
       let currentEnergy = 3
 
@@ -99,6 +100,14 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
         break
     }
 
+    const nowTime = new Date().getTime()
+    const overdueMissions = activeMissions.filter(m => {
+      if (!m.end_date || m.end_date === 'NO_DEADLINE') return false
+      const isPastDue = new Date(m.end_date).getTime() < nowTime
+      const isCompleted = m.tasks && m.tasks.length > 0 && m.tasks.every((t: any) => t.is_completed)
+      return isPastDue && !isCompleted
+    })
+
     const userData = {
       username: profile?.full_name || 'MEMBER',
       rank: profile?.rank || 'RECRUIT',
@@ -115,12 +124,19 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
       })),
       critical_missions: activeMissions.filter(m => {
         if (!m.end_date) return false
-        const days = Math.ceil((new Date(m.end_date).getTime() - new Date().getTime()) / (1000 * 3600 * 24))
+        const days = Math.ceil((new Date(m.end_date).getTime() - nowTime) / (1000 * 3600 * 24))
         return days > 0 && days <= 3
       }).map(m => ({
         title: m.title,
         progress: m.progress || 0,
         end_date: m.end_date || 'NO_DEADLINE',
+        tasks_completed: m.tasks?.filter((t: any) => t.is_completed).length || 0,
+        tasks_total: m.tasks?.length || 0,
+        next_task: m.tasks?.find((t: any) => !t.is_completed)?.title || 'DONE'
+      })),
+      overdue_missions: overdueMissions.map(m => ({
+        title: m.title,
+        end_date: m.end_date,
         tasks_completed: m.tasks?.filter((t: any) => t.is_completed).length || 0,
         tasks_total: m.tasks?.length || 0,
         next_task: m.tasks?.find((t: any) => !t.is_completed)?.title || 'DONE'
