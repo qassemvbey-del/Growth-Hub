@@ -80,23 +80,14 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
 
     let prompt = ''
     switch (actionType) {
-      case 'scan_status':
-        prompt = 'Give me a full tactical status report of all my missions and overall performance'
+      case 'REALITY_CHECK':
+        prompt = 'REALITY_CHECK: Rant aggressively about my overdue and ignored tasks. Mention them by name, shame my lack of discipline, and command immediate action.'
         break
-      case 'daily_plan':
-        prompt = 'Based on my missions and deadlines, what exactly should I focus on today? Give me a priority order.'
+      case 'TOP_3_FOCUS':
+        prompt = 'TOP_3_FOCUS: Analyze my active tasks and goals. Filter them down and return ONLY a strict, numbered list of the top 3 absolute priorities for today. Keep it brief, high-pressure, and highly actionable.'
         break
-      case 'critical_alert':
-        prompt = 'Which of my missions are in danger? What do I need to do immediately?'
-        break
-      case 'brief_mission':
-        prompt = 'Brief me on my most critical mission. Give me a tactical breakdown of what I need to do next.'
-        break
-      case 'motivate_me':
-        prompt = 'Give me a harsh, high-energy motivational speech based on my current progress. Make me want to work right now.'
-        break
-      case 'how_to_start':
-        prompt = 'I feel stuck. What is the smallest, easiest task I can do right now to build momentum?'
+      case 'QUICK_WIN':
+        prompt = 'QUICK_WIN: Scan all my incomplete tasks. Find the absolute easiest, smallest 5-minute task I can start with right now. Order me to complete it immediately to build momentum. No fluff.'
         break
     }
 
@@ -269,60 +260,36 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
                   : 'SELECT_ACTION:'}
               </span>
               
-              <div className="grid grid-cols-1 gap-3">
-                <ActionButton 
-                  icon="analytics" 
-                  title="SCAN_STATUS" 
-                  subtitle={profile?.language === 'ar' ? 'تحليل وضعي الحالي' : 'Complete status analysis'} 
-                  onClick={() => handleAction('scan_status')}
-                  disabled={isLoading || energy === 0}
-                  color={coachColor}
-                  lang={profile?.language}
-                />
-                <ActionButton 
-                  icon="event_note" 
-                  title="DAILY_PLAN" 
-                  subtitle={profile?.language === 'ar' ? 'خطة النهارده' : 'What to focus on today'} 
-                  onClick={() => handleAction('daily_plan')}
-                  disabled={isLoading || energy === 0}
-                  color={coachColor}
-                  lang={profile?.language}
-                />
+              <div className="grid grid-cols-1 gap-4">
                 <ActionButton 
                   icon="warning" 
-                  title="CRITICAL_ALERT" 
-                  subtitle={profile?.language === 'ar' ? 'تنبيهات خطيرة' : 'Goals in danger'} 
-                  onClick={() => handleAction('critical_alert')}
+                  title={profile?.language === 'ar' ? 'كشف حساب' : 'REALITY CHECK'} 
+                  subtitle={profile?.language === 'ar' ? 'مواجهة وحشية بالمهام المتأخرة والمهملة' : 'Brutal check on overdue & ignored tasks'} 
+                  onClick={() => handleAction('REALITY_CHECK')}
                   disabled={isLoading || energy === 0}
                   color={coachColor}
                   lang={profile?.language}
+                  className="py-5 px-5"
                 />
                 <ActionButton 
                   icon="target" 
-                  title="BRIEF_GOAL" 
-                  subtitle={profile?.language === 'ar' ? 'بريف عن أهم هدف' : 'Tactical goal breakdown'} 
-                  onClick={() => handleAction('brief_mission')}
+                  title={profile?.language === 'ar' ? 'أهم 3 مهام' : 'TOP 3 FOCUS'} 
+                  subtitle={profile?.language === 'ar' ? 'تحديد أهم 3 أولويات قصوى لليوم فوراً' : 'Extract the top 3 absolute priorities for today'} 
+                  onClick={() => handleAction('TOP_3_FOCUS')}
                   disabled={isLoading || energy === 0}
                   color={coachColor}
                   lang={profile?.language}
-                />
-                <ActionButton 
-                  icon="local_fire_department" 
-                  title="MOTIVATE_ME" 
-                  subtitle={profile?.language === 'ar' ? 'شجعني واضغط عليا' : 'Give me a harsh motivational speech'} 
-                  onClick={() => handleAction('motivate_me')}
-                  disabled={isLoading || energy === 0}
-                  color={coachColor}
-                  lang={profile?.language}
+                  className="py-5 px-5"
                 />
                 <ActionButton 
                   icon="bolt" 
-                  title="HOW_TO_START" 
-                  subtitle={profile?.language === 'ar' ? 'أبدأ بإيه دلوقتي؟' : 'What is the easiest task to start with?'} 
-                  onClick={() => handleAction('how_to_start')}
+                  title={profile?.language === 'ar' ? 'مكسب سريع' : 'QUICK WIN'} 
+                  subtitle={profile?.language === 'ar' ? 'مهمة سهلة في 5 دقائق لكسر حاجز الكسل' : 'Find the easiest 5-minute task to start with'} 
+                  onClick={() => handleAction('QUICK_WIN')}
                   disabled={isLoading || energy === 0}
                   color={coachColor}
                   lang={profile?.language}
+                  className="py-5 px-5"
                 />
               </div>
             </div>
@@ -343,7 +310,7 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
   )
 }
 
-function ActionButton({ icon, title, subtitle, onClick, disabled, color, lang }: any) {
+function ActionButton({ icon, title, subtitle, onClick, disabled, color, lang, className }: any) {
   const isRTL = lang === 'ar'
   const IconComponent = IconMap[icon] || Zap
   const ChevronIcon = isRTL ? ChevronLeft : ChevronRight
@@ -354,8 +321,9 @@ function ActionButton({ icon, title, subtitle, onClick, disabled, color, lang }:
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "w-full p-4 bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 transition-all duration-300 group flex items-start gap-4 text-start relative overflow-hidden rounded-xl cursor-pointer hover:scale-[1.02]",
-        disabled && "opacity-50 cursor-not-allowed"
+        "w-full p-5 bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 transition-all duration-300 group flex items-start gap-4 text-start relative overflow-hidden rounded-xl cursor-pointer hover:scale-[1.02]",
+        disabled && "opacity-50 cursor-not-allowed hover:scale-100",
+        className
       )}
       onMouseEnter={e => {
         if (!disabled) {
