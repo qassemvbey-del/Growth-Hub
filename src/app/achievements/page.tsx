@@ -13,7 +13,6 @@ import { VaultContent } from '../vault/page'
 export default function WinsPage() {
   const { profile, calculateAccountability, t, isRTL, mounted, currentTheme } = useGrowth()
   const [archived, setArchived] = useState<any[]>([])
-  const [activeTab, setActiveTab] = useState<'WINS' | 'RANKS'>('WINS')
   const [loading, setLoading] = useState(true)
   const [selectedMission, setSelectedMission] = useState<any | null>(null)
   const supabase = createClient()
@@ -98,34 +97,7 @@ export default function WinsPage() {
   return (
     <Shell>
       <div className="p-6 md:p-12 space-y-12 md:space-y-16">
-        {/* Tabs */}
-        <div className="flex items-center justify-center gap-4 mb-8">
-          <button 
-            onClick={() => setActiveTab('WINS')}
-            className={cn(
-              "px-8 py-3 font-space font-black uppercase tracking-widest text-[11px] md:text-sm border transition-all",
-              activeTab === 'WINS' ? "text-black border-transparent shadow-lg" : "bg-[var(--input-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-            )}
-            style={activeTab === 'WINS' ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
-          >
-            🏆 {isRTL ? 'سجل الإنجازات' : 'WINS'}
-          </button>
-          <button 
-            onClick={() => setActiveTab('RANKS')}
-            className={cn(
-              "px-8 py-3 font-space font-black uppercase tracking-widest text-[11px] md:text-sm border transition-all",
-              activeTab === 'RANKS' ? "text-black border-transparent shadow-lg" : "bg-[var(--input-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-            )}
-            style={activeTab === 'RANKS' ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
-          >
-            ⚡ {isRTL ? 'الرتب' : 'RANKS'}
-          </button>
-        </div>
 
-        {activeTab === 'RANKS' ? (
-          <VaultContent />
-        ) : (
-          <>
             {/* Header */}
             <div className="text-center space-y-4 relative">
               <div className="flex items-center justify-center gap-6 mb-2">
@@ -303,10 +275,7 @@ export default function WinsPage() {
                 </button>
               </motion.div>
             </motion.div>
-          )}
         </AnimatePresence>
-          </>
-        )}
       </div>
     </Shell>
   )

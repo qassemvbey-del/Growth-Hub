@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, CheckCircle2, FileText, HelpCircle, Lock, LogOut, Star, User, Brain, Settings as SettingsIcon, Moon, Sun } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, FileText, HelpCircle, Lock, LogOut, Star, User, Brain, Settings as SettingsIcon, Moon, Sun, Trophy } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Shell from '@/components/layout/Shell'
@@ -13,6 +13,7 @@ import { useSound } from '@/context/SoundContext'
 import CustomSelect from '@/components/ui/CustomSelect'
 import { deleteOwnAccount } from '@/app/actions/adminActions'
 import AvatarSelector from '@/components/ui/AvatarSelector'
+import { VaultContent } from '../vault/page'
 
 export default function SettingsPage() {
   const { profile, setProfile, isLoading, refreshProfile, mounted, t, isRTL, currentTheme } = useGrowth()
@@ -21,7 +22,7 @@ export default function SettingsPage() {
   const supabase = createClient()
   const { volume, setVolume, isMuted, setIsMuted, playBlip } = useSound()
 
-  const [activeTab, setActiveTab] = useState<'ACCOUNT' | 'AI_COACH' | 'SYSTEM'>('ACCOUNT')
+  const [activeTab, setActiveTab] = useState<'ACCOUNT' | 'RANKS' | 'AI_COACH' | 'SYSTEM'>('ACCOUNT')
   const [formData, setFormData] = useState({
     full_name: '',
     age: '18',
@@ -213,14 +214,16 @@ export default function SettingsPage() {
     </Shell>
   )
 
-  const getTabIcon = (id: 'ACCOUNT' | 'AI_COACH' | 'SYSTEM', className?: string) => {
+  const getTabIcon = (id: 'ACCOUNT' | 'RANKS' | 'AI_COACH' | 'SYSTEM', className?: string) => {
     if (id === 'ACCOUNT') return <User className={className} />
+    if (id === 'RANKS') return <Trophy className={className} />
     if (id === 'AI_COACH') return <Brain className={className} />
     return <SettingsIcon className={className} />
   }
 
   const tabOptions = [
     { id: 'ACCOUNT', label: isRTL ? 'الحساب' : 'ACCOUNT' },
+    { id: 'RANKS', label: isRTL ? 'الرتب والترقيات' : 'RANKS & SYSTEMS' },
     { id: 'AI_COACH', label: aiNameHeader },
     { id: 'SYSTEM', label: isRTL ? 'النظام' : 'SYSTEM' }
   ] as const
@@ -509,6 +512,13 @@ export default function SettingsPage() {
                         </div>
 
                       </div>
+                    </div>
+                  )}
+
+                  {/* RANKS & SYSTEMS VIEW */}
+                  {activeTab === 'RANKS' && (
+                    <div className="space-y-6 overflow-x-hidden">
+                      <VaultContent />
                     </div>
                   )}
 

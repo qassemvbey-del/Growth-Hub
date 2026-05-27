@@ -162,18 +162,6 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
             </span>
             <span className="text-xs font-bold" style={{ color: currentTheme.color }}>{progressPct.toFixed(0)}%</span>
           </div>
-          <div className="w-full h-2 bg-zinc-200 dark:bg-white/10 rounded-full overflow-hidden p-0.5 border border-zinc-300 dark:border-white/5 shadow-inner">
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: `${progressPct}%` }}
-              transition={{ duration: 1, ease: 'easeOut' }}
-              className="h-full rounded-full"
-              style={{ 
-                backgroundColor: currentTheme.color,
-                boxShadow: `0 0 10px ${currentTheme.color}`
-              }}
-            />
-          </div>
         </div>
       </div>
 

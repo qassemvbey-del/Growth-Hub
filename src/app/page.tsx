@@ -1,6 +1,6 @@
 'use client'
 
-import { Activity, AlertTriangle, BarChart3, Lightbulb, Target, Zap, Crosshair, Calendar, Users } from 'lucide-react'
+import { Activity, AlertTriangle, BarChart3, Lightbulb, Target, Zap, Crosshair, Calendar, Users, Swords } from 'lucide-react'
 import { NeonIcon } from '@/components/ui/NeonIcon'
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
@@ -476,7 +476,7 @@ export default function Dashboard() {
             </div>
 
             <div className="py-8 flex flex-col items-center justify-center text-center space-y-4">
-              <span className="text-4xl animate-bounce">⚔️</span>
+              <Swords className="w-12 h-12 stroke-[1.5] animate-pulse" style={{ color: currentTheme.color }} />
               <p className="text-base font-black tracking-wide text-zinc-100 leading-relaxed uppercase max-w-xs">
                 {computedRivalryText}
               </p>
