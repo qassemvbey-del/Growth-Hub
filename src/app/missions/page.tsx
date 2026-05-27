@@ -34,7 +34,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
   const { profile, t, calculateAccountability, isRTL, mounted, currentTheme, setShowAuthModal, addXp } = useGrowth()
   const { showToast } = useToast()
   const router = useRouter()
-  const { playDeploy, playBlip, playError } = useSound()
+  const { playDeploy, playBlip, playError, playClick } = useSound()
   const [missions, setMissions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
@@ -1203,21 +1203,19 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
 
                 <div className="flex justify-end gap-3 pt-2">
                   <button 
-                    onClick={() => { setShowCreate(false); setDefaultView('list'); }} 
+                    onClick={() => { playClick(); setShowCreate(false); setDefaultView('list'); }} 
                     className="px-4 py-2.5 rounded-xl text-xs uppercase tracking-widest text-zinc-400 hover:text-white transition-all font-black cursor-pointer"
                   >
                     {isRTL ? 'إلغاء' : 'Cancel'}
                   </button>
                   <button 
-                    onClick={() => addMission()} 
+                    onClick={() => { playClick(); addMission(); }} 
                     disabled={isSubmitting}
-                    className={cn(
-                      "px-10 py-4 font-space font-black text-base uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 cursor-pointer bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-black shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all",
-                      isSubmitting && "opacity-50 cursor-not-allowed"
-                    )}
+                    className="px-6 py-2.5 font-space font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 cursor-pointer text-black hover:brightness-110 transition-all shadow-md"
+                    style={{ backgroundColor: currentTheme.color }}
                   >
-                    {isSubmitting && <RefreshCw className="animate-spin text-sm w-3.5 h-3.5" />}
-                    {isRTL ? 'تفعيل' : 'Activate'}
+                    {isSubmitting && <RefreshCw className="animate-spin text-[10px] w-3 h-3" />}
+                    {isRTL ? 'إنشاء هدف' : 'CREATE GOAL'}
                   </button>
                 </div>
               </motion.div>

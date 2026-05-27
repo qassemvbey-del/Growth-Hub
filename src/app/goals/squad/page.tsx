@@ -48,7 +48,7 @@ export default function SquadGoalsPage() {
   const { profile, t, calculateAccountability, isRTL, mounted, currentTheme, setShowAuthModal, addXp } = useGrowth()
   const { showToast } = useToast()
   const router = useRouter()
-  const { playDeploy, playBlip, playError } = useSound()
+  const { playDeploy, playBlip, playError, playClick } = useSound()
   const [missions, setMissions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
@@ -1235,7 +1235,7 @@ export default function SquadGoalsPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[200] flex items-center justify-center bg-white/90 dark:bg-black/90 backdrop-blur-md p-4 overflow-y-auto"
+              className="fixed inset-0 z-[200] flex items-center justify-center bg-white/90 dark:bg-black/90 backdrop-blur-sm p-4 overflow-y-auto"
               onClick={() => setShowCreate(false)}
             >
               <motion.div
@@ -1243,206 +1243,85 @@ export default function SquadGoalsPage() {
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9 }}
                 onClick={e => e.stopPropagation()}
-                className="w-[calc(100%-2rem)] mx-auto md:max-w-xl bg-zinc-950/90 border border-white/10 backdrop-blur-md p-5 md:p-8 space-y-6 rounded-2xl shadow-2xl my-auto max-h-[90vh] overflow-y-auto"
+                className="w-full max-w-[380px] bg-zinc-950/95 border border-white/10 p-6 space-y-5 rounded-2xl shadow-2xl my-auto relative"
               >
-                <div className="flex flex-col gap-1.5">
-                  <h2 className="text-xl md:text-2xl font-space font-black uppercase text-black dark:text-white tracking-tighter">
+                <button 
+                  onClick={() => { setShowCreate(false); setDefaultView('list'); }} 
+                  className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors p-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                <div className="flex flex-col gap-1">
+                  <h2 className="text-lg font-black uppercase text-white tracking-wider">
                     {typeFilter === 'squad'
                       ? (isRTL ? 'إنشاء هدف فريق' : 'Create Team Goal')
-                      : (isRTL ? 'إنشاء هدف فردي جديد' : 'Create Solo Goal')}
+                      : (isRTL ? 'إنشاء هدف جديد' : 'Create New Goal')}
                   </h2>
-                  {typeFilter === 'squad' && (
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-teal-500/10 border border-teal-500/25 rounded-md self-start">
-                      <span className="text-[10px] font-space font-black text-teal-400 uppercase tracking-widest">
-                        ⚔ TEAM GOAL — Collaborative
-                      </span>
-                    </div>
-                  )}
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs md:text-sm font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'عنوان الهدف' : 'Goal Title'}</label>
+                {/* Title */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black tracking-widest uppercase text-zinc-400">
+                    {isRTL ? 'العنوان' : 'Goal Title'}
+                  </label>
                   <input
                     autoFocus
                     value={newTitle}
-                    placeholder={isRTL ? 'اسم هدفك...' : 'Name your goal...'}
+                    placeholder={isRTL ? 'ما الذي تريد تحقيقه؟...' : 'What do you want to achieve?...'}
                     onChange={e => setNewTitle(e.target.value)}
-                    className="w-full bg-zinc-900/50 border border-white/10 py-2.5 px-4 rounded-xl font-space text-base font-black text-white outline-none transition-all placeholder:text-zinc-500"
-                    onFocus={e => e.currentTarget.style.borderColor = currentTheme.color}
-                    onBlur={e => e.currentTarget.style.borderColor = ''}
+                    className="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--theme-color)] py-3 px-4 rounded-xl text-base font-bold text-white outline-none transition-all placeholder:text-zinc-600 shadow-inner"
+                    style={{ borderColor: 'rgba(255,255,255,0.08)' }}
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <label className="text-xs md:text-sm font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'حجم الهدف' : 'Goal Size'}</label>
-                    <div className="group relative flex items-center cursor-help">
-                      <Info className="w-3.5 h-3.5 transition-colors group-hover:text-white" />
-                      <div className="pointer-events-none absolute bottom-full mb-2 w-64 md:w-80 rounded-xl bg-zinc-900 border border-white/10 p-3 md:p-4 text-xs md:text-sm text-zinc-200 shadow-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-[300]">
-                        {isRTL 
-                          ? "حجم الهدف يحدد سعة الـ Slots المستهلكة في لوحة القيادة، وسقف نقاط الـ XP المكتسبة (Small: 4 مهام، Medium: 8 مهام، Large: 20 مهمة). يمكنك إضافة مهام إضافية بعد السقف للتنظيم فقط."
-                          : "Goal size determines Focus Slots consumed on the dashboard and the XP reward ceiling (Small: 4 tasks, Medium: 8 tasks, Large: 20 tasks). Extra tasks can be added freely for organization."}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    {SIZES.map(s => (
-                      <button
-                        key={s.key}
-                        type="button"
-                        onClick={() => { playBlip(); setNewSize(s.key); }}
-                        className={cn(
-                          "p-3 border flex items-center justify-center gap-2 transition-all rounded-xl cursor-pointer text-sm font-bold uppercase tracking-wider",
-                          newSize === s.key 
-                            ? "text-black border-transparent shadow-lg" 
-                            : "border-white/10 text-zinc-400 hover:border-white/20 hover:text-white bg-black/20"
-                        )}
-                        style={newSize === s.key ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}55` } : {}}
-                        onMouseEnter={e => { if (newSize !== s.key) e.currentTarget.style.borderColor = `${currentTheme.color}60` }}
-                        onMouseLeave={e => { if (newSize !== s.key) e.currentTarget.style.borderColor = '' }}
-                      >
-                        {renderSizeIcon(s.key, "w-4 h-4 md:w-4.5 md:h-4.5")}
-                        <span className="text-xs md:text-sm font-space font-black uppercase tracking-tighter">{isRTL ? (s.key === 'lg' ? 'كبيرة' : s.key === 'md' ? 'متوسطة' : 'صغيرة') : (s.key === 'lg' ? 'Large' : s.key === 'md' ? 'Medium' : 'Small')}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs md:text-sm font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>
-                    {isRTL ? 'طريقة العرض الافتراضية' : 'DEFAULT LAYOUT'}
+                {/* Deadline */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black tracking-widest uppercase text-zinc-400">
+                    {isRTL ? 'تاريخ الاستحقاق (اختياري)' : 'Deadline (Optional)'}
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => { playBlip(); setDefaultView('list'); }}
-                      className={cn(
-                        "p-3 border flex items-center justify-center gap-2.5 transition-all rounded-xl cursor-pointer text-sm font-black uppercase tracking-wider",
-                        defaultView === 'list'
-                          ? "text-black border-transparent shadow-lg"
-                          : "border-white/10 text-zinc-400 hover:border-white/20 hover:text-white bg-black/20"
-                      )}
-                      style={defaultView === 'list' ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}55` } : {}}
-                      onMouseEnter={e => { if (defaultView !== 'list') e.currentTarget.style.borderColor = `${currentTheme.color}60` }}
-                      onMouseLeave={e => { if (defaultView !== 'list') e.currentTarget.style.borderColor = '' }}
-                    >
-                      <List className="w-4 h-4 md:w-4.5 md:h-4.5" />
-                      <span className="text-xs md:text-sm font-space font-black uppercase tracking-tighter">
-                        {isRTL ? 'قائمة (المناهج)' : 'List View'}
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => { playBlip(); setDefaultView('board'); }}
-                      className={cn(
-                        "p-3 border flex items-center justify-center gap-2.5 transition-all rounded-xl cursor-pointer text-sm font-black uppercase tracking-wider",
-                        defaultView === 'board'
-                          ? "text-black border-transparent shadow-lg"
-                          : "border-white/10 text-zinc-400 hover:border-white/20 hover:text-white bg-black/20"
-                      )}
-                      style={defaultView === 'board' ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}55` } : {}}
-                      onMouseEnter={e => { if (defaultView !== 'board') e.currentTarget.style.borderColor = `${currentTheme.color}60` }}
-                      onMouseLeave={e => { if (defaultView !== 'board') e.currentTarget.style.borderColor = '' }}
-                    >
-                      <Kanban className="w-4 h-4 md:w-4.5 md:h-4.5" />
-                      <span className="text-xs md:text-sm font-space font-black uppercase tracking-tighter">
-                        {isRTL ? 'لوحة (المشاريع)' : 'Board View'}
-                      </span>
-                    </button>
-                  </div>
-                  <p className="text-[10px] text-zinc-500 font-medium tracking-wide leading-normal">
-                    {isRTL 
-                      ? "قائمة: تناسب المسارات التعليمية والخطوات المنهجية. لوحة: تناسب المشاريع والمهام التفاعلية."
-                      : "List View: Perfect for courses, syllabi and sequential steps. Board View: Ideal for interactive projects and kanban tasks."}
-                  </p>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={e => setEndDate(e.target.value)}
+                    className="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--theme-color)] py-2.5 px-4 text-sm font-bold text-white outline-none transition-all rounded-xl date-input-tactical"
+                    style={{ colorScheme: 'dark', borderColor: 'rgba(255,255,255,0.08)' }}
+                  />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-xs md:text-sm font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>
-                      {t('start_date')}
-                    </label>
-                    <input
-                      type="date"
-                      value={startDate}
-                      onChange={e => setStartDate(e.target.value)}
-                      className="w-full bg-zinc-900/50 border border-white/10 py-2.5 px-4 font-space text-base font-black text-white outline-none transition-all uppercase rounded-xl date-input-tactical"
-                      style={{ colorScheme: 'dark' }}
-                      onFocus={e => e.currentTarget.style.borderColor = currentTheme.color}
-                      onBlur={e => e.currentTarget.style.borderColor = ''}
+                {/* Show on Dashboard Checkbox */}
+                <div className="flex items-center justify-between py-2 border-t border-b border-white/[0.05]">
+                  <span className="text-[10px] font-black tracking-widest uppercase text-zinc-400">
+                    {isRTL ? 'تثبيت في اللوحة الرئيسة' : 'Pin to Dashboard'}
+                  </span>
+                  <label className="relative inline-flex items-center cursor-pointer select-none">
+                    <input 
+                      type="checkbox"
+                      checked={syncOnCreate}
+                      onChange={() => { playBlip(); setSyncOnCreate(!syncOnCreate); }}
+                      className="sr-only peer"
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs md:text-sm font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>
-                      {t('end_date')}
-                    </label>
-                    <input
-                      type="date"
-                      value={endDate}
-                      onChange={e => setEndDate(e.target.value)}
-                      className="w-full bg-zinc-900/50 border border-white/10 py-2.5 px-4 font-space text-base font-black text-white outline-none transition-all uppercase rounded-xl date-input-tactical"
-                      style={{ colorScheme: 'dark' }}
-                      onFocus={e => e.currentTarget.style.borderColor = currentTheme.color}
-                      onBlur={e => e.currentTarget.style.borderColor = ''}
-                    />
-                  </div>
+                    <div className="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-zinc-400 peer-checked:after:bg-black after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--theme-color)]"
+                      style={{ '--theme-color': currentTheme.color } as React.CSSProperties}
+                    ></div>
+                  </label>
                 </div>
 
-                <div className="flex flex-col md:flex-row gap-6">
-                  <div className="space-y-2 flex-1">
-                     <label className="text-xs md:text-sm font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'عرض في اللوحة' : 'Show on Dashboard'}</label>
-                     <button 
-                       type="button"
-                       onClick={() => { playBlip(); setSyncOnCreate(!syncOnCreate); }}
-                       className="w-full py-2.5 px-4 border font-space text-base font-black uppercase tracking-widest transition-all duration-300 rounded-xl flex items-center justify-between gap-4 cursor-pointer"
-                       style={syncOnCreate ? {
-                         backgroundColor: currentTheme.color,
-                         borderColor: currentTheme.color,
-                         color: '#000',
-                         boxShadow: `0 0 18px ${currentTheme.color}55`
-                       } : {
-                         backgroundColor: 'transparent',
-                         borderColor: 'white/10',
-                         color: 'var(--text-secondary)'
-                       }}
-                     >
-                       <span className="flex items-center gap-3">
-                         <LayoutDashboard className="w-5 h-5 shrink-0" />
-                         {syncOnCreate
-                           ? (isRTL ? 'مرئي في اللوحة' : 'SHOW ON DASHBOARD')
-                           : (isRTL ? 'مخفي من اللوحة' : 'STAY OFF-GRID')}
-                       </span>
-                       <span
-                         className="text-[10px] font-black tracking-widest px-2 py-0.5 rounded-full border transition-all duration-300"
-                         style={syncOnCreate ? {
-                           backgroundColor: 'rgba(0,0,0,0.25)',
-                           borderColor: 'rgba(0,0,0,0.2)',
-                           color: '#000'
-                         } : {
-                           backgroundColor: 'transparent',
-                           borderColor: 'white/10',
-                           color: 'var(--text-secondary)'
-                         }}
-                       >
-                         {syncOnCreate ? 'ON' : 'OFF'}
-                       </span>
-                     </button>
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-6 pt-4 border-t border-white/10">
-                  <button onClick={() => { setShowCreate(false); setDefaultView('list'); }} className="px-6 py-4 border border-white/10 rounded-xl text-zinc-400 font-space text-base uppercase tracking-widest hover:text-white hover:border-white/20 transition-all font-black cursor-pointer">{isRTL ? 'إلغاء' : 'Cancel'}</button>
+                <div className="flex justify-end gap-3 pt-2">
                   <button 
-                    onClick={() => addMission()} 
-                    disabled={isSubmitting}
-                    className={cn(
-                      "px-10 py-4 font-space font-black text-base uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 cursor-pointer bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-black shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all",
-                      isSubmitting && "opacity-50 cursor-not-allowed"
-                    )}
+                    onClick={() => { playClick(); setShowCreate(false); setDefaultView('list'); }} 
+                    className="px-4 py-2.5 rounded-xl text-xs uppercase tracking-widest text-zinc-400 hover:text-white transition-all font-black cursor-pointer"
                   >
-                    {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                    {isRTL ? 'تفعيل' : 'Activate'}
+                    {isRTL ? 'إلغاء' : 'Cancel'}
+                  </button>
+                  <button 
+                    onClick={() => { playClick(); addMission(); }} 
+                    disabled={isSubmitting}
+                    className="px-6 py-2.5 font-space font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 cursor-pointer text-black hover:brightness-110 transition-all shadow-md"
+                    style={{ backgroundColor: currentTheme.color }}
+                  >
+                    {isSubmitting && <Loader2 className="w-3 h-3 animate-spin text-black" />}
+                    {isRTL ? 'إنشاء هدف' : 'CREATE GOAL'}
                   </button>
                 </div>
               </motion.div>
