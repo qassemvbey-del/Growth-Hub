@@ -1450,7 +1450,17 @@ const { progress, isInRedZone } = useMemo(() => {
               <div className="relative">
                 <button
                    onClick={() => { playBlip(); setShowImportDropdown(!showImportDropdown); }}
-                   className="px-4 md:px-5 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-lg uppercase flex items-center gap-2 border-[var(--card-border)] text-white hover:bg-white/5 hover:border-white/20 cursor-pointer"
+                   className={cn(
+                      "px-4 md:px-5 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-lg uppercase flex items-center gap-2 border-[var(--card-border)] text-white hover:bg-white/5 hover:border-white/20 cursor-pointer",
+                      (mission?.title === "Start Here 🚀" || mission?.title === "ابدأ من هنا 🚀") && 
+                      mission?.tasks?.some((t: any) => t.metadata?.is_tutorial_import === true && !t.is_completed) && 
+                      "animate-pulse ring-2"
+                   )}
+                   style={(mission?.title === "Start Here 🚀" || mission?.title === "ابدأ من هنا 🚀") && 
+                      mission?.tasks?.some((t: any) => t.metadata?.is_tutorial_import === true && !t.is_completed) ? { 
+                      borderColor: missionColor, color: missionColor,
+                      boxShadow: `0 0 15px ${missionColor}44`
+                   } : {}}
                 >
                    <span>[ IMPORT DATA ]</span>
                    <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-200", showImportDropdown && "rotate-180")} />
@@ -2227,12 +2237,21 @@ const { progress, isInRedZone } = useMemo(() => {
         missionId={id as string}
         themeColor={missionColor}
         onTasksAdded={(newTasks) => {
-          setMission((prev: any) => ({
-            ...prev,
-            tasks: [...(prev.tasks || []), ...newTasks]
-          }))
+          setMission((prev: any) => {
+            const nextTasks = [...(prev.tasks || []), ...newTasks]
+            return {
+              ...prev,
+              tasks: nextTasks
+            }
+          })
           showToast(isRTL ? 'تم استيراد قائمة التشغيل بنجاح' : 'PLAYLIST_IMPORTED // TASKS_DEPLOYED', 'success')
           playSuccess()
+          
+          // Automatically complete "Import Tutorial Task" if it exists (Point 3)
+          const tutorialImportTask = mission?.tasks?.find((t: any) => t.metadata?.is_tutorial_import === true && !t.is_completed)
+          if (tutorialImportTask) {
+            toggleTask(tutorialImportTask.id, false)
+          }
           
           // Switch view to list and persist choice
           setActiveView('list')

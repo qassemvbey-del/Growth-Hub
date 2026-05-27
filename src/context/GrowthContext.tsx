@@ -415,6 +415,17 @@ export function getRankNeonClass(rank: string): string {
 }
 
 export function GrowthProvider({ children }: { children: React.ReactNode }) {
+  // Language detection (Point 1)
+  const getSystemLanguage = (): Language => {
+    if (typeof window === 'undefined') return 'en'
+    const cached = localStorage.getItem('language')
+    if (cached === 'ar' || cached === 'en') return cached
+    const browserLang = navigator.language || (navigator as any).userLanguage || ''
+    const resolved = browserLang.toLowerCase().startsWith('ar') ? 'ar' : 'en'
+    localStorage.setItem('language', resolved)
+    return resolved
+  }
+
   const [profile, setProfile] = useState<Profile | null>(() => {
     if (typeof window !== 'undefined') {
       const cached = localStorage.getItem('cached_profile')
@@ -423,6 +434,9 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
           return JSON.parse(cached) as Profile
         } catch (e) {}
       }
+      // Set default language state based on detection
+      const initialLang = getSystemLanguage()
+      return { language: initialLang } as Profile
     }
     return null
   })
@@ -862,6 +876,63 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
             }
           }
 
+          // Dynamic Seeding Logic for Authenticated Mode (Point 2)
+          try {
+            const { count, error: countError } = await supabase
+              .from('cups')
+              .select('id', { count: 'exact', head: true })
+              .eq('user_id', user.id)
+              .eq('is_archived', false)
+
+            if (!countError && count === 0) {
+              const isAr = (profileData.language || 'en') === 'ar'
+              const seedGoalTitle = isAr ? "ابدأ من هنا 🚀" : "Start Here 🚀"
+              const { data: newCup } = await supabase
+                .from('cups')
+                .insert({
+                  user_id: user.id,
+                  title: seedGoalTitle,
+                  status: 'active',
+                  size: 'md',
+                  is_archived: false,
+                  sync_to_dashboard: true,
+                  metadata: { defaultView: 'list', is_tutorial: true }
+                })
+                .select()
+                .single()
+
+              if (newCup) {
+                const arSteps = [
+                  "اضغط على النيشان هنا عشان تقفل أول مهمة ليك وتكسب أول 10 XP.",
+                  "اضغط `Ctrl + K` عشان تفتح الـ Command Palette. أسرع أداة للتحكم.",
+                  "جرب تسحب كورس يوتيوب دلوقتي! اضغط على زرار Import Playlist فوق.",
+                  "اضغط على أيقونة الـ Pin 📌 في الهدف ده، عشان يتثبت في الداشبورد.",
+                  "افتح الـ AI Coach من القائمة.. عشان تاخد تقرير تكتيكي.",
+                  "امسح الهدف التدريبي ده من سلة المهملات، وابدأ هدفك الحقيقي."
+                ]
+                const enSteps = [
+                  "Click the target circle here to complete your first task and earn 10 XP.",
+                  "Press `Ctrl + K` to open the Command Palette. The fastest tool for control.",
+                  "Try importing a YouTube course now! Click the Import Playlist button above.",
+                  "Click the Pin 📌 icon on this goal to lock it in the dashboard.",
+                  "Open the AI Coach from the menu to get a tactical report.",
+                  "Delete this training goal from the trash, and start your real goal."
+                ]
+                const steps = isAr ? arSteps : enSteps
+                const taskPayloads = steps.map((step, idx) => ({
+                  cup_id: newCup.id,
+                  title: step,
+                  weight: 3,
+                  is_completed: false,
+                  metadata: idx === 2 ? { is_tutorial_import: true } : {}
+                }))
+                await supabase.from('tasks').insert(taskPayloads)
+              }
+            }
+          } catch (seedErr) {
+            console.error('Seeding tutorial failed:', seedErr)
+          }
+
           // Blocked Check
           if (data.blocked) {
             router.push('/blocked')
@@ -971,6 +1042,53 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
           setProfile(guestProfile);
           if (typeof window !== 'undefined') {
             localStorage.setItem('cached_profile', JSON.stringify(guestProfile));
+            
+            // Seed tutorial goals for guests if empty (Point 2)
+            const guestGoalsStr = localStorage.getItem('guest_goals')
+            const guestGoals = guestGoalsStr ? JSON.parse(guestGoalsStr) : []
+            if (guestGoals.length === 0) {
+              const isAr = storedLang === 'ar'
+              const seedGoalTitle = isAr ? "ابدأ من هنا 🚀" : "Start Here 🚀"
+              const fakeId = 'local_' + Math.random().toString(36).substring(2, 9)
+              
+              const arSteps = [
+                "اضغط على النيشان هنا عشان تقفل أول مهمة ليك وتكسب أول 10 XP.",
+                "اضغط `Ctrl + K` عشان تفتح الـ Command Palette. أسرع أداة للتحكم.",
+                "جرب تسحب كورس يوتيوب دلوقتي! اضغط على زرار Import Playlist فوق.",
+                "اضغط على أيقونة الـ Pin 📌 في الهدف ده، عشان يتثبت في الداشبورد.",
+                "افتح الـ AI Coach من القائمة.. عشان تاخد تقرير تكتيكي.",
+                "امسح الهدف التدريبي ده من سلة المهملات، وابدأ هدفك الحقيقي."
+              ]
+              const enSteps = [
+                "Click the target circle here to complete your first task and earn 10 XP.",
+                "Press `Ctrl + K` to open the Command Palette. The fastest tool for control.",
+                "Try importing a YouTube course now! Click the Import Playlist button above.",
+                "Click the Pin 📌 icon on this goal to lock it in the dashboard.",
+                "Open the AI Coach from the menu to get a tactical report.",
+                "Delete this training goal from the trash, and start your real goal."
+              ]
+              const steps = isAr ? arSteps : enSteps
+              const newLocalGoal = {
+                id: fakeId,
+                user_id: 'guest',
+                title: seedGoalTitle,
+                status: 'active',
+                size: 'md',
+                is_archived: false,
+                sync_to_dashboard: true,
+                created_at: new Date().toISOString(),
+                metadata: { defaultView: 'list', is_tutorial: true },
+                tasks: steps.map((step, idx) => ({
+                  id: 'local_task_' + Math.random().toString(36).substring(2, 9),
+                  cup_id: fakeId,
+                  title: step,
+                  weight: 3,
+                  is_completed: false,
+                  metadata: idx === 2 ? { is_tutorial_import: true } : {}
+                }))
+              }
+              localStorage.setItem('guest_goals', JSON.stringify([newLocalGoal]))
+            }
           }
         }
       }
