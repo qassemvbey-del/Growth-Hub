@@ -28,6 +28,7 @@ import EntryGateModal from '@/components/auth/EntryGateModal'
 import LevelUpModal from '@/components/ui/LevelUpModal'
 import GlitchOverlay from '@/components/ui/GlitchOverlay'
 import CommandPalette from '@/components/ui/CommandPalette'
+import Tutorial from '@/components/ui/Tutorial'
 
 
 interface ShellProps {
@@ -977,6 +978,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       />
       <AuthModal />
       <EntryGateModal />
+      <Tutorial />
 
       {/* Mobile fullscreen overlay for notification list to prevent containing block issue */}
       <div className="lg:hidden">

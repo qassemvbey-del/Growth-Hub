@@ -523,7 +523,8 @@ export default function Dashboard() {
                   onClick={() => router.push(`/missions/${mission.id}`)}
                   className={cn(
                     "relative group cursor-pointer p-5 rounded-xl border bg-zinc-900/20 hover:bg-white/5 transition-all overflow-hidden flex flex-col gap-4",
-                    isInRedZone ? "border-red-500/40" : "border-white/5 hover:border-white/10"
+                    isInRedZone ? "border-red-500/40" : "border-white/5 hover:border-white/10",
+                    (mission.title === "Start Here 🚀" || mission.title === "ابدأ من هنا 🚀") && "onboarding-start-goal"
                   )}
                 >
                   <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: isInRedZone ? '#ef4444' : customColor }} />

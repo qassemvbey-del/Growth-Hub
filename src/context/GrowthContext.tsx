@@ -929,6 +929,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
                   metadata: idx === 2 ? { is_tutorial_import: true } : {}
                 }))
                 await supabase.from('tasks').insert(taskPayloads)
+                setTutorialActive(true)
               }
             }
           } catch (seedErr) {
@@ -1092,6 +1093,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
                 }))
               }
               localStorage.setItem('guest_goals', JSON.stringify([newLocalGoal]))
+              setTutorialActive(true)
             }
           }
         }
