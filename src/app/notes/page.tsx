@@ -458,7 +458,7 @@ export default function NotesPage() {
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--theme-color)]/5 border border-[var(--theme-color)]/10 backdrop-blur-md">
             <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-color)] animate-ping" />
             <span className="font-space text-[9px] tracking-[0.25em] font-black uppercase text-[var(--theme-color)]">
-              {isRTL ? 'جاري استرجاع السجلات المشفرة...' : 'COMPILING_ENCRYPTED_DATABASE_LOGS...'}
+              {isRTL ? 'جاري تحميل الملاحظات...' : 'Loading notes...'}
             </span>
           </div>
         </div>

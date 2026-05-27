@@ -18,9 +18,9 @@ import { validateContent } from '@/lib/profanityFilter'
 import { aiProfanityCheck } from '@/app/actions/profanityCheck'
 
 const SIZES = [
-  { key: 'lg', label: 'LARGE GOAL',  desc: 'Macro Objective', icon: Flame },
-  { key: 'md', label: 'MEDIUM GOAL', desc: 'Standard Focus',  icon: SignalMedium },
-  { key: 'sm', label: 'SMALL GOAL',  desc: 'Micro Focus',     icon: SignalLow },
+  { key: 'lg', label: 'LARGE GOAL', desc: 'Macro Objective', icon: Flame },
+  { key: 'md', label: 'MEDIUM GOAL', desc: 'Standard Focus', icon: SignalMedium },
+  { key: 'sm', label: 'SMALL GOAL', desc: 'Micro Focus', icon: SignalLow },
 ]
 
 const getRankBorderClass = (rank: string) => {
@@ -53,13 +53,13 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
   const [activeRulesGoalId, setActiveRulesGoalId] = useState<string | null>(null)
   const [goalMembersMap, setGoalMembersMap] = useState<Record<string, any[]>>({})
   const [goalActiveTodayMap, setGoalActiveTodayMap] = useState<Record<string, number>>({})
-  
+
   // Join Goal Modal states
   const [joinCodeInput, setJoinCodeInput] = useState('')
   const [joinStatus, setJoinStatus] = useState<'idle' | 'scanning' | 'valid' | 'invalid' | 'already_member' | 'success'>('idle')
   const [scannedGoalName, setScannedGoalName] = useState('')
   const [joinErrorText, setJoinErrorText] = useState('')
-  
+
   const supabase = createClient()
 
   // ── Attachments state ─────────────────────────────────────────────────
@@ -113,13 +113,13 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
         style={typeFilter === 'squad' ? { borderLeftColor: mission.color || color } : {}}
       >
         <div className="absolute top-0 inset-x-0 h-[2.5px]" style={{ backgroundColor: isInRedZone ? '#FF0055' : (mission.color || color) }} />
-        
+
         <div className="flex justify-between items-start mb-auto">
           <div className="flex flex-col gap-1 flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <SizeIconComp className="w-3.5 h-3.5 opacity-40 shrink-0" style={{ color: isInRedZone ? '#FF0055' : (mission.color || color) }} />
               <p className="text-[8px] font-space tracking-[0.3em] uppercase font-black opacity-40">
-                 {mission.sync_to_dashboard ? (isRTL ? 'نشط' : 'ACTIVE') : (isRTL ? 'استعداد' : 'STANDBY')}
+                {mission.sync_to_dashboard ? (isRTL ? 'نشط' : 'ACTIVE') : (isRTL ? 'استعداد' : 'STANDBY')}
               </p>
               {typeFilter === 'solo' && (
                 <span className="text-[8px] font-space tracking-widest font-black uppercase text-zinc-500 opacity-60 bg-zinc-500/10 border border-zinc-500/20 px-1.5 py-0.5 rounded-sm">
@@ -139,10 +139,10 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
               )}
             </div>
             <h3 className="text-lg md:text-xl font-space font-black uppercase text-[var(--text-primary)] truncate mt-1">
-               {mission.title}
+              {mission.title}
             </h3>
           </div>
-          
+
           <div className="flex items-center gap-2 shrink-0">
             <span className="text-xl md:text-2xl font-black font-space shrink-0" style={{ color: isInRedZone ? '#FF0055' : (mission.color || color) }}>{percentage}%</span>
             {typeFilter === 'squad' && mission.user_id === profile?.id && (
@@ -157,7 +157,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 >
                   <Settings className="w-4 h-4" />
                 </button>
-                
+
                 <AnimatePresence>
                   {activeRulesGoalId === mission.id && (
                     <motion.div
@@ -170,7 +170,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       <p className="text-[10px] font-black tracking-widest text-zinc-500 uppercase border-b border-zinc-800/80 pb-1.5">
                         SQUAD RULES // OWNER ONLY
                       </p>
-                      
+
                       <label className="flex items-center justify-between text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer select-none">
                         <span>No date changes for members</span>
                         <input
@@ -242,7 +242,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     )}
                   </div>
                 ))}
-                
+
                 {(goalMembersMap[mission.id] || []).length > 4 && (
                   <div className="w-6 h-6 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[7px] font-space font-black text-teal-400 shadow-md shrink-0">
                     +{(goalMembersMap[mission.id] || []).length - 4}
@@ -277,98 +277,98 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
           </div>
 
           <div className="flex justify-between items-center">
-             <div className="flex items-center gap-3">
-                <p className="text-[8px] font-space text-[var(--text-secondary)] uppercase font-black tracking-widest">
-                  {completedTasks}/{totalTasks} {isRTL ? 'المهام' : 'TASKS'}
+            <div className="flex items-center gap-3">
+              <p className="text-[8px] font-space text-[var(--text-secondary)] uppercase font-black tracking-widest">
+                {completedTasks}/{totalTasks} {isRTL ? 'المهام' : 'TASKS'}
+              </p>
+              {(mission.start_date || mission.end_date) && (
+                <p className="text-[7px] font-space text-[var(--text-secondary)]/50 uppercase tracking-wider">
+                  {fmtDate(mission.start_date)} → {fmtDate(mission.end_date)}
                 </p>
-                {(mission.start_date || mission.end_date) && (
-                  <p className="text-[7px] font-space text-[var(--text-secondary)]/50 uppercase tracking-wider">
-                    {fmtDate(mission.start_date)} → {fmtDate(mission.end_date)}
-                  </p>
-                )}
-             </div>
-             <div className="flex items-center gap-2">
-                {typeFilter === 'squad' && mission.metadata?.invite_code && (
-                  <button
-                    onClick={(e) => handleCopyInviteLink(e, mission.metadata.invite_code)}
-                    className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] hover:border-teal-400/50 hover:bg-teal-500/5 transition-all rounded-sm shrink-0 animate-pulse"
-                    title="COPY_INVITE_CODE"
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {typeFilter === 'squad' && mission.metadata?.invite_code && (
+                <button
+                  onClick={(e) => handleCopyInviteLink(e, mission.metadata.invite_code)}
+                  className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] hover:border-teal-400/50 hover:bg-teal-500/5 transition-all rounded-sm shrink-0 animate-pulse"
+                  title="COPY_INVITE_CODE"
+                >
+                  <Link className="text-sm text-teal-400 w-3.5 h-3.5" />
+                </button>
+              )}
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const { progress } = calculateAccountability(mission);
+                  const percentage = Math.round(progress);
+                  const completed = mission.tasks?.filter((t: any) => t.is_completed).length || 0;
+                  const total = mission.tasks?.length || 0;
+
+                  const formatDate = (dateStr: string | null, fallbackDate?: Date) => {
+                    const d = dateStr ? new Date(dateStr) : (fallbackDate || new Date());
+                    return d.toISOString().split('T')[0].replace(/-/g, '');
+                  };
+
+                  const dtStart = formatDate(mission.start_date);
+                  let dtEnd;
+                  if (mission.end_date) {
+                    dtEnd = formatDate(mission.end_date);
+                  } else {
+                    const d = mission.start_date ? new Date(mission.start_date) : new Date();
+                    d.setDate(d.getDate() + 30);
+                    dtEnd = d.toISOString().split('T')[0].replace(/-/g, '');
+                  }
+
+                  const details = encodeURIComponent(`Growth Hub Goal | Progress: ${percentage}% | Tasks: ${completed}/${total}`);
+                  const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(mission.title)}&dates=${dtStart}/${dtEnd}&details=${details}&location=Growth_Hub`;
+
+                  window.open(googleUrl, '_blank');
+                  playBlip();
+                }}
+                className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] transition-all rounded-sm shrink-0"
+                onMouseEnter={e => e.currentTarget.style.borderColor = `${(mission.color || color)}60`}
+                onMouseLeave={e => e.currentTarget.style.borderColor = ''}
+                title="ADD_TO_GOOGLE_CALENDAR"
+              >
+                <Calendar className="text-sm w-3.5 h-3.5" />
+              </button>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openAttachments(mission.id);
+                }}
+                className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] transition-all rounded-sm shrink-0"
+                onMouseEnter={e => e.currentTarget.style.borderColor = `${(mission.color || color)}60`}
+                onMouseLeave={e => e.currentTarget.style.borderColor = ''}
+                title="ATTACHMENTS"
+                style={{
+                  borderColor: (attachmentCounts[mission.id] || 0) > 0 ? `${(mission.color || color)}44` : undefined,
+                  boxShadow: (attachmentCounts[mission.id] || 0) > 0 ? `0 0 10px ${(mission.color || color)}22` : undefined
+                }}
+              >
+                <HelpCircle />
+                {(attachmentCounts[mission.id] || 0) > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 text-black text-[8px] font-black flex items-center justify-center rounded-full shadow-lg"
+                    style={{ backgroundColor: (mission.color || color), boxShadow: `0 0 10px ${(mission.color || color)}` }}
                   >
-                    <Link className="text-sm text-teal-400 w-3.5 h-3.5" />
-                  </button>
+                    {attachmentCounts[mission.id]}
+                  </span>
                 )}
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const { progress } = calculateAccountability(mission);
-                    const percentage = Math.round(progress);
-                    const completed = mission.tasks?.filter((t: any) => t.is_completed).length || 0;
-                    const total = mission.tasks?.length || 0;
-                    
-                    const formatDate = (dateStr: string | null, fallbackDate?: Date) => {
-                      const d = dateStr ? new Date(dateStr) : (fallbackDate || new Date());
-                      return d.toISOString().split('T')[0].replace(/-/g, '');
-                    };
-
-                    const dtStart = formatDate(mission.start_date);
-                    let dtEnd;
-                    if (mission.end_date) {
-                      dtEnd = formatDate(mission.end_date);
-                    } else {
-                      const d = mission.start_date ? new Date(mission.start_date) : new Date();
-                      d.setDate(d.getDate() + 30);
-                      dtEnd = d.toISOString().split('T')[0].replace(/-/g, '');
-                    }
-
-                    const details = encodeURIComponent(`Growth Hub Goal | Progress: ${percentage}% | Tasks: ${completed}/${total}`);
-                    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(mission.title)}&dates=${dtStart}/${dtEnd}&details=${details}&location=Growth_Hub`;
-                    
-                    window.open(googleUrl, '_blank');
-                    playBlip();
-                  }}
-                  className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] transition-all rounded-sm shrink-0"
-                  onMouseEnter={e => e.currentTarget.style.borderColor = `${(mission.color || color)}60`}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = ''}
-                  title="ADD_TO_GOOGLE_CALENDAR"
-                >
-                  <Calendar className="text-sm w-3.5 h-3.5" />
-                </button>
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openAttachments(mission.id);
-                  }}
-                  className="relative flex items-center justify-center w-8 h-8 border border-[var(--card-border)] transition-all rounded-sm shrink-0"
-                  onMouseEnter={e => e.currentTarget.style.borderColor = `${(mission.color || color)}60`}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = ''}
-                  title="ATTACHMENTS"
-                  style={{
-                    borderColor: (attachmentCounts[mission.id] || 0) > 0 ? `${(mission.color || color)}44` : undefined,
-                    boxShadow: (attachmentCounts[mission.id] || 0) > 0 ? `0 0 10px ${(mission.color || color)}22` : undefined
-                  }}
-                >
-                  <HelpCircle />
-                  {(attachmentCounts[mission.id] || 0) > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 text-black text-[8px] font-black flex items-center justify-center rounded-full shadow-lg"
-                      style={{ backgroundColor: (mission.color || color), boxShadow: `0 0 10px ${(mission.color || color)}` }}
-                    >
-                      {attachmentCounts[mission.id]}
-                    </span>
-                  )}
-                </button>
-               <ArrowRight className="text-[var(--text-secondary)]/35 group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform text-lg w-[18px] h-[18px]" />
-             </div>
+              </button>
+              <ArrowRight className="text-[var(--text-secondary)]/35 group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform text-lg w-[18px] h-[18px]" />
+            </div>
           </div>
         </div>
       </motion.div>
     )
   }
 
-  useEffect(() => { 
+  useEffect(() => {
     if (mounted) {
-      fetchMissions() 
+      fetchMissions()
       if (window.location.search.includes('create=true')) {
         const params = new URLSearchParams(window.location.search)
         const createTask = params.get('createTask')
@@ -394,7 +394,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
         window.history.replaceState({}, '', newUrl)
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted])
 
   const extractCode = (input: string) => {
@@ -424,7 +424,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
 
     try {
       const { data, error } = await supabase.rpc('verify_squad_invite', { input_code: code })
-      
+
       if (error) {
         setJoinStatus('invalid')
         setJoinErrorText('INVALID_CODE // TRY AGAIN')
@@ -461,7 +461,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
 
     try {
       const { data, error } = await supabase.rpc('submit_squad_join_request', { input_code: code })
-      
+
       if (error) {
         setJoinStatus('invalid')
         setJoinErrorText('INVALID_CODE // TRY AGAIN')
@@ -473,9 +473,9 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
       if (result && result.success) {
         setJoinStatus('success')
         showToast(
-          isRTL 
-            ? 'تم إرسال طلب الانضمام // بانتظار موافقة القائد' 
-            : 'JOIN REQUEST SUBMITTED // WAITING FOR OWNER APPROVAL', 
+          isRTL
+            ? 'تم إرسال طلب الانضمام // بانتظار موافقة القائد'
+            : 'JOIN REQUEST SUBMITTED // WAITING FOR OWNER APPROVAL',
           'success'
         )
         playDeploy()
@@ -521,7 +521,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
   const toggleSquadRule = async (mission: any, ruleKey: string) => {
     const newMetadata = { ...mission.metadata }
     newMetadata.rules = { ...newMetadata.rules, [ruleKey]: !newMetadata.rules?.[ruleKey] }
-    
+
     const { error } = await supabase.from('cups').update({ metadata: newMetadata }).eq('id', mission.id)
     if (!error) {
       setMissions(prev => prev.map(m => m.id === mission.id ? { ...m, metadata: newMetadata } : m))
@@ -587,17 +587,17 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
     if (data) {
       setMissions(data)
       fetchAllAttachmentCounts(user.id, data.map((m: any) => m.id))
-      
+
       const squadGoals = data.filter((m: any) => m.metadata?.type === 'squad')
       if (squadGoals.length > 0) {
         const squadGoalIds = squadGoals.map((m: any) => m.id)
-        
+
         // Fetch squad members and map them (exclude blocked)
         const { data: members } = await supabase
           .from('goal_members')
           .select('*, profiles(*)')
           .in('goal_id', squadGoalIds)
-        
+
         if (members) {
           const map: Record<string, any[]> = {}
           members.forEach((m: any) => {
@@ -722,7 +722,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
       })
       setAttachmentCounts(counts)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleAttachmentCountChange = useCallback((missionId: string, count: number) => {
@@ -732,18 +732,18 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
   const openAttachments = async (missionId: string) => {
     playBlip()
     setModalLoading(true)
-    
+
     const { data } = await supabase
       .from('mission_attachments')
       .select('*')
       .eq('mission_id', missionId)
       .order('created_at', { ascending: false })
-    
+
     if (data) {
       setActiveAttachments(data)
       setAttachmentCounts(prev => ({ ...prev, [missionId]: data.length }))
     }
-    
+
     setAttachmentMissionId(missionId)
     setModalLoading(false)
   }
@@ -753,7 +753,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
   const addMission = async (bypassWarning: boolean = false) => {
     if (isSubmitting) return
     setIsSubmitting(true)
-    
+
     try {
       const { data: { user } } = await supabase.auth.getUser()
 
@@ -807,7 +807,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
         const updated = [newLocalGoal, ...guestGoals]
         localStorage.setItem('guest_goals', JSON.stringify(updated))
         setMissions(updated)
-        
+
         setShowCreate(false)
         setShowWarningModal(false)
         setNewTitle('')
@@ -821,60 +821,60 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
         return
       }
 
-    // 1. Get synced cups to check capacity
-    const { data: synced } = await supabase
-      .from('cups')
-      .select('id, size')
-      .eq('user_id', user.id)
-      .eq('sync_to_dashboard', true)
-      .eq('is_archived', false)
+      // 1. Get synced cups to check capacity
+      const { data: synced } = await supabase
+        .from('cups')
+        .select('id, size')
+        .eq('user_id', user.id)
+        .eq('sync_to_dashboard', true)
+        .eq('is_archived', false)
 
-    const usedSlots = (synced || []).reduce((acc: number, m: any) => {
-      return acc + (SIZE_SLOTS[m.size?.toLowerCase()] ?? 1)
-    }, 0)
+      const usedSlots = (synced || []).reduce((acc: number, m: any) => {
+        return acc + (SIZE_SLOTS[m.size?.toLowerCase()] ?? 1)
+      }, 0)
 
-    // Capacity guard: only check if syncing to dashboard
-    if (syncOnCreate) {
-      const newSlots = SIZE_SLOTS[newSize] ?? 1
-      if (usedSlots + newSlots > 9) {
-        showToast(
-          isRTL
-            ? `سعة المحطة ممتلئة (${usedSlots.toFixed(1).replace('.0','')}/9 فتحات) - أتمم أو أزل مهمات موجودة.`
-            : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0','')}/9 SLOTS) — Complete or un-equip existing goals.`,
-          'warning'
-        )
-        playError()
-        return
-      }
-    }
-
-    // 2. Perform Feature 3 checks (Context Switching Warning):
-    if (!bypassWarning) {
-      const cooldown = localStorage.getItem('context_warning_cooldown')
-      const isCooldownActive = cooldown && (Date.now() - Number(cooldown) < 24 * 60 * 60 * 1000)
-
-      if (!isCooldownActive) {
-        // Condition A: Is active Focus Capacity Used >= 77%? (7/9 slots or more occupied)
-        const isCapacityHeavy = usedSlots >= 7
-
-        // Condition B: Are there critical missions? (end_date <= 5 days remaining AND progress < 50%)
-        const criticalMissions = missions.filter(m => {
-          if (!m.end_date) return false
-          const daysLeft = (new Date(m.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-          const { progress } = calculateAccountability(m)
-          return daysLeft <= 5 && progress < 50
-        })
-        const hasCriticalMissions = criticalMissions.length > 0
-
-        if (isCapacityHeavy || hasCriticalMissions) {
-          setWarningSlots(usedSlots)
-          setWarningCriticalCount(criticalMissions.length)
-          setShowWarningModal(true)
+      // Capacity guard: only check if syncing to dashboard
+      if (syncOnCreate) {
+        const newSlots = SIZE_SLOTS[newSize] ?? 1
+        if (usedSlots + newSlots > 9) {
+          showToast(
+            isRTL
+              ? `سعة المحطة ممتلئة (${usedSlots.toFixed(1).replace('.0', '')}/9 فتحات) - أتمم أو أزل مهمات موجودة.`
+              : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0', '')}/9 SLOTS) — Complete or un-equip existing goals.`,
+            'warning'
+          )
           playError()
-          return // Halt creation flow!
+          return
         }
       }
-    }
+
+      // 2. Perform Feature 3 checks (Context Switching Warning):
+      if (!bypassWarning) {
+        const cooldown = localStorage.getItem('context_warning_cooldown')
+        const isCooldownActive = cooldown && (Date.now() - Number(cooldown) < 24 * 60 * 60 * 1000)
+
+        if (!isCooldownActive) {
+          // Condition A: Is active Focus Capacity Used >= 77%? (7/9 slots or more occupied)
+          const isCapacityHeavy = usedSlots >= 7
+
+          // Condition B: Are there critical missions? (end_date <= 5 days remaining AND progress < 50%)
+          const criticalMissions = missions.filter(m => {
+            if (!m.end_date) return false
+            const daysLeft = (new Date(m.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+            const { progress } = calculateAccountability(m)
+            return daysLeft <= 5 && progress < 50
+          })
+          const hasCriticalMissions = criticalMissions.length > 0
+
+          if (isCapacityHeavy || hasCriticalMissions) {
+            setWarningSlots(usedSlots)
+            setWarningCriticalCount(criticalMissions.length)
+            setShowWarningModal(true)
+            playError()
+            return // Halt creation flow!
+          }
+        }
+      }
 
       const metadataPayload: any = {
         defaultView,
@@ -897,11 +897,11 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
         sync_to_dashboard: syncOnCreate,
         metadata: metadataPayload
       }
-    if (startDate) insertData.start_date = startDate
-    if (endDate) insertData.end_date = endDate
+      if (startDate) insertData.start_date = startDate
+      if (endDate) insertData.end_date = endDate
 
       const { data, error } = await supabase.from('cups').insert(insertData).select().single()
-      
+
       if (data) {
         if (typeFilter === 'squad') {
           await supabase.from('goal_members').insert({
@@ -945,7 +945,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--theme-color)]/5 border border-[var(--theme-color)]/10 backdrop-blur-md">
             <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-color)] animate-ping" />
             <span className="font-space text-[9px] tracking-[0.25em] font-black uppercase text-[var(--theme-color)]">
-              {isRTL ? 'مزامنة أهداف مساحة العمل السحابية...' : 'SYNCING_CLOUD_WORKSPACE_OBJECTIVES...'}
+              {isRTL ? 'جاري مزامنة مساحة العمل...' : 'Syncing workspace...'}
             </span>
           </div>
         </div>
@@ -953,16 +953,16 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
         {/* Shimmer skeleton matching grid goals layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-pulse">
           {[1, 2, 3].map((idx) => (
-            <div 
+            <div
               key={idx}
               className="relative p-8 border border-[var(--card-border)] bg-[var(--card-bg)] rounded-3xl min-h-[350px] flex flex-col justify-between overflow-hidden"
             >
               {/* Theme glow effect */}
-              <div 
-                className="absolute top-0 left-0 right-0 h-[2px]" 
-                style={{ background: `linear-gradient(90deg, transparent, ${currentTheme.color}80, transparent)` }} 
+              <div
+                className="absolute top-0 left-0 right-0 h-[2px]"
+                style={{ background: `linear-gradient(90deg, transparent, ${currentTheme.color}80, transparent)` }}
               />
-              
+
               {/* Header Telemetry */}
               <div className="flex justify-between items-center w-full">
                 <div className="w-24 h-4.5 rounded bg-[var(--theme-color)]/15" />
@@ -971,7 +971,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
 
               {/* Central Circle Progress Shimmer */}
               <div className="flex flex-col items-center justify-center my-8 space-y-4">
-                <div 
+                <div
                   className="w-24 h-24 rounded-full border-4 border-dashed flex items-center justify-center animate-[spin_30s_linear_infinite]"
                   style={{ borderColor: `${currentTheme.color}25` }}
                 >
@@ -1017,16 +1017,16 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
               </h1>
             </div>
             <p className={cn("text-[11px] font-space tracking-[0.35em] uppercase font-bold", isRTL ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]")}>
-               {typeFilter === 'solo' ? (
-                 <>{isRTL ? 'أهداف شخصية نشطة' : 'PERSONAL GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
-               ) : typeFilter === 'squad' ? (
-                 <>{isRTL ? 'أهداف تعاونية نشطة' : 'COLLABORATIVE GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
-               ) : (
-                 <>{isRTL ? 'الأهداف الأساسية النشطة' : 'Active Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'هدف نشط' : 'total'}</>
-               )}
+              {typeFilter === 'solo' ? (
+                <>{isRTL ? 'أهداف شخصية نشطة' : 'PERSONAL GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
+              ) : typeFilter === 'squad' ? (
+                <>{isRTL ? 'أهداف تعاونية نشطة' : 'COLLABORATIVE GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
+              ) : (
+                <>{isRTL ? 'الأهداف الأساسية النشطة' : 'Active Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'هدف نشط' : 'total'}</>
+              )}
             </p>
           </div>
-          
+
           {typeFilter === 'squad' ? (
             <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
               <button
@@ -1087,8 +1087,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 onClick={e => e.stopPropagation()}
                 className="w-[calc(100%-2rem)] mx-auto md:max-w-2xl bg-[var(--card-bg)]/90 backdrop-blur-xl border border-[var(--card-border)] p-5 md:p-8 space-y-6 rounded-2xl shadow-2xl my-auto max-h-[90vh] overflow-y-auto relative"
               >
-                <button 
-                  onClick={() => setShowGuide(false)} 
+                <button
+                  onClick={() => setShowGuide(false)}
                   className="absolute top-4 right-4 rtl:left-4 rtl:right-auto text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors p-1 flex items-center justify-center shrink-0"
                 >
                   <X className="w-5 h-5" />
@@ -1139,8 +1139,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 onClick={e => e.stopPropagation()}
                 className="w-full max-w-[380px] bg-zinc-950/95 border border-white/10 p-6 space-y-5 rounded-2xl shadow-2xl my-auto relative"
               >
-                <button 
-                  onClick={() => { setShowCreate(false); setDefaultView('list'); }} 
+                <button
+                  onClick={() => { setShowCreate(false); setDefaultView('list'); }}
                   className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors p-1"
                 >
                   <X className="w-4 h-4" />
@@ -1189,7 +1189,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     {isRTL ? 'تثبيت في اللوحة الرئيسة' : 'Pin to Dashboard'}
                   </span>
                   <label className="relative inline-flex items-center cursor-pointer select-none">
-                    <input 
+                    <input
                       type="checkbox"
                       checked={syncOnCreate}
                       onChange={() => { playBlip(); setSyncOnCreate(!syncOnCreate); }}
@@ -1202,14 +1202,14 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 </div>
 
                 <div className="flex justify-end gap-3 pt-2">
-                  <button 
-                    onClick={() => { playClick(); setShowCreate(false); setDefaultView('list'); }} 
+                  <button
+                    onClick={() => { playClick(); setShowCreate(false); setDefaultView('list'); }}
                     className="px-4 py-2.5 rounded-xl text-xs uppercase tracking-widest text-zinc-400 hover:text-white transition-all font-black cursor-pointer"
                   >
                     {isRTL ? 'إلغاء' : 'Cancel'}
                   </button>
-                  <button 
-                    onClick={() => { playClick(); addMission(); }} 
+                  <button
+                    onClick={() => { playClick(); addMission(); }}
                     disabled={isSubmitting}
                     className="px-6 py-2.5 font-space font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 cursor-pointer text-black hover:brightness-110 transition-all shadow-md"
                     style={{ backgroundColor: currentTheme.color }}
@@ -1410,7 +1410,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 >
                   {/* Neon alert top line */}
                   <div className="absolute top-0 inset-x-0 h-[2.5px] bg-[#FF0055]" />
-                  
+
                   <div className="space-y-6">
                     <div className="flex items-center gap-3 text-[#FF0055]">
                       <AlertTriangle className="text-3xl animate-pulse w-8 h-8" />
@@ -1421,8 +1421,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
 
                     <div className="space-y-4 font-space text-xs leading-relaxed text-[var(--text-primary)]">
                       <p className="font-bold border-l-2 border-[#FF0055] pl-3 py-1 bg-[#FF0055]/5">
-                        {isRTL 
-                          ? '🚧 تشتيت التركيز يقلل الأداء الذهني بنسبة تصل إلى 40%.' 
+                        {isRTL
+                          ? '🚧 تشتيت التركيز يقلل الأداء الذهني بنسبة تصل إلى 40%.'
                           : '🚧 WARNING: Context Switching degrades cognitive performance by up to 40%.'}
                       </p>
                       <p className="text-[var(--text-secondary)]">
@@ -1430,12 +1430,12 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                           ? 'توجد مهام نشطة تستهلك سعة التركيز أو مهام حرجة قريبة من الموعد النهائي. إضافة هدف جديد سيقلل من جودة التنفيذ.'
                           : 'Multiple cognitive focus slots are active, or critical goals are near their deadline. Adding a new goal will degrade execution quality.'}
                       </p>
-                      
+
                       <div className="p-3 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl space-y-2">
                         {warningSlots >= 7 && (
                           <div className="flex justify-between items-center text-[10px] uppercase font-bold text-[var(--text-secondary)] font-space">
                             <span>{isRTL ? 'سعة التركيز النشطة:' : 'Active Focus Capacity:'}</span>
-                            <span className="text-[#FF0055] font-black">{warningSlots.toFixed(1).replace('.0','')}/9 Slots ({(warningSlots/9 * 100).toFixed(0)}%)</span>
+                            <span className="text-[#FF0055] font-black">{warningSlots.toFixed(1).replace('.0', '')}/9 Slots ({(warningSlots / 9 * 100).toFixed(0)}%)</span>
                           </div>
                         )}
                         {warningCriticalCount > 0 && (
@@ -1556,16 +1556,16 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
               className={cn(
                 "w-[calc(100%-2rem)] mx-auto md:max-w-md bg-zinc-950/95 border backdrop-blur-md p-6 md:p-8 space-y-6 rounded-2xl shadow-2xl my-auto max-h-[90vh] overflow-y-auto relative text-left transition-all duration-300",
                 joinStatus === 'invalid' ? 'border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.2)]' :
-                joinStatus === 'valid' ? 'border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.2)]' :
-                'border-teal-500/30'
+                  joinStatus === 'valid' ? 'border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.2)]' :
+                    'border-teal-500/30'
               )}
             >
-              <button 
+              <button
                 onClick={() => {
                   setShowJoinGoal(false);
                   setJoinStatus('idle');
                   setJoinCodeInput('');
-                }} 
+                }}
                 className="absolute top-4 right-4 rtl:left-4 rtl:right-auto text-[var(--text-secondary)] hover:text-white transition-colors p-1 flex items-center justify-center shrink-0 cursor-pointer"
               >
                 <X className="w-5 h-5" />
@@ -1595,8 +1595,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       className={cn(
                         "w-full bg-zinc-900/80 border text-center font-mono py-3 px-4 rounded-xl text-sm tracking-widest uppercase outline-none transition-all placeholder:text-zinc-600 placeholder:font-sans",
                         joinStatus === 'invalid' ? 'border-red-500 text-red-400 focus:border-red-400' :
-                        joinStatus === 'valid' ? 'border-emerald-500 text-emerald-400 focus:border-emerald-400' :
-                        'border-zinc-800 text-teal-400 focus:border-teal-500'
+                          joinStatus === 'valid' ? 'border-emerald-500 text-emerald-400 focus:border-emerald-400' :
+                            'border-zinc-800 text-teal-400 focus:border-teal-500'
                       )}
                     />
 

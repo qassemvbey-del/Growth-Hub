@@ -1207,7 +1207,7 @@ const { progress, isInRedZone } = useMemo(() => {
   if (loading || !mounted) return (
     <Shell>
       <div className="p-16 font-space animate-pulse tracking-widest text-sm uppercase" style={{ color: currentTheme.color }}>
-        {isRTL ? 'جاري التحميل...' : 'LOADING WORKSPACE...'}
+        {isRTL ? 'جاري مزامنة مساحة العمل...' : 'Syncing workspace...'}
       </div>
     </Shell>
   )

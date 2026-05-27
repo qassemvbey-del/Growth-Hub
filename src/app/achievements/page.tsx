@@ -127,7 +127,7 @@ export default function WinsPage() {
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--theme-color)]/5 border border-[var(--theme-color)]/10 backdrop-blur-md">
                 <div className="w-2 h-2 rounded-full bg-[var(--theme-color)] animate-ping" />
                 <span className="font-space text-[10px] tracking-[0.3em] font-black uppercase" style={{ color: currentTheme.color }}>
-                  {isRTL ? 'جاري الاتصال بالخزانة المشفرة...' : 'SECURE_VAULT_DECRYPTING...'}
+                  {isRTL ? 'جاري تحميل الإنجازات...' : 'Loading wins...'}
                 </span>
               </div>
             </div>

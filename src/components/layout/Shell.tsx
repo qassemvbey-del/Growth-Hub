@@ -12,7 +12,7 @@ import { useSound } from '@/context/SoundContext'
 import { 
   LayoutGrid, Trophy, Target, FileText, User, Settings, Zap, Bell, Flame, Bot, X, Home,
   Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp, CloudLightning,
-  Crosshair, Shield
+  Crosshair, Shield, CheckCircle
 } from 'lucide-react'
 
 
@@ -30,6 +30,64 @@ import GlitchOverlay from '@/components/ui/GlitchOverlay'
 import CommandPalette from '@/components/ui/CommandPalette'
 import Tutorial from '@/components/ui/Tutorial'
 
+
+function WorkspaceLoader({ isRTL }: { isRTL: boolean }) {
+  const icons = [Target, Zap, Shield, Trophy, CheckCircle]
+  const [index, setIndex] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % icons.length)
+    }, 400)
+    return () => clearInterval(interval)
+  }, [icons.length])
+
+  const ActiveIcon = icons[index]
+
+  return (
+    <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#050505] z-[9999] overflow-hidden select-none font-space p-6">
+      {/* Subtle Grid Background */}
+      <div className="absolute inset-0 pointer-events-none cyber-grid opacity-[0.03] z-0" />
+      <div className="absolute inset-0 pointer-events-none scanlines opacity-[0.01] z-0" />
+      
+      <div className="relative z-10 flex flex-col items-center gap-6">
+        {/* Dynamic cycling icon */}
+        <div className="relative w-24 h-24 flex items-center justify-center">
+          {/* Subtle Ambient Glow behind the icon using the orange color */}
+          <div 
+            className="absolute w-20 h-20 rounded-full opacity-40 blur-xl transition-all duration-300 animate-pulse"
+            style={{
+              background: 'radial-gradient(circle, #FF5F00 33%, transparent 70%)',
+            }}
+          />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={index}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="relative"
+            >
+              <ActiveIcon 
+                className="w-16 h-16 transition-all duration-300" 
+                style={{ 
+                  color: '#FF5F00', 
+                  filter: 'drop-shadow(0 0 15px rgba(255, 95, 0, 0.65))' 
+                }} 
+              />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+        
+        {/* Simple elegant text */}
+        <p className="text-zinc-400 text-sm tracking-widest animate-pulse font-medium">
+          {isRTL ? 'جاري تحميل مساحة العمل...' : 'Loading workspace...'}
+        </p>
+      </div>
+    </div>
+  )
+}
 
 interface ShellProps {
   children: React.ReactNode
@@ -494,153 +552,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   }, [profile?.rank])
 
   if (isLoading || !mounted) {
-    const EN_LOGS = [
-      'Establishing secure link to Cloud Database...',
-      'Calibrating productivity core & focus matrix...',
-      'Synchronizing team workspaces & databases...',
-      'Applying custom premium aesthetics system...',
-      'Workspace components fully compiled. Launching...'
-    ]
-    const AR_LOGS = [
-      'جاري الاتصال السحابي المشفر بقاعدة البيانات...',
-      'معايرة محرك الإنتاجية ومصفوفة التركيز...',
-      'تزامن مساحات العمل الجماعية وقواعد البيانات...',
-      'تطبيق المظهر الفاخر وعناصر الواجهة الفنية...',
-      'مساحة العمل جاهزة تماماً. جاري الإطلاق...'
-    ]
-    const currentLogs = shellIsRTL ? AR_LOGS : EN_LOGS
-
-    return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#050505] z-[9999] overflow-hidden select-none font-space p-6 ltr">
-        {/* Subtle Cyber Grid Background */}
-        <div className="absolute inset-0 pointer-events-none cyber-grid opacity-[0.03] z-0" />
-        <div className="absolute inset-0 pointer-events-none scanlines opacity-[0.01] z-0" />
-        
-        {/* Central Ambient Glow */}
-        <div 
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none z-0 opacity-20 transition-all duration-1000"
-          style={{
-            background: `radial-gradient(circle, ${currentTheme.color}33 0%, transparent 70%)`,
-            filter: 'blur(80px)',
-          }}
-        />
-
-        <div className="relative z-10 w-full max-w-xl flex flex-col items-center gap-10">
-          
-          {/* Main Intelligent Glowing Orb/Orbital Spinner */}
-          <div className="relative w-32 h-32 flex items-center justify-center">
-            {/* Spinning Outer Ring */}
-            <div 
-              className="absolute inset-0 rounded-full border-t border-b border-r border-transparent animate-spin"
-              style={{ borderColor: `${currentTheme.color}40`, borderWidth: '2px', animationDuration: '4s' }}
-            />
-            {/* Reverse Spinning Inner Ring */}
-            <div 
-              className="absolute inset-3 rounded-full border-l border-r border-t border-transparent animate-spin-reverse"
-              style={{ borderColor: `${currentTheme.color}60`, borderWidth: '1px', animationDuration: '3s' }}
-            />
-            {/* Glowing Focal Point */}
-            <div 
-              className="absolute inset-8 rounded-full flex items-center justify-center backdrop-blur-xl transition-all duration-300"
-              style={{
-                background: `radial-gradient(circle, ${currentTheme.color}22 0%, ${currentTheme.color}05 100%)`,
-                border: `1px solid ${currentTheme.color}30`,
-                boxShadow: `0 0 30px ${currentTheme.color}20`
-              }}
-            >
-              <LayoutGrid className="w-10 h-10 animate-pulse" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 10px ${currentTheme.color})` }} />
-            </div>
-            
-            {/* Corner Tech Decorators */}
-            <div className="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2" style={{ borderColor: currentTheme.color }} />
-            <div className="absolute -top-2 -right-2 w-4 h-4 border-t-2 border-r-2" style={{ borderColor: currentTheme.color }} />
-            <div className="absolute -bottom-2 -left-2 w-4 h-4 border-b-2 border-l-2" style={{ borderColor: currentTheme.color }} />
-            <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2" style={{ borderColor: currentTheme.color }} />
-          </div>
-
-          {/* Central Title */}
-          <div className="text-center space-y-2">
-            <h2 className="text-2xl font-black tracking-[0.3em] uppercase text-white font-space">
-              {shellIsRTL ? 'تهيئة مساحة العمل' : 'SYSTEM LOADING'}
-            </h2>
-            <p className="text-[10px] tracking-[0.4em] uppercase font-bold text-white/40">
-              GROWTH HUB COMPILING / WORKSPACE ACTIVE
-            </p>
-          </div>
-
-          {/* Premium Glassmorphic Terminal Logs Terminal Console */}
-          <div 
-            className="w-full bg-[#0a0a0a]/80 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-2xl relative overflow-hidden"
-            style={{ borderColor: `${currentTheme.color}15` }}
-          >
-            {/* Decorative Top Bar */}
-            <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-4 text-[10px] text-white/30 tracking-widest uppercase">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-red-500/40" />
-                <span className="w-2 h-2 rounded-full bg-amber-500/40" />
-                <span className="w-2 h-2 rounded-full bg-green-500/40" />
-              </div>
-              <div className="font-monospace text-[9px] text-white/50">
-                {shellIsRTL ? 'تأمين مساحة العمل // نشط' : 'SECURE_WORKSPACE_MODE'}
-              </div>
-            </div>
-
-            {/* Dynamic Logs Grid */}
-            <div className="space-y-3 font-monospace text-xs text-left" dir="ltr">
-              {currentLogs.map((log, index) => {
-                const isDone = index < activeLogIndex
-                const isActive = index === activeLogIndex
-                const isUpcoming = index > activeLogIndex
-
-                return (
-                  <div 
-                    key={index}
-                    className="flex items-center gap-3 transition-all duration-300"
-                    style={{
-                      opacity: isDone ? 0.9 : isActive ? 1 : 0.25,
-                      color: isDone ? currentTheme.color : isActive ? '#ffffff' : 'rgba(255,255,255,0.4)'
-                    }}
-                  >
-                    <span className="font-bold w-6 text-center">
-                      {isDone ? '✔' : isActive ? '⏳' : '○'}
-                    </span>
-                    <span className={isActive ? 'animate-pulse font-black' : ''}>
-                      {log}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Telemetry Footer */}
-            <div className="mt-6 border-t border-white/5 pt-4 flex items-center justify-between text-[9px] font-monospace text-white/30 uppercase tracking-widest">
-              <div>LATENCY: 18ms</div>
-              <div>SECURITY: PROTECTED</div>
-              <div>CORE: DISCIPLINE</div>
-            </div>
-          </div>
-
-          {/* Premium Progress Bar */}
-          <div className="w-full space-y-2">
-            <div className="flex justify-between items-center text-xs font-monospace font-black tracking-widest uppercase">
-              <span style={{ color: currentTheme.color }}>{shellIsRTL ? 'تحميل الخلايا المحددة' : 'COMPILING DATA'}</span>
-              <span className="text-white">{bootProgress}%</span>
-            </div>
-            <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden relative">
-              <div 
-                className="h-full rounded-full transition-all duration-150 ease-out"
-                style={{
-                  width: `${bootProgress}%`,
-                  backgroundColor: currentTheme.color,
-                  boxShadow: `0 0 10px ${currentTheme.color}`
-                }}
-              />
-            </div>
-          </div>
-
-        </div>
-      </div>
-    )
+    return <WorkspaceLoader isRTL={shellIsRTL} />
   }
 
   return (
