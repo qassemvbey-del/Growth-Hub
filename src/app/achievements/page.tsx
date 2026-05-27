@@ -275,6 +275,7 @@ export default function WinsPage() {
                 </button>
               </motion.div>
             </motion.div>
+          )}
         </AnimatePresence>
       </div>
     </Shell>
