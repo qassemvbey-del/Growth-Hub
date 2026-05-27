@@ -811,17 +811,22 @@ export default function MissionDetailPage() {
     const nextStatus = !currentStatus
     const isLocal = typeof id === 'string' && id.startsWith('local_')
 
+    // Optimistically update the state
+    setMission((prev: any) => ({
+      ...prev,
+      tasks: prev.tasks.map((t: any) =>
+        t.id === taskId ? { ...t, is_completed: nextStatus } : t
+      )
+    }))
+
     if (isLocal) {
-      setMission((prev: any) => {
-        const next = {
-          ...prev,
-          tasks: prev.tasks.map((t: any) => t.id === taskId ? { ...t, is_completed: nextStatus } : t)
-        }
-        const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-        const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g)
-        localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
-        return next
-      })
+      const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+      const next = {
+        ...mission,
+        tasks: mission.tasks.map((t: any) => t.id === taskId ? { ...t, is_completed: nextStatus } : t)
+      }
+      const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g)
+      localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
       if (nextStatus) playSuccess()
       else playBlip()
       return
@@ -832,55 +837,57 @@ export default function MissionDetailPage() {
       .update({ is_completed: nextStatus })
       .eq('id', taskId)
 
-    if (!error) {
+    if (error) {
+      // Rollback on error
       setMission((prev: any) => ({
         ...prev,
         tasks: prev.tasks.map((t: any) =>
-          t.id === taskId ? { ...t, is_completed: nextStatus } : t
+          t.id === taskId ? { ...t, is_completed: currentStatus } : t
         )
       }))
+      showToast(isRTL ? 'فشل تحديث البيانات في قاعدة البيانات' : 'DATABASE_UPDATE_ERROR', 'warning')
+      playError()
+      return
+    }
 
-      if (nextStatus) {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          await supabase.from('task_completion_log').insert({
-            user_id: user.id,
-            completed_at: new Date().toISOString()
-          })
-          const taskIndex = mission.tasks.findIndex((t: any) => t.id === taskId)
-          const task = mission.tasks[taskIndex]
-          if (task) {
-            const sizeStr = mission.size?.toLowerCase() || 'md'
-            let xpCeiling = 8
-            if (sizeStr === 'sm' || sizeStr === 's' || sizeStr === 'small') xpCeiling = 4
-            else if (sizeStr === 'lg' || sizeStr === 'l' || sizeStr === 'large') xpCeiling = 20
+    if (nextStatus) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase.from('task_completion_log').insert({
+          user_id: user.id,
+          completed_at: new Date().toISOString()
+        })
+        const taskIndex = mission.tasks.findIndex((t: any) => t.id === taskId)
+        const task = mission.tasks[taskIndex]
+        if (task) {
+          const sizeStr = mission.size?.toLowerCase() || 'md'
+          let xpCeiling = 8
+          if (sizeStr === 'sm' || sizeStr === 's' || sizeStr === 'small') xpCeiling = 4
+          else if (sizeStr === 'lg' || sizeStr === 'l' || sizeStr === 'large') xpCeiling = 20
 
-            if (taskIndex < xpCeiling) {
-              await addXp(task.weight * 10, task.title)
-            } else {
-              // Soft cap reached: 0 XP
-            }
-            playSuccess()
+          if (taskIndex < xpCeiling) {
+            await addXp(task.weight * 10, task.title)
           }
+          playSuccess()
         }
-      } else {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          const taskIndex = mission.tasks.findIndex((t: any) => t.id === taskId)
-          const task = mission.tasks[taskIndex]
-          if (task) {
-            const sizeStr = mission.size?.toLowerCase() || 'md'
-            let xpCeiling = 8
-            if (sizeStr === 'sm' || sizeStr === 's' || sizeStr === 'small') xpCeiling = 4
-            else if (sizeStr === 'lg' || sizeStr === 'l' || sizeStr === 'large') xpCeiling = 20
-
-            if (taskIndex < xpCeiling) {
-              await addXp(-(task.weight * 10))
-            }
-          }
-        }
-        playBlip()
       }
+    } else {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const taskIndex = mission.tasks.findIndex((t: any) => t.id === taskId)
+        const task = mission.tasks[taskIndex]
+        if (task) {
+          const sizeStr = mission.size?.toLowerCase() || 'md'
+          let xpCeiling = 8
+          if (sizeStr === 'sm' || sizeStr === 's' || sizeStr === 'small') xpCeiling = 4
+          else if (sizeStr === 'lg' || sizeStr === 'l' || sizeStr === 'large') xpCeiling = 20
+
+          if (taskIndex < xpCeiling) {
+            await addXp(-(task.weight * 10))
+          }
+        }
+      }
+      playBlip()
     }
   }
 
