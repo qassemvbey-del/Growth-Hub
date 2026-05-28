@@ -18,7 +18,6 @@ import {
 
 import { useInbox } from '@/hooks/useInbox'
 import InboxDropdown from '@/components/ui/InboxDropdown'
-import ReportModal from '@/components/ui/ReportModal'
 import PomodoroHUD from '@/components/ui/PomodoroHUD'
 import CoachPanel from '@/components/ui/CoachPanel'
 import OperatorGuide from '@/components/ui/OperatorGuide'
@@ -664,7 +663,6 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                 onClose={() => setInboxOpen(false)}
                 onRead={(report) => {
                   markAsRead(report.id)
-                  setSelectedReport(report)
                   setInboxOpen(false)
                 }}
                 themeColor={currentTheme.color}
@@ -851,12 +849,6 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         })}
       </nav>
 
-      <ReportModal 
-        report={selectedReport}
-        onClose={() => setSelectedReport(null)}
-        themeColor={currentTheme.color}
-        isRTL={isRTL}
-      />
 
       <PomodoroHUD />
 
@@ -900,7 +892,6 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
           onClose={() => setInboxOpen(false)}
           onRead={(report) => {
             markAsRead(report.id)
-            setSelectedReport(report)
             setInboxOpen(false)
           }}
           themeColor={currentTheme.color}
