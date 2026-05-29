@@ -1012,7 +1012,9 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 ) : typeFilter === 'squad' ? (
                   <>{isRTL ? 'عمليات' : 'SQUAD'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الفريق' : '_OPS'}</span></>
                 ) : (
-                  <>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الأهداف' : '_CANVAS'}</span></>
+                  /* Legacy GOAL_CANVAS commented out per safety rules */
+                  /* <>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الأهداف' : '_CANVAS'}</span></> */
+                  <>{isRTL ? 'أهداف' : 'SOLO'}<span style={{ color: currentTheme.color }}>{isRTL ? ' فردية' : '_GOALS'}</span></>
                 )}
               </h1>
             </div>
@@ -1022,7 +1024,9 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
               ) : typeFilter === 'squad' ? (
                 <>{isRTL ? 'أهداف تعاونية نشطة' : 'COLLABORATIVE GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
               ) : (
-                <>{isRTL ? 'الأهداف الأساسية النشطة' : 'Active Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'هدف نشط' : 'total'}</>
+                /* Legacy GOAL_CANVAS subtitle commented out */
+                /* <>{isRTL ? 'الأهداف الأساسية النشطة' : 'Active Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'هدف نشط' : 'total'}</> */
+                <>{isRTL ? 'أهداف شخصية نشطة' : 'PERSONAL GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
               )}
             </p>
           </div>

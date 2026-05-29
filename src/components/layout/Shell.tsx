@@ -672,7 +672,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         </header>
 
         {/* ── MOBILE TOP BAR ── */}
-        <header className="flex lg:hidden w-full px-4 h-16 justify-between items-center border-b border-[var(--card-border)] bg-[var(--sidebar-bg)]/95 backdrop-blur-2xl z-[150] sticky top-0 transition-colors duration-500 relative">
+        <header className="flex lg:hidden w-full p-4 pt-safe justify-between items-center border-b border-[var(--card-border)] bg-[var(--sidebar-bg)]/95 backdrop-blur-2xl z-[150] sticky top-0 transition-colors duration-500 relative">
           {/* LEFT: User Avatar Image */}
           <div 
             onClick={() => router.push('/settings')}
@@ -815,8 +815,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       <nav className="lg:hidden fixed bottom-0 w-full bg-[var(--sidebar-bg)] border-t border-[var(--card-border)] z-[200] flex items-center justify-around px-2 backdrop-blur-2xl">
         {[
           { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
-          { label: isRTL ? 'شخصي' : 'Personal Goals', icon: Crosshair, href: '/goals/solo' },
-          { label: isRTL ? 'فريق' : 'Team Goals', icon: Shield, href: '/goals/squad' },
+          { label: isRTL ? 'شخصي' : 'Goals', icon: Crosshair, href: '/goals/solo' },
+          { label: isRTL ? 'فريق' : 'Squad', icon: Shield, href: '/goals/squad' },
           { label: isRTL ? 'الملاحظات' : 'Notes', icon: FileText, href: '/notes' },
           { label: isRTL ? 'الإنجازات' : 'Wins', icon: Trophy, href: '/achievements' },
         ].map(item => {
@@ -834,7 +834,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                 const IconComponent = item.icon
                 return <IconComponent className="w-5 h-5" style={{ color: isActive ? currentTheme.color : undefined }} />
               })()}
-              <span className="text-[9px] font-space font-bold tracking-wider uppercase">
+              <span className="text-[10px] font-space font-bold tracking-wider uppercase whitespace-nowrap">
                 {item.label}
               </span>
               {isActive && (
@@ -863,11 +863,11 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         "inset-inline-start-72"
       )} />
 
-      {/* Central Command Hub */}
-      <div className="fixed bottom-8 ltr:left-8 rtl:right-8 flex items-center gap-4 z-[40]">
+      {/* Central Command Hub commented out to comply with safety rules */}
+      {/* <div className="fixed bottom-8 ltr:left-8 rtl:right-8 flex items-center gap-4 z-[40]">
         <OperatorGuide />
         <GlobalActionMenu />
-      </div>
+      </div> */}
 
       <LevelUpModal />
       <GlitchOverlay active={isRankUpModalOpen} />
