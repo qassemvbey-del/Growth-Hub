@@ -32,6 +32,7 @@ interface TaskDrawerProps {
   squadMembers?: any[]
   isSquad?: boolean
   missionOwnerId?: string | null
+  onDelete?: () => void
 }
 
 const getYouTubeId = (urlOrId: string) => {
@@ -55,7 +56,8 @@ export default function TaskDrawer({
   cupId,
   squadMembers = [],
   isSquad = false,
-  missionOwnerId = null
+  missionOwnerId = null,
+  onDelete
 }: TaskDrawerProps) {
   const { isRTL, t, addXp, profile } = useGrowth()
   const { startFocus } = usePomodoro()
@@ -628,14 +630,14 @@ export default function TaskDrawer({
   }
 
   return (
-    <div className="fixed inset-0 z-[9990] flex items-stretch">
+    <div className="fixed inset-0 z-[20000] flex items-stretch">
       {/* 1. Backdrop Overlay */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9990] cursor-pointer"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[20000] cursor-pointer"
       />
 
       {/* 2. Side Panel */}
@@ -644,7 +646,7 @@ export default function TaskDrawer({
         animate={{ x: 0 }}
         exit={{ x: isRTL ? '-100%' : '100%' }}
         transition={{ type: 'tween', duration: 0.35, ease: 'easeOut' }}
-        className={`fixed top-0 bottom-0 z-[9995] w-full md:w-[50vw] lg:w-[45vw] bg-zinc-950/98 shadow-2xl flex flex-col border-white/10 ${
+        className={`fixed top-0 bottom-0 z-[20005] w-full md:w-[50vw] lg:w-[45vw] bg-zinc-950/98 shadow-2xl flex flex-col border-white/10 ${
           isRTL ? 'left-0 border-r-2' : 'right-0 border-l-2'
         }`}
         style={{ borderColor: themeColor }}
@@ -677,7 +679,7 @@ export default function TaskDrawer({
         />
 
         {/* Single Scrollable view content wrapper */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-8 select-none">
+        <div className="flex-1 overflow-y-auto p-6 pb-24 space-y-8 select-none">
           <TaskDrawerMetadata
             task={task}
             themeColor={themeColor}
@@ -833,6 +835,82 @@ export default function TaskDrawer({
           />
 
 
+        </div>
+
+        {/* Fixed Thumb-Zone Footer */}
+        {/* <div className="fixed bottom-0 left-0 w-full z-[99999] bg-[#0a0a0f]/95 backdrop-blur-xl border-t border-white/5 p-3 pb-safe flex items-center gap-2"> */}
+        <div className="absolute bottom-0 left-0 w-full z-[99999] bg-[#0a0a0f]/95 backdrop-blur-xl border-t border-white/5 p-3 pb-safe flex items-center gap-2">
+          {/* Play/Focus Button */}
+          {!task.is_completed ? (
+            <button
+              type="button"
+              onClick={() => {
+                startFocus(task.title, task.id, cupId)
+                onClose()
+              }}
+              className="flex-1 py-3 rounded-xl text-xs font-bold font-space flex items-center justify-center gap-2 transition-all bg-orange-500/10 border border-orange-500/30 text-orange-500 hover:bg-orange-500/20 active:scale-95"
+            >
+              <Play className="w-4 h-4 fill-current" />
+              <span>{isRTL ? 'تركيز' : 'START FOCUS'}</span>
+            </button>
+          ) : (
+            <div className="flex-1 text-center py-3 text-[10px] uppercase font-mono tracking-widest text-zinc-500 select-none">
+              {isRTL ? 'المهمة مكتملة' : 'TASK IS COMPLETED'}
+            </div>
+          )}
+
+          {/* Complete Button */}
+          <button
+            type="button"
+            onClick={() => {
+              onComplete()
+              
+              // Send completion notification to assignee
+              const assigneeId = task.assigned_to
+              if (assigneeId && assigneeId !== currentUserId) {
+                const senderName = profile?.full_name || 'Operator'
+                const nextStatusEn = task.is_completed ? "set your task to incomplete" : "completed your task"
+                const nextStatusAr = task.is_completed ? "تغيير مهمتك لغير مكتملة" : "أكمل مهمتك المعينة"
+                
+                const notifTitle = isRTL
+                  ? `✅ ${senderName} قام بـ ${nextStatusAr}`
+                  : `✅ ${senderName} ${nextStatusEn}`
+                const notifContent = isRTL
+                  ? `${senderName} قام بـ ${nextStatusAr} في مهمتك المعينة "${task.title}"`
+                  : `${senderName} ${nextStatusEn} "${task.title}"`
+                  
+                sendNotification(assigneeId, 'reaction', notifTitle, notifContent)
+              }
+              onClose()
+            }}
+            className="flex-1 py-3 rounded-xl text-xs font-bold font-space flex items-center justify-center gap-2 transition-all border text-center"
+            style={{
+              backgroundColor: task.is_completed ? 'transparent' : themeColor,
+              borderColor: themeColor,
+              color: task.is_completed ? themeColor : '#000000',
+              boxShadow: task.is_completed ? 'none' : `0 0 12px ${themeColor}40`
+            }}
+          >
+            {task.is_completed ? <NeonIcon icon={RefreshCw} className="w-4 h-4 animate-spin" /> : <NeonIcon icon={Circle} className="w-4 h-4 opacity-50" />}
+            <span>{task.is_completed ? t('markIncomplete') : t('markCompleted')}</span>
+          </button>
+
+          {/* Delete Button (If handler is provided) */}
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm(isRTL ? 'هل أنت متأكد من حذف هذه المهمة؟' : 'Are you sure you want to delete this task?')) {
+                  onDelete()
+                  onClose()
+                }
+              }}
+              className="w-12 h-12 shrink-0 flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl transition-all"
+              title="DELETE TASK"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </motion.div>
     </div>

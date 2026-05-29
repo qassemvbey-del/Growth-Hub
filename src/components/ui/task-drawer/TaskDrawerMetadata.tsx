@@ -35,7 +35,8 @@ export default function TaskDrawerMetadata({
 }: TaskDrawerMetadataProps) {
   return (
     <>
-      {/* A. STATUS, WEIGHT, XP & TIMELINE PANEL */}
+      {/* A. STATUS, WEIGHT, XP & TIMELINE PANEL (LEGACY GRID COMMENTED OUT TO RECLAIM VERTICAL SPACE) */}
+      {/*
       <div className="p-5 border border-white/5 bg-zinc-900/40 rounded-xl space-y-4">
         <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
           {isRTL ? 'بيانات المهمة // METADATA' : 'TASK METADATA // PROFILE'}
@@ -71,6 +72,38 @@ export default function TaskDrawerMetadata({
             </span>
           </div>
         </div>
+      </div>
+      */}
+
+      {/* Redesigned Compact Inline Metadata Pills */}
+      <div className="flex flex-wrap gap-2 text-xs">
+        {/* Status Pill */}
+        <span 
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-space font-bold border"
+          style={{
+            borderColor: task.is_completed ? '#10B98130' : `${themeColor}30`,
+            backgroundColor: task.is_completed ? '#10B98105' : `${themeColor}05`,
+            color: task.is_completed ? '#10B981' : themeColor
+          }}
+        >
+          <span className={`w-1.5 h-1.5 rounded-full ${task.is_completed ? 'bg-emerald-500 shadow-[0_0_6px_#10B981]' : 'bg-amber-500'}`} style={!task.is_completed ? { backgroundColor: themeColor, boxShadow: `0 0 6px ${themeColor}` } : {}} />
+          {task.is_completed ? t('completed') : t('inProgress')}
+        </span>
+
+        {/* Difficulty Weight Pill */}
+        <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-mono font-bold border border-white/5 bg-white/[0.02] text-white/80">
+          ⚡ {task.weight || 1} / 6
+        </span>
+
+        {/* XP Reward Pill */}
+        <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-mono font-bold border border-teal-500/20 bg-teal-500/5 text-teal-400">
+          +{(task.weight || 1) * 10} XP
+        </span>
+
+        {/* Deadline Pill */}
+        <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-mono font-bold border border-white/5 bg-white/[0.02] text-white/70">
+          📅 {endDate || (isRTL ? 'غير محدد' : 'NOT SET')}
+        </span>
       </div>
 
       {/* B. ASSIGNEE SECTION (Squad Goals Only) */}

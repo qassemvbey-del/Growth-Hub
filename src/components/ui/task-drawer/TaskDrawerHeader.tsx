@@ -43,7 +43,7 @@ export default function TaskDrawerHeader({
   return (
     <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/[0.01] shrink-0">
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <span 
             className="text-[10px] uppercase font-mono tracking-widest font-black"
             style={{ color: themeColor }}
@@ -57,8 +57,9 @@ export default function TaskDrawerHeader({
           >
             <LinkIcon className="w-3.5 h-3.5" />
           </button>
-        </div>
-        <input
+        </div> */}
+        {/* Legacy input commented out to allow for wrapping title */}
+        {/* <input
           type="text"
           value={taskTitle}
           onChange={(e) => setTaskTitle(e.target.value)}
@@ -74,11 +75,35 @@ export default function TaskDrawerHeader({
           }}
           className="text-xl font-bold font-space text-[#FFFFFF] tracking-tight uppercase bg-transparent w-full border-none focus:outline-none focus:ring-0 p-0 mt-1"
           placeholder={isRTL ? "اسم المهمة..." : "Task Name..."}
+        /> */}
+        <textarea
+          rows={1}
+          value={taskTitle}
+          onChange={(e) => {
+            setTaskTitle(e.target.value)
+            e.target.style.height = 'auto'
+            e.target.style.height = `${e.target.scrollHeight}px`
+          }}
+          onBlur={() => {
+            if (taskTitle.trim() && taskTitle !== task.title) {
+              updateTask(task.id, { title: taskTitle.trim() })
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              e.currentTarget.blur()
+            }
+          }}
+          className="text-lg/snug font-bold font-space text-[#FFFFFF] tracking-tight uppercase bg-transparent w-full border-none focus:outline-none focus:ring-0 p-0 mt-1 resize-none overflow-hidden break-words whitespace-normal"
+          placeholder={isRTL ? "اسم المهمة..." : "Task Name..."}
         />
       </div>
       
       <div className="flex items-center gap-3 ml-4 shrink-0">
-        {/* Start Focus Button */}
+        {/* Focus and Complete buttons moved to Sticky Thumb-Zone Footer in TaskDrawer.tsx */}
+        {/* Legacy header action buttons commented out to prevent squishing */}
+        {/*
         {!task.is_completed && (
           <button
             type="button"
@@ -94,13 +119,10 @@ export default function TaskDrawerHeader({
           </button>
         )}
 
-        {/* Complete Button */}
         <button
           type="button"
           onClick={() => {
             onComplete()
-            
-            // Send completion notification to assignee
             const assigneeId = task.assigned_to
             if (assigneeId && assigneeId !== currentUserId) {
               const senderName = profile?.full_name || 'Operator'
@@ -116,7 +138,6 @@ export default function TaskDrawerHeader({
                 
               sendNotification(assigneeId, 'reaction', notifTitle, notifContent)
             }
-            
             onClose()
           }}
           className="px-3.5 py-2 rounded-lg text-[9px] font-space font-black tracking-widest cursor-pointer transition-all border flex items-center gap-1.5 hover:scale-105"
@@ -130,6 +151,7 @@ export default function TaskDrawerHeader({
           {task.is_completed ? <NeonIcon icon={RefreshCw} className="w-3 h-3 animate-spin" /> : <NeonIcon icon={Circle} className="w-3 h-3 opacity-50" />}
           <span className="hidden sm:inline">{task.is_completed ? t('markIncomplete') : t('markCompleted')}</span>
         </button>
+        */}
 
         <button
           onClick={onClose}

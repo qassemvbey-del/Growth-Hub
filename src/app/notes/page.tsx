@@ -557,7 +557,8 @@ export default function NotesPage() {
               )}
               style={noteSourceFilter === 'personal' ? { backgroundColor: currentTheme.color } : {}}
             >
-              {isRTL ? '📝 ملاحظاتي الحرة' : '📝 Personal Notes'}
+              {/* {isRTL ? '📝 ملاحظاتي الحرة' : '📝 Personal Notes'} */}
+              {isRTL ? 'ملاحظاتي الحرة' : 'PERSONAL NOTES'}
             </button>
             <button 
               onClick={() => setNoteSourceFilter('task')}
@@ -569,7 +570,8 @@ export default function NotesPage() {
               )}
               style={noteSourceFilter === 'task' ? { backgroundColor: currentTheme.color } : {}}
             >
-              {isRTL ? '💬 تعليقات المهام' : '💬 Task Comments'}
+              {/* {isRTL ? '💬 تعليقات المهام' : '💬 Task Comments'} */}
+              {isRTL ? 'تعليقات المهام' : 'TASK COMMENTS'}
             </button>
             <button 
               onClick={() => setNoteSourceFilter('all')}
@@ -581,7 +583,8 @@ export default function NotesPage() {
               )}
               style={noteSourceFilter === 'all' ? { backgroundColor: currentTheme.color } : {}}
             >
-              {isRTL ? '👁️ عرض الكل' : '👁️ Show All'}
+              {/* {isRTL ? '👁️ عرض الكل' : '👁️ Show All'} */}
+              {isRTL ? 'عرض الكل' : 'SHOW ALL'}
             </button>
           </div>
 

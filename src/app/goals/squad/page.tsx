@@ -1105,13 +1105,14 @@ export default function SquadGoalsPage() {
                 {typeFilter === 'solo' ? (
                   <>{isRTL ? 'أهداف' : 'PERSONAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' شخصية' : '_GOALS'}</span></>
                 ) : typeFilter === 'squad' ? (
-                  <>{isRTL ? 'أهداف' : 'TEAM'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الفريق' : '_GOALS'}</span></>
+                  <>{isRTL ? 'أهداف' : /* 'TEAM' */ 'SQUAD'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الفريق' : '_GOALS'}</span></>
                 ) : (
                   <>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الأهداف' : '_CANVAS'}</span></>
                 )}
               </h1>
             </div>
-            <p className={cn("text-[11px] font-space tracking-[0.35em] uppercase font-bold", isRTL ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]")}>
+            {/* Comment out collaborative goals subtitle sentence to keep header clean */}
+            {/* <p className={cn("text-[11px] font-space tracking-[0.35em] uppercase font-bold", isRTL ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]")}>
                {typeFilter === 'solo' ? (
                  <>{isRTL ? 'أهداف شخصية نشطة' : 'PERSONAL GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
                ) : typeFilter === 'squad' ? (
@@ -1119,7 +1120,7 @@ export default function SquadGoalsPage() {
                ) : (
                  <>{isRTL ? 'الأهداف الأساسية النشطة' : 'Active Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'هدف نشط' : 'total'}</>
                )}
-            </p>
+            </p> */}
           </div>
           
           {typeFilter === 'squad' ? (
@@ -1137,7 +1138,7 @@ export default function SquadGoalsPage() {
                 style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
                 <Plus className="w-4 h-4" />
-                {isRTL ? 'إنشاء هدف فريق' : 'CREATE TEAM GOAL'}
+                {isRTL ? 'إنشاء هدف فريق' : /* 'CREATE TEAM GOAL' */ 'CREATE SQUAD GOAL'}
               </button>
             </div>
           ) : (
@@ -1255,7 +1256,7 @@ export default function SquadGoalsPage() {
                 <div className="flex flex-col gap-1">
                   <h2 className="text-lg font-black uppercase text-white tracking-wider">
                     {typeFilter === 'squad'
-                      ? (isRTL ? 'إنشاء هدف فريق' : 'Create Team Goal')
+                      ? (isRTL ? 'إنشاء هدف فريق' : /* 'Create Team Goal' */ 'Create Squad Goal')
                       : (isRTL ? 'إنشاء هدف جديد' : 'Create New Goal')}
                   </h2>
                 </div>

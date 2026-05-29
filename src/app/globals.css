@@ -251,7 +251,7 @@
   }
 }
 
-/* Cyberpunk Scrollbar Styling */
+/* Cyberpunk Scrollbar Styling - Commented out to hide scrollbars globally
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -266,10 +266,19 @@
   filter: brightness(1.2);
 }
 
-/* Apply to all scrollable areas */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--theme-color, var(--color-primary, #39FF14)) #0a0a0a;
+}
+*/
+
+/* Nuke scrollbars globally across all browsers while keeping scrolling functional */
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }
 
 /* V8.8 PWA Absolute Override */

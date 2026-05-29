@@ -1589,9 +1589,9 @@ const { progress, isInRedZone } = useMemo(() => {
               </div>
               
               {/* Premium Segmented Layout View Toggle switcher with Smart Time Filters */}
-              <div className="flex flex-wrap items-center gap-4">
+              <div className="flex overflow-x-auto whitespace-nowrap w-full scrollbar-hide [&::-webkit-scrollbar]:hidden items-center gap-4 pb-2 md:pb-0 md:w-auto">
                 {/* Smart Time Filters */}
-                <div className="flex items-center gap-1.5 p-1 bg-black/40 border border-white/5 backdrop-blur-md rounded-lg">
+                <div className="flex items-center gap-1.5 p-1 bg-black/40 border border-white/5 backdrop-blur-md rounded-lg shrink-0">
                   {[
                     { key: 'ALL', label: isRTL ? 'الكل' : 'All Active' },
                     { key: 'WEEK', label: isRTL ? 'هذا الأسبوع' : 'Upcoming This Week' },
@@ -1614,7 +1614,7 @@ const { progress, isInRedZone } = useMemo(() => {
                   ))}
                 </div>
 
-                <div className="flex items-center gap-1.5 p-1 bg-black/40 border border-white/5 backdrop-blur-md rounded-lg">
+                <div className="flex items-center gap-1.5 p-1 bg-black/40 border border-white/5 backdrop-blur-md rounded-lg shrink-0">
                   <button
                     type="button"
                     onClick={() => { playBlip(); setActiveView('list'); }}
@@ -1722,256 +1722,234 @@ const { progress, isInRedZone } = useMemo(() => {
                            </div>
                          )}
 
-                         {/* Main Row: Right = index+check, Center = title+details, Left = actions */}
-                         <div className={cn(
-                           "flex items-center justify-between gap-4 w-full",
-                           isRTL ? "flex-row" : "flex-row-reverse"
-                         )}>
-                           {/* RIGHT SIDE: Index + Completion Check */}
-                           <div className="flex items-center gap-3 shrink-0">
-                             <span className="font-space font-black text-[11px] text-white/30 w-5 text-right select-none">
-                               {String(index + 1).padStart(2, '0')}
-                             </span>
-                             <button
+                                   {/* Main Row: Title, checkbox, details */}
+                          <div className="flex items-center justify-between gap-4 w-full">
+                            {/* Task Title Group (Checkbox, Index, Title) */}
+                            <div className={cn(
+                              "flex items-center gap-3 w-full",
+                              isRTL ? "flex-row" : "flex-row-reverse"
+                            )}>
+                              {/* RIGHT SIDE: Index + Check */}
+                              <div className="flex items-center gap-3 shrink-0">
+                                <span className="font-space font-black text-[11px] text-white/30 w-5 text-right select-none">
+                                  {String(index + 1).padStart(2, '0')}
+                                </span>
+                                <button
+                                   onClick={(e) => { 
+                                     e.stopPropagation(); 
+                                     if (!canToggleTask(task)) {
+                                       showToast(isRTL ? 'غير مسموح // ليست مهمتك' : 'RESTRICTED // NOT YOUR TASK', 'warning');
+                                       playError();
+                                       return;
+                                     }
+                                     if (navigator.vibrate) navigator.vibrate(50);
+                                     toggleTask(task.id, task.is_completed); 
+                                   }}
+                                   className="shrink-0 cursor-pointer flex items-center justify-center"
+                                 >
+                                   {task.is_completed ? (
+                                     <NeonIcon icon={CheckCircle2} interactive size={22} style={{ color: currentTheme.color }} />
+                                   ) : (
+                                     <NeonIcon icon={Circle} interactive size={22} className="opacity-40 hover:opacity-80 text-white/60 hover:text-white transition-opacity" />
+                                   )}
+                                 </button>
+                              </div>
+
+                              {/* CENTER: Title + Detail Row */}
+                              <div className={cn(
+                                "flex-1 min-w-0 flex flex-col",
+                                isRTL ? "items-end text-right pr-4" : "items-start text-left pl-4"
+                              )}>
+                                <span className={cn(
+                                  "text-base md:text-[17px] font-space font-bold tracking-tight transition-all duration-300 ease-in-out uppercase truncate max-w-full block",
+                                  task.is_completed ? "text-gray-500 line-through opacity-55" : "text-white"
+                                )}>
+                                  {task.title}
+                                </span>
+                                <div className={cn("flex items-center gap-3 mt-1 w-full", isRTL ? "justify-end" : "justify-start")}>
+                                  {hasVideo ? (
+                                    <>
+                                      <svg width="13" height="13" viewBox="0 0 24 24" fill={currentTheme.color} className="shrink-0">
+                                        <path d="M19.59 6.69a4.83 4.83 0 0 0-3.39-3.39C14.76 3 12 3 12 3s-2.76 0-4.2.3a4.83 4.83 0 0 0-3.39 3.39A48.6 48.6 0 0 0 4 12a48.6 48.6 0 0 0 .41 5.31 4.83 4.83 0 0 0 3.39 3.39C9.24 21 12 21 12 21s2.76 0 4.2-.3a4.83 4.83 0 0 0 3.39-3.39A48.6 48.6 0 0 0 20 12a48.6 48.6 0 0 0-.41-5.31zM10 15V9l5 3z"/>
+                                      </svg>
+                                      <span className="font-mono text-[11px] text-[#FFFFFF] tracking-wider">
+                                        {formatVideoTime(videoProgress)} / {formatVideoTime(videoDuration)}
+                                      </span>
+                                    </>
+                                  ) : timeFormatted ? (
+                                    <span className="font-mono text-[11px] text-white/50 bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-md tracking-wider inline-flex items-center">
+                                      {timeFormatted}
+                                    </span>
+                                  ) : null}
+                                  {task.metadata?.endDate && (() => {
+                                    const tDate = new Date(task.metadata.endDate)
+                                    tDate.setHours(0,0,0,0)
+                                    const todayDate = new Date()
+                                    todayDate.setHours(0,0,0,0)
+                                    const isOverdue = !task.is_completed && tDate < todayDate
+                                    return (
+                                      <span className={cn(
+                                        "font-mono text-[10px] px-2 py-0.5 rounded-md tracking-wider inline-flex items-center gap-1 border",
+                                        isOverdue 
+                                          ? "text-red-500 border-red-500/30 bg-red-950/15 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse font-black" 
+                                          : "text-white/40 border-white/5 bg-white/[0.02]"
+                                      )}>
+                                        📅 {task.metadata.endDate}
+                                      </span>
+                                    )
+                                  })()}
+                                  <ComplexityDashes weight={task.weight} color={currentTheme.color} />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Restructured Thumb-Friendly action row with divider */}
+                          <div className="w-full flex items-center justify-between mt-3 pt-3 border-t border-white/5">
+                            {/* Left side: Assignee & XP Badge */}
+                            <div className="flex items-center gap-3 shrink-0">
+                              {/* Assignee Area (Squad only) */}
+                              {mission?.metadata?.type === 'squad' && (
+                                <div className="relative">
+                                  {task.assigned_to && task.assignee ? (
+                                    <button
+                                      onClick={(e) => handleAssignClick(e, task)}
+                                      className={cn(
+                                        "w-7 h-7 rounded-full overflow-hidden shrink-0 flex items-center justify-center relative hover:opacity-80 transition-opacity",
+                                        getRankRingClass(task.assignee.rank)
+                                      )}
+                                      title={isRTL ? `assigned_to_${task.assignee.full_name}` : `Assigned to ${task.assignee.full_name}`}
+                                    >
+                                      {task.assignee.avatar_url ? (
+                                        <img src={task.assignee.avatar_url} className="w-full h-full object-cover" />
+                                      ) : (
+                                        <span className="text-[10px] font-bold text-white">
+                                          {task.assignee.full_name?.charAt(0) || '?'}
+                                        </span>
+                                      )}
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={(e) => handleAssignClick(e, task)}
+                                      className="px-2 py-1 border border-dashed border-white/25 hover:border-teal-500 hover:text-teal-400 text-white/40 text-[9px] font-mono tracking-wider rounded transition-colors"
+                                    >
+                                      [ + ASSIGN ]
+                                    </button>
+                                  )}
+
+                                  {/* Assignee Popover dropdown */}
+                                  {activeAssignPopover === task.id && (
+                                    <div 
+                                      className="absolute left-0 bottom-full mb-2 w-48 bg-[#0a0a0f] border border-white/10 rounded-lg shadow-2xl z-[150] p-2 space-y-1 font-space text-left"
+                                      onClick={e => e.stopPropagation()}
+                                    >
+                                      <div className="text-[9px] font-black text-zinc-500 tracking-widest uppercase p-1.5 border-b border-white/5">
+                                        {isRTL ? 'ASSIGN' : 'ASSIGN OPERATOR'}
+                                      </div>
+                                      <div className="max-h-40 overflow-y-auto py-1">
+                                        {squadMembers.map((member) => (
+                                          <button
+                                            key={member.id}
+                                            onClick={async (e) => {
+                                              e.stopPropagation()
+                                              setActiveAssignPopover(null)
+                                              const { error } = await supabase
+                                                .from('tasks')
+                                                .update({ assigned_to: member.id })
+                                                .eq('id', task.id)
+                                              if (!error) {
+                                                const memberProfile = {
+                                                  id: member.id,
+                                                  full_name: member.full_name,
+                                                  avatar_url: member.avatar_url,
+                                                  rank: member.rank
+                                                }
+                                                setMission((prev: any) => ({
+                                                  ...prev,
+                                                  tasks: prev.tasks.map((t: any) => t.id === task.id ? { ...t, assigned_to: member.id, assignee: memberProfile } : t)
+                                                }))
+                                                showToast(isRTL ? `ASSIGNED` : `ASSIGNED TO ${member.full_name.toUpperCase()}`, 'success')
+                                                playSuccess()
+                                              }
+                                            }}
+                                            className={cn(
+                                              "w-full flex items-center gap-2 p-1.5 hover:bg-white/5 rounded text-left transition-colors text-xs text-white",
+                                              task.assigned_to === member.id ? "bg-white/5 font-bold" : ""
+                                            )}
+                                          >
+                                            {member.avatar_url ? (
+                                              <img src={member.avatar_url} className="w-5 h-5 rounded-full object-cover" />
+                                            ) : (
+                                              <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center text-[8px] font-bold text-white">
+                                                {member.full_name?.charAt(0) || '?'}
+                                              </div>
+                                            )}
+                                            <span className="truncate">{member.full_name}</span>
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* XP Reward Badge */}
+                              <div className="flex items-center gap-1 bg-[#14b8a6]/10 border border-[#14b8a6]/20 px-2 py-0.5 rounded text-[10px] font-mono text-[#14b8a6] tracking-wider shrink-0 font-bold">
+                                +{task.weight * 10} XP
+                              </div>
+                            </div>
+
+                            {/* Right side: Action Buttons (Play, Timer, Trash) */}
+                            <div className="flex items-center gap-x-1 shrink-0">
+                              {hasVideo && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setSelectedTask(task); }}
+                                  className="p-2.5 md:p-1.5 text-[var(--text-secondary)] hover:text-white transition-all cursor-pointer"
+                                  style={{ color: selectedTask?.id === task.id ? currentTheme.color : '' }}
+                                  title={selectedTask?.id === task.id ? 'CLOSE_VIDEO' : 'PLAY_VIDEO'}
+                                >
+                                  {selectedTask?.id === task.id ? (
+                                     <Tv className="w-5 h-5 md:w-4 md:h-4" />
+                                   ) : (
+                                     <Play className="w-5 h-5 md:w-4 md:h-4" />
+                                   )}
+                                </button>
+                              )}
+                              <button
+                                onClick={(e) => { e.stopPropagation(); startFocus(task.title, task.id, id as string); }}
+                                className="p-2.5 md:p-1.5 text-[var(--text-secondary)] hover:text-white transition-all cursor-pointer"
+                                onMouseEnter={e => e.currentTarget.style.color = currentTheme.color}
+                                onMouseLeave={e => e.currentTarget.style.color = ''}
+                                title="START_FOCUS_SESSION"
+                              >
+                                <Timer className="w-5 h-5 md:w-4 md:h-4" />
+                              </button>
+
+                              <button
                                 onClick={(e) => { 
                                   e.stopPropagation(); 
-                                  if (!canToggleTask(task)) {
-                                    showToast(isRTL ? "غير مسموح // ليست مهمتك" : "RESTRICTED // NOT YOUR TASK", "warning");
-                                    playError();
-                                    return;
+                                  if (mission?.metadata?.type === 'squad') {
+                                    const currentUserMember = squadMembers.find(m => m.id === profile?.id)
+                                    const currentUserRole = currentUserMember?.role
+                                    const isOwner = mission?.user_id === profile?.id || currentUserRole === 'owner'
+                                    const isCoAdmin = currentUserRole === 'co-admin'
+                                    const isPrivileged = isOwner || isCoAdmin
+                                    if (!isPrivileged) {
+                                      showToast(isRTL ? 'RESTRICTED' : 'RESTRICTED // SQUAD ADMINS ONLY', 'warning')
+                                      playError()
+                                      return
+                                    }
                                   }
-                                  toggleTask(task.id, task.is_completed); 
+                                  deleteTask(task.id); 
                                 }}
-                                className="shrink-0 cursor-pointer flex items-center justify-center"
+                                className="p-2.5 md:p-1.5 text-[var(--text-secondary)] hover:text-red-500 transition-all cursor-pointer"
+                                title="DELETE_TASK"
                               >
-                                {task.is_completed ? (
-                                  <NeonIcon icon={CheckCircle2} interactive size={22} style={{ color: currentTheme.color }} />
-                                ) : (
-                                  <NeonIcon icon={Circle} interactive size={22} className="opacity-40 hover:opacity-80 text-white/60 hover:text-white transition-opacity" />
-                                )}
+                                <Trash2 className="w-5 h-5 md:w-4 md:h-4" />
                               </button>
-                           </div>
-
-                           {/* CENTER: Title + Detail Row (metrics + dashes) */}
-                            <div className={cn(
-                              "flex-1 min-w-0 flex flex-col",
-                              isRTL ? "items-end text-right pr-4" : "items-start text-left pl-4"
-                            )}>
-                             <span className={cn(
-                               "text-base md:text-[17px] font-space font-bold tracking-tight transition-all duration-300 ease-in-out uppercase truncate max-w-full block",
-                               task.is_completed ? "text-gray-500 line-through opacity-55" : "text-white"
-                             )}>
-                               {task.title}
-                             </span>
-                              <div className={cn("flex items-center gap-3 mt-1 w-full", isRTL ? "justify-end" : "justify-start")}>
-                               {hasVideo ? (
-                                 <>
-                                   <svg width="13" height="13" viewBox="0 0 24 24" fill={currentTheme.color} className="shrink-0">
-                                     <path d="M19.59 6.69a4.83 4.83 0 0 0-3.39-3.39C14.76 3 12 3 12 3s-2.76 0-4.2.3a4.83 4.83 0 0 0-3.39 3.39A48.6 48.6 0 0 0 4 12a48.6 48.6 0 0 0 .41 5.31 4.83 4.83 0 0 0 3.39 3.39C9.24 21 12 21 12 21s2.76 0 4.2-.3a4.83 4.83 0 0 0 3.39-3.39A48.6 48.6 0 0 0 20 12a48.6 48.6 0 0 0-.41-5.31zM10 15V9l5 3z"/>
-                                   </svg>
-                                   <span className="font-mono text-[11px] text-[#FFFFFF] tracking-wider">
-                                     {formatVideoTime(videoProgress)} / {formatVideoTime(videoDuration)}
-                                   </span>
-                                 </>
-                               ) : timeFormatted ? (
-                                 <span className="font-mono text-[11px] text-white/50 bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-md tracking-wider inline-flex items-center">
-                                   {timeFormatted}
-                                 </span>
-                               ) : null}
-                                {task.metadata?.endDate && (() => {
-                                  const tDate = new Date(task.metadata.endDate)
-                                  tDate.setHours(0,0,0,0)
-                                  const todayDate = new Date()
-                                  todayDate.setHours(0,0,0,0)
-                                  const isOverdue = !task.is_completed && tDate < todayDate
-                                  return (
-                                    <span className={cn(
-                                      "font-mono text-[10px] px-2 py-0.5 rounded-md tracking-wider inline-flex items-center gap-1 border",
-                                      isOverdue 
-                                        ? "text-red-500 border-red-500/30 bg-red-950/15 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse font-black" 
-                                        : "text-white/40 border-white/5 bg-white/[0.02]"
-                                    )}>
-                                      📅 {task.metadata.endDate}
-                                    </span>
-                                  )
-                                })()}
-                               <ComplexityDashes weight={task.weight} color={currentTheme.color} />
-                                
-                             </div>
-                           </div>
-
-                           {/* LEFT SIDE: Assignee, XP, and Utility Actions */}
-                           <div className="flex items-center gap-3 shrink-0 relative">
-
-                             {/* Assignee Area (Squad only) */}
-                             {mission?.metadata?.type === 'squad' && (
-                               <div className="relative">
-                                 {task.assigned_to && task.assignee ? (
-                                   <button
-                                     onClick={(e) => handleAssignClick(e, task)}
-                                     className={cn(
-                                       "w-7 h-7 rounded-full overflow-hidden shrink-0 flex items-center justify-center relative hover:opacity-80 transition-opacity",
-                                       getRankRingClass(task.assignee.rank)
-                                     )}
-                                     title={isRTL ? `assigned_to_${task.assignee.full_name}` : `Assigned to ${task.assignee.full_name}`}
-                                   >
-                                     {task.assignee.avatar_url ? (
-                                       <img src={task.assignee.avatar_url} className="w-full h-full object-cover" />
-                                     ) : (
-                                       <span className="text-[10px] font-bold text-white">
-                                         {task.assignee.full_name?.charAt(0) || '?'}
-                                       </span>
-                                     )}
-                                   </button>
-                                 ) : (
-                                   <button
-                                     onClick={(e) => handleAssignClick(e, task)}
-                                     className="px-2 py-1 border border-dashed border-white/25 hover:border-teal-500 hover:text-teal-400 text-white/40 text-[9px] font-mono tracking-wider rounded transition-colors"
-                                   >
-                                     [ + ASSIGN ]
-                                   </button>
-                                 )}
-
-                                 {/* Assignee Popover dropdown */}
-                                 {activeAssignPopover === task.id && (
-                                   <div 
-                                     className="absolute right-0 bottom-full mb-2 w-48 bg-[#0a0a0f] border border-white/10 rounded-lg shadow-2xl z-[150] p-2 space-y-1 font-space text-left"
-                                     onClick={e => e.stopPropagation()}
-                                   >
-                                     <div className="text-[9px] font-black text-zinc-500 tracking-widest uppercase p-1.5 border-b border-white/5">
-                                       {isRTL ? "ASSIGN" : "ASSIGN OPERATOR"}
-                                     </div>
-                                     <div className="max-h-40 overflow-y-auto py-1">
-                                       {squadMembers.map((member: any) => (
-                                         <button
-                                           key={member.id}
-                                           onClick={async (e) => {
-                                             e.stopPropagation()
-                                             setActiveAssignPopover(null)
-                                             const { error } = await supabase
-                                               .from('tasks')
-                                               .update({ assigned_to: member.id })
-                                               .eq('id', task.id)
-                                             if (!error) {
-                                               const memberProfile = {
-                                                 id: member.id,
-                                                 full_name: member.full_name,
-                                                 avatar_url: member.avatar_url,
-                                                 rank: member.rank
-                                               }
-                                               setMission((prev: any) => ({
-                                                 ...prev,
-                                                 tasks: prev.tasks.map((t: any) => t.id === task.id ? { ...t, assigned_to: member.id, assignee: memberProfile } : t)
-                                               }))
-                                               showToast(isRTL ? `ASSIGNED` : `ASSIGNED TO ${member.full_name.toUpperCase()}`, "success")
-                                               playSuccess()
-                                             }
-                                           }}
-                                           className={cn(
-                                             "w-full flex items-center gap-2 p-1.5 hover:bg-white/5 rounded text-left transition-colors text-xs text-white",
-                                             task.assigned_to === member.id ? "bg-white/5 font-bold" : ""
-                                           )}
-                                         >
-                                           {member.avatar_url ? (
-                                             <img src={member.avatar_url} className="w-5 h-5 rounded-full object-cover" />
-                                           ) : (
-                                             <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center text-[8px] font-bold text-white">
-                                               {member.full_name?.charAt(0) || '?'}
-                                             </div>
-                                           )}
-                                           <span className="truncate">{member.full_name}</span>
-                                         </button>
-                                       ))}
-                                     </div>
-                                     {task.assigned_to && (
-                                       <button
-                                         onClick={async (e) => {
-                                           e.stopPropagation()
-                                           setActiveAssignPopover(null)
-                                           const { error } = await supabase
-                                             .from('tasks')
-                                             .update({ assigned_to: null })
-                                             .eq('id', task.id)
-                                           if (!error) {
-                                             setMission((prev: any) => ({
-                                               ...prev,
-                                               tasks: prev.tasks.map((t: any) => t.id === task.id ? { ...t, assigned_to: null, assignee: null } : t)
-                                             }))
-                                             showToast(isRTL ? "UNASSIGN" : "TASK UNASSIGNED", "success")
-                                             playSuccess()
-                                           }
-                                         }}
-                                         className="w-full text-center py-1.5 hover:bg-red-500/10 text-red-400 hover:text-red-300 font-black tracking-widest text-[9px] uppercase border-t border-white/5 mt-1 rounded transition-colors"
-                                       >
-                                         {isRTL ? "UNASSIGN" : "UNASSIGN"}
-                                       </button>
-                                     )}
-                                   </div>
-                                 )}
-                               </div>
-                             )}
-
-                             {/* XP Reward Badge */}
-                             <div className="flex items-center gap-1 bg-[#14b8a6]/10 border border-[#14b8a6]/20 px-2 py-0.5 rounded text-[10px] font-mono text-[#14b8a6] tracking-wider shrink-0 font-bold">
-                               +{task.weight * 10} XP
-                             </div>
-
-                             {/* Utility Actions */}
-                             <div className="flex items-center gap-x-1 shrink-0 opacity-40 group-hover:opacity-100 transition-opacity">
-                               {hasVideo && (
-                                 <button
-                                   onClick={(e) => { e.stopPropagation(); setSelectedTask(task); }}
-                                   className="p-2 transition-all"
-                                   style={{ color: selectedTask?.id === task.id ? currentTheme.color : 'var(--text-secondary)' }}
-                                   onMouseEnter={e => { if (selectedTask?.id !== task.id) e.currentTarget.style.color = currentTheme.color }}
-                                   onMouseLeave={e => { if (selectedTask?.id !== task.id) e.currentTarget.style.color = '' }}
-                                   title={selectedTask?.id === task.id ? 'CLOSE_VIDEO' : 'PLAY_VIDEO'}
-                                 >
-                                   {selectedTask?.id === task.id ? (
-                                      <Tv className="w-4 h-4 mx-auto" />
-                                    ) : (
-                                      <Play className="w-4 h-4 mx-auto" />
-                                    )}
-                                 </button>
-                               )}
-                               <button
-                                 onClick={(e) => { e.stopPropagation(); startFocus(task.title, task.id, id as string); }}
-                                 className="p-2 text-[var(--text-secondary)] transition-all"
-                                 onMouseEnter={e => e.currentTarget.style.color = currentTheme.color}
-                                 onMouseLeave={e => e.currentTarget.style.color = ''}
-                                 title="START_FOCUS_SESSION"
-                               >
-                                 <Timer className="text-lg w-[18px] h-[18px]" />
-                               </button>
-
-                               <button
-                                 onClick={(e) => { 
-                                   e.stopPropagation(); 
-                                   if (mission?.metadata?.type === 'squad') {
-                                     const currentUserMember = squadMembers.find(m => m.id === profile?.id)
-                                     const currentUserRole = currentUserMember?.role
-                                     const isOwner = mission?.user_id === profile?.id || currentUserRole === 'owner'
-                                     const isCoAdmin = currentUserRole === 'co-admin'
-                                     const isPrivileged = isOwner || isCoAdmin
-                                     if (!isPrivileged) {
-                                       showToast(isRTL ? "RESTRICTED" : "RESTRICTED // SQUAD ADMINS ONLY", "warning")
-                                       playError()
-                                       return
-                                     }
-                                   }
-                                   deleteTask(task.id); 
-                                 }}
-                                 className="p-2 text-[var(--text-secondary)] hover:text-red-500 transition-all"
-                                 title="DELETE_TASK"
-                               >
-                                 <Trash2 className="text-lg w-[18px] h-[18px]" />
-                               </button>
-                             </div>
-                           </div>
-                         </div>
-
-                         {/* Full-width progress line (rank color) */}
-                         {(hasVideo && videoDuration > 0) && (
+                            </div>
+                          </div>
+{(hasVideo && videoDuration > 0) && (
                            <div className="relative h-[2px] bg-white/5 rounded-full overflow-hidden w-full">
                              <motion.div
                                initial={{ width: 0 }}
