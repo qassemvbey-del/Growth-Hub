@@ -558,7 +558,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   return (
     <div
       className={cn(
-        'min-h-screen bg-zinc-50 dark:bg-[#050505] text-foreground flex relative transition-colors duration-500',
+        /* 'min-h-screen bg-zinc-50 dark:bg-[#050505] text-foreground flex relative transition-colors duration-500', */
+        'min-h-screen bg-zinc-50 dark:bg-transparent text-foreground flex relative transition-colors duration-500',
         networkStatus === 'OFFLINE' && 'connection-offline'
       )}
       style={{ 

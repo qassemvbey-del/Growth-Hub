@@ -6,7 +6,8 @@ interface AmbientAuroraProps {
 
 export default function AmbientAurora({ themeColor }: AmbientAuroraProps) {
   return (
-    <div className="fixed inset-0 z-[-1] overflow-hidden bg-transparent hidden dark:block pointer-events-none select-none">
+    /* <div className="fixed inset-0 z-[-1] overflow-hidden bg-transparent hidden dark:block pointer-events-none select-none"> */
+    <div className="fixed inset-0 z-0 overflow-hidden bg-transparent dark:bg-[#050505] hidden dark:block pointer-events-none select-none">
       {/* Orb 1: Dynamic Theme Color */}
       <div 
         className="absolute w-[45vw] h-[45vw] rounded-full mix-blend-screen filter blur-[120px] opacity-20 -top-20 -left-20 animate-aurora-blob"

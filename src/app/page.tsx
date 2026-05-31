@@ -343,7 +343,8 @@ export default function Dashboard() {
         </div>
 
         {/* ── THE FOCUS PIPELINE (Top Section - Full Width) ── */}
-        <div className="w-full bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-6 md:p-8 space-y-4 shadow-xl relative overflow-hidden">
+        {/* bg-[var(--card-bg)] border border-[var(--card-border)] */}
+        <div className="w-full bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-2xl p-6 md:p-8 space-y-4 shadow-xl relative overflow-hidden">
           <div className="absolute top-0 inset-x-0 h-1" style={{ background: `linear-gradient(to right, ${currentTheme.color}, transparent)` }} />
           
           <div className="flex justify-between items-center">
@@ -395,7 +396,8 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-8 items-start font-space">
           
           {/* Action Inbox (60%) */}
-          <div className="lg:col-span-6 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-6 md:p-8 space-y-6 shadow-xl relative overflow-hidden">
+          {/* bg-[var(--card-bg)] border border-[var(--card-border)] */}
+          <div className="lg:col-span-6 bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-2xl p-6 md:p-8 space-y-6 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r to-transparent" style={{ backgroundImage: `linear-gradient(to right, ${currentTheme.color}, transparent)` }} />
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
@@ -475,8 +477,9 @@ export default function Dashboard() {
           </div>
 
           {/* The Rivalry Tracker (40%) */}
+          {/* bg-[var(--card-bg)] border */}
           <div 
-            className="lg:col-span-4 bg-[var(--card-bg)] border rounded-2xl p-6 md:p-8 space-y-6 shadow-xl relative overflow-hidden transition-all duration-300"
+            className="lg:col-span-4 bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-2xl p-6 md:p-8 space-y-6 shadow-xl relative overflow-hidden transition-all duration-300"
             style={{ 
               borderColor: currentTheme.color,
               boxShadow: `0 0 20px ${currentTheme.color}25`
@@ -546,8 +549,9 @@ export default function Dashboard() {
                 <div
                   key={mission.id}
                   onClick={() => router.push(`/missions/${mission.id}`)}
+                  /* bg-zinc-900/20 */
                   className={cn(
-                    "relative group cursor-pointer p-5 rounded-xl border bg-zinc-900/20 hover:bg-white/5 transition-all overflow-hidden flex flex-col gap-4",
+                    "relative group cursor-pointer p-5 rounded-xl border bg-white/60 dark:bg-black/40 backdrop-blur-3xl border-black/5 dark:border-white/5 transition-all overflow-hidden flex flex-col gap-4",
                     isInRedZone ? "border-red-500/40" : "border-white/5 hover:border-white/10",
                     (mission.title === "Start Here 🚀" || mission.title === "ابدأ من هنا 🚀") && "onboarding-start-goal"
                   )}
