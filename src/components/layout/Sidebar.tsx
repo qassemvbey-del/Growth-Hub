@@ -84,13 +84,13 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
   return (
     /* bg-[var(--sidebar-bg)] border-[var(--card-border)] */
     <aside className={cn(
-      "hidden lg:flex w-72 bg-white/60 dark:bg-black/40 backdrop-blur-3xl h-screen fixed top-0 flex-col z-[110] border-y-0 shadow-[20px_0_50px_rgba(0,0,0,0.05)] dark:shadow-[20px_0_50px_rgba(0,0,0,0.5)] sidebar-target transition-all duration-300",
-      "inset-inline-start-0",
-      isRTL ? "border-l border-black/5 dark:border-white/5" : "border-r border-black/5 dark:border-white/5"
+      "hidden lg:flex w-72 bg-white/60 dark:bg-black/40 backdrop-blur-3xl h-screen fixed top-0 flex-col z-[110] border-y-0 border-x-0 shadow-[20px_0_50px_rgba(0,0,0,0.05)] dark:shadow-[20px_0_50px_rgba(0,0,0,0.5)] sidebar-target transition-all duration-300",
+      "inset-inline-start-0"
     )}>
       {/* ── ULTRA-PREMIUM IDENTITY LAYER ── */}
       {/* bg-[var(--sidebar-bg)]/50 border-[var(--card-border)] */}
-      <div className="pt-12 px-8 flex flex-col items-center text-center relative overflow-hidden group border-b border-black/5 dark:border-white/5 pb-8 bg-transparent">
+      {/* border-b border-black/5 dark:border-white/5 */}
+      <div className="pt-12 px-8 flex flex-col items-center text-center relative overflow-hidden group border-b-0 pb-8 bg-transparent">
         {/* Avatar Component with Instagram-style neon ring */}
         <div className={cn(
           "relative p-1.5 rounded-full bg-gradient-to-tr shadow-2xl group-hover:scale-105 transition-transform duration-500 cursor-pointer",
@@ -391,7 +391,8 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
 
       {/* ── DOCKED SETTINGS & THEME TOGGLE ── */}
       {/* border-[var(--card-border)] bg-[var(--sidebar-bg)]/50 */}
-      <div className="p-4 mt-auto border-t border-black/5 dark:border-white/5 flex items-center gap-2 bg-transparent shrink-0">
+      {/* border-t border-black/5 dark:border-white/5 */}
+      <div className="p-4 mt-auto border-t-0 flex items-center gap-2 bg-transparent shrink-0">
         <Link 
           href="/settings" 
           onClick={playBlip}
