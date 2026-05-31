@@ -39,7 +39,8 @@
   }
 
   --animate-scanline: scanline 12s linear infinite;
-  --animate-aurora-blob: aurora-blob 20s infinite ease-in-out;
+  /* --animate-aurora-blob: aurora-blob 20s infinite ease-in-out; */
+  --animate-aurora-blob: aurora-blob 10s infinite ease-in-out;
 }
 
 :root {
