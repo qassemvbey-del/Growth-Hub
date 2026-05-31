@@ -592,7 +592,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         {/* ── DESKTOP TOP BAR (TRANSIENT TELEMETRY ONLY) ── */}
         {/* bg-[var(--sidebar-bg)]/95 backdrop-blur-2xl border-b border-[var(--card-border)] */}
         {/* <header className="hidden lg:flex w-full px-8 h-16 justify-end items-center border-b border-black/5 dark:border-white/5 bg-white/60 dark:bg-black/40 backdrop-blur-3xl z-[150] sticky top-0 transition-colors duration-500 relative header-target"> */}
-        <header className="hidden lg:flex w-full px-8 h-16 justify-end items-center border-b-0 bg-white/60 dark:bg-black/40 backdrop-blur-3xl z-[150] sticky top-0 transition-colors duration-500 relative header-target">
+        {/* bg-white/60 dark:bg-black/40 backdrop-blur-3xl border-b-0 */}
+        <header className="hidden lg:flex w-full px-8 h-16 justify-end items-center border-none bg-transparent dark:bg-black/10 backdrop-blur-[40px] z-[150] sticky top-0 transition-colors duration-500 relative header-target">
           <div className="absolute -bottom-[1px] inset-inline-start-12 w-48 h-[1px] shadow-[0_0_15px_currentcolor]" style={{ backgroundColor: currentTheme.color, color: currentTheme.color }} />
 
           {/* CENTER: Core Brand Text */}
@@ -679,7 +680,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         {/* ── MOBILE TOP BAR ── */}
         {/* bg-[var(--sidebar-bg)]/95 backdrop-blur-2xl border-b border-[var(--card-border)] */}
         {/* <header className="flex lg:hidden w-full p-4 pt-safe justify-between items-center border-b border-black/5 dark:border-white/5 bg-white/60 dark:bg-black/40 backdrop-blur-3xl z-[150] sticky top-0 transition-colors duration-500 relative"> */}
-        <header className="flex lg:hidden w-full p-4 pt-safe justify-between items-center border-b-0 bg-white/60 dark:bg-black/40 backdrop-blur-3xl z-[150] sticky top-0 transition-colors duration-500 relative">
+        {/* bg-white/60 dark:bg-black/40 backdrop-blur-3xl border-b-0 */}
+        <header className="flex lg:hidden w-full p-4 pt-safe justify-between items-center border-none bg-transparent dark:bg-black/10 backdrop-blur-[40px] z-[150] sticky top-0 transition-colors duration-500 relative">
           {/* LEFT: User Avatar Image */}
           <div 
             onClick={() => router.push('/settings')}

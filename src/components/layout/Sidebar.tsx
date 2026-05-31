@@ -83,8 +83,9 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
 
   return (
     /* bg-[var(--sidebar-bg)] border-[var(--card-border)] */
+    /* bg-white/60 dark:bg-black/40 backdrop-blur-3xl border-x-0 shadow-[20px_0_50px...] */
     <aside className={cn(
-      "hidden lg:flex w-72 bg-white/60 dark:bg-black/40 backdrop-blur-3xl h-screen fixed top-0 flex-col z-[110] border-y-0 border-x-0 shadow-[20px_0_50px_rgba(0,0,0,0.05)] dark:shadow-[20px_0_50px_rgba(0,0,0,0.5)] sidebar-target transition-all duration-300",
+      "hidden lg:flex w-72 bg-transparent dark:bg-black/10 backdrop-blur-[40px] border-none h-screen fixed top-0 flex-col z-[110] shadow-none sidebar-target transition-all duration-300",
       "inset-inline-start-0"
     )}>
       {/* ── ULTRA-PREMIUM IDENTITY LAYER ── */}

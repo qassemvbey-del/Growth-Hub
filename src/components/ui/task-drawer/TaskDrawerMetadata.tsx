@@ -109,7 +109,8 @@ export default function TaskDrawerMetadata({
 
       {/* B. ASSIGNEE SECTION (Squad Goals Only) */}
       {isSquad && squadMembers && squadMembers.length > 0 && (
-        <div className="p-5 border border-white/5 bg-zinc-900/40 rounded-md space-y-4">
+        /* bg-zinc-900/40 */
+        <div className="p-5 border border-white/5 bg-transparent dark:bg-white/5 rounded-md space-y-4">
           <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
             {isRTL ? 'المسؤول' : 'ASSIGNED TO'}
           </h3>
@@ -121,7 +122,8 @@ export default function TaskDrawerMetadata({
                   {task.assignee.avatar_url ? (
                     <img src={task.assignee.avatar_url} className="w-8 h-8 rounded-full object-cover border border-white/10" />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-xs font-bold text-white">
+                    /* bg-zinc-800 */
+                    <div className="w-8 h-8 rounded-full bg-transparent dark:bg-white/10 border border-white/10 flex items-center justify-center text-xs font-bold text-white">
                       {task.assignee.full_name?.charAt(0) || '?'}
                     </div>
                   )}
@@ -201,7 +203,8 @@ export default function TaskDrawerMetadata({
                         {member.avatar_url ? (
                           <img src={member.avatar_url} className="w-6 h-6 rounded-full object-cover shrink-0" />
                         ) : (
-                          <div className="w-6 h-6 rounded-full bg-zinc-800 flex items-center justify-center text-[9px] font-bold shrink-0 text-white">
+                          /* bg-zinc-800 */
+                          <div className="w-6 h-6 rounded-full bg-transparent dark:bg-white/10 flex items-center justify-center text-[9px] font-bold shrink-0 text-white">
                             {member.full_name?.charAt(0) || '?'}
                           </div>
                         )}

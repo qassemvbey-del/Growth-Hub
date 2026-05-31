@@ -28,7 +28,8 @@ export default function TaskDrawerChecklist({
   themeColor
 }: TaskDrawerChecklistProps) {
   return (
-    <div className="space-y-3 p-5 border border-white/5 bg-zinc-900/40 rounded-md">
+    /* bg-zinc-900/40 */
+    <div className="space-y-3 p-5 border border-white/5 bg-transparent dark:bg-white/5 rounded-md">
       <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
         {isRTL ? 'المهام الفرعية // SUBTASKS' : 'CHECKLIST // SUBTASKS'}
       </h3>
@@ -39,7 +40,8 @@ export default function TaskDrawerChecklist({
           placeholder={isRTL ? 'مهمة فرعية جديدة...' : 'Add checklist item...'}
           value={newSubtaskText}
           onChange={e => setNewSubtaskText(e.target.value)}
-          className="flex-1 bg-zinc-900/80 border border-white/8 py-2 px-3 font-space text-xs text-white outline-none transition-all rounded-md focus:border-white/20"
+          /* bg-zinc-900/80 */
+          className="flex-1 bg-transparent dark:bg-white/5 border border-white/8 py-2 px-3 font-space text-xs text-white outline-none transition-all rounded-md focus:border-white/20"
         />
         <button
           type="submit"
@@ -48,12 +50,13 @@ export default function TaskDrawerChecklist({
           <NeonIcon icon={PlusSquare} className="w-4 h-4" />
         </button>
       </form>
-
+ 
       <div className="space-y-2 mt-3">
         {subtasks.map((sub: any) => (
           <div
             key={sub.id}
-            className="flex items-center justify-between gap-3 p-2.5 rounded-md border bg-zinc-950/40 border-white/5 hover:border-white/10 transition-colors"
+            /* bg-zinc-950/40 */
+            className="flex items-center justify-between gap-3 p-2.5 rounded-md border bg-transparent dark:bg-white/[0.02] border-white/5 hover:border-white/10 transition-colors"
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <button

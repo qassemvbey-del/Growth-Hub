@@ -22,7 +22,8 @@ export default function TaskDrawerDescription({
       <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
         {isRTL ? 'وصف المهمة' : 'TASK DESCRIPTION'}
       </h3>
-      <div className="border border-white/5 rounded-md overflow-hidden bg-zinc-950/40">
+      {/* bg-zinc-950/40 */}
+      <div className="border border-white/5 rounded-md overflow-hidden bg-transparent dark:bg-white/[0.02]">
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
