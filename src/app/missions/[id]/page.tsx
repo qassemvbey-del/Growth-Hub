@@ -1752,7 +1752,10 @@ const { progress, isInRedZone } = useMemo(() => {
                                       </span>
                                     )
                                   })()}
-                                  <ComplexityDashes weight={task.weight} color={currentTheme.color} />
+                                  <div className={cn("flex items-center gap-2", isRTL ? "mr-auto" : "ml-auto")}>
+                                    <span className="text-[9px] uppercase font-mono text-white/30 tracking-widest">Weight:</span>
+                                    <ComplexityDashes weight={task.weight} color={currentTheme.color} />
+                                  </div>
                                 </div>
                               </div>
                             </div>

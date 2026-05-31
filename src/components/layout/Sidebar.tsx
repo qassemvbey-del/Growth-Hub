@@ -166,11 +166,17 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
 
         {/* XP Progress Bar */}
         <div className="w-full space-y-1.5 mt-5 px-2">
-          <div className="flex justify-between items-center text-[11px] font-space tracking-wider font-black">
-            <span className="text-zinc-500 dark:text-zinc-400 uppercase">
-              {mounted ? (isRTL ? `░░░░ ${xpNeeded} نقطة إلى ${nextRankName === 'MAX RANK' ? 'أعلى رتبة' : nextRankName}` : `░░░░ ${xpNeeded}xp to ${nextRankName}`) : `░░░░ 800xp to PLATINUM`}
+          <div className="flex justify-between items-center w-full text-[11px] font-space tracking-wider font-black">
+            <span className="text-zinc-500 dark:text-zinc-400 uppercase text-left leading-tight">
+              {mounted
+                ? (isRTL
+                    ? `${xpNeeded} نقطة إلى ${nextRankName === 'MAX RANK' ? 'أعلى رتبة' : nextRankName}`
+                    : `${xpNeeded}xp to ${nextRankName}`)
+                : `800xp to PLATINUM`}
             </span>
-            <span className="text-xs font-bold" style={{ color: currentTheme.color }}>{progressPct.toFixed(0)}%</span>
+            <span className="text-xs font-bold shrink-0 pl-2" style={{ color: currentTheme.color }}>
+              {progressPct.toFixed(0)}%
+            </span>
           </div>
         </div>
       </div>

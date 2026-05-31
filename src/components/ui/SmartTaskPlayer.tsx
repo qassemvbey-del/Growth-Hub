@@ -143,8 +143,11 @@ export default function SmartTaskPlayer({
     }
   }, [saveCurrentTime])
 
-  // Build the YouTube video URL from the ID
-  const videoUrl = `https://www.youtube.com/watch?v=${videoId}`
+  // If videoId is missing or empty, do NOT render a dead black box.
+  if (!videoId || videoId.trim() === "") return null
+
+  // Build the video URL: If it is already a full URL, use it directly; otherwise wrap it as a YouTube URL.
+  const videoUrl = videoId.includes('://') ? videoId : `https://www.youtube.com/watch?v=${videoId}`
 
   return (
     <div className="w-full h-full relative">
@@ -154,7 +157,7 @@ export default function SmartTaskPlayer({
       <ReactPlayer
         ref={playerRef}
         url={videoUrl}
-        controls
+        controls={true}
         playing={isPlaying}
         onReady={handleReady}
         onProgress={handleProgress}

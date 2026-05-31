@@ -685,7 +685,20 @@ export default function TaskDrawer({
   */
 
   // --- RESTORED ORIGINAL VIDEO PLAYER LOGIC ---
-  const videoId = task.video_id || getYouTubeId(task.video_url || '')
+  const resolvedVideoUrl = task.video_url || task.metadata?.videoUrl || task.metadata?.mediaUrl || (() => {
+    const attachments = task.metadata?.attachments || []
+    const youtubeAttach = attachments.find((att: any) => 
+      att.url && (att.url.includes('youtube.com') || att.url.includes('youtu.be') || att.url.includes('mp4'))
+    )
+    if (youtubeAttach) return youtubeAttach.url
+
+    const descMatches = task.description?.match(/https?:\/\/[^\s]+/)
+    if (descMatches) return descMatches[0]
+
+    return ''
+  })()
+
+  const videoId = task.video_id || getYouTubeId(resolvedVideoUrl)
   const hasVideo = !!videoId
 
   // Stored local video details
