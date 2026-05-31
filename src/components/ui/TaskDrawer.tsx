@@ -648,7 +648,8 @@ export default function TaskDrawer({
     alert(isRTL ? 'تم نسخ رابط المهمة!' : 'Task link copied to clipboard!')
   }
 
-  // --- VIDEO PLAYER LOGIC & EXTRACTION ---
+  // --- VIDEO PLAYER LOGIC & EXTRACTION (COMMENTED OUT LEGACY REACTPLAYER HELPERS) ---
+  /*
   const videoUrl = task.metadata?.videoUrl || task.metadata?.mediaUrl || (() => {
     const attachments = task.metadata?.attachments || []
     const youtubeAttach = attachments.find((att: any) => 
@@ -680,6 +681,25 @@ export default function TaskDrawer({
     if (typeof window !== 'undefined') {
       localStorage.setItem(`video_progress_${task.id}`, String(state.playedSeconds))
     }
+  }
+  */
+
+  // --- RESTORED ORIGINAL VIDEO PLAYER LOGIC ---
+  const videoId = task.video_id || getYouTubeId(task.video_url || '')
+  const hasVideo = !!videoId
+
+  // Stored local video details
+  const storedProgress = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`growth_hub_video_progress_${task.id}`) || '0') : 0
+  const storedDuration = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`growth_hub_video_duration_${task.id}`) || '0') : 0
+  const videoProgress = task.video_progress ?? storedProgress
+  const videoDuration = task.video_duration ?? storedDuration
+
+  const formatVideoTime = (secs: number) => {
+    const h = Math.floor(secs / 3600)
+    const m = Math.floor((secs % 3600) / 60)
+    const s = Math.floor(secs % 60)
+    if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+    return `${m}:${String(s).padStart(2, '0')}`
   }
 
   return (
@@ -735,6 +755,33 @@ export default function TaskDrawer({
 
         {/* Single Scrollable view content wrapper */}
         <div className="flex-1 overflow-y-auto p-6 pb-24 space-y-8 select-none">
+          {/* SmartTaskPlayer Section (Strict aspect-video container with dynamic rendering) */}
+          {hasVideo && (
+            <div className="space-y-3 shrink-0">
+              <div className="w-full aspect-video rounded-xl overflow-hidden shadow-lg relative border bg-black/40" style={{ borderColor: `${themeColor}20` }}>
+                <SmartTaskPlayer
+                  taskId={task.id}
+                  videoId={videoId}
+                  initialProgress={videoProgress}
+                  isGuest={isGuest}
+                  themeColor={themeColor}
+                  onComplete={onComplete}
+                  onProgressUpdate={onProgressUpdate}
+                />
+              </div>
+              {/* Mini video meta bar */}
+              <div className="flex justify-between items-center text-[11px] font-mono text-white/55 px-1 bg-white/[0.02] py-2 rounded-lg border border-white/5">
+                <span className="flex items-center gap-1.5 px-2">
+                  <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: themeColor }} />
+                  {t('savedProgress')}
+                </span>
+                <span className="px-2 tracking-widest">
+                  {formatVideoTime(videoProgress)} / {formatVideoTime(videoDuration)}
+                </span>
+              </div>
+            </div>
+          )}
+
           <TaskDrawerMetadata
             task={task}
             themeColor={themeColor}
@@ -750,6 +797,8 @@ export default function TaskDrawer({
             sendNotification={sendNotification}
           />
 
+          {/* Commented out temporary video player block at the bottom */}
+          {/*
           {videoUrl && (
             <div className="space-y-3">
               <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
@@ -769,6 +818,7 @@ export default function TaskDrawer({
               </div>
             </div>
           )}
+          */}
 
           <TaskDrawerDescription
             task={task}
