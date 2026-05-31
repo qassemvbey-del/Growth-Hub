@@ -13,8 +13,12 @@ export default function AmbientAurora({ themeColor }: AmbientAuroraProps) {
         className="absolute w-[45vw] h-[45vw] rounded-full mix-blend-screen filter blur-[120px] opacity-45 -top-20 -left-20 animate-aurora-blob"
         style={{ backgroundColor: themeColor }}
       /> */}
-      <div 
+      {/* <div 
         className="absolute w-[45vw] h-[45vw] rounded-full mix-blend-screen filter blur-[120px] md:blur-[150px] opacity-60 -top-20 -left-20 animate-aurora-blob"
+        style={{ backgroundColor: themeColor }}
+      /> */}
+      <div 
+        className="absolute w-[25vw] h-[25vw] rounded-full mix-blend-screen filter blur-[120px] md:blur-[150px] opacity-20 -top-20 -left-20 animate-aurora-blob"
         style={{ backgroundColor: themeColor }}
       />
 

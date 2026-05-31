@@ -102,9 +102,22 @@ export default function TaskDrawerMetadata({
         </span>
 
         {/* Deadline Pill */}
-        <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md font-mono font-bold border border-white/5 bg-white/[0.02] text-white/70">
+        {/* <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md font-mono font-bold border border-white/5 bg-white/[0.02] text-white/70">
           📅 {endDate || (isRTL ? 'غير محدد' : 'NOT SET')}
-        </span>
+        </span> */}
+        <label className="relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono font-bold border border-white/5 bg-white/[0.02] text-white/70 hover:bg-white/[0.05] hover:text-white cursor-pointer transition-all">
+          <span>📅 {endDate || (isRTL ? 'غير محدد' : 'NOT SET')}</span>
+          <input
+            type="date"
+            value={endDate ? endDate.substring(0, 10) : ''}
+            onChange={async (e) => {
+              const selectedDate = e.target.value
+              const updatedMetadata = { ...task.metadata, endDate: selectedDate }
+              await updateTask(task.id, { metadata: updatedMetadata })
+            }}
+            className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+          />
+        </label>
       </div>
 
       {/* B. ASSIGNEE SECTION (Squad Goals Only) */}

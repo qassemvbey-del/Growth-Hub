@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useState, FormEvent, KeyboardEvent, useEffect, useRef, useCallback } from 'react'
+import dynamic from 'next/dynamic'
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false }) as any
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
 import { createClient } from '@/lib/supabase'
@@ -646,6 +648,40 @@ export default function TaskDrawer({
     alert(isRTL ? 'تم نسخ رابط المهمة!' : 'Task link copied to clipboard!')
   }
 
+  // --- VIDEO PLAYER LOGIC & EXTRACTION ---
+  const videoUrl = task.metadata?.videoUrl || task.metadata?.mediaUrl || (() => {
+    const attachments = task.metadata?.attachments || []
+    const youtubeAttach = attachments.find((att: any) => 
+      att.url && (att.url.includes('youtube.com') || att.url.includes('youtu.be') || att.url.includes('mp4'))
+    )
+    if (youtubeAttach) return youtubeAttach.url
+
+    const descMatches = task.description?.match(/https?:\/\/[^\s]+/)
+    if (descMatches) return descMatches[0]
+
+    return ''
+  })()
+
+  const playerRef = useRef<any>(null)
+
+  const handlePlayerReady = () => {
+    if (typeof window !== 'undefined' && playerRef.current) {
+      const saved = localStorage.getItem(`video_progress_${task.id}`)
+      if (saved) {
+        const savedSeconds = parseFloat(saved)
+        if (savedSeconds > 0) {
+          playerRef.current.seekTo(savedSeconds)
+        }
+      }
+    }
+  }
+
+  const handlePlayerProgress = (state: { playedSeconds: number }) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`video_progress_${task.id}`, String(state.playedSeconds))
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-[20000] flex items-stretch">
       {/* 1. Backdrop Overlay */}
@@ -713,6 +749,26 @@ export default function TaskDrawer({
             updateTask={onUpdateTask}
             sendNotification={sendNotification}
           />
+
+          {videoUrl && (
+            <div className="space-y-3">
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
+                {isRTL ? 'مشغل الفيديو // EMBEDDED PLAYER' : 'EMBEDDED VIDEO PLAYER // MEDIA'}
+              </h3>
+              <div className="relative aspect-video w-full rounded-md overflow-hidden bg-black/40 border border-white/5 shadow-2xl">
+                <ReactPlayer
+                  ref={playerRef}
+                  url={videoUrl}
+                  controls
+                  width="100%"
+                  height="100%"
+                  onReady={handlePlayerReady}
+                  onProgress={handlePlayerProgress}
+                  progressInterval={2000}
+                />
+              </div>
+            </div>
+          )}
 
           <TaskDrawerDescription
             task={task}
