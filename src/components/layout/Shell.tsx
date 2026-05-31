@@ -28,6 +28,7 @@ import LevelUpModal from '@/components/ui/LevelUpModal'
 import GlitchOverlay from '@/components/ui/GlitchOverlay'
 import CommandPalette from '@/components/ui/CommandPalette'
 import Tutorial from '@/components/ui/Tutorial'
+import AmbientAurora from '@/components/ui/AmbientAurora'
 
 
 function WorkspaceLoader({ isRTL }: { isRTL: boolean }) {
@@ -557,7 +558,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   return (
     <div
       className={cn(
-        'min-h-screen bg-transparent text-foreground flex relative transition-colors duration-500',
+        'min-h-screen bg-zinc-50 dark:bg-[#050505] text-foreground flex relative transition-colors duration-500',
         networkStatus === 'OFFLINE' && 'connection-offline'
       )}
       style={{ 
@@ -577,6 +578,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         `}</style>
       )}
       {/* Background FX */}
+      <AmbientAurora themeColor={currentTheme?.color || '#14b8a6'} />
       <div className="fixed inset-0 pointer-events-none z-[100] scanlines opacity-[0.02]" />
       <div className="fixed inset-0 pointer-events-none z-0 cyber-grid opacity-[0.05]" />
 

@@ -1140,8 +1140,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 initial={{ scale: 0.9, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9 }}
-                onClick={e => e.stopPropagation()}
-                className="w-full max-w-[380px] bg-zinc-950/95 border border-white/10 p-6 space-y-5 rounded-md shadow-2xl my-auto relative"
+                /* bg-zinc-950/95 border border-white/10 */
+                className="w-full max-w-[380px] bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 p-6 space-y-5 rounded-md shadow-2xl my-auto relative"
               >
                 <button
                   onClick={() => { setShowCreate(false); setDefaultView('list'); }}
@@ -1558,7 +1558,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
               exit={{ scale: 0.9 }}
               onClick={e => e.stopPropagation()}
               className={cn(
-                "w-[calc(100%-2rem)] mx-auto md:max-w-md bg-zinc-950/95 border backdrop-blur-md p-6 md:p-8 space-y-6 rounded-md shadow-2xl my-auto max-h-[90vh] overflow-y-auto relative text-left transition-all duration-300",
+                /* bg-zinc-950/95 border */
+                "w-[calc(100%-2rem)] mx-auto md:max-w-md bg-white/60 dark:bg-black/40 backdrop-blur-3xl border-black/5 dark:border-white/5 border p-6 md:p-8 space-y-6 rounded-md shadow-2xl my-auto max-h-[90vh] overflow-y-auto relative text-left transition-all duration-300",
                 joinStatus === 'invalid' ? 'border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.2)]' :
                   joinStatus === 'valid' ? 'border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.2)]' :
                     'border-teal-500/30'

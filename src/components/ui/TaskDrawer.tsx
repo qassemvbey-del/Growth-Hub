@@ -646,7 +646,8 @@ export default function TaskDrawer({
         animate={{ x: 0 }}
         exit={{ x: isRTL ? '-100%' : '100%' }}
         transition={{ type: 'tween', duration: 0.35, ease: 'easeOut' }}
-        className={`fixed top-0 bottom-0 z-[20005] w-full md:w-[50vw] lg:w-[45vw] bg-zinc-950/98 shadow-2xl flex flex-col border-white/10 ${
+        /* bg-zinc-950/98 shadow-2xl flex flex-col border-white/10 */
+        className={`fixed top-0 bottom-0 z-[20005] w-full md:w-[50vw] lg:w-[45vw] bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 shadow-2xl flex flex-col ${
           isRTL ? 'left-0 border-r-2' : 'right-0 border-l-2'
         }`}
         style={{ borderColor: themeColor }}
@@ -838,7 +839,8 @@ export default function TaskDrawer({
         </div>
 
         {/* Fixed Thumb-Zone Footer - Explicitly lifted to clear bottom nav */}
-        <div className="absolute bottom-[85px] left-0 w-full z-[99999] bg-[#0a0a0f]/95 backdrop-blur-xl border-t border-white/5 p-3 pb-safe flex items-center gap-2">
+        {/* bg-[#0a0a0f]/95 backdrop-blur-xl border-t border-white/5 */}
+        <div className="absolute bottom-[85px] left-0 w-full z-[99999] bg-white/60 dark:bg-black/40 backdrop-blur-3xl border-t border-black/5 dark:border-white/5 p-3 pb-safe flex items-center gap-2">
           {/* Play/Focus Button */}
           {!task.is_completed ? (
             <button

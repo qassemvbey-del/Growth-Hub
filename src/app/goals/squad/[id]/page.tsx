@@ -1477,8 +1477,8 @@ const { progress, isInRedZone } = useMemo(() => {
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute left-0 mt-2 w-56 bg-zinc-950 border border-white/10 rounded-md shadow-2xl z-50 p-1.5 space-y-1 font-space"
+                        /* bg-zinc-950 border border-white/10 */
+                        className="absolute left-0 mt-2 w-56 bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-md shadow-2xl z-50 p-1.5 space-y-1 font-space"
                       >
                         <button
                           onClick={() => { playBlip(); setShowPlaylistModal(true); setShowImportDropdown(false); }}
@@ -2708,8 +2708,8 @@ const { progress, isInRedZone } = useMemo(() => {
               initial={{ scale: 0.95, y: 15, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.95, y: 15, opacity: 0 }}
-              onClick={e => e.stopPropagation()}
-              className="bg-zinc-950 border border-cyan-500/30 rounded-md p-6 max-w-md w-full relative overflow-hidden shadow-[0_0_40px_rgba(6,182,212,0.15)] space-y-6"
+              /* bg-zinc-950 border border-cyan-500/30 */
+              className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border-black/5 dark:border-white/5 border rounded-md p-6 max-w-md w-full relative overflow-hidden shadow-[0_0_40px_rgba(6,182,212,0.15)] space-y-6"
             >
               {/* Decorative top neon bar */}
               <div className="absolute top-0 inset-x-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, #22d3ee, transparent)` }} />
@@ -2737,7 +2737,8 @@ const { progress, isInRedZone } = useMemo(() => {
               <div className="space-y-5 relative">
                 {/* Generating Overlay for Achievement Card */}
                 {isGeneratingCard && (
-                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-zinc-950/90 backdrop-blur-md rounded-md border border-white/5">
+                  /* bg-zinc-950/90 backdrop-blur-md rounded-md border border-white/5 */
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white/60 dark:bg-black/40 backdrop-blur-3xl rounded-md border border-black/5 dark:border-white/5">
                     <div className="relative w-12 h-12">
                       <div className="absolute inset-0 rounded-full border-t-2 border-l-2 border-transparent animate-spin" style={{ borderTopColor: missionColor, borderLeftColor: missionColor, filter: `drop-shadow(0 0 6px ${missionColor})` }} />
                       <div className="absolute inset-2 rounded-full border-b-2 border-r-2 border-transparent animate-spin" style={{ borderBottomColor: missionColor, borderRightColor: missionColor, opacity: 0.5, animationDirection: 'reverse' }} />
