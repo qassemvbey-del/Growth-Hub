@@ -1,6 +1,6 @@
 'use client'
 
-import { Keyboard, Layers, Link, Pin, Plus, Save, Search, Trash2, X, Bold, Italic } from 'lucide-react'
+import { FileText, Keyboard, Layers, Link, Pin, Plus, Save, Search, Trash2, X, Bold, Italic } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
 import Shell from '@/components/layout/Shell'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -772,13 +772,45 @@ export default function NotesPage() {
 
 
         {/* Notes Grid */}
+        {/* Original flat empty state replaced — see git history for old version */}
         {filteredNotes.length === 0 ? (
-          <div className="flex items-center justify-center py-40">
-            <p className="text-black/30 dark:text-white/10 font-space text-[11px] tracking-[0.5em] uppercase font-black">
-              {searchQuery 
-                ? (isRTL ? 'لا توجد ملاحظات مطابقة' : 'No matching notes') 
-                : (isRTL ? 'لا توجد ملاحظات بعد — أضف ملاحظتك الأولى' : 'No notes yet — add your first')}
-            </p>
+          <div className="flex items-center justify-center py-12 sm:py-20">
+            <div 
+              className="w-full max-w-md mx-auto p-6 sm:p-8 border border-white/10 bg-black/40 backdrop-blur-xl rounded-2xl flex flex-col items-center justify-center text-center relative overflow-hidden"
+              style={{ boxShadow: `0 0 25px ${currentTheme.color}10, inset 0 0 15px ${currentTheme.color}05` }}
+            >
+              {/* Decorative corner accents */}
+              <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-2xl pointer-events-none" style={{ borderColor: `${currentTheme.color}30` }} />
+              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 rounded-br-2xl pointer-events-none" style={{ borderColor: `${currentTheme.color}30` }} />
+
+              {/* Pulsing circular badge */}
+              <div 
+                className="w-16 h-16 rounded-full flex items-center justify-center mb-5 relative"
+                style={{ backgroundColor: `${currentTheme.color}10`, border: `1px solid ${currentTheme.color}30`, boxShadow: `0 0 20px ${currentTheme.color}20` }}
+              >
+                <span className="absolute inset-0 rounded-full animate-ping opacity-20" style={{ backgroundColor: currentTheme.color }} />
+                <FileText className="w-7 h-7 animate-pulse" style={{ color: currentTheme.color }} />
+              </div>
+
+              {/* Terminal status readout */}
+              <span className="text-[10px] uppercase tracking-[0.2em] font-space font-black mb-2" style={{ color: currentTheme.color }}>
+                {searchQuery 
+                  ? 'SEARCH_RESULT // NO_MATCH' 
+                  : 'TERMINAL_STATUS // MEMORY_VOID'}
+              </span>
+
+              <h3 className="text-sm font-bold font-space text-zinc-200 tracking-wide uppercase mb-1">
+                {searchQuery
+                  ? (isRTL ? 'لا توجد ملاحظات مطابقة' : 'No Matching Notes Found')
+                  : (isRTL ? 'لا توجد ملاحظات مسجلة' : 'No Active Encrypted Notes')}
+              </h3>
+
+              <p className="text-xs font-space text-zinc-500 leading-relaxed max-w-[280px]">
+                {searchQuery
+                  ? (isRTL ? 'جرب كلمات بحث مختلفة للعثور على ما تبحث عنه.' : 'Try different search terms to locate your entries.')
+                  : (isRTL ? 'لا توجد ملاحظات مسجلة حالياً. اضغط على زر "إضافة ملاحظة" لتسجيل أولى أفكارك.' : 'Your memory vault is empty. Tap "Add Note" to encrypt your first thought.')}
+              </p>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
