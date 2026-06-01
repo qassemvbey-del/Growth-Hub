@@ -892,18 +892,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       </nav>
       ── */}
 
-      {/* Edge swipe trigger zone for mobile */}
-      {/* Commented out original edge-swipe trigger for safety:
-      {!isMobileNavOpen && (
-        <div 
-          className="fixed top-0 left-0 w-6 h-full z-[9999] lg:hidden"
-          onTouchStart={() => {
-            setIsMobileNavOpen(true);
-            playBlip();
-          }}
-        />
-      )}
-      */}
+      {/* Commented out original narrow edge-touch trigger:
       {!isMobileNavOpen && (
         <div 
           className="fixed top-0 left-0 w-6 h-full z-[9999] lg:hidden bg-transparent touch-none"
@@ -913,6 +902,43 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
             playBlip();
           }}
         />
+      )}
+      */}
+      {/* Full-screen swipe-to-open gesture detector — RTL-aware */}
+      {!isMobileNavOpen && (
+        <div 
+          className="fixed inset-0 z-[9999] lg:hidden pointer-events-none"
+        >
+          <div 
+            className="absolute top-0 h-full w-10 pointer-events-auto touch-none"
+            style={{ [isRTL ? 'right' : 'left']: 0 }}
+            onTouchStart={(e) => {
+              const touch = e.touches[0]
+              ;(e.currentTarget as HTMLDivElement).dataset.startX = String(touch.clientX)
+              ;(e.currentTarget as HTMLDivElement).dataset.startY = String(touch.clientY)
+            }}
+            onTouchEnd={(e) => {
+              const el = e.currentTarget as HTMLDivElement
+              const startX = parseFloat(el.dataset.startX || '0')
+              const startY = parseFloat(el.dataset.startY || '0')
+              const endTouch = e.changedTouches[0]
+              const deltaX = endTouch.clientX - startX
+              const deltaY = Math.abs(endTouch.clientY - startY)
+              
+              // Only trigger if horizontal swipe ≥ 60px and not a vertical scroll
+              const threshold = 60
+              if (deltaY < 80) {
+                if (!isRTL && deltaX >= threshold) {
+                  setIsMobileNavOpen(true)
+                  playBlip()
+                } else if (isRTL && deltaX <= -threshold) {
+                  setIsMobileNavOpen(true)
+                  playBlip()
+                }
+              }
+            }}
+          />
+        </div>
       )}
 
       {/* ── MOBILE SIDEBAR DRAWER ── */}
