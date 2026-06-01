@@ -228,9 +228,7 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
                 >
                   {isLoading ? (
                     <div className="flex flex-col items-center justify-center h-full space-y-4 py-10">
-                       <span className="text-xs font-black tracking-widest animate-pulse uppercase" style={{ color: coachColor }}>
-                         {profile?.language === 'ar' ? `${coachName} بيفكر...` : `${coachName}_PROCESSING...`}
-                       </span>
+                       <CyclingLoadingText coachName={coachName} userName={profile?.full_name || 'Coach'} lang={profile?.language} color={coachColor} />
                        <div className="flex gap-2">
                           {[0, 1, 2].map(i => (
                             <motion.div
@@ -360,5 +358,35 @@ function ActionButton({ icon, title, subtitle, onClick, disabled, color, lang, c
         <ChevronIcon className="w-4 h-4" />
       </div>
     </button>
+  )
+}
+
+function CyclingLoadingText({ coachName, userName, lang, color }: { coachName: string; userName: string; lang?: string; color: string }) {
+  const isAr = lang === 'ar'
+  const messages = React.useMemo(() => isAr ? [
+    'جاري تحليل البيانات... 🔍',
+    'مزامنة التقدم... ⚡',
+    `${userName} يعالج البيانات... 🧠`,
+    'تنظيم المحتوى... 📂',
+  ] : [
+    'Analyzing metadata... 🔍',
+    'Syncing progress... ⚡',
+    `${userName} is processing... 🧠`,
+    'Organizing your content... 📂',
+  ], [isAr, userName])
+
+  const [index, setIndex] = React.useState(0)
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex(prev => (prev + 1) % messages.length)
+    }, 2000)
+    return () => clearInterval(interval)
+  }, [messages.length])
+
+  return (
+    <span className="text-xs font-black tracking-widest animate-pulse uppercase" style={{ color }}>
+      {messages[index]}
+    </span>
   )
 }

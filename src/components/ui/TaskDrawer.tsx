@@ -39,12 +39,28 @@ interface TaskDrawerProps {
 
 const getYouTubeId = (urlOrId: string) => {
   if (!urlOrId) return ''
+  // If it's already a clean 11-char ID, return it directly
   if (urlOrId.length === 11 && !urlOrId.includes('/') && !urlOrId.includes('?')) return urlOrId
   try {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/
+    // Primary strategy: Use URL object to extract 'v' query parameter (handles playlist URLs robustly)
+    const urlObj = new URL(urlOrId)
+    const vParam = urlObj.searchParams.get('v')
+    if (vParam && vParam.length === 11) return vParam
+    // Handle youtu.be short links
+    if (urlObj.hostname === 'youtu.be') {
+      const pathId = urlObj.pathname.slice(1)
+      if (pathId.length === 11) return pathId
+    }
+    // Handle /embed/ or /v/ paths
+    const pathMatch = urlObj.pathname.match(/\/(embed|v)\/([a-zA-Z0-9_-]{11})/)
+    if (pathMatch && pathMatch[2]) return pathMatch[2]
+  } catch (_e) {
+    // Fallback: legacy regex for non-standard inputs
+    const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
     const match = urlOrId.match(regExp)
     return (match && match[2].length === 11) ? match[2] : urlOrId
-  } catch (e) { return urlOrId }
+  }
+  return urlOrId
 }
 
 export default function TaskDrawer({

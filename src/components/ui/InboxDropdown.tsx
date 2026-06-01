@@ -1,6 +1,6 @@
 'use client'
 
-import { Inbox, X, ArrowRight } from 'lucide-react'
+import { Inbox, X, ArrowRight, CheckCheck } from 'lucide-react'
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -21,10 +21,11 @@ interface Props {
   reports: Report[]
   onClose: () => void
   onRead: (report: Report) => void
+  onMarkAllRead?: () => void
   themeColor: string
 }
 
-export default function InboxDropdown({ isOpen, reports, onClose, onRead, themeColor }: Props) {
+export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMarkAllRead, themeColor }: Props) {
   const router = useRouter()
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all')
   const { isRTL } = useGrowth()
@@ -74,6 +75,17 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, themeC
             <span className="text-[9px] font-space font-black bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded-full shrink-0" style={{ color: themeColor }}>
               {reports.filter(r => !r.is_read).length} {isRTL ? 'غير مقروء' : 'UNREAD'}
             </span>
+            {onMarkAllRead && reports.some(r => !r.is_read) && (
+              <button
+                onClick={onMarkAllRead}
+                className="flex items-center gap-1 text-[8px] font-space font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all cursor-pointer"
+                style={{ color: themeColor }}
+                title={isRTL ? 'تحديد الكل كمقروء' : 'Read All'}
+              >
+                <CheckCheck className="w-3 h-3" />
+                {isRTL ? 'قراءة الكل' : 'Read All'}
+              </button>
+            )}
             <button onClick={onClose} className="p-1 -mr-1 text-black/40 dark:text-white/30 hover:text-black dark:hover:text-white transition-colors cursor-pointer" title={isRTL ? 'إغلاق' : 'Close'}>
               <X className="w-4 h-4" />
             </button>

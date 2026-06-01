@@ -306,7 +306,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
     return CloudLightning
   }
 
-  const { reports, markAsRead } = useInbox()
+  const { reports, markAsRead, fetchReports } = useInbox()
   const unreadCount = useMemo(() => reports.filter(r => !r.is_read).length, [reports])
 
   useEffect(() => {
@@ -367,6 +367,18 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   // Global Escape & Enter keys listener to manage popups, modals, and actions
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+Arrow scroll shortcuts
+      if (e.ctrlKey && e.key === 'ArrowUp') {
+        e.preventDefault()
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        return
+      }
+      if (e.ctrlKey && e.key === 'ArrowDown') {
+        e.preventDefault()
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+        return
+      }
+
       if (e.key !== 'Escape' && e.key !== 'Enter') return
 
       const activeEl = document.activeElement
@@ -672,6 +684,11 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                   markAsRead(report.id)
                   setInboxOpen(false)
                 }}
+                onMarkAllRead={async () => {
+                  const unread = reports.filter(r => !r.is_read)
+                  for (const r of unread) { await markAsRead(r.id) }
+                  fetchReports()
+                }}
                 themeColor={currentTheme.color}
               />
             </div>
@@ -904,6 +921,11 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
           onRead={(report) => {
             markAsRead(report.id)
             setInboxOpen(false)
+          }}
+          onMarkAllRead={async () => {
+            const unread = reports.filter(r => !r.is_read)
+            for (const r of unread) { await markAsRead(r.id) }
+            fetchReports()
           }}
           themeColor={currentTheme.color}
         />
