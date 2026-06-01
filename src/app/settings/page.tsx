@@ -434,95 +434,49 @@ export default function SettingsPage() {
                           />
                         </div>
 
-                        {/* Counter Widget and Gender Row */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                          
-                          {/* CUSTOM AGE COUNTER (No Spinner arrows) */}
-                          <div className="space-y-2">
-                            <label className="font-space tracking-widest uppercase font-black text-xs text-[var(--text-secondary)]">
-                              {t('age')}
-                            </label>
-                            
-                            {/* Replaced with compact Age Counter:
-                            <div className="flex items-center bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl p-1 h-12 w-full justify-between">
-                              <button
-                                type="button"
-                                onClick={handleDecrementAge}
-                                className="w-10 h-10 rounded-lg flex items-center justify-center border font-bold text-lg transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/80"
-                                style={{ borderColor: `${currentTheme.color}40`, color: currentTheme.color }}
-                              >
-                                &minus;
-                              </button>
-
-                              <span className="font-space font-black text-lg text-white tracking-widest px-4">
-                                {formData.age}
-                              </span>
-
-                              <button
-                                type="button"
-                                onClick={handleIncrementAge}
-                                className="w-10 h-10 rounded-lg flex items-center justify-center border font-bold text-lg transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/80"
-                                style={{ borderColor: `${currentTheme.color}40`, color: currentTheme.color }}
-                              >
-                                &#43;
-                              </button>
-                            </div>
-                            */}
-                            <div className="flex items-center bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl p-1 h-9 sm:h-12 w-full justify-between">
-                              <button
-                                type="button"
-                                onClick={handleDecrementAge}
-                                className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center border font-bold text-base sm:text-lg transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/80 cursor-pointer"
-                                style={{ borderColor: `${currentTheme.color}40`, color: currentTheme.color }}
-                              >
-                                &minus;
-                              </button>
-
-                              <span className="font-space font-black text-sm sm:text-lg text-white tracking-widest px-4">
-                                {formData.age}
-                              </span>
-
-                              <button
-                                type="button"
-                                onClick={handleIncrementAge}
-                                className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center border font-bold text-base sm:text-lg transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/80 cursor-pointer"
-                                style={{ borderColor: `${currentTheme.color}40`, color: currentTheme.color }}
-                              >
-                                &#43;
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Gender CustomSelect */}
-                          <div className="space-y-2">
-                            <label className="font-space tracking-widest uppercase font-black text-xs text-[var(--text-secondary)]">
-                              {t('gender')}
-                            </label>
-                            {/* Replaced with compact CustomSelect:
-                            <CustomSelect
-                              value={formData.gender || ''}
-                              onChange={val => setFormData({ ...formData, gender: val })}
-                              options={[
-                                { value: 'Male', label: t('male') },
-                                { value: 'Female', label: t('female') }
-                              ]}
-                              placeholder={isRTL ? 'اختر' : 'SELECT'}
-                              className="h-12 flex items-center"
-                            />
-                            */}
-                            <CustomSelect
-                              value={formData.gender || ''}
-                              onChange={val => setFormData({ ...formData, gender: val })}
-                              options={[
-                                { value: 'Male', label: t('male') },
-                                { value: 'Female', label: t('female') }
-                              ]}
-                              placeholder={isRTL ? 'اختر' : 'SELECT'}
-                              className="h-9 sm:h-12 flex items-center"
-                            />
-                          </div>
-
+                        {/* Age — Simple numerical input matching Full Name field */}
+                        <div className="space-y-2">
+                          <label className="font-space tracking-widest uppercase font-black text-xs text-[var(--text-secondary)]">
+                            {t('age')}
+                          </label>
+                          <input
+                            type="number"
+                            min={10}
+                            max={99}
+                            value={formData.age}
+                            onChange={e => {
+                              const raw = e.target.value
+                              if (raw === '') {
+                                setFormData({ ...formData, age: '' })
+                              } else {
+                                const val = parseInt(raw, 10)
+                                if (!isNaN(val) && val >= 0 && val <= 99) {
+                                  setFormData({ ...formData, age: String(val) })
+                                }
+                              }
+                            }}
+                            className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl px-4 py-2 sm:py-3.5 font-space text-sm font-bold text-[var(--text-primary)] outline-none focus:ring-2 focus:border-transparent transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            style={{ ['--tw-ring-color' as any]: `${currentTheme.color}55` }}
+                          />
                         </div>
+
+                        {/* Gender — Removed from UI per user request. Data layer retained in context.
+                        <div className="space-y-2">
+                          <label className="font-space tracking-widest uppercase font-black text-xs text-[var(--text-secondary)]">
+                            {t('gender')}
+                          </label>
+                          <CustomSelect
+                            value={formData.gender || ''}
+                            onChange={val => setFormData({ ...formData, gender: val })}
+                            options={[
+                              { value: 'Male', label: t('male') },
+                              { value: 'Female', label: t('female') }
+                            ]}
+                            placeholder={isRTL ? 'اختر' : 'SELECT'}
+                            className="h-9 sm:h-12 flex items-center"
+                          />
+                        </div>
+                        */}
 
 
 
