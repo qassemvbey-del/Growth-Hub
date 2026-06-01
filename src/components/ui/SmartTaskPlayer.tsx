@@ -26,19 +26,36 @@ export default function SmartTaskPlayer({
   const iframeRef = useRef<HTMLIFrameElement>(null)
   
   const [isMounted, setIsMounted] = useState(false)
+  const [windowOrigin, setWindowOrigin] = useState('')
   const progressRef = useRef(0)
   const durationRef = useRef(0)
   const hasSeeked = useRef(false)
 
   useEffect(() => {
     setIsMounted(true)
+    if (typeof window !== 'undefined') {
+      setWindowOrigin(window.location.origin)
+    }
   }, [])
 
-  // 1. Recover saved time using exact localStorage keys
+  // 1. Recover saved time using structured JSON object or legacy number strings
   const savedTime = useMemo(() => {
-    const stored = localStorage.getItem(`yt_progress_${taskId}`) || localStorage.getItem(`growth_hub_video_progress_${taskId}`) || '0'
-    const parsed = parseFloat(stored)
-    return Math.floor(parsed > 0 ? parsed : (initialProgress || 0))
+    const stored = localStorage.getItem(`yt_progress_${taskId}`)
+    if (stored) {
+      try {
+        const parsedObj = JSON.parse(stored)
+        if (parsedObj && typeof parsedObj.time === 'number') {
+          return Math.floor(parsedObj.time)
+        }
+      } catch (e) {
+        // Fallback to legacy parsing if not JSON formatted
+        const parsedNum = parseFloat(stored)
+        if (!isNaN(parsedNum) && parsedNum > 0) return Math.floor(parsedNum)
+      }
+    }
+    const legacyStored = localStorage.getItem(`growth_hub_video_progress_${taskId}`)
+    const parsedLegacy = parseFloat(legacyStored || '0')
+    return Math.floor(parsedLegacy > 0 ? parsedLegacy : (initialProgress || 0))
   }, [taskId, initialProgress])
 
   // 2. Extract videoId or playlistId from multiple YouTube formats
@@ -76,7 +93,7 @@ export default function SmartTaskPlayer({
         }
       }
     } catch (e) {
-      // Ignore URL parsing exceptions and fall back
+      // Ignore URL parsing exceptions
     }
 
     // Handle raw 11-character video IDs directly
@@ -84,18 +101,18 @@ export default function SmartTaskPlayer({
       return { type: 'video', id: videoUrl }
     }
 
-    // Default fallback
     return { type: 'video', id: videoUrl }
   }, [url])
 
-  // 3. Construct direct YouTube IFrame embed URL
+  // 3. Construct YouTube IFrame URL with buffering optimizations & playsinline
   const iframeUrl = useMemo(() => {
     if (!parsedMedia.id) return ''
     const base = parsedMedia.type === 'playlist'
       ? `https://www.youtube.com/embed/videoseries?list=${parsedMedia.id}`
       : `https://www.youtube.com/embed/${parsedMedia.id}`
-    return `${base}?enablejsapi=1&start=${savedTime}&rel=0&modestbranding=1`
-  }, [parsedMedia, savedTime])
+    const originParam = windowOrigin ? `&origin=${encodeURIComponent(windowOrigin)}` : ''
+    return `${base}?enablejsapi=1&start=${savedTime}&rel=0&playsinline=1&modestbranding=1${originParam}`
+  }, [parsedMedia, savedTime, windowOrigin])
 
   // 4. Send {event: 'listening'} postMessage when iframe mounts and loads
   useEffect(() => {
@@ -106,12 +123,11 @@ export default function SmartTaskPlayer({
       try {
         el.contentWindow?.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*')
       } catch (err) {
-        // Safe catch for iframe postMessage exceptions
+        // Safe catch
       }
     }
 
     el.addEventListener('load', handleLoad)
-    // Trigger immediately if already loaded
     handleLoad()
 
     return () => {
@@ -119,10 +135,13 @@ export default function SmartTaskPlayer({
     }
   }, [iframeUrl])
 
-  // 5. PostMessage API Event Listener for progress saving
+  // 5. PostMessage API Event Listener with YouTube Origin Security Check
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
-      // Validate source window origin if needed, or simply parse data safely
+      if (e.origin !== 'https://www.youtube.com' && e.origin !== 'https://www.youtube-nocookie.com') {
+        return
+      }
+
       try {
         const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data
         if (!data) return
@@ -133,25 +152,31 @@ export default function SmartTaskPlayer({
           const duration = data.info.duration
 
           if (currentTime !== undefined) {
-            progressRef.current = currentTime
+            const time = Math.floor(currentTime)
+            const dur = Math.floor(duration || durationRef.current || 0)
             
-            // Instantly save to localStorage with key: yt_progress_${taskId}
-            localStorage.setItem(`yt_progress_${taskId}`, currentTime.toString())
-            localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
+            progressRef.current = time
+            
+            // Instantly save to localStorage key as JSON object: yt_progress_${taskId}
+            localStorage.setItem(
+              `yt_progress_${taskId}`,
+              JSON.stringify({ time, duration: dur })
+            )
+            localStorage.setItem(`growth_hub_video_progress_${taskId}`, time.toString())
 
             // Toast feedback for auto-seek on first seek match
-            if (!hasSeeked.current && currentTime > 0) {
+            if (!hasSeeked.current && time > 0) {
               hasSeeked.current = true
               showToast('تم استئناف التشغيل من حيث توقفت', 'success')
+            }
+
+            if (onProgressUpdate) {
+              onProgressUpdate(time, dur)
             }
           }
 
           if (duration !== undefined && duration > 0) {
-            durationRef.current = duration
-          }
-
-          if (currentTime !== undefined && onProgressUpdate) {
-            onProgressUpdate(currentTime, durationRef.current)
+            durationRef.current = Math.floor(duration)
           }
         }
 
@@ -160,7 +185,10 @@ export default function SmartTaskPlayer({
           const state = data.info
           if (state === 0) {
             // Video ended: reset progress
-            localStorage.setItem(`yt_progress_${taskId}`, '0')
+            localStorage.setItem(
+              `yt_progress_${taskId}`,
+              JSON.stringify({ time: 0, duration: durationRef.current })
+            )
             localStorage.setItem(`growth_hub_video_progress_${taskId}`, '0')
             if (!isGuest) {
               supabase.from('tasks').update({ video_progress: 0 }).eq('id', taskId).then()
@@ -168,14 +196,14 @@ export default function SmartTaskPlayer({
             onComplete()
           } else if (state === 2) {
             // Paused: sync to db instantly
-            const currentTime = progressRef.current
+            const time = Math.floor(progressRef.current)
             if (!isGuest) {
-              supabase.from('tasks').update({ video_progress: currentTime }).eq('id', taskId).then()
+              supabase.from('tasks').update({ video_progress: time }).eq('id', taskId).then()
             }
           }
         }
       } catch (err) {
-        // Safe catch for parsing non-JSON messages from other extensions/iframes
+        // Safe catch for postMessage parse error
       }
     }
 
@@ -189,7 +217,7 @@ export default function SmartTaskPlayer({
   useEffect(() => {
     const interval = setInterval(() => {
       if (isGuest) return
-      const currentTime = progressRef.current
+      const currentTime = Math.floor(progressRef.current)
       if (currentTime > 0) {
         supabase.from('tasks').update({ video_progress: currentTime }).eq('id', taskId).then()
       }
@@ -201,10 +229,14 @@ export default function SmartTaskPlayer({
   // Ensure final save on unmount
   useEffect(() => {
     return () => {
-      const currentTime = progressRef.current
-      localStorage.setItem(`yt_progress_${taskId}`, currentTime.toString())
-      if (!isGuest && currentTime > 0) {
-        supabase.from('tasks').update({ video_progress: currentTime }).eq('id', taskId).then()
+      const time = Math.floor(progressRef.current)
+      const duration = durationRef.current
+      localStorage.setItem(
+        `yt_progress_${taskId}`,
+        JSON.stringify({ time, duration })
+      )
+      if (!isGuest && time > 0) {
+        supabase.from('tasks').update({ video_progress: time }).eq('id', taskId).then()
       }
     }
   }, [taskId, isGuest, supabase])
