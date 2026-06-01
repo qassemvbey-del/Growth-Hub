@@ -216,6 +216,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   }, [networkStatus, prevStatus])
 
   const renderNetworkPill = (isMobile: boolean) => {
+    /*
     if (networkStatus === 'OFFLINE') {
       return (
         <div className={cn(
@@ -258,6 +259,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         </div>
       )
     }
+    */
     return null
   }
 
@@ -816,7 +818,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         </header>
 
         {/* ── AI COACH FLOATING MESSAGE DROPDOWN ── */}
-        <AnimatePresence>
+        {/* <AnimatePresence>
           {aiOpen && (
             <motion.div
               initial={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -846,7 +848,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
               <p className="text-[9px] font-space text-black/30 dark:text-white/30 tracking-widest uppercase">AUTO_CLOSE // 8S</p>
             </motion.div>
           )}
-        </AnimatePresence>
+        </AnimatePresence> */}
 
         <div className="relative">
           {children}
@@ -1001,10 +1003,10 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                 isRTL ? "right-0 border-l border-r-0" : "left-0 border-r"
               )}
               style={{ 
-                borderColor: `${currentTheme.color}25`,
+                borderColor: `${currentTheme.color}50`,
                 boxShadow: isRTL 
-                  ? `-5px 0 30px ${currentTheme.color}20` 
-                  : `5px 0 30px ${currentTheme.color}20`
+                  ? `-10px 0 40px ${currentTheme.color}40` 
+                  : `10px 0 40px ${currentTheme.color}40`
               }}
             >
               {/* Header of Drawer */}
