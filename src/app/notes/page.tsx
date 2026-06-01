@@ -792,23 +792,23 @@ export default function NotesPage() {
                 <FileText className="w-7 h-7 animate-pulse" style={{ color: currentTheme.color }} />
               </div>
 
-              {/* Terminal status readout */}
+              {/* Status label */}
               <span className="text-[10px] uppercase tracking-[0.2em] font-space font-black mb-2" style={{ color: currentTheme.color }}>
                 {searchQuery 
-                  ? 'SEARCH_RESULT // NO_MATCH' 
-                  : 'TERMINAL_STATUS // MEMORY_VOID'}
+                  ? (isRTL ? 'نتائج البحث' : 'SEARCH RESULTS') 
+                  : (isRTL ? 'الملاحظات' : 'NOTES')}
               </span>
 
               <h3 className="text-sm font-bold font-space text-zinc-200 tracking-wide uppercase mb-1">
                 {searchQuery
                   ? (isRTL ? 'لا توجد ملاحظات مطابقة' : 'No Matching Notes Found')
-                  : (isRTL ? 'لا توجد ملاحظات مسجلة' : 'No Active Encrypted Notes')}
+                  : (isRTL ? 'لا توجد ملاحظات مضافة بعد' : 'No notes added yet')}
               </h3>
 
               <p className="text-xs font-space text-zinc-500 leading-relaxed max-w-[280px]">
                 {searchQuery
-                  ? (isRTL ? 'جرب كلمات بحث مختلفة للعثور على ما تبحث عنه.' : 'Try different search terms to locate your entries.')
-                  : (isRTL ? 'لا توجد ملاحظات مسجلة حالياً. اضغط على زر "إضافة ملاحظة" لتسجيل أولى أفكارك.' : 'Your memory vault is empty. Tap "Add Note" to encrypt your first thought.')}
+                  ? (isRTL ? 'جرب كلمات بحث مختلفة للعثور على ما تبحث عنه.' : 'Try different search terms to find what you\'re looking for.')
+                  : (isRTL ? 'لا توجد ملاحظات مضافة بعد. اضغط على زر "إضافة ملاحظة" لكتابة فكرتك الأولى.' : 'You haven\'t added any notes yet. Tap "Add Note" to write your first one.')}
               </p>
             </div>
           </div>
