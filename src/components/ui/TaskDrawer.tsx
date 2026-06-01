@@ -751,11 +751,13 @@ export default function TaskDrawer({
         transition={{ type: 'tween', duration: 0.35, ease: 'easeOut' }}
         /* bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 */
         /* bg-white/10 dark:bg-black/40 backdrop-blur-3xl shadow-2xl */
-        className={`fixed top-0 bottom-0 z-[20005] w-full md:w-[50vw] lg:w-[45vw] bg-white/5 dark:bg-black/20 backdrop-blur-[40px] shadow-2xl flex flex-col ${
+        className={`fixed top-0 bottom-0 z-[20005] w-full md:w-[50vw] lg:w-[45vw] shadow-2xl flex flex-col ${
           isRTL ? 'left-0 border-r border-white/5' : 'right-0 border-l border-white/5'
         }`}
         style={{ borderColor: themeColor }}
       >
+        {/* SIBLING BACKGROUND LAYER TO BYPASS CHROMIUM BACKDROP-FILTER IFRAME BUG */}
+        <div className="absolute inset-0 -z-10 bg-white/5 dark:bg-black/20 backdrop-blur-[40px] pointer-events-none rounded-none" />
         {/* Decorative Top Accent Glow */}
         <div 
           className="h-[2px] w-full shrink-0" 
