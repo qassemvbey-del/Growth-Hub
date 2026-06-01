@@ -49,14 +49,14 @@ export default function SmartTaskPlayer({
   //   videoUrl = `https://www.youtube.com/watch?v=${videoUrl}`
   // }
 
-  let validUrl = url;
-  if (url && !url.includes('http')) {
-    if (url.startsWith('PL')) {
-      validUrl = 'https://www.youtube.com/playlist?list=' + url;
-    } else {
-      validUrl = 'https://www.youtube.com/watch?v=' + url;
-    }
-  }
+  // let validUrl = url;
+  // if (url && !url.includes('http')) {
+  //   if (url.startsWith('PL')) {
+  //     validUrl = 'https://www.youtube.com/playlist?list=' + url;
+  //   } else {
+  //     validUrl = 'https://www.youtube.com/watch?v=' + url;
+  //   }
+  // }
 
   const handleProgress = useCallback((state: { playedSeconds: number, played: number }) => {
     // Silently update the ref, NO useState
@@ -148,30 +148,26 @@ export default function SmartTaskPlayer({
   }
 
   return (
-    <div className="w-full h-full relative">
-      <div className="absolute inset-0 pointer-events-none z-10" style={{ boxShadow: `inset 0 0 20px ${themeColor}22` }} />
-      
-      <div className="relative z-50 bg-black w-full aspect-video rounded-md overflow-hidden">
-        <ReactPlayer
-          ref={playerRef}
-          url={validUrl}
-          controls={true}
-          width="100%"
-          height="100%"
-          className="absolute top-0 left-0"
-          onReady={handleReady}
-          onPlay={handlePlay}
-          onPause={handlePause}
-          onProgress={handleProgress}
-          onEnded={handleEnded}
-          progressInterval={1000} // ReactPlayer fires onProgress every 1s, but we only update refs
-          config={{
-            youtube: {
-              playerVars: { modestbranding: 1, rel: 0 }
-            }
-          }}
-        />
-      </div>
+    <div className="w-full aspect-video relative">
+      <ReactPlayer
+        ref={playerRef}
+        url={url}
+        controls={true}
+        width="100%"
+        height="100%"
+        className="absolute top-0 left-0"
+        onReady={handleReady}
+        onPlay={handlePlay}
+        onPause={handlePause}
+        onProgress={handleProgress}
+        onEnded={handleEnded}
+        progressInterval={1000} // ReactPlayer fires onProgress every 1s, but we only update refs
+        config={{
+          youtube: {
+            playerVars: { modestbranding: 1, rel: 0 }
+          }
+        }}
+      />
     </div>
   )
 }
