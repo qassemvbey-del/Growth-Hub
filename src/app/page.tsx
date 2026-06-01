@@ -313,7 +313,10 @@ export default function Dashboard() {
 
   return (
     <Shell syncedMissions={missions} onMissionsRefresh={fetchDashboardMissions}>
-      <div className="w-full min-h-[calc(100dvh-64px)] flex flex-col py-4 sm:py-8 md:py-12 px-2 sm:px-6 md:px-12 space-y-4 sm:space-y-6 md:space-y-8 max-w-7xl mx-auto font-space">
+      <div 
+        className="w-full min-h-[calc(100dvh-64px)] flex flex-col py-4 sm:py-8 md:py-12 px-2 sm:px-6 md:px-12 space-y-4 sm:space-y-6 md:space-y-8 max-w-7xl mx-auto font-space relative"
+        style={{ background: `radial-gradient(ellipse at 50% 0%, ${currentTheme.color}08 0%, transparent 60%)` }}
+      >
         
         {/* ── COMMAND CENTER TITLE ── */}
         <div className="w-full flex flex-col items-center text-center space-y-2 sm:space-y-3">
@@ -495,7 +498,13 @@ export default function Dashboard() {
         <div className="w-full font-space">
           
           {/* Action Inbox */}
-          <div className="w-full bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 shadow-xl relative overflow-hidden">
+          <div 
+            className="w-full bg-white/60 dark:bg-black/40 backdrop-blur-3xl border rounded-xl sm:rounded-2xl p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 shadow-xl relative overflow-hidden"
+            style={{ 
+              borderColor: `${currentTheme.color}20`,
+              boxShadow: `0 0 20px ${currentTheme.color}10`
+            }}
+          >
             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r to-transparent" style={{ backgroundImage: `linear-gradient(to right, ${currentTheme.color}, transparent)` }} />
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-1.5 sm:gap-2">
@@ -647,12 +656,15 @@ export default function Dashboard() {
                  <div
                    key={mission.id}
                    onClick={() => router.push(`/missions/${mission.id}`)}
-                   /* bg-zinc-900/20 */
                    className={cn(
-                     "relative group cursor-pointer p-3 sm:p-5 rounded-xl border bg-white/60 dark:bg-black/40 backdrop-blur-3xl border-black/5 dark:border-white/5 transition-all overflow-hidden flex flex-col gap-2.5 sm:gap-4",
-                     isInRedZone ? "border-red-500/40" : "border-white/5 hover:border-white/10",
-                     (mission.title === "Start Here 🚀" || mission.title === "ابدأ من هنا 🚀") && "onboarding-start-goal"
-                   )}
+                      "relative group cursor-pointer p-3 sm:p-5 rounded-xl border bg-white/60 dark:bg-black/40 backdrop-blur-3xl transition-all overflow-hidden flex flex-col gap-2.5 sm:gap-4",
+                      isInRedZone ? "border-red-500/40" : "border-white/5 hover:border-white/10",
+                      (mission.title === "Start Here 🚀" || mission.title === "ابدأ من هنا 🚀") && "onboarding-start-goal"
+                    )}
+                    style={{
+                      boxShadow: isInRedZone ? '0 0 15px rgba(239,68,68,0.15)' : `0 0 15px ${customColor}12`,
+                      borderColor: isInRedZone ? undefined : `${customColor}20`
+                    }}
                  >
                    <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: isInRedZone ? '#ef4444' : customColor }} />
 
