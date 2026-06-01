@@ -179,13 +179,19 @@ export default function SmartTaskPlayer({
       {/* Decorative cyber border glow */}
       <div className="absolute inset-0 pointer-events-none z-10" style={{ boxShadow: `inset 0 0 20px ${themeColor}22` }} />
       
-      <YouTube 
-        videoId={videoId} 
-        opts={opts} 
-        onReady={onReady}
-        onStateChange={onStateChange}
-        className="w-full h-full absolute inset-0"
-      />
+      {/* CRITICAL GPU ACCELERATION & ISOLATION LAYER TO FIX IFRAME FREEZING */}
+      <div 
+        className="relative z-50 transform-gpu bg-black overflow-hidden isolate w-full aspect-video rounded-md"
+        style={{ transform: 'translate3d(0, 0, 0)' }}
+      >
+        <YouTube 
+          videoId={videoId} 
+          opts={opts} 
+          onReady={onReady}
+          onStateChange={onStateChange}
+          className="w-full h-full"
+        />
+      </div>
     </div>
   )
 }
