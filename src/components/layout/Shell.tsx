@@ -895,10 +895,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       {/* Edge swipe trigger zone for mobile */}
       {!isMobileNavOpen && (
         <div 
-          className={cn(
-            "fixed top-0 bottom-0 w-4 z-[199] lg:hidden",
-            isRTL ? "right-0" : "left-0"
-          )}
+          className="fixed top-0 left-0 w-6 h-full z-[9999] lg:hidden"
           onTouchStart={() => {
             setIsMobileNavOpen(true);
             playBlip();
@@ -922,14 +919,11 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
             {/* Drawer Content */}
             <motion.div
               drag="x"
-              dragDirectionLock
-              dragConstraints={{ left: isRTL ? 0 : -280, right: isRTL ? 280 : 0 }}
-              dragElastic={0.15}
-              onDragEnd={(event, info) => {
-                const swipeDistance = info.offset.x
-                const shouldClose = isRTL ? swipeDistance > 80 : swipeDistance < -80
-                if (shouldClose) {
-                  setIsMobileNavOpen(false)
+              dragConstraints={{ left: -300, right: 0 }}
+              dragElastic={0.1}
+              onDragEnd={(e, info) => { 
+                if (info.offset.x < -50 || info.velocity.x < -500) {
+                  setIsMobileNavOpen(false); 
                 }
               }}
               initial={{ x: isRTL ? '100%' : '-100%' }}
@@ -937,7 +931,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
               exit={{ x: isRTL ? '100%' : '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
               className={cn(
-                "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-[#09090b]/98 border-r border-white/5 shadow-2xl p-6 transform-gpu",
+                "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-[#09090b]/98 border-r border-white/5 shadow-2xl p-6 transform-gpu will-change-transform",
                 isRTL ? "right-0 border-l border-white/5 border-r-0" : "left-0"
               )}
             >
