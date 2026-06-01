@@ -147,7 +147,32 @@ export default function SmartTaskPlayer({
   if (!videoId || videoId.trim() === "") return null
 
   // Build the video URL: If it is already a full URL, use it directly; otherwise wrap it as a YouTube URL.
-  const videoUrl = videoId.includes('://') ? videoId : `https://www.youtube.com/watch?v=${videoId}`
+  // const videoUrl = videoId.includes('://') ? videoId : `https://www.youtube.com/watch?v=${videoId}`
+
+  // --- UPGRADED ROBUST YOUTUBE PLAYLIST & URL NORMALIZATION ---
+  let resolvedId = videoId.trim()
+  if ((resolvedId.includes('youtube.com') || resolvedId.includes('youtu.be')) && !resolvedId.includes('://')) {
+    resolvedId = `https://${resolvedId}`
+  }
+
+  let videoUrl = resolvedId.includes('://') ? resolvedId : `https://www.youtube.com/watch?v=${resolvedId}`
+
+  if (videoUrl.includes('list=')) {
+    try {
+      const playlistMatch = videoUrl.match(/[?&]list=([^#\&\?]+)/)
+      const playlistId = playlistMatch ? playlistMatch[1] : null
+      if (playlistId) {
+        const videoMatch = videoUrl.match(/[?&]v=([^#\&\?]+)/)
+        const vId = videoMatch ? videoMatch[1] : null
+        if (vId && vId.length === 11) {
+          videoUrl = `https://www.youtube.com/watch?v=${vId}&list=${playlistId}`
+        } else {
+          videoUrl = `https://www.youtube.com/embed/videoseries?list=${playlistId}`
+        }
+      }
+    } catch (_err) {}
+  }
+
 
   return (
     <div className="w-full h-full relative">
