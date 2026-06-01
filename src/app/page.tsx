@@ -313,37 +313,36 @@ export default function Dashboard() {
 
   return (
     <Shell syncedMissions={missions} onMissionsRefresh={fetchDashboardMissions}>
-      <div className="w-full min-h-[calc(100vh-64px)] flex flex-col py-8 md:py-12 px-4 md:px-12 space-y-8 max-w-7xl mx-auto font-space">
+      <div className="w-full min-h-[calc(100dvh-64px)] flex flex-col py-4 sm:py-8 md:py-12 px-2 sm:px-6 md:px-12 space-y-4 sm:space-y-6 md:space-y-8 max-w-7xl mx-auto font-space">
         
         {/* ── COMMAND CENTER TITLE ── */}
-        <div className="w-full flex flex-col items-center text-center space-y-3">
-          <div className="flex items-center gap-6">
-            <div className="h-[1px] w-20 md:w-32" style={{ background: `linear-gradient(to right, transparent, ${currentTheme.color}40)` }} />
+        <div className="w-full flex flex-col items-center text-center space-y-2 sm:space-y-3">
+          <div className="flex items-center gap-3 sm:gap-6">
+            <div className="h-[1px] w-12 sm:w-20 md:w-32" style={{ background: `linear-gradient(to right, transparent, ${currentTheme.color}40)` }} />
             <motion.span
               style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }}
               animate={{ opacity: [0.3, 1, 0.3] }}
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <Zap className="w-5 h-5 md:w-6 md:h-6 shrink-0" />
+              <Zap className="w-4.5 h-4.5 sm:w-5 sm:h-5 md:w-6 md:h-6 shrink-0" />
             </motion.span>
-            <div className="h-[1px] w-20 md:w-32" style={{ background: `linear-gradient(to left, transparent, ${currentTheme.color}40)` }} />
+            <div className="h-[1px] w-12 sm:w-20 md:w-32" style={{ background: `linear-gradient(to left, transparent, ${currentTheme.color}40)` }} />
           </div>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tight uppercase leading-none text-zinc-900 dark:text-white"
+            className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight uppercase leading-none text-zinc-900 dark:text-white"
           >
             {isRTL ? 'منصة' : 'FOCUS'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'HUB'}</span>
           </motion.h1>
 
-          <p className="text-[10px] text-zinc-500 dark:text-white/40 tracking-[0.4em] uppercase font-black">
+          <p className="text-[8px] sm:text-[10px] text-zinc-500 dark:text-white/40 tracking-[0.2em] sm:tracking-[0.4em] uppercase font-black">
             {isRTL ? 'لوحة الإنتاجية والتركيز' : 'PRODUCTIVITY FOCUS MATRIX'} // {profile?.rank || 'MEMBER'}
           </p>
         </div>
 
-        {/* ── THE FOCUS PIPELINE (Top Section - Full Width) ── */}
-        {/* bg-[var(--card-bg)] border border-[var(--card-border)] */}
+        {/* ── THE FOCUS PIPELINE (Top Section - Full Width - Commented out for Mobile Optimization) ──
         <div className="w-full bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-2xl p-6 md:p-8 space-y-4 shadow-xl relative overflow-hidden">
           <div className="absolute top-0 inset-x-0 h-1" style={{ background: `linear-gradient(to right, ${currentTheme.color}, transparent)` }} />
           
@@ -360,7 +359,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Segmented Energy Bar based on total tasks due today */}
           <div 
             className="flex gap-2 h-7 p-1 rounded-xl border bg-zinc-100 dark:bg-[#050505] overflow-hidden shadow-inner w-full"
             style={{ borderColor: `${currentTheme.color}30` }}
@@ -389,29 +387,123 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+        ── */}
+
+        {/* ── TOP STATS GRID (Daily Focus Stats & The Rivalry Tracker Side-by-Side) ── */}
+        <div className="grid grid-cols-2 gap-2 sm:gap-6 w-full items-stretch">
+          
+          {/* 1. Daily Focus Stats */}
+          <div className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-6 space-y-2 sm:space-y-4 shadow-xl relative overflow-hidden flex flex-col justify-between">
+            <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r" style={{ backgroundImage: `linear-gradient(to right, ${currentTheme.color}, transparent)` }} />
+            
+            <div className="flex justify-between items-center gap-1.5">
+              <div className="flex items-center gap-1 sm:gap-2 min-w-0">
+                <NeonIcon icon={Zap} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} />
+                <span className="text-[9px] sm:text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase truncate">
+                  {isRTL ? 'التركيز اليومي' : 'DAILY FOCUS'}
+                </span>
+              </div>
+              <div className="text-[10px] sm:text-lg font-black tracking-tight shrink-0">
+                <span style={{ color: currentTheme.color }}>{completedTasksToday}</span>
+                <span className="text-zinc-500 text-[8px] sm:text-sm">/{totalTasksDueToday}</span>
+              </div>
+            </div>
+
+            {/* Segmented Energy Bar */}
+            <div 
+              className="flex gap-1 h-5 sm:h-7 p-0.5 sm:p-1 rounded-lg sm:rounded-xl border bg-zinc-100 dark:bg-[#050505] overflow-hidden shadow-inner w-full mt-1.5"
+              style={{ borderColor: `${currentTheme.color}30` }}
+            >
+              {totalTasksDueToday === 0 ? (
+                <div className="flex-1 rounded-sm border border-zinc-200 dark:border-white/5 bg-zinc-200/50 dark:bg-white/[0.02]" />
+              ) : (
+                Array.from({ length: totalTasksDueToday }).map((_, i) => {
+                  const isActive = i < completedTasksToday
+                  return (
+                    <div
+                      key={i}
+                      className="flex-1 rounded-sm transition-all duration-500 relative overflow-hidden"
+                      style={{
+                        backgroundColor: isActive ? currentTheme.color : 'transparent',
+                        border: isActive ? 'none' : '1px solid rgba(255, 255, 255, 0.05)',
+                        boxShadow: isActive ? `0 0 10px ${currentTheme.color}` : 'none',
+                      }}
+                    >
+                      {isActive && (
+                        <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                      )}
+                    </div>
+                  )
+                })
+              )}
+            </div>
+          </div>
+
+          {/* 2. Rivalry Tracker */}
+          <div 
+            className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-6 space-y-2 sm:space-y-4 shadow-xl relative overflow-hidden transition-all duration-300 flex flex-col justify-between"
+            style={{ 
+              borderColor: currentTheme.color,
+              boxShadow: `0 0 15px ${currentTheme.color}15`
+            }}
+          >
+            <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: currentTheme.color }} />
+            
+            <div className="flex justify-between items-center gap-1.5">
+              <div className="flex items-center gap-1 sm:gap-2 min-w-0">
+                <NeonIcon icon={Users} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} />
+                <span className="text-[9px] sm:text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase truncate">
+                  {isRTL ? 'المنافسة' : 'RIVALRY'}
+                </span>
+              </div>
+              
+              {squadsList.length > 1 && (
+                <select
+                  value={selectedSquadId}
+                  onChange={(e) => { playBlip(); setSelectedSquadId(e.target.value); }}
+                  className="bg-black/60 border rounded px-1 py-0.5 text-[8px] sm:text-[10px] font-space font-black uppercase text-zinc-300 outline-none cursor-pointer focus:border-teal-500 shrink-0 max-w-[65px] sm:max-w-none truncate"
+                  style={{ color: currentTheme.color, borderColor: `${currentTheme.color}30` }}
+                >
+                  {squadsList.map((sq) => (
+                    <option key={sq.id} value={sq.id} className="bg-zinc-950 text-white">
+                      {sq.title}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 mt-1.5">
+              <Swords className="w-4.5 h-4.5 sm:w-6 sm:h-6 shrink-0 animate-pulse" style={{ color: currentTheme.color }} />
+              <p className="text-[9px] sm:text-xs font-black tracking-wide text-zinc-100 uppercase truncate leading-tight flex-1">
+                {computedRivalryText}
+              </p>
+            </div>
+          </div>
+
+        </div>
 
         <InlineGuideTip hasTasks={allTasks.length > 0} />
 
-        {/* ── MIDDLE TWO-COLUMN GRID (Action Inbox & Rivalry Tracker) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-8 items-start font-space">
+        {/* ── MIDDLE GRID (Action Inbox - Fully Optimized for Mobile & Desktop) ── */}
+        <div className="w-full font-space">
           
-          {/* Action Inbox (60%) */}
-          {/* bg-[var(--card-bg)] border border-[var(--card-border)] */}
-          <div className="lg:col-span-6 bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-2xl p-6 md:p-8 space-y-6 shadow-xl relative overflow-hidden">
+          {/* Action Inbox */}
+          <div className="w-full bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r to-transparent" style={{ backgroundImage: `linear-gradient(to right, ${currentTheme.color}, transparent)` }} />
             <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <NeonIcon icon={Activity} className="w-4 h-4 shrink-0" style={{ color: currentTheme.color }} />
-                <h2 className="text-sm font-black tracking-widest text-[var(--text-secondary)] uppercase">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <NeonIcon icon={Activity} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} />
+                <h2 className="text-[10px] sm:text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase">
                   {isRTL ? 'الوارد التكتيكي العاجل' : 'ACTION INBOX // CRITICAL'}
                 </h2>
               </div>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black border" style={{ color: currentTheme.color, borderColor: `${currentTheme.color}30`, backgroundColor: `${currentTheme.color}15` }}>
+              <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[10px] font-black border shrink-0" style={{ color: currentTheme.color, borderColor: `${currentTheme.color}30`, backgroundColor: `${currentTheme.color}15` }}>
                 {actionInboxTasks.length} {isRTL ? 'مهمة عاجلة' : 'IMMEDIATE'}
               </span>
             </div>
 
-            <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+            <div className="space-y-2.5 sm:space-y-3 max-h-[300px] sm:max-h-[380px] overflow-y-auto pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {actionInboxTasks.map((task) => {
                 const tDate = new Date(task.metadata.endDate || task.metadata.dueDate)
                 tDate.setHours(0,0,0,0)
@@ -423,32 +515,32 @@ export default function Dashboard() {
                   <motion.div
                     key={task.id}
                     layout
-                    className="flex items-center justify-between p-4 rounded-xl border border-white/5 bg-zinc-950/20 hover:bg-white/5 hover:border-white/10 transition-all gap-4 font-space"
+                    className="flex items-center justify-between p-2.5 sm:p-4 rounded-xl border border-white/5 bg-zinc-950/20 hover:bg-white/5 hover:border-white/10 transition-all gap-2.5 sm:gap-4 font-space"
                   >
-                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                    <div className="flex items-center gap-2 sm:gap-3.5 min-w-0 flex-1">
                       <button
                         onClick={() => toggleTask(task)}
-                        className="w-6 h-6 rounded-full border flex items-center justify-center bg-transparent hover:bg-white/5 transition-all shrink-0 cursor-pointer animate-none group/btn"
+                        className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-full border flex items-center justify-center bg-transparent hover:bg-white/5 transition-all shrink-0 cursor-pointer animate-none group/btn"
                         style={{ borderColor: task.missionColor || currentTheme.color }}
                       >
                         <NeonIcon 
                           icon={Crosshair} 
                           interactive 
-                          className="w-3.5 h-3.5 opacity-0 group-hover/btn:opacity-100 transition-opacity" 
+                          className="w-3 sm:w-3.5 sm:h-3.5 opacity-0 group-hover/btn:opacity-100 transition-opacity" 
                           style={{ color: task.missionColor || currentTheme.color }} 
                         />
                       </button>
 
                       <div className="flex flex-col min-w-0 flex-1">
-                        <span className="text-sm font-black text-white/95 uppercase truncate leading-tight">{task.title}</span>
-                        <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider mt-0.5 truncate">{task.missionTitle}</span>
+                        <span className="text-xs sm:text-sm font-black text-white/95 uppercase truncate leading-tight">{task.title}</span>
+                        <span className="text-[8px] sm:text-[9px] text-zinc-500 font-bold uppercase tracking-wider mt-0.5 truncate">{task.missionTitle}</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
                       {/* Overdue/Today Date indicator */}
                       <span className={cn(
-                        "font-mono text-[9px] px-2 py-0.5 rounded border tracking-wider",
+                        "font-mono text-[8px] sm:text-[9px] px-1.5 sm:px-2 py-0.5 rounded border tracking-wider",
                         isOverdue 
                           ? "text-red-500 border-red-500/30 bg-red-950/15 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse font-black" 
                           : "text-zinc-400 border-white/5 bg-white/[0.02]"
@@ -457,7 +549,7 @@ export default function Dashboard() {
                       </span>
 
                       {/* XP badge */}
-                      <span className="text-[10px] font-mono text-zinc-500 tracking-wider">
+                      <span className="text-[8px] sm:text-[10px] font-mono text-zinc-500 tracking-wider">
                         +{task.weight * 10}XP
                       </span>
                     </div>
@@ -466,9 +558,9 @@ export default function Dashboard() {
               })}
 
               {actionInboxTasks.length === 0 && (
-                <div className="py-16 text-center space-y-2 border border-dashed border-white/5 rounded-xl">
-                  <span className="text-zinc-600 font-black text-2xl">⚡</span>
-                  <p className="text-xs text-zinc-500 dark:text-white/30 uppercase tracking-widest">
+                <div className="py-12 sm:py-16 text-center space-y-2 border border-dashed border-white/5 rounded-xl">
+                  <span className="text-zinc-600 font-black text-xl sm:text-2xl">⚡</span>
+                  <p className="text-[9px] sm:text-xs text-zinc-500 dark:text-white/30 uppercase tracking-widest">
                     {isRTL ? 'الوارد فارغ! جميع الالتزامات منجزة.' : 'INBOX CLEAR // NO OVERDUE TASKS'}
                   </p>
                 </div>
@@ -476,8 +568,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* The Rivalry Tracker (40%) */}
-          {/* bg-[var(--card-bg)] border */}
+          {/* The Rivalry Tracker (Old card placement commented out for Mobile Grid Optimization) ──
           <div 
             className="lg:col-span-4 bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-2xl p-6 md:p-8 space-y-6 shadow-xl relative overflow-hidden transition-all duration-300"
             style={{ 
@@ -527,6 +618,7 @@ export default function Dashboard() {
               </button>
             </div>
           </div>
+          ── */}
 
         </div>
 
@@ -539,27 +631,27 @@ export default function Dashboard() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 cells-target">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-6 cells-target">
             {pinnedGoals.map((mission, idx) => {
-              const { progress, isInRedZone } = calculateAccountability(mission)
-              const roundedProgress = Math.round(progress)
-              const customColor = mission.color || currentTheme.color
+               const { progress, isInRedZone } = calculateAccountability(mission)
+               const roundedProgress = Math.round(progress)
+               const customColor = mission.color || currentTheme.color
 
-              return (
-                <div
-                  key={mission.id}
-                  onClick={() => router.push(`/missions/${mission.id}`)}
-                  /* bg-zinc-900/20 */
-                  className={cn(
-                    "relative group cursor-pointer p-5 rounded-xl border bg-white/60 dark:bg-black/40 backdrop-blur-3xl border-black/5 dark:border-white/5 transition-all overflow-hidden flex flex-col gap-4",
-                    isInRedZone ? "border-red-500/40" : "border-white/5 hover:border-white/10",
-                    (mission.title === "Start Here 🚀" || mission.title === "ابدأ من هنا 🚀") && "onboarding-start-goal"
-                  )}
-                >
-                  <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: isInRedZone ? '#ef4444' : customColor }} />
+               return (
+                 <div
+                   key={mission.id}
+                   onClick={() => router.push(`/missions/${mission.id}`)}
+                   /* bg-zinc-900/20 */
+                   className={cn(
+                     "relative group cursor-pointer p-3 sm:p-5 rounded-xl border bg-white/60 dark:bg-black/40 backdrop-blur-3xl border-black/5 dark:border-white/5 transition-all overflow-hidden flex flex-col gap-2.5 sm:gap-4",
+                     isInRedZone ? "border-red-500/40" : "border-white/5 hover:border-white/10",
+                     (mission.title === "Start Here 🚀" || mission.title === "ابدأ من هنا 🚀") && "onboarding-start-goal"
+                   )}
+                 >
+                   <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: isInRedZone ? '#ef4444' : customColor }} />
 
-                  <div className="flex justify-between items-start gap-2">
-                    <h3 className="text-sm font-black uppercase tracking-wide truncate max-w-[80%] text-zinc-100 font-space">
+                   <div className="flex justify-between items-start gap-1.5 sm:gap-2">
+                     <h3 className="text-xs sm:text-sm font-black uppercase tracking-wide truncate max-w-[75%] text-zinc-100 font-space">
                       {mission.title}
                     </h3>
                     <span 
