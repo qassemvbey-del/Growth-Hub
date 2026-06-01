@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase'
 import { useToast } from '@/components/ui/Toast'
@@ -28,6 +28,12 @@ export default function SmartTaskPlayer({
   const { showToast } = useToast()
   const supabase = createClient()
   
+  const [isMounted, setIsMounted] = useState(false)
+  
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+  
   const playerRef = useRef<any>(null)
   const hasSeeked = useRef(false)
   
@@ -38,10 +44,10 @@ export default function SmartTaskPlayer({
 
   // ReactPlayer natively supports standard YouTube URLs and playlists.
   // If we receive a raw 11-character ID from old database entries, reconstruct the standard watch URL.
-  let videoUrl = url
-  if (videoUrl && videoUrl.length === 11 && !videoUrl.includes('/')) {
-    videoUrl = `https://www.youtube.com/watch?v=${videoUrl}`
-  }
+  // let videoUrl = url
+  // if (videoUrl && videoUrl.length === 11 && !videoUrl.includes('/')) {
+  //   videoUrl = `https://www.youtube.com/watch?v=${videoUrl}`
+  // }
 
   const handleProgress = useCallback((state: { playedSeconds: number, played: number }) => {
     // Silently update the ref, NO useState
@@ -128,6 +134,10 @@ export default function SmartTaskPlayer({
     }
   }, [taskId, isGuest, supabase])
 
+  if (!isMounted) {
+    return <div className="w-full aspect-video bg-zinc-900 animate-pulse rounded-md"></div>
+  }
+
   return (
     <div className="w-full h-full relative">
       <div className="absolute inset-0 pointer-events-none z-10" style={{ boxShadow: `inset 0 0 20px ${themeColor}22` }} />
@@ -135,7 +145,7 @@ export default function SmartTaskPlayer({
       <div className="relative z-50 bg-black w-full aspect-video rounded-md overflow-hidden">
         <ReactPlayer
           ref={playerRef}
-          url={videoUrl}
+          url={url}
           controls={true}
           width="100%"
           height="100%"
@@ -155,5 +165,6 @@ export default function SmartTaskPlayer({
     </div>
   )
 }
+
 
 
