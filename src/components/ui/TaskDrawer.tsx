@@ -740,7 +740,7 @@ export default function TaskDrawer({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[20000] cursor-pointer"
+        className="fixed inset-0 bg-black/65 z-[20000] cursor-pointer"
       />
 
       {/* 2. Side Panel */}
@@ -756,8 +756,8 @@ export default function TaskDrawer({
         }`}
         style={{ borderColor: themeColor }}
       >
-        {/* SIBLING BACKGROUND LAYER TO BYPASS CHROMIUM BACKDROP-FILTER IFRAME BUG */}
-        <div className="absolute inset-0 -z-10 bg-white/5 dark:bg-black/20 backdrop-blur-[40px] pointer-events-none rounded-none" />
+        {/* HIGH-PERFORMANCE COMPOSITE BACKGROUND LAYER (ZERO BLUR OVERHEAD TO ENSURE BUTTERY SMOOTH 60FPS VIDEO) */}
+        <div className="absolute inset-0 -z-10 bg-[#09090b]/98 pointer-events-none rounded-none" />
         {/* Decorative Top Accent Glow */}
         <div 
           className="h-[2px] w-full shrink-0" 
