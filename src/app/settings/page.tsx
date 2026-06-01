@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, CheckCircle2, FileText, HelpCircle, Lock, LogOut, Star, User, Brain, Settings as SettingsIcon, Moon, Sun, Trophy } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, FileText, HelpCircle, Lock, LogOut, Star, User, Brain, Settings as SettingsIcon, Moon, Sun, Trophy, Volume2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Shell from '@/components/layout/Shell'
@@ -270,13 +270,13 @@ export default function SettingsPage() {
                   className={cn(
                     "flex items-center gap-2 px-3 py-2.5 rounded-xl font-space font-black text-[10px] uppercase border tracking-wider transition-all duration-300 w-full justify-center whitespace-nowrap",
                     activeTab === tab.id
-                      ? "text-black font-bold shadow-lg"
+                      ? "text-black font-black"
                       : "bg-black/20 border-white/5 text-white/60 hover:text-white"
                   )}
                   style={activeTab === tab.id ? {
                     backgroundColor: currentTheme.color,
-                    borderColor: currentTheme.color,
-                    boxShadow: `0 0 10px ${currentTheme.color}22`
+                    borderColor: '#ffffff',
+                    boxShadow: `0 0 15px ${currentTheme.color}, inset 0 0 8px rgba(255,255,255,0.6)`
                   } : {}}
                 >
                   {getTabIcon(tab.id, "w-3.5 h-3.5 shrink-0")}
@@ -763,28 +763,23 @@ export default function SettingsPage() {
                             <label className="text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
                               {isRTL ? 'مستوى الصوت العام' : 'MASTER SYSTEM VOLUME'}
                             </label>
-                            <span className="text-sm font-space font-black" style={{ color: currentTheme.color }}>
-                              {Math.round(volume * 100)}%
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-space font-black" style={{ color: currentTheme.color }}>
+                                {Math.round(volume * 100)}%
+                              </span>
+                              <button
+                                type="button"
+                                onClick={playBlip}
+                                disabled={isMuted}
+                                className="p-1 rounded bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 active:scale-90 transition-all cursor-pointer disabled:opacity-30 flex items-center justify-center"
+                                title={isRTL ? 'اختبار الصوت' : 'Test Sound'}
+                                style={!isMuted ? { color: currentTheme.color, borderColor: `${currentTheme.color}30`, boxShadow: `0 0 8px ${currentTheme.color}22` } : {}}
+                              >
+                                <Volume2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </div>
-                          {/* Replaced with volume slider + tap buttons:
-                          <input 
-                            type="range"
-                            min="0"
-                            max="1"
-                            step="0.05"
-                            value={volume}
-                            onChange={(e) => setVolume(parseFloat(e.target.value))}
-                            onMouseUp={playBlip}
-                            onTouchEnd={playBlip}
-                            disabled={isMuted}
-                            className={cn(
-                              "w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer transition-all",
-                              isMuted && "opacity-30 grayscale"
-                            )}
-                            style={{ accentColor: currentTheme.color }}
-                          />
-                          */}
+                          
                           <div className="flex items-center gap-3">
                             <button
                               type="button"
@@ -829,39 +824,39 @@ export default function SettingsPage() {
                         <div className="flex items-center justify-between border-t border-white/10 pt-6">
                           <div className="space-y-1">
                             <p className="text-xs font-space text-white tracking-widest uppercase font-black">
-                              {isRTL ? 'كتم جميع الأصوات' : 'MUTE MASTER SFX'}
+                              {isRTL ? 'أصوات النظام' : 'System Sounds'}
                             </p>
                             <p className="text-[10px] font-space text-white/40 tracking-wider">
-                              {isRTL ? 'تعطيل المؤثرات الصوتية بالكامل' : 'SILENCE ALL HIGH-FIDELITY SYSTEM AUDIO FEEDBACK'}
+                              {isRTL ? 'تمكين المؤثرات الصوتية التفاعلية والاستجابات اللمسية.' : 'Enable interactive UI sound effects and haptic responses.'}
                             </p>
                           </div>
                           
                           <button
                             type="button"
                             onClick={() => {
-                              setIsMuted(!isMuted)
-                              if (isMuted) playBlip()
+                              const nextMute = !isMuted
+                              setIsMuted(nextMute)
+                              if (!nextMute) {
+                                setTimeout(() => playBlip(), 50)
+                              }
                             }}
                             className={cn(
                               "w-14 h-7 rounded-full transition-all relative border flex items-center px-1.5 cursor-pointer",
-                              isMuted 
-                                ? "bg-red-500/20 border-red-500/50 justify-end" 
+                              !isMuted 
+                                ? "justify-end" 
                                 : "justify-start bg-white/[0.02] border-white/10"
                             )}
-                            style={!isMuted ? { backgroundColor: `${currentTheme.color}20`, borderColor: `${currentTheme.color}50` } : {}}
+                            style={!isMuted ? { backgroundColor: `${currentTheme.color}20`, borderColor: `${currentTheme.color}50`, boxShadow: `0 0 10px ${currentTheme.color}33` } : {}}
                           >
                             <motion.div 
                               layout
-                              className={cn(
-                                "w-4 h-4 rounded-full shadow-lg transition-colors",
-                                isMuted ? "bg-red-500" : ""
-                              )}
-                              style={!isMuted ? { backgroundColor: currentTheme.color } : {}}
+                              className="w-4 h-4 rounded-full shadow-lg transition-colors"
+                              style={!isMuted ? { backgroundColor: currentTheme.color } : { backgroundColor: 'rgba(255,255,255,0.2)' }}
                             />
                           </button>
                         </div>
 
-                        {/* Dynamic Sound Spatializer test button */}
+                        {/* Dynamic Sound Spatializer test button commented out for sleek interface simplification:
                         <div className="border border-white/5 bg-white/[0.01] p-4 rounded-xl flex items-center justify-between gap-4">
                           <p className="text-[10px] font-space text-white/40 tracking-wider">
                             {isRTL 
@@ -878,6 +873,7 @@ export default function SettingsPage() {
                             {isRTL ? 'اختبار الصوت' : 'TEST SFX ENGINE'}
                           </button>
                         </div>
+                        */}
 
                       </div>
                     </div>
