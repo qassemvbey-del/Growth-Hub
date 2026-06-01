@@ -1,8 +1,6 @@
 'use client'
 
 import React, { useState, FormEvent, KeyboardEvent, useEffect, useRef, useCallback } from 'react'
-import dynamic from 'next/dynamic'
-const ReactPlayer = dynamic(() => import('react-player'), { ssr: false }) as any
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
 import { createClient } from '@/lib/supabase'
@@ -714,8 +712,8 @@ export default function TaskDrawer({
     return ''
   })()
 
-  const videoId = task.video_id || getYouTubeId(resolvedVideoUrl)
-  const hasVideo = !!videoId
+  const finalVideoUrl = resolvedVideoUrl || task.video_id || ''
+  const hasVideo = !!finalVideoUrl
 
 
   // Stored local video details
@@ -793,7 +791,7 @@ export default function TaskDrawer({
               <div className="w-full aspect-video rounded-xl overflow-hidden shadow-lg relative border bg-black/40" style={{ borderColor: `${themeColor}20` }}>
                 <SmartTaskPlayer
                   taskId={task.id}
-                  videoId={videoId}
+                  url={finalVideoUrl}
                   initialProgress={videoProgress}
                   isGuest={isGuest}
                   themeColor={themeColor}

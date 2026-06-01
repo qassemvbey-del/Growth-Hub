@@ -1,14 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
-import dynamic from 'next/dynamic'
-import { createClient } from '@/lib/supabase'
-import { useToast } from '@/components/ui/Toast'
-
-// Dynamic import for ReactPlayer to avoid SSR hydration mismatch
-const ReactPlayer = dynamic(() => import('react-player'), { ssr: false }) as any
+import React from 'react'
 
 interface SmartTaskPlayerProps {
   taskId: string
-  videoId: string
+  url: string
   initialProgress: number
   isGuest: boolean
   themeColor: string
@@ -17,104 +11,65 @@ interface SmartTaskPlayerProps {
 }
 
 export default function SmartTaskPlayer({ 
-  taskId, 
-  videoId, 
-  initialProgress, 
-  isGuest, 
+  url, 
   themeColor,
-  onComplete,
-  onProgressUpdate
 }: SmartTaskPlayerProps) {
-  const { showToast } = useToast()
-  const supabase = createClient()
   
-  const playerRef = useRef<any>(null)
-  const hasSeeked = useRef(false)
-  const isReady = useRef(false)
-  const durationRef = useRef(0)
-
-  // Construct standard youtube URL to feed to ReactPlayer
-  const videoUrl = `https://www.youtube.com/watch?v=${videoId}`
-
-  const handleProgress = useCallback(async (state: { playedSeconds: number, played: number }) => {
-    const currentTime = state.playedSeconds
-    const duration = durationRef.current
-
-    if (isGuest) {
-      localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
-      if (duration > 0) {
-        localStorage.setItem(`growth_hub_video_duration_${taskId}`, duration.toString())
-      }
-    } else {
-      // Background async update
-      supabase
-        .from('tasks')
-        .update({ video_progress: currentTime })
-        .eq('id', taskId)
-        .then()
-      
-      if (duration > 0) {
-        localStorage.setItem(`growth_hub_video_duration_${taskId}`, duration.toString())
-      }
-    }
-
-    if (onProgressUpdate) {
-      onProgressUpdate(currentTime, duration)
-    }
-  }, [isGuest, taskId, supabase, onProgressUpdate])
-
-  const handleReady = useCallback((player: any) => {
-    isReady.current = true
+  const getEmbedUrl = (rawUrl: string) => {
+    if (!rawUrl) return ''
     try {
-      durationRef.current = player.getDuration() || 0
+      const urlObj = new URL(rawUrl)
       
-      // Auto-seek if we have progress saved
-      if (!hasSeeked.current && initialProgress > 0) {
-        player.seekTo(initialProgress, 'seconds')
-        hasSeeked.current = true
-        showToast('تم استئناف التشغيل من حيث توقفت', 'success')
+      // Handle playlist URLs
+      const listId = urlObj.searchParams.get('list')
+      if (listId) {
+        return `https://www.youtube.com/embed/videoseries?list=${listId}`
       }
       
-      if (onProgressUpdate) {
-        onProgressUpdate(initialProgress || 0, durationRef.current)
+      // Handle standard youtube.com?v= URLs
+      const vParam = urlObj.searchParams.get('v')
+      if (vParam) {
+        return `https://www.youtube.com/embed/${vParam}`
       }
-    } catch (err) {
-      console.error('Error during player ready', err)
-    }
-  }, [initialProgress, onProgressUpdate, showToast])
 
-  const handleEnded = useCallback(() => {
-    if (isGuest) {
-      localStorage.setItem(`growth_hub_video_progress_${taskId}`, "0")
-    } else {
-      supabase.from('tasks').update({ video_progress: 0 }).eq('id', taskId).then()
+      // Handle youtu.be short URLs
+      if (urlObj.hostname === 'youtu.be') {
+        const pathId = urlObj.pathname.slice(1)
+        if (pathId) return `https://www.youtube.com/embed/${pathId}`
+      }
+
+      // Handle embed or v paths
+      const pathMatch = urlObj.pathname.match(/\/(embed|v)\/([a-zA-Z0-9_-]{11})/)
+      if (pathMatch && pathMatch[2]) {
+        return `https://www.youtube.com/embed/${pathMatch[2]}`
+      }
+      
+    } catch (e) {
+      // Fallback for raw 11-character IDs or already valid embed URLs
+      if (rawUrl.length === 11) {
+        return `https://www.youtube.com/embed/${rawUrl}`
+      }
     }
-    onComplete()
-  }, [isGuest, taskId, supabase, onComplete])
+    
+    // If all else fails, just return the raw URL (might already be an embed link)
+    return rawUrl
+  }
+
+  const embedUrl = getEmbedUrl(url)
 
   return (
     <div className="w-full h-full relative">
       <div className="absolute inset-0 pointer-events-none z-10" style={{ boxShadow: `inset 0 0 20px ${themeColor}22` }} />
       
-      <div className="relative z-50 bg-black w-full aspect-video rounded-md overflow-hidden">
-        <ReactPlayer
-          ref={playerRef}
-          url={videoUrl}
-          controls={true}
-          width="100%"
-          height="100%"
-          onReady={handleReady}
-          onProgress={handleProgress}
-          onEnded={handleEnded}
-          progressInterval={5000}
-          config={{
-            youtube: {
-              playerVars: { modestbranding: 1, rel: 0 }
-            }
-          }}
-        />
-      </div>
+      <iframe 
+        className="w-full aspect-video rounded-md bg-black" 
+        src={embedUrl} 
+        frameBorder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowFullScreen
+      ></iframe>
     </div>
   )
 }
+
 
