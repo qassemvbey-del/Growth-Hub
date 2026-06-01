@@ -36,8 +36,12 @@ export default function SmartTaskPlayer({
   const durationRef = useRef(0)
   const isPlayingRef = useRef(false)
 
-  // ReactPlayer automatically parses raw youtube URLs and playlist parameters safely.
-  const videoUrl = url
+  // ReactPlayer natively supports standard YouTube URLs and playlists.
+  // If we receive a raw 11-character ID from old database entries, reconstruct the standard watch URL.
+  let videoUrl = url
+  if (videoUrl && videoUrl.length === 11 && !videoUrl.includes('/')) {
+    videoUrl = `https://www.youtube.com/watch?v=${videoUrl}`
+  }
 
   const handleProgress = useCallback((state: { playedSeconds: number, played: number }) => {
     // Silently update the ref, NO useState

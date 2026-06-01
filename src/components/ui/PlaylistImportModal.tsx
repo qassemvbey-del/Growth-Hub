@@ -44,29 +44,29 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
     return () => clearInterval(interval)
   }, [loading])
 
-  const userName = profile?.full_name || 'Coach'
+  const userName = (profile as any)?.coach_name || 'Coach'
   const loadingMessages = isRTL ? [
-    'جاري تحليل البيانات... 🔍',
-    'مزامنة التقدم... ⚡',
-    `${userName} يعالج البيانات... 🧠`,
-    'تنظيم المحتوى... 📂',
+    'جاري تحليل البيانات...',
+    'مزامنة التقدم...',
+    `${userName} يعالج البيانات...`,
+    'تنظيم المحتوى...',
   ] : [
-    'Analyzing... 🔍',
-    'Syncing... ⚡',
-    `${userName} is processing... 🧠`,
-    'Organizing your content... 📂',
+    'Analyzing...',
+    'Syncing...',
+    `${userName} is processing...`,
+    'Organizing your content...',
   ]
 
   const buttonMessages = isRTL ? [
-    'تحليل... 🔍',
-    'مزامنة... ⚡',
-    'معالجة... 🧠',
-    'تنظيم... 📂',
+    'تحليل...',
+    'مزامنة...',
+    'معالجة...',
+    'تنظيم...',
   ] : [
-    'Analyzing... 🔍',
-    'Syncing... ⚡',
-    'Processing... 🧠',
-    'Organizing... 📂',
+    'Analyzing...',
+    'Syncing...',
+    'Processing...',
+    'Organizing...',
   ]
 
   const supabase = createClient()
@@ -299,12 +299,7 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
             </div>
             {loading && (
               <div className="flex flex-col items-center justify-center p-6 bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl space-y-4 mt-4">
-                <img 
-                  src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3NpaXB0aWw5MXFkMnoxNW11aTNrNXNlcmFidjBpZ3RreWhvMXU2ciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/l3q2t2KAQQvscCqYw/giphy.gif" 
-                  alt="Processing..." 
-                  className="w-14 h-14 opacity-85 select-none pointer-events-none"
-                  style={{ filter: `drop-shadow(0 0 10px ${themeColor})` }}
-                />
+                <Loader2 className="animate-spin w-10 h-10 mx-auto mb-4" style={{ color: themeColor }} />
                 <span className="text-xs font-black tracking-widest animate-pulse uppercase" style={{ color: themeColor }}>
                   {loadingMessages[loadingTextIndex]}
                 </span>
