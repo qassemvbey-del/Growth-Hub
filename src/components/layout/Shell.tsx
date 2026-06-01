@@ -12,7 +12,7 @@ import { useSound } from '@/context/SoundContext'
 import { 
   LayoutGrid, Trophy, Target, FileText, User, Settings, Zap, Bell, Flame, Bot, X, Home,
   Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp, CloudLightning,
-  Crosshair, Shield, CheckCircle
+  Crosshair, Shield, CheckCircle, Menu
 } from 'lucide-react'
 
 
@@ -109,6 +109,11 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
   const [bootProgress, setBootProgress] = useState(0)
   const [activeLogIndex, setActiveLogIndex] = useState(0)
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
+
+  useEffect(() => {
+    setIsMobileNavOpen(false)
+  }, [pathname])
 
   // System Bootloader Simulation Effect
   useEffect(() => {
@@ -598,7 +603,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       <Sidebar isRTL={isRTL} onOpenCoach={() => { setCoachPanelOpen(true); playNeuralLink(); }} />
 
       <main className={cn(
-        'flex-1 min-h-screen pb-20 lg:pb-0 transition-all duration-500 relative z-10 w-full max-w-full overflow-x-hidden',
+        'flex-1 min-h-screen pb-0 lg:pb-0 transition-all duration-500 relative z-10 w-full max-w-full overflow-x-hidden',
         'lg:ps-72 lg:max-w-none'
       )}>
         {/* ── DESKTOP TOP BAR (TRANSIENT TELEMETRY ONLY) ── */}
@@ -701,39 +706,48 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         {/* bg-white/60 dark:bg-black/40 backdrop-blur-3xl border-b-0 */}
         {/* bg-transparent dark:bg-black/10 backdrop-blur-[40px] border-none */}
         <header className="flex lg:hidden w-full p-4 pt-safe justify-between items-center bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-black/5 dark:border-white/[0.03] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] z-[150] sticky top-0 transition-colors duration-500 relative">
-          {/* LEFT: User Avatar Image */}
-          <div 
-            onClick={() => router.push('/settings')}
-            className="relative w-10 h-10 rounded-full p-0.5 bg-gradient-to-tr flex items-center justify-center cursor-pointer shadow-md shrink-0 active:scale-95 transition-transform"
-            style={{ 
-              backgroundImage: `linear-gradient(to top right, ${currentTheme.color}, ${currentTheme.color}88, transparent, ${currentTheme.color})`,
-              boxShadow: `0 0 15px ${currentTheme.color}33`
-            }}
-            title={isRTL ? 'الملف الشخصي' : 'User Profile'}
-          >
-            <div className="w-full h-full rounded-full overflow-hidden bg-zinc-100/80 dark:bg-white/15 backdrop-blur-md p-0.5 flex items-center justify-center border border-black/20 dark:border-white/10">
-              {mounted && profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt="User" className="w-[90%] h-[90%] mx-auto object-contain p-1 rounded-full" />
-              ) : (
-                <User className="w-5 h-5 text-[var(--text-secondary)]" />
+          {/* LEFT: Hamburger Menu Icon & User Avatar */}
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => { setIsMobileNavOpen(true); playBlip(); }}
+              className="w-9 h-9 flex items-center justify-center bg-[var(--input-bg)] border border-[var(--card-border)] rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-white/20 transition-all cursor-pointer active:scale-95 shrink-0"
+              title={isRTL ? 'القائمة' : 'Menu'}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <div 
+              onClick={() => router.push('/settings')}
+              className="relative w-9 h-9 rounded-full p-0.5 bg-gradient-to-tr flex items-center justify-center cursor-pointer shadow-md shrink-0 active:scale-95 transition-transform"
+              style={{ 
+                backgroundImage: `linear-gradient(to top right, ${currentTheme.color}, ${currentTheme.color}88, transparent, ${currentTheme.color})`,
+                boxShadow: `0 0 10px ${currentTheme.color}33`
+              }}
+              title={isRTL ? 'الملف الشخصي' : 'User Profile'}
+            >
+              <div className="w-full h-full rounded-full overflow-hidden bg-zinc-100/80 dark:bg-white/15 backdrop-blur-md p-0.5 flex items-center justify-center border border-black/20 dark:border-white/10">
+                {mounted && profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt="User" className="w-[90%] h-[90%] mx-auto object-contain p-1 rounded-full" />
+                ) : (
+                  <User className="w-4 h-4 text-[var(--text-secondary)]" />
+                )}
+              </div>
+              {/* Visual Role Icon Overlay Badge at bottom-right */}
+              {mounted && profile?.avatar_url && (
+                <div 
+                  className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center border border-[var(--sidebar-bg)] shadow-md z-20 backdrop-blur-md"
+                  style={{ 
+                    backgroundColor: currentTheme.color, 
+                    color: '#000000',
+                    boxShadow: `0 0 8px ${currentTheme.color}` 
+                  }}
+                >
+                  {(() => {
+                    const IconComponent = getRoleIconComponent(profile.avatar_url)
+                    return <IconComponent className="w-2.5 h-2.5 text-black stroke-[2.5]" />
+                  })()}
+                </div>
               )}
             </div>
-            {/* Visual Role Icon Overlay Badge at bottom-right */}
-            {mounted && profile?.avatar_url && (
-              <div 
-                className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full flex items-center justify-center border border-[var(--sidebar-bg)] shadow-md z-20 backdrop-blur-md"
-                style={{ 
-                  backgroundColor: currentTheme.color, 
-                  color: '#000000',
-                  boxShadow: `0 0 8px ${currentTheme.color}` 
-                }}
-              >
-                {(() => {
-                  const IconComponent = getRoleIconComponent(profile.avatar_url)
-                  return <IconComponent className="w-2.5 h-2.5 text-black stroke-[2.5]" />
-                })()}
-              </div>
-            )}
           </div>
 
           {/* CENTER: Core Brand Text */}
@@ -839,7 +853,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         </div>
       </main>
 
-      {/* ── MOBILE BOTTOM NAVIGATION ── */}
+      {/* ── MOBILE BOTTOM NAVIGATION ──
       <nav className="lg:hidden fixed bottom-0 w-full bg-[var(--sidebar-bg)] border-t border-[var(--card-border)] z-[200] flex items-center justify-around px-2 backdrop-blur-2xl">
         {[
           { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
@@ -876,6 +890,112 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
           )
         })}
       </nav>
+      ── */}
+
+      {/* ── MOBILE SIDEBAR DRAWER ── */}
+      <AnimatePresence>
+        {isMobileNavOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileNavOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] lg:hidden cursor-pointer"
+            />
+            
+            {/* Drawer Content */}
+            <motion.div
+              initial={{ x: isRTL ? '100%' : '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: isRTL ? '100%' : '-100%' }}
+              transition={{ type: 'tween', duration: 0.3, ease: 'easeOut' }}
+              className={cn(
+                "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-[#09090b]/98 border-r border-white/5 shadow-2xl p-6",
+                isRTL ? "right-0 border-l border-white/5 border-r-0" : "left-0"
+              )}
+            >
+              {/* Header of Drawer */}
+              <div className="flex justify-between items-center mb-8">
+                <AnimatedLogo className="text-lg tracking-[0.2em]" />
+                <button 
+                  onClick={() => { setIsMobileNavOpen(false); playBlip(); }}
+                  className="w-8 h-8 flex items-center justify-center bg-white/5 border border-white/10 rounded-full text-white/50 hover:text-white transition-all cursor-pointer active:scale-95"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Profile Panel */}
+              <div className="flex flex-col items-center text-center pb-6 border-b border-white/5 mb-6">
+                <div 
+                  onClick={() => { router.push('/settings'); setIsMobileNavOpen(false); }}
+                  className="relative p-1 rounded-full bg-gradient-to-tr shadow-lg cursor-pointer"
+                  style={{ backgroundImage: `linear-gradient(to top right, ${currentTheme.color}, ${currentTheme.color}88, transparent, ${currentTheme.color})`, boxShadow: `0 0 20px ${currentTheme.color}33` }}
+                >
+                  <div className="w-16 h-16 rounded-full bg-[#050505] p-0.5 overflow-hidden flex items-center justify-center">
+                    {mounted && profile?.avatar_url ? (
+                      <img src={profile.avatar_url} alt="User" className="w-[90%] h-[90%] mx-auto object-contain rounded-full" />
+                    ) : (
+                      <User className="w-8 h-8 text-[var(--text-secondary)]" />
+                    )}
+                  </div>
+                </div>
+                <span className="text-sm font-space font-black mt-3 text-zinc-100 truncate max-w-[200px]">
+                  {profile?.full_name || 'USER'}
+                </span>
+                <span className="text-[10px] font-space font-black uppercase tracking-[0.2em] opacity-80 mt-1" style={{ color: currentTheme.color }}>
+                  XP: {profile?.xp || 0}
+                </span>
+              </div>
+
+              {/* Navigation Items */}
+              <div className="flex-1 space-y-2 overflow-y-auto">
+                {[
+                  { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
+                  { label: isRTL ? 'أهدافي' : 'Goals', icon: Target, href: '/missions' },
+                  { label: isRTL ? 'ملاحظاتي' : 'Notes', icon: FileText, href: '/notes' },
+                  { label: isRTL ? 'إنجازاتي' : 'Wins', icon: Trophy, href: '/achievements' },
+                ].map(item => {
+                  const isActive = pathname === item.href
+                  const IconComponent = item.icon
+                  return (
+                    <button
+                      key={item.href}
+                      onClick={() => { playBlip(); router.push(item.href); setIsMobileNavOpen(false); }}
+                      className={cn(
+                        "w-full flex items-center gap-4 px-4 py-3 rounded-lg font-space text-sm font-bold uppercase tracking-wider transition-all relative cursor-pointer",
+                        isActive 
+                          ? "text-[var(--text-primary)]" 
+                          : "text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
+                      )}
+                      style={isActive ? { color: currentTheme.color, backgroundColor: `${currentTheme.color}15`, border: `1px solid ${currentTheme.color}30` } : {}}
+                    >
+                      <IconComponent className="w-5 h-5" />
+                      <span>{item.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* Footer Settings Toggle */}
+              <div className="pt-4 border-t border-white/5">
+                <button
+                  onClick={() => { router.push('/settings'); setIsMobileNavOpen(false); playBlip(); }}
+                  className={cn(
+                    "w-full flex items-center gap-4 px-4 py-3 rounded-lg font-space text-sm font-bold uppercase tracking-wider text-[var(--text-secondary)] hover:text-white hover:bg-white/5 transition-all cursor-pointer",
+                    pathname === '/settings' ? "text-[var(--text-primary)] border border-white/10 bg-white/5" : ""
+                  )}
+                >
+                  <Settings className="w-5 h-5 animate-[spin_8s_linear_infinite]" />
+                  <span>{isRTL ? 'الإعدادات' : 'Settings'}</span>
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
 
       <PomodoroHUD />

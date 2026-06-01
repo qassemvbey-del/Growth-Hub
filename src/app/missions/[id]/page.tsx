@@ -1579,7 +1579,8 @@ const { progress, isInRedZone } = useMemo(() => {
                     )}
                     style={activeView === 'list' ? { color: missionColor, backgroundColor: `${missionColor}15`, borderColor: `${missionColor}30` } : {}}
                   >
-                    <HelpCircle />
+                    {/* <HelpCircle /> */}
+                    <List className="w-3.5 h-3.5" />
                     {isRTL ? 'قائمة' : 'LIST VIEW'}
                   </button>
                   <button
@@ -1593,7 +1594,8 @@ const { progress, isInRedZone } = useMemo(() => {
                     )}
                     style={activeView === 'board' ? { color: missionColor, backgroundColor: `${missionColor}15`, borderColor: `${missionColor}30` } : {}}
                   >
-                    <HelpCircle />
+                    {/* <HelpCircle /> */}
+                    <LayoutGrid className="w-3.5 h-3.5" />
                     {isRTL ? 'كانبان' : 'BOARD VIEW'}
                   </button>
                 </div>
