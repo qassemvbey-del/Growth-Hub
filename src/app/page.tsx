@@ -393,7 +393,13 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-2 sm:gap-6 w-full items-stretch">
           
           {/* 1. Daily Focus Stats */}
-          <div className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-6 space-y-2 sm:space-y-4 shadow-xl relative overflow-hidden flex flex-col justify-between">
+          <div 
+            className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-6 space-y-2 sm:space-y-4 shadow-xl relative overflow-hidden flex flex-col justify-between transition-all duration-300"
+            style={{ 
+              borderColor: `${currentTheme.color}25`,
+              boxShadow: `0 0 15px ${currentTheme.color}15`
+            }}
+          >
             <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r" style={{ backgroundImage: `linear-gradient(to right, ${currentTheme.color}, transparent)` }} />
             
             <div className="flex justify-between items-center gap-1.5">
@@ -444,7 +450,7 @@ export default function Dashboard() {
             className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-6 space-y-2 sm:space-y-4 shadow-xl relative overflow-hidden transition-all duration-300 flex flex-col justify-between"
             style={{ 
               borderColor: currentTheme.color,
-              boxShadow: `0 0 15px ${currentTheme.color}15`
+              boxShadow: `0 0 20px ${currentTheme.color}25`
             }}
           >
             <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: currentTheme.color }} />
@@ -475,7 +481,7 @@ export default function Dashboard() {
 
             <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 mt-1.5">
               <Swords className="w-4.5 h-4.5 sm:w-6 sm:h-6 shrink-0 animate-pulse" style={{ color: currentTheme.color }} />
-              <p className="text-[9px] sm:text-xs font-black tracking-wide text-zinc-100 uppercase truncate leading-tight flex-1">
+              <p className="text-[9px] sm:text-xs font-black tracking-wide text-zinc-100 uppercase leading-tight flex-1 line-clamp-2 break-words whitespace-normal">
                 {computedRivalryText}
               </p>
             </div>
