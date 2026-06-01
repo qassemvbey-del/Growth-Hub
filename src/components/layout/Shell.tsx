@@ -971,9 +971,15 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
               exit={{ x: isRTL ? '100%' : '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
               className={cn(
-                "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-[#09090b]/98 border-r border-white/5 shadow-2xl p-6 transform-gpu will-change-transform",
-                isRTL ? "right-0 border-l border-white/5 border-r-0" : "left-0"
+                "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-zinc-950/95 backdrop-blur-2xl shadow-2xl p-6 transform-gpu will-change-transform",
+                isRTL ? "right-0 border-l border-r-0" : "left-0 border-r"
               )}
+              style={{ 
+                borderColor: `${currentTheme.color}25`,
+                boxShadow: isRTL 
+                  ? `-5px 0 30px ${currentTheme.color}20` 
+                  : `5px 0 30px ${currentTheme.color}20`
+              }}
             >
               {/* Header of Drawer */}
               <div className="flex justify-between items-center mb-8">
@@ -1032,7 +1038,15 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                           ? "text-[var(--text-primary)]" 
                           : "text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
                       )}
-                      style={isActive ? { color: currentTheme.color, backgroundColor: `${currentTheme.color}15`, border: `1px solid ${currentTheme.color}30` } : {}}
+                      style={isActive ? { 
+                        color: currentTheme.color, 
+                        backgroundColor: `${currentTheme.color}15`,
+                        borderLeft: isRTL ? 'none' : `3px solid ${currentTheme.color}`,
+                        borderRight: isRTL ? `3px solid ${currentTheme.color}` : 'none',
+                        paddingLeft: isRTL ? undefined : (item.indent ? '28px' : '12px'),
+                        paddingRight: isRTL ? (item.indent ? '28px' : '12px') : undefined,
+                        boxShadow: `0 0 15px ${currentTheme.color}15`
+                      } : {}}
                     >
                       <IconComponent className={item.indent ? "w-4 h-4" : "w-5 h-5"} />
                       <span>{item.label}</span>
