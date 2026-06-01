@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase'
 import { useToast } from '@/components/ui/Toast'
@@ -42,26 +42,42 @@ export default function SmartTaskPlayer({
   const durationRef = useRef(0)
   const isPlayingRef = useRef(false)
 
-  // ReactPlayer natively supports standard YouTube URLs and playlists.
-  // If we receive a raw 11-character ID from old database entries, reconstruct the standard watch URL.
-  // let videoUrl = url
-  // if (videoUrl && videoUrl.length === 11 && !videoUrl.includes('/')) {
-  //   videoUrl = `https://www.youtube.com/watch?v=${videoUrl}`
-  // }
-
-  // let validUrl = url;
-  // if (url && !url.includes('http')) {
-  //   if (url.startsWith('PL')) {
-  //     validUrl = 'https://www.youtube.com/playlist?list=' + url;
-  //   } else {
-  //     validUrl = 'https://www.youtube.com/watch?v=' + url;
-  //   }
-  // }
+  // --- UPGRADED ROBUST YOUTUBE PLAYLIST & URL NORMALIZATION ---
+  const resolvedUrl = useMemo(() => {
+    let videoUrl = url ? url.trim() : ''
+    if (!videoUrl) return ''
+    if (!videoUrl.includes('://')) {
+      if (videoUrl.startsWith('PL')) {
+        videoUrl = `https://www.youtube.com/playlist?list=${videoUrl}`
+      } else if (videoUrl.length === 11) {
+        videoUrl = `https://www.youtube.com/watch?v=${videoUrl}`
+      } else {
+        videoUrl = `https://www.youtube.com/watch?v=${videoUrl}`
+      }
+    } else if ((videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) && !videoUrl.includes('watch?v=') && !videoUrl.includes('playlist?list=') && !videoUrl.includes('embed/')) {
+      try {
+        const urlObj = new URL(videoUrl)
+        if (urlObj.hostname === 'youtu.be') {
+          const pathId = urlObj.pathname.slice(1)
+          if (pathId) videoUrl = `https://www.youtube.com/watch?v=${pathId}`
+        }
+      } catch (e) {}
+    }
+    return videoUrl
+  }, [url])
 
   const handleProgress = useCallback((state: { playedSeconds: number, played: number }) => {
-    // Silently update the ref, NO useState
-    progressRef.current = state.playedSeconds
-  }, [])
+    const currentTime = state.playedSeconds
+    progressRef.current = currentTime
+
+    // Write to localStorage instantly on progress ticks
+    localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
+
+    // Update parent UI safely
+    if (onProgressUpdate) {
+      onProgressUpdate(currentTime, durationRef.current)
+    }
+  }, [taskId, onProgressUpdate])
 
   const handlePlay = useCallback(() => {
     isPlayingRef.current = true
@@ -69,7 +85,12 @@ export default function SmartTaskPlayer({
 
   const handlePause = useCallback(() => {
     isPlayingRef.current = false
-  }, [])
+    const currentTime = progressRef.current
+    localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
+    if (!isGuest) {
+      supabase.from('tasks').update({ video_progress: currentTime }).eq('id', taskId).then()
+    }
+  }, [taskId, isGuest, supabase])
 
   const handleReady = useCallback((player: any) => {
     try {
@@ -91,6 +112,7 @@ export default function SmartTaskPlayer({
   }, [initialProgress, onProgressUpdate, showToast])
 
   const handleEnded = useCallback(() => {
+    isPlayingRef.current = false
     if (isGuest) {
       localStorage.setItem(`growth_hub_video_progress_${taskId}`, "0")
     } else {
@@ -99,43 +121,26 @@ export default function SmartTaskPlayer({
     onComplete()
   }, [isGuest, taskId, supabase, onComplete])
 
-  // Silent save loop (every 5 seconds)
+  // Database save loop (every 5 seconds)
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!isPlayingRef.current) return
+      if (!isPlayingRef.current || isGuest) return
       
       const currentTime = progressRef.current
-      const duration = durationRef.current
-
-      // Save to localStorage
-      localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
-      if (duration > 0) {
-        localStorage.setItem(`growth_hub_video_duration_${taskId}`, duration.toString())
-      }
-
-      // Save to DB
-      if (!isGuest) {
-        supabase
-          .from('tasks')
-          .update({ video_progress: currentTime })
-          .eq('id', taskId)
-          .then()
-      }
-
-      // Update parent UI safely (only once every 5 seconds instead of 60fps)
-      if (onProgressUpdate) {
-        onProgressUpdate(currentTime, duration)
-      }
+      supabase
+        .from('tasks')
+        .update({ video_progress: currentTime })
+        .eq('id', taskId)
+        .then()
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [taskId, isGuest, supabase, onProgressUpdate])
+  }, [taskId, isGuest, supabase])
 
   // Ensure instant save on unmount
   useEffect(() => {
     return () => {
       const currentTime = progressRef.current
-      const duration = durationRef.current
       localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
       if (!isGuest) {
         supabase.from('tasks').update({ video_progress: currentTime }).eq('id', taskId).then()
@@ -143,7 +148,7 @@ export default function SmartTaskPlayer({
     }
   }, [taskId, isGuest, supabase])
 
-  if (!isMounted) {
+  if (!isMounted || !resolvedUrl) {
     return <div className="w-full aspect-video bg-zinc-900 animate-pulse rounded-md"></div>
   }
 
@@ -151,7 +156,7 @@ export default function SmartTaskPlayer({
     <div className="w-full aspect-video relative">
       <ReactPlayer
         ref={playerRef}
-        url={url}
+        url={resolvedUrl}
         controls={true}
         width="100%"
         height="100%"
@@ -161,7 +166,7 @@ export default function SmartTaskPlayer({
         onPause={handlePause}
         onProgress={handleProgress}
         onEnded={handleEnded}
-        progressInterval={1000} // ReactPlayer fires onProgress every 1s, but we only update refs
+        progressInterval={1000}
         config={{
           youtube: {
             playerVars: { modestbranding: 1, rel: 0 }
