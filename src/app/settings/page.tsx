@@ -184,6 +184,18 @@ export default function SettingsPage() {
     }
   }
 
+  const handleDecrementVolume = () => {
+    const newVol = Math.max(0, volume - 0.05)
+    setVolume(newVol)
+    playBlip()
+  }
+
+  const handleIncrementVolume = () => {
+    const newVol = Math.min(1, volume + 0.05)
+    setVolume(newVol)
+    playBlip()
+  }
+
   // Catastrophic Delete Action
   const handlePermanentlyDeleteAccount = async () => {
     if (!profile) return
@@ -230,12 +242,12 @@ export default function SettingsPage() {
 
   return (
     <Shell>
-      <div className="min-h-[calc(100vh-64px)] p-6 md:p-12 flex flex-col items-center">
-        <div className="w-full max-w-4xl space-y-10">
+      <div className="min-h-[calc(100dvh-64px)] p-2 sm:p-6 md:p-12 flex flex-col items-center">
+        <div className="w-full max-w-4xl space-y-6 sm:space-y-10">
           
           {/* Symmetrical Settings Header */}
           <header className="space-y-3">
-            <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase not- text-black dark:text-white leading-none">
+            <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase text-black dark:text-white leading-none">
               {t('settings')}
             </h1>
             <p className="text-[10px] md:text-xs font-space tracking-[0.5em] uppercase font-black opacity-50" style={{ color: currentTheme.color }}>
@@ -244,10 +256,10 @@ export default function SettingsPage() {
           </header>
 
           {/* Symmetrical layout split (1/4 vertical left tab sidebar, 3/4 content tab cards) */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-8 items-start">
             
-            {/* Mobile Swipe selector pills */}
-            <div className="flex md:hidden flex-row gap-2 overflow-x-auto pb-4 justify-between w-full scrollbar-none">
+            {/* Mobile 2x2 Segmented Grid Control (Nuked horizontal scroll) */}
+            <div className="grid grid-cols-2 gap-1.5 w-full md:hidden pb-4">
               {tabOptions.map((tab) => (
                 <button
                   key={tab.id}
@@ -256,7 +268,7 @@ export default function SettingsPage() {
                     playBlip()
                   }}
                   className={cn(
-                    "flex items-center gap-2 px-4 py-3 rounded-xl font-space font-black text-xs uppercase border tracking-wider transition-all duration-300 flex-1 whitespace-nowrap justify-center",
+                    "flex items-center gap-2 px-3 py-2.5 rounded-xl font-space font-black text-[10px] uppercase border tracking-wider transition-all duration-300 w-full justify-center whitespace-nowrap",
                     activeTab === tab.id
                       ? "text-black font-bold shadow-lg"
                       : "bg-black/20 border-white/5 text-white/60 hover:text-white"
@@ -264,11 +276,11 @@ export default function SettingsPage() {
                   style={activeTab === tab.id ? {
                     backgroundColor: currentTheme.color,
                     borderColor: currentTheme.color,
-                    boxShadow: `0 0 15px ${currentTheme.color}33`
+                    boxShadow: `0 0 10px ${currentTheme.color}22`
                   } : {}}
                 >
-                  {getTabIcon(tab.id, "w-4 h-4")}
-                  {tab.label}
+                  {getTabIcon(tab.id, "w-3.5 h-3.5 shrink-0")}
+                  <span className="truncate">{tab.label}</span>
                 </button>
               ))}
             </div>
@@ -338,6 +350,7 @@ export default function SettingsPage() {
 
                       <div className="space-y-6">
                         {/* Avatar Display Section */}
+                        {/* Commented out original for Mobile Optimization:
                         <div className="border border-white/10 bg-white/[0.02] rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
                           <div className="flex items-center gap-6">
                             <div className="relative w-20 h-20 rounded-full border border-white/20 p-1 flex items-center justify-center bg-zinc-100/80 dark:bg-white/10 backdrop-blur-md overflow-hidden shadow-2xl group">
@@ -372,6 +385,41 @@ export default function SettingsPage() {
                             {isRTL ? 'تغيير الشخصية' : 'CHANGE AVATAR'}
                           </button>
                         </div>
+                        */}
+                        <div className="border border-white/10 bg-white/[0.02] rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 shadow-xl">
+                          <div className="flex items-center gap-4 sm:gap-6">
+                            <div className="relative w-14 h-14 sm:w-20 sm:h-20 rounded-full border border-white/20 p-1 flex items-center justify-center bg-zinc-100/80 dark:bg-white/10 backdrop-blur-md overflow-hidden shadow-2xl group">
+                              {profile?.avatar_url ? (
+                                <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                              ) : (
+                                <User className="text-white/40 text-2xl sm:text-4xl w-6 h-6 sm:w-10 sm:h-10" />
+                              )}
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                                <FileText className="text-white text-base sm:text-xl w-4 h-4 sm:w-5 sm:h-5" />
+                              </div>
+                            </div>
+                            <div className="space-y-1 text-center sm:text-start">
+                              <h4 className="font-space font-black text-base sm:text-lg text-white tracking-wider uppercase">
+                                {profile?.full_name || 'MEMBER'}
+                              </h4>
+                              <p className="text-[9px] sm:text-[10px] font-space tracking-[0.3em] uppercase font-black" style={{ color: currentTheme.color }}>
+                                {profile?.rank || 'RECRUIT'} // {profile?.custom_avatar ? 'CUSTOM_SVG' : 'GOOGLE_PROFILE'}
+                              </p>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsAvatarSelectorOpen(true)
+                              playBlip()
+                            }}
+                            className="px-4 py-2.5 sm:px-6 sm:py-3.5 rounded-xl font-space font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all shadow-lg hover:scale-105 active:scale-95 cursor-pointer border border-white/20 hover:border-white/40 text-black font-bold"
+                            style={{ backgroundColor: currentTheme.color, boxShadow: `0 0 20px ${currentTheme.color}33` }}
+                          >
+                            {isRTL ? 'تغيير الشخصية' : 'CHANGE AVATAR'}
+                          </button>
+                        </div>
 
                         {/* Full Name */}
                         <div className="space-y-2">
@@ -381,7 +429,7 @@ export default function SettingsPage() {
                           <input
                             value={formData.full_name}
                             onChange={e => setFormData({ ...formData, full_name: e.target.value })}
-                            className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl px-4 py-3.5 font-space text-sm font-bold text-[var(--text-primary)] outline-none focus:ring-2 focus:border-transparent transition-all"
+                            className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl px-4 py-2 sm:py-3.5 font-space text-sm font-bold text-[var(--text-primary)] outline-none focus:ring-2 focus:border-transparent transition-all"
                             style={{ ['--tw-ring-color' as any]: `${currentTheme.color}55` }}
                           />
                         </div>
@@ -395,6 +443,7 @@ export default function SettingsPage() {
                               {t('age')}
                             </label>
                             
+                            {/* Replaced with compact Age Counter:
                             <div className="flex items-center bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl p-1 h-12 w-full justify-between">
                               <button
                                 type="button"
@@ -418,6 +467,30 @@ export default function SettingsPage() {
                                 &#43;
                               </button>
                             </div>
+                            */}
+                            <div className="flex items-center bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl p-1 h-9 sm:h-12 w-full justify-between">
+                              <button
+                                type="button"
+                                onClick={handleDecrementAge}
+                                className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center border font-bold text-base sm:text-lg transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/80 cursor-pointer"
+                                style={{ borderColor: `${currentTheme.color}40`, color: currentTheme.color }}
+                              >
+                                &minus;
+                              </button>
+
+                              <span className="font-space font-black text-sm sm:text-lg text-white tracking-widest px-4">
+                                {formData.age}
+                              </span>
+
+                              <button
+                                type="button"
+                                onClick={handleIncrementAge}
+                                className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center border font-bold text-base sm:text-lg transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/80 cursor-pointer"
+                                style={{ borderColor: `${currentTheme.color}40`, color: currentTheme.color }}
+                              >
+                                &#43;
+                              </button>
+                            </div>
                           </div>
 
                           {/* Gender CustomSelect */}
@@ -425,6 +498,7 @@ export default function SettingsPage() {
                             <label className="font-space tracking-widest uppercase font-black text-xs text-[var(--text-secondary)]">
                               {t('gender')}
                             </label>
+                            {/* Replaced with compact CustomSelect:
                             <CustomSelect
                               value={formData.gender || ''}
                               onChange={val => setFormData({ ...formData, gender: val })}
@@ -434,6 +508,17 @@ export default function SettingsPage() {
                               ]}
                               placeholder={isRTL ? 'اختر' : 'SELECT'}
                               className="h-12 flex items-center"
+                            />
+                            */}
+                            <CustomSelect
+                              value={formData.gender || ''}
+                              onChange={val => setFormData({ ...formData, gender: val })}
+                              options={[
+                                { value: 'Male', label: t('male') },
+                                { value: 'Female', label: t('female') }
+                              ]}
+                              placeholder={isRTL ? 'اختر' : 'SELECT'}
+                              className="h-9 sm:h-12 flex items-center"
                             />
                           </div>
 
@@ -541,7 +626,7 @@ export default function SettingsPage() {
                           <input
                             value={formData.ai_name}
                             onChange={e => setFormData({ ...formData, ai_name: e.target.value })}
-                            className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl px-4 py-3.5 font-space text-sm font-bold text-[var(--text-primary)] outline-none focus:ring-2 focus:border-transparent transition-all"
+                            className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl px-4 py-2 sm:py-3.5 font-space text-sm font-bold text-[var(--text-primary)] outline-none focus:ring-2 focus:border-transparent transition-all"
                             style={{ ['--tw-ring-color' as any]: `${currentTheme.color}55` }}
                           />
                         </div>
@@ -624,7 +709,7 @@ export default function SettingsPage() {
                                   playBlip()
                                 }}
                                 className={cn(
-                                  'py-3.5 border font-space text-xs font-black transition-all rounded-xl uppercase tracking-widest',
+                                  'py-2 sm:py-3.5 border font-space text-[10px] sm:text-xs font-black transition-all rounded-xl uppercase tracking-widest',
                                   formData.language === l.key 
                                     ? 'text-black border-transparent shadow-lg font-black' 
                                     : 'bg-[var(--input-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-white'
@@ -657,7 +742,7 @@ export default function SettingsPage() {
                                     setIsDarkMode(setDark)
                                   }}
                                   className={cn(
-                                    'py-3.5 flex items-center justify-center gap-2 border font-space text-xs font-black transition-all rounded-xl uppercase tracking-widest',
+                                    'py-2 sm:py-3.5 flex items-center justify-center gap-2 border font-space text-[10px] sm:text-xs font-black transition-all rounded-xl uppercase tracking-widest',
                                     isActive
                                       ? 'text-black border-transparent shadow-lg font-black' 
                                       : 'bg-[var(--input-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--card-border)]'
@@ -682,6 +767,7 @@ export default function SettingsPage() {
                               {Math.round(volume * 100)}%
                             </span>
                           </div>
+                          {/* Replaced with volume slider + tap buttons:
                           <input 
                             type="range"
                             min="0"
@@ -698,6 +784,45 @@ export default function SettingsPage() {
                             )}
                             style={{ accentColor: currentTheme.color }}
                           />
+                          */}
+                          <div className="flex items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={handleDecrementVolume}
+                              disabled={isMuted || volume <= 0}
+                              className="w-8 h-8 rounded-lg flex items-center justify-center border font-bold text-base transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/80 disabled:opacity-30 cursor-pointer"
+                              style={{ borderColor: `${currentTheme.color}40`, color: currentTheme.color }}
+                            >
+                              &minus;
+                            </button>
+
+                            <input 
+                              type="range"
+                              min="0"
+                              max="1"
+                              step="0.05"
+                              value={volume}
+                              onChange={(e) => setVolume(parseFloat(e.target.value))}
+                              onMouseUp={playBlip}
+                              onTouchEnd={playBlip}
+                              disabled={isMuted}
+                              className={cn(
+                                "flex-1 h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer transition-all",
+                                isMuted && "opacity-30 grayscale"
+                              )}
+                              style={{ accentColor: currentTheme.color }}
+                            />
+
+                            <button
+                              type="button"
+                              onClick={handleIncrementVolume}
+                              disabled={isMuted || volume >= 1}
+                              className="w-8 h-8 rounded-lg flex items-center justify-center border font-bold text-base transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/80 disabled:opacity-30 cursor-pointer"
+                              style={{ borderColor: `${currentTheme.color}40`, color: currentTheme.color }}
+                            >
+                              &#43;
+                            </button>
+                          </div>
                         </div>
 
                         {/* Sliding custom mute toggle */}
@@ -806,6 +931,7 @@ export default function SettingsPage() {
                     <label className="text-[10px] font-space text-red-500/60 tracking-widest uppercase font-black">XP_CALIBRATION_SLIDER</label>
                     <span className="text-lg font-space font-black text-red-500">{profile?.xp || 0} XP</span>
                   </div>
+                  {/* Replaced with XP range slider + tap buttons:
                   <input 
                     type="range"
                     min="0"
@@ -822,6 +948,57 @@ export default function SettingsPage() {
                     }}
                     className="w-full h-1 bg-red-500/20 rounded-lg appearance-none cursor-pointer accent-red-500"
                   />
+                  */}
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const newXp = Math.max(0, (profile?.xp || 0) - 250)
+                        setProfile({ ...profile, xp: newXp } as any)
+                        const { data: { user } } = await supabase.auth.getUser()
+                        if (user) {
+                          await supabase.from('profiles').update({ xp: newXp }).eq('id', user.id)
+                        }
+                        playBlip()
+                      }}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center border border-red-500/40 font-bold text-base transition-all duration-300 hover:bg-red-500/10 active:scale-95 text-red-500 cursor-pointer"
+                    >
+                      &minus;
+                    </button>
+
+                    <input 
+                      type="range"
+                      min="0"
+                      max="10000"
+                      step="50"
+                      value={profile?.xp || 0}
+                      onChange={async (e) => {
+                        const newXp = parseInt(e.target.value)
+                        setProfile({ ...profile, xp: newXp } as any)
+                        const { data: { user } } = await supabase.auth.getUser()
+                        if (user) {
+                          await supabase.from('profiles').update({ xp: newXp }).eq('id', user.id)
+                        }
+                      }}
+                      className="flex-1 h-1 bg-red-500/20 rounded-lg appearance-none cursor-pointer accent-red-500"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const newXp = Math.min(10000, (profile?.xp || 0) + 250)
+                        setProfile({ ...profile, xp: newXp } as any)
+                        const { data: { user } } = await supabase.auth.getUser()
+                        if (user) {
+                          await supabase.from('profiles').update({ xp: newXp }).eq('id', user.id)
+                        }
+                        playBlip()
+                      }}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center border border-red-500/40 font-bold text-base transition-all duration-300 hover:bg-red-500/10 active:scale-95 text-red-500 cursor-pointer"
+                    >
+                      &#43;
+                    </button>
+                  </div>
                 </div>
 
                 <div className="p-4 bg-red-500/5 border border-red-500/10 flex gap-4 items-center rounded-xl">
