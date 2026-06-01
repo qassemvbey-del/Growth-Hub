@@ -195,6 +195,11 @@ export default function TaskDrawer({
 
     return finalElements
   }
+  const [isAnimationComplete, setIsAnimationComplete] = useState(false)
+  useEffect(() => {
+    setIsAnimationComplete(false)
+  }, [task.id])
+
   const [taskTitle, setTaskTitle] = useState(task.title || '')
   useEffect(() => {
     setTaskTitle(task.title || '')
@@ -747,6 +752,7 @@ export default function TaskDrawer({
         animate={{ x: 0 }}
         exit={{ x: isRTL ? '-100%' : '100%' }}
         transition={{ type: 'tween', duration: 0.35, ease: 'easeOut' }}
+        onAnimationComplete={() => setIsAnimationComplete(true)}
         /* bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 */
         /* bg-white/10 dark:bg-black/40 backdrop-blur-3xl shadow-2xl */
         className={`fixed top-0 bottom-0 z-[20005] w-full md:w-[50vw] lg:w-[45vw] shadow-2xl flex flex-col ${
@@ -789,15 +795,19 @@ export default function TaskDrawer({
           {hasVideo && (
             <div className="space-y-3 shrink-0">
               <div className="w-full aspect-video rounded-xl overflow-hidden shadow-lg relative border bg-black/40" style={{ borderColor: `${themeColor}20` }}>
-                <SmartTaskPlayer
-                  taskId={task.id}
-                  url={finalVideoUrl}
-                  initialProgress={videoProgress}
-                  isGuest={isGuest}
-                  themeColor={themeColor}
-                  onComplete={onComplete}
-                  onProgressUpdate={onProgressUpdate}
-                />
+                {isAnimationComplete ? (
+                  <SmartTaskPlayer
+                    taskId={task.id}
+                    url={finalVideoUrl}
+                    initialProgress={videoProgress}
+                    isGuest={isGuest}
+                    themeColor={themeColor}
+                    onComplete={onComplete}
+                    onProgressUpdate={onProgressUpdate}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-zinc-900 animate-pulse rounded-md" />
+                )}
               </div>
               {/* Mini video meta bar */}
               <div className="flex justify-between items-center text-[11px] font-mono text-white/55 px-1 bg-white/[0.02] py-2 rounded-lg border border-white/5">
