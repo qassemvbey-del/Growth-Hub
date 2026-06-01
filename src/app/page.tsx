@@ -220,6 +220,7 @@ export default function Dashboard() {
 
   // Calculate rivalry tracking for selected squad
   const computedRivalryText = useMemo(() => {
+    /*
     if (!selectedSquadId || !squadMembersMap[selectedSquadId]) {
       return isRTL ? 'انضم إلى فريق لتتبع منافسيك.' : 'Join a squad to track your rivals.'
     }
@@ -253,7 +254,11 @@ export default function Dashboard() {
       }
     }
     return isRTL ? 'لا يوجد منافسين في هذا الفريق.' : 'No other active rivals in this squad.'
-  }, [selectedSquadId, squadMembersMap, profile, isRTL])
+    */
+    return isRTL 
+      ? 'ترتيبك في الفريق: شوف مركزك بين زمايلك.' 
+      : 'Squad Leaderboard: See your rank among teammates.'
+  }, [isRTL])
 
   async function toggleTask(task: any) {
     const updatedStatus = !task.is_completed
@@ -315,20 +320,20 @@ export default function Dashboard() {
     <Shell syncedMissions={missions} onMissionsRefresh={fetchDashboardMissions}>
       <div 
         className="w-full min-h-[calc(100dvh-64px)] flex flex-col py-4 sm:py-8 md:py-12 px-2 sm:px-6 md:px-12 space-y-4 sm:space-y-6 md:space-y-8 max-w-7xl mx-auto font-space relative"
-        style={{ background: `radial-gradient(ellipse at 50% 0%, ${currentTheme.color}30 0%, transparent 55%), radial-gradient(ellipse at 80% 20%, ${currentTheme.color}18 0%, transparent 45%)` }}
+        style={{ background: `radial-gradient(ellipse at 50% 0%, ${currentTheme.color}45 0%, transparent 55%), radial-gradient(ellipse at 80% 20%, ${currentTheme.color}30 0%, transparent 45%)` }}
       >
         
         {/* ── COMMAND CENTER TITLE ── */}
         <div className="w-full flex flex-col items-center text-center space-y-2 sm:space-y-3">
           <div className="flex items-center gap-3 sm:gap-6">
             <div className="h-[1px] w-12 sm:w-20 md:w-32" style={{ background: `linear-gradient(to right, transparent, ${currentTheme.color}40)` }} />
-            <motion.span
+            {/* <motion.span
               style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }}
               animate={{ opacity: [0.3, 1, 0.3] }}
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             >
               <Zap className="w-4.5 h-4.5 sm:w-5 sm:h-5 md:w-6 md:h-6 shrink-0" />
-            </motion.span>
+            </motion.span> */}
             <div className="h-[1px] w-12 sm:w-20 md:w-32" style={{ background: `linear-gradient(to left, transparent, ${currentTheme.color}40)` }} />
           </div>
 
@@ -340,9 +345,9 @@ export default function Dashboard() {
             {isRTL ? 'منصة' : 'FOCUS'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'HUB'}</span>
           </motion.h1>
 
-          <p className="text-[8px] sm:text-[10px] text-zinc-500 dark:text-white/40 tracking-[0.2em] sm:tracking-[0.4em] uppercase font-black">
+          {/* <p className="text-[8px] sm:text-[10px] text-zinc-500 dark:text-white/40 tracking-[0.2em] sm:tracking-[0.4em] uppercase font-black">
             {isRTL ? 'لوحة الإنتاجية والتركيز' : 'PRODUCTIVITY FOCUS MATRIX'} // {profile?.rank || 'MEMBER'}
-          </p>
+          </p> */}
         </div>
 
         {/* ── THE FOCUS PIPELINE (Top Section - Full Width - Commented out for Mobile Optimization) ──
@@ -399,15 +404,15 @@ export default function Dashboard() {
           <div 
             className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-6 space-y-2 sm:space-y-4 shadow-xl relative overflow-hidden flex flex-col justify-between transition-all duration-300"
             style={{ 
-              borderColor: `${currentTheme.color}25`,
-              boxShadow: `0 0 15px ${currentTheme.color}15`
+              borderColor: `${currentTheme.color}50`,
+              boxShadow: `0 0 25px ${currentTheme.color}35`
             }}
           >
             <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r" style={{ backgroundImage: `linear-gradient(to right, ${currentTheme.color}, transparent)` }} />
             
             <div className="flex justify-between items-center gap-1.5">
               <div className="flex items-center gap-1 sm:gap-2 min-w-0">
-                <NeonIcon icon={Zap} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} />
+                {/* <NeonIcon icon={Zap} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} /> */}
                 <span className="text-[9px] sm:text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase truncate">
                   {isRTL ? 'التركيز اليومي' : 'DAILY FOCUS'}
                 </span>
@@ -453,14 +458,14 @@ export default function Dashboard() {
             className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-6 space-y-2 sm:space-y-4 shadow-xl relative overflow-hidden transition-all duration-300 flex flex-col justify-between"
             style={{ 
               borderColor: currentTheme.color,
-              boxShadow: `0 0 20px ${currentTheme.color}25`
+              boxShadow: `0 0 30px ${currentTheme.color}45`
             }}
           >
             <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: currentTheme.color }} />
             
             <div className="flex justify-between items-center gap-1.5">
               <div className="flex items-center gap-1 sm:gap-2 min-w-0">
-                <NeonIcon icon={Users} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} />
+                {/* <NeonIcon icon={Users} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} /> */}
                 <span className="text-[9px] sm:text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase truncate">
                   {isRTL ? 'المنافسة' : 'RIVALRY'}
                 </span>
@@ -483,7 +488,7 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 mt-1.5">
-              <Swords className="w-4.5 h-4.5 sm:w-6 sm:h-6 shrink-0 animate-pulse" style={{ color: currentTheme.color }} />
+              {/* <Swords className="w-4.5 h-4.5 sm:w-6 sm:h-6 shrink-0 animate-pulse" style={{ color: currentTheme.color }} /> */}
               <p className="text-[9px] sm:text-xs font-black tracking-wide text-zinc-100 uppercase leading-tight flex-1 line-clamp-2 break-words whitespace-normal">
                 {computedRivalryText}
               </p>
@@ -501,14 +506,14 @@ export default function Dashboard() {
           <div 
             className="w-full bg-white/60 dark:bg-black/40 backdrop-blur-3xl border rounded-xl sm:rounded-2xl p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 shadow-xl relative overflow-hidden"
             style={{ 
-              borderColor: `${currentTheme.color}20`,
-              boxShadow: `0 0 20px ${currentTheme.color}10`
+              borderColor: `${currentTheme.color}40`,
+              boxShadow: `0 0 30px ${currentTheme.color}30`
             }}
           >
             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r to-transparent" style={{ backgroundImage: `linear-gradient(to right, ${currentTheme.color}, transparent)` }} />
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <NeonIcon icon={Activity} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} />
+                {/* <NeonIcon icon={Activity} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} /> */}
                 <h2 className="text-[10px] sm:text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase">
                   {isRTL ? 'الوارد التكتيكي العاجل' : 'ACTION INBOX // CRITICAL'}
                 </h2>
@@ -576,7 +581,8 @@ export default function Dashboard() {
                 <div className="py-12 sm:py-16 text-center space-y-2 border border-dashed border-white/5 rounded-xl">
                   <span className="text-zinc-600 font-black text-xl sm:text-2xl">⚡</span>
                   <p className="text-[9px] sm:text-xs text-zinc-500 dark:text-white/30 uppercase tracking-widest">
-                    {isRTL ? 'الوارد فارغ! جميع الالتزامات منجزة.' : 'INBOX CLEAR // NO OVERDUE TASKS'}
+                    {/* {isRTL ? 'الوارد فارغ! جميع الالتزامات منجزة.' : 'INBOX CLEAR // NO OVERDUE TASKS'} */}
+                    {isRTL ? 'عاش! مفيش أي مهام متأخرة عليك حالياً.' : "You're all caught up! Overdue tasks will appear here."}
                   </p>
                 </div>
               )}
@@ -640,9 +646,9 @@ export default function Dashboard() {
         {/* ── PINNED GOALS (Bottom Section - Full Width Grid) ── */}
         <div className="w-full space-y-6 pt-8 border-t border-[var(--card-border)]">
           <div className="flex items-center gap-3">
-            <NeonIcon icon={Target} className="text-2xl w-6 h-6 shrink-0" style={{ color: currentTheme.color }} />
+            {/* <NeonIcon icon={Target} className="text-2xl w-6 h-6 shrink-0" style={{ color: currentTheme.color }} /> */}
             <h2 className="text-sm font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">
-              {isRTL ? 'الأهداف المثبتة // مصفوفة التركيز' : 'PINNED GOALS // FOCUS MATRIX'}
+              {isRTL ? 'الأهداف المثبتة' : 'PINNED GOALS'}
             </h2>
           </div>
 
@@ -662,8 +668,8 @@ export default function Dashboard() {
                       (mission.title === "Start Here 🚀" || mission.title === "ابدأ من هنا 🚀") && "onboarding-start-goal"
                     )}
                     style={{
-                      boxShadow: isInRedZone ? '0 0 15px rgba(239,68,68,0.15)' : `0 0 15px ${customColor}12`,
-                      borderColor: isInRedZone ? undefined : `${customColor}20`
+                      boxShadow: isInRedZone ? '0 0 20px rgba(239,68,68,0.3)' : `0 0 25px ${customColor}25`,
+                      borderColor: isInRedZone ? undefined : `${customColor}45`
                     }}
                  >
                    <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: isInRedZone ? '#ef4444' : customColor }} />
