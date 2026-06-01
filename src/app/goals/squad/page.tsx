@@ -1330,6 +1330,7 @@ export default function SquadGoalsPage() {
           )}
         </AnimatePresence>
 
+        {/* Commented out My Tasks section block to permanently remove it from the site
         {!typeFilter && (
           <div className="w-full bg-zinc-50/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/80 rounded-md p-6 md:p-8 space-y-6 shadow-md transition-all duration-300 hover:shadow-[0_0_0_1px_rgba(161,161,170,0.3)] backdrop-blur-md">
             <div className="flex flex-row justify-between items-center border-b border-zinc-200 dark:border-zinc-800 pb-4">
@@ -1433,6 +1434,7 @@ export default function SquadGoalsPage() {
             </div>
           </div>
         )}
+        */}
 
         <div className="w-full">
           {typeFilter === 'squad' ? (

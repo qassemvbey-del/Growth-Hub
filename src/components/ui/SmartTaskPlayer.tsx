@@ -9,7 +9,7 @@ import { useGrowth } from '@/context/GrowthContext'
 
 interface SmartTaskPlayerProps {
   taskId: string
-  videoId: string
+  url: string
   initialProgress: number
   isGuest: boolean
   themeColor: string
@@ -19,7 +19,7 @@ interface SmartTaskPlayerProps {
 
 export default function SmartTaskPlayer({ 
   taskId, 
-  videoId, 
+  url, 
   initialProgress, 
   isGuest, 
   themeColor,
@@ -143,9 +143,14 @@ export default function SmartTaskPlayer({
     }
   }, [saveCurrentTime])
 
-  // If videoId is missing or empty, do NOT render a dead black box.
-  if (!videoId || videoId.trim() === "") return null
+  // If url is missing or empty, do NOT render a dead black box.
+  if (!url || url.trim() === "") return null
 
+  // Feed the raw URL stream exactly as pasted by the user. Do NOT manipulate the URL string.
+  const videoUrl = url
+
+  // Comment out old parsing and normalization logic to adhere to safety requirements
+  /*
   // Build the video URL: If it is already a full URL, use it directly; otherwise wrap it as a YouTube URL.
   // const videoUrl = videoId.includes('://') ? videoId : `https://www.youtube.com/watch?v=${videoId}`
 
@@ -172,6 +177,7 @@ export default function SmartTaskPlayer({
       }
     } catch (_err) {}
   }
+  */
 
 
   return (
