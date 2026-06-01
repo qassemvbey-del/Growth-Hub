@@ -906,8 +906,9 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       */}
       {!isMobileNavOpen && (
         <div 
-          className="fixed top-0 left-0 w-6 h-full z-[9999] lg:hidden bg-transparent"
-          onTouchStart={() => {
+          className="fixed top-0 left-0 w-6 h-full z-[9999] lg:hidden bg-transparent touch-none"
+          onTouchStart={(e) => {
+            e.preventDefault();
             setIsMobileNavOpen(true);
             playBlip();
           }}
