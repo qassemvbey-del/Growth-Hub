@@ -999,7 +999,7 @@ export default function TaskDrawer({
         {/* Fixed Thumb-Zone Footer - Explicitly lifted to clear bottom nav */}
         {/* bg-[#0a0a0f]/95 backdrop-blur-xl border-t border-white/5 */}
         {/* bg-white/60 dark:bg-black/40 backdrop-blur-3xl */}
-        <div className="absolute bottom-[85px] left-0 w-full z-[99999] bg-transparent backdrop-blur-[40px] border-t border-black/5 dark:border-white/5 p-3 pb-safe flex items-center gap-2">
+        <div className="absolute bottom-[85px] left-0 w-full z-[99999] bg-[#09090b]/98 border-t border-black/5 dark:border-white/5 p-3 pb-safe flex items-center gap-2">
           {/* Play/Focus Button */}
           {!task.is_completed ? (
             <button

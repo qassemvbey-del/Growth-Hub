@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import YouTube, { YouTubeEvent, YouTubePlayer } from 'react-youtube'
+import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase'
 import { useToast } from '@/components/ui/Toast'
+
+// Dynamic import for ReactPlayer to avoid SSR hydration mismatch
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false }) as any
 
 interface SmartTaskPlayerProps {
   taskId: string
@@ -22,176 +25,96 @@ export default function SmartTaskPlayer({
   onComplete,
   onProgressUpdate
 }: SmartTaskPlayerProps) {
-  const [player, setPlayer] = useState<YouTubePlayer | null>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
   const { showToast } = useToast()
   const supabase = createClient()
-  const progressInterval = useRef<NodeJS.Timeout | null>(null)
-
-  // --- V25.1 HOTFIX: Mutable refs to avoid stale closures in beforeunload ---
-  const playerRef = useRef<YouTubePlayer | null>(null)
-  const isPlayingRef = useRef(false)
-
-  // --- V25.1 HOTFIX: Guard flag to fix seek race condition ---
+  
+  const playerRef = useRef<any>(null)
   const hasSeeked = useRef(false)
+  const isReady = useRef(false)
+  const durationRef = useRef(0)
 
-  // Keep refs in sync with state
-  useEffect(() => { playerRef.current = player }, [player])
-  useEffect(() => { isPlayingRef.current = isPlaying }, [isPlaying])
+  // Construct standard youtube URL to feed to ReactPlayer
+  const videoUrl = `https://www.youtube.com/watch?v=${videoId}`
 
-  // Configuration for the YouTube Iframe
-  const opts = {
-    height: '100%',
-    width: '100%',
-    playerVars: {
-      autoplay: 0,
-      modestbranding: 1,
-      rel: 0,
-      fs: 1,
-    },
-  }
+  const handleProgress = useCallback(async (state: { playedSeconds: number, played: number }) => {
+    const currentTime = state.playedSeconds
+    const duration = durationRef.current
 
-  const saveProgress = useCallback(async (currentTime: number) => {
-    let duration = 0
-    if (playerRef.current) {
-      try {
-        duration = playerRef.current.getDuration()
-      } catch (e) {}
-    }
     if (isGuest) {
       localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
       if (duration > 0) {
         localStorage.setItem(`growth_hub_video_duration_${taskId}`, duration.toString())
       }
     } else {
-      await supabase
+      // Background async update
+      supabase
         .from('tasks')
         .update({ video_progress: currentTime })
         .eq('id', taskId)
+        .then()
+      
       if (duration > 0) {
         localStorage.setItem(`growth_hub_video_duration_${taskId}`, duration.toString())
       }
     }
+
     if (onProgressUpdate) {
       onProgressUpdate(currentTime, duration)
     }
   }, [isGuest, taskId, supabase, onProgressUpdate])
 
-  // --- V25.1 HOTFIX: Instant save helper using refs (safe for beforeunload) ---
-  const saveCurrentTime = useCallback(() => {
-    const p = playerRef.current
-    if (p && isPlayingRef.current) {
-      try {
-        const currentTime = p.getCurrentTime()
-        const duration = p.getDuration()
-        localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
-        if (duration > 0) {
-          localStorage.setItem(`growth_hub_video_duration_${taskId}`, duration.toString())
-        }
-        if (!isGuest) {
-          supabase
-            .from('tasks')
-            .update({ video_progress: currentTime })
-            .eq('id', taskId)
-        }
-        if (onProgressUpdate) {
-          onProgressUpdate(currentTime, duration)
-        }
-      } catch (_e) {
-        // Player may already be destroyed — silently ignore
-      }
-    }
-  }, [taskId, isGuest, supabase, onProgressUpdate])
-
-  const onReady = (event: YouTubeEvent) => {
-    const p = event.target
-    setPlayer(p)
-    // V25.1: We no longer seekTo here — it races with YouTube buffering.
-    // The seek is deferred to the first PLAYING state in onStateChange.
-    if (onProgressUpdate) {
-      try {
-        onProgressUpdate(p.getCurrentTime(), p.getDuration())
-      } catch (e) {}
-    }
-  }
-
-  // --- V25.1 HOTFIX: Unified onStateChange handles PLAYING seek + PAUSED instant save ---
-  const onStateChange = (event: YouTubeEvent) => {
-    const state = event.data
-    const p = event.target
-
-    // YouTube PlayerState constants (from YT.PlayerState)
-    const PLAYING = 1
-    const PAUSED = 2
-    const ENDED = 0
-
-    if (state === PLAYING) {
-      setIsPlaying(true)
-
-      // V25.1 FIX: Deferred auto-resume — only seek after YouTube is actively streaming
+  const handleReady = useCallback((player: any) => {
+    isReady.current = true
+    try {
+      durationRef.current = player.getDuration() || 0
+      
+      // Auto-seek if we have progress saved
       if (!hasSeeked.current && initialProgress > 0) {
-        p.seekTo(initialProgress, true)
+        player.seekTo(initialProgress, 'seconds')
         hasSeeked.current = true
         showToast('تم استئناف التشغيل من حيث توقفت', 'success')
       }
-    } else if (state === PAUSED) {
-      setIsPlaying(false)
-      // V25.1 FIX: Instant save on pause — don't wait for the 5s interval
-      saveProgress(p.getCurrentTime())
-    } else if (state === ENDED) {
-      setIsPlaying(false)
-      saveProgress(0) // Reset progress on completion
-      onComplete()
+      
+      if (onProgressUpdate) {
+        onProgressUpdate(initialProgress || 0, durationRef.current)
+      }
+    } catch (err) {
+      console.error('Error during player ready', err)
     }
-  }
+  }, [initialProgress, onProgressUpdate, showToast])
 
-  // Polling loop to save progress every 5 seconds while playing
-  useEffect(() => {
-    if (isPlaying && player) {
-      progressInterval.current = setInterval(() => {
-        saveProgress(player.getCurrentTime())
-      }, 5000)
+  const handleEnded = useCallback(() => {
+    if (isGuest) {
+      localStorage.setItem(`growth_hub_video_progress_${taskId}`, "0")
     } else {
-      if (progressInterval.current) {
-        clearInterval(progressInterval.current)
-      }
+      supabase.from('tasks').update({ video_progress: 0 }).eq('id', taskId).then()
     }
-
-    return () => {
-      if (progressInterval.current) {
-        clearInterval(progressInterval.current)
-      }
-    }
-  }, [isPlaying, player, saveProgress])
-
-  // --- V25.1 HOTFIX: beforeunload listener — saves the instant the tab is killed ---
-  useEffect(() => {
-    window.addEventListener('beforeunload', saveCurrentTime)
-    return () => {
-      window.removeEventListener('beforeunload', saveCurrentTime)
-      // Also save on component unmount (navigation within the SPA)
-      saveCurrentTime()
-    }
-  }, [saveCurrentTime])
+    onComplete()
+  }, [isGuest, taskId, supabase, onComplete])
 
   return (
     <div className="w-full h-full relative">
-      {/* Decorative cyber border glow */}
       <div className="absolute inset-0 pointer-events-none z-10" style={{ boxShadow: `inset 0 0 20px ${themeColor}22` }} />
       
-      {/* CRITICAL GPU ACCELERATION & ISOLATION LAYER TO FIX IFRAME FREEZING */}
-      <div 
-        className="relative z-50 transform-gpu bg-black overflow-hidden isolate w-full aspect-video rounded-md"
-        style={{ transform: 'translate3d(0, 0, 0)' }}
-      >
-        <YouTube 
-          videoId={videoId} 
-          opts={opts} 
-          onReady={onReady}
-          onStateChange={onStateChange}
-          className="w-full h-full"
+      <div className="relative z-50 bg-black w-full aspect-video rounded-md overflow-hidden">
+        <ReactPlayer
+          ref={playerRef}
+          url={videoUrl}
+          controls={true}
+          width="100%"
+          height="100%"
+          onReady={handleReady}
+          onProgress={handleProgress}
+          onEnded={handleEnded}
+          progressInterval={5000}
+          config={{
+            youtube: {
+              playerVars: { modestbranding: 1, rel: 0 }
+            }
+          }}
         />
       </div>
     </div>
   )
 }
+
