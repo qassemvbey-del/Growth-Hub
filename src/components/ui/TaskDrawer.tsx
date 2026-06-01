@@ -732,13 +732,13 @@ export default function TaskDrawer({
 
   return (
     <div className="fixed inset-0 z-[20000] flex items-stretch">
-      {/* 1. Backdrop Overlay */}
+      {/* 1. Backdrop Overlay (ZERO BLUR) */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 bg-black/65 z-[20000] cursor-pointer"
+        className="fixed inset-0 bg-black/50 backdrop-blur-none z-[20000] cursor-pointer"
       />
 
       {/* 2. Side Panel */}

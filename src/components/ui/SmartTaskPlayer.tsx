@@ -17,6 +17,12 @@ export default function SmartTaskPlayer({
   
   const getEmbedUrl = (rawUrl: string) => {
     if (!rawUrl) return ''
+    
+    // If it's already a valid embed link, keep it
+    if (rawUrl.includes('youtube.com/embed/')) {
+      return rawUrl
+    }
+
     try {
       const urlObj = new URL(rawUrl)
       
@@ -39,19 +45,21 @@ export default function SmartTaskPlayer({
       }
 
       // Handle embed or v paths
-      const pathMatch = urlObj.pathname.match(/\/(embed|v)\/([a-zA-Z0-9_-]{11})/)
-      if (pathMatch && pathMatch[2]) {
+      const pathMatch = urlObj.pathname.match(/\/(embed|v)\/([a-zA-Z0-9_-]+)/)
+      if (pathMatch && pathMatch[2] && pathMatch[2] !== 'videoseries') {
         return `https://www.youtube.com/embed/${pathMatch[2]}`
       }
       
     } catch (e) {
-      // Fallback for raw 11-character IDs or already valid embed URLs
+      // Fallback for raw IDs
+      if (rawUrl.startsWith('PL')) {
+        return `https://www.youtube.com/embed/videoseries?list=${rawUrl}`
+      }
       if (rawUrl.length === 11) {
         return `https://www.youtube.com/embed/${rawUrl}`
       }
     }
     
-    // If all else fails, just return the raw URL (might already be an embed link)
     return rawUrl
   }
 
