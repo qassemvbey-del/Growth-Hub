@@ -1,4 +1,10 @@
-import React from 'react'
+import React, { useEffect, useRef, useCallback } from 'react'
+import dynamic from 'next/dynamic'
+import { createClient } from '@/lib/supabase'
+import { useToast } from '@/components/ui/Toast'
+
+// Dynamic import for ReactPlayer to avoid SSR hydration mismatch
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false }) as any
 
 interface SmartTaskPlayerProps {
   taskId: string
@@ -11,71 +17,137 @@ interface SmartTaskPlayerProps {
 }
 
 export default function SmartTaskPlayer({ 
+  taskId, 
   url, 
+  initialProgress, 
+  isGuest, 
   themeColor,
+  onComplete,
+  onProgressUpdate
 }: SmartTaskPlayerProps) {
+  const { showToast } = useToast()
+  const supabase = createClient()
   
-  const getEmbedUrl = (rawUrl: string) => {
-    if (!rawUrl) return ''
-    
-    // If it's already a valid embed link, keep it
-    if (rawUrl.includes('youtube.com/embed/')) {
-      return rawUrl
-    }
+  const playerRef = useRef<any>(null)
+  const hasSeeked = useRef(false)
+  
+  // Track progress SILENTLY using refs (avoids re-render crash loops)
+  const progressRef = useRef(0)
+  const durationRef = useRef(0)
+  const isPlayingRef = useRef(false)
 
+  // ReactPlayer automatically parses raw youtube URLs and playlist parameters safely.
+  const videoUrl = url
+
+  const handleProgress = useCallback((state: { playedSeconds: number, played: number }) => {
+    // Silently update the ref, NO useState
+    progressRef.current = state.playedSeconds
+  }, [])
+
+  const handlePlay = useCallback(() => {
+    isPlayingRef.current = true
+  }, [])
+
+  const handlePause = useCallback(() => {
+    isPlayingRef.current = false
+  }, [])
+
+  const handleReady = useCallback((player: any) => {
     try {
-      const urlObj = new URL(rawUrl)
+      durationRef.current = player.getDuration() || 0
       
-      // Handle playlist URLs
-      const listId = urlObj.searchParams.get('list')
-      if (listId) {
-        return `https://www.youtube.com/embed/videoseries?list=${listId}`
+      // Auto-seek if we have progress saved
+      if (!hasSeeked.current && initialProgress > 0) {
+        player.seekTo(initialProgress, 'seconds')
+        hasSeeked.current = true
+        showToast('تم استئناف التشغيل من حيث توقفت', 'success')
       }
       
-      // Handle standard youtube.com?v= URLs
-      const vParam = urlObj.searchParams.get('v')
-      if (vParam) {
-        return `https://www.youtube.com/embed/${vParam}`
+      if (onProgressUpdate) {
+        onProgressUpdate(initialProgress || 0, durationRef.current)
+      }
+    } catch (err) {
+      console.error('Error during player ready', err)
+    }
+  }, [initialProgress, onProgressUpdate, showToast])
+
+  const handleEnded = useCallback(() => {
+    if (isGuest) {
+      localStorage.setItem(`growth_hub_video_progress_${taskId}`, "0")
+    } else {
+      supabase.from('tasks').update({ video_progress: 0 }).eq('id', taskId).then()
+    }
+    onComplete()
+  }, [isGuest, taskId, supabase, onComplete])
+
+  // Silent save loop (every 5 seconds)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!isPlayingRef.current) return
+      
+      const currentTime = progressRef.current
+      const duration = durationRef.current
+
+      // Save to localStorage
+      localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
+      if (duration > 0) {
+        localStorage.setItem(`growth_hub_video_duration_${taskId}`, duration.toString())
       }
 
-      // Handle youtu.be short URLs
-      if (urlObj.hostname === 'youtu.be') {
-        const pathId = urlObj.pathname.slice(1)
-        if (pathId) return `https://www.youtube.com/embed/${pathId}`
+      // Save to DB
+      if (!isGuest) {
+        supabase
+          .from('tasks')
+          .update({ video_progress: currentTime })
+          .eq('id', taskId)
+          .then()
       }
 
-      // Handle embed or v paths
-      const pathMatch = urlObj.pathname.match(/\/(embed|v)\/([a-zA-Z0-9_-]+)/)
-      if (pathMatch && pathMatch[2] && pathMatch[2] !== 'videoseries') {
-        return `https://www.youtube.com/embed/${pathMatch[2]}`
+      // Update parent UI safely (only once every 5 seconds instead of 60fps)
+      if (onProgressUpdate) {
+        onProgressUpdate(currentTime, duration)
       }
-      
-    } catch (e) {
-      // Fallback for raw IDs
-      if (rawUrl.startsWith('PL')) {
-        return `https://www.youtube.com/embed/videoseries?list=${rawUrl}`
-      }
-      if (rawUrl.length === 11) {
-        return `https://www.youtube.com/embed/${rawUrl}`
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [taskId, isGuest, supabase, onProgressUpdate])
+
+  // Ensure instant save on unmount
+  useEffect(() => {
+    return () => {
+      const currentTime = progressRef.current
+      const duration = durationRef.current
+      localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
+      if (!isGuest) {
+        supabase.from('tasks').update({ video_progress: currentTime }).eq('id', taskId).then()
       }
     }
-    
-    return rawUrl
-  }
-
-  const embedUrl = getEmbedUrl(url)
+  }, [taskId, isGuest, supabase])
 
   return (
     <div className="w-full h-full relative">
       <div className="absolute inset-0 pointer-events-none z-10" style={{ boxShadow: `inset 0 0 20px ${themeColor}22` }} />
       
-      <iframe 
-        className="w-full aspect-video rounded-md bg-black" 
-        src={embedUrl} 
-        frameBorder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-        allowFullScreen
-      ></iframe>
+      <div className="relative z-50 bg-black w-full aspect-video rounded-md overflow-hidden">
+        <ReactPlayer
+          ref={playerRef}
+          url={videoUrl}
+          controls={true}
+          width="100%"
+          height="100%"
+          onReady={handleReady}
+          onPlay={handlePlay}
+          onPause={handlePause}
+          onProgress={handleProgress}
+          onEnded={handleEnded}
+          progressInterval={1000} // ReactPlayer fires onProgress every 1s, but we only update refs
+          config={{
+            youtube: {
+              playerVars: { modestbranding: 1, rel: 0 }
+            }
+          }}
+        />
+      </div>
     </div>
   )
 }
