@@ -315,7 +315,7 @@ export default function Dashboard() {
     <Shell syncedMissions={missions} onMissionsRefresh={fetchDashboardMissions}>
       <div 
         className="w-full min-h-[calc(100dvh-64px)] flex flex-col py-4 sm:py-8 md:py-12 px-2 sm:px-6 md:px-12 space-y-4 sm:space-y-6 md:space-y-8 max-w-7xl mx-auto font-space relative"
-        style={{ background: `radial-gradient(ellipse at 50% 0%, ${currentTheme.color}08 0%, transparent 60%)` }}
+        style={{ background: `radial-gradient(ellipse at 50% 0%, ${currentTheme.color}30 0%, transparent 55%), radial-gradient(ellipse at 80% 20%, ${currentTheme.color}18 0%, transparent 45%)` }}
       >
         
         {/* ── COMMAND CENTER TITLE ── */}
