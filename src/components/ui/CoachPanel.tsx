@@ -46,6 +46,10 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
       } else {
         const storedEnergy = localStorage.getItem('coach_energy')
         currentEnergy = storedEnergy ? parseInt(storedEnergy, 10) : 3
+        if (isNaN(currentEnergy) || storedEnergy === null) {
+          currentEnergy = 3
+          localStorage.setItem('coach_energy', '3')
+        }
         setEnergy(currentEnergy)
       }
     }
@@ -211,24 +215,36 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
               </div>
             </div>
 
-            {/* Response Area */}
+            {/* Response Area — Cyberpunk Terminal */}
             <div className="p-6">
               <div className="relative group">
-                <div className="absolute -inset-0.5 rounded opacity-0 group-hover:opacity-100 transition duration-1000" style={{ backgroundColor: `${coachColor}22` }}></div>
+                <div className="absolute -inset-0.5 rounded-xl opacity-0 group-hover:opacity-100 transition duration-1000" style={{ backgroundColor: `${coachColor}22` }}></div>
                 <div 
-                  className="relative p-6 bg-white/40 dark:bg-[rgba(0,0,0,0.2)] border overflow-y-auto scrollbar-thin rounded-sm shadow-inner" 
+                  className="relative p-5 bg-zinc-950 border overflow-y-auto scrollbar-thin rounded-xl" 
                   style={{ 
-                    borderColor: `${coachColor}44`,
-                    backgroundColor: `${coachColor}0A`,
+                    borderColor: `${coachColor}30`,
+                    boxShadow: `inset 0 0 20px ${coachColor}15, 0 0 15px ${coachColor}08`,
                     minHeight: '250px',
                     maxHeight: '40vh',
                     direction: isArabic ? 'rtl' : 'ltr',
                     textAlign: isArabic ? 'right' : 'left'
                   }}
                 >
+                  {/* CRT Scanline Overlay */}
+                  <div 
+                    className="pointer-events-none absolute inset-0 z-10 opacity-30 rounded-xl"
+                    style={{ background: 'linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06))', backgroundSize: '100% 4px, 3px 100%' }}
+                  />
+
+                  {/* Terminal Header Label */}
+                  <div className="flex items-center justify-between border-b border-white/5 pb-2 mb-3 font-mono text-[10px] tracking-widest text-emerald-500/70">
+                    <span>&gt; COACH_CORE_TERMINAL // ACTIVE</span>
+                    <span className="animate-pulse">● ONLINE</span>
+                  </div>
+
                   {isLoading ? (
                     <div className="flex flex-col items-center justify-center h-full space-y-4 py-10">
-                       <span className="text-xs font-black tracking-widest animate-pulse uppercase" style={{ color: coachColor }}>
+                       <span className="text-xs font-mono font-black tracking-widest animate-pulse uppercase text-emerald-400">
                          {profile?.language === 'ar' ? `${coachName} بيفكر...` : `${coachName}_PROCESSING...`}
                        </span>
                        <div className="flex gap-2">
@@ -237,14 +253,13 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
                               key={i}
                               animate={{ opacity: [0.2, 1, 0.2] }}
                               transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
-                              className="w-1.5 h-1.5 rounded-full"
-                              style={{ backgroundColor: coachColor }}
+                              className="w-1.5 h-1.5 rounded-full bg-emerald-400"
                             />
                           ))}
                        </div>
                     </div>
                   ) : (
-                    <p className="text-[var(--text-primary)] text-sm md:text-base font-bold leading-relaxed whitespace-pre-wrap">
+                    <p className="font-mono text-sm leading-relaxed text-emerald-400 antialiased whitespace-pre-wrap relative z-20">
                       {response}
                     </p>
                   )}
