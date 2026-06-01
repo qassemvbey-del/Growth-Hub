@@ -26,16 +26,17 @@ export default function SmartTaskPlayer({
   const iframeRef = useRef<HTMLIFrameElement>(null)
   
   const [isMounted, setIsMounted] = useState(false)
-  const [windowOrigin, setWindowOrigin] = useState('')
+  const originRef = useRef(
+    typeof window !== 'undefined' 
+      ? window.location.origin 
+      : ''
+  )
   const progressRef = useRef(0)
   const durationRef = useRef(0)
   const hasSeeked = useRef(false)
 
   useEffect(() => {
     setIsMounted(true)
-    if (typeof window !== 'undefined') {
-      setWindowOrigin(window.location.origin)
-    }
   }, [])
 
   // 1. Recover saved time using structured JSON object or legacy number strings
@@ -104,15 +105,14 @@ export default function SmartTaskPlayer({
     return { type: 'video', id: videoUrl }
   }, [url])
 
-  // 3. Construct YouTube IFrame URL with buffering optimizations & playsinline
   const iframeUrl = useMemo(() => {
     if (!parsedMedia.id) return ''
     const base = parsedMedia.type === 'playlist'
       ? `https://www.youtube.com/embed/videoseries?list=${parsedMedia.id}`
       : `https://www.youtube.com/embed/${parsedMedia.id}`
-    const originParam = windowOrigin ? `&origin=${encodeURIComponent(windowOrigin)}` : ''
+    const originParam = originRef.current ? `&origin=${encodeURIComponent(originRef.current)}` : ''
     return `${base}?enablejsapi=1&start=${savedTime}&rel=0&playsinline=1&modestbranding=1${originParam}`
-  }, [parsedMedia, savedTime, windowOrigin])
+  }, [parsedMedia, savedTime])
 
   // 4. Send {event: 'listening'} postMessage when iframe mounts and loads
   useEffect(() => {
