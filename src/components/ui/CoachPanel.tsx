@@ -227,25 +227,21 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
                   }}
                 >
                   {isLoading ? (
-                    <div className="flex flex-col items-center justify-center min-h-[200px] space-y-5 py-6">
-                      <img 
-                        src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3NpaXB0aWw5MXFkMnoxNW11aTNrNXNlcmFidjBpZ3RreWhvMXU2ciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/l3q2t2KAQQvscCqYw/giphy.gif" 
-                        alt="Thinking..." 
-                        className="w-16 h-16 opacity-85 select-none pointer-events-none"
-                        style={{ filter: `drop-shadow(0 0 10px ${coachColor})` }}
-                      />
-                      <CyclingLoadingText coachName={coachName} userName={profile?.full_name || 'Coach'} lang={profile?.language} color={coachColor} />
-                      <div className="flex gap-2">
-                        {[0, 1, 2].map(i => (
-                          <motion.div
-                            key={i}
-                            animate={{ opacity: [0.2, 1, 0.2] }}
-                            transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
-                            className="w-1.5 h-1.5 rounded-full"
-                            style={{ backgroundColor: coachColor }}
-                          />
-                        ))}
-                      </div>
+                    <div className="flex flex-col items-center justify-center h-full space-y-4 py-10">
+                       <span className="text-xs font-black tracking-widest animate-pulse uppercase" style={{ color: coachColor }}>
+                         {profile?.language === 'ar' ? `${coachName} بيفكر...` : `${coachName}_PROCESSING...`}
+                       </span>
+                       <div className="flex gap-2">
+                          {[0, 1, 2].map(i => (
+                            <motion.div
+                              key={i}
+                              animate={{ opacity: [0.2, 1, 0.2] }}
+                              transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
+                              className="w-1.5 h-1.5 rounded-full"
+                              style={{ backgroundColor: coachColor }}
+                            />
+                          ))}
+                       </div>
                     </div>
                   ) : (
                     <p className="text-[var(--text-primary)] text-sm md:text-base font-bold leading-relaxed whitespace-pre-wrap">
@@ -367,6 +363,7 @@ function ActionButton({ icon, title, subtitle, onClick, disabled, color, lang, c
   )
 }
 
+/* Comment out obsolete CyclingLoadingText component to keep file pristine and follow safety rules
 function CyclingLoadingText({ coachName, userName, lang, color }: { coachName: string; userName: string; lang?: string; color: string }) {
   const isAr = lang === 'ar'
   const messages = React.useMemo(() => isAr ? [
@@ -396,3 +393,4 @@ function CyclingLoadingText({ coachName, userName, lang, color }: { coachName: s
     </span>
   )
 }
+*/

@@ -1,15 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-// Comment out legacy react-youtube imports
-// import YouTube, { YouTubeEvent, YouTubePlayer } from 'react-youtube'
-import dynamic from 'next/dynamic'
-const ReactPlayer = dynamic(() => import('react-player'), { ssr: false }) as any
+import YouTube, { YouTubeEvent, YouTubePlayer } from 'react-youtube'
 import { createClient } from '@/lib/supabase'
 import { useToast } from '@/components/ui/Toast'
-import { useGrowth } from '@/context/GrowthContext'
 
 interface SmartTaskPlayerProps {
   taskId: string
-  url: string
+  videoId: string
   initialProgress: number
   isGuest: boolean
   themeColor: string
@@ -19,33 +15,47 @@ interface SmartTaskPlayerProps {
 
 export default function SmartTaskPlayer({ 
   taskId, 
-  url, 
+  videoId, 
   initialProgress, 
   isGuest, 
   themeColor,
   onComplete,
   onProgressUpdate
 }: SmartTaskPlayerProps) {
+  const [player, setPlayer] = useState<YouTubePlayer | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const { showToast } = useToast()
-  const { isRTL } = useGrowth()
   const supabase = createClient()
+  const progressInterval = useRef<NodeJS.Timeout | null>(null)
 
-  // --- V25.1 HOTFIX: Mutable refs to avoid stale closures ---
-  const playerRef = useRef<any>(null)
+  // --- V25.1 HOTFIX: Mutable refs to avoid stale closures in beforeunload ---
+  const playerRef = useRef<YouTubePlayer | null>(null)
   const isPlayingRef = useRef(false)
 
   // --- V25.1 HOTFIX: Guard flag to fix seek race condition ---
   const hasSeeked = useRef(false)
 
   // Keep refs in sync with state
+  useEffect(() => { playerRef.current = player }, [player])
   useEffect(() => { isPlayingRef.current = isPlaying }, [isPlaying])
+
+  // Configuration for the YouTube Iframe
+  const opts = {
+    height: '100%',
+    width: '100%',
+    playerVars: {
+      autoplay: 0,
+      modestbranding: 1,
+      rel: 0,
+      fs: 1,
+    },
+  }
 
   const saveProgress = useCallback(async (currentTime: number) => {
     let duration = 0
     if (playerRef.current) {
       try {
-        duration = playerRef.current.getDuration() || 0
+        duration = playerRef.current.getDuration()
       } catch (e) {}
     }
     if (isGuest) {
@@ -72,8 +82,8 @@ export default function SmartTaskPlayer({
     const p = playerRef.current
     if (p && isPlayingRef.current) {
       try {
-        const currentTime = p.getCurrentTime() || 0
-        const duration = p.getDuration() || 0
+        const currentTime = p.getCurrentTime()
+        const duration = p.getDuration()
         localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
         if (duration > 0) {
           localStorage.setItem(`growth_hub_video_duration_${taskId}`, duration.toString())
@@ -93,45 +103,66 @@ export default function SmartTaskPlayer({
     }
   }, [taskId, isGuest, supabase, onProgressUpdate])
 
-  // --- UPGRADED REACTPLAYER EVENT HANDLERS ---
-  const handleReady = () => {
-    if (!hasSeeked.current && initialProgress > 0 && playerRef.current) {
+  const onReady = (event: YouTubeEvent) => {
+    const p = event.target
+    setPlayer(p)
+    // V25.1: We no longer seekTo here — it races with YouTube buffering.
+    // The seek is deferred to the first PLAYING state in onStateChange.
+    if (onProgressUpdate) {
       try {
-        playerRef.current.seekTo(initialProgress, 'seconds')
-        hasSeeked.current = true
-        showToast(
-          isRTL ? 'تم استئناف التشغيل من حيث توقفت' : 'Playback resumed from where you left off', 
-          'success'
-        )
-      } catch (e) {
-        console.error('Failed to seek player:', e)
-      }
-    }
-  }
-
-  const handleProgress = (state: { playedSeconds: number }) => {
-    // Save progress regularly
-    saveProgress(state.playedSeconds)
-  }
-
-  const handlePlay = () => {
-    setIsPlaying(true)
-  }
-
-  const handlePause = () => {
-    setIsPlaying(false)
-    if (playerRef.current) {
-      try {
-        saveProgress(playerRef.current.getCurrentTime())
+        onProgressUpdate(p.getCurrentTime(), p.getDuration())
       } catch (e) {}
     }
   }
 
-  const handleEnded = () => {
-    setIsPlaying(false)
-    saveProgress(0) // Reset progress on completion
-    onComplete()
+  // --- V25.1 HOTFIX: Unified onStateChange handles PLAYING seek + PAUSED instant save ---
+  const onStateChange = (event: YouTubeEvent) => {
+    const state = event.data
+    const p = event.target
+
+    // YouTube PlayerState constants (from YT.PlayerState)
+    const PLAYING = 1
+    const PAUSED = 2
+    const ENDED = 0
+
+    if (state === PLAYING) {
+      setIsPlaying(true)
+
+      // V25.1 FIX: Deferred auto-resume — only seek after YouTube is actively streaming
+      if (!hasSeeked.current && initialProgress > 0) {
+        p.seekTo(initialProgress, true)
+        hasSeeked.current = true
+        showToast('تم استئناف التشغيل من حيث توقفت', 'success')
+      }
+    } else if (state === PAUSED) {
+      setIsPlaying(false)
+      // V25.1 FIX: Instant save on pause — don't wait for the 5s interval
+      saveProgress(p.getCurrentTime())
+    } else if (state === ENDED) {
+      setIsPlaying(false)
+      saveProgress(0) // Reset progress on completion
+      onComplete()
+    }
   }
+
+  // Polling loop to save progress every 5 seconds while playing
+  useEffect(() => {
+    if (isPlaying && player) {
+      progressInterval.current = setInterval(() => {
+        saveProgress(player.getCurrentTime())
+      }, 5000)
+    } else {
+      if (progressInterval.current) {
+        clearInterval(progressInterval.current)
+      }
+    }
+
+    return () => {
+      if (progressInterval.current) {
+        clearInterval(progressInterval.current)
+      }
+    }
+  }, [isPlaying, player, saveProgress])
 
   // --- V25.1 HOTFIX: beforeunload listener — saves the instant the tab is killed ---
   useEffect(() => {
@@ -143,76 +174,11 @@ export default function SmartTaskPlayer({
     }
   }, [saveCurrentTime])
 
-  // If url is missing or empty, do NOT render a dead black box.
-  if (!url || url.trim() === "") return null
-
-  // Feed the raw URL stream exactly as pasted by the user. Do NOT manipulate the URL string.
-  const videoUrl = url
-
-  // Comment out old parsing and normalization logic to adhere to safety requirements
-  /*
-  // Build the video URL: If it is already a full URL, use it directly; otherwise wrap it as a YouTube URL.
-  // const videoUrl = videoId.includes('://') ? videoId : `https://www.youtube.com/watch?v=${videoId}`
-
-  // --- UPGRADED ROBUST YOUTUBE PLAYLIST & URL NORMALIZATION ---
-  let resolvedId = videoId.trim()
-  if ((resolvedId.includes('youtube.com') || resolvedId.includes('youtu.be')) && !resolvedId.includes('://')) {
-    resolvedId = `https://${resolvedId}`
-  }
-
-  let videoUrl = resolvedId.includes('://') ? resolvedId : `https://www.youtube.com/watch?v=${resolvedId}`
-
-  if (videoUrl.includes('list=')) {
-    try {
-      const playlistMatch = videoUrl.match(/[?&]list=([^#\&\?]+)/)
-      const playlistId = playlistMatch ? playlistMatch[1] : null
-      if (playlistId) {
-        const videoMatch = videoUrl.match(/[?&]v=([^#\&\?]+)/)
-        const vId = videoMatch ? videoMatch[1] : null
-        if (vId && vId.length === 11) {
-          videoUrl = `https://www.youtube.com/watch?v=${vId}&list=${playlistId}`
-        } else {
-          videoUrl = `https://www.youtube.com/embed/videoseries?list=${playlistId}`
-        }
-      }
-    } catch (_err) {}
-  }
-  */
-
-
   return (
     <div className="w-full h-full relative">
       {/* Decorative cyber border glow */}
       <div className="absolute inset-0 pointer-events-none z-10" style={{ boxShadow: `inset 0 0 20px ${themeColor}22` }} />
       
-      <ReactPlayer
-        ref={playerRef}
-        url={videoUrl}
-        controls={true}
-        playing={isPlaying}
-        onReady={handleReady}
-        onProgress={handleProgress}
-        onPlay={handlePlay}
-        onPause={handlePause}
-        onEnded={handleEnded}
-        progressInterval={5000}
-        width="100%"
-        height="100%"
-        config={{
-          youtube: {
-            playerVars: {
-              autoplay: 0,
-              modestbranding: 1,
-              rel: 0,
-              fs: 1,
-            }
-          }
-        }}
-        className="absolute inset-0"
-      />
-
-      {/* Commented out legacy YouTube component to fulfill non-deletion requirements */}
-      {/*
       <YouTube 
         videoId={videoId} 
         opts={opts} 
@@ -220,8 +186,6 @@ export default function SmartTaskPlayer({
         onStateChange={onStateChange}
         className="w-full h-full absolute inset-0"
       />
-      */}
     </div>
   )
 }
-

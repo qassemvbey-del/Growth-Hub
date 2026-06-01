@@ -700,7 +700,7 @@ export default function TaskDrawer({
   }
   */
 
-  // --- UPGRADED RAW VIDEO URL EXTRACTION (NUKE YOUTUBE ID EXTRACTION) ---
+  // --- RESTORED ORIGINAL VIDEO PLAYER LOGIC (REVERSED EXTRACTION NUKE) ---
   const resolvedVideoUrl = task.video_url || task.metadata?.videoUrl || task.metadata?.mediaUrl || task.metadata?.youtubeUrl || (() => {
     const attachments = task.metadata?.attachments || []
     const youtubeAttach = attachments.find((att: any) => 
@@ -714,12 +714,8 @@ export default function TaskDrawer({
     return ''
   })()
 
-  // Feed the raw URL stream exactly as pasted by the user. If they typed a raw YouTube 11-char ID, wrap it into a valid URL format.
-  const rawUrl = resolvedVideoUrl || (task.video_id ? (task.video_id.includes('://') ? task.video_id : `https://www.youtube.com/watch?v=${task.video_id}`) : '')
-  const hasVideo = !!rawUrl
-  // Comment out old videoId calculations to adhere to safety rules
-  // const videoId = task.video_id || getYouTubeId(resolvedVideoUrl)
-  // const hasVideo = !!videoId
+  const videoId = task.video_id || getYouTubeId(resolvedVideoUrl)
+  const hasVideo = !!videoId
 
 
   // Stored local video details
@@ -795,7 +791,7 @@ export default function TaskDrawer({
               <div className="w-full aspect-video rounded-xl overflow-hidden shadow-lg relative border bg-black/40" style={{ borderColor: `${themeColor}20` }}>
                 <SmartTaskPlayer
                   taskId={task.id}
-                  url={rawUrl}
+                  videoId={videoId}
                   initialProgress={videoProgress}
                   isGuest={isGuest}
                   themeColor={themeColor}
