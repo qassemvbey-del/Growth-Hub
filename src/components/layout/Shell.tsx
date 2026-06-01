@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSound } from '@/context/SoundContext'
 import { 
-  LayoutGrid, Trophy, Target, FileText, User, Settings, Zap, Bell, Flame, Bot, X, Home,
+  LayoutGrid, Trophy, Target, FileText, User, Users, Settings, Zap, Bell, Flame, Bot, X, Home,
   Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp, CloudLightning,
   Crosshair, Shield, CheckCircle, Menu
 } from 'lucide-react'
@@ -892,6 +892,20 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       </nav>
       ── */}
 
+      {/* Edge swipe trigger zone for mobile */}
+      {!isMobileNavOpen && (
+        <div 
+          className={cn(
+            "fixed top-0 bottom-0 w-4 z-[199] lg:hidden",
+            isRTL ? "right-0" : "left-0"
+          )}
+          onTouchStart={() => {
+            setIsMobileNavOpen(true);
+            playBlip();
+          }}
+        />
+      )}
+
       {/* ── MOBILE SIDEBAR DRAWER ── */}
       <AnimatePresence>
         {isMobileNavOpen && (
@@ -907,12 +921,23 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
             
             {/* Drawer Content */}
             <motion.div
+              drag="x"
+              dragDirectionLock
+              dragConstraints={{ left: isRTL ? 0 : -280, right: isRTL ? 280 : 0 }}
+              dragElastic={0.15}
+              onDragEnd={(event, info) => {
+                const swipeDistance = info.offset.x
+                const shouldClose = isRTL ? swipeDistance > 80 : swipeDistance < -80
+                if (shouldClose) {
+                  setIsMobileNavOpen(false)
+                }
+              }}
               initial={{ x: isRTL ? '100%' : '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: isRTL ? '100%' : '-100%' }}
-              transition={{ type: 'tween', duration: 0.3, ease: 'easeOut' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
               className={cn(
-                "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-[#09090b]/98 border-r border-white/5 shadow-2xl p-6",
+                "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-[#09090b]/98 border-r border-white/5 shadow-2xl p-6 transform-gpu",
                 isRTL ? "right-0 border-l border-white/5 border-r-0" : "left-0"
               )}
             >
@@ -955,6 +980,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                 {[
                   { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
                   { label: isRTL ? 'أهدافي' : 'Goals', icon: Target, href: '/missions' },
+                  { label: isRTL ? 'شخصي' : 'Personal Goals', icon: User, href: '/goals/solo', indent: true },
+                  { label: isRTL ? 'فريق' : 'Team Goals', icon: Users, href: '/goals/squad', indent: true },
                   { label: isRTL ? 'ملاحظاتي' : 'Notes', icon: FileText, href: '/notes' },
                   { label: isRTL ? 'إنجازاتي' : 'Wins', icon: Trophy, href: '/achievements' },
                 ].map(item => {
@@ -965,14 +992,15 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                       key={item.href}
                       onClick={() => { playBlip(); router.push(item.href); setIsMobileNavOpen(false); }}
                       className={cn(
-                        "w-full flex items-center gap-4 px-4 py-3 rounded-lg font-space text-sm font-bold uppercase tracking-wider transition-all relative cursor-pointer",
+                        "w-full flex items-center gap-4 py-3 rounded-lg font-space text-sm font-bold uppercase tracking-wider transition-all relative cursor-pointer",
+                        item.indent ? (isRTL ? "pr-8 text-xs h-10" : "pl-8 text-xs h-10") : "",
                         isActive 
                           ? "text-[var(--text-primary)]" 
                           : "text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
                       )}
                       style={isActive ? { color: currentTheme.color, backgroundColor: `${currentTheme.color}15`, border: `1px solid ${currentTheme.color}30` } : {}}
                     >
-                      <IconComponent className="w-5 h-5" />
+                      <IconComponent className={item.indent ? "w-4 h-4" : "w-5 h-5"} />
                       <span>{item.label}</span>
                     </button>
                   )
@@ -995,7 +1023,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
             </motion.div>
           </>
         )}
-      </AnimatePresence>
+      </ AnimatePresence>
 
 
       <PomodoroHUD />
