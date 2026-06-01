@@ -49,6 +49,15 @@ export default function SmartTaskPlayer({
   //   videoUrl = `https://www.youtube.com/watch?v=${videoUrl}`
   // }
 
+  let validUrl = url;
+  if (url && !url.includes('http')) {
+    if (url.startsWith('PL')) {
+      validUrl = 'https://www.youtube.com/playlist?list=' + url;
+    } else {
+      validUrl = 'https://www.youtube.com/watch?v=' + url;
+    }
+  }
+
   const handleProgress = useCallback((state: { playedSeconds: number, played: number }) => {
     // Silently update the ref, NO useState
     progressRef.current = state.playedSeconds
@@ -145,10 +154,11 @@ export default function SmartTaskPlayer({
       <div className="relative z-50 bg-black w-full aspect-video rounded-md overflow-hidden">
         <ReactPlayer
           ref={playerRef}
-          url={url}
+          url={validUrl}
           controls={true}
           width="100%"
           height="100%"
+          className="absolute top-0 left-0"
           onReady={handleReady}
           onPlay={handlePlay}
           onPause={handlePause}
