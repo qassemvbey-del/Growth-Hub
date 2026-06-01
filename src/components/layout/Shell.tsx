@@ -893,9 +893,20 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       ── */}
 
       {/* Edge swipe trigger zone for mobile */}
+      {/* Commented out original edge-swipe trigger for safety:
       {!isMobileNavOpen && (
         <div 
           className="fixed top-0 left-0 w-6 h-full z-[9999] lg:hidden"
+          onTouchStart={() => {
+            setIsMobileNavOpen(true);
+            playBlip();
+          }}
+        />
+      )}
+      */}
+      {!isMobileNavOpen && (
+        <div 
+          className="fixed top-0 left-0 w-6 h-full z-[9999] lg:hidden bg-transparent"
           onTouchStart={() => {
             setIsMobileNavOpen(true);
             playBlip();
@@ -917,6 +928,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
             />
             
             {/* Drawer Content */}
+            {/* Commented out original drawer content gesture physics for safety:
             <motion.div
               drag="x"
               dragConstraints={{ left: -300, right: 0 }}
@@ -924,6 +936,33 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
               onDragEnd={(e, info) => { 
                 if (info.offset.x < -50 || info.velocity.x < -500) {
                   setIsMobileNavOpen(false); 
+                }
+              }}
+              initial={{ x: isRTL ? '100%' : '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: isRTL ? '100%' : '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+              className={cn(
+                "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-[#09090b]/98 border-r border-white/5 shadow-2xl p-6 transform-gpu will-change-transform",
+                isRTL ? "right-0 border-l border-white/5 border-r-0" : "left-0"
+              )}
+            >
+            */}
+            <motion.div
+              drag="x"
+              dragConstraints={isRTL ? { left: 0, right: 300 } : { left: -300, right: 0 }}
+              dragElastic={0.1}
+              onDragEnd={(e, info) => { 
+                const offset = info.offset.x;
+                const velocity = info.velocity.x;
+                if (isRTL) {
+                  if (offset > 50 || velocity > 500) {
+                    setIsMobileNavOpen(false);
+                  }
+                } else {
+                  if (offset < -50 || velocity < -500) {
+                    setIsMobileNavOpen(false);
+                  }
                 }
               }}
               initial={{ x: isRTL ? '100%' : '-100%' }}
