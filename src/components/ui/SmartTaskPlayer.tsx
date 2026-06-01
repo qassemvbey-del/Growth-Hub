@@ -1,10 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import dynamic from 'next/dynamic'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useToast } from '@/components/ui/Toast'
-
-// Dynamic import for ReactPlayer to avoid SSR hydration mismatch
-const ReactPlayer = dynamic(() => import('react-player'), { ssr: false }) as any
 
 interface SmartTaskPlayerProps {
   taskId: string
@@ -27,155 +23,206 @@ export default function SmartTaskPlayer({
 }: SmartTaskPlayerProps) {
   const { showToast } = useToast()
   const supabase = createClient()
+  const iframeRef = useRef<HTMLIFrameElement>(null)
   
   const [isMounted, setIsMounted] = useState(false)
-  
+  const progressRef = useRef(0)
+  const durationRef = useRef(0)
+  const hasSeeked = useRef(false)
+
   useEffect(() => {
     setIsMounted(true)
   }, [])
-  
-  const playerRef = useRef<any>(null)
-  const hasSeeked = useRef(false)
-  
-  // Track progress SILENTLY using refs (avoids re-render crash loops)
-  const progressRef = useRef(0)
-  const durationRef = useRef(0)
-  const isPlayingRef = useRef(false)
 
-  // --- UPGRADED ROBUST YOUTUBE PLAYLIST & URL NORMALIZATION ---
-  const resolvedUrl = useMemo(() => {
-    let videoUrl = url ? url.trim() : ''
-    if (!videoUrl) return ''
-    if (!videoUrl.includes('://')) {
-      if (videoUrl.startsWith('PL')) {
-        videoUrl = `https://www.youtube.com/playlist?list=${videoUrl}`
-      } else if (videoUrl.length === 11) {
-        videoUrl = `https://www.youtube.com/watch?v=${videoUrl}`
-      } else {
-        videoUrl = `https://www.youtube.com/watch?v=${videoUrl}`
+  // 1. Recover saved time using exact localStorage keys
+  const savedTime = useMemo(() => {
+    const stored = localStorage.getItem(`yt_progress_${taskId}`) || localStorage.getItem(`growth_hub_video_progress_${taskId}`) || '0'
+    const parsed = parseFloat(stored)
+    return Math.floor(parsed > 0 ? parsed : (initialProgress || 0))
+  }, [taskId, initialProgress])
+
+  // 2. Extract videoId or playlistId from multiple YouTube formats
+  const parsedMedia = useMemo(() => {
+    const videoUrl = url ? url.trim() : ''
+    if (!videoUrl) return { type: 'video', id: '' }
+
+    try {
+      // Handle playlist URLs
+      if (videoUrl.includes('list=')) {
+        const playlistMatch = videoUrl.match(/[?&]list=([^#\&\?]+)/)
+        if (playlistMatch && playlistMatch[1]) {
+          return { type: 'playlist', id: playlistMatch[1] }
+        }
       }
-    } else if ((videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) && !videoUrl.includes('watch?v=') && !videoUrl.includes('playlist?list=') && !videoUrl.includes('embed/')) {
-      try {
-        const urlObj = new URL(videoUrl)
+
+      // Handle standard youtube.com URLs
+      if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+        const urlObj = new URL(videoUrl.includes('://') ? videoUrl : `https://${videoUrl}`)
+        const vParam = urlObj.searchParams.get('v')
+        if (vParam) {
+          return { type: 'video', id: vParam }
+        }
+
+        // Handle youtu.be short URLs
         if (urlObj.hostname === 'youtu.be') {
           const pathId = urlObj.pathname.slice(1)
-          if (pathId) videoUrl = `https://www.youtube.com/watch?v=${pathId}`
+          if (pathId) return { type: 'video', id: pathId }
         }
-      } catch (e) {}
+
+        // Handle embed or v paths
+        const pathMatch = urlObj.pathname.match(/\/(embed|v)\/([a-zA-Z0-9_-]{11})/)
+        if (pathMatch && pathMatch[2]) {
+          return { type: 'video', id: pathMatch[2] }
+        }
+      }
+    } catch (e) {
+      // Ignore URL parsing exceptions and fall back
     }
-    return videoUrl
+
+    // Handle raw 11-character video IDs directly
+    if (videoUrl.length === 11) {
+      return { type: 'video', id: videoUrl }
+    }
+
+    // Default fallback
+    return { type: 'video', id: videoUrl }
   }, [url])
 
-  const handleProgress = useCallback((state: { playedSeconds: number, played: number }) => {
-    const currentTime = state.playedSeconds
-    progressRef.current = currentTime
+  // 3. Construct direct YouTube IFrame embed URL
+  const iframeUrl = useMemo(() => {
+    if (!parsedMedia.id) return ''
+    const base = parsedMedia.type === 'playlist'
+      ? `https://www.youtube.com/embed/videoseries?list=${parsedMedia.id}`
+      : `https://www.youtube.com/embed/${parsedMedia.id}`
+    return `${base}?enablejsapi=1&start=${savedTime}&rel=0&modestbranding=1`
+  }, [parsedMedia, savedTime])
 
-    // Write to localStorage instantly on progress ticks
-    localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
+  // 4. Send {event: 'listening'} postMessage when iframe mounts and loads
+  useEffect(() => {
+    const el = iframeRef.current
+    if (!el) return
 
-    // Update parent UI safely
-    if (onProgressUpdate) {
-      onProgressUpdate(currentTime, durationRef.current)
-    }
-  }, [taskId, onProgressUpdate])
-
-  const handlePlay = useCallback(() => {
-    isPlayingRef.current = true
-  }, [])
-
-  const handlePause = useCallback(() => {
-    isPlayingRef.current = false
-    const currentTime = progressRef.current
-    localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
-    if (!isGuest) {
-      supabase.from('tasks').update({ video_progress: currentTime }).eq('id', taskId).then()
-    }
-  }, [taskId, isGuest, supabase])
-
-  const handleReady = useCallback((player: any) => {
-    try {
-      durationRef.current = player.getDuration() || 0
-      
-      // Auto-seek if we have progress saved
-      if (!hasSeeked.current && initialProgress > 0) {
-        player.seekTo(initialProgress, 'seconds')
-        hasSeeked.current = true
-        showToast('تم استئناف التشغيل من حيث توقفت', 'success')
+    const handleLoad = () => {
+      try {
+        el.contentWindow?.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*')
+      } catch (err) {
+        // Safe catch for iframe postMessage exceptions
       }
-      
-      if (onProgressUpdate) {
-        onProgressUpdate(initialProgress || 0, durationRef.current)
+    }
+
+    el.addEventListener('load', handleLoad)
+    // Trigger immediately if already loaded
+    handleLoad()
+
+    return () => {
+      el.removeEventListener('load', handleLoad)
+    }
+  }, [iframeUrl])
+
+  // 5. PostMessage API Event Listener for progress saving
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      // Validate source window origin if needed, or simply parse data safely
+      try {
+        const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data
+        if (!data) return
+
+        // Capture periodic timeline updates from YouTube Player API
+        if (data.event === 'infoDelivery' && data.info) {
+          const currentTime = data.info.currentTime
+          const duration = data.info.duration
+
+          if (currentTime !== undefined) {
+            progressRef.current = currentTime
+            
+            // Instantly save to localStorage with key: yt_progress_${taskId}
+            localStorage.setItem(`yt_progress_${taskId}`, currentTime.toString())
+            localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
+
+            // Toast feedback for auto-seek on first seek match
+            if (!hasSeeked.current && currentTime > 0) {
+              hasSeeked.current = true
+              showToast('تم استئناف التشغيل من حيث توقفت', 'success')
+            }
+          }
+
+          if (duration !== undefined && duration > 0) {
+            durationRef.current = duration
+          }
+
+          if (currentTime !== undefined && onProgressUpdate) {
+            onProgressUpdate(currentTime, durationRef.current)
+          }
+        }
+
+        // Capture playback state transitions (0 = ended, 1 = playing, 2 = paused)
+        if (data.event === 'onStateChange' && data.info !== undefined) {
+          const state = data.info
+          if (state === 0) {
+            // Video ended: reset progress
+            localStorage.setItem(`yt_progress_${taskId}`, '0')
+            localStorage.setItem(`growth_hub_video_progress_${taskId}`, '0')
+            if (!isGuest) {
+              supabase.from('tasks').update({ video_progress: 0 }).eq('id', taskId).then()
+            }
+            onComplete()
+          } else if (state === 2) {
+            // Paused: sync to db instantly
+            const currentTime = progressRef.current
+            if (!isGuest) {
+              supabase.from('tasks').update({ video_progress: currentTime }).eq('id', taskId).then()
+            }
+          }
+        }
+      } catch (err) {
+        // Safe catch for parsing non-JSON messages from other extensions/iframes
       }
-    } catch (err) {
-      console.error('Error during player ready', err)
     }
-  }, [initialProgress, onProgressUpdate, showToast])
 
-  const handleEnded = useCallback(() => {
-    isPlayingRef.current = false
-    if (isGuest) {
-      localStorage.setItem(`growth_hub_video_progress_${taskId}`, "0")
-    } else {
-      supabase.from('tasks').update({ video_progress: 0 }).eq('id', taskId).then()
+    window.addEventListener('message', handleMessage)
+    return () => {
+      window.removeEventListener('message', handleMessage)
     }
-    onComplete()
-  }, [isGuest, taskId, supabase, onComplete])
+  }, [taskId, isGuest, supabase, onComplete, onProgressUpdate, showToast])
 
-  // Database save loop (every 5 seconds)
+  // 6. DB Sync Interval (saves progress to DB every 5s while page is open)
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!isPlayingRef.current || isGuest) return
-      
+      if (isGuest) return
       const currentTime = progressRef.current
-      supabase
-        .from('tasks')
-        .update({ video_progress: currentTime })
-        .eq('id', taskId)
-        .then()
+      if (currentTime > 0) {
+        supabase.from('tasks').update({ video_progress: currentTime }).eq('id', taskId).then()
+      }
     }, 5000)
 
     return () => clearInterval(interval)
   }, [taskId, isGuest, supabase])
 
-  // Ensure instant save on unmount
+  // Ensure final save on unmount
   useEffect(() => {
     return () => {
       const currentTime = progressRef.current
-      localStorage.setItem(`growth_hub_video_progress_${taskId}`, currentTime.toString())
-      if (!isGuest) {
+      localStorage.setItem(`yt_progress_${taskId}`, currentTime.toString())
+      if (!isGuest && currentTime > 0) {
         supabase.from('tasks').update({ video_progress: currentTime }).eq('id', taskId).then()
       }
     }
   }, [taskId, isGuest, supabase])
 
-  if (!isMounted || !resolvedUrl) {
+  if (!isMounted || !iframeUrl) {
     return <div className="w-full aspect-video bg-zinc-900 animate-pulse rounded-md"></div>
   }
 
   return (
-    <div className="w-full aspect-video relative">
-      <ReactPlayer
-        ref={playerRef}
-        url={resolvedUrl}
-        controls={true}
-        width="100%"
-        height="100%"
-        className="absolute top-0 left-0"
-        onReady={handleReady}
-        onPlay={handlePlay}
-        onPause={handlePause}
-        onProgress={handleProgress}
-        onEnded={handleEnded}
-        progressInterval={1000}
-        config={{
-          youtube: {
-            playerVars: { modestbranding: 1, rel: 0 }
-          }
-        }}
+    <div className="w-full h-full relative">
+      <div className="absolute inset-0 pointer-events-none z-10" style={{ boxShadow: `inset 0 0 20px ${themeColor}22` }} />
+      <iframe
+        ref={iframeRef}
+        src={iframeUrl}
+        className="w-full aspect-video rounded-md bg-black"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
       />
     </div>
   )
 }
-
-
-
