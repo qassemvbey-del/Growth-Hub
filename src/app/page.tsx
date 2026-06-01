@@ -319,9 +319,10 @@ export default function Dashboard() {
   return (
     <Shell syncedMissions={missions} onMissionsRefresh={fetchDashboardMissions}>
       <div 
-        className="w-full min-h-[calc(100dvh-64px)] flex flex-col py-4 sm:py-8 md:py-12 px-2 sm:px-6 md:px-12 space-y-4 sm:space-y-6 md:space-y-8 max-w-7xl mx-auto font-space relative"
+        className="w-full min-h-[calc(100dvh-64px)] font-space relative"
         style={{ background: `radial-gradient(ellipse at 50% 0%, ${currentTheme.color}45 0%, transparent 55%), radial-gradient(ellipse at 80% 20%, ${currentTheme.color}30 0%, transparent 45%)` }}
       >
+        <div className="w-full flex flex-col py-4 sm:py-8 md:py-12 px-2 sm:px-6 md:px-12 space-y-4 sm:space-y-6 md:space-y-8 max-w-7xl mx-auto bg-transparent border-l-0 border-r-0">
         
         {/* ── COMMAND CENTER TITLE ── */}
         <div className="w-full flex flex-col items-center text-center space-y-2 sm:space-y-3">
@@ -579,7 +580,7 @@ export default function Dashboard() {
 
               {actionInboxTasks.length === 0 && (
                 <div className="py-12 sm:py-16 text-center space-y-2 border border-dashed border-white/5 rounded-xl">
-                  <span className="text-zinc-600 font-black text-xl sm:text-2xl">⚡</span>
+                  {/* <span className="text-zinc-600 font-black text-xl sm:text-2xl">⚡</span> */}
                   <p className="text-[9px] sm:text-xs text-zinc-500 dark:text-white/30 uppercase tracking-widest">
                     {/* {isRTL ? 'الوارد فارغ! جميع الالتزامات منجزة.' : 'INBOX CLEAR // NO OVERDUE TASKS'} */}
                     {isRTL ? 'عاش! مفيش أي مهام متأخرة عليك حالياً.' : "You're all caught up! Overdue tasks will appear here."}
@@ -713,6 +714,7 @@ export default function Dashboard() {
           </div>
         </div>
 
+        </div>
       </div>
     </Shell>
   )
