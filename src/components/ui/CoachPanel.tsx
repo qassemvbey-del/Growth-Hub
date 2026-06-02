@@ -24,9 +24,9 @@ const IconMap: Record<string, React.ComponentType<any>> = {
 }
 
 export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProps) {
-  const { profile, setLastAiMessage, currentTheme, tasksCompletedToday } = useGrowth()
+  const { profile, setLastAiMessage, currentTheme, tasksCompletedToday, isRTL } = useGrowth()
   const { playNeuralLink, playBlip } = useSound()
-  const [response, setResponse] = useState(profile?.language === 'ar' ? 'جاهز، إيه اللي تحب تعمله؟' : 'AWAITING_ORDERS // SELECT_ACTION_BELOW')
+  const [response, setResponse] = useState(profile?.language === 'ar' ? 'جاهز، إيه اللي تحب تعمله؟' : 'What do you need help with?')
   const [isLoading, setIsLoading] = useState(false)
   const [energy, setEnergy] = useState<number>(3)
 
@@ -157,7 +157,7 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
       }
     } catch (err: any) {
       console.error(err)
-      setResponse(profile?.language === 'ar' ? 'فشل الاتصال المشفر بالمدرب السيبراني // يرجى الإعادة لاحقاً' : 'ENCRYPTED_LINK_FAILED // RETRY_LATER')
+      setResponse(profile?.language === 'ar' ? 'مش قادرين نوصل للمدرب دلوقتي. جرب تاني كمان شوية.' : 'Could not connect to the AI Coach. Please try again later.')
     } finally {
       setIsLoading(false)
       playBlip()
@@ -190,7 +190,8 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
               <div className="flex items-center gap-3">
                 <Zap className="animate-pulse" style={{ color: coachColor }} />
                 <span className="text-sm font-black tracking-[0.2em] uppercase whitespace-nowrap overflow-hidden" style={{ color: coachColor }}>
-                  COACH: {coachName} // ONLINE
+                  {/* COACH: {coachName} // ONLINE */}
+                  {isRTL ? `المدرب: ${coachName}` : `Coach Mode: ${coachName}`}
                 </span>
               </div>
               <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
@@ -200,7 +201,7 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
 
             {/* Premium i18n Cyberpunk Energy Bar (Point 1) */}
             <div className="px-6 py-2 bg-black/10 border-b flex items-center justify-between text-[9px] font-monospace tracking-widest uppercase" style={{ borderColor: `${coachColor}11`, color: coachColor }}>
-              <span>{profile?.language === 'ar' ? `فاضل ${energy}/3 مرات تقدر تسأل فيهم` : `[ ENERGY: ${energy}/3 SCANS LEFT ]`}</span>
+              <span>{isArabic ? `فاضل ${energy}/3 مرات تقدر تسأل فيهم` : `${energy} scans left today`}</span>
               <div className="flex gap-1.5 items-center">
                 {[1, 2, 3].map(i => (
                   <div 
@@ -238,14 +239,15 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
 
                   {/* Terminal Header Label */}
                   <div className="flex items-center justify-between border-b border-white/5 pb-2 mb-3 font-mono text-[10px] tracking-widest text-emerald-500/70">
-                    <span>&gt; COACH_CORE_TERMINAL // ACTIVE</span>
-                    <span className="animate-pulse">● ONLINE</span>
+                    {/* <span>&gt; COACH_CORE_TERMINAL // ACTIVE</span>
+                    <span className="animate-pulse">● ONLINE</span> */}
+                    <span>&gt; AI Coach — Online</span>
                   </div>
 
                   {isLoading ? (
                     <div className="flex flex-col items-center justify-center h-full space-y-4 py-10">
                        <span className="text-xs font-mono font-black tracking-widest animate-pulse uppercase text-emerald-400">
-                         {profile?.language === 'ar' ? `${coachName} بيفكر...` : `${coachName}_PROCESSING...`}
+                         {profile?.language === 'ar' ? `${coachName} بيفكر...` : `${coachName} is processing...`}
                        </span>
                        <div className="flex gap-2">
                           {[0, 1, 2].map(i => (
@@ -271,14 +273,14 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
             <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-4 scrollbar-thin">
               <span className="text-[10px] font-black tracking-[0.4em] uppercase" style={{ color: coachColor }}>
                 {energy === 0 
-                  ? (profile?.language === 'ar' ? 'خلصت الـ scans النهارده، رجّع بكره 💪' : '⚠️ RECHARGING UNTIL MIDNIGHT')
-                  : 'SELECT_ACTION:'}
+                  ? (profile?.language === 'ar' ? 'خلصت الـ scans النهارده، رجّع بكره 💪' : '⚠️ Recharging until midnight')
+                  : 'Choose an action'}
               </span>
               
               <div className="grid grid-cols-1 gap-4">
                 <ActionButton 
                   icon="warning" 
-                  title={profile?.language === 'ar' ? 'كشف حساب' : 'REALITY CHECK'} 
+                  title={profile?.language === 'ar' ? 'كشف حساب' : 'Reality Check'} 
                   subtitle={profile?.language === 'ar' ? 'شوف إنت فين بالظبط من Tasks المتأخرة' : 'Brutal check on overdue & ignored tasks'} 
                   onClick={() => handleAction('REALITY_CHECK')}
                   disabled={isLoading || energy === 0}
@@ -288,7 +290,7 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
                 />
                 <ActionButton 
                   icon="target" 
-                  title={profile?.language === 'ar' ? 'أهم 3 حاجات' : 'TOP 3 FOCUS'} 
+                  title={profile?.language === 'ar' ? 'أهم 3 حاجات' : 'Top 3 Focus'} 
                   subtitle={profile?.language === 'ar' ? 'إيه أهم 3 حاجات تعملها النهارده' : 'Extract the top 3 absolute priorities for today'} 
                   onClick={() => handleAction('TOP_3_FOCUS')}
                   disabled={isLoading || energy === 0}
@@ -298,7 +300,7 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
                 />
                 <ActionButton 
                   icon="bolt" 
-                  title={profile?.language === 'ar' ? 'انتصار سريع' : 'QUICK WIN'} 
+                  title={profile?.language === 'ar' ? 'انتصار سريع' : 'Quick Win'} 
                   subtitle={profile?.language === 'ar' ? 'لاقيلك task سهلة تبدأ بيها دلوقتي' : 'Find the easiest 5-minute task to start with'} 
                   onClick={() => handleAction('QUICK_WIN')}
                   disabled={isLoading || energy === 0}

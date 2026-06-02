@@ -68,7 +68,8 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
           <div className="flex items-center gap-2">
             <Inbox className="text-sm w-3.5 h-3.5" style={{ color: themeColor }} />
             <span className="text-[10px] font-space font-black tracking-[0.2em] uppercase opacity-50">
-              {isRTL ? 'صندوق الوارد // الإشعارات' : 'NOTIFICATION INBOX'}
+              {/* {isRTL ? 'صندوق الوارد // الإشعارات' : 'NOTIFICATION INBOX'} */}
+              {isRTL ? 'الإشعارات' : 'Notifications'}
             </span>
           </div>
           <div className="flex items-center gap-3">

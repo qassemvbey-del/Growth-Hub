@@ -81,9 +81,12 @@ export default function KanbanBoard({
   const [dragOverColumnId, setDragOverColumnId] = useState<string | null>(null)
 
   const columns = [
-    { id: 'to-do', name: isRTL ? 'المعلقة' : 'TO-DO', color: '#06B6D4', glowClass: 'shadow-[0_0_15px_rgba(6,182,212,0.15)] border-cyan-500/20 bg-cyan-950/10 text-cyan-400' },
-    { id: 'in-progress', name: isRTL ? 'قيد التنفيذ' : 'IN PROGRESS', color: '#F59E0B', glowClass: 'shadow-[0_0_15px_rgba(245,158,11,0.15)] border-amber-500/20 bg-amber-950/10 text-amber-400' },
-    { id: 'done', name: isRTL ? 'المكتملة' : 'DONE', color: '#10B981', glowClass: 'shadow-[0_0_15px_rgba(16,185,129,0.15)] border-emerald-500/20 bg-emerald-950/10 text-emerald-400' }
+    // { id: 'to-do', name: isRTL ? 'المعلقة' : 'TO-DO', color: '#06B6D4', glowClass: 'shadow-[0_0_15px_rgba(6,182,212,0.15)] border-cyan-500/20 bg-cyan-950/10 text-cyan-400' },
+    // { id: 'in-progress', name: isRTL ? 'قيد التنفيذ' : 'IN PROGRESS', color: '#F59E0B', glowClass: 'shadow-[0_0_15px_rgba(245,158,11,0.15)] border-amber-500/20 bg-amber-950/10 text-amber-400' },
+    // { id: 'done', name: isRTL ? 'المكتملة' : 'DONE', color: '#10B981', glowClass: 'shadow-[0_0_15px_rgba(16,185,129,0.15)] border-emerald-500/20 bg-emerald-950/10 text-emerald-400' }
+    { id: 'to-do', name: isRTL ? 'المعلقة' : 'To Do', color: '#06B6D4', glowClass: 'shadow-[0_0_15px_rgba(6,182,212,0.15)] border-cyan-500/20 bg-cyan-950/10 text-cyan-400' },
+    { id: 'in-progress', name: isRTL ? 'قيد التنفيذ' : 'In Progress', color: '#F59E0B', glowClass: 'shadow-[0_0_15px_rgba(245,158,11,0.15)] border-amber-500/20 bg-amber-950/10 text-amber-400' },
+    { id: 'done', name: isRTL ? 'المكتملة' : 'Done', color: '#10B981', glowClass: 'shadow-[0_0_15px_rgba(16,185,129,0.15)] border-emerald-500/20 bg-emerald-950/10 text-emerald-400' }
   ]
 
   const getTaskColumn = (task: any) => {

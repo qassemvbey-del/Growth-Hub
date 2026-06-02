@@ -3,7 +3,8 @@
 import { motion } from 'framer-motion';
 import { useState, useRef } from 'react';
 
-const text = "GROWTH_HUB";
+// const text = "GROWTH_HUB";
+const text = "Growth Hub";
 
 export default function AnimatedLogo({ className = "" }: { className?: string }) {
   const [isGlitching, setIsGlitching] = useState(false);
