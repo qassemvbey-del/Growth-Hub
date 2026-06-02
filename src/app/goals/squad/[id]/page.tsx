@@ -1560,7 +1560,7 @@ const { progress, isInRedZone } = useMemo(() => {
          {/* Mission Configuration */}
          <div className="space-y-4">
            {/* Row 1: Main Tabs */}
-            <div className="flex flex-wrap gap-4 items-center">
+            <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center w-full md:w-auto">
               {/* PIN ICON TOGGLE */}
               <button 
                  onClick={() => { 
@@ -1572,7 +1572,7 @@ const { progress, isInRedZone } = useMemo(() => {
                     }
                  }}
                  className={cn(
-                    "p-3 border transition-all rounded-md flex items-center justify-center cursor-pointer",
+                    "p-3 border transition-all rounded-md flex items-center justify-center cursor-pointer w-full md:w-auto h-12 md:h-auto min-h-[48px] md:min-h-0",
                     mission.sync_to_dashboard 
                        ? "bg-white/10 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]" 
                        : "border-[var(--card-border)] text-[var(--text-secondary)] hover:opacity-85 hover:border-white/20"
@@ -1588,11 +1588,11 @@ const { progress, isInRedZone } = useMemo(() => {
               </button>
 
               {/* GROUPED IMPORT DATA DROPDOWN */}
-              <div className="relative">
+              <div className="relative w-full md:w-auto">
                 <button
                    onClick={() => { playBlip(); setShowImportDropdown(!showImportDropdown); }}
                    className={cn(
-                      "px-4 md:px-5 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-md uppercase flex items-center gap-2 border-[var(--card-border)] text-white hover:bg-white/5 hover:border-white/20 cursor-pointer",
+                      "w-full md:w-auto px-4 md:px-5 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-md uppercase flex items-center justify-center gap-2 border-[var(--card-border)] text-white hover:bg-white/5 hover:border-white/20 cursor-pointer h-12 md:h-auto min-h-[48px] md:min-h-0",
                       (mission?.title === "Start Here 🚀" || mission?.title === "ابدأ من هنا 🚀") && 
                       mission?.tasks?.some((t: any) => t.metadata?.is_tutorial_import === true && !t.is_completed) && 
                       "animate-pulse ring-2"
@@ -1615,7 +1615,7 @@ const { progress, isInRedZone } = useMemo(() => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         /* bg-zinc-950 border border-white/10 */
-                        className="absolute left-0 mt-2 w-56 bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-md shadow-2xl z-50 p-1.5 space-y-1 font-space"
+                        className="absolute left-0 mt-2 w-full md:w-56 bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-md shadow-2xl z-50 p-1.5 space-y-1 font-space"
                       >
                         <button
                           onClick={() => { 
@@ -1645,7 +1645,7 @@ const { progress, isInRedZone } = useMemo(() => {
               {/* INTEL/NOTES button */}
               <button
                 onClick={() => { playBlip(); setShowIntelModal(true); }}
-                className="px-4 md:px-5 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-md uppercase flex items-center gap-2.5 relative border-[var(--card-border)] text-[var(--text-secondary)] hover:opacity-85 hover:border-white/20 cursor-pointer"
+                className="w-full md:w-auto px-4 md:px-5 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-md uppercase flex items-center justify-center gap-2.5 relative border-[var(--card-border)] text-[var(--text-secondary)] hover:opacity-85 hover:border-white/20 cursor-pointer h-12 md:h-auto min-h-[48px] md:min-h-0"
               >
                 <FileText className="w-4 h-4" />
                 {isRTL ? 'الملاحظات' : 'NOTES'}

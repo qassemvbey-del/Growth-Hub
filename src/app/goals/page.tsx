@@ -1045,17 +1045,17 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
           </div>
 
           {typeFilter === 'squad' ? (
-            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
               <button
                 onClick={() => { playBlip(); setShowJoinGoal(true); }}
-                className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-95 shadow-lg cursor-pointer animate-pulse"
+                className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-12 md:h-11 min-h-[48px] md:min-h-0 px-6 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-95 shadow-lg cursor-pointer animate-pulse"
               >
                 <Link className="text-[16px] leading-none" />
                 {isRTL ? 'الانضمام لهدف' : 'JOIN GOAL'}
               </button>
               <button
                 onClick={() => { playBlip(); setShowCreate(true); }}
-                className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg"
+                className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-12 md:h-11 min-h-[48px] md:min-h-0 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg"
                 style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
                 <Plus className="text-[16px] leading-none" />
@@ -1065,7 +1065,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
           ) : (
             <button
               onClick={() => { playBlip(); setShowCreate(true); }}
-              className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg"
+              className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-12 md:h-11 min-h-[48px] md:min-h-0 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg"
               style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
             >
               <Plus className="text-[16px] leading-none" />

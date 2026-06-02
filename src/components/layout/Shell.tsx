@@ -153,6 +153,42 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   const desktopInboxRef = useRef<HTMLDivElement>(null)
   const mobileInboxRef = useRef<HTMLDivElement>(null)
 
+  // Swipe Gestures
+  const touchStartX = useRef(0)
+  const touchStartY = useRef(0)
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current
+
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+      if (shellIsRTL) {
+        if (deltaX < 0 && !isMobileNavOpen) {
+          setIsMobileNavOpen(true)
+          playBlip()
+        }
+        if (deltaX > 0 && isMobileNavOpen) {
+          setIsMobileNavOpen(false)
+          playBlip()
+        }
+      } else {
+        if (deltaX > 0 && !isMobileNavOpen) {
+          setIsMobileNavOpen(true)
+          playBlip()
+        }
+        if (deltaX < 0 && isMobileNavOpen) {
+          setIsMobileNavOpen(false)
+          playBlip()
+        }
+      }
+    }
+  }
+
   // Real-time Network Radar States
   const [networkStatus, setNetworkStatus] = useState<'ONLINE' | 'OFFLINE' | 'LAG'>('ONLINE')
   const [showSyncSuccess, setShowSyncSuccess] = useState(false)
@@ -591,6 +627,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
   return (
     <div
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       className={cn(
         /* 'min-h-screen bg-zinc-50 dark:bg-[#050505] text-foreground flex relative transition-colors duration-500', */
         'min-h-screen bg-zinc-50 dark:bg-transparent text-foreground flex relative transition-colors duration-500',
@@ -718,53 +756,16 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         </header>
 
         {/* ── MOBILE TOP BAR ── */}
-        {/* bg-[var(--sidebar-bg)]/95 backdrop-blur-2xl border-b border-[var(--card-border)] */}
-        {/* <header className="flex lg:hidden w-full p-4 pt-safe justify-between items-center border-b border-black/5 dark:border-white/5 bg-white/60 dark:bg-black/40 backdrop-blur-3xl z-[150] sticky top-0 transition-colors duration-500 relative"> */}
-        {/* bg-white/60 dark:bg-black/40 backdrop-blur-3xl border-b-0 */}
-        {/* bg-transparent dark:bg-black/10 backdrop-blur-[40px] border-none */}
-        <header className="flex lg:hidden w-full p-4 pt-safe justify-between items-center bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-black/5 dark:border-white/[0.03] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] z-[150] sticky top-0 transition-colors duration-500 relative">
-          {/* LEFT: Hamburger Menu Icon & User Avatar */}
-          <div className="flex items-center gap-2.5">
+        <header className="flex lg:hidden w-full h-14 px-4 items-center justify-between bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-black/5 dark:border-white/[0.03] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] z-[150] sticky top-0 transition-colors duration-500 relative">
+          {/* LEFT: Hamburger Menu Icon */}
+          <div className="flex items-center">
             <button
               onClick={() => { setIsMobileNavOpen(true); playBlip(); }}
-              className="w-9 h-9 flex items-center justify-center bg-[var(--input-bg)] border border-[var(--card-border)] rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-white/20 transition-all cursor-pointer active:scale-95 shrink-0"
+              className="w-11 h-11 flex items-center justify-center bg-[var(--input-bg)] border border-[var(--card-border)] rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-white/20 transition-all cursor-pointer active:scale-95 shrink-0"
               title={isRTL ? 'القائمة' : 'Menu'}
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div 
-              onClick={() => router.push('/settings')}
-              className="relative w-9 h-9 rounded-full p-0.5 bg-gradient-to-tr flex items-center justify-center cursor-pointer shadow-md shrink-0 active:scale-95 transition-transform"
-              style={{ 
-                backgroundImage: `linear-gradient(to top right, ${currentTheme.color}, ${currentTheme.color}88, transparent, ${currentTheme.color})`,
-                boxShadow: `0 0 10px ${currentTheme.color}33`
-              }}
-              title={isRTL ? 'الملف الشخصي' : 'User Profile'}
-            >
-              <div className="w-full h-full rounded-full overflow-hidden bg-zinc-100/80 dark:bg-white/15 backdrop-blur-md p-0.5 flex items-center justify-center border border-black/20 dark:border-white/10">
-                {mounted && profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt="User" className="w-[90%] h-[90%] mx-auto object-contain p-1 rounded-full" />
-                ) : (
-                  <User className="w-4 h-4 text-[var(--text-secondary)]" />
-                )}
-              </div>
-              {/* Visual Role Icon Overlay Badge at bottom-right */}
-              {mounted && profile?.avatar_url && (
-                <div 
-                  className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center border border-[var(--sidebar-bg)] shadow-md z-20 backdrop-blur-md"
-                  style={{ 
-                    backgroundColor: currentTheme.color, 
-                    color: '#000000',
-                    boxShadow: `0 0 8px ${currentTheme.color}` 
-                  }}
-                >
-                  {(() => {
-                    const IconComponent = getRoleIconComponent(profile.avatar_url)
-                    return <IconComponent className="w-2.5 h-2.5 text-black stroke-[2.5]" />
-                  })()}
-                </div>
-              )}
-            </div>
           </div>
 
           {/* CENTER: Core Brand Text */}
@@ -772,7 +773,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
             <AnimatedLogo className="text-lg md:text-xl tracking-[0.2em]" />
           </div>
 
-          {/* RIGHT: Exactly two action icons: 🔔 (Notifications) and 🤖 (Instant AI Coach Chat) */}
+          {/* RIGHT: Exactly one action icon: 🔔 (Notifications) */}
           <div className="flex items-center gap-3">
             {/* Real-time Network Radar */}
             {renderNetworkPill(true)}
@@ -786,7 +787,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                   playBlip()
                 }}
                 className={cn(
-                  "flex items-center justify-center w-9 h-9 rounded-full transition-all border relative cursor-pointer inbox-btn",
+                  "flex items-center justify-center w-11 h-11 rounded-full transition-all border relative cursor-pointer inbox-btn",
                   inboxOpen 
                     ? "bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-primary)] shadow-[0_0_15px_rgba(255,255,255,0.2)]" 
                     : "bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)] hover:text-[var(--text-primary)]"
@@ -803,33 +804,6 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                 )}
               </button>
             </div>
-
-            {/* 🤖 Instant AI Coach Chat trigger */}
-            <button
-              onClick={() => {
-                setCoachPanelOpen(true)
-                playNeuralLink()
-                window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ai-coach' }))
-              }}
-              className={cn(
-                "flex items-center justify-center w-9 h-9 rounded-full transition-all border relative cursor-pointer shadow-md group nav-btn",
-                coachPanelOpen
-                  ? personality === 'SAVAGE'
-                    ? 'bg-[#FF0055] border-[#FF0055] text-white shadow-[0_0_15px_rgba(255,0,85,0.4)]'
-                    : 'bg-[#00E5FF] border-[#00E5FF] text-black shadow-[0_0_15px_rgba(0,229,255,0.4)]'
-                  : 'bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:border-cyan-400/50 hover:text-cyan-400'
-              )}
-              title={isRTL ? 'المدرب الذكي' : 'AI Coach'}
-            >
-              <div className="absolute inset-0 rounded-full animate-pulse opacity-20" style={{ backgroundColor: personality === 'SAVAGE' ? '#FF0055' : '#00E5FF' }}></div>
-              <motion.span 
-                animate={{ opacity: [1, 1, 0.2, 1, 1], rotate: [0, -5, 5, 0] }}
-                transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
-                className="relative z-10"
-              >
-                {personality === 'SAVAGE' ? <Flame className="w-[18px] h-[18px]" /> : <Bot className="w-[18px] h-[18px]" />}
-              </motion.span>
-            </button>
           </div>
         </header>
 
