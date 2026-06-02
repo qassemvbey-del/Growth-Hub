@@ -1471,7 +1471,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                         className="flex-1 py-2.5 text-black font-space font-black text-xs uppercase tracking-widest transition-all shadow-lg rounded-md"
                         style={{ backgroundColor: currentTheme.color }}
                       >
-                        {isRTL ? 'الاستمرار بالتركيز' : 'KEEP FOCUSING'}
+                        {isRTL ? 'الاستمرار بالتركيز' : 'Keep Focusing'}
                       </button>
                     </div>
                   </div>
@@ -1486,7 +1486,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 <>
                   <div className="space-y-2">
                     <h3 className="text-2xl font-black font-space tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
-                      NO SOLO GOALS YET
+                      No Solo Goals Yet
                     </h3>
                     <p className="text-zinc-500 dark:text-zinc-600 text-sm font-space">
                       Create your first personal goal to begin
@@ -1498,7 +1498,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
                   >
                     <Plus className="text-[16px] leading-none" />
-                    CREATE GOAL
+                    Create Goal
                   </button>
                 </>
               ) : typeFilter === 'squad' ? (
@@ -1506,7 +1506,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                   <div className="space-y-2 flex flex-col items-center justify-center select-none">
                     <Users2 className="text-5xl text-zinc-600 dark:text-zinc-500 mb-2 animate-pulse w-12 h-12" />
                     <h3 className="text-2xl font-black font-space tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
-                      NO SQUAD GOALS YET
+                      No squad goals yet
                     </h3>
                     <p className="text-zinc-500 dark:text-zinc-600 text-sm font-space">
                       Lead a squad or join one with an invite code
@@ -1518,7 +1518,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       className="flex flex-row items-center justify-center gap-2 h-11 px-6 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-95 shadow-lg cursor-pointer animate-pulse"
                     >
                       <Link className="text-[16px] leading-none" />
-                      JOIN WITH CODE
+                      Join with Code
                     </button>
                     <button
                       onClick={() => { playBlip(); setShowCreate(true); }}
@@ -1526,7 +1526,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
                     >
                       <Plus className="text-[16px] leading-none" />
-                      CREATE SQUAD GOAL
+                      Create Squad Goal
                     </button>
                   </div>
                 </>
