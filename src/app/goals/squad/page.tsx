@@ -73,6 +73,7 @@ export default function SquadGoalsPage() {
   const [joinStatus, setJoinStatus] = useState<'idle' | 'scanning' | 'valid' | 'invalid' | 'already_member' | 'success'>('idle')
   const [scannedGoalName, setScannedGoalName] = useState('')
   const [joinErrorText, setJoinErrorText] = useState('')
+  const [joinRoleInput, setJoinRoleInput] = useState<string | null>(null)
   
   const supabase = createClient()
 
@@ -402,8 +403,12 @@ export default function SquadGoalsPage() {
     if (mounted) {
       const params = new URLSearchParams(window.location.search)
       const joinParam = params.get('join')
+      const roleParam = params.get('role')
       if (joinParam) {
         setJoinCodeInput(joinParam.toUpperCase())
+        if (roleParam) {
+          setJoinRoleInput(roleParam.toLowerCase())
+        }
         setShowJoinGoal(true)
         // Clean URL parameter
         const newUrl = window.location.pathname
@@ -566,6 +571,25 @@ export default function SquadGoalsPage() {
 
       const result = typeof data === 'string' ? JSON.parse(data) : data
       if (result && result.success) {
+        // Fetch goal ID to update the role on join request
+        const { data: cupData } = await supabase
+          .from('cups')
+          .select('id')
+          .eq('metadata->>invite_code', code)
+          .single()
+        
+        if (cupData && joinRoleInput && ['admin', 'member', 'viewer', 'guest'].includes(joinRoleInput)) {
+          const { data: { user } } = await supabase.auth.getUser()
+          if (user) {
+            await supabase
+              .from('squad_join_requests')
+              .update({ role: joinRoleInput })
+              .eq('goal_id', cupData.id)
+              .eq('user_id', user.id)
+              .eq('status', 'pending')
+          }
+        }
+
         setJoinStatus('success')
         showToast(
           isRTL 
@@ -578,6 +602,7 @@ export default function SquadGoalsPage() {
           setShowJoinGoal(false)
           setJoinCodeInput('')
           setJoinStatus('idle')
+          setJoinRoleInput(null)
           fetchMissions()
         }, 2000)
       } else {

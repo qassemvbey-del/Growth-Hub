@@ -82,6 +82,56 @@ const ComplexityDashes = ({ weight, color }: { weight: number; color: string }) 
   )
 }
 
+interface SquadMember {
+  id: string
+  member_row_id: string
+  full_name: string
+  avatar_url: string | null
+  rank: string
+  role: string
+  last_seen: string | null
+}
+
+interface UseSquadPermissionsParams {
+  mission: any
+  profile: any
+  squadMembers: SquadMember[]
+}
+
+function useSquadPermissions({ mission, profile, squadMembers }: UseSquadPermissionsParams) {
+  const myMemberRow = useMemo(() => {
+    return squadMembers.find((m: any) => m.id === profile?.id || m.user_id === profile?.id)
+  }, [squadMembers, profile?.id])
+
+  const userRole = useMemo(() => {
+    if (mission?.user_id === profile?.id) return 'owner'
+    return myMemberRow?.role || 'guest'
+  }, [mission?.user_id, profile?.id, myMemberRow])
+
+  const normalizedRole = useMemo(() => {
+    return userRole === 'co-admin' ? 'admin' : userRole
+  }, [userRole])
+
+  const canDeleteSquad = normalizedRole === 'owner'
+  const canManageMembers = ['owner', 'admin'].includes(normalizedRole)
+  const canAssignTasks = ['owner', 'admin'].includes(normalizedRole)
+  const canCreateGoal = ['owner', 'admin'].includes(normalizedRole)
+  const canAddTask = ['owner', 'admin', 'member'].includes(normalizedRole)
+  const canCompleteTask = ['owner', 'admin', 'member'].includes(normalizedRole)
+  const canComment = true
+
+  return {
+    normalizedRole,
+    canDeleteSquad,
+    canManageMembers,
+    canAssignTasks,
+    canCreateGoal,
+    canAddTask,
+    canCompleteTask,
+    canComment
+  }
+}
+
 export default function MissionDetailPage() {
   const { id } = useParams()
   const router = useRouter()
@@ -89,9 +139,10 @@ export default function MissionDetailPage() {
   const { showToast } = useToast()
   const { playSuccess, playError, playBlip } = useSound()
   const [mission, setMission] = useState<any>(null)
-  const [squadMembers, setSquadMembers] = useState<any[]>([])
+  const [squadMembers, setSquadMembers] = useState<SquadMember[]>([])
   const [showSquadPanel, setShowSquadPanel] = useState(false)
   const [pendingRequests, setPendingRequests] = useState<any[]>([])
+  const [inviteRole, setInviteRole] = useState<'admin' | 'member' | 'viewer' | 'guest'>('member')
   const [isReviewing, setIsReviewing] = useState<string | null>(null)
   const [activeAssignPopover, setActiveAssignPopover] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -107,6 +158,17 @@ export default function MissionDetailPage() {
   const [onlineUsers, setOnlineUsers] = useState<any[]>([])
   const [mySessionColor, setMySessionColor] = useState<string | null>(null)
   const presenceChannelRef = useRef<any>(null)
+
+  const {
+    normalizedRole,
+    canDeleteSquad,
+    canManageMembers,
+    canAssignTasks,
+    canCreateGoal,
+    canAddTask,
+    canCompleteTask,
+    canComment
+  } = useSquadPermissions({ mission, profile, squadMembers })
 
   const setSelectedTask = (task: any | null) => {
     setSelectedTaskState(task)
@@ -180,14 +242,11 @@ export default function MissionDetailPage() {
   const canToggleTask = (task: any) => {
     if (mission?.metadata?.type !== 'squad') return true
     
-    const currentUserMember = squadMembers.find(m => m.id === profile?.id)
-    const currentUserRole = currentUserMember?.role
-    const isOwner = mission?.user_id === profile?.id || currentUserRole === 'owner'
-    const isCoAdmin = currentUserRole === 'co-admin'
-    const isPrivileged = isOwner || isCoAdmin
+    if (!canCompleteTask) return false
     
+    const isPrivileged = ['owner', 'admin'].includes(normalizedRole)
     if (!task.assigned_to) {
-      return isPrivileged
+      return isPrivileged || normalizedRole === 'member'
     } else {
       return task.assigned_to === profile?.id || isPrivileged
     }
@@ -197,11 +256,13 @@ export default function MissionDetailPage() {
     e.stopPropagation()
     if (mission?.metadata?.type !== 'squad') return
     
-    const currentUserMember = squadMembers.find(m => m.id === profile?.id)
-    const currentUserRole = currentUserMember?.role
-    const isOwner = mission?.user_id === profile?.id || currentUserRole === 'owner'
-    const isCoAdmin = currentUserRole === 'co-admin'
-    const isPrivileged = isOwner || isCoAdmin
+    if (!['owner', 'admin', 'member'].includes(normalizedRole)) {
+      showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")
+      playError()
+      return
+    }
+    
+    const isPrivileged = ['owner', 'admin'].includes(normalizedRole)
     
     if (isPrivileged) {
       setActiveAssignPopover(activeAssignPopover === task.id ? null : task.id)
@@ -855,6 +916,13 @@ export default function MissionDetailPage() {
   }
 
   const toggleTask = async (taskId: string, currentStatus: boolean) => {
+    const taskObj = mission?.tasks?.find((t: any) => t.id === taskId)
+    if (mission?.metadata?.type === 'squad' && taskObj && !canToggleTask(taskObj)) {
+      showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")
+      playError()
+      return
+    }
+
     const nextStatus = !currentStatus
     const isLocal = typeof id === 'string' && id.startsWith('local_')
 
@@ -939,6 +1007,12 @@ export default function MissionDetailPage() {
   }
 
   const onMoveTask = async (taskId: string, newColumnId: string) => {
+    if (mission?.metadata?.type === 'squad' && !canCompleteTask) {
+      showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")
+      playError()
+      return
+    }
+
     const isLocal = typeof id === 'string' && id.startsWith('local_')
     const nextCompleted = newColumnId === 'done'
     
@@ -1031,6 +1105,12 @@ export default function MissionDetailPage() {
 
   const addTask = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
+    if (mission?.metadata?.type === 'squad' && !canAddTask) {
+      showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")
+      playError()
+      return
+    }
+
     const rawTitle = newTaskTitle.trim()
     if (!rawTitle) return
     
@@ -1085,6 +1165,16 @@ export default function MissionDetailPage() {
   }
 
   const deleteTask = async (taskId: string) => {
+    if (mission?.metadata?.type === 'squad') {
+      const currentRules = mission.metadata?.rules || {}
+      const isMemberOrLower = ['member', 'viewer', 'guest'].includes(normalizedRole)
+      if (!['owner', 'admin', 'member'].includes(normalizedRole) || (currentRules.no_delete && isMemberOrLower)) {
+        showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")
+        playError()
+        return
+      }
+    }
+
     const isLocal = typeof id === 'string' && id.startsWith('local_')
     if (isLocal) {
       setMission((prev: any) => {
@@ -1163,6 +1253,11 @@ export default function MissionDetailPage() {
   }
 
   const deleteMission = async () => {
+    if (mission?.metadata?.type === 'squad' && !canDeleteSquad) {
+      showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")
+      playError()
+      return
+    }
     if (!confirm(isRTL ? 'هل أنت متأكد من حذف هذه المهمة؟' : 'CONFIRM GOAL TERMINATION?')) return
     const isLocal = typeof id === 'string' && id.startsWith('local_')
 
@@ -1187,6 +1282,11 @@ export default function MissionDetailPage() {
 
     const toggleSquadRule = async (targetMission: any, ruleKey: string) => {
     playBlip()
+    if (targetMission?.metadata?.type === 'squad' && !canManageMembers) {
+      showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")
+      playError()
+      return
+    }
     const currentRules = targetMission.metadata?.rules || {}
     const newRules = { ...currentRules, [ruleKey]: !currentRules[ruleKey] }
     const newMetadata = {
@@ -1938,13 +2038,10 @@ const { progress, isInRedZone } = useMemo(() => {
                                 onClick={(e) => { 
                                   e.stopPropagation(); 
                                   if (mission?.metadata?.type === 'squad') {
-                                    const currentUserMember = squadMembers.find(m => m.id === profile?.id)
-                                    const currentUserRole = currentUserMember?.role
-                                    const isOwner = mission?.user_id === profile?.id || currentUserRole === 'owner'
-                                    const isCoAdmin = currentUserRole === 'co-admin'
-                                    const isPrivileged = isOwner || isCoAdmin
-                                    if (!isPrivileged) {
-                                      showToast(isRTL ? 'RESTRICTED' : 'RESTRICTED // SQUAD ADMINS ONLY', 'warning')
+                                    const currentRules = mission.metadata?.rules || {}
+                                    const isMemberOrLower = ['member', 'viewer', 'guest'].includes(normalizedRole)
+                                    if (!['owner', 'admin', 'member'].includes(normalizedRole) || (currentRules.no_delete && isMemberOrLower)) {
+                                      showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")
                                       playError()
                                       return
                                     }
@@ -2457,6 +2554,13 @@ const { progress, isInRedZone } = useMemo(() => {
                                                     showToast(isRTL ? 'فشل قبول الطلب' : 'FAILED TO APPROVE', 'warning')
                                                     playError()
                                                   } else {
+                                                    if (req.role && ['admin', 'member', 'viewer', 'guest'].includes(req.role)) {
+                                                      await supabase
+                                                        .from('goal_members')
+                                                        .update({ role: req.role })
+                                                        .eq('goal_id', id)
+                                                        .eq('user_id', req.user_id)
+                                                    }
                                                     showToast(isRTL ? 'تم قبول العضو الجديد في الفريق!' : 'MEMBER APPROVED // JOINED SQUAD', 'success')
                                                     playSuccess()
                                                     await fetchPendingRequests()
@@ -2566,64 +2670,49 @@ const { progress, isInRedZone } = useMemo(() => {
 
                                             {/* Role management controls (Owner only) */}
                                             {isOwner && (
-                                              <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-black uppercase text-zinc-500 shrink-0">
-                                                  {isRTL ? 'الدور:' : 'ROLE:'}
-                                                </span>
-                                                <div className="flex-1 flex gap-1 bg-black/40 border border-white/10 p-0.5 rounded-md">
-                                                  <button
-                                                    onClick={async () => {
-                                                      if (member.role === 'member') return
-                                                      playBlip()
-                                                      const { error } = await supabase
-                                                        .from('goal_members')
-                                                        .update({ role: 'member' })
-                                                        .eq('id', member.member_row_id)
-                                                      if (error) {
-                                                        showToast(isRTL ? 'فشل تحديث الدور' : 'FAILED TO UPDATE ROLE', 'warning')
-                                                        playError()
-                                                      } else {
-                                                        showToast(isRTL ? 'تم تحديث الدور إلى عضو!' : 'ROLE UPDATED TO MEMBER', 'success')
-                                                        playSuccess()
-                                                        await fetchMission()
-                                                      }
-                                                    }}
-                                                    className={cn(
-                                                      "flex-1 py-1 text-[8px] font-black tracking-widest uppercase text-center rounded-md transition-all cursor-pointer",
-                                                      member.role === 'member'
-                                                        ? "bg-zinc-800 text-zinc-300 border border-white/10 font-bold"
-                                                        : "text-zinc-600 hover:text-zinc-400"
-                                                    )}
-                                                  >
-                                                    MEMBER
-                                                  </button>
-                                                  <button
-                                                    onClick={async () => {
-                                                      if (member.role === 'co-admin') return
-                                                      playBlip()
-                                                      const { error } = await supabase
-                                                        .from('goal_members')
-                                                        .update({ role: 'co-admin' })
-                                                        .eq('id', member.member_row_id)
-                                                      if (error) {
-                                                        showToast(isRTL ? 'فشل تحديث الدور' : 'FAILED TO UPDATE ROLE', 'warning')
-                                                        playError()
-                                                      } else {
-                                                        showToast(isRTL ? 'تم تحديث الدور إلى مشرف!' : 'ROLE UPDATED TO CO-ADMIN', 'success')
-                                                        playSuccess()
-                                                        await fetchMission()
-                                                      }
-                                                    }}
-                                                    className={cn(
-                                                      "flex-1 py-1 text-[8px] font-black tracking-widest uppercase text-center rounded-md transition-all cursor-pointer",
-                                                      member.role === 'co-admin'
-                                                        ? "bg-teal-950/50 text-[#14b8a6] border border-[#14b8a6]/30 font-bold"
-                                                        : "text-zinc-600 hover:text-zinc-400"
-                                                    )}
-                                                  >
-                                                    CO-ADMIN
-                                                  </button>
+                                              <div className="flex flex-col gap-2 w-full mt-1.5 pt-1.5 border-t border-white/5">
+                                                <div className="flex items-center justify-between">
+                                                  <label htmlFor={`role-select-${member.id}`} className="text-[10px] font-black uppercase text-zinc-500 tracking-wider">
+                                                    {isRTL ? 'الدور والامتيازات:' : 'ROLE & PERMISSIONS:'}
+                                                  </label>
+                                                  <div className="group relative flex items-center">
+                                                    <HelpCircle className="w-3.5 h-3.5 text-zinc-500 hover:text-teal-400 transition-colors cursor-help" />
+                                                    <div className="absolute right-0 bottom-full mb-2 w-64 p-3 bg-zinc-950/95 border border-white/10 rounded-md text-[10px] leading-relaxed text-zinc-300 font-medium font-sans uppercase tracking-wider hidden group-hover:block z-[200] shadow-xl backdrop-blur-md">
+                                                      <div className="text-[#14b8a6] font-black mb-1">ROLE SCHEMATICS // INFO:</div>
+                                                      <div className="mb-1"><span className="text-teal-400 font-bold">🛡️ ADMIN:</span> Manager controls, no deletion</div>
+                                                      <div className="mb-1"><span className="text-zinc-200 font-bold">⚡ MEMBER:</span> Task deployment & execution</div>
+                                                      <div className="mb-1"><span className="text-blue-400 font-bold">👁️ VIEWER:</span> Read-only access & comments</div>
+                                                      <div><span className="text-zinc-500 font-bold">👤 GUEST:</span> Restricted view & comments</div>
+                                                    </div>
+                                                  </div>
                                                 </div>
+                                                <select
+                                                  id={`role-select-${member.id}`}
+                                                  value={member.role}
+                                                  onChange={async (e) => {
+                                                    const newRole = e.target.value
+                                                    if (newRole === member.role) return
+                                                    playBlip()
+                                                    const { error } = await supabase
+                                                      .from('goal_members')
+                                                      .update({ role: newRole })
+                                                      .eq('id', member.member_row_id)
+                                                    if (error) {
+                                                      showToast(isRTL ? 'فشل تحديث الدور' : 'FAILED TO UPDATE ROLE', 'warning')
+                                                      playError()
+                                                    } else {
+                                                      showToast(isRTL ? 'تم تحديث الدور بنجاح!' : `ROLE UPDATED TO ${newRole.toUpperCase()}`, 'success')
+                                                      playSuccess()
+                                                      await fetchMission()
+                                                    }
+                                                  }}
+                                                  className="w-full bg-zinc-900 border border-white/10 text-zinc-300 py-1.5 px-2.5 rounded-md text-xs outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/30 cursor-pointer font-space transition-all"
+                                                >
+                                                  <option value="admin">ADMIN</option>
+                                                  <option value="member">MEMBER</option>
+                                                  <option value="viewer">VIEWER</option>
+                                                  <option value="guest">GUEST</option>
+                                                </select>
                                               </div>
                                             )}
                                           </div>
@@ -2670,6 +2759,12 @@ const { progress, isInRedZone } = useMemo(() => {
                                         className="accent-teal-400 cursor-pointer"
                                       />
                                     </label>
+                                    <div className="mt-3 pt-3 border-t border-white/5 space-y-1 text-[9px] font-mono text-zinc-500 uppercase tracking-wider">
+                                      <div className="text-zinc-400 font-bold">SYSTEM ROLE POLICIES // ضوابط الأدوار:</div>
+                                      <div>• {isRTL ? 'الضيف (Guest) تنتهي صلاحيته بعد 7 أيام' : 'Guest access expires automatically after 7 days'}</div>
+                                      <div>• {isRTL ? 'المشاهد والضيف لا يمكنهم تعديل أو نقل المهام' : 'Viewer & Guest cannot add, complete, or move tasks'}</div>
+                                      <div>• {isRTL ? 'المشرفون (Admin) لا يمكنهم حذف الفريق' : 'Admins cannot terminate the squad'}</div>
+                                    </div>
                                   </div>
                                 </div>
                               )}
@@ -2759,17 +2854,32 @@ const { progress, isInRedZone } = useMemo(() => {
                       <span className="font-mono text-[9px] text-zinc-500 tracking-widest uppercase">INVITATION_KEY // SECURE_CHANNEL</span>
                       <span className="font-mono text-[8px] bg-red-950/20 border border-red-500/20 text-red-400 px-1.5 py-0.5 rounded-md tracking-wider">PRIVATE</span>
                     </div>
+                    <div className="flex items-center justify-between text-xs border-b border-white/5 pb-2">
+                      <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">
+                        {isRTL ? 'دعوة كـ:' : 'INVITE AS:'}
+                      </span>
+                      <select
+                        value={inviteRole}
+                        onChange={(e) => setInviteRole(e.target.value as any)}
+                        className="bg-zinc-900 border border-white/10 text-zinc-300 py-1 px-2.5 rounded text-[10px] outline-none focus:border-cyan-500/50 cursor-pointer font-space"
+                      >
+                        <option value="admin">ADMIN</option>
+                        <option value="member">MEMBER</option>
+                        <option value="viewer">VIEWER</option>
+                        <option value="guest">GUEST</option>
+                      </select>
+                    </div>
                     <div className="flex gap-2">
                       <input
                         type="text"
                         readOnly
-                        value={`${window.location.origin}/goals/squad?join=${mission.metadata?.invite_code || ''}`}
+                        value={`${window.location.origin}/goals/squad?join=${mission.metadata?.invite_code || ''}&role=${inviteRole}`}
                         className="flex-grow bg-zinc-900/60 border border-white/5 py-2 px-3 rounded-md text-[10px] font-mono text-zinc-400 outline-none select-all focus:border-cyan-500/30"
                       />
                       <button
                         onClick={() => {
                           playBlip()
-                          const inviteUrl = `${window.location.origin}/goals/squad?join=${mission.metadata?.invite_code || ''}`
+                          const inviteUrl = `${window.location.origin}/goals/squad?join=${mission.metadata?.invite_code || ''}&role=${inviteRole}`
                           navigator.clipboard.writeText(inviteUrl)
                           setCopiedRow('invite')
                           setTimeout(() => setCopiedRow(null), 2000)

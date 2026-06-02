@@ -68,3 +68,18 @@ alter table task_progress enable row level security;
 -- Policies for task_progress
 create policy "Users manage own progress" on task_progress
   for all using (auth.uid() = user_id);
+
+-- Goal Members roles update
+ALTER TABLE goal_members 
+ADD COLUMN IF NOT EXISTS role text 
+DEFAULT 'member' 
+CHECK (role IN ('owner','admin','member','viewer','guest'));
+
+UPDATE goal_members 
+SET role = 'admin' 
+WHERE role = 'co-admin';
+
+-- Squad Join Requests role update
+ALTER TABLE squad_join_requests 
+ADD COLUMN IF NOT EXISTS role text 
+DEFAULT 'member';
