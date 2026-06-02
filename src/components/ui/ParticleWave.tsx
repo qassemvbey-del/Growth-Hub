@@ -6,6 +6,10 @@ interface Point {
   x3d: number
   y3d: number
   z3d: number
+  currentX: number
+  currentY: number
+  currentRadius: number
+  currentOpacity: number
 }
 
 export default function ParticleWave() {
@@ -25,19 +29,25 @@ export default function ParticleWave() {
 
     let points: Point[] = []
 
-    // STEP 1: GENERATE DENSE UNIFIED 2D GRID
+    // GENERATE DENSE UNIFIED 2D GRID
     const generateGrid = (w: number, h: number) => {
       const tempPoints: Point[] = []
-      const spacing = 24 // Increased density
+      const spacing = 24
       const cols = Math.ceil(w / spacing) + 4
       const rows = Math.ceil(h / spacing) + 4
 
       for (let c = -2; c < cols; c++) {
         for (let r = -2; r < rows; r++) {
+          const x = c * spacing - w / 2
+          const y = r * spacing - h / 2
           tempPoints.push({
-            x3d: c * spacing - w / 2,
-            y3d: r * spacing - h / 2,
+            x3d: x,
+            y3d: y,
             z3d: 0,
+            currentX: x + w / 2,
+            currentY: y + h / 2,
+            currentRadius: 1.3,
+            currentOpacity: 0.35,
           })
         }
       }
@@ -63,7 +73,6 @@ export default function ParticleWave() {
     let time = 0
 
     const render = () => {
-      // Slow, elegant wave movement
       time += 0.008
 
       // Detect theme dynamically
@@ -83,41 +92,60 @@ export default function ParticleWave() {
         let yDisplacement = Math.sin(waveX + time) * Math.cos(waveY + time) * 16
         yDisplacement += Math.sin(waveX * 2 - time * 0.5) * 5
 
-        // Initial projected 2D coordinates on screen (Centered grid mapping)
-        let finalX = p.x3d + width / 2
-        let finalY = p.y3d + height / 2 + yDisplacement
+        // Base coordinate positions
+        const baseX = p.x3d + width / 2
+        const baseY = p.y3d + height / 2 + yDisplacement
 
-        // Calculate distance to mouse cursor
-        const dx = finalX - mx
-        const dy = finalY - my
+        // Calculate distance from target position to mouse cursor
+        const dx = baseX - mx
+        const dy = baseY - my
         const dist = Math.sqrt(dx * dx + dy * dy)
 
-        // Mouse displacement settings: tight 150px radius with high-force repulsion
-        const activeRadius = 150
-        let radius = 1.3
+        // Target state properties for displacement LERPing
+        let targetX = baseX
+        let targetY = baseY
+        let targetRadius = 1.3
+
         const isDarkTheme = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
-        let opacity = 0.35 // Crisp baseline visibility
         let color = isDarkTheme ? 'rgba(20, 184, 166, ' : 'rgba(13, 148, 136, '
 
+        const centerX = width / 2
+        const centerY = height / 2
+        const distToCenter = Math.sqrt(
+          (baseX - centerX) * (baseX - centerX) +
+            (baseY - centerY) * (baseY - centerY)
+        )
+        const maxDist = Math.sqrt(centerX * centerX + centerY * centerY)
+        const vignette = Math.max(0, 1 - distToCenter / (maxDist * 0.85))
+        
+        let targetOpacity = vignette * 0.45
+
+        // Mouse displacement settings: 150px radius with high-force repulsion
+        const activeRadius = 150
         if (dist < activeRadius) {
           const strength = (activeRadius - dist) / activeRadius
           const angle = Math.atan2(dy, dx)
           
-          // Violent/high-impact quadratic repulsion force
+          // High-force quadratic repulsion formula
           const pushForce = Math.pow(strength, 2) * 55
-          finalX += Math.cos(angle) * pushForce
-          finalY += Math.sin(angle) * pushForce
+          targetX = baseX + Math.cos(angle) * pushForce
+          targetY = baseY + Math.sin(angle) * pushForce
 
-          // Enlarge and glow particles in close proximity
-          opacity += strength * 0.55
-          radius += strength * 1.6
+          targetOpacity += strength * 0.55
+          targetRadius += strength * 1.6
         }
 
+        // STEP 3: SLOW DOWN MOUSE REPULSION USING LINEAR INTERPOLATION (LERP)
+        p.currentX += (targetX - p.currentX) * 0.08
+        p.currentY += (targetY - p.currentY) * 0.08
+        p.currentRadius += (targetRadius - p.currentRadius) * 0.08
+        p.currentOpacity += (targetOpacity - p.currentOpacity) * 0.08
+
         // Render point within screen bounds
-        if (finalX >= 0 && finalX <= width && finalY >= 0 && finalY <= height) {
+        if (p.currentX >= 0 && p.currentX <= width && p.currentY >= 0 && p.currentY <= height) {
           ctx.beginPath()
-          ctx.arc(finalX, finalY, radius, 0, Math.PI * 2)
-          ctx.fillStyle = `${color}${opacity})`
+          ctx.arc(p.currentX, p.currentY, p.currentRadius, 0, Math.PI * 2)
+          ctx.fillStyle = `${color}${Math.max(0, Math.min(1, p.currentOpacity))})`
           ctx.fill()
         }
       })

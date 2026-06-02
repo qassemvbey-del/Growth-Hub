@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import ParticleWave from '@/components/ui/ParticleWave'
 // import { useMousePosition } from '@/hooks/useMousePosition'
@@ -71,6 +72,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [lang, setLang] = useState<'ar' | 'en'>('ar') // Default to Arabic to match system focus
   const supabase = createClient()
+  const router = useRouter()
   
   // Commented out per rule "Never delete code, only comment it out":
   // const mouse = useMousePosition()
@@ -114,6 +116,11 @@ export default function LoginPage() {
     }
   }
 
+  const handleGuestMode = () => {
+    localStorage.setItem('entry_path_selected', 'true')
+    router.push('/')
+  }
+
   // Simplified Translation Dictionaries with Gamified Gaming wording
   const t = {
     ar: {
@@ -122,6 +129,7 @@ export default function LoginPage() {
       welcome: 'أهلاً بيك من تاني',
       desc: 'سجل دخولك دلوقتي عشان تدخل على الـ Dashboard بتاعتك وتتكلم مع مساعد الـ AI عشان تحقق الـ Goals بتاعتك.',
       button: 'ادخل بـ Google',
+      guestButton: 'المتابعة كضيف',
       signingIn: 'بندخلك دلوقتي...',
       tagline: 'مكان شغل متكامل عشان تدير الـ Goals والـ Tasks بتاعتك بإنتاجية عالية.',
       feature1Title: 'Focus Goals',
@@ -138,6 +146,7 @@ export default function LoginPage() {
       welcome: 'Welcome Back',
       desc: 'Sign in to instantly access your workspace & smart AI coach to achieve your goals.',
       button: 'Sign in with Google',
+      guestButton: 'Continue as Guest',
       signingIn: 'Signing in...',
       tagline: 'Growth Hub - Workspace Productivity & Goal Tracking',
       feature1Title: 'Focus Goals',
@@ -170,7 +179,8 @@ export default function LoginPage() {
     }
   }
 
-  const hoverTextClass = "hover:text-teal-400 hover:drop-shadow-[0_0_10px_rgba(20,184,166,0.8)] transition-all duration-300 cursor-default"
+  // STEP 2: UNIVERSAL PREMIUM TEXT HOVER EFFECTS
+  const hoverTextClass = "cursor-default transition-all duration-300 hover:text-teal-400 hover:scale-[1.02] hover:drop-shadow-[0_0_12px_rgba(20,184,166,0.9)]"
 
   return (
     <div className="min-h-screen bg-transparent flex flex-col md:flex-row relative overflow-hidden font-space">
@@ -192,15 +202,15 @@ export default function LoginPage() {
         </button>
       </div>
 
-      {/* MAIN CONTENT WRAPPER: SET TO RELATIVE Z-10 TO SIT ABOVE CANVAS */}
-      <div className="relative z-10 w-full min-h-screen flex flex-col md:flex-row bg-transparent">
+      {/* MAIN CONTENT WRAPPER: SET TO RELATIVE Z-10 TO SIT ABOVE CANVAS & VERTICALLY ALIGN COLUMNS */}
+      <div className="relative z-10 w-full min-h-screen grid grid-cols-1 md:grid-cols-2 items-center bg-transparent">
         
         {/* LEFT COLUMN: PURELY INVISIBLE LAYOUT SKELETON (No borders or backgrounds) */}
         <motion.div 
           variants={leftColumnVariants}
           initial="hidden"
           animate="visible"
-          className="w-full md:w-1/2 flex flex-col justify-between p-8 md:p-20 relative bg-transparent select-none"
+          className="w-full flex flex-col justify-between p-8 md:p-20 relative bg-transparent select-none min-h-[70vh] md:min-h-[80vh]"
         >
           
           {/* Brand Header */}
@@ -268,7 +278,7 @@ export default function LoginPage() {
         </motion.div>
 
         {/* RIGHT COLUMN: PURELY INVISIBLE LAYOUT SKELETON (No solid backgrounds or splits) */}
-        <div className="w-full md:w-1/2 flex items-center justify-center p-8 md:p-20 relative bg-transparent">
+        <div className="w-full flex items-center justify-center p-8 md:p-20 relative bg-transparent">
           
           {/* GLASSMORPHISM LOGIN GATEWAY */}
           <motion.div
@@ -290,17 +300,14 @@ export default function LoginPage() {
               </p>
             </div>
 
-            {/* Secure Google OAuth Action Area with Restored Google Button Text */}
+            {/* Secure Google OAuth Action Area with Premium Dark Google Button & Secondary Guest Button */}
             <div className="space-y-4">
               <button
                 type="button"
                 disabled={loading}
                 onClick={handleGoogleLogin}
-                className="group relative rounded-2xl w-full flex items-center justify-center gap-3 font-bold tracking-wider transition-all duration-300 bg-white dark:bg-white text-zinc-900 dark:text-black border border-zinc-200 dark:border-transparent shadow-md hover:bg-zinc-100 dark:hover:bg-zinc-100 hover:shadow-[0_0_25px_rgba(255,255,255,0.3)] dark:hover:shadow-[0_0_25px_rgba(255,255,255,0.3)] overflow-hidden py-3.5 px-6 active:scale-95 hover:-translate-y-0.5"
+                className="flex items-center justify-center gap-3 w-full py-3.5 bg-zinc-900 text-white font-bold rounded-lg border border-zinc-700 hover:bg-zinc-800 hover:border-zinc-500 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95 transition-all duration-300 group"
               >
-                {/* Animated Glow Highlight on Hover */}
-                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-black/[0.05] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
-                
                 <svg 
                   width="20" 
                   height="20" 
@@ -313,10 +320,19 @@ export default function LoginPage() {
                   <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2A8.99 8.99 0 0 0 0 9l2.99 2.36C3.7 5.17 5.7 3.58 9 3.58z"/>
                 </svg>
 
-                {/* Restored Google Button Text */}
-                <span className="font-space text-xs font-black tracking-[0.15em] uppercase text-zinc-900">
+                {/* Restored Google Button Text (Guaranteed visible with explicit text-white) */}
+                <span className="font-space text-xs font-black tracking-[0.15em] uppercase text-white">
                   {loading ? t[lang].signingIn : t[lang].button}
                 </span>
+              </button>
+
+              {/* Continue as Guest Button */}
+              <button
+                type="button"
+                onClick={handleGuestMode}
+                className="flex items-center justify-center w-full py-3.5 bg-transparent text-zinc-400 font-bold rounded-lg border border-zinc-800 hover:text-white hover:border-zinc-500 hover:bg-zinc-900 active:scale-95 transition-all duration-300 font-space text-xs tracking-[0.15em] uppercase"
+              >
+                <span>{t[lang].guestButton}</span>
               </button>
             </div>
 
@@ -333,3 +349,15 @@ export default function LoginPage() {
     </div>
   )
 }
+
+/* COMMENTED OUT ORIGINAL CODE FOR HISTORICAL REFERENCE:
+export function LoginPageBackup() {
+  return (
+    <div className="min-h-screen bg-transparent flex flex-col md:flex-row relative overflow-hidden font-space">
+      <ParticleWave />
+      <div className="fixed inset-0 pointer-events-none opacity-[0.02] scanlines z-20" />
+      ...
+    </div>
+  )
+}
+*/
