@@ -16,9 +16,13 @@ const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space
 const tajawal = Tajawal({ weight: ["400", "500", "700", "800", "900"], subsets: ["arabic"], variable: "--font-tajawal", preload: false });
 const exo2 = Exo_2({ subsets: ["latin"], weight: ["700", "800", "900"], variable: "--font-exo2", preload: false });
 
+// export const metadata: Metadata = {
+//   title: "Growth Hub | Life Optimization Interface",
+//   description: "Professional high-fidelity life management system",
+// };
 export const metadata: Metadata = {
-  title: "Growth Hub | Life Optimization Interface",
-  description: "Professional high-fidelity life management system",
+  title: "Growth Hub | Level Up Your Learning",
+  description: "Track your goals, crush your courses, and level up with your squad",
 };
 
 export default function RootLayout({

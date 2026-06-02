@@ -1532,7 +1532,13 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 </>
               ) : (
                 <p className="text-[var(--text-secondary)]/50 text-sm text-center font-space">
-                  {isRTL ? 'لا توجد أهداف نشطة حالياً. استخدم لوحة الإنشاء بالأعلى للبدء.' : 'No active goals synced. Use the action panel above to initiate.'}
+                  {isRTL ? 
+                    // 'لا توجد أهداف نشطة حالياً. استخدم لوحة الإنشاء بالأعلى للبدء.'
+                    'مفيش مهام نشطة دلوقتي. خد نفسك وخطط لخطوتك الجاية.'
+                    : 
+                    // 'No active goals synced. Use the action panel above to initiate.'
+                    'No active tasks. Take a breath and plan your next move.'
+                  }
                 </p>
               )}
             </div>

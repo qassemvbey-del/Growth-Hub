@@ -808,7 +808,13 @@ export default function NotesPage() {
               <p className="text-xs font-space text-zinc-500 leading-relaxed max-w-[280px]">
                 {searchQuery
                   ? (isRTL ? 'جرب كلمات بحث مختلفة للعثور على ما تبحث عنه.' : 'Try different search terms to find what you\'re looking for.')
-                  : (isRTL ? 'لا توجد ملاحظات مضافة بعد. اضغط على زر "إضافة ملاحظة" لكتابة فكرتك الأولى.' : 'You haven\'t added any notes yet. Tap "Add Note" to write your first one.')}
+                  : (isRTL ? 
+                      // 'لا توجد ملاحظات مضافة بعد. اضغط على زر "إضافة ملاحظة" لكتابة فكرتك الأولى.'
+                      'كشكولك فاضي. اكتب أول فكرة تيجي في دماغك هنا.'
+                      : 
+                      // 'You haven\'t added any notes yet. Tap "Add Note" to write your first one.'
+                      'Your notebook is empty. Drop your first thought here.'
+                    )}
               </p>
             </div>
           </div>
