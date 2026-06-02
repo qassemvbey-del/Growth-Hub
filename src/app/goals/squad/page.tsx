@@ -1630,7 +1630,7 @@ export default function SquadGoalsPage() {
                         className="flex-1 py-2.5 text-black font-space font-black text-xs uppercase tracking-widest transition-all shadow-lg rounded-xl"
                         style={{ backgroundColor: currentTheme.color }}
                       >
-                        {isRTL ? 'الاستمرار بالتركيز' : 'KEEP FOCUSING'}
+                        {isRTL ? 'الاستمرار بالتركيز' : 'Keep Focusing'}
                       </button>
                     </div>
                   </div>
@@ -1645,7 +1645,7 @@ export default function SquadGoalsPage() {
                 <>
                   <div className="space-y-2">
                     <h3 className="text-2xl font-black font-space tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
-                      NO SOLO GOALS YET
+                      No Solo Goals Yet
                     </h3>
                     <p className="text-zinc-500 dark:text-zinc-600 text-sm font-space">
                       Create your first personal goal to begin
@@ -1657,7 +1657,7 @@ export default function SquadGoalsPage() {
                     style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
                   >
                     <Plus className="w-4 h-4 text-black" />
-                    CREATE GOAL
+                    Create Goal
                   </button>
                 </>
               ) : typeFilter === 'squad' ? (
@@ -1665,7 +1665,7 @@ export default function SquadGoalsPage() {
                   <div className="space-y-2 flex flex-col items-center justify-center select-none">
                     <Users className="w-12 h-12 text-zinc-500 mb-2 animate-pulse" />
                     <h3 className="text-2xl font-black font-space tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
-                      NO TEAM GOALS YET
+                      No team goals yet
                     </h3>
                     <p className="text-zinc-500 dark:text-zinc-600 text-sm font-space">
                       Lead a team or join one with an invite code
@@ -1677,7 +1677,7 @@ export default function SquadGoalsPage() {
                       className="flex flex-row items-center justify-center gap-2 h-11 px-6 rounded-sm border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-95 shadow-lg cursor-pointer animate-pulse"
                     >
                       <LinkIcon className="w-4 h-4" />
-                      JOIN WITH CODE
+                      Join with Code
                     </button>
                     <button
                       onClick={() => { playBlip(); setShowCreate(true); }}
@@ -1685,7 +1685,7 @@ export default function SquadGoalsPage() {
                       style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
                     >
                       <Plus className="w-4 h-4 text-black" />
-                      CREATE TEAM GOAL
+                      Create Team Goal
                     </button>
                   </div>
                 </>
