@@ -670,13 +670,13 @@ export default function SettingsPage() {
                         </h3>
                       </div>
 
-                      <div className="space-y-8">
+                      <div className="space-y-6">
                         {/* Language switch */}
-                        <div className="space-y-4 border-b border-white/10 pb-8">
+                        <div className="flex items-center justify-between border-b border-white/10 pb-6">
                           <label className="text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
                             {isRTL ? 'لغة واجهة النظام' : 'INTERFACE LANGUAGE'}
                           </label>
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="flex bg-zinc-900/50 p-1 rounded-lg border border-white/5 shrink-0">
                             {[
                               { key: 'en', label: 'EN' },
                               { key: 'ar', label: 'AR' }
@@ -689,24 +689,25 @@ export default function SettingsPage() {
                                   playBlip()
                                 }}
                                 className={cn(
-                                  'py-2 sm:py-3.5 border font-space text-[10px] sm:text-xs font-black transition-all rounded-xl uppercase tracking-widest',
+                                  'px-4 py-1.5 font-space text-[10px] font-black transition-all rounded-md uppercase tracking-wider',
                                   formData.language === l.key 
-                                    ? 'text-black border-transparent shadow-lg font-black' 
-                                    : 'bg-[var(--input-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-white'
+                                    ? 'text-black font-black' 
+                                    : 'text-[var(--text-secondary)] hover:text-white'
                                 )}
-                                style={formData.language === l.key ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
+                                style={formData.language === l.key ? { backgroundColor: currentTheme.color, boxShadow: `0 0 10px ${currentTheme.color}33` } : {}}
                               >
                                 {l.label}
                               </button>
                             ))}
                           </div>
                         </div>
+
                         {/* Theme switch */}
-                        <div className="space-y-4 border-b border-white/10 pb-8 mt-8">
+                        <div className="flex items-center justify-between border-b border-white/10 pb-6 mt-6">
                           <label className="text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
                             {isRTL ? 'المظهر' : 'APPEARANCE'}
                           </label>
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="flex bg-zinc-900/50 p-1 rounded-lg border border-white/5 shrink-0">
                             {[
                               { key: 'dark', label: isRTL ? 'ليلي' : 'DARK' },
                               { key: 'light', label: isRTL ? 'نهاري' : 'LIGHT' }
@@ -722,15 +723,15 @@ export default function SettingsPage() {
                                     setIsDarkMode(setDark)
                                   }}
                                   className={cn(
-                                    'py-2 sm:py-3.5 flex items-center justify-center gap-2 border font-space text-[10px] sm:text-xs font-black transition-all rounded-xl uppercase tracking-widest',
+                                    'px-4 py-1.5 flex items-center gap-1.5 font-space text-[10px] font-black transition-all rounded-md uppercase tracking-wider',
                                     isActive
-                                      ? 'text-black border-transparent shadow-lg font-black' 
-                                      : 'bg-[var(--input-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--card-border)]'
+                                      ? 'text-black font-black' 
+                                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                                   )}
-                                  style={isActive ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
+                                  style={isActive ? { backgroundColor: currentTheme.color, boxShadow: `0 0 10px ${currentTheme.color}33` } : {}}
                                 >
-                                  {theme.key === 'dark' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                                  {theme.label}
+                                  {theme.key === 'dark' ? <Moon className="w-3 h-3" /> : <Sun className="w-3 h-3" />}
+                                  <span>{theme.label}</span>
                                 </button>
                               )
                             })}
@@ -738,11 +739,18 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Master range volume slider */}
-                        <div className="space-y-4">
-                          <div className="flex justify-between items-center">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
+                          <div className="space-y-1">
                             <label className="text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
                               {isRTL ? 'مستوى الصوت العام' : 'MASTER SYSTEM VOLUME'}
                             </label>
+                            <p className="text-[10px] font-space text-white/40 tracking-wider">
+                              {isRTL ? 'ضبط مستوى صوت النظام.' : 'Adjust master system volume levels.'}
+                            </p>
+                          </div>
+                          
+                          <div className="flex items-center gap-3 w-full sm:w-auto sm:min-w-[240px]">
+                            {/* Commented out per user request:
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-space font-black" style={{ color: currentTheme.color }}>
                                 {Math.round(volume * 100)}%
@@ -758,14 +766,13 @@ export default function SettingsPage() {
                                 <Volume2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-3">
+                            */}
+
                             <button
                               type="button"
                               onClick={handleDecrementVolume}
                               disabled={isMuted || volume <= 0}
-                              className="w-8 h-8 rounded-lg flex items-center justify-center border font-bold text-base transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/80 disabled:opacity-30 cursor-pointer"
+                              className="w-7 h-7 rounded-lg flex items-center justify-center border font-bold text-sm transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/80 disabled:opacity-30 cursor-pointer"
                               style={{ borderColor: `${currentTheme.color}40`, color: currentTheme.color }}
                             >
                               &minus;
@@ -792,22 +799,26 @@ export default function SettingsPage() {
                               type="button"
                               onClick={handleIncrementVolume}
                               disabled={isMuted || volume >= 1}
-                              className="w-8 h-8 rounded-lg flex items-center justify-center border font-bold text-base transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/80 disabled:opacity-30 cursor-pointer"
+                              className="w-7 h-7 rounded-lg flex items-center justify-center border font-bold text-sm transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/80 disabled:opacity-30 cursor-pointer"
                               style={{ borderColor: `${currentTheme.color}40`, color: currentTheme.color }}
                             >
                               &#43;
                             </button>
+
+                            <span className="text-xs font-space font-black w-10 text-right" style={{ color: currentTheme.color }}>
+                              {Math.round(volume * 100)}%
+                            </span>
                           </div>
                         </div>
 
                         {/* Sliding custom mute toggle */}
-                        <div className="flex items-center justify-between border-t border-white/10 pt-6">
+                        <div className="flex items-center justify-between border-b border-white/10 pb-6">
                           <div className="space-y-1">
                             <p className="text-xs font-space text-white tracking-widest uppercase font-black">
                               {isRTL ? 'أصوات النظام' : 'System Sounds'}
                             </p>
                             <p className="text-[10px] font-space text-white/40 tracking-wider">
-                              {isRTL ? 'تمكين المؤثرات الصوتية التفاعلية والاستجابات اللمسية.' : 'Enable interactive UI sound effects and haptic responses.'}
+                              {isRTL ? 'تمكين المؤثرات الصوتية التفاعلية.' : 'Enable interactive UI sound effects.'}
                             </p>
                           </div>
                           
@@ -821,7 +832,7 @@ export default function SettingsPage() {
                               }
                             }}
                             className={cn(
-                              "w-14 h-7 rounded-full transition-all relative border flex items-center px-1.5 cursor-pointer",
+                              "w-12 h-6 rounded-full transition-all relative border flex items-center px-1 cursor-pointer",
                               !isMuted 
                                 ? "justify-end" 
                                 : "justify-start bg-white/[0.02] border-white/10"
@@ -830,18 +841,18 @@ export default function SettingsPage() {
                           >
                             <motion.div 
                               layout
-                              className="w-4 h-4 rounded-full shadow-lg transition-colors"
+                              className="w-3.5 h-3.5 rounded-full shadow-lg transition-colors"
                               style={!isMuted ? { backgroundColor: currentTheme.color } : { backgroundColor: 'rgba(255,255,255,0.2)' }}
                             />
                           </button>
                         </div>
 
                         {/* System Integration / Native App Section */}
-                        <div className="space-y-4 border-t border-white/10 pt-6">
+                        <div className="space-y-4 border-b border-white/10 pb-6">
                           <label className="text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
                             {isRTL ? 'دمج النظام' : 'SYSTEM INTEGRATION'}
                           </label>
-                          <div className="border border-white/5 bg-white/[0.01] p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div className="space-y-1">
                               <p className="text-xs font-space text-white tracking-widest uppercase font-black">
                                 {isRTL ? 'تطبيق Growth Hub الأصلي' : 'Growth Hub Native App'}
@@ -856,7 +867,7 @@ export default function SettingsPage() {
                               <button
                                 type="button"
                                 disabled
-                                className="px-6 py-3.5 bg-zinc-800/40 border border-zinc-700/50 text-zinc-500 font-bold font-space text-xs rounded-xl uppercase tracking-wider cursor-not-allowed opacity-50 whitespace-nowrap"
+                                className="px-5 py-2.5 bg-zinc-800/40 border border-zinc-700/50 text-zinc-500 font-bold font-space text-xs rounded-lg uppercase tracking-wider cursor-not-allowed opacity-50 whitespace-nowrap"
                               >
                                 {isRTL ? 'تم تثبيت النظام' : 'System Installed'}
                               </button>
@@ -867,14 +878,9 @@ export default function SettingsPage() {
                                   playBlip()
                                   window.dispatchEvent(new CustomEvent('open-pwa-install-modal'))
                                 }}
-                                className="px-6 py-3.5 border text-xs font-space font-black rounded-xl hover:bg-white/5 active:scale-95 transition-all duration-300 uppercase tracking-wider whitespace-nowrap text-black font-bold"
-                                style={{
-                                  backgroundColor: currentTheme.color,
-                                  borderColor: currentTheme.color,
-                                  boxShadow: `0 0 15px ${currentTheme.color}33`
-                                }}
+                                className="px-5 py-2.5 border border-teal-500/50 text-teal-400 hover:bg-teal-500/10 hover:shadow-[0_0_15px_rgba(20,184,166,0.2)] active:scale-95 transition-all duration-300 font-space font-black text-xs rounded-lg uppercase tracking-wider whitespace-nowrap text-center"
                               >
-                                {isRTL ? 'تثبيت التطبيق' : 'Install Growth Hub App'}
+                                {isRTL ? 'تثبيت التطبيق' : 'Install App'}
                               </button>
                             )}
                           </div>
@@ -907,26 +913,25 @@ export default function SettingsPage() {
               </AnimatePresence>
 
               {/* Symmetrical Settings panel action footer */}
-              <div className="pt-8 mt-8 border-t border-white/10 flex flex-col sm:flex-row gap-4 w-full">
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="flex-1 text-black py-4 font-space font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 rounded-xl cursor-pointer text-center font-bold"
-                  style={{ backgroundColor: currentTheme.color, boxShadow: `0 4px 20px ${currentTheme.color}20` }}
-                >
-                  {saving ? (isRTL ? 'جاري الحفظ...' : 'SAVING...') : t('save')}
-                </button>
-
+              <div className="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-zinc-800/50 w-full">
                 <button
                   type="button"
                   onClick={() => {
                     setIsLogoutModalOpen(true)
                     playBlip()
                   }}
-                  className="py-4 px-6 border border-white/10 hover:bg-white/5 text-white/60 hover:text-white transition-all font-space font-black text-xs uppercase tracking-widest rounded-xl text-center cursor-pointer"
+                  className="py-2.5 px-5 border border-red-900/30 text-red-400 hover:bg-red-950/20 transition-all font-space font-black text-xs uppercase tracking-widest rounded-lg text-center cursor-pointer"
                 >
                   {t('logout')}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="bg-teal-600 text-white hover:bg-teal-500 px-6 py-2.5 font-space font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 rounded-lg cursor-pointer text-center font-bold"
+                >
+                  {saving ? (isRTL ? 'جاري الحفظ...' : 'SAVING...') : t('save')}
                 </button>
               </div>
 
