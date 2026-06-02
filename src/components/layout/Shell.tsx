@@ -22,8 +22,8 @@ import PomodoroHUD from '@/components/ui/PomodoroHUD'
 import CoachPanel from '@/components/ui/CoachPanel'
 import OperatorGuide from '@/components/ui/OperatorGuide'
 import GlobalActionMenu from '@/components/ui/GlobalActionMenu'
-import AuthModal from '@/components/auth/AuthModal'
-import EntryGateModal from '@/components/auth/EntryGateModal'
+// import AuthModal from '@/components/auth/AuthModal'
+// import EntryGateModal from '@/components/auth/EntryGateModal'
 import LevelUpModal from '@/components/ui/LevelUpModal'
 import GlitchOverlay from '@/components/ui/GlitchOverlay'
 import CommandPalette from '@/components/ui/CommandPalette'
@@ -99,7 +99,7 @@ interface ShellProps {
 
 export default function Shell({ children, syncedMissions = [], onMissionsRefresh }: ShellProps) {
   // 1. ALL HOOKS AT THE TOP
-  const { isRTL, profile, calculateAccountability, lastAiMessage, t, currentTheme, isRankUpModalOpen, setIsRankUpModalOpen, isLoading } = useGrowth()
+  const { isRTL, profile, calculateAccountability, lastAiMessage, t, currentTheme, isRankUpModalOpen, setIsRankUpModalOpen, isLoading, showAuthModal, setShowAuthModal } = useGrowth()
   const pathname = usePathname()
   const router = useRouter()
   const { playNeuralLink, playBlip } = useSound()
@@ -116,6 +116,13 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   useEffect(() => {
     setIsMobileNavOpen(false)
   }, [pathname])
+
+  useEffect(() => {
+    if (showAuthModal) {
+      setShowAuthModal(false)
+      router.push('/auth/login')
+    }
+  }, [showAuthModal, router, setShowAuthModal])
 
   // System Bootloader Simulation Effect
   useEffect(() => {
@@ -183,7 +190,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
       const start = performance.now()
       try {
-        await fetch('/api/weather?ping=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
+        await fetch('/favicon.ico?ping=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
         const latency = performance.now() - start
         if (latency > 800) {
           setNetworkStatus('LAG')
@@ -1144,8 +1151,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         onOpenCoach={() => setCoachPanelOpen(true)}
         missions={syncedMissions}
       />
-      <AuthModal />
-      <EntryGateModal />
+      {/* <AuthModal /> */}
+      {/* <EntryGateModal /> */}
       <Tutorial />
       <GlobalCreateGoalModal />
 

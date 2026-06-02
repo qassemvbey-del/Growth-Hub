@@ -39,8 +39,17 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (mounted) {
-      fetchDashboardMissions()
-      fetchWeeklyTimeLogs()
+      const checkAuth = async () => {
+        const { data: { user } } = await supabase.auth.getUser()
+        const entryPathSelected = localStorage.getItem('entry_path_selected') === 'true'
+        if (!user && !entryPathSelected) {
+          router.push('/auth/login')
+          return
+        }
+        fetchDashboardMissions()
+        fetchWeeklyTimeLogs()
+      }
+      checkAuth()
     }
   }, [mounted])
 

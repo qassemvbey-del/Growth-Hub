@@ -40,9 +40,35 @@ export default function SettingsPage() {
   const [surveyRating, setSurveyRating] = useState<number>(0)
   const [surveyAlternative, setSurveyAlternative] = useState<string>('')
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true)
+  const [isPwaInstalled, setIsPwaInstalled] = useState<boolean>(false)
+  const [pwaPromptAvailable, setPwaPromptAvailable] = useState<boolean>(false)
 
   useEffect(() => {
     setIsDarkMode(document.documentElement.classList.contains('dark'))
+  }, [])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsPwaInstalled(
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true
+      )
+      setPwaPromptAvailable(!!(window as any).deferredPWAInstallPrompt)
+    }
+
+    const handlePwaPrompt = () => setPwaPromptAvailable(true)
+    const handleAppInstalled = () => {
+      setIsPwaInstalled(true)
+      setPwaPromptAvailable(false)
+    }
+
+    window.addEventListener('pwa-prompt-available', handlePwaPrompt)
+    window.addEventListener('appinstalled', handleAppInstalled)
+
+    return () => {
+      window.removeEventListener('pwa-prompt-available', handlePwaPrompt)
+      window.removeEventListener('appinstalled', handleAppInstalled)
+    }
   }, [])
 
   // Dynamic AI Name Header calculation (No hardcoded "COACH" word)
@@ -808,6 +834,50 @@ export default function SettingsPage() {
                               style={!isMuted ? { backgroundColor: currentTheme.color } : { backgroundColor: 'rgba(255,255,255,0.2)' }}
                             />
                           </button>
+                        </div>
+
+                        {/* System Integration / Native App Section */}
+                        <div className="space-y-4 border-t border-white/10 pt-6">
+                          <label className="text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
+                            {isRTL ? 'دمج النظام' : 'SYSTEM INTEGRATION'}
+                          </label>
+                          <div className="border border-white/5 bg-white/[0.01] p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div className="space-y-1">
+                              <p className="text-xs font-space text-white tracking-widest uppercase font-black">
+                                {isRTL ? 'تطبيق Growth Hub الأصلي' : 'Growth Hub Native App'}
+                              </p>
+                              <p className="text-[10px] font-space text-white/40 tracking-wider">
+                                {isRTL 
+                                  ? 'قم بتثبيت التطبيق على شاشتك الرئيسية للحصول على أداء أسرع وإشعارات النظام.' 
+                                  : 'Install the application on your home screen for faster performance and system notifications.'}
+                              </p>
+                            </div>
+                            {isPwaInstalled ? (
+                              <button
+                                type="button"
+                                disabled
+                                className="px-6 py-3.5 bg-zinc-800/40 border border-zinc-700/50 text-zinc-500 font-bold font-space text-xs rounded-xl uppercase tracking-wider cursor-not-allowed opacity-50 whitespace-nowrap"
+                              >
+                                {isRTL ? 'تم تثبيت النظام' : 'System Installed'}
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  playBlip()
+                                  window.dispatchEvent(new CustomEvent('open-pwa-install-modal'))
+                                }}
+                                className="px-6 py-3.5 border text-xs font-space font-black rounded-xl hover:bg-white/5 active:scale-95 transition-all duration-300 uppercase tracking-wider whitespace-nowrap text-black font-bold"
+                                style={{
+                                  backgroundColor: currentTheme.color,
+                                  borderColor: currentTheme.color,
+                                  boxShadow: `0 0 15px ${currentTheme.color}33`
+                                }}
+                              >
+                                {isRTL ? 'تثبيت التطبيق' : 'Install Growth Hub App'}
+                              </button>
+                            )}
+                          </div>
                         </div>
 
                         {/* Dynamic Sound Spatializer test button commented out for sleek interface simplification:
