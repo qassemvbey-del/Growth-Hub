@@ -51,3 +51,20 @@ create policy "Users can insert tasks into their own cups" on tasks for insert w
 create policy "Users can update tasks of their own cups" on tasks for update using (
   exists (select 1 from cups where cups.id = tasks.cup_id and cups.user_id = auth.uid())
 );
+
+-- Task Progress table
+create table if not exists task_progress (
+  task_id text not null,
+  user_id uuid references auth.users(id) not null,
+  current_time integer default 0,
+  duration integer default 0,
+  updated_at timestamp with time zone default now(),
+  primary key (task_id, user_id)
+);
+
+-- Enable RLS for task_progress
+alter table task_progress enable row level security;
+
+-- Policies for task_progress
+create policy "Users manage own progress" on task_progress
+  for all using (auth.uid() = user_id);
