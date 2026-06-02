@@ -32,7 +32,8 @@ interface CoachUserData {
 export async function chatWithCoach(prompt: string, userData: CoachUserData, language: string) {
   if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
     console.error('COACH_UPLINK_ERROR: NEXT_PUBLIC_GEMINI_API_KEY is missing from environment')
-    return "CONNECTION ERROR // NO_API_KEY_FOUND"
+    // return "CONNECTION ERROR // NO_API_KEY_FOUND"
+    return "I couldn't connect to the server because the API key is missing. Please check your setup."
   }
   const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' })
 
@@ -139,7 +140,8 @@ export async function chatWithCoach(prompt: string, userData: CoachUserData, lan
     return response.text()
   } catch (error: any) {
     console.error('COACH_UPLINK_ERROR:', error)
-    return `CONNECTION ERROR // ${error.message?.toUpperCase() || 'RETRY_SEQUENCE'}`
+    // return `CONNECTION ERROR // ${error.message?.toUpperCase() || 'RETRY_SEQUENCE'}`
+    return `I'm having trouble connecting to the service. Please try again in a moment. (Error: ${error.message || 'unknown'})`
   }
 }
 

@@ -387,6 +387,7 @@ Next step: Visit the Wins page to view your golden cup.`
       }
 
       const title = lang === 'ar' ? `📊 تقرير الأداء الأسبوعي` : `📊 Weekly Review`
+      /*
       const contentText = lang === 'ar' ? `📊 تقرير الأداء الأسبوعي // WEEKLY REVIEW
 
 📅 مراجعة الأسبوع المنصرم:
@@ -413,6 +414,34 @@ ${activeMissionsTextEn || '- No active goals currently.'}
 - Suggested Directive: ${criticalGoalTitle ? `Prioritize completing urgent target: "${criticalGoalTitle}"` : `Maintain current momentum and optimize slot utilization.`}
 
 💡 RECOMMENDATION:
+${recommendationsEn}`
+      */
+      const contentText = lang === 'ar' ? `📊 تقرير الأداء الأسبوعي
+
+📅 مراجعة الأسبوع المنصرم:
+- المهام المكتملة: [${completedCount}] مهمة
+- إجمالي نقاط الخبرة المكتسبة: +[${totalWeeklyXp}] نقطة
+- حالة الأهداف النشطة:
+${activeMissionsTextAr || '- لا توجد أهداف نشطة حالياً.'}
+
+🚀 تطلعات الأسبوع المقبل:
+- سعة التركيز الحالية: ${usedSlots}/9 وحدات تركيز.
+- التوجيه المقترح لزيادة الإنتاجية: ${criticalGoalTitle ? `التركيز الفوري على إتمام "${criticalGoalTitle}"` : `الحفاظ على معدل الإنتاجية الحالي وتعزيز تقدمك`}
+
+💡 التوصية المخصصة:
+${recommendationsAr}` : `📊 Weekly Intelligence Report
+
+📅 Last Week:
+- Tasks Completed: [${completedCount}] tasks
+- XP Gained: +[${totalWeeklyXp}] XP
+- Active Goals Status:
+${activeMissionsTextEn || '- No active goals currently.'}
+
+🚀 Next Week:
+- Current Station Capacity: ${usedSlots}/9 focus slots.
+- Suggested Directive: ${criticalGoalTitle ? `Prioritize completing urgent target: "${criticalGoalTitle}"` : `Maintain current momentum and optimize slot utilization.`}
+
+💡 Recommendation:
 ${recommendationsEn}`
 
       const { data: newReport } = await supabase.from('inbox_reports').insert({

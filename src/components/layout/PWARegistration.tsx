@@ -127,10 +127,12 @@ export default function PWARegistration() {
                 <h3
                   className="text-sm font-black font-space uppercase tracking-wider leading-relaxed text-teal-400 drop-shadow-[0_0_8px_rgba(20,184,166,0.3)]"
                 >
-                  {isRTL ? 'تثبيت التطبيق الأصلي' : 'INSTALL NATIVE APP'}
+                  {/* {isRTL ? 'تثبيت التطبيق الأصلي' : 'INSTALL NATIVE APP'} */}
+                  {isRTL ? 'تثبيت التطبيق الأصلي' : 'Install Native App'}
                 </h3>
                 <p className="text-[8px] font-space text-zinc-400 dark:text-white/20 tracking-[0.4em] uppercase font-black mt-1">
-                  {isRTL ? 'منصة التطوير والنمو' : 'GROWTH HUB // SYSTEM INT'}
+                  {/* {isRTL ? 'منصة التطوير والنمو' : 'GROWTH HUB // SYSTEM INT'} */}
+                  {isRTL ? 'منصة التطوير والنمو' : 'Growth Hub'}
                 </p>
               </div>
             </div>
@@ -148,14 +150,16 @@ export default function PWARegistration() {
                 onClick={handleDismissClick}
                 className="bg-transparent text-zinc-400 border border-zinc-700 hover:text-white hover:bg-zinc-800 px-5 py-2 font-space font-black text-[10px] tracking-widest uppercase transition-all rounded-[3px]"
               >
-                {isRTL ? 'إلغاء' : 'CANCEL'}
+                {/* {isRTL ? 'إلغاء' : 'CANCEL'} */}
+                {isRTL ? 'إلغاء' : 'Cancel'}
               </button>
               
               <button
                 onClick={handleInstallClick}
                 className="bg-teal-500 hover:bg-teal-400 text-black px-5 py-2 font-space font-black text-[10px] tracking-widest uppercase transition-all rounded-[3px] border border-transparent hover:drop-shadow-[0_0_12px_rgba(20,184,166,0.8)] shadow-[0_0_15px_rgba(20,184,166,0.3)]"
               >
-                {isRTL ? 'تثبيت التطبيق' : 'INSTALL APP'}
+                {/* {isRTL ? 'تثبيت التطبيق' : 'INSTALL APP'} */}
+                {isRTL ? 'تثبيت التطبيق' : 'Install App'}
               </button>
             </div>
           </div>

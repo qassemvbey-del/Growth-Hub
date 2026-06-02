@@ -79,7 +79,8 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
       const origin = window.location.origin
       const isFocus = sessionType === 'FOCUS'
-      const title = isFocus ? "🏆 GOAL ACCOMPLISHED" : "☕ BREAK OVER // RESUME FOCUS"
+      // const title = isFocus ? "🏆 GOAL ACCOMPLISHED" : "☕ BREAK OVER // RESUME FOCUS"
+      const title = isFocus ? "🏆 Goal Accomplished!" : "☕ Break over. Ready to resume focus?"
       const options: any = {
         body: isFocus 
           ? `Completed focus session for task: "${taskName || 'Active Task'}".`
@@ -216,12 +217,14 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     triggerCompletionNotification()
     playSuccess()
     if (sessionType === 'FOCUS') {
-      showToast('FOCUS_SESSION_COMPLETE // TAKE A BREAK', 'success')
+      // showToast('FOCUS_SESSION_COMPLETE // TAKE A BREAK', 'success')
+      showToast('Focus session complete. Take a break!', 'success')
       saveTimeLog(focusDuration * 60, new Date().toISOString())
       setSessionType('BREAK')
       setTimeRemaining(breakDuration * 60)
     } else {
-      showToast('BREAK_COMPLETE // RESUME?', 'info')
+      // showToast('BREAK_COMPLETE // RESUME?', 'info')
+      showToast('Break complete. Ready to resume?', 'info')
       setSessionType('FOCUS')
       setTimeRemaining(focusDuration * 60)
       setIsActive(false) // Wait for user to resume

@@ -105,7 +105,8 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
     const { data, error: insertError } = await supabase.from('tasks').insert(payload).select()
 
     if (insertError) {
-      setError(`DATABASE_ERROR // ${insertError.message.toUpperCase()}`)
+      // setError(`DATABASE_ERROR // ${insertError.message.toUpperCase()}`)
+      setError(`Database Error - ${insertError.message}`)
       setDeploying(false)
     } else {
       onTasksAdded(data || [])
@@ -153,7 +154,8 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
               className="font-space font-black uppercase tracking-widest text-sm"
               style={{ color: themeColor }}
             >
-              {isRTL ? 'الاستيراد الذكي' : 'SMART_IMPORT'}
+              {/* {isRTL ? 'الاستيراد الذكي' : 'SMART_IMPORT'} */}
+              {isRTL ? 'الاستيراد الذكي' : 'Smart Import'}
             </h2>
             {phase === 'PREVIEW' && (
               <motion.span
@@ -162,7 +164,8 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                 className="text-[9px] font-space font-black tracking-widest uppercase px-2 py-0.5 rounded-full"
                 style={{ backgroundColor: `${themeColor}22`, color: themeColor }}
               >
-                {isRTL ? 'معاينة' : 'PREVIEW'}
+                {/* {isRTL ? 'معاينة' : 'PREVIEW'} */}
+                {isRTL ? 'معاينة' : 'Preview'}
               </motion.span>
             )}
           </div>
@@ -209,11 +212,12 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                     onFocus={e => { e.currentTarget.style.borderColor = `${themeColor}70` }}
                     onBlur={e => { e.currentTarget.style.borderColor = error ? '#FF0055' : `${themeColor}30` }}
                   />
-                  {pastedText.length > 0 && (
-                    <span className="absolute bottom-2 right-3 text-[9px] font-space text-[var(--text-secondary)]/40 font-black tracking-widest">
-                      {pastedText.length.toLocaleString()} {isRTL ? 'حرف' : 'CHARS'}
-                    </span>
-                  )}
+                    {pastedText.length > 0 && (
+                      <span className="absolute bottom-2 right-3 text-[9px] font-space text-[var(--text-secondary)]/40 font-black tracking-widest">
+                        {/* {pastedText.length.toLocaleString()} {isRTL ? 'حرف' : 'CHARS'} */}
+                        {pastedText.length.toLocaleString()} {isRTL ? 'حرف' : 'Chars'}
+                      </span>
+                    )}
                 </div>
 
                 {/* Error */}
@@ -249,8 +253,10 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                       <Sparkles className="w-4 h-4" />
                     )}
                     {analyzing
-                      ? (isRTL ? 'جاري التحليل...' : 'ANALYZING...')
-                      : (isRTL ? 'استخراج المهام ←' : 'FIND TASKS →')}
+                      // ? (isRTL ? 'جاري التحليل...' : 'ANALYZING...')
+                      // : (isRTL ? 'استخراج المهام ←' : 'FIND TASKS →')}
+                      ? (isRTL ? 'جاري التحليل...' : 'Analyzing...')
+                      : (isRTL ? 'استخراج المهام ←' : 'Find Tasks →')}
                   </button>
                 </div>
               </motion.div>
@@ -273,10 +279,12 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                   <HelpCircle />
                   <div>
                     <p className="text-[13px] font-space font-black uppercase tracking-widest" style={{ color: themeColor }}>
-                      {isRTL ? `تم استخراج ${extractedTasks.length} مهمة بنجاح` : `✓ FOUND ${extractedTasks.length} TASKS`}
+                      {/* {isRTL ? `تم استخراج ${extractedTasks.length} مهمة بنجاح` : `✓ FOUND ${extractedTasks.length} TASKS`} */}
+                      {isRTL ? `تم استخراج ${extractedTasks.length} مهمة بنجاح` : `✓ Found ${extractedTasks.length} Tasks`}
                     </p>
                     <p className="text-[9px] font-space text-[var(--text-secondary)] tracking-widest uppercase">
-                      {isRTL ? 'يرجى مراجعة القائمة وتأكيد الإضافة' : 'REVIEW AND CONFIRM TO ADD'}
+                      {/* {isRTL ? 'يرجى مراجعة القائمة وتأكيد الإضافة' : 'REVIEW AND CONFIRM TO ADD'} */}
+                      {isRTL ? 'يرجى مراجعة القائمة وتأكيد الإضافة' : 'Review and confirm to add'}
                     </p>
                   </div>
                 </div>
@@ -330,7 +338,8 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                     className="flex items-center gap-2 text-[10px] font-space font-black uppercase tracking-widest text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                   >
                     <ArrowLeft className="text-sm w-3.5 h-3.5" />
-                    {isRTL ? 'رجوع' : 'BACK'}
+                    {/* {isRTL ? 'رجوع' : 'BACK'} */}
+                    {isRTL ? 'رجوع' : 'Back'}
                   </button>
 
                   <div className="flex items-center gap-3">
@@ -338,7 +347,8 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                       onClick={handleClose}
                       className="py-2.5 px-4 font-space font-black text-[10px] uppercase tracking-widest text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors rounded-xl cursor-pointer"
                     >
-                      {isRTL ? 'إلغاء' : 'CANCEL'}
+                      {/* {isRTL ? 'إلغاء' : 'CANCEL'} */}
+                      {isRTL ? 'إلغاء' : 'Cancel'}
                     </button>
                     <button
                       onClick={handleDeploy}
@@ -356,8 +366,10 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
                         <Plus className="w-4 h-4" />
                       )}
                       {deploying
-                        ? (isRTL ? 'جاري الإضافة...' : 'ADDING...')
-                        : (isRTL ? 'إضافة المهام ✓' : 'ADD TASKS ✓')}
+                        // ? (isRTL ? 'جاري الإضافة...' : 'ADDING...')
+                        // : (isRTL ? 'إضافة المهام ✓' : 'ADD TASKS ✓')}
+                        ? (isRTL ? 'جاري الإضافة...' : 'Adding...')
+                        : (isRTL ? 'إضافة المهام ✓' : 'Add Tasks ✓')}
                     </button>
                   </div>
                 </div>

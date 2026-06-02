@@ -560,11 +560,13 @@ export default function MissionDetailPage() {
       
       localStorage.setItem(`cleaned_${id}`, 'true')
       setIsCleaned(true)
-      showToast(isRTL ? 'تم تنظيف العناوين بنجاح' : 'TITLES_CLEANED // OPTIMIZED', 'success')
+      // showToast(isRTL ? 'تم تنظيف العناوين بنجاح' : 'TITLES_CLEANED // OPTIMIZED', 'success')
+      showToast(isRTL ? 'تم تنظيف العناوين بنجاح' : 'Titles cleaned and optimized', 'success')
       playSuccess()
     } catch (err) {
       console.error(err)
-      showToast(isRTL ? 'فشل تنظيف العناوين' : 'CLEAN_ERROR', 'warning')
+      // showToast(isRTL ? 'فشل تنظيف العناوين' : 'CLEAN_ERROR', 'warning')
+      showToast(isRTL ? 'فشل تنظيف العناوين' : 'Failed to clean titles', 'warning')
     } finally {
       setIsCleaning(false)
     }
@@ -910,7 +912,8 @@ export default function MissionDetailPage() {
       })
     } else {
       console.error("Error updating task backend:", error)
-      showToast(isRTL ? 'فشل تحديث البيانات في قاعدة البيانات' : 'DATABASE_UPDATE_ERROR', 'warning')
+      // showToast(isRTL ? 'فشل تحديث البيانات في قاعدة البيانات' : 'DATABASE_UPDATE_ERROR', 'warning')
+      showToast(isRTL ? 'فشل تحديث البيانات في قاعدة البيانات' : 'Failed to update database', 'warning')
       playError()
     }
   }
@@ -960,7 +963,8 @@ export default function MissionDetailPage() {
           t.id === taskId ? { ...t, is_completed: currentStatus } : t
         )
       }))
-      showToast(isRTL ? 'فشل تحديث البيانات في قاعدة البيانات' : 'DATABASE_UPDATE_ERROR', 'warning')
+      // showToast(isRTL ? 'فشل تحديث البيانات في قاعدة البيانات' : 'DATABASE_UPDATE_ERROR', 'warning')
+      showToast(isRTL ? 'فشل تحديث البيانات في قاعدة البيانات' : 'Failed to update database', 'warning')
       playError()
       return
     }
@@ -1123,7 +1127,8 @@ export default function MissionDetailPage() {
       }
     } else {
       console.error("Error moving task:", error)
-      showToast(isRTL ? 'فشل نقل المهمة' : 'TASK_MOVE_ERROR', 'warning')
+      // showToast(isRTL ? 'فشل نقل المهمة' : 'TASK_MOVE_ERROR', 'warning')
+      showToast(isRTL ? 'فشل نقل المهمة' : 'Failed to move task', 'warning')
       playError()
     }
   }
@@ -1598,7 +1603,7 @@ const { progress, isInRedZone } = useMemo(() => {
                       boxShadow: `0 0 15px ${missionColor}44`
                    } : {}}
                 >
-                   <span>[ IMPORT DATA ]</span>
+                   <span>Import</span>
                    <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-200", showImportDropdown && "rotate-180")} />
                 </button>
 
@@ -1622,14 +1627,14 @@ const { progress, isInRedZone } = useMemo(() => {
                           className="w-full text-left px-3.5 py-2.5 text-[9px] font-black tracking-wider uppercase text-zinc-400 hover:text-white hover:bg-white/[0.03] rounded-md transition-colors flex items-center gap-2 cursor-pointer"
                         >
                           <ListPlus className="w-3.5 h-3.5" />
-                          {isRTL ? 'استيراد قائمة تشغيل' : 'IMPORT PLAYLIST'}
+                          {isRTL ? 'استيراد قائمة تشغيل' : 'Import Playlist'}
                         </button>
                         <button
                           onClick={() => { playBlip(); setShowSmartImportModal(true); setShowImportDropdown(false); }}
                           className="w-full text-left px-3.5 py-2.5 text-[9px] font-black tracking-wider uppercase text-zinc-400 hover:text-white hover:bg-white/[0.03] rounded-md transition-colors flex items-center gap-2 cursor-pointer"
                         >
                           <ClipboardIcon className="w-3.5 h-3.5" />
-                          {isRTL ? 'استيراد ذكي' : 'SMART IMPORT'}
+                          {isRTL ? 'استيراد ذكي' : 'Smart Import'}
                         </button>
                       </motion.div>
                     </>
@@ -3012,8 +3017,11 @@ const { progress, isInRedZone } = useMemo(() => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-emerald-500"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                 </span>
-                <span className="font-mono text-[8px] tracking-[0.25em] text-emerald-400 uppercase">
+                {/* <span className="font-mono text-[8px] tracking-[0.25em] text-emerald-400 uppercase">
                   SYSTEMS_ACTIVE // SHARE_READY
+                </span> */}
+                <span className="font-mono text-[8px] tracking-[0.25em] text-emerald-400">
+                  Ready to Share
                 </span>
               </div>
             </motion.div>

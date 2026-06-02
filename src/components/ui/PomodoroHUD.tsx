@@ -98,8 +98,11 @@ export default function PomodoroHUD() {
                       className="w-1.5 h-1.5 rounded-full"
                       style={{ backgroundColor: sessionType === 'FOCUS' ? '#F97316' : '#00E5FF' }}
                     />
-                    <span className="text-[10px] font-black tracking-[0.2em] uppercase" style={{ color: sessionType === 'FOCUS' ? '#F97316' : '#00E5FF' }}>
+                    {/* <span className="text-[10px] font-black tracking-[0.2em] uppercase" style={{ color: sessionType === 'FOCUS' ? '#F97316' : '#00E5FF' }}>
                       {sessionType === 'FOCUS' ? (isRTL ? '⚡ وضع التركيز نشط' : '⚡ FOCUS_ACTIVE') : (isRTL ? '☕ فترة الاستراحة' : '☕ RECOVERY')}
+                    </span> */}
+                    <span className="text-[10px] font-black tracking-[0.2em]" style={{ color: sessionType === 'FOCUS' ? '#F97316' : '#00E5FF' }}>
+                      {sessionType === 'FOCUS' ? (isRTL ? '⚡ وضع التركيز نشط' : '⚡ Focus Active') : (isRTL ? '☕ فترة الاستراحة' : '☕ Recovery')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-zinc-400">
@@ -126,11 +129,13 @@ export default function PomodoroHUD() {
                   {showSettings ? (
                     <div className="space-y-4 py-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-[12px] font-black text-white tracking-widest uppercase">{isRTL ? 'إعدادات التايمر' : 'TIMER_CONFIG'}</span>
+                        {/* <span className="text-[12px] font-black text-white tracking-widest uppercase">{isRTL ? 'إعدادات التايمر' : 'TIMER_CONFIG'}</span> */}
+                        <span className="text-[12px] font-black text-white tracking-widest">{isRTL ? 'إعدادات التايمر' : 'Timer Config'}</span>
                       </div>
                       <div className="space-y-3">
                          <div className="space-y-1">
-                            <label className={cn("font-black uppercase tracking-widest block text-[8px] text-zinc-400")}>{isRTL ? 'مدة التركيز (دقيقة)' : 'FOCUS_DURATION (MIN)'}</label>
+                            {/* <label className={cn("font-black uppercase tracking-widest block text-[8px] text-zinc-400")}>{isRTL ? 'مدة التركيز (دقيقة)' : 'FOCUS_DURATION (MIN)'}</label> */}
+                            <label className={cn("font-black tracking-widest block text-[8px] text-zinc-400")}>{isRTL ? 'مدة التركيز (دقيقة)' : 'Focus Duration (Min)'}</label>
                             <input 
                               type="number"
                               min="1"
@@ -141,7 +146,8 @@ export default function PomodoroHUD() {
                             />
                          </div>
                          <div className="space-y-1">
-                            <label className={cn("font-black uppercase tracking-widest block text-[8px] text-zinc-400")}>{isRTL ? 'مدة الراحة (دقيقة)' : 'BREAK_DURATION (MIN)'}</label>
+                            {/* <label className={cn("font-black uppercase tracking-widest block text-[8px] text-zinc-400")}>{isRTL ? 'مدة الراحة (دقيقة)' : 'BREAK_DURATION (MIN)'}</label> */}
+                            <label className={cn("font-black tracking-widest block text-[8px] text-zinc-400")}>{isRTL ? 'مدة الراحة (دقيقة)' : 'Break Duration (Min)'}</label>
                             <input 
                               type="number"
                               min="1"
@@ -157,14 +163,17 @@ export default function PomodoroHUD() {
                         className="w-full py-2 font-space font-black text-[11px] uppercase tracking-widest text-zinc-900 rounded transition-all hover:brightness-110 cursor-pointer"
                         style={{ backgroundColor: '#F97316' }}
                       >
-                        {isRTL ? 'حفظ الإعدادات' : 'SAVE_CONFIG'}
+                        {/* {isRTL ? 'حفظ الإعدادات' : 'SAVE_CONFIG'} */}
+                        {isRTL ? 'حفظ الإعدادات' : 'Save Config'}
                       </button>
                     </div>
                   ) : (
                     <>
                       <div className="space-y-1">
-                        <p className={cn("font-black uppercase tracking-widest block text-[8px] text-zinc-400")}>{isRTL ? 'المهمة الحالية:' : 'CURRENT_OBJECTIVE:'}</p>
-                        <p className="text-[11px] font-bold text-white uppercase truncate">{taskName || (isRTL ? 'بدون عنوان' : 'UNTITLED_PROTOCOL')}</p>
+                        {/* <p className={cn("font-black uppercase tracking-widest block text-[8px] text-zinc-400")}>{isRTL ? 'المهمة الحالية:' : 'CURRENT_OBJECTIVE:'}</p>
+                        <p className="text-[11px] font-bold text-white uppercase truncate">{taskName || (isRTL ? 'بدون عنوان' : 'UNTITLED_PROTOCOL')}</p> */}
+                        <p className={cn("font-black tracking-widest block text-[8px] text-zinc-400")}>{isRTL ? 'المهمة الحالية:' : 'Current Objective:'}</p>
+                        <p className="text-[11px] font-bold text-white truncate">{taskName || (isRTL ? 'بدون عنوان' : 'Untitled Objective')}</p>
                       </div>
 
                       <div className="flex flex-col items-center justify-center py-2">
@@ -195,7 +204,8 @@ export default function PomodoroHUD() {
                             className="flex-1 py-2 text-zinc-900 font-space font-black text-[12px] uppercase tracking-[0.2em] rounded transition-all hover:brightness-110 cursor-pointer"
                             style={{ backgroundColor: '#F97316', boxShadow: `0 0 15px rgba(249, 115, 22, 0.4)` }}
                           >
-                            {isRTL ? 'ابدأ التركيز' : 'START'}
+                            {/* {isRTL ? 'ابدأ التركيز' : 'START'} */}
+                            {isRTL ? 'ابدأ التركيز' : 'Start'}
                           </button>
                         ) : isPaused ? (
                           <button 
@@ -203,21 +213,24 @@ export default function PomodoroHUD() {
                             className="flex-1 py-1.5 text-zinc-900 font-space font-black text-[9px] uppercase tracking-widest rounded transition-all hover:brightness-110 cursor-pointer"
                             style={{ backgroundColor: '#F97316' }}
                           >
-                            RESUME
+                            {/* RESUME */}
+                            Resume
                           </button>
                         ) : (
                           <button 
                             onClick={pause}
                             className="flex-1 py-1.5 bg-zinc-900 border border-orange-500/20 text-white font-space font-black text-[9px] uppercase tracking-widest rounded transition-all hover:bg-zinc-800 cursor-pointer"
                           >
-                            PAUSE
+                            {/* PAUSE */}
+                            Pause
                           </button>
                         )}
                         <button 
                           onClick={stop}
                           className="px-3 py-1.5 bg-[#FF0055]/10 text-[#FF0055] border border-[#FF0055]/30 font-space font-black text-[11px] uppercase tracking-widest hover:bg-[#FF0055]/20 rounded transition-all cursor-pointer"
                         >
-                          {isActive ? (isRTL ? 'إيقاف' : 'STOP') : (isRTL ? 'إغلاق' : 'CLOSE')}
+                          {/* {isActive ? (isRTL ? 'إيقاف' : 'STOP') : (isRTL ? 'إغلاق' : 'CLOSE')} */}
+                          {isActive ? (isRTL ? 'إيقاف' : 'Stop') : (isRTL ? 'إغلاق' : 'Close')}
                         </button>
                       </div>
                     </>
@@ -252,7 +265,8 @@ export default function PomodoroHUD() {
                 <div className="flex items-center gap-3 text-[#FF0055]">
                   <AlertTriangle className="text-3xl animate-pulse w-8 h-8" />
                   <h3 className="text-lg font-black tracking-widest uppercase font-space">
-                    {isRTL ? 'تحذير: تشتيت التركيز' : 'WARNING: CONTEXT SWITCHING'}
+                    {/* {isRTL ? 'تحذير: تشتيت التركيز' : 'WARNING: CONTEXT SWITCHING'} */}
+                    {isRTL ? 'تحذير: تشتيت التركيز' : 'Warning: Context Switching'}
                   </h3>
                 </div>
 
@@ -270,7 +284,8 @@ export default function PomodoroHUD() {
                   {pendingSwitchTask && (
                     <div className="p-3 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-sm space-y-1">
                       <p className="text-[9px] uppercase tracking-widest text-[var(--text-secondary)]">
-                        {isRTL ? 'المهمة البديلة المقترحة:' : 'TARGET OBJECTIVE:'}
+                        {/* {isRTL ? 'المهمة البديلة المقترحة:' : 'TARGET OBJECTIVE:'} */}
+                        {isRTL ? 'المهمة البديلة المقترحة:' : 'Target Objective:'}
                       </p>
                       <p className="font-black text-sm uppercase text-[var(--text-primary)]">
                         {pendingSwitchTask.name}
@@ -284,14 +299,16 @@ export default function PomodoroHUD() {
                     onClick={confirmSwitch}
                     className="flex-1 py-2.5 bg-[#FF0055]/10 text-[#FF0055] border border-[#FF0055]/30 hover:bg-[#FF0055]/20 font-space font-black text-xs uppercase tracking-widest transition-all pomodoro-btn"
                   >
-                    {isRTL ? 'استبدال المهمة' : 'FORCE SWAP'}
+                    {/* {isRTL ? 'استبدال المهمة' : 'FORCE SWAP'} */}
+                    {isRTL ? 'استبدال المهمة' : 'Force Swap'}
                   </button>
                   <button
                     onClick={cancelSwitch}
                     className="flex-1 py-2.5 text-zinc-900 font-space font-black text-xs uppercase tracking-widest transition-all pomodoro-btn"
                     style={{ backgroundColor: currentTheme.color }}
                   >
-                    {isRTL ? 'الاستمرار بالتركيز' : 'KEEP FOCUSING'}
+                    {/* {isRTL ? 'الاستمرار بالتركيز' : 'KEEP FOCUSING'} */}
+                    {isRTL ? 'الاستمرار بالتركيز' : 'Keep Focusing'}
                   </button>
                 </div>
               </div>

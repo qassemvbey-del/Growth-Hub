@@ -106,11 +106,14 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
             {/* Header / Meta */}
             <div className="flex justify-between items-end border-b border-zinc-200 dark:border-white/5 pb-4">
               <div>
-                <p className="text-[10px] text-zinc-500 dark:text-white/30 uppercase tracking-[0.3em] font-black">DOCUMENT_TYPE</p>
-                <p className="text-xs font-black uppercase" style={{ color: themeColor }}>{report.type.replace(/_/g, ' // ')}</p>
+                {/* <p className="text-[10px] text-zinc-500 dark:text-white/30 uppercase tracking-[0.3em] font-black">DOCUMENT_TYPE</p>
+                <p className="text-xs font-black uppercase" style={{ color: themeColor }}>{report.type.replace(/_/g, ' // ')}</p> */}
+                <p className="text-[10px] text-zinc-500 dark:text-white/30 tracking-[0.3em] font-black">Document Type</p>
+                <p className="text-xs font-black" style={{ color: themeColor }}>{report.type.replace(/_/g, ' - ')}</p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] text-zinc-500 dark:text-white/30 uppercase tracking-[0.3em] font-black">TIMESTAMP</p>
+                {/* <p className="text-[10px] text-zinc-500 dark:text-white/30 uppercase tracking-[0.3em] font-black">TIMESTAMP</p> */}
+                <p className="text-[10px] text-zinc-500 dark:text-white/30 tracking-[0.3em] font-black">Timestamp</p>
                 <p className="text-xs font-black text-zinc-800 dark:text-white/80">{new Date(report.created_at).toLocaleString()}</p>
               </div>
             </div>
@@ -129,11 +132,13 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="py-2.5 px-4 bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl">
-                      <p className="text-[9px] font-black tracking-widest uppercase opacity-40 mb-1">TOTAL_XP</p>
+                      {/* <p className="text-[9px] font-black tracking-widest uppercase opacity-40 mb-1">TOTAL_XP</p> */}
+                      <p className="text-[9px] font-black tracking-widest opacity-40 mb-1">Total XP</p>
                       <p className="text-2xl font-black" style={{ color: themeColor }}>{report.content.total_xp}</p>
                     </div>
                     <div className="py-2.5 px-4 bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl">
-                      <p className="text-[9px] font-black tracking-widest uppercase opacity-40 mb-1">PROGRESS</p>
+                      {/* <p className="text-[9px] font-black tracking-widest uppercase opacity-40 mb-1">PROGRESS</p> */}
+                      <p className="text-[9px] font-black tracking-widest opacity-40 mb-1">Progress</p>
                       <p className="text-2xl font-black text-cyan-400">{report.content.overall_progress}%</p>
                     </div>
                   </div>
@@ -155,7 +160,8 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                     className="w-full h-11 text-zinc-950 font-black text-xs uppercase tracking-widest transition-all duration-300 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] border border-cyan-400 bg-cyan-500 hover:bg-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]"
                   >
                     <Zap className="text-base w-4 h-4 fill-current text-zinc-950" />
-                    {isRTL ? '[ ⚡ الذهاب للمهمة ورؤية التعليق ]' : '[ ⚡ GO TO TASK / VIEW COMMENT ]'}
+                    {/* {isRTL ? '[ ⚡ الذهاب للمهمة ورؤية التعليق ]' : '[ ⚡ GO TO TASK / VIEW COMMENT ]'} */}
+                    {isRTL ? '[ ⚡ الذهاب للمهمة ورؤية التعليق ]' : '[ ⚡ Go to Task / View Comment ]'}
                   </button>
                 </div>
               )}
@@ -163,16 +169,22 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
               {report.type === 'deadline_alert' && (
                 <div className="space-y-6">
                   <div className="flex flex-col items-center justify-center py-4 border-2 border-dashed border-[#FF0055]/30 bg-[#FF0055]/5 rounded-xl">
-                    <Timer className="text-4xl text-[#FF0055] animate-pulse w-10 h-10" />
-                    <p className="mt-2 text-xs font-black text-[#FF0055] uppercase tracking-widest">CRITICAL_DEADLINE</p>
+                    <motion.div className="flex flex-col items-center">
+                      <Timer className="text-4xl text-[#FF0055] animate-pulse w-10 h-10" />
+                      {/* <p className="mt-2 text-xs font-black text-[#FF0055] uppercase tracking-widest">CRITICAL_DEADLINE</p> */}
+                      <p className="mt-2 text-xs font-black text-[#FF0055] tracking-widest">Critical Deadline</p>
+                    </motion.div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="py-2.5 px-4 bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl">
-                      <p className="text-[9px] font-black tracking-widest uppercase opacity-40 mb-1">REQUIRED_DAILY</p>
-                      <p className="text-2xl font-black text-[#FF0055]">{report.content.tasks_per_day} <span className="text-[10px]">TASKS</span></p>
+                      {/* <p className="text-[9px] font-black tracking-widest uppercase opacity-40 mb-1">REQUIRED_DAILY</p>
+                      <p className="text-2xl font-black text-[#FF0055]">{report.content.tasks_per_day} <span className="text-[10px]">TASKS</span></p> */}
+                      <p className="text-[9px] font-black tracking-widest opacity-40 mb-1">Required Daily</p>
+                      <p className="text-2xl font-black text-[#FF0055]">{report.content.tasks_per_day} <span className="text-[10px]">tasks</span></p>
                     </div>
                     <div className="py-2.5 px-4 bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl">
-                      <p className="text-[9px] font-black tracking-widest uppercase opacity-40 mb-1">PROGRESS</p>
+                      {/* <p className="text-[9px] font-black tracking-widest uppercase opacity-40 mb-1">PROGRESS</p> */}
+                      <p className="text-[9px] font-black tracking-widest opacity-40 mb-1">Progress</p>
                       <p className="text-2xl font-black text-zinc-900 dark:text-white">{report.content.progress}%</p>
                     </div>
                   </div>
@@ -183,14 +195,17 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                 <div className="space-y-6">
                   <div className="flex flex-col items-center justify-center py-6 bg-neon-green/10 border border-neon-green/30 rounded-xl" style={{ backgroundColor: `${themeColor}10`, borderColor: `${themeColor}30` }}>
                     <Award className="text-5xl mb-2 w-12 h-12" style={{ color: themeColor }} />
-                    <p className="text-sm font-black uppercase tracking-[0.4em]" style={{ color: themeColor }}>GOAL_ACCOMPLISHED</p>
+                    {/* <p className="text-sm font-black uppercase tracking-[0.4em]" style={{ color: themeColor }}>GOAL_ACCOMPLISHED</p> */}
+                    <p className="text-sm font-black tracking-[0.4em]" style={{ color: themeColor }}>Goal Accomplished</p>
                   </div>
                   <div className="py-2.5 px-4 bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-center w-full">
-                    <p className="text-[9px] font-black tracking-widest uppercase opacity-40 mb-1">XP_REWARD_COLLECTED</p>
+                    {/* <p className="text-[9px] font-black tracking-widest uppercase opacity-40 mb-1">XP_REWARD_COLLECTED</p> */}
+                    <p className="text-[9px] font-black tracking-widest opacity-40 mb-1">XP Reward Collected</p>
                     <p className="text-3xl font-black" style={{ color: themeColor }}>+{report.content.xp_earned || 500}</p>
                   </div>
                   <div className="pt-4 border-t border-zinc-200 dark:border-white/5 text-center">
-                    <p className="text-[10px] text-zinc-500 dark:text-white/30 uppercase tracking-widest">STATUS: ARCHIVED_TO_WINS_VAULT</p>
+                    {/* <p className="text-[10px] text-zinc-500 dark:text-white/30 uppercase tracking-widest">STATUS: ARCHIVED_TO_WINS_VAULT</p> */}
+                    <p className="text-[10px] text-zinc-500 dark:text-white/30 tracking-widest">Status: Archived to Wins Vault</p>
                   </div>
                 </div>
               )}
@@ -206,12 +221,16 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                         className="w-14 h-14 rounded-xl border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)] bg-[#050505]"
                       />
                       <div className="space-y-1 text-left flex-1 min-w-0">
-                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em]">OPERATOR_IDENTITY</p>
+                        {/* <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em]">OPERATOR_IDENTITY</p> */}
+                        <p className="text-[10px] text-zinc-500 font-bold tracking-[0.2em]">Operator Identity</p>
                         <p className="text-sm font-black text-zinc-900 dark:text-white truncate font-space">
                           {report.content.requester_name}
                         </p>
-                        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[8px] font-space font-black tracking-widest uppercase">
+                        {/* <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[8px] font-space font-black tracking-widest uppercase">
                           {isRTL ? 'قيد المراجعة' : 'PENDING REVIEW'}
+                        </div> */}
+                        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[8px] font-space font-black tracking-widest">
+                          {isRTL ? 'قيد المراجعة' : 'Pending Review'}
                         </div>
                       </div>
                     </div>
@@ -226,7 +245,8 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                           className="h-11 border border-red-500/30 hover:border-red-500/80 bg-red-950/15 hover:bg-red-500/10 text-red-400 font-space font-black text-xs uppercase tracking-widest transition-all duration-300 rounded-xl flex items-center justify-center gap-1.5 disabled:opacity-40 cursor-pointer"
                         >
                           <X className="text-base w-4 h-4" />
-                          {isRTL ? '[ ✗ رفض ]' : '[ ✗ REJECT ]'}
+                          {/* {isRTL ? '[ ✗ رفض ]' : '[ ✗ REJECT ]'} */}
+                          {isRTL ? '[ ✗ رفض ]' : '[ ✗ Reject ]'}
                         </button>
                         <button
                           onClick={() => handleReviewRequest('approve')}
@@ -234,21 +254,28 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                           className="h-11 bg-teal-500 hover:bg-teal-400 text-black hover:shadow-[0_0_20px_rgba(20,184,166,0.4)] font-space font-black text-xs uppercase tracking-widest transition-all duration-300 rounded-xl flex items-center justify-center gap-1.5 disabled:opacity-40 cursor-pointer"
                         >
                           <Check className="text-base w-4 h-4" />
-                          {isRTL ? '[ ✓ قبول ]' : '[ ✓ APPROVE ]'}
+                          {/* {isRTL ? '[ ✓ قبول ]' : '[ ✓ APPROVE ]'} */}
+                          {isRTL ? '[ ✓ قبول ]' : '[ ✓ Approve ]'}
                         </button>
                       </div>
                     ) : actionStatus === 'approved' ? (
                       <div className="py-4 bg-teal-500/10 border border-teal-500/30 rounded-xl flex items-center justify-center gap-2">
                         <CheckCircle2 className="text-teal-400" />
-                        <p className="text-xs font-space font-black text-teal-400 uppercase tracking-widest">
+                        {/* <p className="text-xs font-space font-black text-teal-400 uppercase tracking-widest">
                           {isRTL ? 'APPROVED // تم قبول العضو للفريق' : 'APPROVED // MEMBER ADDED'}
+                        </p> */}
+                        <p className="text-xs font-space font-black text-teal-400 tracking-widest">
+                          {isRTL ? 'Approved - تم قبول العضو للفريق' : 'Approved - Member Added'}
                         </p>
                       </div>
                     ) : (
                       <div className="py-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center justify-center gap-2">
                         <XCircle className="text-red-400" />
-                        <p className="text-xs font-space font-black text-red-400 uppercase tracking-widest">
+                        {/* <p className="text-xs font-space font-black text-red-400 uppercase tracking-widest">
                           {isRTL ? 'REJECTED // تم رفض طلب الوصول' : 'REJECTED // ACCESS CLASSIFIED'}
+                        </p> */}
+                        <p className="text-xs font-space font-black text-red-400 tracking-widest">
+                          {isRTL ? 'Rejected - تم رفض طلب الوصول' : 'Rejected - Access Denied'}
                         </p>
                       </div>
                     )}
@@ -261,8 +288,11 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                 <div className="space-y-6">
                   <div className="flex flex-col items-center justify-center py-6 bg-teal-500/10 border border-teal-500/30 rounded-xl text-center">
                     <Award className="text-5xl text-teal-400 mb-2 animate-bounce w-12 h-12" />
-                    <p className="text-sm font-black uppercase tracking-[0.4em] text-teal-400">
+                    {/* <p className="text-sm font-black uppercase tracking-[0.4em] text-teal-400">
                       {isRTL ? 'تم منح الإذن // الفريق جاهز' : 'ACCESS GRANTED // SQUAD READY'}
+                    </p> */}
+                    <p className="text-sm font-black tracking-[0.4em] text-teal-400">
+                      {isRTL ? 'تم منح الإذن - الفريق جاهز' : 'Access Granted - Squad Ready'}
                     </p>
                   </div>
                   <button
@@ -273,7 +303,8 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                     className="w-full h-12 bg-teal-500 hover:bg-teal-400 text-black font-space font-black text-xs uppercase tracking-widest transition-all duration-300 rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.3)] flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Zap className="text-base w-4 h-4" />
-                    {isRTL ? '[ ⚡ دخول لوحة الفريق ]' : '[ ⚡ ENTER SQUAD CANVAS ]'}
+                    {/* {isRTL ? '[ ⚡ دخول لوحة الفريق ]' : '[ ⚡ ENTER SQUAD CANVAS ]'} */}
+                    {isRTL ? '[ ⚡ دخول لوحة الفريق ]' : '[ ⚡ Enter Squad Canvas ]'}
                   </button>
                 </div>
               )}
@@ -283,8 +314,11 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                 <div className="space-y-6">
                   <div className="flex flex-col items-center justify-center py-6 bg-red-500/10 border border-red-500/30 rounded-xl text-center">
                     <Lock className="text-5xl text-red-500 mb-2 w-12 h-12" />
-                    <p className="text-sm font-black uppercase tracking-[0.4em] text-red-500">
+                    {/* <p className="text-sm font-black uppercase tracking-[0.4em] text-red-500">
                       {isRTL ? 'الوصول مرفوض // هدف مصنف' : 'ACCESS DENIED // CLASSIFIED'}
+                    </p> */}
+                    <p className="text-sm font-black tracking-[0.4em] text-red-500">
+                      {isRTL ? 'الوصول مرفوض - هدف مصنف' : 'Access Denied'}
                     </p>
                   </div>
                   <p className="text-xs text-center text-zinc-500 dark:text-zinc-400 font-space tracking-wide">
@@ -298,7 +332,8 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
 
             {/* Footer */}
             <div className="pt-6 border-t border-zinc-200 dark:border-white/10 flex justify-between items-center opacity-40">
-              <p className="text-[8px] tracking-[0.5em] font-black uppercase">GROWTH HUB // ONLINE</p>
+              {/* <p className="text-[8px] tracking-[0.5em] font-black uppercase">GROWTH HUB // ONLINE</p> */}
+              <p className="text-[8px] tracking-[0.5em] font-black">Growth Hub - Online</p>
               <p className="text-[8px] font-black uppercase">REF: {report.id.slice(0, 8)}</p>
             </div>
           </div>

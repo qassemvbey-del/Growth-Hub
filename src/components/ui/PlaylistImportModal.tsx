@@ -107,7 +107,8 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
     setPreviewTasks([])
     const playlistId = extractPlaylistId(playlistUrl)
     if (!playlistId) {
-      setError(isRTL ? 'إشارة غير صالحة // ليس قائمة تشغيل' : 'INVALID_SIGNAL // NOT A PLAYLIST')
+      // setError(isRTL ? 'إشارة غير صالحة // ليس قائمة تشغيل' : 'INVALID_SIGNAL // NOT A PLAYLIST')
+      setError(isRTL ? 'إشارة غير صالحة - ليس قائمة تشغيل' : 'Invalid Link - Not a YouTube Playlist')
       return
     }
 
@@ -119,9 +120,11 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
 
       if (itemsData.error) {
         if (itemsData.error.errors?.[0]?.reason === 'playlistNotFound' || itemsData.error.code === 404) {
-          setError(isRTL ? 'تم رفض الوصول // قائمة خاصة' : 'ACCESS_DENIED // PRIVATE_FEED')
+          // setError(isRTL ? 'تم رفض الوصول // قائمة خاصة' : 'ACCESS_DENIED // PRIVATE_FEED')
+          setError(isRTL ? 'تم رفض الوصول - قائمة خاصة' : 'Access Denied - Private Playlist')
         } else {
-          setError(`API_ERROR // ${itemsData.error.message?.toUpperCase() || 'UNKNOWN_REASON'}`)
+          // setError(`API_ERROR // ${itemsData.error.message?.toUpperCase() || 'UNKNOWN_REASON'}`)
+          setError(`API Error - ${itemsData.error.message || 'Unknown Reason'}`)
         }
         setLoading(false)
         return
@@ -129,7 +132,8 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
 
       const items = itemsData.items || []
       if (items.length === 0) {
-        setError(isRTL ? 'خلاصة فارغة // لم يتم العثور على فيديوهات' : 'EMPTY_FEED // NO_VIDEOS_FOUND')
+        // setError(isRTL ? 'خلاصة فارغة // لم يتم العثور على فيديوهات' : 'EMPTY_FEED // NO_VIDEOS_FOUND')
+        setError(isRTL ? 'خلاصة فارغة - لم يتم العثور على فيديوهات' : 'Empty Playlist - No Videos Found')
         setLoading(false)
         return
       }
@@ -176,7 +180,8 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
 
       setPreviewTasks(relativeMapped)
     } catch (err: any) {
-      setError(`NETWORK_ERROR // ${err.message?.toUpperCase() || 'RETRY_SEQUENCE'}`)
+      // setError(`NETWORK_ERROR // ${err.message?.toUpperCase() || 'RETRY_SEQUENCE'}`)
+      setError(`Network Error - Please check connection and try again`)
     } finally {
       setLoading(false)
     }
@@ -188,7 +193,8 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
     const isLocal = typeof missionId === 'string' && missionId.startsWith('local_')
 
     if (!user && !isLocal) {
-      setError('AUTH_REQUIRED // SESSION_TERMINATED')
+      // setError('AUTH_REQUIRED // SESSION_TERMINATED')
+      setError('Authentication Required')
       setConfirming(false)
       return
     }
@@ -237,7 +243,8 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
 
     if (insertError) {
       console.error('PLAYLIST_IMPORT_ERROR:', insertError)
-      setError(`DATABASE_ERROR // ${insertError.message.toUpperCase()}`)
+      // setError(`DATABASE_ERROR // ${insertError.message.toUpperCase()}`)
+      setError(`Database Error - ${insertError.message}`)
       setConfirming(false)
     } else {
       onTasksAdded(data || [])
@@ -265,8 +272,11 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
         <div className="pb-4 border-b flex justify-between items-center border-zinc-200 dark:border-white/10" style={{ borderColor: `${themeColor}22` }}>
           <div className="flex items-center gap-3">
             <ListPlus className="text-neon-green" style={{ color: themeColor }} />
-            <h2 className="font-space font-black uppercase tracking-widest text-sm" style={{ color: themeColor }}>
+            {/* <h2 className="font-space font-black uppercase tracking-widest text-sm" style={{ color: themeColor }}>
               {isRTL ? 'استيراد قائمة التشغيل' : 'PLAYLIST_IMPORT'}
+            </h2> */}
+            <h2 className="font-space font-black tracking-widest text-sm" style={{ color: themeColor }}>
+              {isRTL ? 'استيراد قائمة التشغيل' : 'Playlist Import'}
             </h2>
           </div>
           <button onClick={onClose} className="text-zinc-400 dark:text-white/30 hover:text-zinc-900 dark:hover:text-white cursor-pointer transition-colors">
@@ -277,8 +287,11 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
         {/* URL Input Area */}
         <div className="py-4 space-y-4">
           <div className="space-y-2">
-            <label className="text-[10px] font-space font-black text-zinc-600 dark:text-white/40 uppercase tracking-widest">
+            {/* <label className="text-[10px] font-space font-black text-zinc-600 dark:text-white/40 uppercase tracking-widest">
               {isRTL ? 'رابط قائمة تشغيل يوتيوب' : 'YOUTUBE_PLAYLIST_URL'}
+            </label> */}
+            <label className="text-[10px] font-space font-black text-zinc-600 dark:text-white/40 tracking-widest">
+              {isRTL ? 'رابط قائمة تشغيل يوتيوب' : 'YouTube Playlist URL'}
             </label>
             <div className="flex gap-2">
               <input 
@@ -294,7 +307,8 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
                 className="py-2.5 px-4 font-space font-black text-[10px] uppercase tracking-widest transition-all bg-neon-green text-black disabled:opacity-30 rounded-xl shadow-lg hover:brightness-110 shrink-0 cursor-pointer min-w-[130px] text-center"
                 style={{ backgroundColor: themeColor }}
               >
-                {loading ? buttonMessages[loadingTextIndex] : (isRTL ? 'فحص' : 'SCAN')}
+                {/* {loading ? buttonMessages[loadingTextIndex] : (isRTL ? 'فحص' : 'SCAN')} */}
+                {loading ? buttonMessages[loadingTextIndex] : (isRTL ? 'فحص' : 'Scan')}
               </button>
             </div>
             {loading && (
@@ -317,10 +331,16 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
                 className="space-y-4"
               >
                 <div className="flex justify-between items-end border-b border-zinc-200 dark:border-white/5 pb-2">
-                  <p className="text-[10px] font-space font-black text-zinc-600 dark:text-white/40 uppercase tracking-widest">
+                  {/* <p className="text-[10px] font-space font-black text-zinc-600 dark:text-white/40 uppercase tracking-widest">
                     {isRTL 
                       ? `تم العثور على: ${previewTasks.length} فيديو // المجموع: ${formatSeconds(totalDuration)}`
                       : `FOUND: ${previewTasks.length} VIDEOS // TOTAL: ${formatSeconds(totalDuration)}`
+                    }
+                  </p> */}
+                  <p className="text-[10px] font-space font-black text-zinc-600 dark:text-white/40 tracking-widest">
+                    {isRTL 
+                      ? `تم العثور على: ${previewTasks.length} فيديو - المجموع: ${formatSeconds(totalDuration)}`
+                      : `Found: ${previewTasks.length} Videos - Total: ${formatSeconds(totalDuration)}`
                     }
                   </p>
                 </div>
@@ -330,7 +350,8 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
                       <div className="flex-1 min-w-0 pr-4">
                         <p className="font-space text-[11px] font-bold text-zinc-900 dark:text-white uppercase truncate">{t.title}</p>
                         <p className="font-space text-[9px] text-zinc-500 dark:text-white/40 uppercase tracking-tighter">
-                          {isRTL ? `المدة: ${formatSeconds(t.seconds)}` : `DURATION: ${formatSeconds(t.seconds)}`}
+                          {/* {isRTL ? `المدة: ${formatSeconds(t.seconds)}` : `DURATION: ${formatSeconds(t.seconds)}`} */}
+                          {isRTL ? `المدة: ${formatSeconds(t.seconds)}` : `Duration: ${formatSeconds(t.seconds)}`}
                         </p>
                       </div>
                       <div className="flex gap-1 shrink-0">
@@ -348,7 +369,8 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
                     onClick={onClose}
                     className="py-2.5 px-4 font-space font-black text-[10px] uppercase tracking-widest text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white rounded-xl transition-all cursor-pointer"
                   >
-                    {isRTL ? 'إلغاء' : 'CANCEL'}
+                    {/* {isRTL ? 'إلغاء' : 'CANCEL'} */}
+                    {isRTL ? 'إلغاء' : 'Cancel'}
                   </button>
                   <button 
                     onClick={handleDeploy}
@@ -356,7 +378,8 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
                     className="py-2.5 px-6 font-space font-black text-[10px] uppercase tracking-widest bg-neon-green text-black shadow-lg rounded-xl transition-all hover:brightness-110 cursor-pointer"
                     style={{ backgroundColor: themeColor, boxShadow: `0 0 20px ${themeColor}44` }}
                   >
-                    {confirming ? (isRTL ? 'جاري الإنشاء...' : 'CREATING...') : (isRTL ? 'إنشاء' : 'CREATE')}
+                    {/* {confirming ? (isRTL ? 'جاري الإنشاء...' : 'CREATING...') : (isRTL ? 'إنشاء' : 'CREATE')} */}
+                    {confirming ? (isRTL ? 'جاري الإنشاء...' : 'Creating...') : (isRTL ? 'إنشاء' : 'Create')}
                   </button>
                 </div>
               </motion.div>

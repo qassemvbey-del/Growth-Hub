@@ -9,15 +9,18 @@ import { X, HelpCircle } from 'lucide-react'
 
 const GUIDE_CONTENT_EN: Record<string, { title: string; tips: string[] }> = {
   '/': {
-    title: 'DASHBOARD_TACTICS',
+    // title: 'DASHBOARD_TACTICS',
+    title: 'Dashboard Tactics',
     tips: [
       'Focus Capacity is limited to 9 units. Prioritize big wins.',
-      'Goals in RED_ZONE need immediate intervention.',
+      // 'Goals in RED_ZONE need immediate intervention.',
+      'Goals in Red Zone need immediate intervention.',
       'The EnergyCell shows real-time progress for your active goals.'
     ]
   },
   '/missions': {
-    title: 'GOAL_CONTROL',
+    // title: 'GOAL_CONTROL',
+    title: 'Goal Control',
     tips: [
       'Break large goals into smaller, manageable tasks.',
       'Use the Calendar icon to sync targets with your Google Calendar.',
@@ -33,7 +36,8 @@ const GUIDE_CONTENT_EN: Record<string, { title: string; tips: string[] }> = {
     ]
   },
   '/vault': {
-    title: 'RANKING_PROTOCOL',
+    // title: 'RANKING_PROTOCOL',
+    title: 'Ranking Protocol',
     tips: [
       'Higher ranks unlock premium interface themes and AI behaviors.',
       'XP is earned by completing goal tasks and hitting milestones.',
@@ -41,7 +45,8 @@ const GUIDE_CONTENT_EN: Record<string, { title: string; tips: string[] }> = {
     ]
   },
   '/achievements': {
-    title: 'HONOR_LOG',
+    // title: 'HONOR_LOG',
+    title: 'Honor Log',
     tips: [
       'Medals are proof of your consistent high-performance execution.',
       'Complete unique streaks to unlock rare tactical badges.',
@@ -100,7 +105,8 @@ export default function OperatorGuide() {
 
   const GUIDE_CONTENT = isRTL ? GUIDE_CONTENT_AR : GUIDE_CONTENT_EN
   const content = GUIDE_CONTENT[pathname] || {
-    title: isRTL ? 'النظام جاهز' : 'SYSTEM_READY',
+    // title: isRTL ? 'النظام جاهز' : 'SYSTEM_READY',
+    title: isRTL ? 'النظام جاهز' : 'System Ready',
     tips: isRTL
       ? ['ابدأ العمل على أهدافك اليوم. حافظ على تركيزك لتحقيق أفضل النتائج.']
       : ['Execute your objectives. Maintain high-fidelity focus. No excuses.']
@@ -140,7 +146,8 @@ export default function OperatorGuide() {
               <div className="space-y-4">
                 <header className="flex justify-between items-center border-b border-black/10 dark:border-white/10 pb-3">
                   <span className="text-[10px] font-space tracking-[0.3em] font-black uppercase opacity-60" style={{ color: currentTheme.color }}>
-                    {isRTL ? 'دليل المشغل' : 'MEMBER_GUIDE'} // {content.title}
+                    {/* {isRTL ? 'دليل المشغل' : 'MEMBER_GUIDE'} // {content.title} */}
+                    {isRTL ? 'دليل المشغل' : 'Member Guide'} - {content.title}
                   </span>
                 </header>
 
@@ -157,7 +164,8 @@ export default function OperatorGuide() {
 
                 <div className="pt-4 border-t border-black/10 dark:border-white/10">
                   <p className="text-[9px] font-space tracking-widest uppercase opacity-30">
-                    {isRTL ? 'حافظ على التركيز' : 'STAY_FOCUSED // EXECUTE'}
+                    {/* {isRTL ? 'حافظ على التركيز' : 'STAY_FOCUSED // EXECUTE'} */}
+                    {isRTL ? 'حافظ على التركيز' : 'Stay Focused'}
                   </p>
                 </div>
               </div>

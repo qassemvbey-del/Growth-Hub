@@ -128,8 +128,11 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <HelpCircle />
-                  <p className="text-[10px] font-space tracking-[0.4em] uppercase font-black" style={{ color: currentTheme.color }}>
+                  {/* <p className="text-[10px] font-space tracking-[0.4em] uppercase font-black" style={{ color: currentTheme.color }}>
                     {isRTL ? 'تخصيص الملف الشخصي والهوية' : 'USER_PROFILE // PERSONA SELECTION'}
+                  </p> */}
+                  <p className="text-[10px] font-space tracking-[0.4em] uppercase font-black" style={{ color: currentTheme.color }}>
+                    {isRTL ? 'تخصيص الملف الشخصي والهوية' : 'Customize Profile'}
                   </p>
                 </div>
                 <h2 className="text-2xl md:text-3xl font-space font-black text-zinc-900 dark:text-white uppercase tracking-wider">
@@ -165,7 +168,8 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                   <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 backdrop-blur-md">
                     <span className="w-2 h-2 rounded-full animate-ping" style={{ backgroundColor: currentTheme.color }} />
                     <span className="text-[9px] font-space font-black tracking-widest uppercase text-zinc-800 dark:text-white/80">
-                      {isRTL ? 'حساب جوجل' : 'GOOGLE AUTH'}
+                      {/* {isRTL ? 'حساب جوجل' : 'GOOGLE AUTH'} */}
+                      {isRTL ? 'حساب جوجل' : 'Google Account'}
                     </span>
                   </div>
                 </div>
@@ -245,7 +249,8 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                       <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 backdrop-blur-md">
                         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: avatar.gender === 'male' ? '#00E5FF' : '#E91E63' }} />
                         <span className="text-[9px] font-space font-black tracking-widest uppercase text-zinc-800 dark:text-white/80">
-                          {isRTL ? 'شخصية مهنية' : 'PERSONA'}
+                          {/* {isRTL ? 'شخصية مهنية' : 'PERSONA'} */}
+                          {isRTL ? 'شخصية مهنية' : 'Persona'}
                         </span>
                       </div>
                     </div>
@@ -319,12 +324,14 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                 {isSaving ? (
                   <>
                     <HelpCircle />
-                    <span className="font-bold">{isRTL ? 'جارٍ الحفظ والمزامنة التكتيكية...' : 'SAVING & SYNCING CALIBRATION...'}</span>
+                    {/* <span className="font-bold">{isRTL ? 'جارٍ الحفظ والمزامنة التكتيكية...' : 'SAVING & SYNCING CALIBRATION...'}</span> */}
+                    <span className="font-bold">{isRTL ? 'جارٍ الحفظ والمزامنة التكتيكية...' : 'Saving and Syncing...'}</span>
                   </>
                 ) : (
                   <>
                     <Save className="text-lg font-bold w-[18px] h-[18px]" />
-                    <span className="font-bold">{isRTL ? 'حفظ الشخصية وتفعيل المزامنة' : 'CONFIRM AVATAR SELECTION'}</span>
+                    {/* <span className="font-bold">{isRTL ? 'حفظ الشخصية وتفعيل المزامنة' : 'CONFIRM AVATAR SELECTION'}</span> */}
+                    <span className="font-bold">{isRTL ? 'حفظ الشخصية وتفعيل المزامنة' : 'Confirm Avatar Selection'}</span>
                   </>
                 )}
               </button>

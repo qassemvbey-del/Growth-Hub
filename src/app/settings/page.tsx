@@ -180,10 +180,12 @@ export default function SettingsPage() {
       localStorage.setItem('cached_name', formData.full_name)
       // Background DB sync — don't await to keep UI snappy
       refreshProfile()
-      showToast(isRTL ? 'تم حفظ التغييرات بنجاح' : 'SETTINGS_UPDATED_SUCCESSFULLY', 'success')
+      // showToast(isRTL ? 'تم حفظ التغييرات بنجاح' : 'SETTINGS_UPDATED_SUCCESSFULLY', 'success')
+      showToast(isRTL ? 'تم حفظ التغييرات بنجاح' : 'Settings updated successfully', 'success')
     } else {
-      showToast('UPDATE_ERROR', 'warning')
-      alert('SAVE_FAILED: ' + error.message)
+      // showToast('UPDATE_ERROR', 'warning')
+      showToast('Failed to update settings', 'warning')
+      alert('Save failed: ' + error.message)
     }
     setSaving(false)
   }

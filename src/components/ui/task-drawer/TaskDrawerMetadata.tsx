@@ -39,8 +39,9 @@ export default function TaskDrawerMetadata({
       {/* A. STATUS, WEIGHT, XP & TIMELINE PANEL (LEGACY GRID COMMENTED OUT TO RECLAIM VERTICAL SPACE) */}
       {/*
       <div className="p-5 border border-white/5 bg-zinc-900/40 rounded-xl space-y-4">
-        <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
-          {isRTL ? 'بيانات المهمة // METADATA' : 'TASK METADATA // PROFILE'}
+        // isRTL ? 'بيانات المهمة // METADATA' : 'TASK METADATA // PROFILE'
+        <h3 className="text-[10px] font-black tracking-widest text-zinc-500 font-mono">
+          {isRTL ? 'بيانات المهمة - Metadata' : 'Task Metadata'}
         </h3>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -124,8 +125,11 @@ export default function TaskDrawerMetadata({
       {isSquad && squadMembers && squadMembers.length > 0 && (
         /* bg-zinc-900/40 */
         <div className="p-5 border border-white/5 bg-transparent dark:bg-white/5 rounded-md space-y-4">
-          <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
+          {/* <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
             {isRTL ? 'المسؤول' : 'ASSIGNED TO'}
+          </h3> */}
+          <h3 className="text-[10px] font-black tracking-widest text-zinc-500 font-mono">
+            {isRTL ? 'المسؤول' : 'Assigned To'}
           </h3>
           
           <div className="space-y-4">
@@ -153,7 +157,8 @@ export default function TaskDrawerMetadata({
                   onClick={() => updateTask(task.id, { assigned_to: null, assignee: null })}
                   className="px-3 py-1.5 border border-red-500/30 hover:border-red-500 hover:bg-red-500/10 text-red-400 hover:text-red-300 font-black tracking-widest text-[9px] uppercase rounded-md transition-colors cursor-pointer"
                 >
-                  {isRTL ? 'إلغاء التعيين' : 'UNASSIGN'}
+                  {/* {isRTL ? 'إلغاء التعيين' : 'UNASSIGN'} */}
+                  {isRTL ? 'إلغاء التعيين' : 'Unassign'}
                 </button>
                 )}
               </div>

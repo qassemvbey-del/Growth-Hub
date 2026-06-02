@@ -35,7 +35,8 @@ export interface Profile {
 export const THEME_PACKAGES = {
   SILVER: {
     id: 'SILVER',
-    name: 'Silver // Slate',
+    // name: 'Silver // Slate',
+    name: 'Silver - Slate',
     color: '#94a3b8',
     cupStyle: 'cylinder',
     glow: 'rgba(148, 163, 184, 0.4)',
@@ -45,7 +46,8 @@ export const THEME_PACKAGES = {
   },
   GOLD: {
     id: 'GOLD',
-    name: 'Gold // Gold Burst',
+    // name: 'Gold // Gold Burst',
+    name: 'Gold - Gold Burst',
     color: '#ffcc00',
     cupStyle: 'cylinder',
     glow: 'rgba(255, 204, 0, 0.4)',
@@ -55,7 +57,8 @@ export const THEME_PACKAGES = {
   },
   PLATINUM: {
     id: 'PLATINUM',
-    name: 'Platinum // Pulse',
+    // name: 'Platinum // Pulse',
+    name: 'Platinum - Pulse',
     color: '#38bdf8',
     cupStyle: 'hex',
     glow: 'rgba(56, 189, 248, 0.4)',
@@ -65,7 +68,8 @@ export const THEME_PACKAGES = {
   },
   DIAMOND: {
     id: 'DIAMOND',
-    name: 'Diamond // Glow',
+    // name: 'Diamond // Glow',
+    name: 'Diamond - Glow',
     color: '#d500f9',
     cupStyle: 'crystal',
     glow: 'rgba(213, 0, 249, 0.4)',
@@ -75,7 +79,8 @@ export const THEME_PACKAGES = {
   },
   CROWN: {
     id: 'CROWN',
-    name: 'Crown // Gold',
+    // name: 'Crown // Gold',
+    name: 'Crown - Gold',
     color: '#FACC15',
     cupStyle: 'crystal',
     glow: 'rgba(250, 204, 21, 0.4)',
@@ -85,7 +90,8 @@ export const THEME_PACKAGES = {
   },
   ACE: {
     id: 'ACE',
-    name: 'Ace // Orange',
+    // name: 'Ace // Orange',
+    name: 'Ace - Orange',
     color: '#F97316',
     cupStyle: 'shard',
     glow: 'rgba(249, 115, 22, 0.4)',
@@ -95,7 +101,8 @@ export const THEME_PACKAGES = {
   },
   CONQUEROR: {
     id: 'CONQUEROR',
-    name: 'Conqueror // Red',
+    // name: 'Conqueror // Red',
+    name: 'Conqueror - Red',
     color: '#EF4444',
     cupStyle: 'sphere',
     glow: 'rgba(239, 68, 68, 0.5)',
@@ -106,7 +113,8 @@ export const THEME_PACKAGES = {
   // Theme aliases
   INIT_GREEN: {
     id: 'SILVER',
-    name: 'Silver // Slate',
+    // name: 'Silver // Slate',
+    name: 'Silver - Slate',
     color: '#94a3b8',
     cupStyle: 'cylinder',
     glow: 'rgba(148, 163, 184, 0.4)',
@@ -116,7 +124,8 @@ export const THEME_PACKAGES = {
   },
   GOLD_BURST: {
     id: 'GOLD',
-    name: 'Gold // Gold Burst',
+    // name: 'Gold // Gold Burst',
+    name: 'Gold - Gold Burst',
     color: '#ffcc00',
     cupStyle: 'cylinder',
     glow: 'rgba(255, 204, 0, 0.4)',
@@ -126,7 +135,8 @@ export const THEME_PACKAGES = {
   },
   PLATINUM_PULSE: {
     id: 'PLATINUM',
-    name: 'Platinum // Pulse',
+    // name: 'Platinum // Pulse',
+    name: 'Platinum - Pulse',
     color: '#38bdf8',
     cupStyle: 'hex',
     glow: 'rgba(56, 189, 248, 0.4)',
@@ -136,7 +146,8 @@ export const THEME_PACKAGES = {
   },
   DIAMOND_GLOW: {
     id: 'DIAMOND',
-    name: 'Diamond // Glow',
+    // name: 'Diamond // Glow',
+    name: 'Diamond - Glow',
     color: '#d500f9',
     cupStyle: 'crystal',
     glow: 'rgba(213, 0, 249, 0.4)',
@@ -146,7 +157,8 @@ export const THEME_PACKAGES = {
   },
   CROWN_SHADOW: {
     id: 'CROWN',
-    name: 'Crown // Gold',
+    // name: 'Crown // Gold',
+    name: 'Crown - Gold',
     color: '#FACC15',
     cupStyle: 'crystal',
     glow: 'rgba(250, 204, 21, 0.4)',
@@ -156,7 +168,8 @@ export const THEME_PACKAGES = {
   },
   ACE_STRIKE: {
     id: 'ACE',
-    name: 'Ace // Orange',
+    // name: 'Ace // Orange',
+    name: 'Ace - Orange',
     color: '#F97316',
     cupStyle: 'shard',
     glow: 'rgba(249, 115, 22, 0.4)',
@@ -166,7 +179,8 @@ export const THEME_PACKAGES = {
   },
   CONQUEROR_SUPREME: {
     id: 'CONQUEROR',
-    name: 'Conqueror // Red',
+    // name: 'Conqueror // Red',
+    name: 'Conqueror - Red',
     color: '#EF4444',
     cupStyle: 'sphere',
     glow: 'rgba(239, 68, 68, 0.5)',
@@ -533,7 +547,8 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
   })
   const [tutorialActive, setTutorialActive] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [lastAiMessage, setLastAiMessage] = useState('SYSTEM_ONLINE // STANDING_BY')
+  // const [lastAiMessage, setLastAiMessage] = useState('SYSTEM_ONLINE // STANDING_BY')
+  const [lastAiMessage, setLastAiMessage] = useState('System Online — Standing By')
   const [isRankUpModalOpen, setIsRankUpModalOpen] = useState(false)
   const [oldRank, setOldRank] = useState('SILVER')
   const [newRank, setNewRank] = useState('SILVER')

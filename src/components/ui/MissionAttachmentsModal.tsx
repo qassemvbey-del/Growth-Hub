@@ -131,7 +131,8 @@ const PreviewModal = React.memo(({
             onClick={onClose}
             className="px-4 py-2 font-space font-black uppercase text-[10px] tracking-widest text-zinc-600 dark:text-white/50 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-white/30 rounded-lg transition-all active:scale-95 shrink-0 cursor-pointer"
           >
-            {isRTL ? '[ إغلاق المعاينة // Close Preview ]' : '[ Close Preview ]'}
+            {/* {isRTL ? '[ إغلاق المعاينة // Close Preview ]' : '[ Close Preview ]'} */}
+            {isRTL ? '[ إغلاق المعاينة - Close Preview ]' : '[ Close Preview ]'}
           </button>
         </div>
 
@@ -510,9 +511,13 @@ const MissionAttachmentsModal = ({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/Google_Drive_icon_(2020).svg" alt="Google Drive" className="w-5 h-5 shrink-0" />
               <span>
-                {isDriveConnected
+                {/* {isRTL
                   ? `[ ${isRTL ? 'فتح جوجل درايف' : 'OPEN GOOGLE DRIVE'} ]`
                   : `[ ${isRTL ? 'ربط جوجل درايف' : 'CONNECT GOOGLE DRIVE'} ]`
+                } */}
+                {isDriveConnected
+                  ? `[ ${isRTL ? 'فتح جوجل درايف' : 'Open Google Drive'} ]`
+                  : `[ ${isRTL ? 'ربط جوجل درايف' : 'Connect Google Drive'} ]`
                 }
               </span>
             </button>
@@ -537,7 +542,8 @@ const MissionAttachmentsModal = ({
                   >
                     <input
                       type="text"
-                      placeholder={isRTL ? 'اسم المرفق...' : 'ATTACHMENT_NAME...'}
+                      // placeholder={isRTL ? 'اسم المرفق...' : 'ATTACHMENT_NAME...'}
+                      placeholder={isRTL ? 'اسم المرفق...' : 'Attachment Name...'}
                       value={newName}
                       onChange={e => setNewName(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && handleAddManual()}
@@ -558,7 +564,8 @@ const MissionAttachmentsModal = ({
                         className="py-2.5 px-4 font-space font-black uppercase tracking-widest text-[10px] text-black transition-all rounded-xl shrink-0 cursor-pointer"
                         style={{ backgroundColor: themeColor, boxShadow: `0 0 16px ${themeColor}44` }}
                       >
-                        {adding ? <Loader2 className="w-4 h-4 animate-spin" /> : (isRTL ? 'إضافة' : 'ADD')}
+                        // {adding ? <Loader2 className="w-4 h-4 animate-spin" /> : (isRTL ? 'إضافة' : 'ADD')}
+                        {adding ? <Loader2 className="w-4 h-4 animate-spin" /> : (isRTL ? 'إضافة' : 'Add')}
                       </button>
                     </div>
                   </motion.div>
@@ -572,13 +579,13 @@ const MissionAttachmentsModal = ({
             {loading ? (
               <div className="flex flex-col items-center justify-center py-12 gap-4">
                 <Loader2 className="w-8 h-8 animate-spin" style={{ color: themeColor }} />
-                <p className="font-space font-black uppercase tracking-[0.2em] text-[9px] text-zinc-400 dark:text-white/20">FETCHING_DATA...</p>
+                <p className="font-space font-black tracking-[0.2em] text-[9px] text-zinc-400 dark:text-white/20">Fetching Data...</p>
               </div>
             ) : attachments.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 gap-4">
                 <RefreshCw className="text-4xl opacity-20 w-10 h-10 animate-spin-slow" style={{ color: themeColor }} />
                 <p className="font-space font-black uppercase tracking-[0.4em] text-[9px] text-zinc-400 dark:text-white/20">
-                  {isRTL ? 'لا توجد مرفقات مضافة بعد' : 'NO ATTACHMENTS SYNCD'}
+                  {isRTL ? 'لا توجد مرفقات مضافة بعد' : 'No attachments synced'}
                 </p>
               </div>
             ) : (
@@ -598,7 +605,8 @@ const MissionAttachmentsModal = ({
                               {att.name}
                             </p>
                             <p className="font-space text-[8px] uppercase tracking-widest text-zinc-500 dark:text-white/25 mt-0.5">
-                              {att.file_type.toUpperCase()} // {new Date(att.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              {/* {att.file_type.toUpperCase()} // {new Date(att.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} */}
+                              {att.file_type.toUpperCase()} - {new Date(att.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                             </p>
                           </div>
                         </div>
@@ -633,11 +641,17 @@ const MissionAttachmentsModal = ({
 
           {/* Modal Footer */}
           <div className="py-4 border-t shrink-0 flex items-center justify-between border-zinc-200 dark:border-white/10" style={{ borderColor: `${themeColor}15` }}>
-            <p className="font-space text-[8px] uppercase tracking-[0.4em] text-zinc-400 dark:text-white/15">
+            {/* <p className="font-space text-[8px] uppercase tracking-[0.4em] text-zinc-400 dark:text-white/15">
               {isRTL ? 'مزامنة جوجل درايف // Google Drive Sync' : 'Google Drive Sync // Web Integration'}
             </p>
             <button onClick={onClose} className="font-space font-black uppercase tracking-widest text-[9px] text-zinc-500 dark:text-white/25 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer">
               {isRTL ? 'إغلاق' : 'CLOSE'}
+            </button> */}
+            <p className="font-space text-[8px] tracking-[0.4em] text-zinc-400 dark:text-white/15">
+              {isRTL ? 'مزامنة جوجل درايف - Google Drive Sync' : 'Google Drive Sync - Web Integration'}
+            </p>
+            <button onClick={onClose} className="font-space font-black tracking-widest text-[9px] text-zinc-500 dark:text-white/25 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer">
+              {isRTL ? 'إغلاق' : 'Close'}
             </button>
           </div>
         </div>

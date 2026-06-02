@@ -30,8 +30,9 @@ export default function TaskDrawerChecklist({
   return (
     /* bg-zinc-900/40 */
     <div className="space-y-3 p-5 border border-white/5 bg-transparent dark:bg-white/5 rounded-md">
-      <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
-        {isRTL ? 'المهام الفرعية // SUBTASKS' : 'CHECKLIST // SUBTASKS'}
+      <h3 className="text-[10px] font-black tracking-widest text-zinc-500 font-mono">
+        {/* {isRTL ? 'المهام الفرعية // SUBTASKS' : 'CHECKLIST // SUBTASKS'} */}
+        {isRTL ? 'المهام الفرعية - Checklist' : 'Checklist'}
       </h3>
       
       <form onSubmit={handleAddSubtask} className="flex gap-2">

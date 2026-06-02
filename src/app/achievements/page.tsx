@@ -89,7 +89,8 @@ export default function WinsPage() {
     const e = new Date(end)
     const diff = e.getTime() - s.getTime()
     const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-    return days > 0 ? `${days} ${isRTL ? 'أيام' : 'DAYS'}` : (isRTL ? 'يوم واحد' : 'SINGLE_DAY')
+    // return days > 0 ? `${days} ${isRTL ? 'أيام' : 'DAYS'}` : (isRTL ? 'يوم واحد' : 'SINGLE_DAY')
+    return days > 0 ? `${days} ${isRTL ? 'أيام' : 'days'}` : (isRTL ? 'يوم واحد' : 'Single Day')
   }
 
   if (!mounted) return null
@@ -182,8 +183,11 @@ export default function WinsPage() {
                 <Lock className="text-5xl text-black/20 dark:text-white/10 w-12 h-12" />
               </div>
             </div>
-            <p className="text-[11px] md:text-xs font-space text-[var(--text-secondary)] tracking-[0.5em] uppercase font-black text-center leading-relaxed">
+            {/* <p className="text-[11px] md:text-xs font-space text-[var(--text-secondary)] tracking-[0.5em] uppercase font-black text-center leading-relaxed">
               {isRTL ? 'لا توجد جوائز بعد // أكمل هدفاً أولاً' : 'NO_WINS_YET // Complete a goal first'}
+            </p> */}
+            <p className="text-[11px] md:text-xs font-space text-[var(--text-secondary)] tracking-[0.5em] font-black text-center leading-relaxed">
+              {isRTL ? 'لا توجد جوائز بعد - أكمل هدفاً أولاً' : 'No wins yet. Complete a goal first.'}
             </p>
           </div>
         ) : (
@@ -201,7 +205,8 @@ export default function WinsPage() {
                   className="group flex flex-col items-center gap-3 cursor-pointer"
                 >
                   <div className="text-[8px] md:text-[10px] font-space tracking-[0.4em] uppercase font-black mb-4" style={{ color: `${currentTheme.color}66` }}>
-                    ★ {isRTL ? 'مكتمل' : 'COMPLETE'}
+                  {/* ★ {isRTL ? 'مكتمل' : 'COMPLETE'} */}
+                  ★ {isRTL ? 'مكتمل' : 'Complete'}
                   </div>
 
                   <div className="relative flex flex-col items-center pb-8 pt-4">
@@ -238,7 +243,8 @@ export default function WinsPage() {
                     onClick={(e) => { e.preventDefault(); unarchive(mission.id, e as any) }}
                     className="text-[8px] md:text-[10px] font-space text-[var(--text-secondary)]/50 hover:text-[var(--text-primary)] transition-all tracking-widest uppercase mt-1"
                   >
-                    {isRTL ? 'استعادة ←' : 'RESTORE →'}
+                    {/* {isRTL ? 'استعادة ←' : 'RESTORE →'} */}
+                    {isRTL ? 'استعادة ←' : 'Restore →'}
                   </button>
                 </motion.div>
               )
@@ -267,7 +273,8 @@ export default function WinsPage() {
                   <div className="space-y-4">
                     <div className="flex items-center gap-3">
                       <Medal className="text-sm w-3.5 h-3.5" style={{ color: currentTheme.color }} />
-                      <span className="text-[10px] md:text-xs font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'إنجاز مكتمل' : 'COMPLETED WIN'}</span>
+                      {/* <span className="text-[10px] md:text-xs font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'إنجاز مكتمل' : 'COMPLETED WIN'}</span> */}
+                      <span className="text-[10px] md:text-xs font-space tracking-widest font-black" style={{ color: currentTheme.color }}>{isRTL ? 'إنجاز مكتمل' : 'Completed Win'}</span>
                     </div>
                     <h2 className="text-2xl md:text-4xl font-space font-black uppercase text-[var(--text-primary)] tracking-tighter">
                       {selectedMission.title}
@@ -280,19 +287,23 @@ export default function WinsPage() {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-6 border-y border-[var(--card-border)]">
                   <div className="space-y-1">
-                    <p className="text-[9px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase">{isRTL ? 'المدة' : 'DURATION'}</p>
+                    {/* <p className="text-[9px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase">{isRTL ? 'المدة' : 'DURATION'}</p> */}
+                    <p className="text-[9px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest">{isRTL ? 'المدة' : 'Duration'}</p>
                     <p className="text-sm md:text-base font-space font-black text-[var(--text-primary)]">{calculateDuration(selectedMission.start_date, selectedMission.end_date)}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[9px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase">{isRTL ? 'المهام' : 'TASKS'}</p>
+                    {/* <p className="text-[9px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase">{isRTL ? 'المهام' : 'TASKS'}</p> */}
+                    <p className="text-[9px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest">{isRTL ? 'المهام' : 'Tasks'}</p>
                     <p className="text-sm md:text-base font-space font-black text-[var(--text-primary)]">{selectedMission.totalTasks}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[9px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase">{isRTL ? 'الإنجاز' : 'COMPLETION'}</p>
+                    {/* <p className="text-[9px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase">{isRTL ? 'الإنجاز' : 'COMPLETION'}</p> */}
+                    <p className="text-[9px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest">{isRTL ? 'الإنجاز' : 'Completion'}</p>
                     <p className="text-sm md:text-base font-space font-black" style={{ color: currentTheme.color }}>100%</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[9px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase">{isRTL ? 'التاريخ' : 'STAMP'}</p>
+                    {/* <p className="text-[9px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase">{isRTL ? 'التاريخ' : 'STAMP'}</p> */}
+                    <p className="text-[9px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest">{isRTL ? 'التاريخ' : 'Stamp'}</p>
                     <p className="text-sm md:text-base font-space font-black text-[var(--text-secondary)]">
                       {new Date(selectedMission.created_at).toISOString().split('T')[0].replace(/-/g, '.')}
                     </p>
@@ -308,7 +319,8 @@ export default function WinsPage() {
                            <CheckCircle2 className="text-sm w-3.5 h-3.5" style={{ color: currentTheme.color }} />
                            <span className="text-sm md:text-base font-space font-bold text-[var(--text-primary)]">{task.title}</span>
                          </div>
-                         <span className="text-[10px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">{isRTL ? 'الثقل' : 'WEIGHT'}: {task.weight}</span>
+                         {/* <span className="text-[10px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">{isRTL ? 'الثقل' : 'WEIGHT'}: {task.weight}</span> */}
+                         <span className="text-[10px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest font-black">{isRTL ? 'الثقل' : 'Weight'}: {task.weight}</span>
                        </div>
                      ))}
                    </div>
@@ -321,7 +333,8 @@ export default function WinsPage() {
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = currentTheme.color; (e.currentTarget as HTMLElement).style.color = '#000'; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = `${currentTheme.color}08`; (e.currentTarget as HTMLElement).style.color = currentTheme.color; }}
                 >
-                  {isRTL ? 'استعادة المهمة إلى الوضع النشط' : 'RESTORE_GOAL_TO_ACTIVE'}
+                  {/* {isRTL ? 'استعادة المهمة إلى الوضع النشط' : 'RESTORE_GOAL_TO_ACTIVE'} */}
+                  {isRTL ? 'استعادة المهمة إلى الوضع النشط' : 'Restore Goal to Active'}
                 </button>
               </motion.div>
             </motion.div>

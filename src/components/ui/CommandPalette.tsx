@@ -46,7 +46,8 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
     showToast(
       isRTL
         ? (isZen ? 'تم تفعيل وضع الزن (التركيز الكامل)' : 'تم إلغاء تفعيل وضع الزن')
-        : (isZen ? 'ZEN MODE ACTIVE // DEEP WORK STARTED' : 'ZEN MODE DEACTIVATED'),
+        // : (isZen ? 'ZEN MODE ACTIVE // DEEP WORK STARTED' : 'ZEN MODE DEACTIVATED'),
+        : (isZen ? 'Zen Mode Active - Deep Work Started' : 'Zen Mode Deactivated'),
       isZen ? 'success' : 'warning'
     )
     playSuccess()
@@ -228,7 +229,8 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                   
                   {/* Smart Quick Create */}
                   {showQuickCreate && (
-                    <Command.Group heading={isRTL ? "إنشاء سريع ذكي" : "SMART QUICK CREATE"}>
+                    // Command.Group heading={isRTL ? "إنشاء سريع ذكي" : "SMART QUICK CREATE"}
+                    <Command.Group heading={isRTL ? "إنشاء سريع ذكي" : "Smart Quick Create"}>
                       <Command.Item
                         value={`create task ${search}`}
                         onSelect={() => runCommand(() => { openCreateGoalModal({ goalType: 'solo', prefillTitle: search }); onClose(); })}
@@ -256,7 +258,8 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
 
                   {/* Universal Search Results */}
                   {search.trim().length > 0 && searchResults.length > 0 && (
-                    <Command.Group heading={isRTL ? "نتائج البحث الشامل" : "SEARCH RESULTS"}>
+                    // Command.Group heading={isRTL ? "نتائج البحث الشامل" : "SEARCH RESULTS"}
+                    <Command.Group heading={isRTL ? "نتائج البحث الشامل" : "Search Results"}>
                       {searchResults.map((res: any) => (
                         <Command.Item
                           key={res.id}
@@ -285,7 +288,8 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
 
                   {/* Recently Accessed */}
                   {!search.trim() && recentItems.length > 0 && (
-                    <Command.Group heading={isRTL ? "المستخدم مؤخراً" : "RECENTLY ACCESSED"}>
+                    // Command.Group heading={isRTL ? "المستخدم مؤخراً" : "RECENTLY ACCESSED"}
+                    <Command.Group heading={isRTL ? "المستخدم مؤخراً" : "Recently Accessed"}>
                       {recentItems.map((item: any) => (
                         <Command.Item
                           key={item.id}
@@ -298,17 +302,18 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                             <div className="p-1.5 bg-white/[0.03] border border-white/10 rounded shrink-0">
                               <NeonIcon icon={History} className="w-4 h-4 text-zinc-400" />
                             </div>
-                            <div className="flex flex-col min-w-0 flex-1">
-                              <span className="font-semibold tracking-wide text-[#FFFFFF] truncate uppercase">{item.title}</span>
-                              <span className="text-[9px] text-zinc-500 tracking-wider uppercase font-medium">
-                                {item.type === 'goal' ? (isRTL ? 'هدف' : 'Goal') : item.type === 'task' ? (isRTL ? 'مهمة فرعية' : 'Task') : (isRTL ? 'رابط' : 'Navigation')}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono shrink-0">
-                            <span>{isRTL ? 'فتح' : 'OPEN'}</span>
-                            <CornerDownLeft className="w-3 h-3" />
-                          </div>
+                          <div className="flex flex-col min-w-0 flex-1">
+                               <span className="font-semibold tracking-wide text-[#FFFFFF] truncate uppercase">{item.title}</span>
+                               <span className="text-[9px] text-zinc-500 tracking-wider uppercase font-medium">
+                                 {item.type === 'goal' ? (isRTL ? 'هدف' : 'Goal') : item.type === 'task' ? (isRTL ? 'مهمة فرعية' : 'Task') : (isRTL ? 'رابط' : 'Navigation')}
+                               </span>
+                             </div>
+                           </div>
+                           <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono shrink-0">
+                             {/* <span>{isRTL ? 'فتح' : 'OPEN'}</span> */}
+                             <span>{isRTL ? 'فتح' : 'Open'}</span>
+                             <CornerDownLeft className="w-3 h-3" />
+                           </div>
                         </Command.Item>
                       ))}
                     </Command.Group>
@@ -316,7 +321,8 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
 
                   {/* Actions Group */}
                   <Command.Group 
-                    heading={isRTL ? "الإجراءات البرمجية" : "ACTIONS // COMMAND_LIST"}
+                    // heading={isRTL ? "الإجراءات البرمجية" : "ACTIONS // COMMAND_LIST"}
+                    heading={isRTL ? "الإجراءات البرمجية" : "Actions"}
                     className="px-2 py-1.5 text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] font-space"
                   >
                     <Command.Item
@@ -360,7 +366,8 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
 
                   {/* Navigation Group */}
                   <Command.Group 
-                    heading={isRTL ? "الملاحة والتوجيه" : "NAVIGATION // MATRIX"}
+                    // heading={isRTL ? "الملاحة والتوجيه" : "NAVIGATION // MATRIX"}
+                    heading={isRTL ? "الملاحة والتوجيه" : "Navigation"}
                     className="px-2 py-1.5 text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] font-space"
                   >
                     <Command.Item
@@ -422,7 +429,8 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
 
                   {/* Theme & System Group */}
                   <Command.Group 
-                    heading={isRTL ? "إعدادات المنظومة" : "SYSTEM // CONFIG"}
+                    // heading={isRTL ? "إعدادات المنظومة" : "SYSTEM // CONFIG"}
+                    heading={isRTL ? "إعدادات المنظومة" : "System"}
                     className="px-2 py-1.5 text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] font-space"
                   >
                     <Command.Item
@@ -468,16 +476,19 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                 <div className="px-4 py-3 border-t border-white/[0.08] bg-black/60 flex items-center justify-between text-[10px] font-space text-zinc-500 select-none">
                   <div className="flex items-center gap-2">
                     <span className="text-zinc-600 font-black">◆</span>
-                    <span>{isRTL ? "لوحة التوجيه السيبرانية" : "CYBERPUNK NAVIGATION CORE v3"}</span>
+                    {/* <span>{isRTL ? "لوحة التوجيه السيبرانية" : "CYBERPUNK NAVIGATION CORE v3"}</span> */}
+                    <span>{isRTL ? "لوحة التوجيه السيبرانية" : "Growth Hub Navigation"}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1.5">
                       <kbd className="bg-zinc-900 border border-zinc-800 rounded px-1.5 py-0.5 text-zinc-400">↑↓</kbd>
-                      <span>{isRTL ? "للتنقل" : "NAVIGATE"}</span>
+                      {/* <span>{isRTL ? "للتنقل" : "NAVIGATE"}</span> */}
+                      <span>{isRTL ? "للتنقل" : "Navigate"}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <kbd className="bg-zinc-900 border border-zinc-800 rounded px-1.5 py-0.5 text-zinc-400">ENTER</kbd>
-                      <span>{isRTL ? "للتأكيد" : "SELECT"}</span>
+                      {/* <span>{isRTL ? "للتأكيد" : "SELECT"}</span> */}
+                      <span>{isRTL ? "للتأكيد" : "Select"}</span>
                     </div>
                   </div>
                 </div>

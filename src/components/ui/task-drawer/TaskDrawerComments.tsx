@@ -244,8 +244,11 @@ export default function TaskDrawerComments({
       <div className="space-y-4 pt-4 border-t border-white/5">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-4 h-4" style={{ color: themeColor }} />
-          <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
+          {/* <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
             {isRTL ? 'التعليقات' : 'COMMENTS'}
+          </h3> */}
+          <h3 className="text-[10px] font-black tracking-widest text-zinc-500 font-mono">
+            {isRTL ? 'التعليقات' : 'Comments'}
           </h3>
         </div>
 
@@ -473,8 +476,12 @@ export default function TaskDrawerComments({
                 /* bg-zinc-950/98 */
                 className="mentions-dropdown-container absolute bottom-full mb-2 left-3 right-3 bg-black/80 border border-white/10 rounded-md max-h-64 overflow-y-auto shadow-2xl p-1.5 z-50 backdrop-blur-xl"
               >
-                <div className="text-[8px] font-mono tracking-[0.2em] font-black uppercase text-zinc-500 px-3 py-1.5 border-b border-white/5 mb-1 flex items-center justify-between">
+                {/* <div className="text-[8px] font-mono tracking-[0.2em] font-black uppercase text-zinc-500 px-3 py-1.5 border-b border-white/5 mb-1 flex items-center justify-between">
                   <span>{isRTL ? 'اختر أعضاء للإشارة' : 'SELECT MEMBERS TO MENTION'}</span>
+                  <span className="text-[9px]" style={{ color: themeColor }}>{selectedMentions.size}/{squadMembers.length}</span>
+                </div> */}
+                <div className="text-[8px] font-mono tracking-[0.2em] font-black text-zinc-500 px-3 py-1.5 border-b border-white/5 mb-1 flex items-center justify-between">
+                  <span>{isRTL ? 'اختر أعضاء للإشارة' : 'Select Members to Mention'}</span>
                   <span className="text-[9px]" style={{ color: themeColor }}>{selectedMentions.size}/{squadMembers.length}</span>
                 </div>
 
@@ -502,10 +509,13 @@ export default function TaskDrawerComments({
                       <div className="w-2 h-0.5 bg-teal-400 rounded-full" />
                     )}
                   </div>
-                  <span className="text-xs font-space font-black uppercase tracking-wider" style={{ color: themeColor }}>
-                    {selectedMentions.size === squadMembers.length
+                  <span className="text-xs font-space font-black tracking-wider">
+                    {/* {selectedMentions.size === squadMembers.length
                       ? (isRTL ? 'إلغاء تحديد الكل' : 'DESELECT ALL')
-                      : (isRTL ? 'تحديد الكل' : 'SELECT ALL')}
+                      : (isRTL ? 'تحديد الكل' : 'SELECT ALL')} */}
+                    {selectedMentions.size === squadMembers.length
+                      ? (isRTL ? 'إلغاء تحديد الكل' : 'Deselect All')
+                      : (isRTL ? 'تحديد الكل' : 'Select All')}
                   </span>
                 </button>
 
@@ -563,7 +573,8 @@ export default function TaskDrawerComments({
                     className="w-full py-2 rounded-md text-[10px] font-black font-space uppercase tracking-widest transition-all cursor-pointer text-black"
                     style={{ backgroundColor: themeColor }}
                   >
-                    {isRTL ? `تم (${selectedMentions.size})` : `DONE (${selectedMentions.size} SELECTED)`}
+                    {/* {isRTL ? `تم (${selectedMentions.size})` : `DONE (${selectedMentions.size} SELECTED)`} */}
+                    {isRTL ? `تم (${selectedMentions.size})` : `Done (${selectedMentions.size} Selected)`}
                   </button>
                 </div>
               </motion.div>
@@ -574,8 +585,11 @@ export default function TaskDrawerComments({
           {showMentionsDropdown && !mentionPickerMode && filteredMembers.length > 0 && (
             /* bg-zinc-950/95 */
             <div className="mentions-dropdown-container absolute bottom-full mb-2 left-3 bg-black/80 border border-white/10 rounded-md max-h-48 overflow-y-auto w-56 shadow-2xl p-1 z-50 backdrop-blur-md">
-              <div className="text-[8px] font-mono tracking-[0.2em] font-black uppercase text-zinc-500 px-3 py-1.5 border-b border-white/5 mb-1">
+              {/* <div className="text-[8px] font-mono tracking-[0.2em] font-black uppercase text-zinc-500 px-3 py-1.5 border-b border-white/5 mb-1">
                 {isRTL ? 'إشارة إلى عضو // SQUAD_MEMBERS' : 'MENTION SQUAD MEMBER'}
+              </div> */}
+              <div className="text-[8px] font-mono tracking-[0.2em] font-black text-zinc-500 px-3 py-1.5 border-b border-white/5 mb-1">
+                {isRTL ? 'إشارة إلى عضو - Squad Members' : 'Mention Squad Member'}
               </div>
               {filteredMembers.map((member) => (
                 <button
@@ -602,8 +616,11 @@ export default function TaskDrawerComments({
           {showEmojiPicker && (
             /* bg-zinc-950/95 */
             <div className="absolute bottom-full mb-2 right-3 bg-black/80 border border-white/10 rounded-md shadow-2xl p-2.5 z-50 max-w-[240px] backdrop-blur-md">
-              <div className="text-[8px] font-mono tracking-[0.2em] font-black uppercase text-zinc-500 px-1 py-1 border-b border-white/5 mb-2">
+              {/* <div className="text-[8px] font-mono tracking-[0.2em] font-black uppercase text-zinc-500 px-1 py-1 border-b border-white/5 mb-2">
                 {isRTL ? 'اختر رمز تعبيري // SELECT_EMOJI' : 'SELECT EMOJI'}
+              </div> */}
+              <div className="text-[8px] font-mono tracking-[0.2em] font-black text-zinc-500 px-1 py-1 border-b border-white/5 mb-2">
+                {isRTL ? 'اختر رمز تعبيري - Select Emoji' : 'Select Emoji'}
               </div>
               <div className="grid grid-cols-6 gap-1.5">
                 {['⚡', '☕', '🔥', '🚀', '🎯', '👾', '💻', '🧠', '✅', '❌', '👍', '😂', '🎉', '👀', '✨', '🙌', '💯', '❤️'].map((emoji) => (

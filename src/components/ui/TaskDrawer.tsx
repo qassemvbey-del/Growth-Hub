@@ -841,8 +841,9 @@ export default function TaskDrawer({
           {/*
           {videoUrl && (
             <div className="space-y-3">
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
-                {isRTL ? 'مشغل الفيديو // EMBEDDED PLAYER' : 'EMBEDDED VIDEO PLAYER // MEDIA'}
+              <h3 className="text-[10px] font-black tracking-widest text-zinc-500 font-mono">
+                // isRTL ? 'مشغل الفيديو // EMBEDDED PLAYER' : 'EMBEDDED VIDEO PLAYER // MEDIA'
+                {isRTL ? 'مشغل الفيديو - Embedded Player' : 'Embedded Video Player'}
               </h3>
               <div className="relative aspect-video w-full rounded-md overflow-hidden bg-black/40 border border-white/5 shadow-2xl">
                 <ReactPlayer
@@ -880,11 +881,12 @@ export default function TaskDrawer({
             themeColor={themeColor}
           />
 
-          {/* E. GOOGLE DRIVE ATTACHMENTS */}
+          {/* Google Drive Attachments */}
           <div className="space-y-4">
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
-              {isRTL ? 'المرفقات // ATTACHMENTS' : 'DRIVE ATTACHMENTS // FILES'}
-            </h3>
+             <h3 className="text-[10px] font-black tracking-widest text-zinc-500 font-mono">
+              {/* {isRTL ? 'المرفقات // ATTACHMENTS' : 'DRIVE ATTACHMENTS // FILES'} */}
+              {isRTL ? 'المرفقات - Attachments' : 'Drive Attachments'}
+             </h3>
             
             {/* bg-zinc-900/50 */}
             <div className="space-y-2 p-4 rounded-md bg-transparent dark:bg-white/5 border border-white/5">

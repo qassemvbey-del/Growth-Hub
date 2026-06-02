@@ -852,7 +852,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                   "text-[10px] md:text-[11px] font-space tracking-[0.3em] font-black uppercase",
                   profile?.ai_personality === 'SAVAGE' ? "text-[#FF0055]" : "text-cyan-600 dark:text-cyan-400"
                 )}>
-                {profile?.ai_name || (isRTL ? 'الـ Coach' : 'COACH')} // {profile?.ai_personality === 'SAVAGE' ? (isRTL ? 'النمط الشرس' : 'SAVAGE_MODE') : (isRTL ? 'متصل' : 'ONLINE')}
+                // {profile?.ai_name || (isRTL ? 'الـ Coach' : 'COACH')} // {profile?.ai_personality === 'SAVAGE' ? (isRTL ? 'النمط الشرس' : 'SAVAGE_MODE') : (isRTL ? 'متصل' : 'ONLINE')}
+                {profile?.ai_name || (isRTL ? 'الـ Coach' : 'Coach')} - {profile?.ai_personality === 'SAVAGE' ? (isRTL ? 'النمط الشرس' : 'Savage Mode') : (isRTL ? 'متصل' : 'Online')}
                 </span>
                 <button onClick={() => setAiOpen(false)} className="text-black/30 dark:text-white/30 hover:text-black dark:hover:text-white transition-all close-btn">
                   <X className="w-4.5 h-4.5 md:w-5 md:h-5" />
@@ -861,7 +862,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
               <p className="text-[13px] md:text-[15px] font-space font-bold text-black/90 dark:text-white/90 leading-relaxed" dir="auto">
                 "{lastAiMessage}"
               </p>
-              <p className="text-[9px] font-space text-black/30 dark:text-white/30 tracking-widest uppercase">AUTO_CLOSE // 8S</p>
+              // <p className="text-[9px] font-space text-black/30 dark:text-white/30 tracking-widest uppercase">AUTO_CLOSE // 8S</p>
+              <p className="text-[9px] font-space text-black/30 dark:text-white/30 tracking-widest uppercase">Auto close in 8s</p>
             </motion.div>
           )}
         </AnimatePresence> */}
