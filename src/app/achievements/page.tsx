@@ -116,7 +116,8 @@ export default function WinsPage() {
                   </>
                 )}
               </h1>
-              <p className="text-[11px] font-space text-[var(--text-secondary)] tracking-[0.35em] uppercase font-bold">
+              {/* Removed uppercase class to allow correct casing */}
+              <p className="text-[11px] font-space text-[var(--text-secondary)] tracking-[0.35em] font-bold">
                 {isRTL ? 'المهام المكتملة' : 'Completed'} &nbsp;·&nbsp; {archived.length} {isRTL ? 'سجل' : 'total'}
               </p>
             </div>

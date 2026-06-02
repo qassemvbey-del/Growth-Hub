@@ -408,12 +408,15 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               </motion.span>
               <span className="font-space font-black text-xs tracking-[0.3em] uppercase text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors font-space">
                 {/* {mounted ? (isRTL ? 'المدرب الذكي' : 'COACH') : 'COACH'} */}
-                {mounted ? (isRTL ? 'الـ Coach' : 'COACH') : 'COACH'}
+                {mounted ? (isRTL ? 'الـ Coach' : 'Coach') : 'Coach'}
               </span>
             </div>
+            {/* Commented out navigation index badge as it represents a shortcut key */}
+            {/*
             <span className="px-2 py-0.5 rounded border text-[9px] font-space font-black tracking-widest uppercase relative z-10" style={{ color: currentTheme.color, borderColor: `${currentTheme.color}40`, backgroundColor: `${currentTheme.color}20` }}>
               AI // 05
             </span>
+            */}
           </button>
         </div>
       </nav>

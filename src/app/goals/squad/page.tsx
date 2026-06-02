@@ -1146,13 +1146,16 @@ export default function SquadGoalsPage() {
               <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase not- text-black dark:text-white leading-none">
                 {typeFilter === 'solo' ? (
                   /* <>{isRTL ? 'أهداف' : 'PERSONAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' شخصية' : '_GOALS'}</span></> */
-                  <>{isRTL ? 'Goals' : 'PERSONAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' شخصية' : '_GOALS'}</span></>
+                  // <>{isRTL ? 'Goals' : 'PERSONAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' شخصية' : '_GOALS'}</span></>
+                  <>{isRTL ? 'Goals' : 'Personal'}<span style={{ color: currentTheme.color }}>{isRTL ? ' شخصية' : ' Goals'}</span></>
                 ) : typeFilter === 'squad' ? (
                   /* <>{isRTL ? 'أهداف' : 'TEAM' / 'SQUAD'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الفريق' : '_GOALS'}</span></> */
-                  <>{isRTL ? 'Goals' : 'SQUAD'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Squad' : '_GOALS'}</span></>
+                  // <>{isRTL ? 'Goals' : 'SQUAD'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Squad' : '_GOALS'}</span></>
+                  <>{isRTL ? 'Goals' : 'Squad'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Squad' : ' Goals'}</span></>
                 ) : (
                   /* <>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الأهداف' : '_CANVAS'}</span></> */
-                  <>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Goals' : '_CANVAS'}</span></>
+                  // <>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Goals' : '_CANVAS'}</span></>
+                  <>{isRTL ? 'لوحة' : 'Goal'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Goals' : ' Canvas'}</span></>
                 )}
               </h1>
             </div>

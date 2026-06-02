@@ -431,7 +431,8 @@ export default function SettingsPage() {
                                 {profile?.full_name || 'MEMBER'}
                               </h4>
                               <p className="text-[9px] sm:text-[10px] font-space tracking-[0.3em] uppercase font-black" style={{ color: currentTheme.color }}>
-                                {profile?.rank || 'RECRUIT'} // {profile?.custom_avatar ? 'CUSTOM_SVG' : 'GOOGLE_PROFILE'}
+                                {/* {profile?.rank || 'RECRUIT'} // {profile?.custom_avatar ? 'CUSTOM_SVG' : 'GOOGLE_PROFILE'} */}
+                                {profile?.rank ? profile.rank.charAt(0).toUpperCase() + profile.rank.slice(1).toLowerCase() : 'Recruit'} — {profile?.custom_avatar ? 'Custom Avatar' : 'Google Profile'}
                               </p>
                             </div>
                           </div>

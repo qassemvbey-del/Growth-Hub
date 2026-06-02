@@ -107,14 +107,17 @@ export default function AdminDashboard() {
           <div>
             <div className="flex items-center gap-3 text-red-500 mb-1">
               <HelpCircle />
-              <h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase">ADMIN_CONTROL_CENTER</h1>
+              {/* <h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase">ADMIN_CONTROL_CENTER</h1> */}
+              <h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase">Admin Control Center</h1>
             </div>
-            <p className="text-[10px] md:text-xs font-black tracking-[0.5em] text-red-500/40 uppercase">SYSTEM_OVERSIGHT // CLASSIFIED // LEVEL_BLACK</p>
+            {/* <p className="text-[10px] md:text-xs font-black tracking-[0.5em] text-red-500/40 uppercase">SYSTEM_OVERSIGHT // CLASSIFIED // LEVEL_BLACK</p> */}
+            <p className="text-[10px] md:text-xs font-black tracking-[0.5em] text-red-500/40 uppercase">System Oversight - Classified - Level Black</p>
           </div>
           
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-[9px] text-white/30 font-black tracking-widest uppercase">ADMIN_IN_CHARGE</p>
+              {/* <p className="text-[9px] text-white/30 font-black tracking-widest uppercase">ADMIN_IN_CHARGE</p> */}
+              <p className="text-[9px] text-white/30 font-black tracking-widest uppercase">Admin in Charge</p>
               <p className="text-sm font-bold text-red-500">{profile?.full_name}</p>
             </div>
             <div className="w-12 h-12 border border-red-500/30 rounded-sm bg-red-500/10 flex items-center justify-center">
@@ -128,22 +131,33 @@ export default function AdminDashboard() {
         
         {/* STATS GRID */}
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatsCard title="TOTAL_MEMBERS" value={stats?.totalUsers} icon="groups" trend="GROWTH_METRICS" />
-          <StatsCard title="ACTIVE_GOALS" value={stats?.activeMissions} icon="target" />
-          <StatsCard title="ONLINE_NOW" value={stats?.onlineNow} icon="sensors" isOnline />
-          <StatsCard title="TOTAL_XP_GENERATED" value={stats?.totalXp?.toLocaleString()} icon="bolt" />
+          {/* <StatsCard title="TOTAL_MEMBERS" value={stats?.totalUsers} icon="groups" trend="GROWTH_METRICS" /> */}
+          <StatsCard title="Total Members" value={stats?.totalUsers} icon="groups" trend="Growth Metrics" />
+          {/* <StatsCard title="ACTIVE_GOALS" value={stats?.activeMissions} icon="target" /> */}
+          <StatsCard title="Active Goals" value={stats?.activeMissions} icon="target" />
+          {/* <StatsCard title="ONLINE_NOW" value={stats?.onlineNow} icon="sensors" isOnline /> */}
+          <StatsCard title="Online Now" value={stats?.onlineNow} icon="sensors" isOnline />
+          {/* <StatsCard title="TOTAL_XP_GENERATED" value={stats?.totalXp?.toLocaleString()} icon="bolt" /> */}
+          <StatsCard title="Total XP Generated" value={stats?.totalXp?.toLocaleString()} icon="bolt" />
           
-          <StatsCard title="NEW_TODAY" value={stats?.newToday} icon="today" color="red" />
-          <StatsCard title="NEW_THIS_WEEK" value={stats?.newWeek} icon="calendar_view_week" />
-          <StatsCard title="COMPLETED_TODAY" value={stats?.completedToday} icon="verified" />
-          <StatsCard title="TASKS_EXECUTED" value={stats?.totalTasks} icon="task_alt" />
+          {/* <StatsCard title="NEW_TODAY" value={stats?.newToday} icon="today" color="red" /> */}
+          <StatsCard title="New Today" value={stats?.newToday} icon="today" color="red" />
+          {/* <StatsCard title="NEW_THIS_WEEK" value={stats?.newWeek} icon="calendar_view_week" /> */}
+          <StatsCard title="New This Week" value={stats?.newWeek} icon="calendar_view_week" />
+          {/* <StatsCard title="COMPLETED_TODAY" value={stats?.completedToday} icon="verified" /> */}
+          <StatsCard title="Completed Today" value={stats?.completedToday} icon="verified" />
+          {/* <StatsCard title="TASKS_EXECUTED" value={stats?.totalTasks} icon="task_alt" /> */}
+          <StatsCard title="Tasks Executed" value={stats?.totalTasks} icon="task_alt" />
         </section>
 
         {/* TABS */}
         <div className="flex border-b border-white/5 gap-8">
-          <TabButton active={activeTab === 'users'} onClick={() => setActiveTab('users')} label="MEMBER_REGISTRY" icon="badge" />
-          <TabButton active={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} label="GOAL_ANALYTICS" icon="analytics" />
-          <TabButton active={activeTab === 'activity'} onClick={() => setActiveTab('activity')} label="RECENT_ACTIVITY" icon="history" />
+          {/* <TabButton active={activeTab === 'users'} onClick={() => setActiveTab('users')} label="MEMBER_REGISTRY" icon="badge" /> */}
+          <TabButton active={activeTab === 'users'} onClick={() => setActiveTab('users')} label="Member Registry" icon="badge" />
+          {/* <TabButton active={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} label="GOAL_ANALYTICS" icon="analytics" /> */}
+          <TabButton active={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} label="Goal Analytics" icon="analytics" />
+          {/* <TabButton active={activeTab === 'activity'} onClick={() => setActiveTab('activity')} label="RECENT_ACTIVITY" icon="history" /> */}
+          <TabButton active={activeTab === 'activity'} onClick={() => setActiveTab('activity')} label="Recent Activity" icon="history" />
         </div>
 
         {/* CONTENT AREA */}
@@ -250,9 +264,11 @@ export default function AdminDashboard() {
                 className="grid grid-cols-1 md:grid-cols-2 gap-8"
               >
                 <div className="bg-white/[0.02] border border-white/5 p-6 rounded-sm">
-                  <h3 className="text-red-500 font-black text-xs tracking-widest uppercase mb-6 flex items-center gap-2">
+                  {/* <h3 className="text-red-500 font-black text-xs tracking-widest uppercase mb-6 flex items-center gap-2"> */}
+                  <h3 className="text-red-500 font-black text-xs tracking-widest mb-6 flex items-center gap-2">
                     <TrendingUp className="text-sm w-3.5 h-3.5" />
-                    TOP_MISSION_VECTORS
+                    {/* TOP_MISSION_VECTORS */}
+                    Top Mission Vectors
                   </h3>
                   <div className="space-y-4">
                     {analytics?.topTopics.map(([topic, count]: any, i: number) => (
@@ -261,25 +277,30 @@ export default function AdminDashboard() {
                           <span className="text-red-500/40 font-mono text-[10px]">0{i+1}</span>
                           <span className="text-sm font-bold uppercase">{topic}</span>
                         </div>
-                        <span className="text-xs font-mono text-red-500">{count} UNITS</span>
+                        {/* <span className="text-xs font-mono text-red-500">{count} UNITS</span> */}
+                        <span className="text-xs font-mono text-red-500">{count} Units</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 <div className="bg-white/[0.02] border border-white/5 p-6 rounded-sm">
-                   <h3 className="text-red-500 font-black text-xs tracking-widest uppercase mb-6 flex items-center gap-2">
+                   {/* <h3 className="text-red-500 font-black text-xs tracking-widest uppercase mb-6 flex items-center gap-2"> */}
+                   <h3 className="text-red-500 font-black text-xs tracking-widest mb-6 flex items-center gap-2">
                     <HelpCircle />
-                    SYSTEM_PERFORMANCE
+                    {/* SYSTEM_PERFORMANCE */}
+                    System Performance
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-black/40 border border-white/5 text-center">
                       <p className="text-2xl font-black text-white">75%</p>
-                      <p className="text-[9px] text-white/30 font-black uppercase mt-1">AVG_COMPLETION</p>
+                      {/* <p className="text-[9px] text-white/30 font-black uppercase mt-1">AVG_COMPLETION</p> */}
+                      <p className="text-[9px] text-white/30 font-black uppercase mt-1">Avg Completion</p>
                     </div>
                     <div className="p-4 bg-black/40 border border-white/5 text-center">
                       <p className="text-2xl font-black text-white">4.2</p>
-                      <p className="text-[9px] text-white/30 font-black uppercase mt-1">TASKS_PER_MISSION</p>
+                      {/* <p className="text-[9px] text-white/30 font-black uppercase mt-1">TASKS_PER_MISSION</p> */}
+                      <p className="text-[9px] text-white/30 font-black uppercase mt-1">Tasks Per Mission</p>
                     </div>
                   </div>
                 </div>
@@ -401,13 +422,17 @@ function isUserOnline(lastSeen: string | null) {
 }
 
 function formatRelativeTime(dateString: string | null) {
-  if (!dateString) return 'NEVER'
+  {/* if (!dateString) return 'NEVER' */}
+  if (!dateString) return 'Never'
   const now = new Date().getTime()
   const then = new Date(dateString).getTime()
   const diff = now - then
   
-  if (diff < 60000) return 'JUST_NOW'
-  if (diff < 3600000) return `${Math.floor(diff / 60000)}m_AGO`
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)}h_AGO`
+  {/* if (diff < 60000) return 'JUST_NOW' */}
+  if (diff < 60000) return 'Just Now'
+  {/* if (diff < 3600000) return `${Math.floor(diff / 60000)}m_AGO` */}
+  if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`
+  {/* if (diff < 86400000) return `${Math.floor(diff / 3600000)}h_AGO` */}
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`
   return new Date(dateString).toLocaleDateString()
 }

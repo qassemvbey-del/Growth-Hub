@@ -1008,25 +1008,32 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
               <Layers className="text-3xl md:text-4xl w-8 h-8" style={{ color: currentTheme.color }} />
               <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase not- text-black dark:text-white leading-none">
                 {typeFilter === 'solo' ? (
-                  <>{isRTL ? 'أهداف' : 'SOLO'}<span style={{ color: currentTheme.color }}>{isRTL ? ' فردية' : '_GOALS'}</span></>
+                  // <>{isRTL ? 'أهداف' : 'SOLO'}<span style={{ color: currentTheme.color }}>{isRTL ? ' فردية' : '_GOALS'}</span></>
+                  <>{isRTL ? 'أهداف' : 'Solo'}<span style={{ color: currentTheme.color }}>{isRTL ? ' فردية' : ' Goals'}</span></>
                 ) : typeFilter === 'squad' ? (
-                  <>{isRTL ? 'عمليات' : 'SQUAD'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الفريق' : '_OPS'}</span></>
+                  // <>{isRTL ? 'عمليات' : 'SQUAD'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الفريق' : '_OPS'}</span></>
+                  <>{isRTL ? 'عمليات' : 'Squad'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الفريق' : ' Goals'}</span></>
                 ) : (
                   /* Legacy GOAL_CANVAS commented out per safety rules */
                   /* <>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الأهداف' : '_CANVAS'}</span></> */
-                  <>{isRTL ? 'أهداف' : 'SOLO'}<span style={{ color: currentTheme.color }}>{isRTL ? ' فردية' : '_GOALS'}</span></>
+                  // <>{isRTL ? 'أهداف' : 'SOLO'}<span style={{ color: currentTheme.color }}>{isRTL ? ' فردية' : '_GOALS'}</span></>
+                  <>{isRTL ? 'أهداف' : 'Solo'}<span style={{ color: currentTheme.color }}>{isRTL ? ' فردية' : ' Goals'}</span></>
                 )}
               </h1>
             </div>
-            <p className={cn("text-[11px] font-space tracking-[0.35em] uppercase font-bold", isRTL ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]")}>
+            {/* Removed uppercase class to allow correct casing */}
+            <p className={cn("text-[11px] font-space tracking-[0.35em] font-bold", isRTL ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]")}>
               {typeFilter === 'solo' ? (
-                <>{isRTL ? 'أهداف شخصية نشطة' : 'PERSONAL GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
+                // <>{isRTL ? 'أهداف شخصية نشطة' : 'PERSONAL GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
+                <>{isRTL ? 'أهداف شخصية نشطة' : 'Personal Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'Active'}</>
               ) : typeFilter === 'squad' ? (
-                <>{isRTL ? 'أهداف تعاونية نشطة' : 'COLLABORATIVE GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
+                // <>{isRTL ? 'أهداف تعاونية نشطة' : 'COLLABORATIVE GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
+                <>{isRTL ? 'أهداف تعاونية نشطة' : 'Collaborative Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'Active'}</>
               ) : (
                 /* Legacy GOAL_CANVAS subtitle commented out */
                 /* <>{isRTL ? 'الأهداف الأساسية النشطة' : 'Active Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'هدف نشط' : 'total'}</> */
-                <>{isRTL ? 'أهداف شخصية نشطة' : 'PERSONAL GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
+                // <>{isRTL ? 'أهداف شخصية نشطة' : 'PERSONAL GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
+                <>{isRTL ? 'أهداف شخصية نشطة' : 'Personal Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'Active'}</>
               )}
             </p>
           </div>
