@@ -430,8 +430,8 @@ export default function Dashboard() {
               <div className="flex items-center gap-1 sm:gap-2 min-w-0">
                 {/* <NeonIcon icon={Zap} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} /> */}
                 <span className="text-[9px] sm:text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase truncate">
-                  {/* {isRTL ? 'التركيز اليومي' : 'DAILY FOCUS'} */}
-                  {isRTL ? 'الـ Focus اليومي' : 'DAILY FOCUS'}
+                  {/* {isRTL ? 'الـ Focus اليومي' : 'DAILY FOCUS'} */}
+                  {isRTL ? 'الـ Focus اليومي' : 'Daily Focus'}
                 </span>
               </div>
               <div className="text-[10px] sm:text-lg font-black tracking-tight shrink-0">
@@ -533,7 +533,7 @@ export default function Dashboard() {
                 {/* <NeonIcon icon={Activity} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} /> */}
                 <h2 className="text-[10px] sm:text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase">
                   {/* {isRTL ? 'الوارد التكتيكي العاجل' : 'ACTION INBOX // CRITICAL'} */}
-                  {isRTL ? 'الوارد العاجل' : 'ACTION INBOX // CRITICAL'}
+                  {isRTL ? 'الوارد العاجل' : 'Action Inbox'}
                 </h2>
               </div>
               <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[10px] font-black border shrink-0" style={{ color: currentTheme.color, borderColor: `${currentTheme.color}30`, backgroundColor: `${currentTheme.color}15` }}>
