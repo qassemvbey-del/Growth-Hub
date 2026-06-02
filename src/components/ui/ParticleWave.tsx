@@ -59,7 +59,12 @@ export default function ParticleWave() {
 
     const render = () => {
       time += 0.03
-      ctx.fillStyle = '#000000'
+
+      // STEP 1: DETECT THEME DYNAMICALLY
+      const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+      
+      // Clear with dynamic theme background
+      ctx.fillStyle = isDark ? '#09090b' : '#ffffff'
       ctx.fillRect(0, 0, width, height)
 
       const cosX = Math.cos(angleX)
@@ -70,15 +75,12 @@ export default function ParticleWave() {
 
       points.forEach((p) => {
         // Calculate procedural undulating height wave (Z-axis)
-        // Combine sine/cosine waves across spatial axes
         const waveX = p.x3d * 0.004
         const waveY = p.y3d * 0.004
         let z = Math.sin(waveX + time) * Math.cos(waveY + time) * 45
-        z += Math.sin(waveX * 2 - time * 0.5) * 15 // Adding layer of complexity for 3D realism
+        z += Math.sin(waveX * 2 - time * 0.5) * 15
 
-        // Apply dynamic mouse displacement/ripple
-        // Check distance to cursor in 2D space
-        // Project baseline position to screen to compute distance to mouse pointer
+        // Project baseline position to compute distance to mouse pointer
         const tempY = p.y3d * cosX - z * sinX
         const tempZ = p.y3d * sinX + z * cosX + fov
         const screenX = (p.x3d * fov) / tempZ + width / 2
@@ -90,7 +92,6 @@ export default function ParticleWave() {
         let mouseDisplacement = 0
 
         if (dist < 250) {
-          // Push particles up when mouse is near
           const strength = (250 - dist) / 250
           mouseDisplacement = Math.sin(strength * Math.PI) * 40
           z += mouseDisplacement
@@ -100,13 +101,10 @@ export default function ParticleWave() {
         const rotatedY = p.y3d * cosX - z * sinX
         const rotatedZ = p.y3d * sinX + z * cosX + fov
 
-        // Calculate 2D coordinates projected onto screen
         const finalX = (p.x3d * fov) / rotatedZ + width / 2
         const finalY = (rotatedY * fov) / rotatedZ + height / 2
 
-        // Keep rendering within window bounds
         if (finalX >= 0 && finalX <= width && finalY >= 0 && finalY <= height) {
-          // Vignette/fade opacity based on distance from screen center
           const centerX = width / 2
           const centerY = height / 2
           const distToCenter = Math.sqrt(
@@ -116,10 +114,10 @@ export default function ParticleWave() {
           const maxDist = Math.sqrt(centerX * centerX + centerY * centerY)
           const vignette = Math.max(0, 1 - distToCenter / (maxDist * 0.85))
 
-          // Enhanced mouse proximity glow
+          // Draw dots using dynamic theme colours: White for dark mode, dark slate for light mode
           let opacity = vignette * 0.15
           let radius = 1.2
-          let color = 'rgba(20, 184, 166, ' // Teal accent
+          let color = isDark ? 'rgba(255, 255, 255, ' : 'rgba(15, 23, 42, '
 
           if (dist < 220) {
             const glowFactor = (220 - dist) / 220
@@ -149,7 +147,7 @@ export default function ParticleWave() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 z-0 w-full h-full bg-black pointer-events-none"
+      className="fixed inset-0 w-full h-full pointer-events-none -z-10"
     />
   )
 }
