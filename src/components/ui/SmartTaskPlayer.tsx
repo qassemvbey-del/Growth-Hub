@@ -51,13 +51,13 @@ export default function SmartTaskPlayer({
         if (user) {
           const { data, error } = await supabase
             .from('task_progress')
-            .select('current_time')
+            .select('video_time')
             .eq('task_id', taskId)
             .eq('user_id', user.id)
             .maybeSingle()
           
-          if (data && typeof data.current_time === 'number') {
-            setDbSavedTime(data.current_time)
+          if (data && typeof data.video_time === 'number') {
+            setDbSavedTime(data.video_time)
           }
         }
       } catch (err) {
@@ -159,8 +159,8 @@ export default function SmartTaskPlayer({
           await supabase.from('task_progress').upsert({
             task_id: taskId,
             user_id: user.id,
-            current_time: time,
-            duration: duration,
+            video_time: time,
+            video_duration: duration,
             updated_at: new Date().toISOString()
           })
         }
@@ -251,8 +251,8 @@ export default function SmartTaskPlayer({
                   await supabase.from('task_progress').upsert({
                     task_id: taskId,
                     user_id: data.user.id,
-                    current_time: 0,
-                    duration: durationRef.current,
+                    video_time: 0,
+                    video_duration: durationRef.current,
                     updated_at: new Date().toISOString()
                   })
                 }

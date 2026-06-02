@@ -56,8 +56,8 @@ create policy "Users can update tasks of their own cups" on tasks for update usi
 create table if not exists task_progress (
   task_id text not null,
   user_id uuid references auth.users(id) not null,
-  current_time integer default 0,
-  duration integer default 0,
+  video_time integer default 0,
+  video_duration integer default 0,
   updated_at timestamp with time zone default now(),
   primary key (task_id, user_id)
 );
