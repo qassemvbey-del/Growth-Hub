@@ -373,7 +373,13 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       if ((e.ctrlKey || e.metaKey) && e.code === 'KeyK') {
         e.preventDefault()
         e.stopPropagation()
-        setCommandPaletteOpen(prev => !prev)
+        setCommandPaletteOpen(prev => {
+          const next = !prev
+          if (next) {
+            window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ctrl-k' }))
+          }
+          return next
+        })
       }
     }
     window.addEventListener('keydown', handleCtrlK, { capture: true })
@@ -611,7 +617,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       <div className="fixed inset-0 pointer-events-none z-[100] scanlines opacity-[0.02]" />
       <div className="fixed inset-0 pointer-events-none z-0 cyber-grid opacity-[0.05]" />
 
-      <Sidebar isRTL={isRTL} onOpenCoach={() => { setCoachPanelOpen(true); playNeuralLink(); }} />
+      <Sidebar isRTL={isRTL} onOpenCoach={() => { setCoachPanelOpen(true); playNeuralLink(); window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ai-coach' })); }} />
 
       <main className={cn(
         'flex-1 min-h-screen pb-0 lg:pb-0 transition-all duration-500 relative z-10 w-full max-w-full overflow-x-hidden',
@@ -803,6 +809,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
               onClick={() => {
                 setCoachPanelOpen(true)
                 playNeuralLink()
+                window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ai-coach' }))
               }}
               className={cn(
                 "flex items-center justify-center w-9 h-9 rounded-full transition-all border relative cursor-pointer shadow-md group nav-btn",
@@ -1148,7 +1155,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       <CommandPalette 
         isOpen={commandPaletteOpen} 
         onClose={() => setCommandPaletteOpen(false)} 
-        onOpenCoach={() => setCoachPanelOpen(true)}
+        onOpenCoach={() => { setCoachPanelOpen(true); window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ai-coach' })); }}
         missions={syncedMissions}
       />
       {/* <AuthModal /> */}

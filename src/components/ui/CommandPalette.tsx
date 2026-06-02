@@ -178,7 +178,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={onClose}
-              className="fixed inset-0 bg-black/85 backdrop-blur-md"
+              className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm"
             />
 
             {/* Modal Container */}

@@ -1006,6 +1006,31 @@ export default function MissionDetailPage() {
     }
   }
 
+  useEffect(() => {
+    const handleOnboardingAction = async (e: Event) => {
+      const detail = (e as CustomEvent).detail
+      if (!mission?.tasks) return
+
+      let targetTask = null
+      if (detail === 'ctrl-k') {
+        targetTask = mission.tasks.find((t: any) => t.title.toUpperCase().includes('CTRL + K') && !t.is_completed)
+      } else if (detail === 'pin') {
+        targetTask = mission.tasks.find((t: any) => (t.title.toUpperCase().includes('PIN') || t.title.includes('📌')) && !t.is_completed)
+      } else if (detail === 'import-playlist') {
+        targetTask = mission.tasks.find((t: any) => t.title.toUpperCase().includes('YOUTUBE') && !t.is_completed)
+      } else if (detail === 'ai-coach') {
+        targetTask = mission.tasks.find((t: any) => t.title.toUpperCase().includes('AI COACH') && !t.is_completed)
+      }
+
+      if (targetTask) {
+        await toggleTask(targetTask.id, false)
+      }
+    }
+
+    window.addEventListener('onboarding-action', handleOnboardingAction)
+    return () => window.removeEventListener('onboarding-action', handleOnboardingAction)
+  }, [mission?.tasks, toggleTask])
+
   const onMoveTask = async (taskId: string, newColumnId: string) => {
     if (mission?.metadata?.type === 'squad' && !canCompleteTask) {
       showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")
@@ -1533,7 +1558,14 @@ const { progress, isInRedZone } = useMemo(() => {
             <div className="flex flex-wrap gap-4 items-center">
               {/* PIN ICON TOGGLE */}
               <button 
-                 onClick={() => { playBlip(); updateMission({ sync_to_dashboard: !mission.sync_to_dashboard }); }}
+                 onClick={() => { 
+                    playBlip(); 
+                    const nextVal = !mission.sync_to_dashboard;
+                    updateMission({ sync_to_dashboard: nextVal }); 
+                    if (nextVal) {
+                      window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'pin' }));
+                    }
+                 }}
                  className={cn(
                     "p-3 border transition-all rounded-md flex items-center justify-center cursor-pointer",
                     mission.sync_to_dashboard 
@@ -1581,7 +1613,12 @@ const { progress, isInRedZone } = useMemo(() => {
                         className="absolute left-0 mt-2 w-56 bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-md shadow-2xl z-50 p-1.5 space-y-1 font-space"
                       >
                         <button
-                          onClick={() => { playBlip(); setShowPlaylistModal(true); setShowImportDropdown(false); }}
+                          onClick={() => { 
+                            playBlip(); 
+                            setShowPlaylistModal(true); 
+                            setShowImportDropdown(false); 
+                            window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'import-playlist' }));
+                          }}
                           className="w-full text-left px-3.5 py-2.5 text-[9px] font-black tracking-wider uppercase text-zinc-400 hover:text-white hover:bg-white/[0.03] rounded-md transition-colors flex items-center gap-2 cursor-pointer"
                         >
                           <ListPlus className="w-3.5 h-3.5" />
@@ -2071,7 +2108,7 @@ const { progress, isInRedZone } = useMemo(() => {
                    })}
                 </AnimatePresence>
 
-                 {/* INLINE QUICK ADD ROW */}
+                 {/* INLINE QUICK ADD ROW commented out per user request to resolve redundancy
                  <div className="mt-3 flex items-center gap-3 p-3 bg-white/[0.01] hover:bg-white/[0.02] border border-dashed border-white/10 hover:border-white/20 rounded-md transition-all">
                    <div className="w-5 shrink-0 text-right select-none font-mono text-[10px] text-white/20 font-black">
                      +
@@ -2145,6 +2182,7 @@ const { progress, isInRedZone } = useMemo(() => {
                      }}
                    />
                  </div>
+                 */}
              </div>
            ) : (
              <KanbanBoard
