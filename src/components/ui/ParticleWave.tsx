@@ -60,11 +60,11 @@ export default function ParticleWave() {
     const render = () => {
       time += 0.03
 
-      // STEP 1: DETECT THEME DYNAMICALLY
+      // DETECT THEME DYNAMICALLY
       const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
       
-      // Clear with dynamic theme background
-      ctx.fillStyle = isDark ? '#09090b' : '#ffffff'
+      // STEP 2: USE TRAILING CLEAR EFFECT FOR SMOOTH MOTION TRAILS
+      ctx.fillStyle = isDark ? 'rgba(9, 9, 11, 0.25)' : 'rgba(255, 255, 255, 0.25)'
       ctx.fillRect(0, 0, width, height)
 
       const cosX = Math.cos(angleX)
@@ -114,14 +114,14 @@ export default function ParticleWave() {
           const maxDist = Math.sqrt(centerX * centerX + centerY * centerY)
           const vignette = Math.max(0, 1 - distToCenter / (maxDist * 0.85))
 
-          // Draw dots using dynamic theme colours: White for dark mode, dark slate for light mode
-          let opacity = vignette * 0.15
-          let radius = 1.2
-          let color = isDark ? 'rgba(255, 255, 255, ' : 'rgba(15, 23, 42, '
+          // Draw highly visible contrasting teal dots
+          let opacity = vignette * 0.45 // Increased opacity for crystal clear visibility
+          let radius = 1.4 // Slightly larger radius
+          let color = isDark ? 'rgba(20, 184, 166, ' : 'rgba(13, 148, 136, '
 
           if (dist < 220) {
             const glowFactor = (220 - dist) / 220
-            opacity += glowFactor * 0.5
+            opacity += glowFactor * 0.45
             radius += glowFactor * 1.5
           }
 
@@ -144,10 +144,11 @@ export default function ParticleWave() {
     }
   }, [])
 
+  // STEP 1: SET CANVAS WRAPPER TO Z-0
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-full h-full pointer-events-none -z-10"
+      className="fixed inset-0 w-full h-full pointer-events-none z-0"
     />
   )
 }
