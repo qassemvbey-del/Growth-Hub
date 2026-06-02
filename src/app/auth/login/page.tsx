@@ -54,6 +54,7 @@ export default function LoginPage() {
 
   // Translation Dictionaries
   const t = {
+    /*
     ar: {
       title: 'منصة الإنتاجية والنمو الشخصي',
       subtitle: 'GROWTH HUB',
@@ -69,6 +70,23 @@ export default function LoginPage() {
       feature3Title: 'نظام النقاط ومستويات النمو',
       feature3Desc: 'اكتسب مستويات متقدمة ونقاط خبرة (XP) مستمرة مع كل إنجاز مكتمل.',
       footer: 'منصة نمو وتطوير احترافية · جميع الحقوق محفوظة',
+    },
+    */
+    ar: {
+      title: 'منصة الإنتاجية وتطوير نفسك',
+      subtitle: 'GROWTH HUB',
+      welcome: 'أهلاً بيك من تاني',
+      desc: 'سجل دخولك دلوقتي عشان تدخل على الـ Dashboard بتاعتك وتتكلم مع مساعد الـ AI عشان تحقق الـ Goals بتاعتك.',
+      button: 'ادخل بـ Google',
+      signingIn: 'بندخلك دلوقتي...',
+      tagline: 'مكان شغل متكامل عشان تدير الـ Goals والـ Tasks بتاعتك بإنتاجية عالية.',
+      feature1Title: 'محرك الـ Goals الذكي',
+      feature1Desc: 'تخطيط الـ Goals الشخصية والـ Squad بدقة ووضوح.',
+      feature2Title: 'التوجيه بمساعدة الـ AI',
+      feature2Desc: 'الـ Coach الشخصي بتاعك بالـ AI اللي معاك 24 ساعة عشان يحمسك.',
+      feature3Title: 'نظام النقاط ومستويات الـ Rank',
+      feature3Desc: 'هات مستويات عالية و XP على طول مع كل إنجاز تخلصه.',
+      footer: 'منصة تطوير شخصي احترافية · كل الحقوق محفوظة',
     },
     en: {
       title: 'Productivity & Growth Platform',
@@ -237,7 +255,8 @@ export default function LoginPage() {
           {/* Secure lock telemetry indicator */}
           <div className="flex items-center justify-center gap-2 text-[9px] font-monospace text-white/30 uppercase tracking-widest pt-4 border-t border-white/5">
             <Shield className="w-3.5 h-3.5 text-emerald-500/60" />
-            <span>{lang === 'ar' ? 'بيئة عمل آمنة ومحمية' : 'SECURE & PROTECTED WORKSPACE'}</span>
+            {/* <span>{lang === 'ar' ? 'بيئة عمل آمنة ومحمية' : 'SECURE & PROTECTED WORKSPACE'}</span> */}
+            <span>{lang === 'ar' ? 'مكان شغل آمن ومحمي' : 'SECURE & PROTECTED WORKSPACE'}</span>
           </div>
 
         </motion.div>

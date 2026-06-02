@@ -76,7 +76,12 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
 
   const MENU_ITEMS = [
     { icon: Home, label: mounted ? (isRTL ? 'الرئيسية' : "Home") : "Home", href: '/', shortcut: '01', exact: true },
+    /*
     { icon: Target, label: mounted ? (isRTL ? 'أهدافي' : 'Goals') : 'Goals', href: '/missions', shortcut: '02', exact: false },
+    { icon: FileText, label: mounted ? (isRTL ? 'ملاحظاتي' : 'Notes') : 'Notes', href: '/notes', shortcut: '03', exact: false },
+    { icon: Trophy, label: mounted ? (isRTL ? 'إنجازاتي' : 'Wins') : 'Wins', href: '/achievements', shortcut: '04', exact: false },
+    */
+    { icon: Target, label: mounted ? (isRTL ? 'الـ Goals' : 'Goals') : 'Goals', href: '/missions', shortcut: '02', exact: false },
     { icon: FileText, label: mounted ? (isRTL ? 'ملاحظاتي' : 'Notes') : 'Notes', href: '/notes', shortcut: '03', exact: false },
     { icon: Trophy, label: mounted ? (isRTL ? 'إنجازاتي' : 'Wins') : 'Wins', href: '/achievements', shortcut: '04', exact: false },
   ]
@@ -142,7 +147,14 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
         {mounted && perks.hasTitle && (
           <span className="text-[10px] font-space font-black uppercase tracking-[0.2em] opacity-80 mt-1" style={{ color: currentTheme.color }}>
             [ {isRTL ? (
+              /*
               profile?.rank === 'GOLD' ? 'المشغل الذهبي' :
+              profile?.rank === 'PLATINUM' ? 'النخبة البلاتينية' :
+              profile?.rank === 'DIAMOND' ? 'الماستر الماسي' :
+              profile?.rank === 'CROWN' ? 'الملك المتوج' :
+              profile?.rank === 'ACE' ? 'البطل القرمزي' : 'الفاتح الأعظم'
+              */
+              profile?.rank === 'GOLD' ? 'الأوبريتور الذهبي' :
               profile?.rank === 'PLATINUM' ? 'النخبة البلاتينية' :
               profile?.rank === 'DIAMOND' ? 'الماستر الماسي' :
               profile?.rank === 'CROWN' ? 'الملك المتوج' :
@@ -170,7 +182,8 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
             <span className="text-zinc-500 dark:text-zinc-400 uppercase text-left leading-tight">
               {mounted
                 ? (isRTL
-                    ? `${xpNeeded} نقطة إلى ${nextRankName === 'MAX RANK' ? 'أعلى رتبة' : nextRankName}`
+                    /* ? `${xpNeeded} نقطة إلى ${nextRankName === 'MAX RANK' ? 'أعلى رتبة' : nextRankName}` */
+                    ? `${xpNeeded} XP لحد ${nextRankName === 'MAX RANK' ? 'أعلى Rank' : nextRankName}`
                     : `${xpNeeded}xp to ${nextRankName}`)
                 : `800xp to PLATINUM`}
             </span>
@@ -258,7 +271,8 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                     >
                       {[
                         { label: mounted ? (isRTL ? 'شخصي' : 'Personal Goals') : 'Personal Goals', icon: User, href: '/goals/solo' },
-                        { label: mounted ? (isRTL ? 'فريق' : 'Team Goals') : 'Team Goals', icon: Users, href: '/goals/squad' }
+                        /* { label: mounted ? (isRTL ? 'فريق' : 'Team Goals') : 'Team Goals', icon: Users, href: '/goals/squad' } */
+                        { label: mounted ? (isRTL ? 'Squad' : 'Team Goals') : 'Team Goals', icon: Users, href: '/goals/squad' }
                       ].map((subItem, subIdx) => {
                         const isSubActive = pathname === subItem.href
                         const isSubHovered = hoveredIndex === (100 + subIdx)
@@ -393,7 +407,8 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                 <NeonIcon icon={Bot} className="w-5 h-5" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }} />
               </motion.span>
               <span className="font-space font-black text-xs tracking-[0.3em] uppercase text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors font-space">
-                {mounted ? (isRTL ? 'المدرب الذكي' : 'COACH') : 'COACH'}
+                {/* {mounted ? (isRTL ? 'المدرب الذكي' : 'COACH') : 'COACH'} */}
+                {mounted ? (isRTL ? 'الـ Coach' : 'COACH') : 'COACH'}
               </span>
             </div>
             <span className="px-2 py-0.5 rounded border text-[9px] font-space font-black tracking-widest uppercase relative z-10" style={{ color: currentTheme.color, borderColor: `${currentTheme.color}40`, backgroundColor: `${currentTheme.color}20` }}>

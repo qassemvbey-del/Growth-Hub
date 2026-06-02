@@ -255,8 +255,13 @@ export default function Dashboard() {
     }
     return isRTL ? 'لا يوجد منافسين في هذا الفريق.' : 'No other active rivals in this squad.'
     */
+    /*
     return isRTL 
       ? 'ترتيبك في الفريق: شوف مركزك بين زمايلك.' 
+      : 'Squad Leaderboard: See your rank among teammates.'
+    */
+    return isRTL 
+      ? 'ترتيبك في الـ Squad: شوف مركزك بين زمايلك.' 
       : 'Squad Leaderboard: See your rank among teammates.'
   }, [isRTL])
 
@@ -343,7 +348,8 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight uppercase leading-none text-zinc-900 dark:text-white"
           >
-            {isRTL ? 'منصة' : 'FOCUS'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'HUB'}</span>
+            {/* {isRTL ? 'منصة' : 'FOCUS'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'HUB'}</span> */}
+            {isRTL ? 'منصة' : 'FOCUS'} <span style={{ color: currentTheme.color }}>{isRTL ? 'الـ Focus' : 'HUB'}</span>
           </motion.h1>
 
           {/* <p className="text-[8px] sm:text-[10px] text-zinc-500 dark:text-white/40 tracking-[0.2em] sm:tracking-[0.4em] uppercase font-black">
@@ -415,7 +421,8 @@ export default function Dashboard() {
               <div className="flex items-center gap-1 sm:gap-2 min-w-0">
                 {/* <NeonIcon icon={Zap} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} /> */}
                 <span className="text-[9px] sm:text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase truncate">
-                  {isRTL ? 'التركيز اليومي' : 'DAILY FOCUS'}
+                  {/* {isRTL ? 'التركيز اليومي' : 'DAILY FOCUS'} */}
+                  {isRTL ? 'الـ Focus اليومي' : 'DAILY FOCUS'}
                 </span>
               </div>
               <div className="text-[10px] sm:text-lg font-black tracking-tight shrink-0">
@@ -516,11 +523,13 @@ export default function Dashboard() {
               <div className="flex items-center gap-1.5 sm:gap-2">
                 {/* <NeonIcon icon={Activity} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} /> */}
                 <h2 className="text-[10px] sm:text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase">
-                  {isRTL ? 'الوارد التكتيكي العاجل' : 'ACTION INBOX // CRITICAL'}
+                  {/* {isRTL ? 'الوارد التكتيكي العاجل' : 'ACTION INBOX // CRITICAL'} */}
+                  {isRTL ? 'الوارد العاجل' : 'ACTION INBOX // CRITICAL'}
                 </h2>
               </div>
               <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[10px] font-black border shrink-0" style={{ color: currentTheme.color, borderColor: `${currentTheme.color}30`, backgroundColor: `${currentTheme.color}15` }}>
-                {actionInboxTasks.length} {isRTL ? 'مهمة عاجلة' : 'IMMEDIATE'}
+                {/* {actionInboxTasks.length} {isRTL ? 'مهمة عاجلة' : 'IMMEDIATE'} */}
+                {actionInboxTasks.length} {isRTL ? 'Task عاجل' : 'IMMEDIATE'}
               </span>
             </div>
 
@@ -583,7 +592,8 @@ export default function Dashboard() {
                   {/* <span className="text-zinc-600 font-black text-xl sm:text-2xl">⚡</span> */}
                   <p className="text-[9px] sm:text-xs text-zinc-500 dark:text-white/30 uppercase tracking-widest">
                     {/* {isRTL ? 'الوارد فارغ! جميع الالتزامات منجزة.' : 'INBOX CLEAR // NO OVERDUE TASKS'} */}
-                    {isRTL ? 'عاش! مفيش أي مهام متأخرة عليك حالياً.' : "You're all caught up! Overdue tasks will appear here."}
+                    {/* {isRTL ? 'عاش! مفيش أي مهام متأخرة عليك حالياً.' : "You're all caught up! Overdue tasks will appear here."} */}
+                    {isRTL ? 'عاش! مفيش أي Tasks متأخرة عليك دلوقتي.' : "You're all caught up! Overdue tasks will appear here."}
                   </p>
                 </div>
               )}
@@ -649,7 +659,8 @@ export default function Dashboard() {
           <div className="flex items-center gap-3">
             {/* <NeonIcon icon={Target} className="text-2xl w-6 h-6 shrink-0" style={{ color: currentTheme.color }} /> */}
             <h2 className="text-sm font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">
-              {isRTL ? 'الأهداف المثبتة' : 'PINNED GOALS'}
+              {/* {isRTL ? 'الأهداف المثبتة' : 'PINNED GOALS'} */}
+              {isRTL ? 'الـ Goals المثبتة' : 'PINNED GOALS'}
             </h2>
           </div>
 
@@ -707,7 +718,8 @@ export default function Dashboard() {
             {pinnedGoals.length === 0 && (
               <div className="col-span-full py-12 text-center border border-dashed border-white/5 rounded-xl">
                 <p className="text-xs uppercase tracking-widest text-zinc-500 font-bold">
-                  {isRTL ? 'لا توجد أهداف مثبتة. افتح هدفاً وثبّته في لوحة التحكم.' : 'No goals pinned. Open a goal and pin it to your Dashboard.'}
+                  {/* {isRTL ? 'لا توجد أهداف مثبتة. افتح هدفاً وثبّته في لوحة التحكم.' : 'No goals pinned. Open a goal and pin it to your Dashboard.'} */}
+                  {isRTL ? 'مفيش Goals مثبتة. افتح Goal وثبته في الـ Dashboard.' : 'No goals pinned. Open a goal and pin it to your Dashboard.'}
                 </p>
               </div>
             )}

@@ -278,6 +278,7 @@ export const TRANSLATIONS = {
     markCompleted: 'MARK COMPLETED',
     googleApiNotConfigured: 'Google API keys are not configured.',
   },
+  /*
   ar: {
     dashboard: 'الرئيسية',
     mission: 'الأهداف',
@@ -350,6 +351,79 @@ export const TRANSLATIONS = {
     markCompleted: 'اعتماد كمكتملة',
     googleApiNotConfigured: 'مفاتيح Google API غير مهيأة بعد.',
   }
+  */
+  ar: {
+    dashboard: 'الرئيسية',
+    mission: 'Goals',
+    brain: 'الأفكار والملاحظات',
+    achievements: 'الإنجازات',
+    vault: 'الخزنة',
+    streak: 'Streak',
+    exit: 'خروج',
+    sync: 'المزامنة شغالة',
+    operator: 'العضو',
+    status: 'متصل',
+    createMission: 'عمل Goal جديد',
+    task: 'Task فرعي',
+    showOnDashboard: 'ورّيه في الرئيسية',
+    save: 'احفظ',
+    cancel: 'مش دلوقتي',
+    delete: 'مسح',
+    edit: 'عدّل',
+    deadline: 'آخر ميعاد',
+    start_date: 'تاريخ البداية',
+    end_date: 'تاريخ النهاية',
+    title: 'العنوان',
+    progress: 'التقدم',
+    on_track: 'على التراك',
+    late: 'متأخر',
+    ahead: 'سابق وقته',
+    addTask: 'ضيف Task فرعي',
+    settings: 'الإعدادات',
+    gender: 'النوع',
+    male: 'ذكر',
+    female: 'أنثى',
+    age: 'السن',
+    fullName: 'اسمك بالكامل',
+    aiName: 'اسم الـ Coach',
+    aiPersonality: 'شخصية الـ Coach',
+    gentle: 'هادي',
+    savage: 'شرس',
+    logout: 'خروج',
+    noTasks: 'مفيش Tasks فرعية مضافة دلوقتي. من فضلك ضيف Task فرعي تحت.',
+    tapToEnter: 'دوس عشان تدخل',
+    purge: 'مسح',
+    deploy: 'عمل',
+    missionColor: 'لون الـ Goal',
+    missionScale: 'حجم الـ Goal',
+    details: 'التفاصيل',
+    time: 'الوقت',
+    notes: 'الملاحظات',
+    attachments: 'المرفقات',
+    noDescription: 'مفيش وصف موجود',
+    writeNotePlaceholder: '[ اكتب ملحوظة جديدة للـ Task... ]',
+    googleDriveLinkBtn: 'اربط ملف من Google Drive',
+    googleDriveDesc: 'بضغطة واحدة، اربط ملفاتك مباشرة من حسابك. مش هنستهلك أي مساحة من السيرفر.',
+    taskDetail: 'تفاصيل الـ Task',
+    savedProgress: 'التقدم اللي اتحفظ',
+    coreTaskStatement: 'بيان الـ Task الأساسي',
+    writeDescriptionPlaceholder: 'اكتب وصف أو بيان للـ Task ده...',
+    completed: 'خلصت',
+    inProgress: 'بيتعمل',
+    priority: 'الأهمية: ',
+    high: 'عالية 🔥',
+    regular: 'عادية',
+    statusComplexity: 'الحالة والتقدير',
+    currentStatus: 'الحالة دلوقتي',
+    taskWeight: 'وزن الـ Task / أهميته',
+    timeTrackingTitle: 'تتبع الوقت جاي قريب',
+    timeTrackingDesc: 'في التحديث الجاي (Phase 2)، هتقدر تشغل مؤقت بومودورو مخصوص لكل Task وتربطه بالكامل مع سجل التتبع كله.',
+    addNote: 'ضيف ملحوظة',
+    deleteAttachment: 'مسح المرفق',
+    markIncomplete: 'شيل علامة خلصت',
+    markCompleted: 'خلصتها!',
+    googleApiNotConfigured: 'مفاتيح الـ Google API مش متظبطة لسه.',
+  }
 }
 
 interface GrowthContextType {
@@ -389,6 +463,10 @@ interface GrowthContextType {
   }
   getRankNeonClass: (rank: string) => string
   tasksCompletedToday: number
+  isCreateGoalModalOpen: boolean
+  openCreateGoalModal: (opts?: { prefillTitle?: string; goalType?: 'solo' | 'squad' }) => void
+  closeCreateGoalModal: () => void
+  createGoalModalOpts: { prefillTitle?: string; goalType?: 'solo' | 'squad' }
 }
 
 const GrowthContext = createContext<GrowthContextType | undefined>(undefined)
@@ -461,6 +539,18 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
   const [newRank, setNewRank] = useState('SILVER')
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [topXpUserId, setTopXpUserId] = useState<string | null>(null)
+  const [isCreateGoalModalOpen, setIsCreateGoalModalOpen] = useState(false)
+  const [createGoalModalOpts, setCreateGoalModalOpts] = useState<{ prefillTitle?: string; goalType?: 'solo' | 'squad' }>({})
+
+  const openCreateGoalModal = (opts?: { prefillTitle?: string; goalType?: 'solo' | 'squad' }) => {
+    setCreateGoalModalOpts(opts || {})
+    setIsCreateGoalModalOpen(true)
+  }
+
+  const closeCreateGoalModal = () => {
+    setIsCreateGoalModalOpen(false)
+    setCreateGoalModalOpts({})
+  }
   
   // Anti-cheat state variables
   const [cooldownEnd, setCooldownEnd] = useState<string | null>(null)
@@ -737,12 +827,14 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
     // Trigger toasts
     if (reason === 'quality') {
       triggerToast(
-        isRTL ? "اسم المهمة غير واضح. تم تشغيل فلتر الجودة. تم منح 0 XP." : "Task name too vague. Quality filter triggered. 0 XP awarded.",
+        // isRTL ? "اسم المهمة غير واضح. تم تشغيل فلتر الجودة. تم منح 0 XP." : "Task name too vague. Quality filter triggered. 0 XP awarded.",
+        isRTL ? "اسم الـ Task مش واضح. فلتر الجودة اشتغل. اتمنح 0 XP." : "Task name too vague. Quality filter triggered. 0 XP awarded.",
         'warning'
       )
     } else if (reason === 'velocity' || (amount > 0 && completionTimestamps.filter(t => Date.now() - t < 60000).length >= 2)) {
       triggerToast(
-        isRTL ? "تم اكتشاف سبام. تم إيقاف كسب نقاط الـ XP مؤقتاً لمدة 15 دقيقة." : "Spam detected. XP gain is on cooldown for 15 minutes.",
+        // isRTL ? "تم اكتشاف سبام. تم إيقاف كسب نقاط الـ XP مؤقتاً لمدة 15 دقيقة." : "Spam detected. XP gain is on cooldown for 15 minutes.",
+        isRTL ? "شكلها سبام. كسب الـ XP وقف مؤقتاً لمدة 15 دقيقة." : "Spam detected. XP gain is on cooldown for 15 minutes.",
         'warning'
       )
     }
@@ -1218,7 +1310,11 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
       setShowAuthModal,
       perks,
       getRankNeonClass,
-      tasksCompletedToday
+      tasksCompletedToday,
+      isCreateGoalModalOpen,
+      openCreateGoalModal,
+      closeCreateGoalModal,
+      createGoalModalOpts
     }}>
       {children}
     </GrowthContext.Provider>

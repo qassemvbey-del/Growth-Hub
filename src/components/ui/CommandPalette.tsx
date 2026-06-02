@@ -19,7 +19,7 @@ interface CommandPaletteProps {
 }
 
 export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions = [] }: CommandPaletteProps) {
-  const { currentTheme, isRTL } = useGrowth()
+  const { currentTheme, isRTL, openCreateGoalModal } = useGrowth()
   const { showToast } = useToast()
   const { playBlip, playSuccess } = useSound()
   const router = useRouter()
@@ -231,7 +231,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                     <Command.Group heading={isRTL ? "إنشاء سريع ذكي" : "SMART QUICK CREATE"}>
                       <Command.Item
                         value={`create task ${search}`}
-                        onSelect={() => runCommand(() => { router.push(`/missions?create=true&createTask=${encodeURIComponent(search)}`); onClose(); })}
+                        onSelect={() => runCommand(() => { openCreateGoalModal({ goalType: 'solo', prefillTitle: search }); onClose(); })}
                         className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-zinc-300 hover:text-white cursor-pointer transition-all gap-3"
                         style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
                       >
@@ -321,7 +321,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                   >
                     <Command.Item
                       value="create new goal"
-                      onSelect={() => runCommand(() => { router.push('/missions?create=true'); onClose(); })}
+                      onSelect={() => runCommand(() => { openCreateGoalModal({ goalType: 'solo' }); onClose(); })}
                       className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-zinc-300 hover:text-white cursor-pointer transition-all gap-3"
                       style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
                     >
@@ -339,7 +339,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
 
                     <Command.Item
                       value="create team workspace"
-                      onSelect={() => runCommand(() => { router.push('/goals/squad?create=true'); onClose(); })}
+                      onSelect={() => runCommand(() => { openCreateGoalModal({ goalType: 'squad' }); onClose(); })}
                       className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-zinc-300 hover:text-white cursor-pointer transition-all gap-3 mt-1"
                       style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
                     >

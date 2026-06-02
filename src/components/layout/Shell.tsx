@@ -29,6 +29,7 @@ import GlitchOverlay from '@/components/ui/GlitchOverlay'
 import CommandPalette from '@/components/ui/CommandPalette'
 import Tutorial from '@/components/ui/Tutorial'
 import AmbientAurora from '@/components/ui/AmbientAurora'
+import GlobalCreateGoalModal from '@/components/ui/GlobalCreateGoalModal'
 
 
 function WorkspaceLoader({ isRTL }: { isRTL: boolean }) {
@@ -82,7 +83,8 @@ function WorkspaceLoader({ isRTL }: { isRTL: boolean }) {
         
         {/* Simple elegant text */}
         <p className="text-zinc-400 text-sm tracking-widest animate-pulse font-medium">
-          {isRTL ? 'جاري تحميل مساحة العمل...' : 'Loading workspace...'}
+          {/* {isRTL ? 'جاري تحميل مساحة العمل...' : 'Loading workspace...'} */}
+          {isRTL ? 'مساحة العمل بتتحمل...' : 'Loading workspace...'}
         </p>
       </div>
     </div>
@@ -836,7 +838,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                   "text-[10px] md:text-[11px] font-space tracking-[0.3em] font-black uppercase",
                   profile?.ai_personality === 'SAVAGE' ? "text-[#FF0055]" : "text-cyan-600 dark:text-cyan-400"
                 )}>
-                  {profile?.ai_name || (isRTL ? 'المدرب' : 'COACH')} // {profile?.ai_personality === 'SAVAGE' ? (isRTL ? 'نمط شرس' : 'SAVAGE_MODE') : (isRTL ? 'متصل' : 'ONLINE')}
+                {profile?.ai_name || (isRTL ? 'الـ Coach' : 'COACH')} // {profile?.ai_personality === 'SAVAGE' ? (isRTL ? 'النمط الشرس' : 'SAVAGE_MODE') : (isRTL ? 'متصل' : 'ONLINE')}
                 </span>
                 <button onClick={() => setAiOpen(false)} className="text-black/30 dark:text-white/30 hover:text-black dark:hover:text-white transition-all close-btn">
                   <X className="w-4.5 h-4.5 md:w-5 md:h-5" />
@@ -1045,11 +1047,21 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
               {/* Navigation Items */}
               <div className="flex-1 space-y-2 overflow-y-auto">
-                {[
+                {/*
+                [
                   { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
                   { label: isRTL ? 'أهدافي' : 'Goals', icon: Target, href: '/missions' },
                   { label: isRTL ? 'شخصي' : 'Personal Goals', icon: User, href: '/goals/solo', indent: true },
                   { label: isRTL ? 'فريق' : 'Team Goals', icon: Users, href: '/goals/squad', indent: true },
+                  { label: isRTL ? 'ملاحظاتي' : 'Notes', icon: FileText, href: '/notes' },
+                  { label: isRTL ? 'إنجازاتي' : 'Wins', icon: Trophy, href: '/achievements' },
+                ]
+                */}
+                {[
+                  { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
+                  { label: isRTL ? 'الـ Goals' : 'Goals', icon: Target, href: '/missions' },
+                  { label: isRTL ? 'شخصي' : 'Personal Goals', icon: User, href: '/goals/solo', indent: true },
+                  { label: isRTL ? 'Squad' : 'Team Goals', icon: Users, href: '/goals/squad', indent: true },
                   { label: isRTL ? 'ملاحظاتي' : 'Notes', icon: FileText, href: '/notes' },
                   { label: isRTL ? 'إنجازاتي' : 'Wins', icon: Trophy, href: '/achievements' },
                 ].map(item => {
@@ -1135,6 +1147,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       <AuthModal />
       <EntryGateModal />
       <Tutorial />
+      <GlobalCreateGoalModal />
 
       {/* Mobile fullscreen overlay for notification list to prevent containing block issue */}
       <div className="lg:hidden">

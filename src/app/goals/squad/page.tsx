@@ -592,9 +592,12 @@ export default function SquadGoalsPage() {
 
         setJoinStatus('success')
         showToast(
-          isRTL 
+          /* isRTL 
             ? 'تم إرسال طلب الانضمام // بانتظار موافقة القائد' 
-            : 'JOIN REQUEST SUBMITTED // WAITING FOR OWNER APPROVAL', 
+            : 'JOIN REQUEST SUBMITTED // WAITING FOR OWNER APPROVAL', */
+          isRTL 
+            ? 'طلب الانضمام اتبعت // مستنيين موافقة القائد' 
+            : 'JOIN REQUEST SUBMITTED // WAITING FOR OWNER APPROVAL',
           'success'
         )
         playDeploy()
@@ -611,11 +614,13 @@ export default function SquadGoalsPage() {
           setJoinStatus('already_member')
         } else if (err.includes('REQUEST_PENDING')) {
           setJoinStatus('invalid')
-          setJoinErrorText(isRTL ? 'الطلب قيد الانتظار بالفعل // يرجى الانتظار' : 'REQUEST_PENDING // ALREADY SENT')
+          /* setJoinErrorText(isRTL ? 'الطلب قيد الانتظار بالفعل // يرجى الانتظار' : 'REQUEST_PENDING // ALREADY SENT') */
+          setJoinErrorText(isRTL ? 'الطلب متعلق فعلاً // من فضلك استنى' : 'REQUEST_PENDING // ALREADY SENT')
           playError()
         } else if (err.includes('REQUEST_REJECTED')) {
           setJoinStatus('invalid')
-          setJoinErrorText(isRTL ? 'تم رفض طلبك السابق // الوصول مصنف' : 'REQUEST_REJECTED // ACCESS CLASSIFIED')
+          /* setJoinErrorText(isRTL ? 'تم رفض طلبك السابق // الوصول مصنف' : 'REQUEST_REJECTED // ACCESS CLASSIFIED') */
+          setJoinErrorText(isRTL ? 'طلبك القديم اترفض // الوصول ممنوع' : 'REQUEST_REJECTED // ACCESS CLASSIFIED')
           playError()
         } else {
           setJoinStatus('invalid')
@@ -634,7 +639,8 @@ export default function SquadGoalsPage() {
     e.stopPropagation()
     const link = `${window.location.origin}/goals/squad?join=${code}`
     navigator.clipboard.writeText(link)
-    showToast(isRTL ? 'تم نسخ الرابط' : 'INVITE LINK COPIED', 'success')
+    /* showToast(isRTL ? 'تم نسخ الرابط' : 'INVITE LINK COPIED', 'success') */
+    showToast(isRTL ? 'الرابط اتنسخ' : 'INVITE LINK COPIED', 'success')
     playBlip()
   }
 
@@ -645,10 +651,12 @@ export default function SquadGoalsPage() {
     const { error } = await supabase.from('cups').update({ metadata: newMetadata }).eq('id', mission.id)
     if (!error) {
       setMissions(prev => prev.map(m => m.id === mission.id ? { ...m, metadata: newMetadata } : m))
-      showToast(isRTL ? 'تم تحديث القاعدة!' : 'RULE UPDATED', 'success')
+      /* showToast(isRTL ? 'تم تحديث القاعدة!' : 'RULE UPDATED', 'success') */
+      showToast(isRTL ? 'القاعدة اتحدثت!' : 'RULE UPDATED', 'success')
       playDeploy()
     } else {
-      showToast(isRTL ? 'فشل التحديث!' : 'UPDATE FAILED', 'warning')
+      /* showToast(isRTL ? 'فشل التحديث!' : 'UPDATE FAILED', 'warning') */
+      showToast(isRTL ? 'التحديث مش اشتغل!' : 'UPDATE FAILED', 'warning')
       playError()
     }
   }
@@ -879,21 +887,24 @@ export default function SquadGoalsPage() {
 
       const titleToCheck = newTitle.trim()
       if (!titleToCheck) {
-        showToast(isRTL ? 'يجب إدخال اسم للهدف' : 'Goal title is required', 'warning')
+        /* showToast(isRTL ? 'يجب إدخال اسم للهدف' : 'Goal title is required', 'warning') */
+        showToast(isRTL ? 'لازم تكتب اسم للـ Goal' : 'Goal title is required', 'warning')
         playError()
         return
       }
 
       const { isValid } = validateContent(titleToCheck)
       if (!isValid) {
-        showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')
+        /* showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning') */
+        showToast(isRTL ? 'من فضلك اتكلم بطريقة مناسبة في السيستم' : 'Please maintain professional language', 'warning')
         playError()
         return
       }
 
       const isAiValid = await aiProfanityCheck(titleToCheck)
       if (!isAiValid) {
-        showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')
+        /* showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning') */
+        showToast(isRTL ? 'من فضلك اتكلم بطريقة مناسبة في السيستم' : 'Please maintain professional language', 'warning')
         playError()
         return
       }
@@ -935,7 +946,8 @@ export default function SquadGoalsPage() {
         setStartDate('')
         setEndDate('')
         setDefaultView('list')
-        showToast(isRTL ? 'تم حفظ الهدف محلياً' : 'Goal saved locally!', 'success')
+        /* showToast(isRTL ? 'تم حفظ الهدف محلياً' : 'Goal saved locally!', 'success') */
+        showToast(isRTL ? 'الـ Goal اتحفظ عندك محلياً' : 'Goal saved locally!', 'success')
         playDeploy()
         router.push(`/goals/squad/${fakeId}`)
         return
@@ -958,8 +970,11 @@ export default function SquadGoalsPage() {
       const newSlots = SIZE_SLOTS[newSize] ?? 1
       if (usedSlots + newSlots > 9) {
         showToast(
-          isRTL
+          /* isRTL
             ? `سعة المحطة ممتلئة (${usedSlots.toFixed(1).replace('.0','')}/9 فتحات) - أتمم أو أزل مهمات موجودة.`
+            : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0','')}/9 SLOTS) — Complete or un-equip existing goals.`, */
+          isRTL
+            ? `سعة المحطة مليانة (${usedSlots.toFixed(1).replace('.0','')}/9 فتحات) - خلص أو شيل Goals موجودة.`
             : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0','')}/9 SLOTS) — Complete or un-equip existing goals.`,
           'warning'
         )
@@ -1038,7 +1053,8 @@ export default function SquadGoalsPage() {
         setStartDate('')
         setEndDate('')
         setDefaultView('list')
-        showToast(isRTL ? 'تم إنشاء الهدف' : 'Goal activated!', 'success')
+        /* showToast(isRTL ? 'تم إنشاء الهدف' : 'Goal activated!', 'success') */
+        showToast(isRTL ? 'الـ Goal اتعمل' : 'Goal activated!', 'success')
         playDeploy()
         router.push(`/goals/squad/${data.id}`)
       }
@@ -1065,7 +1081,8 @@ export default function SquadGoalsPage() {
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--theme-color)]/5 border border-[var(--theme-color)]/10 backdrop-blur-md">
             <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-color)] animate-ping" />
             <span className="font-space text-[9px] tracking-[0.25em] font-black uppercase text-[var(--theme-color)]">
-              {isRTL ? 'مزامنة أهداف مساحة العمل السحابية...' : 'SYNCING_CLOUD_WORKSPACE_OBJECTIVES...'}
+              {/* {isRTL ? 'مزامنة أهداف مساحة العمل السحابية...' : 'SYNCING_CLOUD_WORKSPACE_OBJECTIVES...'} */}
+              {isRTL ? 'مزامنة الـ Goals السحابية...' : 'SYNCING_CLOUD_WORKSPACE_OBJECTIVES...'}
             </span>
           </div>
         </div>
@@ -1128,11 +1145,14 @@ export default function SquadGoalsPage() {
               <Layers className="w-8 h-8 md:w-10 md:h-10 shrink-0" style={{ color: currentTheme.color }} />
               <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase not- text-black dark:text-white leading-none">
                 {typeFilter === 'solo' ? (
-                  <>{isRTL ? 'أهداف' : 'PERSONAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' شخصية' : '_GOALS'}</span></>
+                  /* <>{isRTL ? 'أهداف' : 'PERSONAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' شخصية' : '_GOALS'}</span></> */
+                  <>{isRTL ? 'Goals' : 'PERSONAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' شخصية' : '_GOALS'}</span></>
                 ) : typeFilter === 'squad' ? (
-                  <>{isRTL ? 'أهداف' : /* 'TEAM' */ 'SQUAD'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الفريق' : '_GOALS'}</span></>
+                  /* <>{isRTL ? 'أهداف' : 'TEAM' / 'SQUAD'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الفريق' : '_GOALS'}</span></> */
+                  <>{isRTL ? 'Goals' : 'SQUAD'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Squad' : '_GOALS'}</span></>
                 ) : (
-                  <>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الأهداف' : '_CANVAS'}</span></>
+                  /* <>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الأهداف' : '_CANVAS'}</span></> */
+                  <>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Goals' : '_CANVAS'}</span></>
                 )}
               </h1>
             </div>
@@ -1154,8 +1174,9 @@ export default function SquadGoalsPage() {
                 onClick={() => { playBlip(); setShowJoinGoal(true); }}
                 className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-95 shadow-lg cursor-pointer animate-pulse"
               >
-                <LinkIcon className="w-4 h-4" />
-                {isRTL ? 'الانضمام لهدف' : 'JOIN GOAL'}
+                <LinkIcon className="w-4.5 h-4.5" />
+                {/* {isRTL ? 'الانضمام لهدف' : 'JOIN GOAL'} */}
+                {isRTL ? 'ادخل في Goal' : 'JOIN GOAL'}
               </button>
               <button
                 onClick={() => { playBlip(); setShowCreate(true); }}
@@ -1163,7 +1184,8 @@ export default function SquadGoalsPage() {
                 style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
                 <Plus className="w-4 h-4" />
-                {isRTL ? 'إنشاء هدف فريق' : /* 'CREATE TEAM GOAL' */ 'CREATE SQUAD GOAL'}
+                {/* {isRTL ? 'إنشاء هدف فريق' : 'CREATE SQUAD GOAL'} */}
+                {isRTL ? 'اعمل Squad Goal' : 'CREATE SQUAD GOAL'}
               </button>
             </div>
           ) : (
@@ -1173,7 +1195,8 @@ export default function SquadGoalsPage() {
               style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
             >
               <Plus className="w-4 h-4" />
-              {typeFilter === 'solo' ? (isRTL ? 'إنشاء هدف فردي' : 'CREATE GOAL') : (isRTL ? 'إنشاء هدف' : 'Create Goal')}
+              {/* {typeFilter === 'solo' ? (isRTL ? 'إنشاء هدف فردي' : 'CREATE GOAL') : (isRTL ? 'إنشاء هدف' : 'Create Goal')} */}
+              {typeFilter === 'solo' ? (isRTL ? 'اعمل Goal شخصي' : 'CREATE GOAL') : (isRTL ? 'اعمل Goal' : 'Create Goal')}
             </button>
           )}
         </header>
@@ -1228,13 +1251,19 @@ export default function SquadGoalsPage() {
                 <div className="space-y-4">
                   {isRTL ? (
                     <div className="space-y-2 border-r-4 pr-4 border-l-0 rtl:border-l-0 rtl:border-r-4 text-right" style={{ borderColor: currentTheme.color }}>
-                      <p className="text-xl md:text-2xl lg:text-3xl font-black text-[var(--text-primary)] mb-3 leading-snug">
+                      {/* <p className="text-xl md:text-2xl lg:text-3xl font-black text-[var(--text-primary)] mb-3 leading-snug">
                         مرحباً بك في منصتك الشخصية لإدارة الأهداف والإنتاجية. هذا النظام مصمم لمساعدتك على تنظيم يومك وبناء عادات مستدامة.
+                      </p> */}
+                      <p className="text-xl md:text-2xl lg:text-3xl font-black text-[var(--text-primary)] mb-3 leading-snug">
+                        أهلاً بك في منصتك الشخصية عشان تدير الـ Goals بتاعتك والإنتاجية. السيستم ده معمول عشان يساعدك تنظم يومك وتعمل عادات تعيش معاك.
                       </p>
                       <ol className="list-decimal list-inside space-y-2 text-sm md:text-base text-[var(--text-primary)]/80 font-bold">
-                        <li><span style={{ color: currentTheme.color }}>سعة التركيز (Focus Capacity):</span> تدعم واجهة العمل بحد أقصى 9 مهام نشطة في نفس الوقت لضمان تركيزك الكامل وتجنب تشتت الانتباه.</li>
+                        {/* <li><span style={{ color: currentTheme.color }}>سعة التركيز (Focus Capacity):</span> تدعم واجهة العمل بحد أقصى 9 مهام نشطة في نفس الوقت لضمان تركيزك الكامل وتجنب تشتت الانتباه.</li>
                         <li><span style={{ color: currentTheme.color }}>نقاط الإنجاز (XP System):</span> إكمال المهام يمنحك نقاط خبرة لتوثيق حجم مجهودك ومراقبة تزايد معدل إنتاجيتك بشكل ملموس.</li>
-                        <li><span style={{ color: currentTheme.color }}>مؤشر الالتزام:</span> التراجع عن متابعة أهدافك اليومية أو التكاسل لفترات طويلة يؤدي إلى انخفاض نقاطك تدريجياً، لتنبيهك بضرورة العودة للمسار الصحيح.</li>
+                        <li><span style={{ color: currentTheme.color }}>مؤشر الالتزام:</span> التراجع عن متابعة أهدافك اليومية أو التكاسل لفترات طويلة يؤدي إلى انخفاض نقاطك تدريجياً، لتنبيهك بضرورة العودة للمسار الصحيح.</li> */}
+                        <li><span style={{ color: currentTheme.color }}>سعة الـ Focus:</span> الـ Dashboard بتدعم لحد 9 Goals شغالة في نفس الوقت عشان تفضل مركز ومفيش حاجة تشتتك.</li>
+                        <li><span style={{ color: currentTheme.color }}>نظام الـ XP:</span> لما تخلص الـ Tasks هتاخد XP عشان تشوف مجهودك وتتابع إنتاجيتك بوضوح.</li>
+                        <li><span style={{ color: currentTheme.color }}>مؤشر الالتزام:</span> لو كبّرت دماغك ومتابعتش الـ Goals بتاعتك أو كسلت كتير، الـ XP هيقل تدريجياً عشان يفكرك ترجع على التراك تاني.</li>
                       </ol>
                     </div>
                   ) : (
@@ -1338,7 +1367,8 @@ export default function SquadGoalsPage() {
                     onClick={() => { playClick(); setShowCreate(false); setDefaultView('list'); }} 
                     className="px-4 py-2.5 rounded-md text-xs uppercase tracking-widest text-zinc-400 hover:text-white transition-all font-black cursor-pointer"
                   >
-                    {isRTL ? 'إلغاء' : 'Cancel'}
+                    {/* {isRTL ? 'إلغاء' : 'Cancel'} */}
+                    {isRTL ? 'اتركها' : 'Cancel'}
                   </button>
                   <button 
                     onClick={() => { playClick(); addMission(); }} 
@@ -1347,7 +1377,8 @@ export default function SquadGoalsPage() {
                     style={{ backgroundColor: currentTheme.color }}
                   >
                     {isSubmitting && <Loader2 className="w-3 h-3 animate-spin text-black" />}
-                    {isRTL ? 'إنشاء هدف' : 'CREATE GOAL'}
+                    {/* {isRTL ? 'إنشاء هدف' : 'CREATE GOAL'} */}
+                    {isRTL ? 'عمل Goal' : 'CREATE GOAL'}
                   </button>
                 </div>
               </motion.div>
@@ -1660,7 +1691,8 @@ export default function SquadGoalsPage() {
                 </>
               ) : (
                 <p className="text-[var(--text-secondary)]/50 text-sm text-center font-space">
-                  {isRTL ? 'لا توجد أهداف نشطة حالياً. استخدم لوحة الإنشاء بالأعلى للبدء.' : 'No active goals synced. Use the action panel above to initiate.'}
+                  {/* {isRTL ? 'لا توجد أهداف نشطة حالياً. استخدم لوحة الإنشاء بالأعلى للبدء.' : 'No active goals synced. Use the action panel above to initiate.'} */}
+                  {isRTL ? 'مفيش Goals نشطة دلوقتي. استخدم لوحة الإنشاء فوق عشان تبدأ.' : 'No active goals synced. Use the action panel above to initiate.'}
                 </p>
               )}
             </div>
@@ -1709,13 +1741,15 @@ export default function SquadGoalsPage() {
                 <div className="flex items-center gap-3 text-teal-400">
                   <UserPlus className="w-6 h-6 animate-pulse text-teal-400" />
                   <h2 className="text-xl font-space font-black uppercase tracking-widest">
-                    {isRTL ? 'الانضمام للفريق' : 'JOIN_A_SQUAD'}
+                    {/* {isRTL ? 'الانضمام للفريق' : 'JOIN_A_SQUAD'} */}
+                    {isRTL ? 'ادخل الـ Squad' : 'JOIN_A_SQUAD'}
                   </h2>
                 </div>
 
                 <div className="space-y-4">
                   <p className="text-xs font-space text-zinc-400 uppercase tracking-wider">
-                    {isRTL ? 'أدخل رمز الدعوة أو رابط الهدف' : 'Enter an invite code or paste a goal link'}
+                    {/* {isRTL ? 'أدخل رمز الدعوة أو رابط الهدف' : 'Enter an invite code or paste a goal link'} */}
+                    {isRTL ? 'اكتب كود الدعوة أو لينك الـ Goal' : 'Enter an invite code or paste a goal link'}
                   </p>
 
                   <div className="space-y-2">
@@ -1752,7 +1786,8 @@ export default function SquadGoalsPage() {
                     )}
                     {joinStatus === 'success' && (
                       <p className="text-[10px] font-space font-black text-emerald-400 uppercase tracking-widest text-center animate-pulse">
-                        {isRTL ? 'تم تقديم الطلب // بانتظار موافقة القائد' : 'REQUEST SUBMITTED // WAITING FOR APPROVAL'}
+                        {/* {isRTL ? 'تم تقديم الطلب // بانتظار موافقة القائد' : 'REQUEST SUBMITTED // WAITING FOR APPROVAL'} */}
+                        {isRTL ? 'الطلب اتبعت // مستنيين موافقة القائد' : 'REQUEST SUBMITTED // WAITING FOR APPROVAL'}
                       </p>
                     )}
                   </div>
