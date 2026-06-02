@@ -1448,7 +1448,7 @@ const { progress, isInRedZone } = useMemo(() => {
                       boxShadow: `0 0 15px ${missionColor}44`
                    } : {}}
                 >
-                   <span>[ IMPORT DATA ]</span>
+                   <span>Import</span>
                    <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-200", showImportDropdown && "rotate-180")} />
                 </button>
 
@@ -1472,14 +1472,14 @@ const { progress, isInRedZone } = useMemo(() => {
                           className="w-full text-left px-3.5 py-2.5 text-[9px] font-black tracking-wider uppercase text-zinc-400 hover:text-white hover:bg-white/[0.03] rounded-md transition-colors flex items-center gap-2 cursor-pointer"
                         >
                           <ListPlus className="w-3.5 h-3.5" />
-                          {isRTL ? 'استيراد قائمة تشغيل' : 'IMPORT PLAYLIST'}
+                          {isRTL ? 'استيراد قائمة تشغيل' : 'Import Playlist'}
                         </button>
                         <button
                           onClick={() => { playBlip(); setShowSmartImportModal(true); setShowImportDropdown(false); }}
                           className="w-full text-left px-3.5 py-2.5 text-[9px] font-black tracking-wider uppercase text-zinc-400 hover:text-white hover:bg-white/[0.03] rounded-md transition-colors flex items-center gap-2 cursor-pointer"
                         >
                           <ClipboardIcon className="w-3.5 h-3.5" />
-                          {isRTL ? 'استيراد ذكي' : 'SMART IMPORT'}
+                          {isRTL ? 'استيراد ذكي' : 'Smart Import'}
                         </button>
                       </motion.div>
                     </>
