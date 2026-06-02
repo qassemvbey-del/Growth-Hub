@@ -1310,7 +1310,7 @@ const { progress, isInRedZone } = useMemo(() => {
       <div className="w-full max-w-7xl mx-auto px-4 md:px-8 p-4 md:p-12 space-y-8 md:space-y-12">
         
         {/* Mission Header Overview */}
-        /* rounded-md */
+        {/* rounded-md */}
         <section className="bg-[var(--card-bg)] border border-[var(--card-border)] p-6 md:p-12 rounded-md space-y-6 relative overflow-hidden">
             <div className="absolute top-0 inset-x-0 h-[2.5px]" style={{ background: missionColor }} />
             

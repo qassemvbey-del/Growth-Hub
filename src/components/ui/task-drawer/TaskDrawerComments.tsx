@@ -282,7 +282,7 @@ export default function TaskDrawerComments({
                       <span className="text-[9px] font-mono text-zinc-500">{noteTime}</span>
                     </div>
                     
-                    /* bg-zinc-900/20 */
+                    {/* bg-zinc-900/20 */}
                     <div className="mt-1 flex items-start justify-between gap-3 p-3 border bg-transparent dark:bg-white/5 border-white/5 rounded-md rounded-tl-none">
                       <div className="text-xs text-white/80 leading-relaxed font-space break-words flex-1">
                         {formatNoteContent(noteContent)}
