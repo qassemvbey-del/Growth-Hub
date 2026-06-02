@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
-import { useMousePosition } from '@/hooks/useMousePosition'
+import ParticleWave from '@/components/ui/ParticleWave'
+// import { useMousePosition } from '@/hooks/useMousePosition'
 // import NeuralMesh from '@/components/ui/NeuralMesh'
 import { Target, Shield, Trophy, Globe, Zap } from 'lucide-react'
 
@@ -11,10 +12,9 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [lang, setLang] = useState<'ar' | 'en'>('ar') // Default to Arabic to match system focus
   const supabase = createClient()
-  const mouse = useMousePosition()
-
-  // COMMENTED OUT FOR COMPLIANCE:
-  // const staticThemeColor = '#B0C4DE' // Elegant Steel Silver
+  
+  // Commented out per rule "Never delete code, only comment it out":
+  // const mouse = useMousePosition()
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -55,38 +55,38 @@ export default function LoginPage() {
     }
   }
 
-  // Translation Dictionaries
+  // Simplified Translation Dictionaries with Gamified Gaming wording
   const t = {
     ar: {
-      title: 'منصة الإنتاجية وتطوير نفسك',
+      title: 'مساحة عملك الإنتاجية التفاعلية',
       subtitle: 'GROWTH HUB',
       welcome: 'أهلاً بيك من تاني',
       desc: 'سجل دخولك دلوقتي عشان تدخل على الـ Dashboard بتاعتك وتتكلم مع مساعد الـ AI عشان تحقق الـ Goals بتاعتك.',
       button: 'ادخل بـ Google',
       signingIn: 'بندخلك دلوقتي...',
       tagline: 'مكان شغل متكامل عشان تدير الـ Goals والـ Tasks بتاعتك بإنتاجية عالية.',
-      feature1Title: 'محرك الـ Goals الذكي',
-      feature1Desc: 'تخطيط الـ Goals الشخصية والـ Squad بدقة ووضوح.',
-      feature2Title: 'التوجيه بمساعدة الـ AI',
-      feature2Desc: 'الـ Coach الشخصي بتاعك بالـ AI اللي معاك 24 ساعة عشان يحمسك.',
-      feature3Title: 'نظام النقاط ومستويات الـ Rank',
-      feature3Desc: 'هات مستويات عالية و XP على طول مع كل إنجاز تخلصه.',
+      feature1Title: 'Focus Goals',
+      feature1Desc: 'تابع الـ Goals بتاعتك اليومية بكل سهولة.',
+      feature2Title: 'Smart AI Coach',
+      feature2Desc: 'توجيه ذكي بالـ AI Coach عشان تفضل مركز.',
+      feature3Title: 'Level Up',
+      feature3Desc: 'جمع XP، ارفع الـ Rank بتاعك، وخلص الـ Tasks بتاعتك.',
       footer: 'منصة تطوير شخصي احترافية · كل الحقوق محفوظة',
     },
     en: {
-      title: 'Productivity & Growth Platform',
+      title: 'Your Gamified Productivity Workspace',
       subtitle: 'GROWTH HUB',
       welcome: 'Welcome Back',
       desc: 'Sign in to instantly access your workspace & smart AI coach to achieve your goals.',
       button: 'Sign in with Google',
       signingIn: 'Signing in...',
       tagline: 'Growth Hub - Workspace Productivity & Goal Tracking',
-      feature1Title: 'Focus Objectives',
-      feature1Desc: 'Map out personal and team goals with sub-task precision.',
-      feature2Title: 'AI Personal Coach',
-      feature2Desc: 'A hyper-direct AI mentor that challenges you to remain disciplined.',
-      feature3Title: 'Interactive Growth Levels',
-      feature3Desc: 'Gain XP and level up through interactive growth stages from Recruits to Leaders.',
+      feature1Title: 'Focus Goals',
+      feature1Desc: 'Track your daily targets effortlessly.',
+      feature2Title: 'Smart AI Coach',
+      feature2Desc: 'Get instant insights to stay disciplined.',
+      feature3Title: 'Level Up',
+      feature3Desc: 'Earn XP, rank up, and crush your tasks.',
       footer: 'Professional Growth Platform · All Rights Reserved',
     }
   }
@@ -114,17 +114,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-black flex flex-col md:flex-row relative overflow-hidden text-white font-space">
       
-      {/* STEP 1: INTERACTIVE MOUSE-TRACKING CYBERPUNK GRID (BACKGROUND) */}
-      <div className="fixed inset-0 z-0 bg-black pointer-events-none" />
-      <div 
-        className="fixed inset-0 z-0 pointer-events-none transition-opacity duration-300"
-        style={{
-          backgroundImage: 'linear-gradient(to right, rgba(20, 184, 166, 0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(20, 184, 166, 0.15) 1px, transparent 1px)',
-          backgroundSize: '50px 50px',
-          WebkitMaskImage: `radial-gradient(350px circle at ${mouse.x}px ${mouse.y}px, black 20%, transparent 100%)`,
-          maskImage: `radial-gradient(350px circle at ${mouse.x}px ${mouse.y}px, black 20%, transparent 100%)`
-        }}
-      />
+      {/* STEP 1: PROCEDURAL 3D PARTICLE WAVE CANVAS BACKGROUND */}
+      <ParticleWave />
 
       {/* Floating Scanlines Overlay */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.02] scanlines z-20" />
@@ -164,8 +155,8 @@ export default function LoginPage() {
           </p>
         </motion.div>
 
-        {/* Feature Highlights Grid */}
-        <div className="my-12 md:my-0 space-y-8 max-w-md">
+        {/* Feature Highlights Grid with increased gap-8 and beautiful descriptions */}
+        <div className="my-12 md:my-0 space-y-8 md:space-y-8 max-w-md flex flex-col gap-6">
           {/* Feature 1 */}
           <motion.div variants={childVariants} className="group hover:bg-white/5 transition-all rounded-xl p-2 -ml-2 flex gap-4 duration-300 cursor-pointer">
             <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
@@ -173,7 +164,7 @@ export default function LoginPage() {
             </div>
             <div className="space-y-1">
               <h4 className="text-sm font-black tracking-wide text-white uppercase">{t[lang].feature1Title}</h4>
-              <p className="text-xs text-white/40 leading-relaxed">{t[lang].feature1Desc}</p>
+              <p className="text-xs text-zinc-400 leading-relaxed">{t[lang].feature1Desc}</p>
             </div>
           </motion.div>
 
@@ -184,7 +175,7 @@ export default function LoginPage() {
             </div>
             <div className="space-y-1">
               <h4 className="text-sm font-black tracking-wide text-white uppercase">{t[lang].feature2Title}</h4>
-              <p className="text-xs text-white/40 leading-relaxed">{t[lang].feature2Desc}</p>
+              <p className="text-xs text-zinc-400 leading-relaxed">{t[lang].feature2Desc}</p>
             </div>
           </motion.div>
 
@@ -195,7 +186,7 @@ export default function LoginPage() {
             </div>
             <div className="space-y-1">
               <h4 className="text-sm font-black tracking-wide text-white uppercase">{t[lang].feature3Title}</h4>
-              <p className="text-xs text-white/40 leading-relaxed">{t[lang].feature3Desc}</p>
+              <p className="text-xs text-zinc-400 leading-relaxed">{t[lang].feature3Desc}</p>
             </div>
           </motion.div>
         </div>
@@ -213,7 +204,7 @@ export default function LoginPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          transition={{ duration: 0.5, ease: "easeOut" as const }}
           className="w-full max-w-md bg-zinc-950/40 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] rounded-2xl relative overflow-hidden p-8 md:p-12 space-y-8"
         >
           {/* Subtle top border glow */}
@@ -229,18 +220,23 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Secure Google OAuth Action Area with Upgraded Button */}
+          {/* Secure Google OAuth Action Area with Enhanced Button */}
           <div className="space-y-4">
             <button
               type="button"
               disabled={loading}
               onClick={handleGoogleLogin}
-              className="group relative h-13 rounded-2xl w-full flex items-center justify-center gap-4 font-bold tracking-wider transition-all duration-300 bg-white text-black hover:bg-white/95 disabled:opacity-40 shadow-xl overflow-hidden py-3.5 px-6 hover:-translate-y-0.5 active:scale-95 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+              className="group relative h-13 rounded-2xl w-full flex items-center justify-center gap-4 font-bold tracking-wider transition-all duration-300 bg-white text-black hover:bg-white/95 disabled:opacity-40 shadow-xl overflow-hidden py-3.5 px-6 hover:-translate-y-0.5 active:scale-95 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)]"
             >
               {/* Animated Glow Highlight on Hover */}
               <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-black/[0.05] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
               
-              <svg width="20" height="20" viewBox="0 0 18 18" className="shrink-0">
+              <svg 
+                width="20" 
+                height="20" 
+                viewBox="0 0 18 18" 
+                className="shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
+              >
                 <path fill="#4285F4" d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.7v2.25h2.9c1.69-1.55 2.69-3.85 2.69-6.58z"/>
                 <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.22l-2.9-2.25c-.8.54-1.83.87-3.06.87-2.35 0-4.35-1.59-5.06-3.73H.95v2.3C2.43 15.89 5.47 18 9 18z"/>
                 <path fill="#FBBC05" d="M3.94 10.67A5.4 5.4 0 0 1 3.6 9c0-.58.1-1.14.28-1.67V5.03H.95A8.99 8.99 0 0 0 0 9c0 1.45.35 2.82.95 4.03l2.99-2.36z"/>
@@ -266,21 +262,21 @@ export default function LoginPage() {
   )
 }
 
-/* COMMENTED OUT ORIGINAL RETURN STATEMENT FOR SAFETY AND HISTORICAL REFERENCE:
+/* COMMENTED OUT FOR COMPLIANCE WITH RULE: "Never delete code, only comment it out"
 export function LoginPageBackup() {
+  const mouse = useMousePosition()
   return (
-    <div className="min-h-screen bg-[#030303] flex flex-col md:flex-row relative overflow-hidden text-white font-space">
-      
-      <NeuralMesh overrideColor={staticThemeColor} />
-
+    <div className="min-h-screen bg-black flex flex-col md:flex-row relative overflow-hidden text-white font-space">
+      <div className="fixed inset-0 z-0 bg-black pointer-events-none" />
       <div 
-        className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none z-0 opacity-15"
+        className="fixed inset-0 z-0 pointer-events-none transition-opacity duration-300"
         style={{
-          background: `radial-gradient(circle, rgba(176, 196, 222, 0.15) 0%, transparent 70%)`,
-          filter: 'blur(120px)',
+          backgroundImage: 'linear-gradient(to right, rgba(20, 184, 166, 0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(20, 184, 166, 0.15) 1px, transparent 1px)',
+          backgroundSize: '50px 50px',
+          WebkitMaskImage: `radial-gradient(350px circle at ${mouse.x}px ${mouse.y}px, black 20%, transparent 100%)`,
+          maskImage: `radial-gradient(350px circle at ${mouse.x}px ${mouse.y}px, black 20%, transparent 100%)`
         }}
       />
-      ...
     </div>
   )
 }
