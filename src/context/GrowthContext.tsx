@@ -1003,7 +1003,8 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
                   "جرب تسحب كورس يوتيوب دلوقتي! اضغط على زرار Import Playlist فوق.",
                   "اضغط على أيقونة الـ Pin 📌 في الهدف ده، عشان يتثبت في الداشبورد.",
                   "افتح الـ AI Coach من القائمة.. عشان تاخد تقرير تكتيكي.",
-                  "امسح الهدف التدريبي ده من سلة المهملات، وابدأ هدفك الحقيقي."
+                  // "امسح الهدف التدريبي ده من سلة المهملات، وابدأ هدفك الحقيقي."
+                  "إعلن انتصارك: علم على الدايرة الأخيرة دي عشان توصل لـ 100% وتنقل المهمة دي لصفحة الـ Wins!"
                 ]
                 const enSteps = [
                   "Click the target circle here to complete your first task and earn 10 XP.",
@@ -1011,7 +1012,8 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
                   "Try importing a YouTube course now! Click the Import Playlist button above.",
                   "Click the Pin 📌 icon on this goal to lock it in the dashboard.",
                   "Open the AI Coach from the menu to get a tactical report.",
-                  "Delete this training goal from the trash, and start your real goal."
+                  // "Delete this training goal from the trash, and start your real goal."
+                  "CLAIM YOUR VICTORY: Check this final circle to hit 100% and warp this mission to your WINS dashboard!"
                 ]
                 const steps = isAr ? arSteps : enSteps
                 const taskPayloads = steps.map((step, idx) => ({
@@ -1153,7 +1155,8 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
                 "جرب تسحب كورس يوتيوب دلوقتي! اضغط على زرار Import Playlist فوق.",
                 "اضغط على أيقونة الـ Pin 📌 في الهدف ده، عشان يتثبت في الداشبورد.",
                 "افتح الـ AI Coach من القائمة.. عشان تاخد تقرير تكتيكي.",
-                "امسح الهدف التدريبي ده من سلة المهملات، وابدأ هدفك الحقيقي."
+                // "امسح الهدف التدريبي ده من سلة المهملات، وابدأ هدفك الحقيقي."
+                "إعلن انتصارك: علم على الدايرة الأخيرة دي عشان توصل لـ 100% وتنقل المهمة دي لصفحة الـ Wins!"
               ]
               const enSteps = [
                 "Click the target circle here to complete your first task and earn 10 XP.",
@@ -1161,7 +1164,8 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
                 "Try importing a YouTube course now! Click the Import Playlist button above.",
                 "Click the Pin 📌 icon on this goal to lock it in the dashboard.",
                 "Open the AI Coach from the menu to get a tactical report.",
-                "Delete this training goal from the trash, and start your real goal."
+                // "Delete this training goal from the trash, and start your real goal."
+                "CLAIM YOUR VICTORY: Check this final circle to hit 100% and warp this mission to your WINS dashboard!"
               ]
               const steps = isAr ? arSteps : enSteps
               const newLocalGoal = {
