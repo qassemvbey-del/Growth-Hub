@@ -3,15 +3,18 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
-import NeuralMesh from '@/components/ui/NeuralMesh'
+import { useMousePosition } from '@/hooks/useMousePosition'
+// import NeuralMesh from '@/components/ui/NeuralMesh'
 import { Target, Shield, Trophy, Globe, Zap } from 'lucide-react'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [lang, setLang] = useState<'ar' | 'en'>('ar') // Default to Arabic to match system focus
   const supabase = createClient()
+  const mouse = useMousePosition()
 
-  const staticThemeColor = '#B0C4DE' // Elegant Steel Silver
+  // COMMENTED OUT FOR COMPLIANCE:
+  // const staticThemeColor = '#B0C4DE' // Elegant Steel Silver
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -54,24 +57,6 @@ export default function LoginPage() {
 
   // Translation Dictionaries
   const t = {
-    /*
-    ar: {
-      title: 'منصة الإنتاجية والنمو الشخصي',
-      subtitle: 'GROWTH HUB',
-      welcome: 'مرحباً بك مجدداً',
-      desc: 'سجل الدخول فوراً للوصول إلى لوحة التحكم الشخصية ومساعد الذكاء الاصطناعي الذكي لتحقيق أهدافك.',
-      button: 'الدخول بواسطة Google',
-      signingIn: 'جاري تسجيل الدخول...',
-      tagline: 'مساحة العمل المتكاملة لإدارة الأهداف والمهام بإنتاجية عالية.',
-      feature1Title: 'محرك الأهداف الذكي',
-      feature1Desc: 'تخطيط الأهداف الاستراتيجية الفردية والجماعية بدقة ووضوح.',
-      feature2Title: 'التوجيه بالذكاء الاصطناعي',
-      feature2Desc: 'مدربك الشخصي بالذكاء الاصطناعي المرافق لك على مدار الساعة لشحذ همتك.',
-      feature3Title: 'نظام النقاط ومستويات النمو',
-      feature3Desc: 'اكتسب مستويات متقدمة ونقاط خبرة (XP) مستمرة مع كل إنجاز مكتمل.',
-      footer: 'منصة نمو وتطوير احترافية · جميع الحقوق محفوظة',
-    },
-    */
     ar: {
       title: 'منصة الإنتاجية وتطوير نفسك',
       subtitle: 'GROWTH HUB',
@@ -106,25 +91,38 @@ export default function LoginPage() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-[#030303] flex flex-col md:flex-row relative overflow-hidden text-white font-space">
-      
-      {/* Background Immersion Neural Mesh */}
-      <NeuralMesh overrideColor={staticThemeColor} />
+  // Staggered boot-up animation variants
+  const leftColumnVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15
+      }
+    }
+  }
 
-      {/* Ambient Radial Lights */}
+  const childVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: 'easeOut' as const }
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-black flex flex-col md:flex-row relative overflow-hidden text-white font-space">
+      
+      {/* STEP 1: INTERACTIVE MOUSE-TRACKING CYBERPUNK GRID (BACKGROUND) */}
+      <div className="fixed inset-0 z-0 bg-black pointer-events-none" />
       <div 
-        className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none z-0 opacity-15"
+        className="fixed inset-0 z-0 pointer-events-none transition-opacity duration-300"
         style={{
-          background: `radial-gradient(circle, rgba(176, 196, 222, 0.15) 0%, transparent 70%)`,
-          filter: 'blur(120px)',
-        }}
-      />
-      <div 
-        className="absolute bottom-10 right-10 w-[500px] h-[500px] rounded-full pointer-events-none z-0 opacity-10"
-        style={{
-          background: `radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%)`,
-          filter: 'blur(100px)',
+          backgroundImage: 'linear-gradient(to right, rgba(20, 184, 166, 0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(20, 184, 166, 0.15) 1px, transparent 1px)',
+          backgroundSize: '50px 50px',
+          WebkitMaskImage: `radial-gradient(350px circle at ${mouse.x}px ${mouse.y}px, black 20%, transparent 100%)`,
+          maskImage: `radial-gradient(350px circle at ${mouse.x}px ${mouse.y}px, black 20%, transparent 100%)`
         }}
       />
 
@@ -142,30 +140,34 @@ export default function LoginPage() {
         </button>
       </div>
 
-      {/* LEFT COLUMN: VISUAL BRANDING PANELS */}
-      <div className="w-full md:w-1/2 flex flex-col justify-between p-8 md:p-20 relative z-10 border-b md:border-b-0 md:border-r border-white/5 bg-black/20 backdrop-blur-sm select-none">
+      {/* LEFT COLUMN: VISUAL BRANDING PANELS WITH SYSTEM BOOT-UP ANIMATIONS */}
+      <motion.div 
+        variants={leftColumnVariants}
+        initial="hidden"
+        animate="visible"
+        className="w-full md:w-1/2 flex flex-col justify-between p-8 md:p-20 relative z-10 border-b md:border-b-0 md:border-r border-white/5 bg-black/20 backdrop-blur-sm select-none"
+      >
         
         {/* Brand Header */}
-        <div className="space-y-4">
+        <motion.div variants={childVariants} className="space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[9px] uppercase tracking-[0.25em] font-black">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
             {t[lang].title}
           </div>
           <h1 
-            className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase text-white leading-none"
-            style={{ textShadow: '0 0 35px rgba(255, 255, 255, 0.15)' }}
+            className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase text-white leading-none drop-shadow-[0_0_15px_rgba(20,184,166,0.5)]"
           >
             {t[lang].subtitle}
           </h1>
           <p className="text-sm text-white/50 max-w-sm tracking-wide leading-relaxed">
             {t[lang].tagline}
           </p>
-        </div>
+        </motion.div>
 
         {/* Feature Highlights Grid */}
         <div className="my-12 md:my-0 space-y-8 max-w-md">
           {/* Feature 1 */}
-          <div className="flex gap-4">
+          <motion.div variants={childVariants} className="group hover:bg-white/5 transition-all rounded-xl p-2 -ml-2 flex gap-4 duration-300 cursor-pointer">
             <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
               <Target className="w-5 h-5 text-white/75" />
             </div>
@@ -173,10 +175,10 @@ export default function LoginPage() {
               <h4 className="text-sm font-black tracking-wide text-white uppercase">{t[lang].feature1Title}</h4>
               <p className="text-xs text-white/40 leading-relaxed">{t[lang].feature1Desc}</p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Feature 2 */}
-          <div className="flex gap-4">
+          <motion.div variants={childVariants} className="group hover:bg-white/5 transition-all rounded-xl p-2 -ml-2 flex gap-4 duration-300 cursor-pointer">
             <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
               <Zap className="w-5 h-5 text-white/75" />
             </div>
@@ -184,10 +186,10 @@ export default function LoginPage() {
               <h4 className="text-sm font-black tracking-wide text-white uppercase">{t[lang].feature2Title}</h4>
               <p className="text-xs text-white/40 leading-relaxed">{t[lang].feature2Desc}</p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Feature 3 */}
-          <div className="flex gap-4">
+          <motion.div variants={childVariants} className="group hover:bg-white/5 transition-all rounded-xl p-2 -ml-2 flex gap-4 duration-300 cursor-pointer">
             <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
               <Trophy className="w-5 h-5 text-white/75" />
             </div>
@@ -195,28 +197,27 @@ export default function LoginPage() {
               <h4 className="text-sm font-black tracking-wide text-white uppercase">{t[lang].feature3Title}</h4>
               <p className="text-xs text-white/40 leading-relaxed">{t[lang].feature3Desc}</p>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Brand Footer */}
-        <div className="text-[10px] tracking-[0.3em] font-monospace text-white/30 uppercase">
+        <motion.div variants={childVariants} className="text-[10px] tracking-[0.3em] font-monospace text-white/30 uppercase">
           {t[lang].footer}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      {/* RIGHT COLUMN: LOGIN FORM PANEL */}
+      {/* RIGHT COLUMN: LOGIN FORM PANEL WITH GLASSMORPHISM */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-8 md:p-20 relative z-10 bg-black/40">
         
-        {/* Sleek Glassmorphic Login Card */}
+        {/* STEP 3: GLASSMORPHISM LOGIN GATEWAY */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="w-full max-w-md bg-[#090909]/60 backdrop-blur-2xl border border-white/5 rounded-3xl p-8 md:p-12 shadow-2xl relative space-y-8"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="w-full max-w-md bg-zinc-950/40 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] rounded-2xl relative overflow-hidden p-8 md:p-12 space-y-8"
         >
-          {/* Tech Decorator Lines */}
-          <div className="absolute top-0 left-8 right-8 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-          <div className="absolute -top-[1px] left-1/2 -translate-x-1/2 w-4 h-[3px] bg-white rounded-full blur-[0.5px]" />
+          {/* Subtle top border glow */}
+          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-teal-500/50 to-transparent" />
 
           {/* Card Header */}
           <div className="space-y-3 text-center md:text-left">
@@ -228,13 +229,13 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Secure Google OAuth Action Area */}
+          {/* Secure Google OAuth Action Area with Upgraded Button */}
           <div className="space-y-4">
             <button
               type="button"
               disabled={loading}
               onClick={handleGoogleLogin}
-              className="group relative h-13 rounded-2xl w-full flex items-center justify-center gap-4 font-bold tracking-wider transition-all duration-300 bg-white text-black hover:bg-white/95 disabled:opacity-40 shadow-xl overflow-hidden py-3.5 px-6"
+              className="group relative h-13 rounded-2xl w-full flex items-center justify-center gap-4 font-bold tracking-wider transition-all duration-300 bg-white text-black hover:bg-white/95 disabled:opacity-40 shadow-xl overflow-hidden py-3.5 px-6 hover:-translate-y-0.5 active:scale-95 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]"
             >
               {/* Animated Glow Highlight on Hover */}
               <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-black/[0.05] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
@@ -255,8 +256,7 @@ export default function LoginPage() {
           {/* Secure lock telemetry indicator */}
           <div className="flex items-center justify-center gap-2 text-[9px] font-monospace text-white/30 uppercase tracking-widest pt-4 border-t border-white/5">
             <Shield className="w-3.5 h-3.5 text-emerald-500/60" />
-            {/* <span>{lang === 'ar' ? 'بيئة عمل آمنة ومحمية' : 'SECURE & PROTECTED WORKSPACE'}</span> */}
-            <span>{lang === 'ar' ? 'مكان شغل آمن ومحمي' : 'SECURE & PROTECTED WORKSPACE'}</span>
+            <span className="animate-pulse">{lang === 'ar' ? 'مكان شغل آمن ومحمي' : 'SECURE & PROTECTED WORKSPACE'}</span>
           </div>
 
         </motion.div>
@@ -265,3 +265,23 @@ export default function LoginPage() {
     </div>
   )
 }
+
+/* COMMENTED OUT ORIGINAL RETURN STATEMENT FOR SAFETY AND HISTORICAL REFERENCE:
+export function LoginPageBackup() {
+  return (
+    <div className="min-h-screen bg-[#030303] flex flex-col md:flex-row relative overflow-hidden text-white font-space">
+      
+      <NeuralMesh overrideColor={staticThemeColor} />
+
+      <div 
+        className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none z-0 opacity-15"
+        style={{
+          background: `radial-gradient(circle, rgba(176, 196, 222, 0.15) 0%, transparent 70%)`,
+          filter: 'blur(120px)',
+        }}
+      />
+      ...
+    </div>
+  )
+}
+*/
