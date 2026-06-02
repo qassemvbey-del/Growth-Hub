@@ -96,25 +96,38 @@ export default function NotesPage() {
   const [newContent, setNewContent] = useState('')
   const [newTitle, setNewTitle] = useState('')
   const [newTag, setNewTag] = useState('')
-  const [newMissionId, setNewMissionId] = useState<string>('')
+  // const [newMissionId, setNewMissionId] = useState<string>('')
+  const [newGoalId, setNewGoalId] = useState<string>('')
   const [searchQuery, setSearchQuery] = useState('')
   const [filterTag, setFilterTag] = useState('all')
-  const [selectedMissionId, setSelectedMissionId] = useState<string | null>(null)
+  // const [selectedMissionId, setSelectedMissionId] = useState<string | null>(null)
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null)
   const [noteSourceFilter, setNoteSourceFilter] = useState<'all' | 'personal' | 'task'>('personal')
   const router = useRouter()
   const supabase = createClient()
   const { currentTheme, isRTL, mounted } = useGrowth()
 
-  const uniqueMissions = useMemo(() => {
-    const missionsMap = new Map<string, string>()
+  // const uniqueMissions = useMemo(() => {
+  //   const missionsMap = new Map<string, string>()
+  //   notes.forEach(note => {
+  //     const missionId = note.cups?.id || note.mission_id || note.cup_id
+  //     const missionTitle = note.cups?.title || note.cups_title
+  //     if (missionId && missionTitle) {
+  //       missionsMap.set(missionId, missionTitle)
+  //     }
+  //   })
+  //   return Array.from(missionsMap.entries()).map(([id, title]) => ({ id, title }))
+  // }, [notes])
+  const uniqueGoals = useMemo(() => {
+    const goalsMap = new Map<string, string>()
     notes.forEach(note => {
-      const missionId = note.cups?.id || note.mission_id || note.cup_id
-      const missionTitle = note.cups?.title || note.cups_title
-      if (missionId && missionTitle) {
-        missionsMap.set(missionId, missionTitle)
+      const goalId = note.cups?.id || note.goal_id
+      const goalTitle = note.cups?.title || note.cups_title
+      if (goalId && goalTitle) {
+        goalsMap.set(goalId, goalTitle)
       }
     })
-    return Array.from(missionsMap.entries()).map(([id, title]) => ({ id, title }))
+    return Array.from(goalsMap.entries()).map(([id, title]) => ({ id, title }))
   }, [notes])
 
   useEffect(() => { 
@@ -180,10 +193,13 @@ export default function NotesPage() {
                     color: mission.color || currentTheme.color,
                     is_locked: false,
                     is_on_home: false,
-                    pos_x: 0,
-                    pos_y: 0,
+                    // pos_x: 0,
+                    // pos_y: 0,
+                    position_x: 0,
+                    position_y: 0,
                     font_settings: { family: 'space', weight: 'normal', style: 'normal' },
-                    mission_id: mission.id,
+                    // mission_id: mission.id,
+                    goal_id: mission.id,
                     task_id: task.id,
                     created_at: createdAt,
                     cups: {
@@ -221,10 +237,13 @@ export default function NotesPage() {
                 color: mission.color || currentTheme.color,
                 is_locked: false,
                 is_on_home: false,
-                pos_x: 0,
-                pos_y: 0,
+                // pos_x: 0,
+                // pos_y: 0,
+                position_x: 0,
+                position_y: 0,
                 font_settings: { family: 'space', weight: 'normal', style: 'normal' },
-                mission_id: mission.id,
+                // mission_id: mission.id,
+                goal_id: mission.id,
                 task_id: task.id,
                 created_at: createdAt,
                 cups: {
@@ -276,11 +295,16 @@ export default function NotesPage() {
       setNotes(prev => prev.filter(n => n.id !== id))
 
       if (noteToDelete._isTaskNote) {
-        const { task_id, mission_id, _noteIndex } = noteToDelete
-        if (mission_id && mission_id.startsWith('local_')) {
+        // const { task_id, mission_id, _noteIndex } = noteToDelete
+        // if (mission_id && mission_id.startsWith('local_')) {
+        //   // Guest mode
+        //   const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+        //   const goal = guestGoals.find((g: any) => g.id === mission_id)
+        const { task_id, goal_id, _noteIndex } = noteToDelete
+        if (goal_id && goal_id.startsWith('local_')) {
           // Guest mode
           const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-          const goal = guestGoals.find((g: any) => g.id === mission_id)
+          const goal = guestGoals.find((g: any) => g.id === goal_id)
           if (goal && goal.tasks) {
             const taskObj = goal.tasks.find((t: any) => t.id === task_id)
             if (taskObj && taskObj.metadata && taskObj.metadata.notes) {
@@ -329,11 +353,16 @@ export default function NotesPage() {
     if (!noteToUpdate) return
 
     if (noteToUpdate._isTaskNote) {
-      const { task_id, mission_id, _noteIndex } = noteToUpdate
-      if (mission_id && mission_id.startsWith('local_')) {
+      // const { task_id, mission_id, _noteIndex } = noteToUpdate
+      // if (mission_id && mission_id.startsWith('local_')) {
+      //   // Guest mode
+      //   const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+      //   const goal = guestGoals.find((g: any) => g.id === mission_id)
+      const { task_id, goal_id, _noteIndex } = noteToUpdate
+      if (goal_id && goal_id.startsWith('local_')) {
         // Guest mode
         const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-        const goal = guestGoals.find((g: any) => g.id === mission_id)
+        const goal = guestGoals.find((g: any) => g.id === goal_id)
         if (goal && goal.tasks) {
           const taskObj = goal.tasks.find((t: any) => t.id === task_id)
           if (taskObj && taskObj.metadata && taskObj.metadata.notes) {
@@ -411,14 +440,16 @@ export default function NotesPage() {
       n.cups?.title?.toLowerCase().includes(q)
     )
     const matchesTag = filterTag === 'all' || n.tag === filterTag
-    const missionId = n.cups?.id || n.mission_id || n.cup_id
-    const matchesMission = selectedMissionId === null || missionId === selectedMissionId
+    // const missionId = n.cups?.id || n.mission_id || n.cup_id
+    // const matchesMission = selectedMissionId === null || missionId === selectedMissionId
+    const goalId = n.cups?.id || n.goal_id
+    const matchesGoal = selectedGoalId === null || goalId === selectedGoalId
     const matchesSource = (
       noteSourceFilter === 'all' ||
       (noteSourceFilter === 'personal' && !n._isTaskNote) ||
       (noteSourceFilter === 'task' && n._isTaskNote)
     )
-    return matchesSearch && matchesTag && matchesMission && matchesSource
+    return matchesSearch && matchesTag && matchesGoal && matchesSource
   })
 
   async function createNote() {
@@ -433,11 +464,14 @@ export default function NotesPage() {
       color: currentTheme.color,
       is_locked: false,
       is_on_home: false,
-      pos_x: 0,
-      pos_y: 0,
+      // pos_x: 0,
+      // pos_y: 0,
+      position_x: 0,
+      position_y: 0,
       font_settings: { family: 'space', weight: 'normal', style: 'normal' }
     }
-    if (newMissionId) newNote.mission_id = newMissionId
+    // if (newMissionId) newNote.mission_id = newMissionId
+    if (newGoalId) newNote.goal_id = newGoalId
 
     const { data } = await supabase.from('notes').insert(newNote).select('*, cups(id, title)').single()
     if (data) {
@@ -446,7 +480,8 @@ export default function NotesPage() {
       setNewContent('')
       setNewTitle('')
       setNewTag('')
-      setNewMissionId('')
+      // setNewMissionId('')
+      setNewGoalId('')
     }
   }
 
@@ -670,8 +705,10 @@ export default function NotesPage() {
                     {isRTL ? 'ربط بالهدف (اختياري)' : 'Link to Goal (optional)'}
                   </label>
                   <CustomSelect
-                    value={newMissionId}
-                    onChange={val => setNewMissionId(val)}
+                    // value={newMissionId}
+                    // onChange={val => setNewMissionId(val)}
+                    value={newGoalId}
+                    onChange={val => setNewGoalId(val)}
                     options={[
                       { value: '', label: isRTL ? '— بدون ربط —' : '— NO LINK —' },
                       ...missions.map(m => ({ value: m.id, label: m.title.toUpperCase() }))
@@ -686,7 +723,7 @@ export default function NotesPage() {
                   {isRTL ? 'اضغط ⌘+Enter للحفظ' : '⌘+Enter to save'}
                 </div>
                 <div className="flex gap-6">
-                  <button onClick={() => { setIsCreating(false); setNewContent(''); setNewTitle(''); setNewTag(''); setNewMissionId('') }} className="text-[var(--text-secondary)] font-space uppercase text-[10px] tracking-widest hover:text-[var(--text-primary)] transition-all">{isRTL ? 'إلغاء' : 'CANCEL'}</button>
+                  <button onClick={() => { setIsCreating(false); setNewContent(''); setNewTitle(''); setNewTag(''); setNewGoalId('') }} className="text-[var(--text-secondary)] font-space uppercase text-[10px] tracking-widest hover:text-[var(--text-primary)] transition-all">{isRTL ? 'إلغاء' : 'CANCEL'}</button>
                   <button 
                     onClick={createNote} 
                     className="px-8 py-2 text-black font-space font-black uppercase text-xs tracking-widest rounded-md transition-all duration-300 hover:brightness-110 active:scale-95"
@@ -702,35 +739,42 @@ export default function NotesPage() {
         </AnimatePresence>
 
         {/* Goal Filter Bar */}
-        {uniqueMissions.length > 0 && (
+        {uniqueGoals.length > 0 && (
           <div className="flex flex-col gap-2 bg-white/[0.01] dark:bg-white/[0.01] border border-black/5 dark:border-white/5 p-4 rounded-md backdrop-blur-md">
             <span className="text-[10px] font-space text-black/40 dark:text-white/30 tracking-widest uppercase font-black">
               {isRTL ? 'تصفية حسب الهدف' : 'Filter by Goal'}
             </span>
             <div className="flex gap-2.5 overflow-x-auto pb-1.5 no-scrollbar [&::-webkit-scrollbar]:hidden">
               <button
-                onClick={() => setSelectedMissionId(null)}
+                // onClick={() => setSelectedMissionId(null)}
+                onClick={() => setSelectedGoalId(null)}
                 className={cn(
                   "px-4 py-1.5 border font-space text-[9px] font-black tracking-widest uppercase transition-all whitespace-nowrap rounded-md cursor-pointer",
-                  selectedMissionId === null
+                  // selectedMissionId === null
+                  selectedGoalId === null
                     ? "text-black border-transparent shadow-md"
                     : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)]/50 hover:text-[var(--text-primary)]"
                 )}
-                style={selectedMissionId === null ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
+                // style={selectedMissionId === null ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
+                style={selectedGoalId === null ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
               >
                 {isRTL ? 'جميع الأهداف' : 'ALL GOALS'}
               </button>
-              {uniqueMissions.map(m => (
+              {/* {uniqueMissions.map(m => ( */}
+              {uniqueGoals.map(m => (
                 <button
                   key={m.id}
-                  onClick={() => setSelectedMissionId(selectedMissionId === m.id ? null : m.id)}
+                  // onClick={() => setSelectedMissionId(selectedMissionId === m.id ? null : m.id)}
+                  onClick={() => setSelectedGoalId(selectedGoalId === m.id ? null : m.id)}
                   className={cn(
                     "px-4 py-1.5 border font-space text-[9px] font-black tracking-widest uppercase transition-all whitespace-nowrap rounded-md cursor-pointer",
-                    selectedMissionId === m.id
+                    // selectedMissionId === m.id
+                    selectedGoalId === m.id
                       ? "text-black border-transparent shadow-md"
                       : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)]/50 hover:text-[var(--text-primary)]"
                   )}
-                  style={selectedMissionId === m.id ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
+                  // style={selectedMissionId === m.id ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
+                  style={selectedGoalId === m.id ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
                 >
                   {m.title.toUpperCase()}
                 </button>
@@ -867,8 +911,14 @@ export default function NotesPage() {
                       <div 
                         onClick={(e) => {
                           e.stopPropagation()
-                          const mId = linkedMission.id || note.mission_id || note.cup_id
-                          if (mId) router.push(`/missions/${mId}`)
+                          // const mId = linkedMission.id || note.mission_id || note.cup_id
+                          // if (mId) router.push(`/missions/${mId}`)
+                          const mId = linkedMission.id || note.goal_id
+                          if (mId) {
+                            const g = missions.find(m => m.id === mId)
+                            const isPublic = g?.metadata?.type === 'public'
+                            router.push(isPublic ? `/goals/public/${mId}` : `/goals/squad/${mId}`)
+                          }
                         }}
                         className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-md text-[8px] font-space font-black tracking-wider uppercase hover:bg-zinc-800 hover:scale-105 transition-all cursor-pointer z-10"
                         style={{ backgroundColor: `${noteColor}15`, color: noteColor, border: `1px solid ${noteColor}30` }}
@@ -964,10 +1014,17 @@ export default function NotesPage() {
                  {editingNote.cups && (
                     <div 
                       onClick={() => {
-                        const mId = editingNote.cups.id || editingNote.mission_id || editingNote.cup_id
+                        // const mId = editingNote.cups.id || editingNote.mission_id || editingNote.cup_id
+                        // if (mId) {
+                        //   setEditingNote(null)
+                        //   router.push(`/missions/${mId}`)
+                        // }
+                        const mId = editingNote.cups.id || editingNote.goal_id
                         if (mId) {
                           setEditingNote(null)
-                          router.push(`/missions/${mId}`)
+                          const g = missions.find(m => m.id === mId)
+                          const isPublic = g?.metadata?.type === 'public'
+                          router.push(isPublic ? `/goals/public/${mId}` : `/goals/squad/${mId}`)
                         }
                       }}
                       className="flex items-center gap-2 text-[10px] font-space font-black tracking-widest uppercase hover:underline cursor-pointer transition-all" 

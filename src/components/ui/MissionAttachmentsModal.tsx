@@ -14,7 +14,8 @@ import { cn } from '@/lib/utils'
 // ── Types ──────────────────────────────────────────────────────────────────
 interface Attachment {
   id: string
-  mission_id: string
+  // mission_id: string
+  goal_id: string
   user_id: string
   name: string
   url: string
@@ -23,7 +24,8 @@ interface Attachment {
 }
 
 interface Props {
-  missionId: string
+  // missionId: string
+  goalId: string
   missionTitle: string
   themeColor: string
   isOpen: boolean
@@ -175,8 +177,19 @@ const PreviewModal = React.memo(({
 PreviewModal.displayName = 'PreviewModal'
 
 // ── Main Modal ─────────────────────────────────────────────────────────────
+// const MissionAttachmentsModal = ({
+//   missionId,
+//   missionTitle,
+//   themeColor,
+//   isOpen,
+//   attachments,
+//   setAttachments,
+//   loading,
+//   onClose,
+//   onCountChange,
+// }: Props) => {
 const MissionAttachmentsModal = ({
-  missionId,
+  goalId,
   missionTitle,
   themeColor,
   isOpen,
@@ -371,10 +384,21 @@ const MissionAttachmentsModal = ({
         return
       }
 
+      // const { data, error } = await supabase
+      //   .from('goal_attachments')
+      //   .insert({
+      //     mission_id: missionId,
+      //     user_id: user.id,
+      //     name,
+      //     url,
+      //     file_type: fileType
+      //   })
+      //   .select()
+      //   .single()
       const { data, error } = await supabase
         .from('goal_attachments')
         .insert({
-          mission_id: missionId,
+          goal_id: goalId,
           user_id: user.id,
           name,
           url,
@@ -412,10 +436,21 @@ const MissionAttachmentsModal = ({
       }
       
       const file_type = detectFileType(trimUrl)
+      // const { data, error } = await supabase
+      //   .from('goal_attachments')
+      //   .insert({
+      //     mission_id: missionId,
+      //     user_id: user.id,
+      //     name: trimName,
+      //     url: trimUrl,
+      //     file_type
+      //   })
+      //   .select()
+      //   .single()
       const { data, error } = await supabase
         .from('goal_attachments')
         .insert({
-          mission_id: missionId,
+          goal_id: goalId,
           user_id: user.id,
           name: trimName,
           url: trimUrl,

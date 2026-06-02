@@ -206,11 +206,14 @@ export default function TaskDrawerComments({
           color: themeColor || '#06B6D4',
           is_locked: false,
           is_on_home: false,
-          pos_x: 0,
-          pos_y: 0,
+          // pos_x: 0,
+          // pos_y: 0,
+          position_x: 0,
+          position_y: 0,
           font_settings: { family: 'space', weight: 'normal', style: 'normal' },
-          mission_id: task.cup_id || null,
-          cup_id: task.cup_id || null,
+          // mission_id: task.cup_id || null,
+          // cup_id: task.cup_id || null,
+          goal_id: task.goal_id || null,
           task_id: task.id || null,
         }
         await supabase.from('notes').insert(newNotePayload)

@@ -913,7 +913,8 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
 
                   if (newCup && tasks && tasks.length > 0) {
                     const taskPayloads = tasks.map((t: any) => ({
-                      cup_id: newCup.id,
+                      // cup_id: newCup.id,
+                      goal_id: newCup.id,
                       title: t.title,
                       original_title: t.original_title,
                       weight: t.weight,
@@ -1032,7 +1033,8 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
                 ]
                 const steps = isAr ? arSteps : enSteps
                 const taskPayloads = steps.map((step, idx) => ({
-                  cup_id: newCup.id,
+                  // cup_id: newCup.id,
+                  goal_id: newCup.id,
                   title: step,
                   weight: 3,
                   is_completed: false,
@@ -1197,7 +1199,8 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
                 metadata: { defaultView: 'list', is_tutorial: true },
                 tasks: steps.map((step, idx) => ({
                   id: 'local_task_' + Math.random().toString(36).substring(2, 9),
-                  cup_id: fakeId,
+                  // cup_id: fakeId,
+                  goal_id: fakeId,
                   title: step,
                   weight: 3,
                   is_completed: false,

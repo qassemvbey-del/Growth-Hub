@@ -282,10 +282,12 @@ export default function Dashboard() {
     })))
 
     // Support guest goals locally
-    if (task.cup_id?.startsWith('local_')) {
+    // if (task.cup_id?.startsWith('local_')) {
+    if (task.goal_id?.startsWith('local_')) {
       const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
       const updatedGoals = guestGoals.map((m: any) => {
-        if (m.id === task.cup_id) {
+        // if (m.id === task.cup_id) {
+        if (m.id === task.goal_id) {
           return {
             ...m,
             tasks: m.tasks?.map((t: any) => t.id === task.id ? { ...t, is_completed: updatedStatus } : t)
@@ -301,7 +303,8 @@ export default function Dashboard() {
     if (error) {
       fetchDashboardMissions()
     } else {
-      const mission = missions.find(m => m.id === task.cup_id)
+      // const mission = missions.find(m => m.id === task.cup_id)
+      const mission = missions.find(m => m.id === task.goal_id)
       if (mission && mission.tasks) {
         const taskIndex = mission.tasks.findIndex((t: any) => t.id === task.id)
         if (taskIndex !== -1) {
@@ -322,7 +325,7 @@ export default function Dashboard() {
           await supabase.from('task_completion_log').insert([{
             user_id: user.id,
             task_id: task.id,
-            cup_id: task.cup_id,
+            // cup_id: task.cup_id,
             completed_at: new Date().toISOString()
           }])
         }
@@ -682,7 +685,8 @@ export default function Dashboard() {
                return (
                  <div
                    key={mission.id}
-                   onClick={() => router.push(`/missions/${mission.id}`)}
+                   // onClick={() => router.push(`/missions/${mission.id}`)}
+                   onClick={() => router.push(mission.metadata?.type === 'public' ? `/goals/public/${mission.id}` : `/goals/squad/${mission.id}`)}
                    className={cn(
                       "relative group cursor-pointer p-3 sm:p-5 rounded-xl border bg-white/60 dark:bg-black/40 backdrop-blur-3xl transition-all overflow-hidden flex flex-col gap-2.5 sm:gap-4",
                       isInRedZone ? "border-red-500/40" : "border-white/5 hover:border-white/10",

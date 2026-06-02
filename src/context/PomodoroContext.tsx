@@ -17,7 +17,7 @@ interface PomodoroContextType {
   isInitialized: boolean
   focusDuration: number
   breakDuration: number
-  startFocus: (taskName: string, taskId?: string, cupId?: string) => void
+  startFocus: (taskName: string, taskId?: string, goalId?: string) => void
   startTimer: () => void
   pause: () => void
   resume: () => void
@@ -25,10 +25,10 @@ interface PomodoroContextType {
   toggleMinimize: () => void
   updateConfig: (focus: number, breakTime: number) => void
   taskId?: string
-  cupId?: string
+  goalId?: string
   showSwitchWarning: boolean
   setShowSwitchWarning: (show: boolean) => void
-  pendingSwitchTask: { name: string; taskId?: string; cupId?: string } | null
+  pendingSwitchTask: { name: string; taskId?: string; goalId?: string } | null
   confirmSwitch: () => void
   cancelSwitch: () => void
 }
@@ -47,11 +47,11 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   const [sessionType, setSessionType] = useState<SessionType>('FOCUS')
   const [taskName, setTaskName] = useState('')
   const [taskId, setTaskId] = useState<string | undefined>(undefined)
-  const [cupId, setCupId] = useState<string | undefined>(undefined)
+  const [goalId, setGoalId] = useState<string | undefined>(undefined)
   const [isMinimized, setIsMinimized] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
   const [showSwitchWarning, setShowSwitchWarning] = useState(false)
-  const [pendingSwitchTask, setPendingSwitchTask] = useState<{ name: string; taskId?: string; cupId?: string } | null>(null)
+  const [pendingSwitchTask, setPendingSwitchTask] = useState<{ name: string; taskId?: string; goalId?: string } | null>(null)
 
   const { showToast } = useToast()
   const { playSuccess, playBlip } = useSound()
@@ -123,7 +123,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
           setSessionType(data.sessionType)
           setTaskName(data.taskName)
           setTaskId(data.taskId)
-          setCupId(data.cupId)
+          setGoalId(data.goalId || data.cupId)
         }
       } else {
         setTimeRemaining(data.timeRemaining)
@@ -133,7 +133,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
         setSessionType(data.sessionType)
         setTaskName(data.taskName)
         setTaskId(data.taskId)
-        setCupId(data.cupId)
+        setGoalId(data.goalId || data.cupId)
       }
     }
   }, [])
@@ -149,7 +149,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
         sessionType,
         taskName,
         taskId,
-        cupId,
+        goalId,
         startTime: Date.now(),
         initialTime: timeRemaining
       }
@@ -157,7 +157,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     } else {
       localStorage.removeItem('pomodoro_session')
     }
-  }, [timeRemaining, isActive, isPaused, isInitialized, sessionType, taskName, taskId, cupId])
+  }, [timeRemaining, isActive, isPaused, isInitialized, sessionType, taskName, taskId, goalId])
 
   useEffect(() => {
     if (isActive && !isPaused && timeRemaining > 0) {
@@ -181,7 +181,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   }, [timeRemaining, isActive, isPaused, sessionType])
 
   const saveTimeLog = async (durationSecs: number, endedAt: string) => {
-    if (!taskId || !cupId || durationSecs <= 0) return
+    if (!taskId || !goalId || durationSecs <= 0) return
 
     const activeSessionStr = localStorage.getItem('active_session')
     if (!activeSessionStr) return
@@ -197,7 +197,8 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
       await supabase.from('time_logs').insert({
         user_id: user.id,
         task_id: taskId,
-        cup_id: cupId,
+        // cup_id: cupId,
+        goal_id: goalId,
         started_at: activeSession.started_at || new Date().toISOString(),
         ended_at: endedAt,
         duration_minutes: durationMin,
@@ -206,7 +207,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem('active_session')
 
       if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('time-log-saved', { detail: { taskId, cupId } }))
+        window.dispatchEvent(new CustomEvent('time-log-saved', { detail: { taskId, goalId } }))
       }
     } catch (e) {
       console.error('FAILED TO SAVE TIME LOG:', e)
@@ -248,7 +249,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   const executeStartFocus = (name: string, tId?: string, cId?: string) => {
     setTaskName(name)
     setTaskId(tId)
-    setCupId(cId)
+    setGoalId(cId)
     setSessionType('FOCUS')
     setTimeRemaining(focusDuration * 60)
     setIsInitialized(true)
@@ -263,7 +264,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
       Notification.requestPermission();
     }
     if (isActive && sessionType === 'FOCUS' && taskId && taskId !== tId) {
-      setPendingSwitchTask({ name, taskId: tId, cupId: cId })
+      setPendingSwitchTask({ name, taskId: tId, goalId: cId })
       setShowSwitchWarning(true)
       playBlip()
       return
@@ -279,7 +280,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
           saveTimeLog(elapsed, new Date().toISOString())
         }
       }
-      executeStartFocus(pendingSwitchTask.name, pendingSwitchTask.taskId, pendingSwitchTask.cupId)
+      executeStartFocus(pendingSwitchTask.name, pendingSwitchTask.taskId, pendingSwitchTask.goalId)
       setShowSwitchWarning(false)
       setPendingSwitchTask(null)
     }
@@ -299,10 +300,11 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     setIsPaused(false)
     playBlip()
 
-    if (taskId && cupId) {
+    if (taskId && goalId) {
       localStorage.setItem('active_session', JSON.stringify({
         task_id: taskId,
-        cup_id: cupId,
+        // cup_id: cupId,
+        goal_id: goalId,
         started_at: new Date().toISOString()
       }))
     }
@@ -335,7 +337,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     setTimeRemaining(focusDuration * 60)
     setTaskName('')
     setTaskId(undefined)
-    setCupId(undefined)
+    setGoalId(undefined)
     playBlip()
   }
 
@@ -359,7 +361,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
       timeRemaining, isActive, isPaused, sessionType, taskName, isMinimized, isInitialized,
       focusDuration, breakDuration,
       startFocus, startTimer, pause, resume, stop, toggleMinimize, updateConfig,
-      taskId, cupId,
+      taskId, goalId,
       showSwitchWarning, setShowSwitchWarning, pendingSwitchTask, confirmSwitch, cancelSwitch
     }}>
       {children}

@@ -12,8 +12,10 @@ interface TaskDrawerHeaderProps {
   themeColor: string
   onComplete: () => void
   onClose: () => void
-  startFocus: (title: string, id: string, cupId?: string) => void
-  cupId?: string
+  // startFocus: (title: string, id: string, cupId?: string) => void
+  startFocus: (title: string, id: string, goalId?: string) => void
+  // cupId?: string
+  goalId?: string
   currentUserId: string | null
   profile: any
   isRTL: boolean
@@ -31,7 +33,8 @@ export default function TaskDrawerHeader({
   onComplete,
   onClose,
   startFocus,
-  cupId,
+  // cupId,
+  goalId,
   currentUserId,
   profile,
   isRTL,

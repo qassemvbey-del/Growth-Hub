@@ -28,7 +28,8 @@ interface TaskDrawerProps {
   onComplete: () => void
   onProgressUpdate?: (currentTime: number, duration: number) => void
   onUpdateTask: (taskId: string, updates: any) => Promise<void> | void
-  cupId?: string
+  // cupId?: string
+  goalId?: string
   squadMembers?: any[]
   isSquad?: boolean
   missionOwnerId?: string | null
@@ -69,7 +70,8 @@ export default function TaskDrawer({
   onComplete,
   onProgressUpdate,
   onUpdateTask,
-  cupId,
+  // cupId,
+  goalId,
   squadMembers = [],
   isSquad = false,
   missionOwnerId = null,
@@ -264,7 +266,8 @@ export default function TaskDrawer({
           taskTitle: task?.title,
           senderId: currentUserId,
           senderName: profile?.full_name || 'Operator',
-          cupId: task?.cup_id || cupId,
+          // cupId: task?.cup_id || cupId,
+          goalId: task?.goal_id || goalId,
           isSquad: isSquad || false
         })
       })
@@ -296,7 +299,7 @@ export default function TaskDrawer({
     } catch (err) {
       console.error('Failed to send notification:', err)
     }
-  }, [currentUserId, profile?.full_name, task?.id, task?.title, cupId, isSquad])
+  }, [currentUserId, profile?.full_name, task?.id, task?.title, goalId, isSquad])
 
 
 
@@ -662,7 +665,10 @@ export default function TaskDrawer({
 
   const handleCopyLink = () => {
     if (typeof window === 'undefined') return
-    const link = `${window.location.origin}/goals/squad/${task.cup_id}?task=${task.id}`
+    // const link = `${window.location.origin}/goals/squad/${task.cup_id}?task=${task.id}`
+    const link = isSquad
+      ? `${window.location.origin}/goals/squad/${task.goal_id}?task=${task.id}`
+      : `${window.location.origin}/goals/${task.goal_id}?task=${task.id}`
     navigator.clipboard.writeText(link)
     alert(isRTL ? 'تم نسخ رابط المهمة!' : 'Task link copied to clipboard!')
   }
@@ -779,7 +785,8 @@ export default function TaskDrawer({
           onComplete={onComplete}
           onClose={onClose}
           startFocus={startFocus}
-          cupId={cupId}
+          // cupId={cupId}
+          goalId={goalId}
           currentUserId={currentUserId}
           profile={profile}
           isRTL={isRTL}
@@ -1015,7 +1022,8 @@ export default function TaskDrawer({
             <button
               type="button"
               onClick={() => {
-                startFocus(task.title, task.id, cupId)
+                // startFocus(task.title, task.id, cupId)
+                startFocus(task.title, task.id, goalId)
                 onClose()
               }}
               className="flex-1 h-10 rounded-md text-[10px] font-bold font-space flex items-center justify-center gap-2 transition-all bg-orange-500/10 border border-orange-500/30 text-orange-500 hover:bg-orange-500/20 active:scale-95"

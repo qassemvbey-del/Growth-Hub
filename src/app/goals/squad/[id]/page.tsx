@@ -217,7 +217,8 @@ export default function MissionDetailPage() {
   const [totalTimeInvested, setTotalTimeInvested] = useState<number>(0)
   
   // --- ATTACHMENTS STATE ---
-  const [attachmentMissionId, setAttachmentMissionId] = useState<string | null>(null)
+  // const [attachmentMissionId, setAttachmentMissionId] = useState<string | null>(null)
+  const [attachmentGoalId, setAttachmentGoalId] = useState<string | null>(null)
   const [attachmentCount, setAttachmentCount] = useState(0)
   const [activeAttachments, setActiveAttachments] = useState<any[]>([])
   const [modalLoading, setModalLoading] = useState(false)
@@ -388,7 +389,8 @@ export default function MissionDetailPage() {
     const { data, error } = await supabase
       .from('time_logs')
       .select('duration_minutes, task_id')
-      .eq('cup_id', id)
+      // .eq('cup_id', id)
+      .eq('goal_id', id)
       .eq('user_id', user.id)
 
     if (error) {
@@ -465,7 +467,7 @@ export default function MissionDetailPage() {
       setShowShareModal(false)
       setShowPlaylistModal(false)
       setShowSmartImportModal(false)
-      setAttachmentMissionId(null)
+      setAttachmentGoalId(null)
       setActiveAttachments([])
     }
     window.addEventListener('close-all-modals', handleCloseAll)
@@ -502,7 +504,7 @@ export default function MissionDetailPage() {
     const { count } = await supabase
       .from('goal_attachments')
       .select('*', { count: 'exact', head: true })
-      .eq('mission_id', id)
+      .eq('goal_id', id)
       .eq('user_id', user.id)
     if (count !== null) setAttachmentCount(count)
   }
@@ -513,13 +515,13 @@ export default function MissionDetailPage() {
     const { data } = await supabase
       .from('goal_attachments')
       .select('*')
-      .eq('mission_id', id)
+      .eq('goal_id', id)
       .order('created_at', { ascending: false })
     if (data) {
       setActiveAttachments(data)
       setAttachmentCount(data.length)
     }
-    setAttachmentMissionId(id as string)
+    setAttachmentGoalId(id as string)
     setModalLoading(false)
   }
 
@@ -641,7 +643,7 @@ export default function MissionDetailPage() {
     const { data } = await supabase
       .from('notes')
       .select('*')
-      .eq('mission_id', id)
+      .eq('goal_id', id)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
     if (data) setLinkedNotes(data)
@@ -1160,7 +1162,7 @@ export default function MissionDetailPage() {
     }
 
     const payload = {
-      cup_id: id,
+      goal_id: id,
       title: rawTitle,
       original_title: rawTitle,
       weight: newTaskWeight,
@@ -2112,82 +2114,6 @@ const { progress, isInRedZone } = useMemo(() => {
                      )
                    })}
                 </AnimatePresence>
-
-                 {/* INLINE QUICK ADD ROW commented out per user request to resolve redundancy
-                 <div className="mt-3 flex items-center gap-3 p-3 bg-white/[0.01] hover:bg-white/[0.02] border border-dashed border-white/10 hover:border-white/20 rounded-md transition-all">
-                   <div className="w-5 shrink-0 text-right select-none font-mono text-[10px] text-white/20 font-black">
-                     +
-                   </div>
-                   <input
-                     type="text"
-                     placeholder={isRTL ? "إضافة مهمة سريعة... (Enter)" : "Quick add task... (Press Enter)"}
-                     className="flex-1 bg-transparent border-none outline-none font-space text-sm text-white placeholder-white/30"
-                     onKeyDown={async (e) => {
-                       if (e.key === 'Enter') {
-                         e.preventDefault()
-                         const title = e.currentTarget.value.trim()
-                         if (!title) return
-                         e.currentTarget.value = ''
-                         
-                         // Create task optimistically
-                         const newId = 'temp_' + Date.now()
-                         const tempTask = {
-                           id: newId,
-                           title,
-                           is_completed: false,
-                           weight: 3,
-                           cup_id: id,
-                           metadata: {}
-                         }
-                         
-                         setMission((prev: any) => ({
-                           ...prev,
-                           tasks: [...(prev.tasks || []), tempTask]
-                         }))
-                         
-                         playBlip()
-                         
-                         const isLocal = typeof id === 'string' && id.startsWith('local_')
-                         if (isLocal) {
-                           setMission((prev: any) => {
-                             const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]');
-                             const updatedTasks = prev.tasks.map((t: any) => t.id === newId ? { ...t, id: 'local_task_' + Date.now() } : t);
-                             const next = { ...prev, tasks: updatedTasks };
-                             const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g);
-                             localStorage.setItem('guest_goals', JSON.stringify(updatedGoals));
-                             return next;
-                           });
-                           return;
-                         }
-                         
-                         const { data, error } = await supabase
-                           .from('tasks')
-                           .insert([{
-                             cup_id: id,
-                             title,
-                             weight: 3,
-                             is_completed: false
-                           }])
-                           .select()
-                           
-                         if (error) {
-                           setMission((prev: any) => ({
-                             ...prev,
-                             tasks: (prev.tasks || []).filter((t: any) => t.id !== newId)
-                           }))
-                           showToast(isRTL ? "فشل إنشاء المهمة" : "FAILED TO CREATE TASK", "warning")
-                           playError()
-                         } else if (data && data[0]) {
-                           setMission((prev: any) => ({
-                             ...prev,
-                             tasks: (prev.tasks || []).map((t: any) => t.id === newId ? data[0] : t)
-                           }))
-                         }
-                       }
-                     }}
-                   />
-                 </div>
-                 */}
              </div>
            ) : (
              <KanbanBoard
@@ -2200,7 +2126,7 @@ const { progress, isInRedZone } = useMemo(() => {
                setSelectedTask={setSelectedTask}
                selectedTask={selectedTask}
                timeStatsMap={timeStatsMap}
-               cupId={id as string}
+               goalId={id as string}
                onlineUsers={onlineUsers}
                currentUserId={profile?.id}
              />
@@ -2245,30 +2171,6 @@ const { progress, isInRedZone } = useMemo(() => {
                    />
                 </div>
              </form>
-
-             {/* Dynamic Bilingual Alert */}
-             {(() => {
-               const sizeStr = mission.size?.toLowerCase() || 'md'
-               const tCount = mission.tasks?.length || 0
-               if (sizeStr === 'sm' || sizeStr === 's' || sizeStr === 'small') {
-                 if (tCount > 4) {
-                   return (
-                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="text-xs text-yellow-500/80 font-space px-2">
-                       {isRTL ? "واضح إن الهدف ده فيه مهام كتير! إيه رأيك تكبر حجمه لـ Medium عشان يعكس مجهودك الحقيقي وتكسب نقاط XP أكتر؟" : "Looks like this goal has a lot of tasks! How about upgrading it to Medium to reflect your true effort and earn more XP?"}
-                     </motion.div>
-                   )
-                 }
-               } else if (sizeStr === 'md' || sizeStr === 'm' || sizeStr === 'medium') {
-                 if (tCount > 8) {
-                   return (
-                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="text-xs text-yellow-500/80 font-space px-2">
-                       {isRTL ? "المهام بدأت تزيد هنا! إيه رأيك تخليه Large؟ الحجم الأكبر هيديك مساحة أفضل وسقف XP أعلى يناسب تعبك." : "Tasks are piling up! Consider upgrading to Large to give yourself more space and unlock a higher XP ceiling."}
-                     </motion.div>
-                   )
-                 }
-               }
-               return null
-             })()}
             </div>
          </section>
         </div>
@@ -2364,7 +2266,7 @@ const { progress, isInRedZone } = useMemo(() => {
       <PlaylistImportModal 
         isOpen={showPlaylistModal}
         onClose={() => setShowPlaylistModal(false)}
-        missionId={id as string}
+        goalId={id as string}
         themeColor={missionColor}
         onTasksAdded={(newTasks) => {
           setMission((prev: any) => {
@@ -2394,7 +2296,7 @@ const { progress, isInRedZone } = useMemo(() => {
       <SmartImportModal
         isOpen={showSmartImportModal}
         onClose={() => setShowSmartImportModal(false)}
-        missionId={id as string}
+        goalId={id as string}
         themeColor={missionColor}
         onTasksAdded={(newTasks) => {
           setMission((prev: any) => ({
@@ -2417,17 +2319,17 @@ const { progress, isInRedZone } = useMemo(() => {
       />
 
       {/* Attachments Modal */}
-      {attachmentMissionId && (
+      {attachmentGoalId && (
         <MissionAttachmentsModal
-          missionId={attachmentMissionId}
+          goalId={attachmentGoalId}
           missionTitle={mission?.title ?? ''}
           themeColor={missionColor}
-          isOpen={!!attachmentMissionId}
+          isOpen={!!attachmentGoalId}
           attachments={activeAttachments}
           setAttachments={setActiveAttachments}
           loading={modalLoading}
           onClose={() => {
-            setAttachmentMissionId(null)
+            setAttachmentGoalId(null)
             setActiveAttachments([])
           }}
           onCountChange={count => setAttachmentCount(count)}
@@ -3038,7 +2940,8 @@ const { progress, isInRedZone } = useMemo(() => {
           onComplete={() => toggleTask(selectedTask.id, selectedTask.is_completed)}
           onProgressUpdate={(currentTime, duration) => updateTaskProgress(selectedTask.id, currentTime, duration)}
           onUpdateTask={onUpdateTask}
-          cupId={typeof id === 'string' ? id : undefined}
+          // cupId={typeof id === 'string' ? id : undefined}
+          goalId={typeof id === 'string' ? id : undefined}
           squadMembers={squadMembers}
           isSquad={mission?.metadata?.type === 'squad'}
           missionOwnerId={mission?.user_id}

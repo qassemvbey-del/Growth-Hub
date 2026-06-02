@@ -145,7 +145,7 @@ export async function chatWithCoach(prompt: string, userData: CoachUserData, lan
   }
 }
 
-export async function generateTasks(goal: string, cupId: string) {
+export async function generateTasks(goal: string, goalId: string) {
   if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
     console.error('AI_MAGIC_ERROR: NEXT_PUBLIC_GEMINI_API_KEY is missing from environment')
     return { success: false, error: 'PROTOCOL_FAILURE: NO_API_KEY' }
@@ -180,7 +180,8 @@ export async function generateTasks(goal: string, cupId: string) {
       const { data: insertedTask, error } = await supabase
         .from('tasks')
         .insert({
-          cup_id: cupId,
+          // cup_id: cupId,
+          goal_id: goalId,
           parent_id: parentId,
           title: task.title,
           type: task.type,

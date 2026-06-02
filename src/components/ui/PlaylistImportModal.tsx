@@ -19,14 +19,16 @@ interface PreviewTask {
 interface Props {
   isOpen: boolean
   onClose: () => void
-  missionId: string
+  // missionId: string
+  goalId: string
   themeColor: string
   onTasksAdded: (tasks: any[]) => void
 }
 
 const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || 'AIzaSyAcS6t0jQivhoXePWTajpocP0upKX313hk'
 
-export default function PlaylistImportModal({ isOpen, onClose, missionId, themeColor, onTasksAdded }: Props) {
+// export default function PlaylistImportModal({ isOpen, onClose, missionId, themeColor, onTasksAdded }: Props) {
+export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColor, onTasksAdded }: Props) {
   const { isRTL, profile } = useGrowth()
   const [playlistUrl, setPlaylistUrl] = useState('')
   const [loading, setLoading] = useState(false)
@@ -190,7 +192,8 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
   const handleDeploy = async () => {
     setConfirming(true)
     const { data: { user } } = await supabase.auth.getUser()
-    const isLocal = typeof missionId === 'string' && missionId.startsWith('local_')
+    // const isLocal = typeof missionId === 'string' && missionId.startsWith('local_')
+    const isLocal = typeof goalId === 'string' && goalId.startsWith('local_')
 
     if (!user && !isLocal) {
       // setError('AUTH_REQUIRED // SESSION_TERMINATED')
@@ -200,8 +203,19 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
     }
 
     const now = Date.now()
+    // const payload = previewTasks.map((t, index) => ({
+    //   cup_id: missionId,
+    //   title: t.title,
+    //   original_title: t.originalTitle,
+    //   weight: t.weight,
+    //   is_completed: false,
+    //   type: 'standard',
+    //   video_id: t.videoId,
+    //   video_progress: 0,
+    //   created_at: new Date(now + index * 10).toISOString()
+    // }))
     const payload = previewTasks.map((t, index) => ({
-      cup_id: missionId,
+      goal_id: goalId,
       title: t.title,
       original_title: t.originalTitle,
       weight: t.weight,
@@ -221,7 +235,8 @@ export default function PlaylistImportModal({ isOpen, onClose, missionId, themeC
       // Save to localStorage under guest_goals
       const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
       const updatedGoals = guestGoals.map((g: any) => {
-        if (g.id === missionId) {
+        // if (g.id === missionId) {
+        if (g.id === goalId) {
           return {
             ...g,
             tasks: [...(g.tasks || []), ...generatedTasks]

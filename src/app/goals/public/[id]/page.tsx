@@ -92,7 +92,8 @@ export default function PublicGoalPage() {
         const { data: logs } = await supabase
           .from('time_logs')
           .select('duration_minutes')
-          .eq('cup_id', id)
+          // .eq('cup_id', id)
+          .eq('goal_id', id)
 
         if (logs) {
           const totalMins = logs.reduce((sum: number, log: any) => sum + (log.duration_minutes || 0), 0)

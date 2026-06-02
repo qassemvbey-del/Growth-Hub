@@ -17,7 +17,8 @@ interface KanbanBoardProps {
   setSelectedTask: (task: any | null) => void
   selectedTask: any | null
   timeStatsMap: Record<string, number>
-  cupId?: string
+  // cupId?: string
+  goalId?: string
   onlineUsers?: any[]
   currentUserId?: string
 }
@@ -72,7 +73,8 @@ export default function KanbanBoard({
   setSelectedTask,
   selectedTask,
   timeStatsMap,
-  cupId,
+  // cupId,
+  goalId,
   onlineUsers = [],
   currentUserId
 }: KanbanBoardProps) {

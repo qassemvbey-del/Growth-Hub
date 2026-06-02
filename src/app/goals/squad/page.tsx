@@ -751,15 +751,19 @@ export default function SquadGoalsPage() {
         todayMidnight.setUTCHours(0, 0, 0, 0)
         const { data: activeLogs } = await supabase
           .from('time_logs')
-          .select('cup_id, user_id')
-          .in('cup_id', squadGoalIds)
+          // .select('cup_id, user_id')
+          .select('goal_id, user_id')
+          // .in('cup_id', squadGoalIds)
+          .in('goal_id', squadGoalIds)
           .gte('started_at', todayMidnight.toISOString())
 
         if (activeLogs) {
           const activeMap: Record<string, Set<string>> = {}
           activeLogs.forEach((log: any) => {
-            if (!activeMap[log.cup_id]) activeMap[log.cup_id] = new Set()
-            activeMap[log.cup_id].add(log.user_id)
+            // if (!activeMap[log.cup_id]) activeMap[log.cup_id] = new Set()
+            if (!activeMap[log.goal_id]) activeMap[log.goal_id] = new Set()
+            // activeMap[log.cup_id].add(log.user_id)
+            activeMap[log.goal_id].add(log.user_id)
           })
           const activeCounts: Record<string, number> = {}
           Object.keys(activeMap).forEach(cupId => {
@@ -786,7 +790,8 @@ export default function SquadGoalsPage() {
 
   const filteredTasks = useMemo(() => {
     if (activeTab === 'ALL') return allTasks
-    return allTasks.filter(t => t.cup_id === activeTab)
+    // return allTasks.filter(t => t.cup_id === activeTab)
+    return allTasks.filter(t => t.goal_id === activeTab)
   }, [allTasks, activeTab])
 
   async function toggleTask(task: any) {
@@ -797,10 +802,12 @@ export default function SquadGoalsPage() {
     })))
 
     // Support guest goals locally
-    if (task.cup_id?.startsWith('local_')) {
+    // if (task.cup_id?.startsWith('local_')) {
+    if (task.goal_id?.startsWith('local_')) {
       const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
       const updatedGoals = guestGoals.map((m: any) => {
-        if (m.id === task.cup_id) {
+        // if (m.id === task.cup_id) {
+        if (m.id === task.goal_id) {
           return {
             ...m,
             tasks: m.tasks?.map((t: any) => t.id === task.id ? { ...t, is_completed: updatedStatus } : t)
@@ -816,7 +823,8 @@ export default function SquadGoalsPage() {
     if (error) {
       fetchMissions()
     } else {
-      const mission = missions.find(m => m.id === task.cup_id)
+      // const mission = missions.find(m => m.id === task.cup_id)
+      const mission = missions.find(m => m.id === task.goal_id)
       if (mission && mission.tasks) {
         const taskIndex = mission.tasks.findIndex((t: any) => t.id === task.id)
         if (taskIndex !== -1) {
@@ -837,7 +845,7 @@ export default function SquadGoalsPage() {
           await supabase.from('task_completion_log').insert([{
             user_id: user.id,
             task_id: task.id,
-            cup_id: task.cup_id,
+            // cup_id: task.cup_id,
             completed_at: new Date().toISOString()
           }])
         }
@@ -1559,7 +1567,8 @@ export default function SquadGoalsPage() {
           {/* ── ATTACHMENTS MODAL (rendered once, outside cards) ── */}
           {attachmentMissionId && (
             <MissionAttachmentsModal
-              missionId={attachmentMissionId}
+              // missionId={attachmentMissionId}
+              goalId={attachmentMissionId}
               missionTitle={missions.find(m => m.id === attachmentMissionId)?.title ?? ''}
               themeColor={currentTheme.color}
               isOpen={!!attachmentMissionId}

@@ -102,7 +102,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: idx * 0.05 }}
-        onClick={() => { playBlip(); router.push(`/missions/${mission.id}`); }}
+        // onClick={() => { playBlip(); router.push(`/missions/${mission.id}`); }}
+        onClick={() => { playBlip(); router.push(mission.metadata?.type === 'public' ? `/goals/public/${mission.id}` : `/goals/squad/${mission.id}`); }}
         className={cn(
           "group relative flex flex-col bg-[var(--card-bg)] border border-[var(--card-border)] hover:border-[var(--card-border)]/50 cursor-pointer transition-all rounded-md shadow-xl overflow-hidden",
           typeFilter === 'squad'
@@ -615,15 +616,19 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
         todayMidnight.setUTCHours(0, 0, 0, 0)
         const { data: activeLogs } = await supabase
           .from('time_logs')
-          .select('cup_id, user_id')
-          .in('cup_id', squadGoalIds)
+          // .select('cup_id, user_id')
+          .select('goal_id, user_id')
+          // .in('cup_id', squadGoalIds)
+          .in('goal_id', squadGoalIds)
           .gte('started_at', todayMidnight.toISOString())
 
         if (activeLogs) {
           const activeMap: Record<string, Set<string>> = {}
           activeLogs.forEach((log: any) => {
-            if (!activeMap[log.cup_id]) activeMap[log.cup_id] = new Set()
-            activeMap[log.cup_id].add(log.user_id)
+            // if (!activeMap[log.cup_id]) activeMap[log.cup_id] = new Set()
+            if (!activeMap[log.goal_id]) activeMap[log.goal_id] = new Set()
+            // activeMap[log.cup_id].add(log.user_id)
+            activeMap[log.goal_id].add(log.user_id)
           })
           const activeCounts: Record<string, number> = {}
           Object.keys(activeMap).forEach(cupId => {
@@ -650,7 +655,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
 
   const filteredTasks = useMemo(() => {
     if (activeTab === 'ALL') return allTasks
-    return allTasks.filter(t => t.cup_id === activeTab)
+    // return allTasks.filter(t => t.cup_id === activeTab)
+    return allTasks.filter(t => t.goal_id === activeTab)
   }, [allTasks, activeTab])
 
   async function toggleTask(task: any) {
@@ -661,10 +667,12 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
     })))
 
     // Support guest goals locally
-    if (task.cup_id?.startsWith('local_')) {
+    // if (task.cup_id?.startsWith('local_')) {
+    if (task.goal_id?.startsWith('local_')) {
       const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
       const updatedGoals = guestGoals.map((m: any) => {
-        if (m.id === task.cup_id) {
+        // if (m.id === task.cup_id) {
+        if (m.id === task.goal_id) {
           return {
             ...m,
             tasks: m.tasks?.map((t: any) => t.id === task.id ? { ...t, is_completed: updatedStatus } : t)
@@ -680,7 +688,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
     if (error) {
       fetchMissions()
     } else {
-      const mission = missions.find(m => m.id === task.cup_id)
+      // const mission = missions.find(m => m.id === task.cup_id)
+      const mission = missions.find(m => m.id === task.goal_id)
       if (mission && mission.tasks) {
         const taskIndex = mission.tasks.findIndex((t: any) => t.id === task.id)
         if (taskIndex !== -1) {
@@ -701,7 +710,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
           await supabase.from('task_completion_log').insert([{
             user_id: user.id,
             task_id: task.id,
-            cup_id: task.cup_id,
+            // cup_id: task.cup_id,
             completed_at: new Date().toISOString()
           }])
         }
@@ -818,7 +827,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
         setDefaultView('list')
         showToast(isRTL ? 'تم حفظ الهدف محلياً' : 'Goal saved locally!', 'success')
         playDeploy()
-        router.push(`/missions/${fakeId}`)
+        // router.push(`/missions/${fakeId}`)
+        router.push(`/goals/squad/${fakeId}`)
         return
       }
 
@@ -921,7 +931,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
         setDefaultView('list')
         showToast(isRTL ? 'تم إنشاء الهدف' : 'Goal activated!', 'success')
         playDeploy()
-        router.push(`/missions/${data.id}`)
+        // router.push(`/missions/${data.id}`)
+        router.push(data.metadata?.type === 'public' ? `/goals/public/${data.id}` : `/goals/squad/${data.id}`)
       }
     } finally {
       setIsSubmitting(false)
@@ -1396,7 +1407,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
           {/* ── ATTACHMENTS MODAL (rendered once, outside cards) ── */}
           {attachmentMissionId && (
             <MissionAttachmentsModal
-              missionId={attachmentMissionId}
+              // missionId={attachmentMissionId}
+              goalId={attachmentMissionId}
               missionTitle={missions.find(m => m.id === attachmentMissionId)?.title ?? ''}
               themeColor={currentTheme.color}
               isOpen={!!attachmentMissionId}

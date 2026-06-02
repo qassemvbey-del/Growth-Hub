@@ -10,14 +10,16 @@ import { useGrowth } from '@/context/GrowthContext'
 interface Props {
   isOpen: boolean
   onClose: () => void
-  missionId: string
+  // missionId: string
+  goalId: string
   themeColor: string
   onTasksAdded: (tasks: any[]) => void
 }
 
 type Phase = 'INPUT' | 'PREVIEW'
 
-export default function SmartImportModal({ isOpen, onClose, missionId, themeColor, onTasksAdded }: Props) {
+// export default function SmartImportModal({ isOpen, onClose, missionId, themeColor, onTasksAdded }: Props) {
+export default function SmartImportModal({ isOpen, onClose, goalId, themeColor, onTasksAdded }: Props) {
   const { isRTL } = useGrowth()
   const [phase, setPhase] = useState<Phase>('INPUT')
   const [pastedText, setPastedText] = useState('')
@@ -60,7 +62,8 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
   const handleDeploy = async () => {
     setDeploying(true)
     const { data: { user } } = await supabase.auth.getUser()
-    const isLocal = typeof missionId === 'string' && missionId.startsWith('local_')
+    // const isLocal = typeof missionId === 'string' && missionId.startsWith('local_')
+    const isLocal = typeof goalId === 'string' && goalId.startsWith('local_')
 
     if (!user && !isLocal) {
       setError(isRTL ? 'يرجى تسجيل الدخول للمتابعة' : 'AUTH_REQUIRED')
@@ -69,8 +72,16 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
     }
 
     const now = Date.now()
+    // const payload = extractedTasks.map((title, index) => ({
+    //   cup_id: missionId,
+    //   title,
+    //   weight: 3,
+    //   is_completed: false,
+    //   type: 'standard',
+    //   created_at: new Date(now + index * 10).toISOString()
+    // }))
     const payload = extractedTasks.map((title, index) => ({
-      cup_id: missionId,
+      goal_id: goalId,
       title,
       weight: 3,
       is_completed: false,
@@ -87,7 +98,8 @@ export default function SmartImportModal({ isOpen, onClose, missionId, themeColo
       // Save to localStorage under guest_goals
       const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
       const updatedGoals = guestGoals.map((g: any) => {
-        if (g.id === missionId) {
+        // if (g.id === missionId) {
+        if (g.id === goalId) {
           return {
             ...g,
             tasks: [...(g.tasks || []), ...generatedTasks]
