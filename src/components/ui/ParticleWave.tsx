@@ -23,9 +23,34 @@ export default function ParticleWave() {
     let width = (canvas.width = window.innerWidth)
     let height = (canvas.height = window.innerHeight)
 
+    let points: Point[] = []
+
+    // STEP 1: GENERATE UNIFIED GRID DYNAMICALLY
+    const generateGrid = (w: number, h: number) => {
+      const tempPoints: Point[] = []
+      const spacingX = 40
+      const spacingY = 40
+      const cols = Math.floor(w / spacingX) + 6
+      const rows = Math.floor(h / spacingY) + 6
+
+      for (let c = -3; c < cols; c++) {
+        for (let r = -3; r < rows; r++) {
+          tempPoints.push({
+            x3d: c * spacingX - w / 2,
+            y3d: r * spacingY - h / 2,
+            z3d: 0,
+          })
+        }
+      }
+      points = tempPoints
+    }
+
+    generateGrid(width, height)
+
     const handleResize = () => {
       width = canvas.width = window.innerWidth
       height = canvas.height = window.innerHeight
+      generateGrid(width, height)
     }
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -36,34 +61,18 @@ export default function ParticleWave() {
     window.addEventListener('resize', handleResize)
     window.addEventListener('mousemove', handleMouseMove)
 
-    // Generate fixed 3D grid points (X & Y indices)
-    const points: Point[] = []
-    const spacingX = 40
-    const spacingY = 40
-    const cols = Math.floor(width / spacingX) + 6
-    const rows = Math.floor(height / spacingY) + 6
-
-    for (let c = -3; c < cols; c++) {
-      for (let r = -3; r < rows; r++) {
-        points.push({
-          x3d: c * spacingX - width / 2,
-          y3d: r * spacingY - height / 2,
-          z3d: 0,
-        })
-      }
-    }
-
     let time = 0
     const fov = 350 // Perspective FOV
     const angleX = 1.1 // Camera tilt angle
 
     const render = () => {
-      time += 0.03
+      // REDUCE SPEED: Lower the increment for calm, elegant wave movement
+      time += 0.007
 
       // DETECT THEME DYNAMICALLY
       const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
       
-      // STEP 2: USE TRAILING CLEAR EFFECT FOR SMOOTH MOTION TRAILS
+      // Use trailing clear effect for smooth motion trails
       ctx.fillStyle = isDark ? 'rgba(9, 9, 11, 0.25)' : 'rgba(255, 255, 255, 0.25)'
       ctx.fillRect(0, 0, width, height)
 
@@ -74,11 +83,11 @@ export default function ParticleWave() {
       const my = mouseRef.current.y
 
       points.forEach((p) => {
-        // Calculate procedural undulating height wave (Z-axis)
-        const waveX = p.x3d * 0.004
-        const waveY = p.y3d * 0.004
-        let z = Math.sin(waveX + time) * Math.cos(waveY + time) * 45
-        z += Math.sin(waveX * 2 - time * 0.5) * 15
+        // GENTLE WAVE: Apply a smoother, flatter sine wave displacement to prevent vertical lines
+        const waveX = p.x3d * 0.003
+        const waveY = p.y3d * 0.003
+        let z = Math.sin(waveX + time) * Math.cos(waveY + time) * 22
+        z += Math.sin(waveX * 2 - time * 0.4) * 6
 
         // Project baseline position to compute distance to mouse pointer
         const tempY = p.y3d * cosX - z * sinX
@@ -91,9 +100,12 @@ export default function ParticleWave() {
         const dist = Math.sqrt(dx * dx + dy * dy)
         let mouseDisplacement = 0
 
-        if (dist < 250) {
-          const strength = (250 - dist) / 250
-          mouseDisplacement = Math.sin(strength * Math.PI) * 40
+        // BOOST MOUSE EFFECT: Expand interaction radius to 400px
+        const activeRadius = 400
+        if (dist < activeRadius) {
+          const strength = (activeRadius - dist) / activeRadius
+          // Smooth cosine curves for displacement repelling
+          mouseDisplacement = Math.sin(strength * Math.PI) * 35
           z += mouseDisplacement
         }
 
@@ -115,14 +127,14 @@ export default function ParticleWave() {
           const vignette = Math.max(0, 1 - distToCenter / (maxDist * 0.85))
 
           // Draw highly visible contrasting teal dots
-          let opacity = vignette * 0.45 // Increased opacity for crystal clear visibility
-          let radius = 1.4 // Slightly larger radius
+          let opacity = vignette * 0.45 
+          let radius = 1.3 
           let color = isDark ? 'rgba(20, 184, 166, ' : 'rgba(13, 148, 136, '
 
-          if (dist < 220) {
-            const glowFactor = (220 - dist) / 220
-            opacity += glowFactor * 0.45
-            radius += glowFactor * 1.5
+          if (dist < activeRadius) {
+            const glowFactor = (activeRadius - dist) / activeRadius
+            opacity += glowFactor * 0.55
+            radius += glowFactor * 1.8
           }
 
           ctx.beginPath()
@@ -144,7 +156,6 @@ export default function ParticleWave() {
     }
   }, [])
 
-  // STEP 1: SET CANVAS WRAPPER TO Z-0
   return (
     <canvas
       ref={canvasRef}

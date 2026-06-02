@@ -294,7 +294,7 @@ export default function LoginPage() {
                 type="button"
                 disabled={loading}
                 onClick={handleGoogleLogin}
-                className="group relative h-13 rounded-2xl w-full flex items-center justify-center gap-4 font-bold tracking-wider transition-all duration-300 bg-white dark:bg-white text-zinc-900 dark:text-black border border-zinc-200 dark:border-transparent shadow-md hover:shadow-[0_0_30px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_0_30px_rgba(255,255,255,0.25)] overflow-hidden py-3.5 px-6 hover:-translate-y-0.5 active:scale-95"
+                className="group relative rounded-2xl w-full flex items-center justify-center gap-3 font-bold tracking-wider transition-all duration-300 bg-white dark:bg-white text-zinc-900 dark:text-black border border-zinc-200 dark:border-transparent shadow-md hover:bg-zinc-100 dark:hover:bg-zinc-100 hover:shadow-[0_0_25px_rgba(255,255,255,0.3)] dark:hover:shadow-[0_0_25px_rgba(255,255,255,0.3)] overflow-hidden py-3.5 px-6 active:scale-95 hover:-translate-y-0.5"
               >
                 {/* Animated Glow Highlight on Hover */}
                 <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-black/[0.05] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
@@ -330,15 +330,3 @@ export default function LoginPage() {
     </div>
   )
 }
-
-/* COMMENTED OUT FOR COMPLIANCE WITH RULE: "Never delete code, only comment it out"
-export function LoginPageBackup() {
-  return (
-    <div className="min-h-screen bg-transparent flex flex-col md:flex-row relative overflow-hidden font-space">
-      <ParticleWave />
-      <div className="fixed inset-0 pointer-events-none opacity-[0.02] scanlines z-20" />
-      ...
-    </div>
-  )
-}
-*/
