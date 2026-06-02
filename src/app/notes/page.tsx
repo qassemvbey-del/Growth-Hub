@@ -799,7 +799,8 @@ export default function NotesPage() {
                   : (isRTL ? 'الملاحظات' : 'NOTES')}
               </span>
 
-              <h3 className="text-sm font-bold font-space text-zinc-200 tracking-wide uppercase mb-1">
+              {/* <h3 className="text-sm font-bold font-space text-zinc-200 tracking-wide uppercase mb-1"> */}
+              <h3 className="text-sm font-bold font-space text-zinc-200 tracking-wide mb-1">
                 {searchQuery
                   ? (isRTL ? 'لا توجد ملاحظات مطابقة' : 'No Matching Notes Found')
                   : (isRTL ? 'لا توجد ملاحظات مضافة بعد' : 'No notes added yet')}

@@ -1,6 +1,7 @@
 'use client'
 
-import { AlertTriangle, ArrowRight, Calendar, Check, CheckCircle2, HelpCircle, Info, Kanban, Layers, Link, List, Plus, RefreshCw, Users2, Zap, Trophy, Award, Shield, Settings, Star, X, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard, Circle } from 'lucide-react'
+// import { AlertTriangle, ArrowRight, Calendar, Check, CheckCircle2, HelpCircle, Info, Kanban, Layers, Link, List, Plus, RefreshCw, Users2, Zap, Trophy, Award, Shield, Settings, Star, X, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard, Circle } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Calendar, Check, CheckCircle2, HelpCircle, Info, Kanban, Layers, Link, List, Plus, RefreshCw, Users2, Zap, Trophy, Award, Shield, Settings, Star, X, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard, Circle, Target, Users } from 'lucide-react'
 import { NeonIcon } from '@/components/ui/NeonIcon'
 import Shell from '@/components/layout/Shell'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -1005,7 +1006,12 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
         <header className="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-black/5 dark:border-white/5 pb-8">
           <div className="space-y-4 text-center md:text-start">
             <div className="flex items-center gap-4 justify-center md:justify-start">
-              <Layers className="text-3xl md:text-4xl w-8 h-8" style={{ color: currentTheme.color }} />
+              {/* <Layers className="text-3xl md:text-4xl w-8 h-8" style={{ color: currentTheme.color }} /> */}
+              {typeFilter === 'solo' ? (
+                <Target className="text-3xl md:text-4xl w-8 h-8" style={{ color: currentTheme.color }} />
+              ) : (
+                <Users className="text-3xl md:text-4xl w-8 h-8" style={{ color: currentTheme.color }} />
+              )}
               <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase not- text-black dark:text-white leading-none">
                 {typeFilter === 'solo' ? (
                   // <>{isRTL ? 'أهداف' : 'SOLO'}<span style={{ color: currentTheme.color }}>{isRTL ? ' فردية' : '_GOALS'}</span></>

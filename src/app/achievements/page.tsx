@@ -1,6 +1,7 @@
 'use client'
 
-import { CheckCircle2, Lock, Medal, X } from 'lucide-react'
+// import { CheckCircle2, Lock, Medal, X } from 'lucide-react'
+import { CheckCircle2, Lock, Medal, X, Trophy } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import Shell from '@/components/layout/Shell'
 import EnergyCell from '@/components/ui/EnergyCell'
@@ -103,7 +104,8 @@ export default function WinsPage() {
             <div className="text-center space-y-4 relative">
               <div className="flex items-center justify-center gap-6 mb-2">
                 <div className="w-20 h-[1px] opacity-30" style={{ background: `linear-gradient(to right, transparent, ${currentTheme.color})` }} />
-                <Medal className="text-3xl md:text-4xl w-8 h-8" style={{ color: currentTheme.color }} />
+                {/* <Medal className="text-3xl md:text-4xl w-8 h-8" style={{ color: currentTheme.color }} /> */}
+                <Trophy className="text-3xl md:text-4xl w-8 h-8" style={{ color: currentTheme.color }} />
                 <div className="w-20 h-[1px] opacity-30" style={{ background: `linear-gradient(to left, transparent, ${currentTheme.color})` }} />
               </div>
               <h1 className="text-4xl md:text-7xl font-black font-space tracking-wider uppercase not- text-[var(--text-primary)] leading-none">
@@ -205,9 +207,11 @@ export default function WinsPage() {
                   transition={{ delay: i * 0.07 }}
                   className="group flex flex-col items-center gap-3 cursor-pointer"
                 >
-                  <div className="text-[8px] md:text-[10px] font-space tracking-[0.4em] uppercase font-black mb-4" style={{ color: `${currentTheme.color}66` }}>
-                  {/* ★ {isRTL ? 'مكتمل' : 'COMPLETE'} */}
+                  {/* <div className="text-[8px] md:text-[10px] font-space tracking-[0.4em] uppercase font-black mb-4" style={{ color: `${currentTheme.color}66` }}>
                   ★ {isRTL ? 'مكتمل' : 'Complete'}
+                  </div> */}
+                  <div className="text-[8px] md:text-[10px] font-space tracking-[0.4em] font-black mb-4" style={{ color: `${currentTheme.color}66` }}>
+                  {isRTL ? 'مكتمل' : 'Complete'}
                   </div>
 
                   <div className="relative flex flex-col items-center pb-8 pt-4">

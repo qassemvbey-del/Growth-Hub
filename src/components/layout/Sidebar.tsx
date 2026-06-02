@@ -270,9 +270,11 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                       className="overflow-hidden flex flex-col gap-1.5 mt-1.5 pl-4"
                     >
                       {[
-                        { label: mounted ? (isRTL ? 'شخصي' : 'Personal Goals') : 'Personal Goals', icon: User, href: '/goals/solo' },
+                        // { label: mounted ? (isRTL ? 'شخصي' : 'Personal Goals') : 'Personal Goals', icon: User, href: '/goals/solo' },
+                        { label: mounted ? (isRTL ? 'شخصي' : 'Solo Goals') : 'Solo Goals', icon: User, href: '/goals/solo' },
                         /* { label: mounted ? (isRTL ? 'فريق' : 'Team Goals') : 'Team Goals', icon: Users, href: '/goals/squad' } */
-                        { label: mounted ? (isRTL ? 'Squad' : 'Team Goals') : 'Team Goals', icon: Users, href: '/goals/squad' }
+                        // { label: mounted ? (isRTL ? 'Squad' : 'Team Goals') : 'Team Goals', icon: Users, href: '/goals/squad' }
+                        { label: mounted ? (isRTL ? 'Squad' : 'Squad Goals') : 'Squad Goals', icon: Users, href: '/goals/squad' }
                       ].map((subItem, subIdx) => {
                         const isSubActive = pathname === subItem.href
                         const isSubHovered = hoveredIndex === (100 + subIdx)

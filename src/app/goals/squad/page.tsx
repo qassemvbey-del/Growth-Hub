@@ -15,12 +15,21 @@ import { useSound } from '@/context/SoundContext'
 import MissionAttachmentsModal from '@/components/ui/MissionAttachmentsModal'
 import { validateContent } from '@/lib/profanityFilter'
 import { aiProfanityCheck } from '@/app/actions/profanityCheck'
+/*
 import { 
   Trophy, Medal, Award, Layers, Settings, Link as LinkIcon, Calendar, Paperclip, 
   ArrowRight, Search, Shield, Users, CheckCircle2, XCircle, Plus,
   HelpCircle, Eye, Info, List, Kanban, Loader2, Sparkles, Check, 
   AlertTriangle, FolderClosed, UserPlus, Users2, Network, X, BookOpen, 
   Settings2, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard, Circle, Zap
+} from 'lucide-react'
+*/
+import { 
+  Trophy, Medal, Award, Layers, Settings, Link as LinkIcon, Calendar, Paperclip, 
+  ArrowRight, Search, Shield, Users, CheckCircle2, XCircle, Plus,
+  HelpCircle, Eye, Info, List, Kanban, Loader2, Sparkles, Check, 
+  AlertTriangle, FolderClosed, UserPlus, Users2, Network, X, BookOpen, 
+  Settings2, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard, Circle, Zap, Target
 } from 'lucide-react'
 
 
@@ -1142,7 +1151,12 @@ export default function SquadGoalsPage() {
         <header className="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-black/5 dark:border-white/5 pb-8">
           <div className="space-y-4 text-center md:text-start">
             <div className="flex items-center gap-4 justify-center md:justify-start">
-              <Layers className="w-8 h-8 md:w-10 md:h-10 shrink-0" style={{ color: currentTheme.color }} />
+              {/* <Layers className="w-8 h-8 md:w-10 md:h-10 shrink-0" style={{ color: currentTheme.color }} /> */}
+              {typeFilter === 'solo' ? (
+                <Target className="w-8 h-8 md:w-10 md:h-10 shrink-0" style={{ color: currentTheme.color }} />
+              ) : (
+                <Users className="w-8 h-8 md:w-10 md:h-10 shrink-0" style={{ color: currentTheme.color }} />
+              )}
               <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase not- text-black dark:text-white leading-none">
                 {typeFilter === 'solo' ? (
                   /* <>{isRTL ? 'أهداف' : 'PERSONAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' شخصية' : '_GOALS'}</span></> */
