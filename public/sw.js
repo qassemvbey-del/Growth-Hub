@@ -1,10 +1,13 @@
 const CACHE_NAME = 'growth-hub-v1'
 const urlsToCache = [
-  '/',
-  '/dashboard',
-  '/missions',
-  '/notes',
-  '/achievements',
+  '/manifest.json',
+  '/logo.svg',
+  '/icon.svg',
+  '/file.svg',
+  '/globe.svg',
+  '/next.svg',
+  '/vercel.svg',
+  '/window.svg',
 ]
 
 self.addEventListener('install', event => {
