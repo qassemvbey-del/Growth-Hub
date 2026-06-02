@@ -73,8 +73,8 @@ export default function SettingsPage() {
 
   // Dynamic AI Name Header calculation (No hardcoded "COACH" word)
   const aiNameHeader = profile?.ai_name 
-    ? profile.ai_name.toUpperCase() 
-    : (isRTL ? 'المنظومة الذكية' : 'AI SYSTEM')
+    ? profile.ai_name 
+    : (isRTL ? 'المنظومة الذكية' : 'AI Coach')
 
   useEffect(() => {
     async function getUser() {
@@ -260,10 +260,10 @@ export default function SettingsPage() {
   }
 
   const tabOptions = [
-    { id: 'ACCOUNT', label: isRTL ? 'الحساب' : 'ACCOUNT' },
-    { id: 'RANKS', label: isRTL ? 'الرتب والترقيات' : 'RANKS & SYSTEMS' },
+    { id: 'ACCOUNT', label: isRTL ? 'الحساب' : 'Account' },
+    { id: 'RANKS', label: isRTL ? 'الرتب والترقيات' : 'Ranks' },
     { id: 'AI_COACH', label: aiNameHeader },
-    { id: 'SYSTEM', label: isRTL ? 'النظام' : 'SYSTEM' }
+    { id: 'SYSTEM', label: isRTL ? 'النظام' : 'System' }
   ] as const
 
   return (
@@ -276,9 +276,9 @@ export default function SettingsPage() {
             <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase text-black dark:text-white leading-none">
               {t('settings')}
             </h1>
-            <p className="text-[10px] md:text-xs font-space tracking-[0.5em] uppercase font-black opacity-50" style={{ color: currentTheme.color }}>
+            {/* <p className="text-[10px] md:text-xs font-space tracking-[0.5em] uppercase font-black opacity-50" style={{ color: currentTheme.color }}>
               {isRTL ? 'تخصيص النظام' : 'SYSTEM CONFIGURATION'}
-            </p>
+            </p> */}
           </header>
 
           {/* Symmetrical layout split (1/4 vertical left tab sidebar, 3/4 content tab cards) */}
@@ -370,7 +370,7 @@ export default function SettingsPage() {
                       <div className="flex items-center gap-3 border-b border-white/10 pb-4">
                         <User className="text-2xl w-6 h-6" style={{ color: currentTheme.color }} />
                         <h3 className="font-space font-black tracking-widest text-sm uppercase text-white">
-                          {isRTL ? 'إعدادات الحساب الشخصي' : 'ACCOUNT CONFIGURATION'}
+                          {isRTL ? 'إعدادات الحساب الشخصي' : 'Account Configuration'}
                         </h3>
                       </div>
 
@@ -666,7 +666,7 @@ export default function SettingsPage() {
                       <div className="flex items-center gap-3 border-b border-white/10 pb-4">
                         <HelpCircle />
                         <h3 className="font-space font-black tracking-widest text-sm uppercase text-white">
-                          {isRTL ? 'إعدادات النظام والصوت' : 'SYSTEM & AUDIO CALIBRATION'}
+                          {isRTL ? 'إعدادات النظام والصوت' : 'System & Audio'}
                         </h3>
                       </div>
 
@@ -674,7 +674,7 @@ export default function SettingsPage() {
                         {/* Language switch */}
                         <div className="flex items-center justify-between border-b border-white/10 pb-6">
                           <label className="text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
-                            {isRTL ? 'لغة واجهة النظام' : 'INTERFACE LANGUAGE'}
+                            {isRTL ? 'لغة واجهة النظام' : 'Interface Language'}
                           </label>
                           <div className="flex bg-zinc-900/50 p-1 rounded-lg border border-white/5 shrink-0">
                             {[
@@ -705,12 +705,12 @@ export default function SettingsPage() {
                         {/* Theme switch */}
                         <div className="flex items-center justify-between border-b border-white/10 pb-6 mt-6">
                           <label className="text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
-                            {isRTL ? 'المظهر' : 'APPEARANCE'}
+                            {isRTL ? 'المظهر' : 'Appearance'}
                           </label>
                           <div className="flex bg-zinc-900/50 p-1 rounded-lg border border-white/5 shrink-0">
                             {[
-                              { key: 'dark', label: isRTL ? 'ليلي' : 'DARK' },
-                              { key: 'light', label: isRTL ? 'نهاري' : 'LIGHT' }
+                              { key: 'dark', label: isRTL ? 'ليلي' : 'Dark' },
+                              { key: 'light', label: isRTL ? 'نهاري' : 'Light' }
                             ].map(theme => {
                               const isActive = (theme.key === 'dark' && isDarkMode) || (theme.key === 'light' && !isDarkMode)
                               return (
@@ -742,7 +742,7 @@ export default function SettingsPage() {
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
                           <div className="space-y-1">
                             <label className="text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
-                              {isRTL ? 'مستوى الصوت العام' : 'MASTER SYSTEM VOLUME'}
+                              {isRTL ? 'مستوى الصوت العام' : 'Master Volume'}
                             </label>
                             <p className="text-[10px] font-space text-white/40 tracking-wider">
                               {isRTL ? 'ضبط مستوى صوت النظام.' : 'Adjust master system volume levels.'}
@@ -850,7 +850,7 @@ export default function SettingsPage() {
                         {/* System Integration / Native App Section */}
                         <div className="space-y-4 border-b border-white/10 pb-6">
                           <label className="text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
-                            {isRTL ? 'دمج النظام' : 'SYSTEM INTEGRATION'}
+                            {isRTL ? 'دمج النظام' : 'System Integration'}
                           </label>
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div className="space-y-1">
@@ -943,10 +943,10 @@ export default function SettingsPage() {
             <section className="w-full pt-12 border-t border-red-500/10 space-y-6">
               <header className="space-y-1">
                 <h2 className="text-xl font-space font-black tracking-tight text-red-500 uppercase">
-                  ADMIN<span className="text-white">_CALIBRATION</span>
+                  Admin Calibration
                 </h2>
                 <p className="text-[9px] font-space text-red-500/40 tracking-[0.4em] uppercase font-black">
-                  DEVELOPER_OVERRIDE // CRITICAL_SYSTEM_ACCESS
+                  Developer Override — Critical System Access
                 </p>
               </header>
 
