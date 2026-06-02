@@ -39,7 +39,7 @@ export default function InlineGuideTip({ hasTasks }: InlineGuideTipProps) {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           className={cn(
-            "relative w-full overflow-hidden rounded-xl bg-[#09090b] border p-5 sm:p-6 mb-6 shadow-2xl z-10",
+            "hidden md:block relative w-full overflow-hidden rounded-xl bg-[#09090b] border p-5 sm:p-6 mb-6 shadow-2xl z-10",
             isRTL ? "text-right" : "text-left"
           )}
           style={{ borderColor: `${currentTheme.color}30` }}
