@@ -13,8 +13,13 @@ export async function generateMetadata(
 
   try {
     const supabase = createAdminClient()
+    // const { data: mission } = await supabase
+    //   .from('cups')
+    //   .select('title')
+    //   .eq('id', id)
+    //   .single()
     const { data: mission } = await supabase
-      .from('cups')
+      .from('goals')
       .select('title')
       .eq('id', id)
       .single()

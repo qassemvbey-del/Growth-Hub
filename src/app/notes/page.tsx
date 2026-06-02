@@ -420,6 +420,7 @@ export default function NotesPage() {
       }
     } else {
       // Standalone note
+      console.log("FINAL_PAYLOAD_DEBUG:", JSON.stringify(updates, null, 2));
       await supabase.from('notes').update(updates).eq('id', id)
     }
   }
@@ -1091,8 +1092,10 @@ export default function NotesPage() {
 
                 {missions.length > 0 && (
                   <CustomSelect
-                    value={editingNote.mission_id || ''}
-                    onChange={val => updateNote(editingNote.id, { mission_id: val || null })}
+                    // value={editingNote.mission_id || ''}
+                    // onChange={val => updateNote(editingNote.id, { mission_id: val || null })}
+                    value={editingNote.goal_id || ''}
+                    onChange={val => updateNote(editingNote.id, { goal_id: val || null })}
                     options={[
                       { value: '', label: '— NO LINK —' },
                       ...missions.map(m => ({ value: m.id, label: m.title.toUpperCase() }))

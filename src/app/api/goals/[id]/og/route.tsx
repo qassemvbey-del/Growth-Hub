@@ -57,8 +57,13 @@ export async function GET(
 
   try {
     const supabase = createAdminClient()
+    // const { data: mission, error } = await supabase
+    //   .from('cups')
+    //   .select('*, tasks(*)')
+    //   .eq('id', id)
+    //   .single()
     const { data: mission, error } = await supabase
-      .from('cups')
+      .from('goals')
       .select('*, tasks(*)')
       .eq('id', id)
       .single()
@@ -244,7 +249,8 @@ export async function GET(
     }
 
     // Fetch time stats for focus
-    const { data: timeLogs } = await supabase.from('time_logs').select('duration_minutes').eq('cup_id', id)
+    // const { data: timeLogs } = await supabase.from('time_logs').select('duration_minutes').eq('cup_id', id)
+    const { data: timeLogs } = await supabase.from('time_logs').select('duration_minutes').eq('goal_id', id)
     const totalTimeInvested = (timeLogs || []).reduce((acc: number, row: any) => acc + (row.duration_minutes || 0), 0)
     const hours = Math.floor(totalTimeInvested / 60)
     const mins = totalTimeInvested % 60
