@@ -25,19 +25,18 @@ export default function ParticleWave() {
 
     let points: Point[] = []
 
-    // STEP 1: GENERATE UNIFIED GRID DYNAMICALLY
+    // STEP 1: GENERATE DENSE UNIFIED 2D GRID
     const generateGrid = (w: number, h: number) => {
       const tempPoints: Point[] = []
-      const spacingX = 40
-      const spacingY = 40
-      const cols = Math.floor(w / spacingX) + 6
-      const rows = Math.floor(h / spacingY) + 6
+      const spacing = 24 // Increased density
+      const cols = Math.ceil(w / spacing) + 4
+      const rows = Math.ceil(h / spacing) + 4
 
-      for (let c = -3; c < cols; c++) {
-        for (let r = -3; r < rows; r++) {
+      for (let c = -2; c < cols; c++) {
+        for (let r = -2; r < rows; r++) {
           tempPoints.push({
-            x3d: c * spacingX - w / 2,
-            y3d: r * spacingY - h / 2,
+            x3d: c * spacing - w / 2,
+            y3d: r * spacing - h / 2,
             z3d: 0,
           })
         }
@@ -62,81 +61,60 @@ export default function ParticleWave() {
     window.addEventListener('mousemove', handleMouseMove)
 
     let time = 0
-    const fov = 350 // Perspective FOV
-    const angleX = 1.1 // Camera tilt angle
 
     const render = () => {
-      // REDUCE SPEED: Lower the increment for calm, elegant wave movement
-      time += 0.007
+      // Slow, elegant wave movement
+      time += 0.008
 
-      // DETECT THEME DYNAMICALLY
+      // Detect theme dynamically
       const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
       
-      // Use trailing clear effect for smooth motion trails
+      // Trailing clear effect for smooth motion trails
       ctx.fillStyle = isDark ? 'rgba(9, 9, 11, 0.25)' : 'rgba(255, 255, 255, 0.25)'
       ctx.fillRect(0, 0, width, height)
-
-      const cosX = Math.cos(angleX)
-      const sinX = Math.sin(angleX)
 
       const mx = mouseRef.current.x
       const my = mouseRef.current.y
 
       points.forEach((p) => {
-        // GENTLE WAVE: Apply a smoother, flatter sine wave displacement to prevent vertical lines
-        const waveX = p.x3d * 0.003
-        const waveY = p.y3d * 0.003
-        let z = Math.sin(waveX + time) * Math.cos(waveY + time) * 22
-        z += Math.sin(waveX * 2 - time * 0.4) * 6
+        // Continuous 2D grid fabric wave math
+        const waveX = p.x3d * 0.005
+        const waveY = p.y3d * 0.005
+        let yDisplacement = Math.sin(waveX + time) * Math.cos(waveY + time) * 16
+        yDisplacement += Math.sin(waveX * 2 - time * 0.5) * 5
 
-        // Project baseline position to compute distance to mouse pointer
-        const tempY = p.y3d * cosX - z * sinX
-        const tempZ = p.y3d * sinX + z * cosX + fov
-        const screenX = (p.x3d * fov) / tempZ + width / 2
-        const screenY = (tempY * fov) / tempZ + height / 2
+        // Initial projected 2D coordinates on screen (Centered grid mapping)
+        let finalX = p.x3d + width / 2
+        let finalY = p.y3d + height / 2 + yDisplacement
 
-        const dx = screenX - mx
-        const dy = screenY - my
+        // Calculate distance to mouse cursor
+        const dx = finalX - mx
+        const dy = finalY - my
         const dist = Math.sqrt(dx * dx + dy * dy)
-        let mouseDisplacement = 0
 
-        // BOOST MOUSE EFFECT: Expand interaction radius to 400px
-        const activeRadius = 400
+        // Mouse displacement settings: tight 150px radius with high-force repulsion
+        const activeRadius = 150
+        let radius = 1.3
+        const isDarkTheme = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+        let opacity = 0.35 // Crisp baseline visibility
+        let color = isDarkTheme ? 'rgba(20, 184, 166, ' : 'rgba(13, 148, 136, '
+
         if (dist < activeRadius) {
           const strength = (activeRadius - dist) / activeRadius
-          // Smooth cosine curves for displacement repelling
-          mouseDisplacement = Math.sin(strength * Math.PI) * 35
-          z += mouseDisplacement
+          const angle = Math.atan2(dy, dx)
+          
+          // Violent/high-impact quadratic repulsion force
+          const pushForce = Math.pow(strength, 2) * 55
+          finalX += Math.cos(angle) * pushForce
+          finalY += Math.sin(angle) * pushForce
+
+          // Enlarge and glow particles in close proximity
+          opacity += strength * 0.55
+          radius += strength * 1.6
         }
 
-        // Re-calculate projection with displaced Z-value
-        const rotatedY = p.y3d * cosX - z * sinX
-        const rotatedZ = p.y3d * sinX + z * cosX + fov
-
-        const finalX = (p.x3d * fov) / rotatedZ + width / 2
-        const finalY = (rotatedY * fov) / rotatedZ + height / 2
-
+        // Render point within screen bounds
         if (finalX >= 0 && finalX <= width && finalY >= 0 && finalY <= height) {
-          const centerX = width / 2
-          const centerY = height / 2
-          const distToCenter = Math.sqrt(
-            (finalX - centerX) * (finalX - centerX) +
-              (finalY - centerY) * (finalY - centerY)
-          )
-          const maxDist = Math.sqrt(centerX * centerX + centerY * centerY)
-          const vignette = Math.max(0, 1 - distToCenter / (maxDist * 0.85))
-
-          // Draw highly visible contrasting teal dots
-          let opacity = vignette * 0.45 
-          let radius = 1.3 
-          let color = isDark ? 'rgba(20, 184, 166, ' : 'rgba(13, 148, 136, '
-
-          if (dist < activeRadius) {
-            const glowFactor = (activeRadius - dist) / activeRadius
-            opacity += glowFactor * 0.55
-            radius += glowFactor * 1.8
-          }
-
           ctx.beginPath()
           ctx.arc(finalX, finalY, radius, 0, Math.PI * 2)
           ctx.fillStyle = `${color}${opacity})`

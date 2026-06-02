@@ -170,6 +170,8 @@ export default function LoginPage() {
     }
   }
 
+  const hoverTextClass = "hover:text-teal-400 hover:drop-shadow-[0_0_10px_rgba(20,184,166,0.8)] transition-all duration-300 cursor-default"
+
   return (
     <div className="min-h-screen bg-transparent flex flex-col md:flex-row relative overflow-hidden font-space">
       
@@ -203,16 +205,16 @@ export default function LoginPage() {
           
           {/* Brand Header */}
           <motion.div variants={childVariants} className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-200/20 dark:bg-white/5 border border-zinc-300/30 dark:border-white/10 text-[9px] uppercase tracking-[0.25em] font-black text-zinc-800 dark:text-zinc-300">
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-200/20 dark:bg-white/5 border border-zinc-300/30 dark:border-white/10 text-[9px] uppercase tracking-[0.25em] font-black text-zinc-800 dark:text-zinc-300 ${hoverTextClass}`}>
               <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
               {t[lang].title}
             </div>
             <h1 
-              className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase text-zinc-900 dark:text-white leading-none drop-shadow-[0_0_15px_rgba(20,184,166,0.5)]"
+              className={`text-4xl md:text-6xl font-black font-space tracking-wider uppercase text-zinc-900 dark:text-white leading-none drop-shadow-[0_0_15px_rgba(20,184,166,0.5)] ${hoverTextClass}`}
             >
               <TypewriterText key={lang} text={t[lang].subtitle} />
             </h1>
-            <p className="text-sm text-zinc-600 dark:text-white/50 max-w-sm tracking-wide leading-relaxed">
+            <p className={`text-sm text-zinc-600 dark:text-white/50 max-w-sm tracking-wide leading-relaxed ${hoverTextClass}`}>
               {t[lang].tagline}
             </p>
           </motion.div>
@@ -225,10 +227,10 @@ export default function LoginPage() {
                 <Target className="w-5 h-5" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-sm font-black tracking-wide text-zinc-900 dark:text-white uppercase">
+                <h4 className={`text-sm font-black tracking-wide text-zinc-900 dark:text-white uppercase ${hoverTextClass}`}>
                   <TypewriterText key={`f1-${lang}`} text={t[lang].feature1Title} />
                 </h4>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{t[lang].feature1Desc}</p>
+                <p className={`text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed ${hoverTextClass}`}>{t[lang].feature1Desc}</p>
               </div>
             </motion.div>
 
@@ -238,10 +240,10 @@ export default function LoginPage() {
                 <Zap className="w-5 h-5" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-sm font-black tracking-wide text-zinc-900 dark:text-white uppercase">
+                <h4 className={`text-sm font-black tracking-wide text-zinc-900 dark:text-white uppercase ${hoverTextClass}`}>
                   <TypewriterText key={`f2-${lang}`} text={t[lang].feature2Title} />
                 </h4>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{t[lang].feature2Desc}</p>
+                <p className={`text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed ${hoverTextClass}`}>{t[lang].feature2Desc}</p>
               </div>
             </motion.div>
 
@@ -251,16 +253,16 @@ export default function LoginPage() {
                 <Trophy className="w-5 h-5" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-sm font-black tracking-wide text-zinc-900 dark:text-white uppercase">
+                <h4 className={`text-sm font-black tracking-wide text-zinc-900 dark:text-white uppercase ${hoverTextClass}`}>
                   <TypewriterText key={`f3-${lang}`} text={t[lang].feature3Title} />
                 </h4>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{t[lang].feature3Desc}</p>
+                <p className={`text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed ${hoverTextClass}`}>{t[lang].feature3Desc}</p>
               </div>
             </motion.div>
           </div>
 
           {/* Brand Footer */}
-          <motion.div variants={childVariants} className="text-[10px] tracking-[0.3em] font-monospace text-zinc-400/50 dark:text-white/30 uppercase">
+          <motion.div variants={childVariants} className={`text-[10px] tracking-[0.3em] font-monospace text-zinc-400/50 dark:text-white/30 uppercase ${hoverTextClass}`}>
             {t[lang].footer}
           </motion.div>
         </motion.div>
@@ -280,15 +282,15 @@ export default function LoginPage() {
 
             {/* Card Header */}
             <div className="space-y-3 text-center md:text-left">
-              <h2 className="text-3xl font-black font-space tracking-tight text-zinc-900 dark:text-white uppercase">
+              <h2 className={`text-3xl font-black font-space tracking-tight text-zinc-900 dark:text-white uppercase ${hoverTextClass}`}>
                 {t[lang].welcome}
               </h2>
-              <p className="text-xs text-zinc-600 dark:text-white/40 leading-relaxed max-w-sm">
+              <p className={`text-xs text-zinc-600 dark:text-white/40 leading-relaxed max-w-sm ${hoverTextClass}`}>
                 {t[lang].desc}
               </p>
             </div>
 
-            {/* Secure Google OAuth Action Area with Enhanced Button */}
+            {/* Secure Google OAuth Action Area with Restored Google Button Text */}
             <div className="space-y-4">
               <button
                 type="button"
@@ -311,7 +313,8 @@ export default function LoginPage() {
                   <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2A8.99 8.99 0 0 0 0 9l2.99 2.36C3.7 5.17 5.7 3.58 9 3.58z"/>
                 </svg>
 
-                <span className="font-space text-xs font-black tracking-[0.15em] uppercase text-zinc-900 dark:text-black">
+                {/* Restored Google Button Text */}
+                <span className="font-space text-xs font-black tracking-[0.15em] uppercase text-zinc-900">
                   {loading ? t[lang].signingIn : t[lang].button}
                 </span>
               </button>
@@ -320,7 +323,7 @@ export default function LoginPage() {
             {/* Secure lock telemetry indicator */}
             <div className="flex items-center justify-center gap-2 text-[9px] font-monospace text-zinc-500 dark:text-white/30 uppercase tracking-widest pt-4 border-t border-zinc-200/50 dark:border-white/5">
               <Shield className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500/60" />
-              <span className="animate-pulse">{lang === 'ar' ? 'مكان شغل آمن ومحمي' : 'SECURE & PROTECTED WORKSPACE'}</span>
+              <span className={`animate-pulse ${hoverTextClass}`}>{lang === 'ar' ? 'مكان شغل آمن ومحمي' : 'SECURE & PROTECTED WORKSPACE'}</span>
             </div>
 
           </motion.div>
