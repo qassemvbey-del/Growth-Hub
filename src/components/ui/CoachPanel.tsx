@@ -26,7 +26,7 @@ const IconMap: Record<string, React.ComponentType<any>> = {
 export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProps) {
   const { profile, setLastAiMessage, currentTheme, tasksCompletedToday } = useGrowth()
   const { playNeuralLink, playBlip } = useSound()
-  const [response, setResponse] = useState(profile?.language === 'ar' ? 'في انتظار الأوامر // اختر إجراء من الأسفل' : 'AWAITING_ORDERS // SELECT_ACTION_BELOW')
+  const [response, setResponse] = useState(profile?.language === 'ar' ? 'جاهز، إيه اللي تحب تعمله؟' : 'AWAITING_ORDERS // SELECT_ACTION_BELOW')
   const [isLoading, setIsLoading] = useState(false)
   const [energy, setEnergy] = useState<number>(3)
 
@@ -200,7 +200,7 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
 
             {/* Premium i18n Cyberpunk Energy Bar (Point 1) */}
             <div className="px-6 py-2 bg-black/10 border-b flex items-center justify-between text-[9px] font-monospace tracking-widest uppercase" style={{ borderColor: `${coachColor}11`, color: coachColor }}>
-              <span>{profile?.language === 'ar' ? `الطاقة المتبقية: ${energy}/3 مسحات تكتيكية` : `[ ENERGY: ${energy}/3 SCANS LEFT ]`}</span>
+              <span>{profile?.language === 'ar' ? `فاضل ${energy}/3 مرات تقدر تسأل فيهم` : `[ ENERGY: ${energy}/3 SCANS LEFT ]`}</span>
               <div className="flex gap-1.5 items-center">
                 {[1, 2, 3].map(i => (
                   <div 
@@ -271,7 +271,7 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
             <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-4 scrollbar-thin">
               <span className="text-[10px] font-black tracking-[0.4em] uppercase" style={{ color: coachColor }}>
                 {energy === 0 
-                  ? (profile?.language === 'ar' ? '⚠️ نفدت الطاقة // إعادة الشحن عند منتصف الليل' : '⚠️ RECHARGING UNTIL MIDNIGHT')
+                  ? (profile?.language === 'ar' ? 'خلصت الـ scans النهارده، رجّع بكره 💪' : '⚠️ RECHARGING UNTIL MIDNIGHT')
                   : 'SELECT_ACTION:'}
               </span>
               
@@ -279,7 +279,7 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
                 <ActionButton 
                   icon="warning" 
                   title={profile?.language === 'ar' ? 'كشف حساب' : 'REALITY CHECK'} 
-                  subtitle={profile?.language === 'ar' ? 'مواجهة وحشية بالمهام المتأخرة والمهملة' : 'Brutal check on overdue & ignored tasks'} 
+                  subtitle={profile?.language === 'ar' ? 'شوف إنت فين بالظبط من Tasks المتأخرة' : 'Brutal check on overdue & ignored tasks'} 
                   onClick={() => handleAction('REALITY_CHECK')}
                   disabled={isLoading || energy === 0}
                   color={coachColor}
@@ -288,8 +288,8 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
                 />
                 <ActionButton 
                   icon="target" 
-                  title={profile?.language === 'ar' ? 'أهم 3 مهام' : 'TOP 3 FOCUS'} 
-                  subtitle={profile?.language === 'ar' ? 'تحديد أهم 3 أولويات قصوى لليوم فوراً' : 'Extract the top 3 absolute priorities for today'} 
+                  title={profile?.language === 'ar' ? 'أهم 3 حاجات' : 'TOP 3 FOCUS'} 
+                  subtitle={profile?.language === 'ar' ? 'إيه أهم 3 حاجات تعملها النهارده' : 'Extract the top 3 absolute priorities for today'} 
                   onClick={() => handleAction('TOP_3_FOCUS')}
                   disabled={isLoading || energy === 0}
                   color={coachColor}
@@ -298,8 +298,8 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
                 />
                 <ActionButton 
                   icon="bolt" 
-                  title={profile?.language === 'ar' ? 'مكسب سريع' : 'QUICK WIN'} 
-                  subtitle={profile?.language === 'ar' ? 'مهمة سهلة في 5 دقائق لكسر حاجز الكسل' : 'Find the easiest 5-minute task to start with'} 
+                  title={profile?.language === 'ar' ? 'انتصار سريع' : 'QUICK WIN'} 
+                  subtitle={profile?.language === 'ar' ? 'لاقيلك task سهلة تبدأ بيها دلوقتي' : 'Find the easiest 5-minute task to start with'} 
                   onClick={() => handleAction('QUICK_WIN')}
                   disabled={isLoading || energy === 0}
                   color={coachColor}
@@ -382,10 +382,10 @@ function ActionButton({ icon, title, subtitle, onClick, disabled, color, lang, c
 function CyclingLoadingText({ coachName, userName, lang, color }: { coachName: string; userName: string; lang?: string; color: string }) {
   const isAr = lang === 'ar'
   const messages = React.useMemo(() => isAr ? [
-    'جاري تحليل البيانات... 🔍',
-    'مزامنة التقدم... ⚡',
-    `${userName} يعالج البيانات... 🧠`,
-    'تنظيم المحتوى... 📂',
+    'بيحلل بياناتك... 🔍',
+    'بيشوف تقدمك... ⚡',
+    `${userName} بيفكر... 🧠`,
+    'بيرتب الكلام... 📂',
   ] : [
     'Analyzing metadata... 🔍',
     'Syncing progress... ⚡',
