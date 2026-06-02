@@ -45,7 +45,7 @@ export default function WinsPage() {
       }
 
       const { data, error } = await supabase
-        .from('cups')
+        .from('goals')
         .select('*, tasks(*)')
         .eq('user_id', user.id)
         .eq('is_archived', true)
@@ -79,7 +79,7 @@ export default function WinsPage() {
 
   const unarchive = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    await supabase.from('cups').update({ is_archived: false, status: 'ACTIVE' }).eq('id', id)
+    await supabase.from('goals').update({ is_archived: false, status: 'ACTIVE' }).eq('id', id)
     setArchived(prev => prev.filter(m => m.id !== id))
     if (selectedMission?.id === id) setSelectedMission(null)
   }

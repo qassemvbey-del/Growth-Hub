@@ -78,7 +78,7 @@ export function useInbox() {
 
       // 2. Get active missions & nearest deadline
       const { data: missions } = await supabase
-        .from('cups')
+        .from('goals')
         .select('*, tasks(*)')
         .eq('user_id', userId)
         .eq('is_archived', false)
@@ -160,7 +160,7 @@ export function useInbox() {
 
     try {
       const { data: missions } = await supabase
-        .from('cups')
+        .from('goals')
         .select('*, tasks(*)')
         .eq('user_id', userId)
 
@@ -311,7 +311,7 @@ Next step: Visit the Wins page to view your golden cup.`
       const gainedXp = completedCount * 25
 
       const { data: completedMissions } = await supabase
-        .from('cups')
+        .from('goals')
         .select('*, tasks(*)')
         .eq('user_id', userId)
         .eq('is_archived', true)
@@ -327,7 +327,7 @@ Next step: Visit the Wins page to view your golden cup.`
       const totalWeeklyXp = gainedXp + missionXp
 
       const { data: activeMissions } = await supabase
-        .from('cups')
+        .from('goals')
         .select('*, tasks(*)')
         .eq('user_id', userId)
         .eq('is_archived', false)
@@ -490,7 +490,7 @@ ${recommendationsEn}`
 
       // FIX 1: No notifications for brand new users
       const { data: cups } = await supabase
-        .from('cups')
+        .from('goals')
         .select('id')
         .eq('user_id', user.id)
         .limit(1)

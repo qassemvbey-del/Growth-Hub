@@ -500,7 +500,7 @@ export default function MissionDetailPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     const { count } = await supabase
-      .from('mission_attachments')
+      .from('goal_attachments')
       .select('*', { count: 'exact', head: true })
       .eq('mission_id', id)
       .eq('user_id', user.id)
@@ -511,7 +511,7 @@ export default function MissionDetailPage() {
     playBlip()
     setModalLoading(true)
     const { data } = await supabase
-      .from('mission_attachments')
+      .from('goal_attachments')
       .select('*')
       .eq('mission_id', id)
       .order('created_at', { ascending: false })
@@ -595,7 +595,7 @@ export default function MissionDetailPage() {
     }
 
     const { data } = await supabase
-      .from('cups')
+      .from('goals')
       .select('*, tasks(*, assignee:profiles!assigned_to(*))')
       .eq('id', id)
       .single()
@@ -835,7 +835,7 @@ export default function MissionDetailPage() {
 
       if (roundedProgress === 100 && !mission.is_archived) {
         const { error } = await supabase
-          .from('cups')
+          .from('goals')
           .update({ is_archived: true, status: 'completed', color: currentTheme.color })
           .eq('id', id)
         
@@ -846,7 +846,7 @@ export default function MissionDetailPage() {
         }
       } else if (roundedProgress < 100 && mission.is_archived) {
         const { error } = await supabase
-          .from('cups')
+          .from('goals')
           .update({ is_archived: false, status: 'active' })
           .eq('id', id)
         
@@ -1248,7 +1248,7 @@ export default function MissionDetailPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         const { data: synced } = await supabase
-          .from('cups')
+          .from('goals')
           .select('id, size')
           .eq('user_id', user.id)
           .eq('sync_to_dashboard', true)
@@ -1275,7 +1275,7 @@ export default function MissionDetailPage() {
       }
     }
 
-    const { error } = await supabase.from('cups').update(updates).eq('id', id)
+    const { error } = await supabase.from('goals').update(updates).eq('id', id)
     if (!error) {
       setMission((prev: any) => ({ ...prev, ...updates }))
       showToast(isRTL ? 'تم التحديث' : 'GOAL UPDATED', 'success')
@@ -1300,7 +1300,7 @@ export default function MissionDetailPage() {
       return
     }
 
-    const { error } = await supabase.from('cups').delete().eq('id', id)
+    const { error } = await supabase.from('goals').delete().eq('id', id)
     if (error) {
       console.error('Delete cup error:', error)
       showToast(isRTL ? `فشل الحذف: ${error.message}` : `DELETE FAILED: ${error.message}`, 'warning')
@@ -1332,7 +1332,7 @@ export default function MissionDetailPage() {
     
     // Update Supabase
     const { error } = await supabase
-      .from('cups')
+      .from('goals')
       .update({ metadata: newMetadata })
       .eq('id', id)
     
@@ -2969,7 +2969,7 @@ const { progress, isInRedZone } = useMemo(() => {
                             return { ...prev, metadata: newMetadata }
                           })
                           const { error } = await supabase
-                            .from('cups')
+                            .from('goals')
                             .update({ metadata: newMetadata })
                             .eq('id', id)
                           if (error) {

@@ -153,7 +153,7 @@ export default function NotesPage() {
 
         // 2. Fetch all user cups (missions) with tasks
         const { data: cupsData } = await supabase
-          .from('cups')
+          .from('goals')
           .select('*, tasks(*)')
           .eq('user_id', user.id)
 
@@ -255,7 +255,7 @@ export default function NotesPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       const { data } = await supabase
-        .from('cups')
+        .from('goals')
         .select('id, title')
         .eq('user_id', user.id)
         .eq('is_archived', false)

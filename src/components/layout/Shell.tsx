@@ -1075,7 +1075,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                 */}
                 {[
                   { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
-                  { label: isRTL ? 'الـ Goals' : 'Goals', icon: Target, href: '/missions' },
+                  // { label: isRTL ? 'الـ Goals' : 'Goals', icon: Target, href: '/missions' },
+                  { label: isRTL ? 'الـ Goals' : 'Goals', icon: Target, href: '/goals' },
                   // { label: isRTL ? 'شخصي' : 'Personal Goals', icon: User, href: '/goals/solo', indent: true },
                   { label: isRTL ? 'شخصي' : 'Solo Goals', icon: User, href: '/goals/solo', indent: true },
                   // { label: isRTL ? 'Squad' : 'Team Goals', icon: Users, href: '/goals/squad', indent: true },

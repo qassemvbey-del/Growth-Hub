@@ -135,7 +135,8 @@ export default function GlobalCreateGoalModal() {
         playDeploy()
         // Dispatch event so any mounted page can refresh its list
         window.dispatchEvent(new CustomEvent('goal-created', { detail: newLocalGoal }))
-        router.push(`/missions/${fakeId}`)
+        // router.push(`/missions/${fakeId}`)
+        router.push(`/goals/${fakeId}`)
         return
       }
 
@@ -143,7 +144,8 @@ export default function GlobalCreateGoalModal() {
       // Check dashboard capacity
       if (syncOnCreate) {
         const { data: synced } = await supabase
-          .from('cups')
+          // .from('cups')
+          .from('goals')
           .select('id, size')
           .eq('user_id', user.id)
           .eq('sync_to_dashboard', true)
@@ -187,7 +189,8 @@ export default function GlobalCreateGoalModal() {
       }
       if (endDate) insertData.end_date = endDate
 
-      const { data, error } = await supabase.from('cups').insert(insertData).select().single()
+      // const { data, error } = await supabase.from('cups').insert(insertData).select().single()
+      const { data, error } = await supabase.from('goals').insert(insertData).select().single()
 
       if (data) {
         if (goalType === 'squad') {
@@ -206,7 +209,9 @@ export default function GlobalCreateGoalModal() {
         window.dispatchEvent(new CustomEvent('goal-created', { detail: data }))
 
         // Navigate into the new goal
-        router.push(`/missions/${data.id}`)
+        // router.push(`/missions/${data.id}`)
+        const targetPath = goalType === 'squad' ? `/goals/squad/${data.id}` : `/goals/${data.id}`
+        router.push(targetPath)
       } else {
         showToast(isRTL ? 'مش اشتغل — جرب تاني' : 'Creation failed — try again', 'warning')
         playError()

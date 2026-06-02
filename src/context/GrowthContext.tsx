@@ -906,7 +906,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
                 for (const g of guestGoals) {
                   const { id: oldCupId, tasks, ...rest } = g
                   const { data: newCup, error: mergeError } = await supabase
-                    .from('cups')
+                    .from('goals')
                     .insert({ ...rest, user_id: user.id })
                     .select()
                     .single()
@@ -987,7 +987,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
           // Dynamic Seeding Logic for Authenticated Mode (Point 2)
           try {
             const { count, error: countError } = await supabase
-              .from('cups')
+              .from('goals')
               .select('id', { count: 'exact', head: true })
               .eq('user_id', user.id)
               .eq('is_archived', false)
@@ -996,7 +996,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
               const isAr = (profileData.language || 'en') === 'ar'
               const seedGoalTitle = isAr ? "ابدأ من هنا 🚀" : "Start Here 🚀"
               const { data: newCup } = await supabase
-                .from('cups')
+                .from('goals')
                 .insert({
                   user_id: user.id,
                   title: seedGoalTitle,

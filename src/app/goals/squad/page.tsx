@@ -582,7 +582,7 @@ export default function SquadGoalsPage() {
       if (result && result.success) {
         // Fetch goal ID to update the role on join request
         const { data: cupData } = await supabase
-          .from('cups')
+          .from('goals')
           .select('id')
           .eq('metadata->>invite_code', code)
           .single()
@@ -657,7 +657,7 @@ export default function SquadGoalsPage() {
     const newMetadata = { ...mission.metadata }
     newMetadata.rules = { ...newMetadata.rules, [ruleKey]: !newMetadata.rules?.[ruleKey] }
     
-    const { error } = await supabase.from('cups').update({ metadata: newMetadata }).eq('id', mission.id)
+    const { error } = await supabase.from('goals').update({ metadata: newMetadata }).eq('id', mission.id)
     if (!error) {
       setMissions(prev => prev.map(m => m.id === mission.id ? { ...m, metadata: newMetadata } : m))
       /* showToast(isRTL ? 'تم تحديث القاعدة!' : 'RULE UPDATED', 'success') */
@@ -705,7 +705,7 @@ export default function SquadGoalsPage() {
     const memberGoalIds = memberRows ? memberRows.map((r: any) => r.goal_id) : []
 
     let query = supabase
-      .from('cups')
+      .from('goals')
       .select('*, tasks(*)')
       .eq('is_archived', false)
       .order('created_at', { ascending: false })
@@ -848,7 +848,7 @@ export default function SquadGoalsPage() {
   const fetchAllAttachmentCounts = useCallback(async (userId: string, missionIds: string[]) => {
     if (!missionIds.length) return
     const { data } = await supabase
-      .from('mission_attachments')
+      .from('goal_attachments')
       .select('mission_id')
       .eq('user_id', userId)
       .in('mission_id', missionIds)
@@ -871,7 +871,7 @@ export default function SquadGoalsPage() {
     setModalLoading(true)
     
     const { data } = await supabase
-      .from('mission_attachments')
+      .from('goal_attachments')
       .select('*')
       .eq('mission_id', missionId)
       .order('created_at', { ascending: false })
@@ -964,7 +964,7 @@ export default function SquadGoalsPage() {
 
     // 1. Get synced cups to check capacity
     const { data: synced } = await supabase
-      .from('cups')
+      .from('goals')
       .select('id, size')
       .eq('user_id', user.id)
       .eq('sync_to_dashboard', true)
@@ -1044,7 +1044,7 @@ export default function SquadGoalsPage() {
     if (startDate) insertData.start_date = startDate
     if (endDate) insertData.end_date = endDate
 
-      const { data, error } = await supabase.from('cups').insert(insertData).select().single()
+      const { data, error } = await supabase.from('goals').insert(insertData).select().single()
       
       if (data) {
         if (typeFilter === 'squad') {

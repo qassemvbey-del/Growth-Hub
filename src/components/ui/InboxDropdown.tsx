@@ -41,8 +41,12 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
 
   const handleNotificationClick = (report: Report) => {
     onRead(report)
-    if (report.content?.cup_id || report.content?.mission_id) {
-      router.push(`/missions/${report.content.cup_id || report.content.mission_id}`)
+    // if (report.content?.cup_id || report.content?.mission_id) {
+    //   router.push(`/missions/${report.content.cup_id || report.content.mission_id}`)
+    // }
+    const targetGoalId = report.content?.goal_id || report.content?.cup_id || report.content?.mission_id
+    if (targetGoalId) {
+      router.push(`/goals/${targetGoalId}`)
     } else {
       router.push('/notifications')
     }

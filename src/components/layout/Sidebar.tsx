@@ -81,7 +81,8 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
     { icon: FileText, label: mounted ? (isRTL ? 'ملاحظاتي' : 'Notes') : 'Notes', href: '/notes', shortcut: '03', exact: false },
     { icon: Trophy, label: mounted ? (isRTL ? 'إنجازاتي' : 'Wins') : 'Wins', href: '/achievements', shortcut: '04', exact: false },
     */
-    { icon: Target, label: mounted ? (isRTL ? 'الـ Goals' : 'Goals') : 'Goals', href: '/missions', shortcut: '02', exact: false },
+    // { icon: Target, label: mounted ? (isRTL ? 'الـ Goals' : 'Goals') : 'Goals', href: '/missions', shortcut: '02', exact: false },
+    { icon: Target, label: mounted ? (isRTL ? 'الـ Goals' : 'Goals') : 'Goals', href: '/goals', shortcut: '02', exact: false },
     { icon: FileText, label: mounted ? (isRTL ? 'ملاحظاتي' : 'Notes') : 'Notes', href: '/notes', shortcut: '03', exact: false },
     { icon: Trophy, label: mounted ? (isRTL ? 'إنجازاتي' : 'Wins') : 'Wins', href: '/achievements', shortcut: '04', exact: false },
   ]
@@ -201,7 +202,8 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
         </h3>
         {MENU_ITEMS.map((item, idx) => {
           if (item.shortcut === '02') {
-            const isGoalsActive = pathname.startsWith('/goals') || pathname.startsWith('/missions')
+            // const isGoalsActive = pathname.startsWith('/goals') || pathname.startsWith('/missions')
+            const isGoalsActive = pathname.startsWith('/goals')
             const isHovered = hoveredIndex === idx
             return (
               <div key={item.href} className="flex flex-col w-full">

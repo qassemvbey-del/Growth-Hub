@@ -74,7 +74,7 @@ export default function Dashboard() {
     }
 
     const { data } = await supabase
-      .from('cups')
+      .from('goals')
       .select('*, tasks(*)')
       .eq('user_id', user.id)
       .eq('is_archived', false)

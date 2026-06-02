@@ -34,8 +34,9 @@ export default function GlobalActionMenu() {
             )}
             style={{ borderColor: `${currentTheme.color}33` }}
           >
+            {/* <button onClick={() => handleAction('/missions?create=true')} */}
             <button
-              onClick={() => handleAction('/missions?create=true')}
+              onClick={() => handleAction('/goals?create=true')}
               className="flex items-center gap-3 w-full p-3 rounded-lg text-left transition-all hover:bg-black/5 dark:hover:bg-white/10 group"
             >
               <HelpCircle />

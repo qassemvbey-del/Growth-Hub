@@ -171,10 +171,12 @@ export default function NotificationsPage() {
                             {isRTL ? 'مقروء' : 'Mark Read'}
                           </button>
                         )}
-                        {(report.content?.cup_id || report.content?.mission_id) && (
+                        {(report.content?.goal_id || report.content?.cup_id || report.content?.mission_id) && (
                           <button
                             onClick={() => {
-                              router.push(`/missions/${report.content.cup_id || report.content.mission_id}`)
+                              const targetGoalId = report.content.goal_id || report.content.cup_id || report.content.mission_id
+                              // router.push(`/missions/${report.content.cup_id || report.content.mission_id}`)
+                              router.push(`/goals/${targetGoalId}`)
                             }}
                             className="p-1.5 bg-white/[0.02] hover:bg-white/5 border border-white/10 text-white/50 hover:text-white rounded-lg transition-all cursor-pointer"
                             title={isRTL ? 'الانتقال للهدف' : 'View Goal'}

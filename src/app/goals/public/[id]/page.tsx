@@ -53,7 +53,7 @@ export default function PublicGoalPage() {
       try {
         // Fetch goal + tasks
         const { data: cup, error: cupError } = await supabase
-          .from('cups')
+          .from('goals')
           .select('*, tasks(*), profiles:user_id(*)')
           .eq('id', id)
           .single()

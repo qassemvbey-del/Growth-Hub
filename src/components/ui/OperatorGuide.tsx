@@ -18,7 +18,8 @@ const GUIDE_CONTENT_EN: Record<string, { title: string; tips: string[] }> = {
       'The EnergyCell shows real-time progress for your active goals.'
     ]
   },
-  '/missions': {
+  // '/missions': {
+  '/goals': {
     // title: 'GOAL_CONTROL',
     title: 'Goal Control',
     tips: [
@@ -64,7 +65,8 @@ const GUIDE_CONTENT_AR: Record<string, { title: string; tips: string[] }> = {
       'مؤشر الطاقة يعرض مستوى التقدم الفعلي لأهدافك النشطة.'
     ]
   },
-  '/missions': {
+  // '/missions': {
+  '/goals': {
     title: 'إدارة الأهداف',
     tips: [
       'قسّم الأهداف الكبيرة إلى مهام صغيرة يسهل إنجازها.',

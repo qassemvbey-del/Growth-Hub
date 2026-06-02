@@ -152,9 +152,10 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                     onClick={() => {
                       onClose()
                       const isSquadGoal = report.content.isSquad ?? false
+                      const targetGoalId = report.content.goal_id || report.content.cup_id || report.content.mission_id
                       const path = isSquadGoal
-                        ? `/goals/squad/${report.content.cup_id}?task=${report.content.task_id}`
-                        : `/missions/${report.content.cup_id}?task=${report.content.task_id}`
+                        ? `/goals/squad/${targetGoalId}?task=${report.content.task_id}`
+                        : `/goals/${targetGoalId}?task=${report.content.task_id}`
                       router.push(path)
                     }}
                     className="w-full h-11 text-zinc-950 font-black text-xs uppercase tracking-widest transition-all duration-300 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] border border-cyan-400 bg-cyan-500 hover:bg-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]"
@@ -298,7 +299,9 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
                   <button
                     onClick={() => {
                       onClose();
-                      router.push(`/missions/${report.content.goal_id}`);
+                      // router.push(`/missions/${report.content.goal_id}`);
+                      const targetGoalId = report.content.goal_id || report.content.cup_id || report.content.mission_id;
+                      router.push(`/goals/${targetGoalId}`);
                     }}
                     className="w-full h-12 bg-teal-500 hover:bg-teal-400 text-black font-space font-black text-xs uppercase tracking-widest transition-all duration-300 rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.3)] flex items-center justify-center gap-1.5 cursor-pointer"
                   >

@@ -93,7 +93,8 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
 
     missions.forEach((m: any) => {
       const isSquad = m.metadata?.type === 'squad'
-      const goalUrl = isSquad ? `/goals/squad/${m.id}` : `/missions/${m.id}`
+      // const goalUrl = isSquad ? `/goals/squad/${m.id}` : `/missions/${m.id}`
+      const goalUrl = isSquad ? `/goals/squad/${m.id}` : `/goals/${m.id}`
 
       // Match Goal Title
       if (m.title?.toLowerCase().includes(query)) {

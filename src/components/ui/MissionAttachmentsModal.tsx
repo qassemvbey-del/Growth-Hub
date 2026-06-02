@@ -372,7 +372,7 @@ const MissionAttachmentsModal = ({
       }
 
       const { data, error } = await supabase
-        .from('mission_attachments')
+        .from('goal_attachments')
         .insert({
           mission_id: missionId,
           user_id: user.id,
@@ -413,7 +413,7 @@ const MissionAttachmentsModal = ({
       
       const file_type = detectFileType(trimUrl)
       const { data, error } = await supabase
-        .from('mission_attachments')
+        .from('goal_attachments')
         .insert({
           mission_id: missionId,
           user_id: user.id,
@@ -444,7 +444,7 @@ const MissionAttachmentsModal = ({
     e.stopPropagation() // Prevent triggering card preview modal click
     setDeletingId(id)
     try {
-      await supabase.from('mission_attachments').delete().eq('id', id)
+      await supabase.from('goal_attachments').delete().eq('id', id)
       const updated = attachments.filter(a => a.id !== id)
       setAttachments(updated)
       onCountChange?.(updated.length)

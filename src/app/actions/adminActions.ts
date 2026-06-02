@@ -28,7 +28,7 @@ export async function getAdminStats() {
   const { count: totalUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
 
   // 2. Total Active Missions
-  const { count: activeMissions } = await supabase.from('cups').select('*', { count: 'exact', head: true }).eq('is_archived', false).eq('sync_to_dashboard', true)
+  const { count: activeMissions } = await supabase.from('goals').select('*', { count: 'exact', head: true }).eq('is_archived', false).eq('sync_to_dashboard', true)
 
   // 3. Missions Completed Today
   const todayStart = new Date()
@@ -82,7 +82,7 @@ export async function getMemberRegistry() {
   const { data: { users: authUsers } } = await supabase.auth.admin.listUsers()
 
   // Fetch all missions to count
-  const { data: missions } = await supabase.from('cups').select('id, user_id, status')
+  const { data: missions } = await supabase.from('goals').select('id, user_id, status')
   
   const registry = profiles?.map(p => {
     const authUser = authUsers.find(u => u.id === p.id)
@@ -171,7 +171,7 @@ export async function getGoalAnalytics() {
   await checkAdmin()
   const supabase = createAdminClient()
 
-  const { data: allMissions } = await supabase.from('cups').select('title, is_archived, tasks_count:tasks(count)')
+  const { data: allMissions } = await supabase.from('goals').select('title, is_archived, tasks_count:tasks(count)')
   
   // Most common topics (basic implementation)
   const topics = allMissions?.reduce((acc: any, m) => {
