@@ -3,7 +3,7 @@
 import Sidebar from './Sidebar'
 import AnimatedLogo from '@/components/ui/AnimatedLogo'
 import { useGrowth } from '@/context/GrowthContext'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useMotionValue, useTransform, type PanInfo } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
@@ -112,7 +112,6 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   const [bootProgress, setBootProgress] = useState(0)
   const [activeLogIndex, setActiveLogIndex] = useState(0)
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
-  const [sidebarDragX, setSidebarDragX] = useState(0) // 0=closed, sidebarWidth=open
   const [searchExpanded, setSearchExpanded] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -170,79 +169,94 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   const mobileInboxRef = useRef<HTMLDivElement>(null)
   const mainWrapperRef = useRef<HTMLDivElement>(null)
 
-  // ── REAL-TIME SWIPE GESTURE SYSTEM ──
+  // ── NATIVE DRAG SIDEBAR SYSTEM (Framer Motion useMotionValue) ──
   const SIDEBAR_WIDTH = 280
-  const touchStartX = useRef(0)
-  const touchStartY = useRef(0)
-  const dragStartX = useRef(0)
-  const isDragging = useRef(false)
+  // sidebarX: 0 = fully open, -SIDEBAR_WIDTH (LTR) or +SIDEBAR_WIDTH (RTL) = fully closed
+  const sidebarX = useMotionValue(0)
+  // Whether the drawer is visually showing (for pointer-events on backdrop)
+  const [isDrawerVisible, setIsDrawerVisible] = useState(false)
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX
-    touchStartY.current = e.touches[0].clientY
-    dragStartX.current = isMobileNavOpen ? SIDEBAR_WIDTH : 0
-    isDragging.current = false
-  }
-
-  const handleTouchMove = (e: TouchEvent) => {
-    const deltaX = e.touches[0].clientX - touchStartX.current
-    const deltaY = e.touches[0].clientY - touchStartY.current
-
-    if (!isDragging.current) {
-      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
-        isDragging.current = true
-      } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 10) {
-        return // let vertical scroll proceed
-      } else {
-        return
-      }
-    }
-
-    if (!isDragging.current) return
-    e.preventDefault() // only blocks scroll after horizontal confirmed
-
-    const isRTLNow = document.documentElement.dir === 'rtl'
-    let nextDragX = dragStartX.current
-
-    if (isRTLNow) {
-      // RTL: swipe LEFT opens, swipe RIGHT closes
-      nextDragX = dragStartX.current - deltaX
-    } else {
-      // LTR: swipe RIGHT opens, swipe LEFT closes
-      nextDragX = dragStartX.current + deltaX
-    }
-
-    const clampedDragX = Math.max(0, Math.min(SIDEBAR_WIDTH, nextDragX))
-    setSidebarDragX(clampedDragX)
-  }
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!isDragging.current) return
-    const threshold = SIDEBAR_WIDTH * 0.3
-    const shouldBeOpen = sidebarDragX > threshold
-
-    if (shouldBeOpen !== isMobileNavOpen) {
-      playBlip()
-    }
-
-    setIsMobileNavOpen(shouldBeOpen)
-    setSidebarDragX(shouldBeOpen ? SIDEBAR_WIDTH : 0)
-    isDragging.current = false
-  }
-
-  // Passive:false so we can preventDefault inside handleTouchMove
+  // Keep isDrawerVisible in sync with sidebarX
   useEffect(() => {
-    const el = mainWrapperRef.current
-    if (!el) return
-    el.addEventListener('touchmove', handleTouchMove, { passive: false })
-    return () => el.removeEventListener('touchmove', handleTouchMove)
+    const unsubscribe = sidebarX.on('change', (latest) => {
+      // Drawer is visible if not fully closed
+      const closedPos = isRTL ? SIDEBAR_WIDTH : -SIDEBAR_WIDTH
+      setIsDrawerVisible(Math.abs(latest - closedPos) > 2)
+    })
+    return unsubscribe
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobileNavOpen])
+  }, [isRTL])
 
-  // Sync sidebarDragX when open/closed state changes (e.g. clicking backdrop)
+  // Snap sidebar to open/closed when isMobileNavOpen changes (hamburger, nav click, backdrop)
   useEffect(() => {
-    setSidebarDragX(isMobileNavOpen ? SIDEBAR_WIDTH : 0)
-  }, [isMobileNavOpen])
+    const closedPos = isRTL ? SIDEBAR_WIDTH : -SIDEBAR_WIDTH
+    // Use spring-like animation via Framer's animate
+    if (isMobileNavOpen) {
+      // Animate to 0 (open)
+      const startVal = sidebarX.get()
+      const duration = 250
+      const startTime = performance.now()
+      const animate = (now: number) => {
+        const elapsed = now - startTime
+        const progress = Math.min(elapsed / duration, 1)
+        // Ease out cubic
+        const eased = 1 - Math.pow(1 - progress, 3)
+        sidebarX.set(startVal + (0 - startVal) * eased)
+        if (progress < 1) requestAnimationFrame(animate)
+      }
+      requestAnimationFrame(animate)
+    } else {
+      const startVal = sidebarX.get()
+      const duration = 200
+      const startTime = performance.now()
+      const animate = (now: number) => {
+        const elapsed = now - startTime
+        const progress = Math.min(elapsed / duration, 1)
+        const eased = 1 - Math.pow(1 - progress, 3)
+        sidebarX.set(startVal + (closedPos - startVal) * eased)
+        if (progress < 1) requestAnimationFrame(animate)
+      }
+      requestAnimationFrame(animate)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobileNavOpen, isRTL])
+
+  // Initialize sidebarX to closed position on mount
+  useEffect(() => {
+    const closedPos = isRTL ? SIDEBAR_WIDTH : -SIDEBAR_WIDTH
+    sidebarX.set(closedPos)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Update backdropOpacity transform range based on RTL
+  const computedBackdropOpacity = useTransform(sidebarX, (v) => {
+    const closedPos = isRTL ? SIDEBAR_WIDTH : -SIDEBAR_WIDTH
+    // 0 when at closedPos, 1 when at 0
+    return 1 - Math.abs(v) / Math.abs(closedPos)
+  })
+
+  const handleSidebarDragEnd = (_e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const velocity = info.velocity.x
+    const currentX = sidebarX.get()
+    const threshold = SIDEBAR_WIDTH * 0.3
+
+    let shouldOpen: boolean
+    if (isRTL) {
+      // RTL: 0=open, SIDEBAR_WIDTH=closed
+      // Fast flick detection
+      if (velocity < -300) shouldOpen = true
+      else if (velocity > 300) shouldOpen = false
+      else shouldOpen = currentX < threshold
+    } else {
+      // LTR: 0=open, -SIDEBAR_WIDTH=closed
+      if (velocity > 300) shouldOpen = true
+      else if (velocity < -300) shouldOpen = false
+      else shouldOpen = currentX > -threshold
+    }
+
+    if (shouldOpen !== isMobileNavOpen) playBlip()
+    setIsMobileNavOpen(shouldOpen)
+  }
 
   // Real-time Network Radar States
   const [networkStatus, setNetworkStatus] = useState<'ONLINE' | 'OFFLINE' | 'LAG'>('ONLINE')
@@ -684,8 +698,6 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
     <>
     <div
       ref={mainWrapperRef}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
       className={cn(
         'min-h-[100dvh] bg-zinc-50 dark:bg-transparent text-foreground flex relative transition-colors duration-500',
         networkStatus === 'OFFLINE' && 'connection-offline'
@@ -963,180 +975,122 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
       {/* FAB moved outside this wrapper to avoid containing-block issues */}
 
-      {/* Commented out original narrow edge-touch trigger:
-      {!isMobileNavOpen && (
-        <div 
-          className="fixed top-0 left-0 w-6 h-full z-[9999] lg:hidden bg-transparent touch-none"
-          onTouchStart={(e) => {
-            e.preventDefault();
-            setIsMobileNavOpen(true);
-            playBlip();
-          }}
-        />
-      )}
-      */}
-      {/* Gesture is now handled by mainWrapperRef touchmove/touchend globally — no edge zone needed */}
+      {/* ── MOBILE SIDEBAR DRAWER (Always rendered, native drag) ── */}
+      {/* Backdrop: always in DOM, pointer-events controlled by isDrawerVisible */}
+      <motion.div
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] lg:hidden"
+        style={{ opacity: computedBackdropOpacity, pointerEvents: isDrawerVisible ? 'auto' : 'none' }}
+        onClick={() => setIsMobileNavOpen(false)}
+      />
 
-      {/* ── MOBILE SIDEBAR DRAWER ── */}
-      <AnimatePresence>
-        {isMobileNavOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMobileNavOpen(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] lg:hidden cursor-pointer"
-            />
-            
-            {/* Drawer Content */}
-            {/* Commented out original drawer content gesture physics for safety:
-            <motion.div
-              drag="x"
-              dragConstraints={{ left: -300, right: 0 }}
-              dragElastic={0.1}
-              onDragEnd={(e, info) => { 
-                if (info.offset.x < -50 || info.velocity.x < -500) {
-                  setIsMobileNavOpen(false); 
-                }
-              }}
-              initial={{ x: isRTL ? '100%' : '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: isRTL ? '100%' : '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className={cn(
-                "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-[#09090b]/98 border-r border-white/5 shadow-2xl p-6 transform-gpu will-change-transform",
-                isRTL ? "right-0 border-l border-white/5 border-r-0" : "left-0"
-              )}
-            >
-            */}
-            <motion.div
-              initial={false}
-              animate={{
-                x: isRTL
-                  ? (SIDEBAR_WIDTH - sidebarDragX)
-                  : (sidebarDragX - SIDEBAR_WIDTH),
-              }}
-              transition={isDragging.current
-                ? { type: 'tween', duration: 0 }
-                : { type: 'spring', stiffness: 400, damping: 35 }
-              }
-              className={cn(
-                "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-zinc-950/95 backdrop-blur-2xl shadow-2xl p-6 transform-gpu will-change-transform",
-                isRTL ? "right-0 border-l border-r-0" : "left-0 border-r"
-              )}
-              style={{ 
-                borderColor: `${currentTheme.color}50`,
-                boxShadow: isRTL 
-                  ? `-10px 0 40px ${currentTheme.color}40` 
-                  : `10px 0 40px ${currentTheme.color}40`
-              }}
-            >
-              {/* Header of Drawer */}
-              <div className="flex justify-between items-center mb-8">
-                <AnimatedLogo className="text-lg tracking-[0.2em]" />
-                <button 
-                  onClick={() => { setIsMobileNavOpen(false); playBlip(); }}
-                  className="w-8 h-8 flex items-center justify-center bg-white/5 border border-white/10 rounded-full text-white/50 hover:text-white transition-all cursor-pointer active:scale-95"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Profile Panel */}
-              <div className="flex flex-col items-center text-center pb-6 border-b border-white/5 mb-6">
-                <div 
-                  onClick={() => { router.push('/settings'); setIsMobileNavOpen(false); }}
-                  className="relative p-1 rounded-full bg-gradient-to-tr shadow-lg cursor-pointer"
-                  style={{ backgroundImage: `linear-gradient(to top right, ${currentTheme.color}, ${currentTheme.color}88, transparent, ${currentTheme.color})`, boxShadow: `0 0 20px ${currentTheme.color}33` }}
-                >
-                  <div className="w-16 h-16 rounded-full bg-[#050505] p-0.5 overflow-hidden flex items-center justify-center">
-                    {mounted && profile?.avatar_url ? (
-                      <img src={profile.avatar_url} alt="User" className="w-[90%] h-[90%] mx-auto object-contain rounded-full" />
-                    ) : (
-                      <User className="w-8 h-8 text-[var(--text-secondary)]" />
-                    )}
-                  </div>
-                </div>
-                <span className="text-sm font-space font-black mt-3 text-zinc-100 truncate max-w-[200px]">
-                  {profile?.full_name || 'USER'}
-                </span>
-                <span className="text-[10px] font-space font-black uppercase tracking-[0.2em] opacity-80 mt-1" style={{ color: currentTheme.color }}>
-                  XP: {profile?.xp || 0}
-                </span>
-              </div>
-
-              {/* Navigation Items */}
-              <div className="flex-1 space-y-2 overflow-y-auto">
-                {/*
-                [
-                  { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
-                  { label: isRTL ? 'أهدافي' : 'Goals', icon: Target, href: '/missions' },
-                  { label: isRTL ? 'شخصي' : 'Personal Goals', icon: User, href: '/goals/solo', indent: true },
-                  { label: isRTL ? 'فريق' : 'Team Goals', icon: Users, href: '/goals/squad', indent: true },
-                  { label: isRTL ? 'ملاحظاتي' : 'Notes', icon: FileText, href: '/notes' },
-                  { label: isRTL ? 'إنجازاتي' : 'Wins', icon: Trophy, href: '/achievements' },
-                ]
-                */}
-                {[
-                  { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
-                  // { label: isRTL ? 'الـ Goals' : 'Goals', icon: Target, href: '/missions' },
-                  { label: isRTL ? 'الـ Goals' : 'Goals', icon: Target, href: '/goals' },
-                  // { label: isRTL ? 'شخصي' : 'Personal Goals', icon: User, href: '/goals/solo', indent: true },
-                  { label: isRTL ? 'شخصي' : 'Solo Goals', icon: User, href: '/goals/solo', indent: true },
-                  // { label: isRTL ? 'Squad' : 'Team Goals', icon: Users, href: '/goals/squad', indent: true },
-                  { label: isRTL ? 'Squad' : 'Squad Goals', icon: Users, href: '/goals/squad', indent: true },
-                  { label: isRTL ? 'ملاحظاتي' : 'Notes', icon: FileText, href: '/notes' },
-                  { label: isRTL ? 'إنجازاتي' : 'Wins', icon: Trophy, href: '/achievements' },
-                ].map(item => {
-                  const isActive = pathname === item.href
-                  const IconComponent = item.icon
-                  return (
-                    <button
-                      key={item.href}
-                      onClick={() => { playBlip(); router.push(item.href); setIsMobileNavOpen(false); }}
-                      className={cn(
-                        "w-full flex items-center gap-4 py-3 rounded-lg font-space text-sm font-bold uppercase tracking-wider transition-all relative cursor-pointer",
-                        item.indent ? (isRTL ? "pr-8 text-xs h-10" : "pl-8 text-xs h-10") : "",
-                        isActive 
-                          ? "text-[var(--text-primary)]" 
-                          : "text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
-                      )}
-                      style={isActive ? { 
-                        color: currentTheme.color, 
-                        backgroundColor: `${currentTheme.color}15`,
-                        borderLeft: isRTL ? 'none' : `3px solid ${currentTheme.color}`,
-                        borderRight: isRTL ? `3px solid ${currentTheme.color}` : 'none',
-                        paddingLeft: isRTL ? undefined : (item.indent ? '28px' : '12px'),
-                        paddingRight: isRTL ? (item.indent ? '28px' : '12px') : undefined,
-                        boxShadow: `0 0 15px ${currentTheme.color}15`
-                      } : {}}
-                    >
-                      <IconComponent className={item.indent ? "w-4 h-4" : "w-5 h-5"} />
-                      <span>{item.label}</span>
-                    </button>
-                  )
-                })}
-              </div>
-
-              {/* Footer Settings Toggle */}
-              <div className="pt-4 border-t border-white/5">
-                <button
-                  onClick={() => { router.push('/settings'); setIsMobileNavOpen(false); playBlip(); }}
-                  className={cn(
-                    "w-full flex items-center gap-4 px-4 py-3 rounded-lg font-space text-sm font-bold uppercase tracking-wider text-[var(--text-secondary)] hover:text-white hover:bg-white/5 transition-all cursor-pointer",
-                    pathname === '/settings' ? "text-[var(--text-primary)] border border-white/10 bg-white/5" : ""
-                  )}
-                >
-                  <Settings className="w-5 h-5 animate-[spin_8s_linear_infinite]" />
-                  <span>{isRTL ? 'الإعدادات' : 'Settings'}</span>
-                </button>
-              </div>
-            </motion.div>
-          </>
+      {/* Drawer: always in DOM, translated off-screen when closed */}
+      <motion.div
+        drag="x"
+        dragConstraints={isRTL
+          ? { left: 0, right: SIDEBAR_WIDTH }
+          : { left: -SIDEBAR_WIDTH, right: 0 }
+        }
+        dragElastic={0.05}
+        dragMomentum={false}
+        onDragEnd={handleSidebarDragEnd}
+        style={{ 
+          x: sidebarX, 
+          borderColor: `${currentTheme.color}50`, 
+          boxShadow: isRTL ? `-10px 0 40px ${currentTheme.color}40` : `10px 0 40px ${currentTheme.color}40` 
+        }}
+        className={cn(
+          "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-zinc-950/95 backdrop-blur-2xl shadow-2xl p-6 transform-gpu will-change-transform touch-pan-y",
+          isRTL ? "right-0 border-l border-r-0" : "left-0 border-r"
         )}
-      </ AnimatePresence>
+      >
+        {/* Header of Drawer */}
+        <div className="flex justify-between items-center mb-8">
+          <AnimatedLogo className="text-lg tracking-[0.2em]" />
+          <button 
+            onClick={() => { setIsMobileNavOpen(false); playBlip(); }}
+            className="w-8 h-8 flex items-center justify-center bg-white/5 border border-white/10 rounded-full text-white/50 hover:text-white transition-all cursor-pointer active:scale-95"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Profile Panel */}
+        <div className="flex flex-col items-center text-center pb-6 border-b border-white/5 mb-6">
+          <div 
+            onClick={() => { router.push('/settings'); setIsMobileNavOpen(false); }}
+            className="relative p-1 rounded-full bg-gradient-to-tr shadow-lg cursor-pointer"
+            style={{ backgroundImage: `linear-gradient(to top right, ${currentTheme.color}, ${currentTheme.color}88, transparent, ${currentTheme.color})`, boxShadow: `0 0 20px ${currentTheme.color}33` }}
+          >
+            <div className="w-16 h-16 rounded-full bg-[#050505] p-0.5 overflow-hidden flex items-center justify-center">
+              {mounted && profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="User" className="w-[90%] h-[90%] mx-auto object-contain rounded-full" />
+              ) : (
+                <User className="w-8 h-8 text-[var(--text-secondary)]" />
+              )}
+            </div>
+          </div>
+          <span className="text-sm font-space font-black mt-3 text-zinc-100 truncate max-w-[200px]">
+            {profile?.full_name || 'USER'}
+          </span>
+          <span className="text-[10px] font-space font-black uppercase tracking-[0.2em] opacity-80 mt-1" style={{ color: currentTheme.color }}>
+            XP: {profile?.xp || 0}
+          </span>
+        </div>
+
+        {/* Navigation Items */}
+        <div className="flex-1 space-y-2 overflow-y-auto">
+          {[
+            { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
+            { label: isRTL ? 'الـ Goals' : 'Goals', icon: Target, href: '/goals' },
+            { label: isRTL ? 'شخصي' : 'Solo Goals', icon: User, href: '/goals/solo', indent: true },
+            { label: isRTL ? 'Squad' : 'Squad Goals', icon: Users, href: '/goals/squad', indent: true },
+            { label: isRTL ? 'ملاحظاتي' : 'Notes', icon: FileText, href: '/notes' },
+            { label: isRTL ? 'إنجازاتي' : 'Wins', icon: Trophy, href: '/achievements' },
+          ].map(item => {
+            const isActive = pathname === item.href
+            const IconComponent = item.icon
+            return (
+              <button
+                key={item.href}
+                onClick={() => { playBlip(); router.push(item.href); setIsMobileNavOpen(false); }}
+                className={cn(
+                  "w-full flex items-center gap-4 py-3 rounded-lg font-space text-sm font-bold uppercase tracking-wider transition-all relative cursor-pointer",
+                  item.indent ? (isRTL ? "pr-8 text-xs h-10" : "pl-8 text-xs h-10") : "",
+                  isActive 
+                    ? "text-[var(--text-primary)]" 
+                    : "text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
+                )}
+                style={isActive ? { 
+                  color: currentTheme.color, 
+                  backgroundColor: `${currentTheme.color}15`,
+                  borderLeft: isRTL ? 'none' : `3px solid ${currentTheme.color}`,
+                  borderRight: isRTL ? `3px solid ${currentTheme.color}` : 'none',
+                  paddingLeft: isRTL ? undefined : (item.indent ? '28px' : '12px'),
+                  paddingRight: isRTL ? (item.indent ? '28px' : '12px') : undefined,
+                  boxShadow: `0 0 15px ${currentTheme.color}15`
+                } : {}}
+              >
+                <IconComponent className={item.indent ? "w-4 h-4" : "w-5 h-5"} />
+                <span>{item.label}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Footer Settings Toggle */}
+        <div className="pt-4 border-t border-white/5">
+          <button
+            onClick={() => { router.push('/settings'); setIsMobileNavOpen(false); playBlip(); }}
+            className={cn(
+              "w-full flex items-center gap-4 px-4 py-3 rounded-lg font-space text-sm font-bold uppercase tracking-wider text-[var(--text-secondary)] hover:text-white hover:bg-white/5 transition-all cursor-pointer",
+              pathname === '/settings' ? "text-[var(--text-primary)] border border-white/10 bg-white/5" : ""
+            )}
+          >
+            <Settings className="w-5 h-5 animate-[spin_8s_linear_infinite]" />
+            <span>{isRTL ? 'الإعدادات' : 'Settings'}</span>
+          </button>
+        </div>
+      </motion.div>
 
 
       <PomodoroHUD />
