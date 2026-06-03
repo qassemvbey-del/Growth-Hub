@@ -33,7 +33,7 @@ interface SearchGoal {
   id: string
   title: string
   metadata?: {
-    type?: 'solo' | 'squad'
+    type?: 'solo' | 'squad' | 'public'
   }
 }
 
@@ -1207,16 +1207,18 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                     </div>
                     <div className="space-y-2">
                       {searchResults.goals.map((goal) => {
+                        const isPublic = goal.metadata?.type === 'public'
                         const isSquad = goal.metadata?.type === 'squad'
-                        const goalTypeLabel = isSquad ? (isRTL ? 'فريق' : 'Squad') : (isRTL ? 'شخصي' : 'Solo')
+                        const goalTypeLabel = isPublic ? (isRTL ? 'عام' : 'Public') : isSquad ? (isRTL ? 'فريق' : 'Squad') : (isRTL ? 'شخصي' : 'Solo')
+                        
                         return (
                           <button
                             key={goal.id}
                             onClick={() => {
-                              if (isSquad) {
-                                router.push(`/goals/squad/${goal.id}`)
+                              if (isPublic) {
+                                router.push(`/goals/public/${goal.id}`)
                               } else {
-                                router.push(`/goals/solo/${goal.id}`)
+                                router.push(`/goals/squad/${goal.id}`)
                               }
                               setIsMobileSearchOpen(false)
                               setSearchQuery('')
@@ -1255,17 +1257,17 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                       {searchResults.tasks.map((task) => {
                         const parentGoal = task.goals ? (Array.isArray(task.goals) ? task.goals[0] : task.goals) : null
                         const goalTitle = parentGoal?.title
-                        const isSquad = parentGoal?.metadata?.type === 'squad'
+                        const isPublic = parentGoal?.metadata?.type === 'public'
                         
                         return (
                           <button
                             key={task.id}
                             onClick={() => {
                               if (parentGoal) {
-                                if (isSquad) {
-                                  router.push(`/goals/squad/${parentGoal.id}`)
+                                if (isPublic) {
+                                  router.push(`/goals/public/${parentGoal.id}`)
                                 } else {
-                                  router.push(`/goals/solo/${parentGoal.id}`)
+                                  router.push(`/goals/squad/${parentGoal.id}`)
                                 }
                               } else {
                                 router.push('/goals/solo')
