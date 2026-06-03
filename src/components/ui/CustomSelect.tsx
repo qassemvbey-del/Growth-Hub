@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, HelpCircle } from 'lucide-react'
+import { Check, HelpCircle, ChevronDown } from 'lucide-react'
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -13,12 +13,13 @@ interface CustomSelectProps {
   placeholder?: string
   className?: string
   compact?: boolean
+  minimal?: boolean
 }
 
 /* Commented out original non-compact signature
 export default function CustomSelect({ options, value, onChange, placeholder = 'SELECT', className }: CustomSelectProps) {
 */
-export default function CustomSelect({ options, value, onChange, placeholder = 'SELECT', className, compact = false }: CustomSelectProps) {
+export default function CustomSelect({ options, value, onChange, placeholder = 'SELECT', className, compact = false, minimal = false }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const { currentTheme } = useGrowth()
@@ -67,6 +68,7 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
         <HelpCircle />
       </button>
       */}
+      {/* Commented out standard compact button for safety
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -85,6 +87,41 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
         </span>
         <HelpCircle className={compact ? "w-3 h-3 ml-1" : "w-4 h-4 ml-2"} />
       </button>
+      */}
+      {minimal ? (
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn(
+            "w-auto bg-transparent border-none p-0 flex items-center gap-1 text-zinc-400 hover:text-white font-space uppercase tracking-wider text-xs transition-all outline-none focus:outline-none cursor-pointer",
+            isOpen ? "text-white" : ""
+          )}
+        >
+          <span className={cn(!selectedOption && "opacity-40")}>
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
+          <ChevronDown className="w-3.5 h-3.5 shrink-0" />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn(
+            "w-full bg-black/5 dark:bg-black border rounded-md flex items-center justify-between text-zinc-900 dark:text-white font-space uppercase tracking-widest transition-all",
+            compact ? "px-2 py-1 text-[10px]" : "px-4 py-3 text-sm",
+            isOpen ? "border-transparent" : "border-zinc-200 dark:border-white/10"
+          )}
+          style={{
+            borderColor: isOpen ? currentTheme.color : undefined,
+            boxShadow: isOpen ? `0 0 10px ${currentTheme.color}30` : undefined
+          }}
+        >
+          <span className={cn(!selectedOption && "opacity-40")}>
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
+          <HelpCircle className={compact ? "w-3 h-3 ml-1" : "w-4 h-4 ml-2"} />
+        </button>
+      )}
 
       <AnimatePresence>
         {isOpen && (

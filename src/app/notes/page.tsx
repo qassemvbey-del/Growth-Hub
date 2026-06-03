@@ -1,6 +1,9 @@
 'use client'
 
+/* Commented out original imports for safety rules
 import { FileText, Keyboard, Layers, Link, Pin, Plus, Save, Search, Trash2, X, Bold, Italic } from 'lucide-react'
+*/
+import { FileText, Keyboard, Layers, Link, Pin, Plus, Save, Search, Trash2, X, Bold, Italic, Target } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
 import Shell from '@/components/layout/Shell'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -1002,104 +1005,133 @@ export default function NotesPage() {
                   .trim()
                   .slice(0, 160) || (isRTL ? 'ملاحظة فارغة...' : 'Empty note...')
 
-                return (
-                  <motion.div
-                    key={note.id}
-                    initial={{ opacity: 0, scale: 0.96 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.92 }}
-                    transition={{ delay: idx * 0.03 }}
-                    onClick={() => setEditingNote(note)}
-                    className={cn(
-                      "group relative p-5 border cursor-pointer transition-all duration-300 h-auto flex flex-col",
-                      "bg-[var(--card-bg)] border-[var(--card-border)] hover:border-[var(--card-border)]/50",
-                      "backdrop-blur-xl",
-                      isRTL ? "text-right" : "text-left",
-                      note._isTaskNote && (isRTL 
-                        ? "border-r-2 border-indigo-500/50 shadow-[inset_-3px_0_10px_rgba(99,102,241,0.05)]" 
-                        : "border-l-2 border-indigo-500/50 shadow-[inset_3px_0_10px_rgba(99,102,241,0.05)]"
-                      )
-                    )}
-                  >
-                    {/* Neon top accent */}
-                    <div
-                      className="absolute top-0 left-0 right-0 h-[1px] opacity-60 group-hover:opacity-100 transition-opacity"
-                      style={{ background: `linear-gradient(90deg, transparent, ${noteColor}, transparent)` }}
-                    />
+                 return (
+                   <motion.div
+                     key={note.id}
+                     initial={{ opacity: 0, scale: 0.96 }}
+                     animate={{ opacity: 1, scale: 1 }}
+                     exit={{ opacity: 0, scale: 0.92 }}
+                     transition={{ delay: idx * 0.03 }}
+                     onClick={() => setEditingNote(note)}
+                     className={cn(
+                       /* Commented out original p-5 padding card class for safety rules
+                       "group relative p-5 border cursor-pointer transition-all duration-300 h-auto flex flex-col",
+                       */
+                       "group relative px-4 py-3 border cursor-pointer transition-all duration-300 h-auto flex flex-col",
+                       "bg-[var(--card-bg)] border-[var(--card-border)] hover:border-[var(--card-border)]/50",
+                       "backdrop-blur-xl",
+                       isRTL ? "text-right" : "text-left",
+                       note._isTaskNote && (isRTL 
+                         ? "border-r-2 border-indigo-500/50 shadow-[inset_-3px_0_10px_rgba(99,102,241,0.05)]" 
+                         : "border-l-2 border-indigo-500/50 shadow-[inset_3px_0_10px_rgba(99,102,241,0.05)]"
+                       )
+                     )}
+                   >
+                     {/* Neon top accent */}
+                     <div
+                       className="absolute top-0 left-0 right-0 h-[1px] opacity-60 group-hover:opacity-100 transition-opacity"
+                       style={{ background: `linear-gradient(90deg, transparent, ${noteColor}, transparent)` }}
+                     />
 
-                    {/* Mission badge */}
-                    {linkedMission && (
-                      <div 
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          const mId = linkedMission.id || note.goal_id
-                          if (mId) {
-                            const g = missions.find(m => m.id === mId)
-                            const isPublic = g?.metadata?.type === 'public'
-                            router.push(isPublic ? `/goals/public/${mId}` : `/goals/squad/${mId}`)
-                          }
-                        }}
-                        className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-md text-[8px] font-space font-black tracking-wider uppercase hover:bg-zinc-800 hover:scale-105 transition-all cursor-pointer z-10"
-                        style={{ backgroundColor: `${noteColor}15`, color: noteColor, border: `1px solid ${noteColor}30` }}
-                      >
-                        <Link className="text-[10px]" />
-                        <span className="max-w-[80px] truncate">{linkedMission.title}</span>
-                      </div>
-                    )}
+                     {/* Commented out absolute top-right Goal badge for safety rules
+                     {linkedMission && (
+                       <div 
+                         onClick={(e) => {
+                           e.stopPropagation()
+                           const mId = linkedMission.id || note.goal_id
+                           if (mId) {
+                             const g = missions.find(m => m.id === mId)
+                             const isPublic = g?.metadata?.type === 'public'
+                             router.push(isPublic ? `/goals/public/${mId}` : `/goals/squad/${mId}`)
+                           }
+                         }}
+                         className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-md text-[8px] font-space font-black tracking-wider uppercase hover:bg-zinc-800 hover:scale-105 transition-all cursor-pointer z-10"
+                         style={{ backgroundColor: `${noteColor}15`, color: noteColor, border: `1px solid ${noteColor}30` }}
+                       >
+                         <Link className="text-[10px]" />
+                         <span className="max-w-[80px] truncate">{linkedMission.title}</span>
+                       </div>
+                     )}
+                     */}
 
-                    {/* Pin indicator */}
-                    {note.is_locked && (
-                      <div className="absolute top-3 left-3 opacity-50">
-                        <Pin className="text-sm w-3.5 h-3.5" style={{ color: noteColor }} />
-                      </div>
-                    )}
+                     {/* Pin indicator */}
+                     {note.is_locked && (
+                       <div className="absolute top-3 left-3 opacity-50">
+                         <Pin className="text-sm w-3.5 h-3.5" style={{ color: noteColor }} />
+                       </div>
+                     )}
 
-                    {/* Title */}
-                    <h3 className="text-xl font-black font-space text-[var(--text-primary)] mt-4 uppercase tracking-tighter truncate">
-                      {note.title && note.title !== 'Untitled Note' ? note.title : (isRTL ? `ملاحظة — ${dateSuffix}` : `Note — ${dateSuffix}`)}
-                    </h3>
+                     {/* Title */}
+                     <h3 className="text-xl font-black font-space text-[var(--text-primary)] mt-4 uppercase tracking-tighter truncate">
+                       {note.title && note.title !== 'Untitled Note' ? note.title : (isRTL ? `ملاحظة — ${dateSuffix}` : `Note — ${dateSuffix}`)}
+                     </h3>
 
-                    {/* Preview */}
-                    <p className={cn(
-                       'text-xs leading-relaxed text-[var(--text-secondary)] mt-2 font-space line-clamp-3'
-                    )}>
-                      "{plainText}"
-                    </p>
+                     {/* Preview */}
+                     <p className={cn(
+                        'text-xs leading-relaxed text-[var(--text-secondary)] mt-2 font-space line-clamp-3'
+                     )}>
+                       "{plainText}"
+                     </p>
 
-                    {/* Footer / Meta */}
-                    <div className="mt-3 pt-3 border-t border-[var(--card-border)]/30 flex items-center justify-between gap-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                         {tagObj && (
-                          <span 
-                            className="px-1.5 py-0.5 border text-[9px] font-black font-space tracking-widest uppercase rounded"
-                            style={{ borderColor: `${noteColor}40`, color: noteColor, backgroundColor: `${noteColor}08` }}
-                          >
-                            {tagObj.label}
-                          </span>
-                        )}
-                        {note._isTaskNote && (
-                          <span 
-                            className="flex items-center gap-1 text-[8px] font-mono text-indigo-400 font-bold uppercase tracking-wider bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 shrink-0"
-                            title="Embedded Task Note"
-                          >
-                            <Layers className="text-[10px]" />
-                            {isRTL ? 'مدمج' : 'NESTED'}
-                          </span>
-                        )}
-                        <span className="text-[9px] font-space text-[var(--text-secondary)] font-black tracking-widest shrink-0">
-                          {date}
-                        </span>
-                      </div>
-                      
-                      <button
-                        onClick={(e) => { e.stopPropagation(); deleteNote(note.id) }}
-                        className="text-[var(--text-secondary)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all shrink-0"
-                      >
-                        <Trash2 className="text-base w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </motion.div>
-                )
+                     {/* Footer / Meta */}
+                     <div className="mt-3 pt-3 border-t border-[var(--card-border)]/30 flex items-center justify-between gap-2">
+                       <div className="flex flex-wrap items-center gap-2">
+                          {tagObj && (
+                           <span 
+                             className="px-1.5 py-0.5 border text-[9px] font-black font-space tracking-widest uppercase rounded"
+                             style={{ borderColor: `${noteColor}40`, color: noteColor, backgroundColor: `${noteColor}08` }}
+                           >
+                             {tagObj.label}
+                           </span>
+                         )}
+                         {note._isTaskNote && (
+                           /* Commented out nested badge with background for safety
+                           <span 
+                             className="flex items-center gap-1 text-[8px] font-mono text-indigo-400 font-bold uppercase tracking-wider bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 shrink-0"
+                             title="Embedded Task Note"
+                           >
+                             <Layers className="text-[10px]" />
+                             {isRTL ? 'مدمج' : 'NESTED'}
+                           </span>
+                           */
+                           <span 
+                             className="text-[10px] font-bold text-indigo-400/80 shrink-0 select-none mr-1"
+                             title={isRTL ? 'تعليق مدمج بالمهمة' : 'Nested Task Comment'}
+                           >
+                             ↳
+                           </span>
+                         )}
+                         <span className="text-[9px] font-space text-[var(--text-secondary)] font-black tracking-widest shrink-0">
+                           {date}
+                         </span>
+                         {linkedMission && (
+                           <div 
+                             onClick={(e) => {
+                               e.stopPropagation()
+                               const mId = linkedMission.id || note.goal_id
+                               if (mId) {
+                                 const g = missions.find(m => m.id === mId)
+                                 const isPublic = g?.metadata?.type === 'public'
+                                 router.push(isPublic ? `/goals/public/${mId}` : `/goals/squad/${mId}`)
+                               }
+                             }}
+                             className="flex items-center gap-1 text-[10px] text-zinc-500 hover:text-zinc-400 transition-all cursor-pointer select-none"
+                           >
+                             <Target className="w-3.5 h-3.5" style={{ color: noteColor }} />
+                             <span className="max-w-[100px] truncate font-space font-bold uppercase tracking-wider">{linkedMission.title}</span>
+                           </div>
+                         )}
+                       </div>
+                       
+                       <button
+                         onClick={(e) => { e.stopPropagation(); deleteNote(note.id) }}
+                         className="text-[var(--text-secondary)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                       >
+                         <Trash2 className="text-base w-3.5 h-3.5" />
+                       </button>
+                     </div>
+                   </motion.div>
+                 )
               })}
             </AnimatePresence>
           </div>
@@ -1129,54 +1161,26 @@ export default function NotesPage() {
                 style={{ background: `linear-gradient(90deg, transparent, ${currentTheme.color}, transparent)` }}
               />
 
-              {/* Commented out original header row for safety rules
-              <div className="flex justify-between items-center mb-6">
-                 {editingNote.cups && (
-                    <div 
-                      onClick={() => {
-                        const mId = editingNote.cups.id || editingNote.goal_id
-                        if (mId) {
-                          setEditingNote(null)
-                          const g = missions.find(m => m.id === mId)
-                          const isPublic = g?.metadata?.type === 'public'
-                          router.push(isPublic ? `/goals/public/${mId}` : `/goals/squad/${mId}`)
-                        }
-                      }}
-                      className="flex items-center gap-2 text-[10px] font-space font-black tracking-widest uppercase hover:underline cursor-pointer transition-all" 
-                      style={{ color: currentTheme.color }}
-                    >
-                      <Link className="text-sm w-3.5 h-3.5" />
-                      {isRTL ? `مرتبط بـ: ${editingNote.cups.title}` : `Linked to: ${editingNote.cups.title}`}
-                    </div>
-                 )}
-                  <span className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black tracking-widest">
-                    ID: {editingNote?.id?.slice(0, 8) ?? 'NEW'}
-                  </span>
-               </div>
-               */}
-
               <div className="flex flex-wrap items-center justify-between gap-4 mb-6 border-b border-[var(--card-border)]/50 pb-4">
                 {missions.length > 0 && (
                   <div className="flex items-center gap-2 max-w-[200px] sm:max-w-[300px]">
-                    <span className="text-[9px] font-space text-[var(--text-secondary)]/50 font-black tracking-widest uppercase shrink-0">
-                      {isRTL ? 'الهدف:' : 'GOAL:'}
+                    <span className="text-[10px] font-space text-zinc-500 font-bold uppercase tracking-wider shrink-0 select-none">
+                      {isRTL ? 'الهدف:' : 'Goal:'}
                     </span>
                     <CustomSelect
-                      compact
+                      minimal
                       value={editingNote.goal_id || ''}
                       onChange={val => updateNote(editingNote.id, { goal_id: val || null })}
                       options={[
                         { value: '', label: isRTL ? '— بدون ربط —' : '— NO LINK —' },
                         ...missions.map(m => ({ value: m.id, label: m.title.toUpperCase() }))
                       ]}
-                      className="w-36 sm:w-48"
+                      className="w-auto"
                     />
                   </div>
                 )}
                 
-                <span className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black tracking-widest">
-                  ID: {editingNote?.id?.slice(0, 8) ?? 'NEW'}
-                </span>
+                {/* ID display removed as per UX guidelines */}
               </div>
 
               <input 
