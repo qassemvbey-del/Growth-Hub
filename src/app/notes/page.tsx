@@ -1020,7 +1020,10 @@ export default function NotesPage() {
                       "backdrop-blur-xl",
                       */
                       "group relative px-4 py-3 border cursor-pointer h-auto flex flex-col rounded-xl transition-all duration-300",
+                      /* Commented out original border settings for safety rules
                       "bg-zinc-900/10 dark:bg-zinc-900/30 border-zinc-200/50 dark:border-zinc-800/60 hover:bg-zinc-100/50 dark:hover:bg-zinc-900/50 hover:border-zinc-300 dark:hover:border-zinc-700",
+                      */
+                      "bg-zinc-900/10 dark:bg-zinc-900/30 border-zinc-200/10 dark:border-zinc-800/40 hover:bg-zinc-100/50 dark:hover:bg-zinc-900/50 hover:border-zinc-300 dark:hover:border-zinc-700",
                       isRTL ? "text-right" : "text-left",
                       note._isTaskNote && (isRTL 
                         ? "border-r-2 border-indigo-500/50 shadow-[inset_-3px_0_10px_rgba(99,102,241,0.05)]" 
@@ -1041,63 +1044,68 @@ export default function NotesPage() {
                       </div>
                     )}
 
-                    {/* Title */}
-                    {/* Commented out original large title text for safety rules
-                    <h3 className="text-xl font-black font-space text-[var(--text-primary)] mt-4 uppercase tracking-tighter truncate">
-                    */}
-                    <h3 className="text-sm font-semibold font-space text-[var(--text-primary)] mt-1 uppercase tracking-wide truncate">
-                      {note.title && note.title !== 'Untitled Note' ? note.title : (isRTL ? `ملاحظة — ${dateSuffix}` : `Note — ${dateSuffix}`)}
-                    </h3>
+                    {/* Group Title and Preview into space-y-0.5 */}
+                    <div className="flex flex-col space-y-0.5">
+                      {/* Title */}
+                      <h3 className="text-sm font-semibold font-space text-[var(--text-primary)] uppercase tracking-wide truncate">
+                        {note.title && note.title !== 'Untitled Note' ? note.title : (isRTL ? `ملاحظة — ${dateSuffix}` : `Note — ${dateSuffix}`)}
+                      </h3>
 
-                    {/* Preview */}
-                    {/* Commented out original preview sizing for safety rules
-                    <p className={cn(
-                       'text-xs leading-relaxed text-[var(--text-secondary)] mt-2 font-space line-clamp-3'
-                    )}>
-                    */}
-                    <p className="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400 mt-1.5 font-space line-clamp-3">
-                      "{plainText}"
-                    </p>
+                      {/* Preview */}
+                      <p className="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400 font-space line-clamp-3">
+                        "{plainText}"
+                      </p>
+                    </div>
 
                     {/* Footer / Meta */}
-                    <div className="mt-auto pt-3 border-t border-zinc-200/20 dark:border-zinc-800/30 flex items-center justify-between gap-2">
+                    <div className="mt-auto pt-3 border-t border-zinc-200/10 dark:border-zinc-800/20 flex items-center justify-between gap-2">
                       <div className="flex flex-wrap items-center gap-2">
                          {tagObj && (
-                          <span 
-                            className="px-1.5 py-0.5 border text-[9px] font-black font-space tracking-widest uppercase rounded"
-                            style={{ borderColor: `${noteColor}40`, color: noteColor, backgroundColor: `${noteColor}08` }}
-                          >
-                            {tagObj.label}
-                          </span>
-                        )}
-                        {note._isTaskNote && (
-                          <span 
-                            className="text-[10px] font-bold text-indigo-400/80 shrink-0 select-none mr-1"
-                            title={isRTL ? 'تعليق مدمج بالمهمة' : 'Nested Task Comment'}
-                          >
-                            ↳
-                          </span>
-                        )}
-                        <span className="text-[9px] font-space text-[var(--text-secondary)] font-black tracking-widest shrink-0">
-                          {date}
-                        </span>
-                        {linkedMission && (
-                          <div 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              const mId = linkedMission.id || note.goal_id
-                              if (mId) {
-                                const g = missions.find(m => m.id === mId)
-                                const isPublic = g?.metadata?.type === 'public'
-                                router.push(isPublic ? `/goals/public/${mId}` : `/goals/squad/${mId}`)
-                              }
-                            }}
-                            className="flex items-center gap-1 text-[10px] text-zinc-500 hover:text-zinc-400 transition-all cursor-pointer select-none"
-                          >
-                            <Target className="w-3.5 h-3.5" style={{ color: noteColor }} />
-                            <span className="max-w-[100px] truncate font-space font-bold uppercase tracking-wider">{linkedMission.title}</span>
-                          </div>
-                        )}
+                           /* Commented out legacy border styled tags for safety rules
+                           <span 
+                             className="px-1.5 py-0.5 border text-[9px] font-black font-space tracking-widest uppercase rounded"
+                             style={{ borderColor: `${noteColor}40`, color: noteColor, backgroundColor: `${noteColor}08` }}
+                           >
+                             {tagObj.label}
+                           </span>
+                           */
+                           <span className="px-1.5 py-0.5 border border-zinc-200/10 dark:border-zinc-800/30 text-[10px] font-bold font-space tracking-wider uppercase rounded text-zinc-600 dark:text-zinc-500 bg-zinc-800/5">
+                             {tagObj.label}
+                           </span>
+                         )}
+                         {note._isTaskNote && (
+                           <span 
+                             className="text-[10px] font-bold text-indigo-400/80 shrink-0 select-none mr-1"
+                             title={isRTL ? 'تعليق مدمج بالمهمة' : 'Nested Task Comment'}
+                           >
+                             ↳
+                           </span>
+                         )}
+                         {/* Commented out original smaller Date span for safety rules
+                         <span className="text-[9px] font-space text-[var(--text-secondary)] font-black tracking-widest shrink-0">
+                           {date}
+                         </span>
+                         */}
+                         <span className="text-[10px] font-space text-zinc-600 dark:text-zinc-500 font-bold tracking-wider shrink-0 select-none">
+                           {date}
+                         </span>
+                         {linkedMission && (
+                           <div 
+                             onClick={(e) => {
+                               e.stopPropagation()
+                               const mId = linkedMission.id || note.goal_id
+                               if (mId) {
+                                 const g = missions.find(m => m.id === mId)
+                                 const isPublic = g?.metadata?.type === 'public'
+                                 router.push(isPublic ? `/goals/public/${mId}` : `/goals/squad/${mId}`)
+                               }
+                             }}
+                             className="flex items-center gap-1 text-[10px] text-zinc-500 hover:text-zinc-400 transition-all cursor-pointer select-none"
+                           >
+                             <Target className="w-3.5 h-3.5" style={{ color: noteColor }} />
+                             <span className="max-w-[100px] truncate font-space font-bold uppercase tracking-wider">{linkedMission.title}</span>
+                           </div>
+                         )}
                       </div>
                       
                       <button
@@ -1130,7 +1138,7 @@ export default function NotesPage() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.93, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-[calc(100%-2rem)] mx-auto md:max-w-3xl p-5 md:p-12 pb-24 md:pb-32 relative border border-[var(--card-border)] bg-[var(--card-bg)] backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-y-auto max-h-[90vh] rounded-md my-auto"
+              className="w-[calc(100%-2rem)] mx-auto md:max-w-3xl p-5 md:p-12 pb-28 md:pb-36 relative border border-[var(--card-border)] bg-[var(--card-bg)] backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-y-auto max-h-[90vh] rounded-md my-auto"
             >
               {/* Neon top bar */}
               <div
@@ -1138,7 +1146,8 @@ export default function NotesPage() {
                 style={{ background: `linear-gradient(90deg, transparent, ${currentTheme.color}, transparent)` }}
               />
 
-              <div className="flex flex-wrap items-center justify-between gap-4 mb-6 border-b border-[var(--card-border)]/50 pb-4">
+              {/* Compacting Header: Goal selector and close inline on the same line */}
+              <div className="flex justify-between items-center w-full mb-3 border-b border-zinc-800/30 pb-2">
                 {missions.length > 0 && (
                   <div className="flex items-center gap-2 max-w-[200px] sm:max-w-[300px]">
                     <span className="text-[10px] font-space text-zinc-500 font-bold uppercase tracking-wider shrink-0 select-none">
@@ -1157,29 +1166,61 @@ export default function NotesPage() {
                   </div>
                 )}
                 
-                {/* ID display removed as per UX guidelines */}
+                <button
+                  onClick={() => setEditingNote(null)}
+                  className="text-[var(--text-secondary)] hover:text-white transition-all cursor-pointer p-1"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
+
+              {/* Commented out previous redundant Goal layout and close button for safety rules
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-6 border-b border-[var(--card-border)]/50 pb-4">
+                {missions.length > 0 && (
+                  <div className="flex items-center gap-2 max-w-[200px] sm:max-w-[300px]">
+                    <span className="text-[10px] font-space text-zinc-500 font-bold uppercase tracking-wider shrink-0 select-none">
+                      {isRTL ? 'الهدف:' : 'Goal:'}
+                    </span>
+                    <CustomSelect
+                      minimal
+                      value={editingNote.goal_id || ''}
+                      onChange={val => updateNote(editingNote.id, { goal_id: val || null })}
+                      options={[
+                        { value: '', label: isRTL ? '— بدون ربط —' : '— NO LINK —' },
+                        ...missions.map(m => ({ value: m.id, label: m.title.toUpperCase() }))
+                      ]}
+                      className="w-auto"
+                    />
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setEditingNote(null)}
+                className="absolute top-5 right-5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
+              >
+                <X className="text-2xl w-6 h-6" />
+              </button>
+              */}
 
               <input 
                  value={editingNote.title || ''}
                  onChange={(e) => updateNote(editingNote.id, { title: e.target.value })}
                  placeholder={isRTL ? 'عنوان الملاحظة...' : 'Note title...'}
                  className={cn(
-                   "w-full bg-transparent border-none p-0 mb-8 font-space font-black text-4xl md:text-5xl text-[var(--text-primary)] outline-none transition-colors tracking-tighter",
+                   "w-full bg-transparent border-none p-0 mb-3 font-space font-black text-4xl md:text-5xl text-[var(--text-primary)] outline-none transition-colors tracking-tighter",
                    isRTL ? "text-right" : "text-left"
                  )}
                  onFocus={e => e.currentTarget.style.color = currentTheme.color}
                  onBlur={e => e.currentTarget.style.color = ''}
                />
 
-               <button
-                 onClick={() => setEditingNote(null)}
-                 className="absolute top-5 right-5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
-               >
-                 <X className="text-2xl w-6 h-6" />
-               </button>
-
+               {/* Formatting Bar: compact buttons with less padding */}
+               {/* Commented out original legacy layout for safety rules
                <div className="flex gap-3 flex-wrap border-b border-[var(--card-border)] pb-6 mb-8">
+                 ...
+               </div>
+               */}
+               <div className="flex gap-1 items-center flex-wrap border-b border-zinc-800/30 pb-2 mb-3">
                  {[
                    { component: Bold, field: 'weight', active: 'bold', inactive: 'normal' },
                    { component: Italic, field: 'style', active: 'italic', inactive: 'normal' },
@@ -1189,82 +1230,58 @@ export default function NotesPage() {
                      onClick={() => updateNote(editingNote.id, {
                        font_settings: { ...editingNote.font_settings, [field]: editingNote.font_settings?.[field] === active ? inactive : active }
                      })}
-                     className={cn('p-2.5 border rounded-md transition-all', editingNote.font_settings?.[field] === active ? 'bg-[var(--input-bg)] border-[var(--card-border)]' : 'bg-[var(--input-bg)] border border-[var(--card-border)] hover:opacity-80')}
+                     className={cn('p-1.5 border rounded transition-all cursor-pointer', editingNote.font_settings?.[field] === active ? 'bg-[var(--input-bg)] border-zinc-700' : 'bg-transparent border-zinc-800/60 hover:opacity-80')}
                    >
-                     <IconComp className="w-4 h-4 text-[var(--text-primary)]" />
+                     <IconComp className="w-3.5 h-3.5 text-[var(--text-primary)]" />
                    </button>
                  ))}
                 <button
                   onClick={() => updateNote(editingNote.id, {
                     font_settings: { ...editingNote.font_settings, family: editingNote.font_settings?.family === 'tajawal' ? 'space' : 'tajawal' }
                   })}
-                  className={cn('px-5 py-2 border rounded-md font-space text-sm font-black tracking-widest text-[var(--text-primary)] transition-all', editingNote.font_settings?.family === 'tajawal' ? 'bg-[var(--input-bg)] border-[var(--card-border)]' : 'bg-[var(--input-bg)] border border-[var(--card-border)] hover:opacity-80')}
+                  className={cn('px-2.5 py-1.5 border rounded font-space text-[10px] font-black tracking-wider text-[var(--text-primary)] transition-all cursor-pointer', editingNote.font_settings?.family === 'tajawal' ? 'bg-[var(--input-bg)] border-zinc-700' : 'bg-transparent border-zinc-800/60 hover:opacity-80')}
                 >
                   {editingNote.font_settings?.family === 'tajawal' ? 'TAJAWAL' : 'SPACE'}
                 </button>
                 <button
                   onClick={() => updateNote(editingNote.id, { is_locked: !editingNote.is_locked })}
-                  className={cn('p-2.5 border rounded-md transition-all', editingNote.is_locked ? 'text-black border-transparent' : 'bg-[var(--input-bg)] border border-[var(--card-border)] hover:opacity-80')}
-                  style={editingNote.is_locked ? { backgroundColor: currentTheme.color, boxShadow: `0 0 10px ${currentTheme.color}55` } : {}}
+                  className={cn('p-1.5 border rounded transition-all cursor-pointer', editingNote.is_locked ? 'text-black border-transparent' : 'bg-transparent border-zinc-800/60 hover:opacity-80')}
+                  style={editingNote.is_locked ? { backgroundColor: currentTheme.color } : {}}
                 >
-                  <Pin className="text-base w-4 h-4" />
+                  <Pin className="w-3.5 h-3.5" />
                 </button>
-
-                {/* Commented out legacy Goal Select in formatting bar for safety rules
-                {missions.length > 0 && (
-                  <CustomSelect
-                    value={editingNote.goal_id || ''}
-                    onChange={val => updateNote(editingNote.id, { goal_id: val || null })}
-                    options={[
-                      { value: '', label: '— NO LINK —' },
-                      ...missions.map(m => ({ value: m.id, label: m.title.toUpperCase() }))
-                    ]}
-                    className="w-48"
-                  />
-                )}
-                */}
               </div>
 
-              {/* Commented out legacy Tag editor for safety rules
-              <div className="flex gap-2 flex-wrap mb-8 border-b border-[var(--card-border)] pb-6">
-                {TAGS.map(t => (
-                  <button
-                    key={t.value}
-                    onClick={() => updateNote(editingNote.id, { tag: editingNote.tag === t.value ? null : t.value })}
-                    className={cn(
-                      "py-2.5 px-4 rounded-md font-space text-[10px] font-black tracking-widest border transition-all",
-                      editingNote.tag === t.value 
-                        ? "text-black border-transparent shadow-lg" 
-                        : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)]/50 hover:text-[var(--text-primary)]"
-                    )}
-                    style={editingNote.tag === t.value ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}44` } : {}}
-                  >
-                    {t.label}
-                  </button>
-                ))}
+              {/* Tags Harmonization: Single flex-wrap row with compact bg-zinc-800/30 pills */}
+              {/* Commented out previous tag bar styling for safety rules
+              <div className="flex gap-1.5 flex-wrap mb-6 border-b border-[var(--card-border)]/50 pb-4">
+                ...
               </div>
               */}
-
-              <div className="flex gap-1.5 flex-wrap mb-6 border-b border-[var(--card-border)]/50 pb-4">
+              <div className="flex gap-1.5 flex-wrap mb-4 border-b border-zinc-800/30 pb-3">
                 {TAGS.map(t => (
                   <button
                     key={t.value}
                     onClick={() => updateNote(editingNote.id, { tag: editingNote.tag === t.value ? null : t.value })}
                     className={cn(
-                      "py-1.5 px-3 rounded-md font-space text-[9px] font-black tracking-widest border transition-all",
+                      "px-2 py-0.5 rounded-full font-space text-[10px] font-bold tracking-wider transition-all border-0 cursor-pointer",
                       editingNote.tag === t.value 
-                        ? "text-black border-transparent shadow-[0_0_8px_rgba(251,191,36,0.2)]" 
-                        : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)]/50 hover:text-[var(--text-primary)]"
+                        ? "text-black font-black" 
+                        : "bg-zinc-800/30 text-zinc-400 hover:text-zinc-200"
                     )}
-                    style={editingNote.tag === t.value ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color } : {}}
+                    style={editingNote.tag === t.value ? { backgroundColor: currentTheme.color } : {}}
                   >
                     {t.label}
                   </button>
                 ))}
               </div>
 
+              {/* Wikipedia and search areas with shrunk padding */}
+              {/* Commented out original padding classes for safety rules
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 sm:gap-4 mb-4 border-b border-black/5 dark:border-white/5 pb-2">
-                <span className="text-[10px] font-space tracking-widest text-[var(--text-secondary)]/30 uppercase font-black mb-1">
+              */}
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2 border-b border-zinc-800/20 pb-1">
+                <span className="text-[10px] font-space tracking-widest text-[var(--text-secondary)]/30 uppercase font-black">
                   {isRTL ? 'محرر اللوحة' : 'Canvas Editor'}
                 </span>
                 <WikiSearch
