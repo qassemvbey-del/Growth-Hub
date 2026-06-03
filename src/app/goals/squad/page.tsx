@@ -857,13 +857,16 @@ export default function SquadGoalsPage() {
     if (!missionIds.length) return
     const { data } = await supabase
       .from('goal_attachments')
-      .select('mission_id')
+      // .select('mission_id')
+      .select('goal_id')
       .eq('user_id', userId)
-      .in('mission_id', missionIds)
+      // .in('mission_id', missionIds)
+      .in('goal_id', missionIds)
     if (data) {
       const counts: Record<string, number> = {}
       data.forEach((row: any) => {
-        counts[row.mission_id] = (counts[row.mission_id] || 0) + 1
+        // counts[row.mission_id] = (counts[row.mission_id] || 0) + 1
+        counts[row.goal_id] = (counts[row.goal_id] || 0) + 1
       })
       setAttachmentCounts(counts)
     }
@@ -881,7 +884,8 @@ export default function SquadGoalsPage() {
     const { data } = await supabase
       .from('goal_attachments')
       .select('*')
-      .eq('mission_id', missionId)
+      // .eq('mission_id', missionId)
+      .eq('goal_id', missionId)
       .order('created_at', { ascending: false })
     
     if (data) {
