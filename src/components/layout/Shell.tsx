@@ -29,6 +29,26 @@ import Tutorial from '@/components/ui/Tutorial'
 import AmbientAurora from '@/components/ui/AmbientAurora'
 import GlobalCreateGoalModal from '@/components/ui/GlobalCreateGoalModal'
 
+interface SearchGoal {
+  id: string
+  title: string
+  metadata?: {
+    type?: 'solo' | 'squad'
+  }
+}
+
+interface SearchTask {
+  id: string
+  title: string
+  goal_id: string
+  goals: SearchGoal | SearchGoal[] | null
+}
+
+interface SearchNote {
+  id: string
+  title: string | null
+  content: string | null
+}
 
 function WorkspaceLoader({ isRTL }: { isRTL: boolean }) {
   const icons = [Target, Zap, Shield, Trophy, CheckCircle]
@@ -113,16 +133,17 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<{
-    goals: any[]
-    tasks: any[]
-    notes: any[]
+    goals: SearchGoal[]
+    tasks: SearchTask[]
+    notes: SearchNote[]
   }>({ goals: [], tasks: [], notes: [] })
 
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   // Live Search with 300ms Debounce
   useEffect(() => {
-    if (!searchQuery.trim()) {
+    const trimmed = searchQuery.trim()
+    if (!trimmed) {
       setSearchResults({ goals: [], tasks: [], notes: [] })
       setIsSearching(false)
       return
@@ -136,25 +157,26 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         const [goalsRes, tasksRes, notesRes] = await Promise.all([
           supabase
             .from('goals')
-            .select('id, title, goal_type')
-            .ilike('title', `%${searchQuery}%`)
+            .select('id, title, metadata')
+            .eq('is_archived', false)
+            .ilike('title', `%${trimmed}%`)
             .limit(5),
           supabase
             .from('tasks')
-            .select('id, title, goal_id')
-            .ilike('title', `%${searchQuery}%`)
+            .select('id, title, goal_id, goals(id, title, metadata)')
+            .ilike('title', `%${trimmed}%`)
             .limit(5),
           supabase
             .from('notes')
             .select('id, title, content')
-            .or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`)
+            .or(`title.ilike.%${trimmed}%,content.ilike.%${trimmed}%`)
             .limit(5)
         ])
 
         setSearchResults({
-          goals: goalsRes.data || [],
-          tasks: tasksRes.data || [],
-          notes: notesRes.data || []
+          goals: (goalsRes.data || []) as SearchGoal[],
+          tasks: (tasksRes.data || []) as unknown as SearchTask[],
+          notes: (notesRes.data || []) as SearchNote[]
         })
       } catch (err) {
         console.error('Error executing live search queries:', err)
@@ -1051,7 +1073,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
       {/* Bottom row: Search icon + Primary FAB */}
       <div className={cn("flex items-center gap-3", shellIsRTL ? "flex-row-reverse" : "")}>
-        {/* Search Icon Button (Instant Full-Screen Overlay trigger) */}
+        {/* Search Icon Button */}
         <motion.button
           onClick={() => {
             playBlip()
@@ -1165,7 +1187,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                 </div>
                 <div>
                   <p className="text-zinc-300 font-black tracking-widest text-sm uppercase">
-                    {isRTL ? '0 تطابقات وجدت' : '0 MATCHES FOUND'}
+                    {isRTL ? '0 تطابات وجدت' : '0 MATCHES FOUND'}
                   </p>
                   <p className="text-zinc-600 text-xs mt-1 font-bold">
                     {isRTL ? 'لم نجد أي سجلات تطابق استعلامك.' : 'No records match your neural query.'}
@@ -1180,26 +1202,42 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                     <div className="flex items-center gap-2 mb-3 px-1">
                       <Target className="w-4 h-4" style={{ color: currentTheme.color }} />
                       <span className="text-xs font-black uppercase tracking-wider" style={{ color: currentTheme.color }}>
-                        {isRTL ? '🎯 الأهداف' : '🎯 Goals'}
+                        {isRTL ? ' الأهداف' : ' Goals'}
                       </span>
                     </div>
                     <div className="space-y-2">
-                      {searchResults.goals.map((goal) => (
-                        <button
-                          key={goal.id}
-                          onClick={() => {
-                            router.push(`/goals/${goal.goal_type === 'squad' ? 'squad' : 'solo'}`);
-                            setIsMobileSearchOpen(false);
-                            setSearchQuery('');
-                          }}
-                          className="w-full text-start p-3 bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl transition-all flex items-center justify-between"
-                        >
-                          <span className="text-sm font-bold text-zinc-200 truncate">{goal.title}</span>
-                          <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700/50">
-                            {goal.goal_type || 'solo'}
-                          </span>
-                        </button>
-                      ))}
+                      {searchResults.goals.map((goal) => {
+                        const isSquad = goal.metadata?.type === 'squad'
+                        const goalTypeLabel = isSquad ? (isRTL ? 'فريق' : 'Squad') : (isRTL ? 'شخصي' : 'Solo')
+                        return (
+                          <button
+                            key={goal.id}
+                            onClick={() => {
+                              if (isSquad) {
+                                router.push(`/goals/squad/${goal.id}`)
+                              } else {
+                                router.push(`/goals/solo/${goal.id}`)
+                              }
+                              setIsMobileSearchOpen(false)
+                              setSearchQuery('')
+                            }}
+                            className="w-full text-start p-3 bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl transition-all flex items-center justify-between gap-3"
+                          >
+                            <span className="text-sm font-bold text-zinc-200 truncate">{goal.title}</span>
+                            <span 
+                              className="text-[10px] uppercase font-black px-2 py-0.5 rounded bg-zinc-800/80 text-zinc-400 border border-zinc-750 flex items-center gap-1.5 shrink-0"
+                              style={{ borderColor: `${currentTheme.color}30` }}
+                            >
+                              {isSquad ? (
+                                <Users className="w-3 h-3 text-[var(--text-secondary)]" style={{ color: currentTheme.color }} />
+                              ) : (
+                                <Target className="w-3 h-3 text-[var(--text-secondary)]" style={{ color: currentTheme.color }} />
+                              )}
+                              <span>{goalTypeLabel}</span>
+                            </span>
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
@@ -1210,23 +1248,44 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                     <div className="flex items-center gap-2 mb-3 px-1">
                       <CheckCircle className="w-4 h-4" style={{ color: currentTheme.color }} />
                       <span className="text-xs font-black uppercase tracking-wider" style={{ color: currentTheme.color }}>
-                        {isRTL ? '✅ المهام' : '✅ Tasks'}
+                        {isRTL ? ' المهام' : ' Tasks'}
                       </span>
                     </div>
                     <div className="space-y-2">
-                      {searchResults.tasks.map((task) => (
-                        <button
-                          key={task.id}
-                          onClick={() => {
-                            router.push(`/goals/solo`);
-                            setIsMobileSearchOpen(false);
-                            setSearchQuery('');
-                          }}
-                          className="w-full text-start p-3 bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl transition-all flex items-center justify-between"
-                        >
-                          <span className="text-sm font-bold text-zinc-200 truncate">{task.title}</span>
-                        </button>
-                      ))}
+                      {searchResults.tasks.map((task) => {
+                        const parentGoal = task.goals ? (Array.isArray(task.goals) ? task.goals[0] : task.goals) : null
+                        const goalTitle = parentGoal?.title
+                        const isSquad = parentGoal?.metadata?.type === 'squad'
+                        
+                        return (
+                          <button
+                            key={task.id}
+                            onClick={() => {
+                              if (parentGoal) {
+                                if (isSquad) {
+                                  router.push(`/goals/squad/${parentGoal.id}`)
+                                } else {
+                                  router.push(`/goals/solo/${parentGoal.id}`)
+                                }
+                              } else {
+                                router.push('/goals/solo')
+                              }
+                              setIsMobileSearchOpen(false)
+                              setSearchQuery('')
+                            }}
+                            className="w-full text-start p-3 bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl transition-all flex flex-col gap-1.5"
+                          >
+                            <span className="text-sm font-bold text-zinc-200 truncate">{task.title}</span>
+                            {goalTitle && (
+                              <span className="text-xs text-zinc-500 font-bold flex items-center gap-1">
+                                <span>🔗</span>
+                                <span>{isRTL ? 'الهدف:' : 'Goal:'}</span>
+                                <span className="text-zinc-400 truncate max-w-[200px]">{goalTitle}</span>
+                              </span>
+                            )}
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
@@ -1237,7 +1296,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                     <div className="flex items-center gap-2 mb-3 px-1">
                       <StickyNote className="w-4 h-4" style={{ color: currentTheme.color }} />
                       <span className="text-xs font-black uppercase tracking-wider" style={{ color: currentTheme.color }}>
-                        {isRTL ? '📝 الملاحظات' : '📝 Notes'}
+                        {isRTL ? ' الملاحظات' : ' Notes'}
                       </span>
                     </div>
                     <div className="space-y-2">
@@ -1245,15 +1304,15 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                         <button
                           key={note.id}
                           onClick={() => {
-                            router.push(`/notes`);
+                            router.push(`/notes?id=${note.id}`);
                             setIsMobileSearchOpen(false);
                             setSearchQuery('');
                           }}
-                          className="w-full text-start p-3 bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl transition-all flex flex-col gap-1"
+                          className="w-full text-start p-3 bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl transition-all flex flex-col gap-1.5"
                         >
                           <span className="text-sm font-bold text-zinc-200 truncate">{note.title || (isRTL ? 'ملاحظة غير معنونة' : 'Untitled Note')}</span>
                           {note.content && (
-                            <span className="text-xs text-zinc-500 line-clamp-1">{note.content}</span>
+                            <span className="text-xs text-zinc-500 line-clamp-1 font-semibold">{note.content}</span>
                           )}
                         </button>
                       ))}
