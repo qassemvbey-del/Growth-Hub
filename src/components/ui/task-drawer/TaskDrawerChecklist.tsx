@@ -29,7 +29,7 @@ export default function TaskDrawerChecklist({
 }: TaskDrawerChecklistProps) {
   return (
     <div className="space-y-2">
-      <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">
+      <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3 opacity-60">
         {/* {isRTL ? 'المهام الفرعية // SUBTASKS' : 'CHECKLIST // SUBTASKS'} */}
         {isRTL ? 'المهام الفرعية - Checklist' : 'Checklist'}
       </h3>
@@ -50,11 +50,11 @@ export default function TaskDrawerChecklist({
         </button>
       </form>
  
-      <div className="space-y-1 mt-2">
+      <div className="space-y-0.5 mt-2">
         {subtasks.map((sub: any) => (
           <div
             key={sub.id}
-            className="flex items-center justify-between gap-1 py-1 transition-colors"
+            className="flex items-center justify-between gap-1 py-0.5 transition-colors"
           >
             <div className="flex items-center gap-2 min-w-0">
               <button

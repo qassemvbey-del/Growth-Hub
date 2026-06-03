@@ -898,28 +898,28 @@ export default function TaskDrawer({
 
           {/* Google Drive Attachments */}
           <div className="space-y-3">
-             <h3 className="text-[10px] font-black tracking-widest text-zinc-500 font-mono">
+             <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3 opacity-60">
               {isRTL ? 'المرفقات - Attachments' : 'Drive Attachments'}
              </h3>
             
             <div className="space-y-2">
               <button
                 onClick={handleGoogleDrivePicker}
-                className="w-full flex items-center gap-2 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/90"
+                className="w-full flex items-center gap-2 py-1.5 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/90"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/Google_Drive_icon_(2020).svg" alt="Drive" className="w-4 h-4 shrink-0" />
+                <img src="/Google_Drive_icon_(2020).svg" alt="Drive" className="w-3.5 h-3.5 shrink-0" />
                 <span className="font-medium tracking-wide uppercase">{isRTL ? 'جوجل درايف' : 'Google Drive'}</span>
                 <span className="ml-auto text-[10px] text-zinc-500 font-mono">
-                  {isDriveConnected ? '[ OPEN ]' : '[ CONNECT ]'}
+                  {isDriveConnected ? 'Open' : 'Connect'}
                 </span>
               </button>
 
               <button
                 onClick={() => setShowManualLink(!showManualLink)}
-                className="w-full flex items-center gap-2 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/40 hover:text-white/70"
+                className="w-full flex items-center gap-2 py-1.5 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/40 hover:text-white/70"
               >
-                <LinkIcon className="w-4 h-4 shrink-0" />
+                <LinkIcon className="w-3.5 h-3.5 shrink-0" />
                 <span className="font-medium tracking-wide uppercase">{isRTL ? 'إضافة رابط يدوياً' : 'Add Manual Link'}</span>
                 <span className="ml-auto text-[10px] font-mono">{showManualLink ? '▲' : '▼'}</span>
               </button>
@@ -1081,7 +1081,7 @@ export default function TaskDrawer({
             }}
             title={task.is_completed ? t('markIncomplete') : t('markCompleted')}
           >
-            {task.is_completed ? <NeonIcon icon={RefreshCw} className="w-5 h-5 animate-spin" /> : <NeonIcon icon={Circle} className="w-5 h-5 opacity-50" />}
+            {task.is_completed ? <CheckCircle2 className="w-5 h-5" style={{ color: themeColor }} /> : <Circle className="w-5 h-5 opacity-50" />}
           </button>
 
           {/* Delete Button (If handler is provided) */}

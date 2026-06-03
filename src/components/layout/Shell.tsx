@@ -140,6 +140,35 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
   const searchInputRef = useRef<HTMLInputElement>(null)
 
+  const [isModalActive, setIsModalActive] = useState(false)
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    let timeoutId: any = null
+    const checkModals = () => {
+      const hasModal = !!document.querySelector('[class*="fixed"][class*="z-[60]"]') ||
+                       !!document.querySelector('[class*="fixed"][class*="z-[200]"]') ||
+                       !!document.querySelector('.fixed.inset-0.backdrop-blur-md') ||
+                       !!document.querySelector('.fixed.inset-0.bg-black\\/60') ||
+                       !!document.querySelector('.fixed.inset-0.bg-black\\/80') ||
+                       !!document.querySelector('.fixed.inset-0.bg-white\\/90')
+      setIsModalActive(hasModal)
+    }
+
+    const debouncedCheck = () => {
+      if (timeoutId) clearTimeout(timeoutId)
+      timeoutId = setTimeout(checkModals, 50)
+    }
+
+    checkModals()
+    const observer = new MutationObserver(debouncedCheck)
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true })
+    return () => {
+      observer.disconnect()
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [])
+
   // Live Search with 300ms Debounce
   useEffect(() => {
     const trimmed = searchQuery.trim()
@@ -744,6 +773,30 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
               </span>
             </div>
 
+            {/* Desktop Search Button */}
+            <button
+              onClick={() => {
+                playBlip()
+                setCommandPaletteOpen(true)
+              }}
+              className="flex items-center justify-center w-10 h-10 rounded-full transition-all border bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:border-white/20 hover:text-[var(--text-primary)] cursor-pointer"
+              title={isRTL ? 'بحث' : 'Search'}
+            >
+              <Search className="w-5 h-5" />
+            </button>
+
+            {/* Desktop Add Goal Button */}
+            <button
+              onClick={() => {
+                playNeuralLink()
+                openCreateGoalModal({ goalType: 'solo' })
+              }}
+              className="flex items-center justify-center w-10 h-10 rounded-full transition-all border bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:border-white/20 hover:text-[var(--text-primary)] cursor-pointer"
+              title={isRTL ? 'هدف جديد' : 'New Goal'}
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+
             {/* 🔔 Inbox Dropdown */}
             <div className="relative shrink-0" ref={desktopInboxRef}>
               <button
@@ -1006,105 +1059,107 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
     </div>
 
     {/* ── MOBILE FLOATING ACTION BUTTON (FAB) SPEED DIAL ── */}
-    <div 
-      className={cn(
-        "lg:hidden fixed bottom-6 z-[100] flex flex-col items-end gap-3",
-        shellIsRTL ? "left-6" : "right-6"
-      )}
-      dir={shellIsRTL ? 'rtl' : 'ltr'}
-    >
-      {/* Speed Dial Actions */}
-      <AnimatePresence>
-        {isFabMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.8 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.8 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className="flex flex-col gap-2 mb-1"
-          >
-            {[
-              { 
-                label: isRTL ? 'ملاحظة جديدة' : 'Add Note', 
-                icon: StickyNote, 
-                delay: 0.1,
-                action: () => { router.push('/notes?create=true'); setIsFabMenuOpen(false); playBlip(); }
-              },
-              { 
-                label: isRTL ? 'مهمة جديدة' : 'Add Task', 
-                icon: CheckCircle, 
-                delay: 0.05,
-                action: () => { showToast(isRTL ? 'ميزة إنشاء المهام العامة قريباً.' : 'Global Task Creation coming soon.', 'info'); setIsFabMenuOpen(false); playBlip(); }
-              },
-              { 
-                label: isRTL ? 'هدف جديد' : 'Create Goal', 
-                icon: Target, 
-                delay: 0,
-                action: () => { openCreateGoalModal({ goalType: 'solo' }); setIsFabMenuOpen(false); playNeuralLink(); }
-              },
-            ].map((item, i) => (
-              <motion.button
-                key={item.label}
-                initial={{ opacity: 0, x: shellIsRTL ? -20 : 20, scale: 0.6 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: shellIsRTL ? -20 : 20, scale: 0.6 }}
-                transition={{ delay: item.delay, type: 'spring', stiffness: 500, damping: 30 }}
-                onClick={item.action}
-                className={cn(
-                  "flex items-center gap-3 h-11 rounded-full bg-zinc-900/95 backdrop-blur-2xl border border-zinc-800 shadow-lg cursor-pointer transition-colors hover:bg-zinc-800/90 active:scale-95",
-                  shellIsRTL ? "flex-row-reverse ps-3 pe-5" : "ps-3 pe-5"
-                )}
-                style={{ boxShadow: `0 4px 20px rgba(0,0,0,0.4)` }}
-              >
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: `${currentTheme.color}20` }}
-                >
-                  <item.icon className="w-4 h-4" style={{ color: currentTheme.color }} />
-                </div>
-                <span className="text-sm font-space font-bold text-zinc-200 whitespace-nowrap">
-                  {item.label}
-                </span>
-              </motion.button>
-            ))}
-          </motion.div>
+    {!isModalActive && (
+      <div 
+        className={cn(
+          "lg:hidden fixed bottom-6 z-[100] flex flex-col items-end gap-3",
+          shellIsRTL ? "left-6" : "right-6"
         )}
-      </AnimatePresence>
+        dir={shellIsRTL ? 'rtl' : 'ltr'}
+      >
+        {/* Speed Dial Actions */}
+        <AnimatePresence>
+          {isFabMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.8 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              className="flex flex-col gap-2 mb-1"
+            >
+              {[
+                { 
+                  label: isRTL ? 'ملاحظة جديدة' : 'Add Note', 
+                  icon: StickyNote, 
+                  delay: 0.1,
+                  action: () => { router.push('/notes?create=true'); setIsFabMenuOpen(false); playBlip(); }
+                },
+                { 
+                  label: isRTL ? 'مهمة جديدة' : 'Add Task', 
+                  icon: CheckCircle, 
+                  delay: 0.05,
+                  action: () => { showToast(isRTL ? 'ميزة إنشاء المهام العامة قريباً.' : 'Global Task Creation coming soon.', 'info'); setIsFabMenuOpen(false); playBlip(); }
+                },
+                { 
+                  label: isRTL ? 'هدف جديد' : 'Create Goal', 
+                  icon: Target, 
+                  delay: 0,
+                  action: () => { openCreateGoalModal({ goalType: 'solo' }); setIsFabMenuOpen(false); playNeuralLink(); }
+                },
+              ].map((item, i) => (
+                <motion.button
+                  key={item.label}
+                  initial={{ opacity: 0, x: shellIsRTL ? -20 : 20, scale: 0.6 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: shellIsRTL ? -20 : 20, scale: 0.6 }}
+                  transition={{ delay: item.delay, type: 'spring', stiffness: 500, damping: 30 }}
+                  onClick={item.action}
+                  className={cn(
+                    "flex items-center gap-3 h-11 rounded-full bg-zinc-900/95 backdrop-blur-2xl border border-zinc-800 shadow-lg cursor-pointer transition-colors hover:bg-zinc-800/90 active:scale-95",
+                    shellIsRTL ? "flex-row-reverse ps-3 pe-5" : "ps-3 pe-5"
+                  )}
+                  style={{ boxShadow: `0 4px 20px rgba(0,0,0,0.4)` }}
+                >
+                  <div 
+                    className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: `${currentTheme.color}20` }}
+                  >
+                    <item.icon className="w-4 h-4" style={{ color: currentTheme.color }} />
+                  </div>
+                  <span className="text-sm font-space font-bold text-zinc-200 whitespace-nowrap">
+                    {item.label}
+                  </span>
+                </motion.button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      {/* Bottom row: Search icon + Primary FAB */}
-      <div className={cn("flex items-center gap-3", shellIsRTL ? "flex-row-reverse" : "")}>
-        {/* Search Icon Button */}
-        <motion.button
-          onClick={() => {
-            playBlip()
-            setIsFabMenuOpen(false)
-            setIsMobileSearchOpen(true)
-          }}
-          whileTap={{ scale: 0.9 }}
-          className="w-14 h-14 rounded-full flex items-center justify-center bg-zinc-900/90 backdrop-blur-2xl border border-zinc-800 shadow-lg cursor-pointer text-zinc-400 hover:text-white transition-colors"
-        >
-          <Search className="w-5 h-5" />
-        </motion.button>
+        {/* Bottom row: Search icon + Primary FAB */}
+        <div className={cn("flex items-center gap-3", shellIsRTL ? "flex-row-reverse" : "")}>
+          {/* Search Icon Button */}
+          <motion.button
+            onClick={() => {
+              playBlip()
+              setIsFabMenuOpen(false)
+              setIsMobileSearchOpen(true)
+            }}
+            whileTap={{ scale: 0.9 }}
+            className="w-14 h-14 rounded-full flex items-center justify-center bg-zinc-900/90 backdrop-blur-2xl border border-zinc-800 shadow-lg cursor-pointer text-zinc-400 hover:text-white transition-colors"
+          >
+            <Search className="w-5 h-5" />
+          </motion.button>
 
-        {/* Primary FAB */}
-        <motion.button
-          onClick={() => {
-            playBlip()
-            setIsFabMenuOpen(!isFabMenuOpen)
-          }}
-          whileTap={{ scale: 0.92 }}
-          animate={{ rotate: isFabMenuOpen ? 45 : 0 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-          className="w-14 h-14 rounded-full flex items-center justify-center text-black shadow-lg cursor-pointer"
-          style={{ 
-            backgroundColor: currentTheme.color,
-            boxShadow: `0 0 20px ${currentTheme.color}50`
-          }}
-        >
-          <Plus className="w-7 h-7" strokeWidth={2.5} />
-        </motion.button>
+          {/* Primary FAB */}
+          <motion.button
+            onClick={() => {
+              playBlip()
+              setIsFabMenuOpen(!isFabMenuOpen)
+            }}
+            whileTap={{ scale: 0.92 }}
+            animate={{ rotate: isFabMenuOpen ? 45 : 0 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+            className="w-14 h-14 rounded-full flex items-center justify-center text-black shadow-lg cursor-pointer"
+            style={{ 
+              backgroundColor: currentTheme.color,
+              boxShadow: `0 0 20px ${currentTheme.color}50`
+            }}
+          >
+            <Plus className="w-7 h-7" strokeWidth={2.5} />
+          </motion.button>
+        </div>
       </div>
-    </div>
+    )}
 
     {/* ── FAB BACKDROP ── */}
     <AnimatePresence>
