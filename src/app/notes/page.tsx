@@ -160,7 +160,7 @@ export default function NotesPage() {
         // 1. Fetch standalone notes
         const { data: notesData } = await supabase
           .from('notes')
-          .select('*, cups(id, title)')
+          .select('*, goals(id, title)')
           .eq('user_id', user.id)
         if (notesData) dbNotes = notesData
 
@@ -420,8 +420,18 @@ export default function NotesPage() {
       }
     } else {
       // Standalone note
-      console.log("FINAL_PAYLOAD_DEBUG:", JSON.stringify(updates, null, 2));
-      await supabase.from('notes').update(updates).eq('id', id)
+      // console.log("FINAL_PAYLOAD_DEBUG:", JSON.stringify(updates, null, 2));
+      // await supabase.from('notes').update(updates).eq('id', id)
+      
+      const allowedKeys = ['title', 'content', 'tag', 'goal_id', 'is_locked', 'position_x', 'position_y', 'font_settings']
+      const sanitizedUpdates: any = {}
+      allowedKeys.forEach(key => {
+        if (updates[key] !== undefined) {
+          sanitizedUpdates[key] = updates[key]
+        }
+      })
+      console.log("FINAL_PAYLOAD_DEBUG:", JSON.stringify(sanitizedUpdates, null, 2))
+      await supabase.from('notes').update(sanitizedUpdates).eq('id', id)
     }
   }
 
@@ -474,7 +484,7 @@ export default function NotesPage() {
     // if (newMissionId) newNote.mission_id = newMissionId
     if (newGoalId) newNote.goal_id = newGoalId
 
-    const { data } = await supabase.from('notes').insert(newNote).select('*, cups(id, title)').single()
+    const { data } = await supabase.from('notes').insert(newNote).select('*, goals(id, title)').single()
     if (data) {
       setNotes([data, ...notes])
       setIsCreating(false)
