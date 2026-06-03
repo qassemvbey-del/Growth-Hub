@@ -111,7 +111,7 @@ interface ShellProps {
 }
 
 export default function Shell({ children, syncedMissions = [], onMissionsRefresh }: ShellProps) {
-  const { isRTL, profile, calculateAccountability, lastAiMessage, t, currentTheme, isRankUpModalOpen, setIsRankUpModalOpen, isLoading, showAuthModal, setShowAuthModal, openCreateGoalModal } = useGrowth()
+  const { isRTL, profile, calculateAccountability, lastAiMessage, t, currentTheme, isRankUpModalOpen, setIsRankUpModalOpen, isLoading, showAuthModal, setShowAuthModal, openCreateGoalModal, isTaskDrawerOpen } = useGrowth()
   const pathname = usePathname()
   const router = useRouter()
   const { playNeuralLink, playBlip } = useSound()
@@ -139,35 +139,6 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   }>({ goals: [], tasks: [], notes: [] })
 
   const searchInputRef = useRef<HTMLInputElement>(null)
-
-  const [isModalActive, setIsModalActive] = useState(false)
-
-  useEffect(() => {
-    if (typeof document === 'undefined') return
-    let timeoutId: any = null
-    const checkModals = () => {
-      const hasModal = !!document.querySelector('[class*="fixed"][class*="z-[60]"]') ||
-                       !!document.querySelector('[class*="fixed"][class*="z-[200]"]') ||
-                       !!document.querySelector('.fixed.inset-0.backdrop-blur-md') ||
-                       !!document.querySelector('.fixed.inset-0.bg-black\\/60') ||
-                       !!document.querySelector('.fixed.inset-0.bg-black\\/80') ||
-                       !!document.querySelector('.fixed.inset-0.bg-white\\/90')
-      setIsModalActive(hasModal)
-    }
-
-    const debouncedCheck = () => {
-      if (timeoutId) clearTimeout(timeoutId)
-      timeoutId = setTimeout(checkModals, 50)
-    }
-
-    checkModals()
-    const observer = new MutationObserver(debouncedCheck)
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true })
-    return () => {
-      observer.disconnect()
-      if (timeoutId) clearTimeout(timeoutId)
-    }
-  }, [])
 
   // Live Search with 300ms Debounce
   useEffect(() => {
@@ -1059,7 +1030,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
     </div>
 
     {/* ── MOBILE FLOATING ACTION BUTTON (FAB) SPEED DIAL ── */}
-    {!isModalActive && (
+    {!isTaskDrawerOpen && (
       <div 
         className={cn(
           "lg:hidden fixed bottom-6 z-[100] flex flex-col items-end gap-3",

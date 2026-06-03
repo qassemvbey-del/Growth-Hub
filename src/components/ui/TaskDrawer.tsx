@@ -77,10 +77,17 @@ export default function TaskDrawer({
   missionOwnerId = null,
   onDelete
 }: TaskDrawerProps) {
-  const { isRTL, t, addXp, profile } = useGrowth()
+  const { isRTL, t, addXp, profile, setIsTaskDrawerOpen } = useGrowth()
   const { startFocus, isActive, isPaused, taskId: activePomodoroTaskId, pause, resume, updateConfig, breakDuration } = usePomodoro()
   const isCurrentTaskFocus = activePomodoroTaskId === task.id
   const isCurrentFocusActive = isCurrentTaskFocus && isActive && !isPaused
+
+  useEffect(() => {
+    setIsTaskDrawerOpen(true)
+    return () => {
+      setIsTaskDrawerOpen(false)
+    }
+  }, [setIsTaskDrawerOpen])
 
   const updateTask = async (taskId: string, updates: any) => {
     await onUpdateTask(taskId, updates)
@@ -750,6 +757,71 @@ export default function TaskDrawer({
   const videoProgress = task.video_progress ?? storedProgress
   const videoDuration = task.video_duration ?? storedDuration
 
+  const [ytDuration, setYtDuration] = useState<number>(0)
+
+  useEffect(() => {
+    let active = true
+    setYtDuration(0)
+    
+    if (!finalVideoUrl) return
+
+    // 1. Try parsing duration using Regex from description or title first (e.g. [15:00], 15min, 15m, 15 mins)
+    const textToParse = `${task.title || ''} ${task.description || ''}`
+    const durationRegexes = [
+      /\[(\d+):00\]/, // matches [15:00]
+      /\b(\d+)\s*(?:mins|minutes|min)\b/i, // matches 15 mins, 15min, etc.
+      /\b(\d+)m\b/i // matches 15m
+    ]
+    
+    let detectedMin = 0
+    for (const regex of durationRegexes) {
+      const match = textToParse.match(regex)
+      if (match && match[1]) {
+        detectedMin = parseInt(match[1], 10)
+        break
+      }
+    }
+
+    if (detectedMin > 0) {
+      setYtDuration(detectedMin * 60)
+      return
+    }
+
+    // 2. Fetch oEmbed metadata and try to extract title/description, parsing duration from there.
+    const videoId = getYouTubeId(finalVideoUrl)
+    if (videoId && videoId.length === 11) {
+      const fetchOEmbed = async () => {
+        try {
+          const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`)
+          if (!res.ok) return
+          const data = await res.json()
+          if (!active) return
+          // Parse duration from oEmbed data (e.g., if title contains something like "[15 mins]")
+          const oembedText = `${data.title || ''} ${data.author_name || ''}`
+          for (const regex of durationRegexes) {
+            const match = oembedText.match(regex)
+            if (match && match[1]) {
+              detectedMin = parseInt(match[1], 10)
+              break
+            }
+          }
+          if (detectedMin > 0) {
+            setYtDuration(detectedMin * 60)
+          }
+        } catch (e) {
+          console.error('Error fetching oEmbed:', e)
+        }
+      }
+      fetchOEmbed()
+    }
+
+    return () => {
+      active = false
+    }
+  }, [task.id, finalVideoUrl, task.title, task.description])
+
+  const resolvedDuration = videoDuration > 0 ? videoDuration : ytDuration
+
   const formatVideoTime = (secs: number) => {
     const h = Math.floor(secs / 3600)
     const m = Math.floor((secs % 3600) / 60)
@@ -833,7 +905,7 @@ export default function TaskDrawer({
                   {t('savedProgress')}
                 </span>
                 <span className="px-2 tracking-widest">
-                  {formatVideoTime(videoProgress)} / {formatVideoTime(videoDuration)}
+                  {formatVideoTime(videoProgress)} / {formatVideoTime(resolvedDuration)}
                 </span>
               </div>
             </div>
@@ -1038,9 +1110,11 @@ export default function TaskDrawer({
             <button
               type="button"
               disabled={task.is_completed}
-              onClick={() => {
-                if (videoDuration > 0) {
-                  updateConfig(Math.round(videoDuration / 60), breakDuration)
+              onClick={(e) => {
+                e.stopPropagation()
+                const durationVal = resolvedDuration
+                if (durationVal > 0) {
+                  updateConfig(Math.round(durationVal / 60), breakDuration)
                 }
                 if (isCurrentTaskFocus) {
                   if (isCurrentFocusActive) {
@@ -1069,17 +1143,18 @@ export default function TaskDrawer({
               )}>
                 {isCurrentFocusActive 
                   ? "PAUSE" 
-                  : (videoDuration > 0 
-                      ? `START (${Math.round(videoDuration / 60)} MINS)` 
+                  : (resolvedDuration > 0 
+                      ? `START (${Math.round(resolvedDuration / 60)} MINS)` 
                       : "POMODORO"
                     )}
               </span>
             </button>
-
+ 
             {/* Complete Button */}
             <button
               type="button"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation()
                 onComplete()
                 
                 // Send completion notification to assignee
@@ -1115,13 +1190,14 @@ export default function TaskDrawer({
               </span>
             </button>
           </div>
-
+ 
           {/* Delete Button (If handler is provided, absolutely positioned on the side to preserve central centering) */}
           {onDelete && (
             <div className={cn("absolute", isRTL ? "left-4" : "right-4")}>
               <button
                 type="button"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation()
                   if (confirm(isRTL ? 'هل أنت متأكد من حذف هذه المهمة؟' : 'Are you sure you want to delete this task?')) {
                     onDelete()
                     onClose()

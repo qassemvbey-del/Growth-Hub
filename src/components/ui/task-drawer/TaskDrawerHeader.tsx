@@ -96,15 +96,10 @@ export default function TaskDrawerHeader({
           {/* Status Toggle Pill */}
           <button
             onClick={onComplete}
-            className={cn(
-              "px-2.5 py-1 rounded-full text-[10px] font-space font-black tracking-wider uppercase transition-all duration-200 border flex items-center gap-1 cursor-pointer",
-              task.is_completed
-                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                : "bg-amber-500/10 border-amber-500/30 text-amber-400"
-            )}
+            className="status-pill border border-orange-500/50 text-orange-500 rounded-full px-2 py-0.5 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
           >
-            {task.is_completed ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Circle className="w-3.5 h-3.5 font-bold" />}
-            <span>{task.is_completed ? t('completed') : t('inProgress')}</span>
+            {task.is_completed ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Circle className="w-3.5 h-3.5" />}
+            <span className="uppercase">{task.is_completed ? t('completed') : t('inProgress')}</span>
           </button>
 
           {/* Close button */}

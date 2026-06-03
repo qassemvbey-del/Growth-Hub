@@ -481,6 +481,8 @@ interface GrowthContextType {
   openCreateGoalModal: (opts?: { prefillTitle?: string; goalType?: 'solo' | 'squad' }) => void
   closeCreateGoalModal: () => void
   createGoalModalOpts: { prefillTitle?: string; goalType?: 'solo' | 'squad' }
+  isTaskDrawerOpen: boolean
+  setIsTaskDrawerOpen: (open: boolean) => void
 }
 
 const GrowthContext = createContext<GrowthContextType | undefined>(undefined)
@@ -556,6 +558,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
   const [topXpUserId, setTopXpUserId] = useState<string | null>(null)
   const [isCreateGoalModalOpen, setIsCreateGoalModalOpen] = useState(false)
   const [createGoalModalOpts, setCreateGoalModalOpts] = useState<{ prefillTitle?: string; goalType?: 'solo' | 'squad' }>({})
+  const [isTaskDrawerOpen, setIsTaskDrawerOpen] = useState(false)
 
   const openCreateGoalModal = (opts?: { prefillTitle?: string; goalType?: 'solo' | 'squad' }) => {
     setCreateGoalModalOpts(opts || {})
@@ -1336,7 +1339,9 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
       isCreateGoalModalOpen,
       openCreateGoalModal,
       closeCreateGoalModal,
-      createGoalModalOpts
+      createGoalModalOpts,
+      isTaskDrawerOpen,
+      setIsTaskDrawerOpen
     }}>
       {children}
     </GrowthContext.Provider>
