@@ -716,9 +716,13 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
       <Sidebar isRTL={isRTL} onOpenCoach={() => { setCoachPanelOpen(true); playNeuralLink(); window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ai-coach' })); }} />
 
-      <main className={cn(
+      <main
+        ref={mainWrapperRef}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className={cn(
         'flex-1 min-h-screen transition-all duration-500 relative z-10 w-full max-w-full overflow-x-hidden',
-        'pb-6 lg:pb-0',
+        'pb-24 lg:pb-8',
         'lg:ps-72 lg:max-w-none'
       )}>
         {/* ── DESKTOP TOP BAR (TRANSIENT TELEMETRY ONLY) ── */}
