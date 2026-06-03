@@ -831,23 +831,23 @@ export default function TaskDrawer({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-0 md:p-4">
-      {/* 1. Backdrop Overlay (ZERO BLUR) */}
+    <div className="fixed inset-0 z-[60] flex items-stretch justify-end p-0">
+      {/* 1. Backdrop Overlay (with backdrop blur as requested) */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 bg-black/60 z-[60] cursor-pointer"
+        className="fixed inset-0 bg-black/60 z-[60] cursor-pointer backdrop-blur-md"
       />
 
-      {/* 2. Modal Content Container */}
+      {/* 2. Sliding Drawer Content Container */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 20 }}
-        transition={{ duration: 0.25, ease: 'easeOut' }}
-        className="w-full h-full md:h-auto md:max-h-[90vh] md:max-w-xl bg-zinc-950/95 backdrop-blur-xl border-t md:border border-white/5 shadow-2xl flex flex-col rounded-t-2xl md:rounded-2xl relative overflow-hidden z-[60]"
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
+        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        className="w-full md:w-[35vw] max-w-xl h-full bg-zinc-950/95 backdrop-blur-xl border-t md:border-l md:border-t-0 border-white/5 shadow-2xl flex flex-col rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden z-[60]"
       >
         {/* Decorative Top Accent Glow */}
         <div 

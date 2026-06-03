@@ -29,6 +29,18 @@ import {
 } from 'lucide-react'
 
 
+const formatDeadline = (dateStr: string) => {
+  if (!dateStr) return '';
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return `DUE: ${dateStr.toUpperCase()}`;
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    return `DUE: ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  } catch (e) {
+    return `DUE: ${dateStr.toUpperCase()}`;
+  }
+}
+
 // --- HELPER COMPONENT: CYBERPUNK WEIGHT BARS ---
 const WeightVisualizer = ({ weight, color, isCompleted = false, onSelect }: { weight: number, color: string, isCompleted?: boolean, onSelect?: (w: number) => void }) => {
   const bars = [1, 2, 3, 4, 5, 6]
@@ -1685,23 +1697,12 @@ const { progress, isInRedZone } = useMemo(() => {
                   const completed = mission.tasks?.filter((t: any) => t.is_completed).length || 0;
                   const total = mission.tasks?.length || 0;
                   
-                  const formatDate = (dateStr: string | null, fallbackDate?: Date) => {
-                    const d = dateStr ? new Date(dateStr) : (fallbackDate || new Date());
-                    return d.toISOString().split('T')[0].replace(/-/g, '');
-                  };
-
-                  const dtStart = formatDate(mission.start_date);
-                  let dtEnd;
-                  if (mission.end_date) {
-                    dtEnd = formatDate(mission.end_date);
-                  } else {
-                    const d = mission.start_date ? new Date(mission.start_date) : new Date();
-                    d.setDate(d.getDate() + 30);
-                    dtEnd = d.toISOString().split('T')[0].replace(/-/g, '');
-                  }
-
-                  const details = encodeURIComponent(`Growth Hub Goal | Progress: ${percentage}% | Tasks: ${completed}/${total}`);
-                  const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(mission.title)}&dates=${dtStart}/${dtEnd}&details=${details}&location=Growth_Hub`;
+                  const cleanDate = (mission.end_date || mission.start_date || new Date().toISOString().split('T')[0]).replace(/-/g, '').substring(0, 8);
+                  const dates = `${cleanDate}T230000/${cleanDate}T235900`;
+                  const title = encodeURIComponent(`[Growth Hub] ${mission.title}`);
+                  const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://playgrowthhub.com';
+                  const details = encodeURIComponent(`Growth Hub Goal | Progress: ${percentage}% | Tasks: ${completed}/${total} | Click here to open: ${appUrl}/goals/squad/${id}`);
+                  const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=Growth_Hub`;
                   
                   window.open(googleUrl, '_blank');
                   playBlip();
@@ -1944,11 +1945,11 @@ const { progress, isInRedZone } = useMemo(() => {
                                       <span className={cn(
                                         "font-mono text-[10px] px-2 py-0.5 rounded tracking-wider inline-flex items-center gap-1.5 border shrink-0",
                                         isOverdue 
-                                          ? "text-red-500 border-red-500/30 bg-red-950/15 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse font-black" 
+                                          ? "bg-red-500/10 border-red-500 text-red-500 font-bold" 
                                           : "text-white/40 border-zinc-800 bg-white/[0.02]"
                                       )}>
                                         <Calendar className={cn("w-3.5 h-3.5", isOverdue ? "text-red-500" : "text-cyan-500/80")} />
-                                        {task.metadata.endDate}
+                                        {formatDeadline(task.metadata.endDate)}
                                       </span>
                                     )
                                   })()}

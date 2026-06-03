@@ -1,8 +1,21 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Circle } from 'lucide-react'
+import { Circle, Calendar } from 'lucide-react'
 import { NeonIcon } from '../NeonIcon'
+import { cn } from '@/lib/utils'
+
+const formatDeadline = (dateStr: string) => {
+  if (!dateStr) return '';
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return `DUE: ${dateStr.toUpperCase()}`;
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    return `DUE: ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  } catch (e) {
+    return `DUE: ${dateStr.toUpperCase()}`;
+  }
+}
 
 interface TaskDrawerMetadataProps {
   task: any
@@ -106,19 +119,61 @@ export default function TaskDrawerMetadata({
         {/* <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md font-mono font-bold border border-white/5 bg-white/[0.02] text-white/70">
           📅 {endDate || (isRTL ? 'غير محدد' : 'NOT SET')}
         </span> */}
-        <label className="relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono font-bold border border-white/5 bg-white/[0.02] text-white/70 hover:bg-white/[0.05] hover:text-white cursor-pointer transition-all">
-          <span>📅 {endDate || (isRTL ? 'غير محدد' : 'NOT SET')}</span>
-          <input
-            type="date"
-            value={endDate ? endDate.substring(0, 10) : ''}
-            onChange={async (e) => {
-              const selectedDate = e.target.value
-              const updatedMetadata = { ...task.metadata, endDate: selectedDate }
-              await updateTask(task.id, { metadata: updatedMetadata })
-            }}
-            className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-          />
-        </label>
+        {(() => {
+          const hasDate = !!endDate
+          const isOverdue = (() => {
+            if (!endDate || task.is_completed) return false
+            const tDate = new Date(endDate)
+            tDate.setHours(0,0,0,0)
+            const todayDate = new Date()
+            todayDate.setHours(0,0,0,0)
+            return tDate < todayDate
+          })()
+          const displayVal = hasDate ? formatDeadline(endDate) : (isRTL ? 'غير محدد' : 'NOT SET')
+          return (
+            <div className="flex items-center gap-2">
+              <label className={cn(
+                "relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono font-bold border cursor-pointer transition-all shrink-0",
+                isOverdue
+                  ? "bg-red-500/10 border-red-500 text-red-500 font-bold"
+                  : "border-white/5 bg-white/[0.02] text-white/70 hover:bg-white/[0.05] hover:text-white"
+              )}>
+                <Calendar className="w-3.5 h-3.5" />
+                <span>{displayVal}</span>
+                <input
+                  type="date"
+                  value={endDate ? endDate.substring(0, 10) : ''}
+                  onChange={async (e) => {
+                    const selectedDate = e.target.value
+                    const updatedMetadata = { ...task.metadata, endDate: selectedDate }
+                    await updateTask(task.id, { metadata: updatedMetadata })
+                  }}
+                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                />
+              </label>
+
+              {hasDate && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const cleanDate = endDate.replace(/-/g, '').substring(0, 8)
+                    const dates = `${cleanDate}T230000/${cleanDate}T235900`
+                    const title = encodeURIComponent(`[Growth Hub] ${task.title}`)
+                    const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://playgrowthhub.com'
+                    const details = encodeURIComponent(`You have a task due today. Click here to open: ${appUrl}/goals/squad/${task.goal_id}`)
+                    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=Growth_Hub`
+                    window.open(googleUrl, '_blank')
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono font-bold border border-white/5 bg-white/[0.02] text-white/50 hover:bg-white/[0.05] hover:text-[#14b8a6] cursor-pointer transition-all"
+                  title="Export deadline to Google Calendar"
+                >
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>EXPORT</span>
+                </button>
+              )}
+            </div>
+          )
+        })()}
       </div>
 
       {/* B. ASSIGNEE SECTION (Squad Goals Only) */}

@@ -50,18 +50,26 @@ interface SearchNote {
   content: string | null
 }
 
-function WorkspaceLoader({ isRTL }: { isRTL: boolean }) {
-  const icons = [Target, Zap, Shield, Trophy, CheckCircle]
-  const [index, setIndex] = useState(0)
+const getRankColor = (rank?: string) => {
+  const r = rank?.toUpperCase() || 'ROOKIE';
+  switch (r) {
+    case 'ROOKIE': return '#9ca3af'; // Gray-400
+    case 'BRONZE': return '#b45309'; // Amber-700
+    case 'SILVER': return '#94a3b8'; // Slate-400
+    case 'GOLD': return '#fbbf24'; // Yellow-400
+    case 'PLATINUM': return '#38bdf8'; // Sky-400
+    case 'DIAMOND': return '#818cf8'; // Indigo-400
+    case 'CROWN': return '#a855f7'; // Purple-500
+    case 'ACE': return '#f97316'; // Orange-500
+    case 'CONQUEROR': return '#fbbf24'; // Gold
+    default: return '#14b8a6'; // Default Theme Teal
+  }
+}
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIndex((prev) => (prev + 1) % icons.length)
-    }, 400)
-    return () => clearInterval(interval)
-  }, [icons.length])
-
-  const ActiveIcon = icons[index]
+function WorkspaceLoader({ isRTL, rank }: { isRTL: boolean; rank?: string }) {
+  // Static icon instead of cycling animations to follow Phase 18 guidelines
+  const ActiveIcon = Trophy
+  const rankColor = getRankColor(rank)
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#050505] z-[9999] overflow-hidden select-none font-space p-6">
@@ -71,32 +79,23 @@ function WorkspaceLoader({ isRTL }: { isRTL: boolean }) {
       <div className="relative z-10 flex flex-col items-center gap-6">
         <div className="relative w-24 h-24 flex items-center justify-center">
           <div 
-            className="absolute w-20 h-20 rounded-full opacity-40 blur-xl transition-all duration-300 animate-pulse"
+            className="absolute w-20 h-20 rounded-full opacity-40 blur-xl transition-all duration-300"
             style={{
-              background: 'radial-gradient(circle, #FF5F00 33%, transparent 70%)',
+              background: `radial-gradient(circle, ${rankColor} 33%, transparent 70%)`,
             }}
           />
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={index}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="relative"
-            >
-              <ActiveIcon 
-                className="w-16 h-16 transition-all duration-300" 
-                style={{ 
-                  color: '#FF5F00', 
-                  filter: 'drop-shadow(0 0 15px rgba(255, 95, 0, 0.65))' 
-                }} 
-              />
-            </motion.div>
-          </AnimatePresence>
+          <div className="relative">
+            <ActiveIcon 
+              className="w-16 h-16 transition-all duration-300 fill-current" 
+              style={{ 
+                color: rankColor, 
+                filter: `drop-shadow(0 0 15px ${rankColor}a8)` 
+              }} 
+            />
+          </div>
         </div>
         
-        <p className="text-zinc-400 text-sm tracking-widest animate-pulse font-medium">
+        <p className="text-sm tracking-widest font-medium" style={{ color: rankColor }}>
           {isRTL ? 'مساحة العمل بتتحمل...' : 'Loading workspace...'}
         </p>
       </div>
@@ -659,7 +658,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   }, [profile?.rank])
 
   if (isLoading || !mounted) {
-    return <WorkspaceLoader isRTL={shellIsRTL} />
+    return <WorkspaceLoader isRTL={shellIsRTL} rank={profile?.rank} />
   }
 
   return (
