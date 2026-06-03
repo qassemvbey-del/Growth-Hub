@@ -74,6 +74,13 @@
 @layer base {
   * {
     font-style: normal !important;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Apply user-select: none to navigation buttons, tabs, and interactive UI elements */
+  button, a, .nav-btn, .tab-btn {
+    user-select: none;
+    -webkit-user-select: none;
   }
   
   em, .italic {

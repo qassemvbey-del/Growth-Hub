@@ -1265,9 +1265,9 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                             onClick={() => {
                               if (parentGoal) {
                                 if (isPublic) {
-                                  router.push(`/goals/public/${parentGoal.id}`)
+                                  router.push(`/goals/public/${parentGoal.id}?taskId=${task.id}`)
                                 } else {
-                                  router.push(`/goals/squad/${parentGoal.id}`)
+                                  router.push(`/goals/squad/${parentGoal.id}?taskId=${task.id}`)
                                 }
                               } else {
                                 router.push('/goals/solo')
