@@ -28,42 +28,39 @@ export default function TaskDrawerChecklist({
   themeColor
 }: TaskDrawerChecklistProps) {
   return (
-    /* bg-zinc-900/40 */
-    <div className="space-y-3 p-5 border border-white/5 bg-transparent dark:bg-white/5 rounded-md">
+    <div className="space-y-2">
       <h3 className="text-[10px] font-black tracking-widest text-zinc-500 font-mono">
         {/* {isRTL ? 'المهام الفرعية // SUBTASKS' : 'CHECKLIST // SUBTASKS'} */}
         {isRTL ? 'المهام الفرعية - Checklist' : 'Checklist'}
       </h3>
       
-      <form onSubmit={handleAddSubtask} className="flex gap-2">
+      <form onSubmit={handleAddSubtask} className="flex gap-2 items-center">
         <input
           type="text"
           placeholder={isRTL ? 'مهمة فرعية جديدة...' : 'Add checklist item...'}
           value={newSubtaskText}
           onChange={e => setNewSubtaskText(e.target.value)}
-          /* bg-zinc-900/80 */
-          className="flex-1 bg-transparent dark:bg-white/5 border border-white/8 py-2 px-3 font-space text-xs text-white outline-none transition-all rounded-md focus:border-white/20"
+          className="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none p-0 font-space text-xs text-white placeholder-white/20"
         />
         <button
           type="submit"
-          className="p-2 border rounded-md bg-teal-500/10 border-teal-500/30 text-teal-400 hover:bg-teal-500/20 transition-all cursor-pointer flex items-center justify-center shrink-0"
+          className="p-1 text-teal-400 hover:text-teal-300 transition-all cursor-pointer flex items-center justify-center shrink-0"
         >
           <NeonIcon icon={PlusSquare} className="w-4 h-4" />
         </button>
       </form>
  
-      <div className="space-y-2 mt-3">
+      <div className="space-y-1 mt-2">
         {subtasks.map((sub: any) => (
           <div
             key={sub.id}
-            /* bg-zinc-950/40 */
-            className="flex items-center justify-between gap-3 p-2.5 rounded-md border bg-transparent dark:bg-white/[0.02] border-white/5 hover:border-white/10 transition-colors"
+            className="flex items-center justify-between gap-2 py-1 transition-colors"
           >
-            <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
               <button
                 type="button"
                 onClick={() => handleToggleSubtask(sub.id, sub.is_completed)}
-                className="w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer shrink-0"
+                className="w-3.5 h-3.5 rounded border flex items-center justify-center transition-all cursor-pointer shrink-0"
                 style={{
                   borderColor: sub.is_completed ? '#10B981' : 'rgba(255,255,255,0.2)',
                   backgroundColor: sub.is_completed ? '#10B981' : 'transparent'

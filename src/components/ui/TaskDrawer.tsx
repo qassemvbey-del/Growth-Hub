@@ -203,6 +203,21 @@ export default function TaskDrawer({
   // }, [task.id])
 
   const [taskTitle, setTaskTitle] = useState(task.title || '')
+  const [goals, setGoals] = useState<any[]>([])
+  useEffect(() => {
+    async function fetchGoals() {
+      const sb = createClient()
+      const { data: { user } } = await sb.auth.getUser()
+      if (user) {
+        const { data } = await sb
+          .from('goals')
+          .select('id, title')
+          .eq('user_id', user.id)
+        if (data) setGoals(data)
+      }
+    }
+    fetchGoals()
+  }, [])
   useEffect(() => {
     setTaskTitle(task.title || '')
   }, [task.title, task.id])
@@ -742,32 +757,24 @@ export default function TaskDrawer({
   }
 
   return (
-    <div className="fixed inset-0 z-[20000] flex items-stretch">
+    <div className="fixed inset-0 z-[20000] flex items-center justify-center p-0 md:p-4">
       {/* 1. Backdrop Overlay (ZERO BLUR) */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 bg-black/50 backdrop-blur-none z-[20000] cursor-pointer"
+        className="fixed inset-0 bg-black/60 z-[20000] cursor-pointer"
       />
 
-      {/* 2. Side Panel */}
+      {/* 2. Modal Content Container */}
       <motion.div
-        initial={{ x: isRTL ? '-100%' : '100%' }}
-        animate={{ x: 0 }}
-        exit={{ x: isRTL ? '-100%' : '100%' }}
-        transition={{ type: 'tween', duration: 0.35, ease: 'easeOut' }}
-        // onAnimationComplete={() => setIsAnimationComplete(true)}
-        /* bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 */
-        /* bg-white/10 dark:bg-black/40 backdrop-blur-3xl shadow-2xl */
-        className={`fixed top-0 bottom-0 z-[20005] w-full md:w-[50vw] lg:w-[45vw] shadow-2xl flex flex-col ${
-          isRTL ? 'left-0 border-r border-white/5' : 'right-0 border-l border-white/5'
-        }`}
-        style={{ borderColor: themeColor }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 20 }}
+        transition={{ duration: 0.25, ease: 'easeOut' }}
+        className="w-full h-full md:h-auto md:max-h-[90vh] md:max-w-xl bg-zinc-950/95 backdrop-blur-xl border-t md:border border-white/5 shadow-2xl flex flex-col rounded-t-2xl md:rounded-2xl relative overflow-hidden z-[20005]"
       >
-        {/* HIGH-PERFORMANCE COMPOSITE BACKGROUND LAYER (ZERO BLUR OVERHEAD TO ENSURE BUTTERY SMOOTH 60FPS VIDEO) */}
-        <div className="absolute inset-0 -z-10 bg-[#09090b]/98 pointer-events-none rounded-none" />
         {/* Decorative Top Accent Glow */}
         <div 
           className="h-[2px] w-full shrink-0" 
@@ -794,10 +801,11 @@ export default function TaskDrawer({
           sendNotification={sendNotification}
           updateTask={onUpdateTask}
           handleCopyLink={handleCopyLink}
+          goals={goals}
         />
 
         {/* Single Scrollable view content wrapper */}
-        <div className="flex-1 overflow-y-auto p-6 pb-24 space-y-8 select-none">
+        <div className="flex-1 overflow-y-auto p-6 pb-12 space-y-6 select-none">
           {/* SmartTaskPlayer Section (Strict aspect-video container with dynamic rendering) */}
           {hasVideo && (
             <div className="space-y-3 shrink-0">
@@ -889,29 +897,31 @@ export default function TaskDrawer({
           />
 
           {/* Google Drive Attachments */}
-          <div className="space-y-4">
+          <div className="space-y-3">
              <h3 className="text-[10px] font-black tracking-widest text-zinc-500 font-mono">
-              {/* {isRTL ? 'المرفقات // ATTACHMENTS' : 'DRIVE ATTACHMENTS // FILES'} */}
               {isRTL ? 'المرفقات - Attachments' : 'Drive Attachments'}
              </h3>
             
-            {/* bg-zinc-900/50 */}
-            <div className="space-y-2 p-4 rounded-md bg-transparent dark:bg-white/5 border border-white/5">
+            <div className="space-y-2">
               <button
                 onClick={handleGoogleDrivePicker}
-                className="w-full flex items-center justify-center gap-3 py-3 px-4 font-space font-black text-xs uppercase tracking-widest text-white/90 bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 hover:border-white/20 transition-all duration-300 rounded-md cursor-pointer"
+                className="w-full flex items-center gap-2 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/90"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/Google_Drive_icon_(2020).svg" alt="Drive" className="w-5 h-5 mr-2" />
-                <span>{isDriveConnected ? '[ OPEN ]' : '[ CONNECT ]'}</span>
+                <img src="/Google_Drive_icon_(2020).svg" alt="Drive" className="w-4 h-4 shrink-0" />
+                <span className="font-medium tracking-wide uppercase">{isRTL ? 'جوجل درايف' : 'Google Drive'}</span>
+                <span className="ml-auto text-[10px] text-zinc-500 font-mono">
+                  {isDriveConnected ? '[ OPEN ]' : '[ CONNECT ]'}
+                </span>
               </button>
 
               <button
                 onClick={() => setShowManualLink(!showManualLink)}
-                className="w-full flex items-center justify-between py-2 px-1 text-[10px] font-space font-black uppercase tracking-widest text-white/40 hover:text-white/70 transition-colors"
+                className="w-full flex items-center gap-2 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/40 hover:text-white/70"
               >
-                <span>{isRTL ? 'إضافة رابط يدوياً' : 'Add Manual Link'}</span>
-                {showManualLink ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                <LinkIcon className="w-4 h-4 shrink-0" />
+                <span className="font-medium tracking-wide uppercase">{isRTL ? 'إضافة رابط يدوياً' : 'Add Manual Link'}</span>
+                <span className="ml-auto text-[10px] font-mono">{showManualLink ? '▲' : '▼'}</span>
               </button>
 
               <AnimatePresence>
@@ -1011,12 +1021,16 @@ export default function TaskDrawer({
           />
 
 
+          {/* Subtle Auto-saved text */}
+          <div className="flex justify-end pr-1 pt-4 select-none">
+            <span className="text-[9px] font-space tracking-widest uppercase text-zinc-600">
+              {isRTL ? 'تم الحفظ تلقائياً' : 'Auto-saved'}
+            </span>
+          </div>
         </div>
 
-        {/* Fixed Thumb-Zone Footer - Explicitly lifted to clear bottom nav */}
-        {/* bg-[#0a0a0f]/95 backdrop-blur-xl border-t border-white/5 */}
-        {/* bg-white/60 dark:bg-black/40 backdrop-blur-3xl */}
-        <div className="absolute bottom-[85px] left-0 w-full z-[99999] bg-[#09090b]/98 border-t border-black/5 dark:border-white/5 p-3 pb-safe flex items-center gap-2">
+        {/* Fixed Thumb-Zone Footer */}
+        <div className="w-full z-[40] bg-[#09090b]/98 border-t border-white/5 p-4 flex items-center gap-2 shrink-0">
           {/* Play/Focus Button */}
           {!task.is_completed ? (
             <button

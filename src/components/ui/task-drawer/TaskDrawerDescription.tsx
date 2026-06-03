@@ -18,24 +18,21 @@ export default function TaskDrawerDescription({
   updateTask
 }: TaskDrawerDescriptionProps) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
         {isRTL ? 'وصف المهمة' : 'TASK DESCRIPTION'}
       </h3>
-      {/* bg-zinc-950/40 */}
-      <div className="border border-white/5 rounded-md overflow-hidden bg-transparent dark:bg-white/[0.02]">
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          onBlur={() => {
-            if (description !== task.description) {
-              updateTask(task.id, { description })
-            }
-          }}
-          className="w-full min-h-[120px] bg-transparent border-none p-4 font-space text-sm text-white outline-none focus:ring-0 placeholder-white/20 resize-y"
-          placeholder={isRTL ? "أضف وصفاً..." : "Add a description..."}
-        />
-      </div>
+      <textarea
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        onBlur={() => {
+          if (description !== task.description) {
+            updateTask(task.id, { description })
+          }
+        }}
+        className="w-full min-h-[100px] bg-transparent border-none p-0 font-space text-sm text-zinc-300 dark:text-zinc-300 outline-none focus:outline-none focus:ring-0 placeholder-white/20 resize-none"
+        placeholder={isRTL ? "أضف وصفاً..." : "Add a description..."}
+      />
     </div>
   )
 }
