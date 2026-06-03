@@ -48,7 +48,7 @@ export default function TaskDrawerHeader({
   goals
 }: TaskDrawerHeaderProps) {
   return (
-    <div className="sticky top-0 bg-[#09090b]/90 backdrop-blur-md border-b border-white/5 z-30 p-4 md:p-6 flex flex-col gap-3 shrink-0">
+    <div className="sticky top-0 bg-[#09090b]/90 backdrop-blur-md border-b border-white/5 z-[60] p-4 md:p-6 flex flex-col gap-3 shrink-0">
       <div className="flex items-center justify-between gap-3 w-full">
         {/* Goal Selector */}
         <div className="flex items-center gap-1.5 max-w-xs sm:max-w-md w-full sm:w-auto">

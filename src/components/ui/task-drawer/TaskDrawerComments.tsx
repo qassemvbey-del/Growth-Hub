@@ -250,7 +250,7 @@ export default function TaskDrawerComments({
           {/* <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
             {isRTL ? 'التعليقات' : 'COMMENTS'}
           </h3> */}
-          <h3 className="text-[10px] font-black tracking-widest text-zinc-500 font-mono">
+          <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">
             {isRTL ? 'التعليقات' : 'Comments'}
           </h3>
         </div>

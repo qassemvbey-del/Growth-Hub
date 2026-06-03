@@ -29,7 +29,7 @@ export default function TaskDrawerChecklist({
 }: TaskDrawerChecklistProps) {
   return (
     <div className="space-y-2">
-      <h3 className="text-[10px] font-black tracking-widest text-zinc-500 font-mono">
+      <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">
         {/* {isRTL ? 'المهام الفرعية // SUBTASKS' : 'CHECKLIST // SUBTASKS'} */}
         {isRTL ? 'المهام الفرعية - Checklist' : 'Checklist'}
       </h3>
@@ -54,7 +54,7 @@ export default function TaskDrawerChecklist({
         {subtasks.map((sub: any) => (
           <div
             key={sub.id}
-            className="flex items-center justify-between gap-2 py-1 transition-colors"
+            className="flex items-center justify-between gap-1 py-1 transition-colors"
           >
             <div className="flex items-center gap-2 min-w-0">
               <button
@@ -79,9 +79,10 @@ export default function TaskDrawerChecklist({
             <button
               type="button"
               onClick={() => handleDeleteSubtask(sub.id)}
-              className="p-1 text-white/35 hover:text-red-400 transition-colors shrink-0"
+              className="p-1 text-zinc-500 hover:text-red-500 transition-colors shrink-0 cursor-pointer"
+              title="DELETE ITEM"
             >
-              <NeonIcon icon={Trash2} interactive intent="danger" className="w-3.5 h-3.5" />
+              <Trash2 className="w-3.5 h-3.5" />
             </button>
           </div>
         ))}

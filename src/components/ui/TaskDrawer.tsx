@@ -757,14 +757,14 @@ export default function TaskDrawer({
   }
 
   return (
-    <div className="fixed inset-0 z-[20000] flex items-center justify-center p-0 md:p-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-0 md:p-4">
       {/* 1. Backdrop Overlay (ZERO BLUR) */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 bg-black/60 z-[20000] cursor-pointer"
+        className="fixed inset-0 bg-black/60 z-[60] cursor-pointer"
       />
 
       {/* 2. Modal Content Container */}
@@ -773,7 +773,7 @@ export default function TaskDrawer({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 20 }}
         transition={{ duration: 0.25, ease: 'easeOut' }}
-        className="w-full h-full md:h-auto md:max-h-[90vh] md:max-w-xl bg-zinc-950/95 backdrop-blur-xl border-t md:border border-white/5 shadow-2xl flex flex-col rounded-t-2xl md:rounded-2xl relative overflow-hidden z-[20005]"
+        className="w-full h-full md:h-auto md:max-h-[90vh] md:max-w-xl bg-zinc-950/95 backdrop-blur-xl border-t md:border border-white/5 shadow-2xl flex flex-col rounded-t-2xl md:rounded-2xl relative overflow-hidden z-[60]"
       >
         {/* Decorative Top Accent Glow */}
         <div 
@@ -1030,26 +1030,23 @@ export default function TaskDrawer({
         </div>
 
         {/* Fixed Thumb-Zone Footer */}
-        <div className="w-full z-[40] bg-[#09090b]/98 border-t border-white/5 p-4 flex items-center gap-2 shrink-0">
+        <div className="w-full z-[60] bg-[#09090b]/98 border-t border-white/5 p-4 flex items-center justify-center gap-4 shrink-0">
           {/* Play/Focus Button */}
-          {!task.is_completed ? (
-            <button
-              type="button"
-              onClick={() => {
-                // startFocus(task.title, task.id, cupId)
-                startFocus(task.title, task.id, goalId)
-                onClose()
-              }}
-              className="flex-1 h-10 rounded-md text-[10px] font-bold font-space flex items-center justify-center gap-2 transition-all bg-orange-500/10 border border-orange-500/30 text-orange-500 hover:bg-orange-500/20 active:scale-95"
-            >
-              <Play className="w-4 h-4 fill-current" />
-              <span>{isRTL ? 'تركيز' : 'START FOCUS'}</span>
-            </button>
-          ) : (
-            <div className="flex-1 text-center py-2 text-[10px] uppercase font-mono tracking-widest text-zinc-500 select-none">
-              {isRTL ? 'المهمة مكتملة' : 'TASK IS COMPLETED'}
-            </div>
-          )}
+          <button
+            type="button"
+            disabled={task.is_completed}
+            onClick={() => {
+              startFocus(task.title, task.id, goalId)
+              onClose()
+            }}
+            className={cn(
+              "w-12 h-12 rounded-xl flex items-center justify-center transition-all bg-orange-500/10 border border-orange-500/30 text-orange-500 hover:bg-orange-500/20 active:scale-95 cursor-pointer",
+              task.is_completed && "opacity-40 cursor-not-allowed"
+            )}
+            title="START FOCUS"
+          >
+            <Play className="w-5 h-5 fill-current" />
+          </button>
 
           {/* Complete Button */}
           <button
@@ -1075,16 +1072,16 @@ export default function TaskDrawer({
               }
               onClose()
             }}
-            className="flex-1 h-10 rounded-md text-[10px] font-bold font-space flex items-center justify-center gap-2 transition-all border text-center"
+            className="w-12 h-12 rounded-xl flex items-center justify-center transition-all border cursor-pointer"
             style={{
               backgroundColor: task.is_completed ? 'transparent' : themeColor,
               borderColor: themeColor,
               color: task.is_completed ? themeColor : '#000000',
               boxShadow: task.is_completed ? 'none' : `0 0 12px ${themeColor}40`
             }}
+            title={task.is_completed ? t('markIncomplete') : t('markCompleted')}
           >
-            {task.is_completed ? <NeonIcon icon={RefreshCw} className="w-4 h-4 animate-spin" /> : <NeonIcon icon={Circle} className="w-4 h-4 opacity-50" />}
-            <span>{task.is_completed ? t('markIncomplete') : t('markCompleted')}</span>
+            {task.is_completed ? <NeonIcon icon={RefreshCw} className="w-5 h-5 animate-spin" /> : <NeonIcon icon={Circle} className="w-5 h-5 opacity-50" />}
           </button>
 
           {/* Delete Button (If handler is provided) */}
@@ -1097,10 +1094,10 @@ export default function TaskDrawer({
                   onClose()
                 }
               }}
-              className="w-10 h-10 shrink-0 flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-md transition-all"
+              className="w-12 h-12 flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 text-red-500/70 hover:text-red-500 border border-red-500/20 rounded-xl transition-all cursor-pointer"
               title="DELETE TASK"
             >
-              <Trash2 className="w-4.5 h-4.5" />
+              <Trash2 className="w-5 h-5" />
             </button>
           )}
         </div>
