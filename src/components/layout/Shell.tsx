@@ -99,7 +99,7 @@ interface ShellProps {
 
 export default function Shell({ children, syncedMissions = [], onMissionsRefresh }: ShellProps) {
   // 1. ALL HOOKS AT THE TOP
-  const { isRTL, profile, calculateAccountability, lastAiMessage, t, currentTheme, isRankUpModalOpen, setIsRankUpModalOpen, isLoading, showAuthModal, setShowAuthModal } = useGrowth()
+  const { isRTL, profile, calculateAccountability, lastAiMessage, t, currentTheme, isRankUpModalOpen, setIsRankUpModalOpen, isLoading, showAuthModal, setShowAuthModal, openCreateGoalModal } = useGrowth()
   const pathname = usePathname()
   const router = useRouter()
   const { playNeuralLink, playBlip } = useSound()
@@ -113,6 +113,9 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   const [activeLogIndex, setActiveLogIndex] = useState(0)
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const [sidebarDragX, setSidebarDragX] = useState(0) // 0=closed, sidebarWidth=open
+  const [searchExpanded, setSearchExpanded] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     setIsMobileNavOpen(false)
@@ -715,7 +718,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
       <main className={cn(
         'flex-1 min-h-screen transition-all duration-500 relative z-10 w-full max-w-full overflow-x-hidden',
-        'pb-20 md:pb-0',
+        'pb-6 lg:pb-0',
         'lg:ps-72 lg:max-w-none'
       )}>
         {/* ── DESKTOP TOP BAR (TRANSIENT TELEMETRY ONLY) ── */}
@@ -904,8 +907,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         </div>
       </main>
 
-      {/* ── MOBILE BOTTOM NAVIGATION ── */}
-      <nav
+      {/* ── MOBILE BOTTOM NAVIGATION (COMMENTED OUT PER PRIORITY 1: BOTTOM BAR FAB) ── */}
+      {/* <nav
         className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-2 backdrop-blur-2xl border-t"
         style={{
           backgroundColor: 'var(--sidebar-bg)',
@@ -958,7 +961,81 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
             </motion.button>
           )
         })}
-      </nav>
+      </nav> */}
+
+      {/* ── MOBILE FLOATING ACTION BUTTON (FAB) CONTAINER ── */}
+      <div 
+        className={cn(
+          "lg:hidden fixed bottom-6 z-[100] flex items-center gap-3",
+          shellIsRTL ? "left-6" : "right-6"
+        )}
+      >
+        {/* Expanding Search Button */}
+        <div 
+          className={cn(
+            "flex items-center h-14 bg-zinc-950/90 backdrop-blur-2xl border border-zinc-800 rounded-full transition-all duration-300 shadow-lg px-3.5",
+            searchExpanded ? "w-64" : "w-14 justify-center"
+          )}
+          style={{ 
+            borderColor: searchExpanded ? `${currentTheme.color}50` : undefined,
+            boxShadow: searchExpanded ? `0 0 20px ${currentTheme.color}25` : undefined
+          }}
+        >
+          <button
+            onClick={() => {
+              playBlip()
+              setSearchExpanded(!searchExpanded)
+              if (!searchExpanded) {
+                setTimeout(() => searchInputRef.current?.focus(), 150)
+              }
+            }}
+            className="flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer shrink-0 w-7 h-7"
+          >
+            {/* Search Icon or X Icon when expanded */}
+            {searchExpanded ? <X className="w-5 h-5" /> : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            )}
+          </button>
+          
+          {searchExpanded && (
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                window.dispatchEvent(new CustomEvent('global-search', { detail: e.target.value }))
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setCommandPaletteOpen(true)
+                  window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ctrl-k' }))
+                }
+              }}
+              placeholder={shellIsRTL ? "ابحث هنا..." : "Search..."}
+              className="flex-1 bg-transparent border-none text-white outline-none ps-2 text-sm font-space font-bold w-full"
+            />
+          )}
+        </div>
+
+        {/* Primary Plus FAB Button */}
+        <motion.button
+          onClick={() => {
+            playNeuralLink()
+            openCreateGoalModal({ goalType: 'solo' })
+          }}
+          whileTap={{ scale: 0.92 }}
+          className="w-14 h-14 rounded-full flex items-center justify-center text-black font-bold tracking-widest text-3xl shadow-lg cursor-pointer"
+          style={{ 
+            backgroundColor: currentTheme.color,
+            boxShadow: `0 0 20px ${currentTheme.color}50`
+          }}
+        >
+          +
+        </motion.button>
+      </div>
 
       {/* Commented out original narrow edge-touch trigger:
       {!isMobileNavOpen && (
@@ -972,7 +1049,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         />
       )}
       */}
-      {/* Gesture is now handled by mainWrapperRef touchmove/touchend globally — no edge zone needed *}
+      {/* Gesture is now handled by mainWrapperRef touchmove/touchend globally — no edge zone needed */}
 
       {/* ── MOBILE SIDEBAR DRAWER ── */}
       <AnimatePresence>
