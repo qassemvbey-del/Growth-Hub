@@ -2,7 +2,7 @@
 
 import { NeonIcon } from '@/components/ui/NeonIcon'
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Shell from '@/components/layout/Shell'
 import EnergyCell from '@/components/ui/EnergyCell'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -150,6 +150,18 @@ export default function MissionDetailPage() {
   const [activeViewInitialized, setActiveViewInitialized] = useState(false)
   const [timeFilter, setTimeFilter] = useState<'ALL' | 'WEEK' | 'OVERDUE'>('ALL')
   const [selectedTaskState, setSelectedTaskState] = useState<any | null>(null)
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    if (!mission?.tasks) return
+    const targetTaskId = searchParams.get('taskId')
+    if (targetTaskId) {
+      const task = mission.tasks.find((t: any) => t.id === targetTaskId)
+      if (task) {
+        setSelectedTaskState(task)
+      }
+    }
+  }, [mission?.tasks, searchParams])
   const selectedTask = useMemo(() => {
     if (!selectedTaskState) return null
     return mission?.tasks?.find((t: any) => t.id === selectedTaskState.id) || selectedTaskState

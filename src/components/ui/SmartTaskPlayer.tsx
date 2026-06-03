@@ -227,10 +227,11 @@ export default function SmartTaskPlayer({
             )
             localStorage.setItem(`growth_hub_video_progress_${taskId}`, time.toString())
 
-            // Toast feedback for auto-seek on first seek match
-            if (!hasSeeked.current && time > 0) {
+            // Toast feedback for auto-seek on first seek match (only if progress > 2 seconds)
+            if (!hasSeeked.current && time > 2) {
               hasSeeked.current = true
-              showToast('تم استئناف التشغيل من حيث توقفت', 'success')
+              const isRTL = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
+              showToast(isRTL ? 'تم استئناف التشغيل من حيث توقفت' : 'Resumed playback', 'success')
             }
 
             if (onProgressUpdate) {
