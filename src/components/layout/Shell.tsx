@@ -12,7 +12,7 @@ import { useSound } from '@/context/SoundContext'
 import { 
   LayoutGrid, Trophy, Target, FileText, User, Users, Settings, Zap, Bell, Flame, Bot, X, Home,
   Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp, CloudLightning,
-  Crosshair, Shield, CheckCircle, Menu
+  Crosshair, Shield, CheckCircle, Menu, Search, Plus, StickyNote
 } from 'lucide-react'
 
 
@@ -112,7 +112,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   const [bootProgress, setBootProgress] = useState(0)
   const [activeLogIndex, setActiveLogIndex] = useState(0)
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
-  const [searchExpanded, setSearchExpanded] = useState(false)
+  const [isFabMenuOpen, setIsFabMenuOpen] = useState(false)
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -1148,80 +1149,236 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       </div>
     </div>
 
-    {/* ── MOBILE FLOATING ACTION BUTTON (FAB) CONTAINER ── */}
+    {/* ── MOBILE FLOATING ACTION BUTTON (FAB) SPEED DIAL ── */}
     {/* Rendered outside the main wrapper to avoid transform/filter containing-block breaking position:fixed */}
     <div 
       className={cn(
-        "lg:hidden fixed bottom-6 z-[100] flex items-center gap-3",
+        "lg:hidden fixed bottom-6 z-[100] flex flex-col items-end gap-3",
         shellIsRTL ? "left-6" : "right-6"
       )}
       dir={shellIsRTL ? 'rtl' : 'ltr'}
     >
-      {/* Expanding Search Button */}
-      <div 
-        className={cn(
-          "flex items-center h-14 bg-zinc-950/90 backdrop-blur-2xl border border-zinc-800 rounded-full transition-all duration-300 shadow-lg px-3.5",
-          searchExpanded ? "w-64" : "w-14 justify-center"
+      {/* Speed Dial Actions (appear above FAB) */}
+      <AnimatePresence>
+        {isFabMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.8 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            className="flex flex-col gap-2 mb-1"
+          >
+            {[
+              { 
+                label: isRTL ? 'ملاحظة جديدة' : 'Add Note', 
+                icon: StickyNote, 
+                delay: 0.1,
+                action: () => { router.push('/notes'); setIsFabMenuOpen(false); playBlip(); }
+              },
+              { 
+                label: isRTL ? 'مهمة جديدة' : 'Add Task', 
+                icon: CheckCircle, 
+                delay: 0.05,
+                action: () => { setIsFabMenuOpen(false); playBlip(); }
+              },
+              { 
+                label: isRTL ? 'هدف جديد' : 'Create Goal', 
+                icon: Target, 
+                delay: 0,
+                action: () => { openCreateGoalModal({ goalType: 'solo' }); setIsFabMenuOpen(false); playNeuralLink(); }
+              },
+            ].map((item, i) => (
+              <motion.button
+                key={item.label}
+                initial={{ opacity: 0, x: shellIsRTL ? -20 : 20, scale: 0.6 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: shellIsRTL ? -20 : 20, scale: 0.6 }}
+                transition={{ delay: item.delay, type: 'spring', stiffness: 500, damping: 30 }}
+                onClick={item.action}
+                className={cn(
+                  "flex items-center gap-3 h-11 rounded-full bg-zinc-900/95 backdrop-blur-2xl border border-zinc-800 shadow-lg cursor-pointer transition-colors hover:bg-zinc-800/90 active:scale-95",
+                  shellIsRTL ? "flex-row-reverse ps-3 pe-5" : "ps-3 pe-5"
+                )}
+                style={{ boxShadow: `0 4px 20px rgba(0,0,0,0.4)` }}
+              >
+                <div 
+                  className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: `${currentTheme.color}20` }}
+                >
+                  <item.icon className="w-4 h-4" style={{ color: currentTheme.color }} />
+                </div>
+                <span className="text-sm font-space font-bold text-zinc-200 whitespace-nowrap">
+                  {item.label}
+                </span>
+              </motion.button>
+            ))}
+          </motion.div>
         )}
-        style={{ 
-          borderColor: searchExpanded ? `${currentTheme.color}50` : undefined,
-          boxShadow: searchExpanded ? `0 0 20px ${currentTheme.color}25` : undefined
-        }}
-      >
-        <button
+      </AnimatePresence>
+
+      {/* Bottom row: Search icon + Primary FAB */}
+      <div className={cn("flex items-center gap-3", shellIsRTL ? "flex-row-reverse" : "")}>
+        {/* Search Icon Button */}
+        <motion.button
           onClick={() => {
             playBlip()
-            setSearchExpanded(!searchExpanded)
-            if (!searchExpanded) {
-              setTimeout(() => searchInputRef.current?.focus(), 150)
-            }
+            setIsFabMenuOpen(false)
+            setIsMobileSearchOpen(true)
           }}
-          className="flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer shrink-0 w-7 h-7"
+          whileTap={{ scale: 0.9 }}
+          className="w-14 h-14 rounded-full flex items-center justify-center bg-zinc-900/90 backdrop-blur-2xl border border-zinc-800 shadow-lg cursor-pointer text-zinc-400 hover:text-white transition-colors"
         >
-          {searchExpanded ? <X className="w-5 h-5" /> : (
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          )}
-        </button>
-        
-        {searchExpanded && (
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value)
-              window.dispatchEvent(new CustomEvent('global-search', { detail: e.target.value }))
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                setCommandPaletteOpen(true)
-                window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ctrl-k' }))
-              }
-            }}
-            placeholder={shellIsRTL ? "ابحث هنا..." : "Search..."}
-            className="flex-1 bg-transparent border-none text-white outline-none ps-2 text-sm font-space font-bold w-full"
-          />
-        )}
-      </div>
+          <Search className="w-5 h-5" />
+        </motion.button>
 
-      {/* Primary Plus FAB Button */}
-      <motion.button
-        onClick={() => {
-          playNeuralLink()
-          openCreateGoalModal({ goalType: 'solo' })
-        }}
-        whileTap={{ scale: 0.92 }}
-        className="w-14 h-14 rounded-full flex items-center justify-center text-black font-bold tracking-widest text-3xl shadow-lg cursor-pointer"
-        style={{ 
-          backgroundColor: currentTheme.color,
-          boxShadow: `0 0 20px ${currentTheme.color}50`
-        }}
-      >
-        +
-      </motion.button>
+        {/* Primary FAB with rotation toggle */}
+        <motion.button
+          onClick={() => {
+            playBlip()
+            setIsFabMenuOpen(!isFabMenuOpen)
+          }}
+          whileTap={{ scale: 0.92 }}
+          animate={{ rotate: isFabMenuOpen ? 45 : 0 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+          className="w-14 h-14 rounded-full flex items-center justify-center text-black shadow-lg cursor-pointer"
+          style={{ 
+            backgroundColor: currentTheme.color,
+            boxShadow: `0 0 20px ${currentTheme.color}50`
+          }}
+        >
+          <Plus className="w-7 h-7" strokeWidth={2.5} />
+        </motion.button>
+      </div>
     </div>
+
+    {/* ── FAB BACKDROP (dims page when speed dial is open) ── */}
+    <AnimatePresence>
+      {isFabMenuOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[99]"
+          onClick={() => setIsFabMenuOpen(false)}
+        />
+      )}
+    </AnimatePresence>
+
+    {/* ── FULL-SCREEN MOBILE SMART SEARCH OVERLAY ── */}
+    <AnimatePresence>
+      {isMobileSearchOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="lg:hidden fixed inset-0 z-[300] bg-zinc-950/98 backdrop-blur-3xl flex flex-col"
+        >
+          {/* Search Header */}
+          <div className="flex items-center gap-3 p-4 border-b border-white/5">
+            <div 
+              className="flex-1 flex items-center gap-3 h-12 bg-zinc-900/80 border border-zinc-800 rounded-xl px-4"
+              style={{ borderColor: `${currentTheme.color}30` }}
+            >
+              <Search className="w-5 h-5 text-zinc-500 shrink-0" />
+              <input
+                ref={searchInputRef}
+                type="search"
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
+                  window.dispatchEvent(new CustomEvent('global-search', { detail: e.target.value }))
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setCommandPaletteOpen(true)
+                    setIsMobileSearchOpen(false)
+                    window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ctrl-k' }))
+                  }
+                }}
+                placeholder={isRTL ? 'ابحث في الأهداف، المهام، الملاحظات...' : 'Search goals, tasks, notes...'}
+                className="flex-1 bg-transparent border-none text-white outline-none text-base font-space font-bold placeholder:text-zinc-600"
+              />
+            </div>
+            <button
+              onClick={() => { setIsMobileSearchOpen(false); setSearchQuery(''); playBlip(); }}
+              className="h-12 px-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white font-space font-bold text-sm transition-colors cursor-pointer"
+            >
+              {isRTL ? 'إلغاء' : 'Cancel'}
+            </button>
+          </div>
+
+          {/* Search Results Area */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            {searchQuery.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
+                <div 
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                  style={{ backgroundColor: `${currentTheme.color}15` }}
+                >
+                  <Search className="w-8 h-8" style={{ color: currentTheme.color, opacity: 0.6 }} />
+                </div>
+                <div>
+                  <p className="text-zinc-400 font-space font-bold text-base">
+                    {isRTL ? 'البحث الذكي جاهز' : 'Smart search ready'}
+                  </p>
+                  <p className="text-zinc-600 font-space text-sm mt-1">
+                    {isRTL ? 'ابحث في الأهداف، المهام، والملاحظات في مكان واحد' : 'Find goals, tasks, and notes in one place'}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Category: Goals */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Target className="w-4 h-4" style={{ color: currentTheme.color }} />
+                    <span className="text-xs font-space font-black uppercase tracking-wider" style={{ color: currentTheme.color }}>
+                      {isRTL ? 'الأهداف' : 'Goals'}
+                    </span>
+                  </div>
+                  <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-4">
+                    <p className="text-zinc-500 font-space text-sm">
+                      {isRTL ? 'جاري البحث...' : 'Searching...'}
+                    </p>
+                  </div>
+                </div>
+                {/* Category: Tasks */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <CheckCircle className="w-4 h-4" style={{ color: currentTheme.color }} />
+                    <span className="text-xs font-space font-black uppercase tracking-wider" style={{ color: currentTheme.color }}>
+                      {isRTL ? 'المهام' : 'Tasks'}
+                    </span>
+                  </div>
+                  <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-4">
+                    <p className="text-zinc-500 font-space text-sm">
+                      {isRTL ? 'جاري البحث...' : 'Searching...'}
+                    </p>
+                  </div>
+                </div>
+                {/* Category: Notes */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <StickyNote className="w-4 h-4" style={{ color: currentTheme.color }} />
+                    <span className="text-xs font-space font-black uppercase tracking-wider" style={{ color: currentTheme.color }}>
+                      {isRTL ? 'الملاحظات' : 'Notes'}
+                    </span>
+                  </div>
+                  <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-4">
+                    <p className="text-zinc-500 font-space text-sm">
+                      {isRTL ? 'جاري البحث...' : 'Searching...'}
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
     </>
   )
 }
