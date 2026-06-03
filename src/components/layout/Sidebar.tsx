@@ -196,6 +196,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
       </div>
 
       {/* ── NAVIGATION MATRIX ── */}
+      {/*
       <nav className="flex-grow px-4 py-8 space-y-2 overflow-y-auto font-space">
         <h3 className="px-6 text-[9px] font-space tracking-[0.8em] text-[var(--text-secondary)]/50 uppercase mb-6 font-black font-space">
           {mounted ? (isRTL ? 'القائمة' : 'MENU') : 'MENU'}
@@ -222,7 +223,6 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-[var(--card-border)] hover:bg-[var(--input-bg)]"
                   )}
                 >
-                  {/* Active Nav Strip Removed */}
                   
                   <NeonIcon
                     icon={item.icon}
@@ -274,8 +274,6 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                       {[
                         // { label: mounted ? (isRTL ? 'شخصي' : 'Personal Goals') : 'Personal Goals', icon: User, href: '/goals/solo' },
                         { label: mounted ? (isRTL ? 'شخصي' : 'Solo Goals') : 'Solo Goals', icon: User, href: '/goals/solo' },
-                        /* { label: mounted ? (isRTL ? 'فريق' : 'Team Goals') : 'Team Goals', icon: Users, href: '/goals/squad' } */
-                        // { label: mounted ? (isRTL ? 'Squad' : 'Team Goals') : 'Team Goals', icon: Users, href: '/goals/squad' }
                         { label: mounted ? (isRTL ? 'Squad' : 'Squad Goals') : 'Squad Goals', icon: Users, href: '/goals/squad' }
                       ].map((subItem, subIdx) => {
                         const isSubActive = pathname === subItem.href
@@ -295,8 +293,6 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--input-bg)]"
                             )}
                           >
-
-
 
                             <NeonIcon 
                               icon={subItem.icon}
@@ -349,7 +345,6 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-[var(--card-border)] hover:bg-[var(--input-bg)]"
               )}
             >
-              {/* Active Nav Strip Removed */}
               
               <NeonIcon
                 icon={item.icon}
@@ -367,6 +362,216 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               
               <span className={cn(
                 "font-space tracking-[0.2em] font-black flex-grow transition-colors duration-300",
+                isRTL ? "text-[15px]" : "text-[11px]"
+              )}
+              style={{ 
+                color: isActive 
+                  ? currentTheme.color 
+                  : (isHovered ? currentTheme.color : undefined)
+              }}
+              >
+                {item.label}
+              </span>
+
+              <span 
+                className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black transition-colors duration-300"
+                style={{ 
+                  color: isHovered ? `${currentTheme.color}66` : undefined 
+                }}
+              >
+                {item.shortcut}
+              </span>
+            </Link>
+          )
+        })}
+
+        <div className="pt-6 px-2">
+          <button
+            type="button"
+            onClick={() => onOpenCoach?.()}
+            className="w-full group relative flex items-center justify-between p-4 rounded-md border transition-all duration-300 overflow-hidden cursor-pointer shadow-lg active:scale-98"
+            style={{
+              backgroundColor: `${currentTheme.color}15`,
+              borderColor: `${currentTheme.color}50`,
+              boxShadow: `0 0 25px ${currentTheme.color}26, inset 0 0 15px ${currentTheme.color}15`
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 pointer-events-none" />
+            <div className="flex items-center gap-3 relative z-10">
+              <motion.span 
+                animate={{ opacity: [1, 0.4, 1], scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <NeonIcon icon={Bot} className="w-5 h-5" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }} />
+              </motion.span>
+              <span className="font-space font-black text-xs tracking-[0.3em] uppercase text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors font-space">
+                {mounted ? (isRTL ? 'الـ Coach' : 'Coach') : 'Coach'}
+              </span>
+            </div>
+          </button>
+        </div>
+      </nav>
+      */}
+
+      <nav className="flex-grow px-4 py-8 space-y-1.5 overflow-y-auto font-space">
+        <h3 className="px-6 text-[9px] font-space tracking-[0.8em] text-[var(--text-secondary)]/50 uppercase mb-6 font-black font-space">
+          {mounted ? (isRTL ? 'القائمة' : 'MENU') : 'MENU'}
+        </h3>
+        {MENU_ITEMS.map((item, idx) => {
+          if (item.shortcut === '02') {
+            const isGoalsActive = pathname.startsWith('/goals')
+            const isHovered = hoveredIndex === idx
+            return (
+              <div key={item.href} className="flex flex-col w-full">
+                <button
+                  type="button"
+                  onClick={() => {
+                    playBlip()
+                    setIsGoalsExpanded(!isGoalsExpanded)
+                  }}
+                  onMouseEnter={() => setHoveredIndex(idx)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                  className={cn(
+                    "flex items-center p-3 px-6 rounded-md transition-all duration-300 relative group overflow-hidden min-h-[44px] w-full text-left cursor-pointer",
+                     isGoalsActive && !pathname.startsWith('/goals/')
+                       ? "bg-[var(--input-bg)] text-[var(--text-primary)] border border-[var(--card-border)] shadow-sm" 
+                       : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-[var(--card-border)] hover:bg-[var(--input-bg)]"
+                  )}
+                >
+                  <NeonIcon
+                    icon={item.icon}
+                    interactive
+                    className={cn(
+                      "w-5 h-5 transition-all duration-300",
+                      isRTL ? "ml-4" : "mr-4"
+                    )}
+                    style={{ 
+                      color: (isGoalsActive && !pathname.startsWith('/goals/'))
+                        ? currentTheme.color 
+                        : (isHovered ? `${currentTheme.color}cc` : undefined)
+                    }}
+                  />
+                  
+                  <span className={cn(
+                    "font-space tracking-[0.2em] font-semibold flex-grow transition-colors duration-300 text-[14px]"
+                  )}
+                  style={{ 
+                    color: (isGoalsActive && !pathname.startsWith('/goals/'))
+                      ? currentTheme.color 
+                      : (isHovered ? currentTheme.color : undefined)
+                  }}
+                  >
+                    {item.label}
+                  </span>
+
+                  <div className="flex items-center gap-2 shrink-0 select-none">
+                    <span 
+                      className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black transition-colors duration-300"
+                      style={{ 
+                        color: isHovered ? `${currentTheme.color}66` : undefined 
+                      }}
+                    >
+                      {item.shortcut}
+                    </span>
+                  </div>
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {isGoalsExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: "easeInOut" }}
+                      className="overflow-hidden flex flex-col gap-1.5 mt-1.5 pl-4"
+                    >
+                      {[
+                        { label: mounted ? (isRTL ? 'شخصي' : 'Solo Goals') : 'Solo Goals', icon: User, href: '/goals/solo' },
+                        { label: mounted ? (isRTL ? 'Squad' : 'Squad Goals') : 'Squad Goals', icon: Users, href: '/goals/squad' }
+                      ].map((subItem, subIdx) => {
+                        const isSubActive = pathname === subItem.href
+                        const isSubHovered = hoveredIndex === (100 + subIdx)
+                        return (
+                          <Link
+                            key={subItem.href}
+                            href={subItem.href}
+                            onClick={playBlip}
+                            onMouseEnter={() => setHoveredIndex(100 + subIdx)}
+                            onMouseLeave={() => setHoveredIndex(null)}
+                            className={cn(
+                              "flex items-center p-2.5 px-4 rounded-md transition-all duration-300 relative group overflow-hidden min-h-[38px] border border-transparent",
+                              isSubActive 
+                                ? "bg-[var(--input-bg)] text-[var(--text-primary)] border-[var(--card-border)] shadow-sm" 
+                                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--input-bg)]"
+                            )}
+                          >
+                            <NeonIcon 
+                              icon={subItem.icon}
+                              interactive
+                              className={cn(
+                                "w-4 h-4 transition-all duration-300",
+                                isRTL ? "ml-4" : "mr-4"
+                              )}
+                              style={{ 
+                                color: isSubActive 
+                                  ? currentTheme.color 
+                                  : (isSubHovered ? `${currentTheme.color}cc` : undefined)
+                              }}
+                            />
+
+                            <span className={cn(
+                              "font-space tracking-[0.2em] font-semibold flex-grow transition-colors duration-300 text-[12px]"
+                            )}
+                            style={{ 
+                              color: isSubActive 
+                                ? currentTheme.color 
+                                : (isSubHovered ? currentTheme.color : undefined)
+                            }}
+                            >
+                              {subItem.label}
+                            </span>
+                          </Link>
+                        )
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )
+          }
+
+          const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
+          const isHovered = hoveredIndex === idx
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={playBlip}
+              onMouseEnter={() => setHoveredIndex(idx)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              className={cn(
+                "flex items-center p-3 px-6 rounded-md transition-all duration-300 relative group overflow-hidden min-h-[44px]",
+                 isActive 
+                   ? "bg-[var(--input-bg)] text-[var(--text-primary)] border border-[var(--card-border)] shadow-sm" 
+                   : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-[var(--card-border)] hover:bg-[var(--input-bg)]"
+              )}
+            >
+              <NeonIcon
+                icon={item.icon}
+                interactive
+                className={cn(
+                  "w-5 h-5 transition-all duration-300",
+                  isRTL ? "ml-4" : "mr-4"
+                )}
+                style={{ 
+                  color: isActive 
+                    ? currentTheme.color 
+                    : (isHovered ? `${currentTheme.color}cc` : undefined)
+                }}
+              />
+              
+              <span className={cn(
+                "font-space tracking-[0.2em] font-semibold flex-grow transition-colors duration-300",
                 isRTL ? "text-[15px]" : "text-[11px]"
               )}
               style={{ 
@@ -411,16 +616,9 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                 <NeonIcon icon={Bot} className="w-5 h-5" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }} />
               </motion.span>
               <span className="font-space font-black text-xs tracking-[0.3em] uppercase text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors font-space">
-                {/* {mounted ? (isRTL ? 'المدرب الذكي' : 'COACH') : 'COACH'} */}
                 {mounted ? (isRTL ? 'الـ Coach' : 'Coach') : 'Coach'}
               </span>
             </div>
-            {/* Commented out navigation index badge as it represents a shortcut key */}
-            {/*
-            <span className="px-2 py-0.5 rounded border text-[9px] font-space font-black tracking-widest uppercase relative z-10" style={{ color: currentTheme.color, borderColor: `${currentTheme.color}40`, backgroundColor: `${currentTheme.color}20` }}>
-              AI // 05
-            </span>
-            */}
           </button>
         </div>
       </nav>

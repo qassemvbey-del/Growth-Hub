@@ -1580,6 +1580,7 @@ const { progress, isInRedZone } = useMemo(() => {
          {/* Mission Configuration */}
          <div className="space-y-4">
            {/* Row 1: Main Tabs */}
+            /*
             <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center w-full md:w-auto">
               {/* PIN ICON TOGGLE */}
               <button 
@@ -1682,6 +1683,112 @@ const { progress, isInRedZone } = useMemo(() => {
                  className="px-4 md:px-6 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-md uppercase flex items-center gap-2.5 bg-cyan-500 border-cyan-500 hover:bg-cyan-400 hover:border-cyan-400 text-zinc-950 font-black shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:shadow-[0_0_22px_rgba(6,182,212,0.6)] cursor-pointer"
               >
                  <Share2 className="w-4 h-4 stroke-[3px] text-zinc-950" />
+                 {isRTL ? 'مشاركة' : 'SHARE'}
+              </button>
+            </div>
+            */
+
+            <div className="grid grid-cols-2 gap-2 md:flex md:flex-row md:items-center w-full md:w-auto">
+              {/* PIN ICON TOGGLE */}
+              <button 
+                 onClick={() => { 
+                    playBlip(); 
+                    const nextVal = !mission.sync_to_dashboard;
+                    updateMission({ sync_to_dashboard: nextVal }); 
+                    if (nextVal) {
+                      window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'pin' }));
+                    }
+                 }}
+                 className={cn(
+                    "p-3 border transition-all rounded-md flex items-center justify-center cursor-pointer w-full md:w-auto h-12 md:h-auto min-h-[48px] md:min-h-0",
+                    mission.sync_to_dashboard 
+                       ? "bg-white/10 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]" 
+                       : "border-[var(--card-border)] text-[var(--text-secondary)] hover:opacity-85 hover:border-white/20"
+                 )}
+                 style={mission.sync_to_dashboard ? { 
+                    borderColor: missionColor, color: missionColor,
+                    backgroundColor: `${missionColor}11`,
+                    boxShadow: `0 0 15px ${missionColor}44`
+                 } : {}}
+                 title={mission.sync_to_dashboard ? (isRTL ? 'إلغاء التثبيت من الواجهة' : 'UNPIN FROM DASHBOARD') : (isRTL ? 'تثبيت في الواجهة' : 'PIN TO DASHBOARD')}
+              >
+                 <Pin className={cn("w-4.5 h-4.5", mission.sync_to_dashboard ? "rotate-45 fill-current" : "")} />
+              </button>
+
+              {/* GROUPED IMPORT DATA DROPDOWN */}
+              <div className="relative w-full md:w-auto">
+                <button
+                   onClick={() => { playBlip(); setShowImportDropdown(!showImportDropdown); }}
+                   className={cn(
+                      "w-full md:w-auto px-4 md:px-5 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-md uppercase flex items-center justify-center gap-2 border-[var(--card-border)] text-white hover:bg-white/5 hover:border-white/20 cursor-pointer h-12 md:h-auto min-h-[48px] md:min-h-0",
+                      (mission?.title === "Start Here 🚀" || mission?.title === "ابدأ من هنا 🚀") && 
+                      mission?.tasks?.some((t: any) => t.metadata?.is_tutorial_import === true && !t.is_completed) && 
+                      "animate-pulse ring-2"
+                   )}
+                   style={(mission?.title === "Start Here 🚀" || mission?.title === "ابدأ من هنا 🚀") && 
+                      mission?.tasks?.some((t: any) => t.metadata?.is_tutorial_import === true && !t.is_completed) ? { 
+                      borderColor: missionColor, color: missionColor,
+                      boxShadow: `0 0 15px ${missionColor}44`
+                   } : {}}
+                >
+                   <span>Import</span>
+                   <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-200", showImportDropdown && "rotate-180")} />
+                </button>
+
+                <AnimatePresence>
+                  {showImportDropdown && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowImportDropdown(false)} />
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="absolute left-0 mt-2 w-full md:w-56 bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-md shadow-2xl z-50 p-1.5 space-y-1 font-space"
+                      >
+                        <button
+                          onClick={() => { 
+                            playBlip(); 
+                            setShowPlaylistModal(true); 
+                            setShowImportDropdown(false); 
+                            window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'import-playlist' }));
+                          }}
+                          className="w-full text-left px-3.5 py-2.5 text-[9px] font-black tracking-wider uppercase text-zinc-400 hover:text-white hover:bg-white/[0.03] rounded-md transition-colors flex items-center gap-2 cursor-pointer"
+                        >
+                          <ListPlus className="w-3.5 h-3.5" />
+                          {isRTL ? 'استيراد قائمة تشغيل' : 'Import Playlist'}
+                        </button>
+                        <button
+                          onClick={() => { playBlip(); setShowSmartImportModal(true); setShowImportDropdown(false); }}
+                          className="w-full text-left px-3.5 py-2.5 text-[9px] font-black tracking-wider uppercase text-zinc-400 hover:text-white hover:bg-white/[0.03] rounded-md transition-colors flex items-center gap-2 cursor-pointer"
+                        >
+                          <ClipboardIcon className="w-3.5 h-3.5" />
+                          {isRTL ? 'استيراد ذكي' : 'Smart Import'}
+                        </button>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* INTEL/NOTES button */}
+              <button
+                onClick={() => { playBlip(); setShowIntelModal(true); }}
+                className="w-full md:w-auto px-4 md:px-5 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-md uppercase flex items-center justify-center gap-2.5 relative border-[var(--card-border)] text-[var(--text-secondary)] hover:opacity-85 hover:border-white/20 cursor-pointer h-12 md:h-auto min-h-[48px] md:min-h-0"
+              >
+                <FileText className="w-4 h-4" />
+                {isRTL ? 'الملاحظات' : 'NOTES'}
+                {linkedNotes.length > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center text-black" style={{ backgroundColor: missionColor }}>
+                    {linkedNotes.length}
+                  </span>
+                )}
+              </button>
+
+              {/* TACTICAL SHARE button - Styled as Outline / Secondary */}
+              <button
+                 onClick={handleShare}
+                 className="w-full md:w-auto px-4 md:px-6 py-3 border font-space text-[10px] font-black tracking-[0.2em] transition-all rounded-md uppercase flex items-center justify-center gap-2.5 bg-transparent border-cyan-500/50 hover:bg-cyan-500/10 hover:border-cyan-400 text-cyan-400 font-black hover:shadow-[0_0_12px_rgba(6,182,212,0.2)] cursor-pointer h-12 md:h-auto min-h-[48px] md:min-h-0 shadow-none"
+              >
+                 <Share2 className="w-4 h-4 stroke-[3px] text-cyan-400" />
                  {isRTL ? 'مشاركة' : 'SHARE'}
               </button>
             </div>
