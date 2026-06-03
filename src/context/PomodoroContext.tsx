@@ -71,9 +71,21 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
       tag: tag || 'pomodoro-timer',
     }
 
-    // Primary: use Service Worker (works in background & locked screen)
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-      navigator.serviceWorker.controller.postMessage(payload)
+    // Primary: use Service Worker directly from registration (highly reliable on mobile PWAs)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then((registration) => {
+        registration.showNotification(title, {
+          body,
+          icon: payload.icon,
+          badge: payload.badge,
+          vibrate: [200, 100, 200],
+          requireInteraction: true,
+          tag: payload.tag,
+          renotify: true,
+        } as unknown as NotificationOptions).catch(err => {
+          console.error('registration.showNotification failed:', err)
+        })
+      })
       return
     }
 
@@ -83,7 +95,6 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
         body,
         icon: payload.icon,
         badge: payload.badge,
-        vibrate: [200, 100, 200],
         requireInteraction: true,
       } as NotificationOptions)
     } catch (err) {
@@ -94,9 +105,18 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   const requestNotificationPermission = () => {
     if (typeof window === 'undefined') return
     if (!('Notification' in window)) return
-    if (Notification.permission === 'granted' || Notification.permission === 'denied') return
-    showToast('Enable notifications to get alerted when your focus session ends.', 'info')
-    Notification.requestPermission()
+    const isRTL = typeof document !== 'undefined' && (document.dir === 'rtl' || document.documentElement.lang === 'ar' || document.documentElement.dir === 'rtl');
+    if (Notification.permission === 'denied') {
+      showToast(isRTL ? '⚠️ الإشعارات محظورة. يرجى تفعيلها من إعدادات المتصفح.' : '⚠️ Notifications are blocked. Please enable them in browser settings.', 'warning')
+      return
+    }
+    if (Notification.permission === 'default') {
+      Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+          showToast(isRTL ? '🔔 تم تفعيل الإشعارات بنجاح!' : '🔔 Notifications enabled successfully!', 'success')
+        }
+      })
+    }
   }
 
   const triggerWarningNotification = () => {

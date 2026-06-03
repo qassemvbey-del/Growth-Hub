@@ -1872,9 +1872,8 @@ const { progress, isInRedZone } = useMemo(() => {
                            </div>
                          )}
 
-                                   {/* Main Row: Title, checkbox, details */}
+                                   {/* Main Row: Checkbox, index, title */}
                           <div className="flex items-center justify-between gap-4 w-full">
-                            {/* Task Title Group (Checkbox, Index, Title) */}
                             <div className={cn(
                               "flex items-center gap-3 w-full",
                               isRTL ? "flex-row-reverse" : "flex-row"
@@ -1907,7 +1906,7 @@ const { progress, isInRedZone } = useMemo(() => {
 
                               {/* CENTER: Title */}
                               <div className={cn(
-                                "flex-1 min-w-[120px] md:min-w-[200px] flex flex-col justify-center",
+                                "flex-1 min-w-0 flex flex-col justify-center",
                                 isRTL ? "items-end text-right" : "items-start text-left"
                               )}>
                                 <span className={cn(
@@ -1917,53 +1916,11 @@ const { progress, isInRedZone } = useMemo(() => {
                                   {task.title}
                                 </span>
                               </div>
-
-                              {/* RIGHT: Details (Video, Date, Weight) */}
-                              <div className={cn(
-                                "flex items-center gap-2 shrink-0 flex-wrap",
-                                isRTL ? "flex-row-reverse" : "flex-row"
-                              )}>
-                                {hasVideo ? (
-                                  <div className="flex items-center gap-1.5 shrink-0 bg-white/[0.03] border border-zinc-800 px-2 py-0.5 rounded text-[11px] font-mono text-white/60">
-                                    <Play className="w-3.5 h-3.5 fill-current" style={{ color: currentTheme.color }} />
-                                    <span className="font-mono text-[11px] text-[#FFFFFF] tracking-wider">
-                                      {formatVideoTime(videoProgress)} / {formatVideoTime(videoDuration)}
-                                    </span>
-                                  </div>
-                                ) : timeFormatted ? (
-                                  <span className="font-mono text-[11px] text-white/50 bg-white/[0.03] border border-zinc-800 px-2 py-0.5 rounded tracking-wider inline-flex items-center gap-1.5">
-                                    <Timer className="w-3.5 h-3.5" style={{ color: currentTheme.color }} />
-                                    {timeFormatted}
-                                  </span>
-                                ) : null}
-                                {task.metadata?.endDate && (() => {
-                                  const tDate = new Date(task.metadata.endDate)
-                                  tDate.setHours(0,0,0,0)
-                                  const todayDate = new Date()
-                                  todayDate.setHours(0,0,0,0)
-                                  const isOverdue = !task.is_completed && tDate < todayDate
-                                  return (
-                                    <span className={cn(
-                                      "font-mono text-[10px] px-2 py-0.5 rounded tracking-wider inline-flex items-center gap-1.5 border shrink-0",
-                                      isOverdue 
-                                        ? "text-red-500 border-red-500/30 bg-red-950/15 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse font-black" 
-                                        : "text-white/40 border-zinc-800 bg-white/[0.02]"
-                                    )}>
-                                      <Calendar className={cn("w-3.5 h-3.5", isOverdue ? "text-red-500" : "text-cyan-500/80")} />
-                                      {task.metadata.endDate}
-                                    </span>
-                                  )
-                                })()}
-                                <div className="flex items-center gap-2 bg-white/[0.01] border border-zinc-900/50 px-2 py-0.5 rounded shrink-0">
-                                  <span className="text-[9px] uppercase font-mono text-white/30 tracking-widest">{isRTL ? 'الوزن:' : 'Weight:'}</span>
-                                  <ComplexityDashes weight={task.weight} color={currentTheme.color} />
-                                </div>
-                              </div>
                             </div>
                           </div>
 
-                          {/* Restructured Thumb-Friendly action row with divider */}
-                          <div className="w-full flex items-center justify-between mt-3 pt-3 border-t border-white/5">
+                          {/* Restructured Thumb-Friendly action row with divider containing details on the right */}
+                          <div className="w-full flex flex-wrap items-center justify-between mt-3 pt-3 border-t border-white/5 gap-3">
                             {/* Left side: Assignee & XP Badge */}
                             <div className="flex items-center gap-3 shrink-0">
                               {/* Assignee Area (Squad only) */}
@@ -2057,53 +2014,68 @@ const { progress, isInRedZone } = useMemo(() => {
                               </div>
                             </div>
 
-                            {/* Right side: Action Buttons (Play, Timer, Trash) */}
-                            <div className="flex items-center gap-x-1 shrink-0">
-                              {/* 
-                              {hasVideo && (
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); setSelectedTask(task); }}
-                                  className="p-2.5 md:p-1.5 text-[var(--text-secondary)] hover:text-white transition-all cursor-pointer"
-                                  style={{ color: selectedTask?.id === task.id ? currentTheme.color : '' }}
-                                  title={selectedTask?.id === task.id ? 'CLOSE_VIDEO' : 'PLAY_VIDEO'}
-                                >
-                                  {selectedTask?.id === task.id ? (
-                                     <Tv className="w-5 h-5 md:w-4 md:h-4" />
-                                   ) : (
-                                     <Play className="w-5 h-5 md:w-4 md:h-4" />
-                                   )}
-                                </button>
-                              )}
-                              <button
-                                onClick={(e) => { e.stopPropagation(); startFocus(task.title, task.id, id as string); }}
-                                className="p-2.5 md:p-1.5 text-[var(--text-secondary)] hover:text-white transition-all cursor-pointer"
-                                onMouseEnter={e => e.currentTarget.style.color = currentTheme.color}
-                                onMouseLeave={e => e.currentTarget.style.color = ''}
-                                title="START_FOCUS_SESSION"
-                              >
-                                <Timer className="w-5 h-5 md:w-4 md:h-4" />
-                              </button>
-                              */}
+                            {/* Right side: Consolidated Details & Actions */}
+                            <div className={cn(
+                              "flex items-center gap-3 ml-auto flex-wrap shrink-0",
+                              isRTL ? "flex-row-reverse" : "flex-row"
+                            )}>
+                              {hasVideo ? (
+                                <div className="flex items-center gap-1.5 shrink-0 bg-white/[0.03] border border-zinc-800 px-2 py-0.5 rounded text-[11px] font-mono text-white/60">
+                                  <Play className="w-3.5 h-3.5 fill-current" style={{ color: currentTheme.color }} />
+                                  <span className="font-mono text-[11px] text-[#FFFFFF] tracking-wider">
+                                    {formatVideoTime(videoProgress)} / {formatVideoTime(videoDuration)}
+                                  </span>
+                                </div>
+                              ) : timeFormatted ? (
+                                <span className="font-mono text-[11px] text-white/50 bg-white/[0.03] border border-zinc-800 px-2 py-0.5 rounded tracking-wider inline-flex items-center gap-1.5">
+                                  <Timer className="w-3.5 h-3.5" style={{ color: currentTheme.color }} />
+                                  {timeFormatted}
+                                </span>
+                              ) : null}
+                              {task.metadata?.endDate && (() => {
+                                const tDate = new Date(task.metadata.endDate)
+                                tDate.setHours(0,0,0,0)
+                                const todayDate = new Date()
+                                todayDate.setHours(0,0,0,0)
+                                const isOverdue = !task.is_completed && tDate < todayDate
+                                return (
+                                  <span className={cn(
+                                    "font-mono text-[10px] px-2 py-0.5 rounded tracking-wider inline-flex items-center gap-1.5 border shrink-0",
+                                    isOverdue 
+                                      ? "text-red-500 border-red-500/30 bg-red-950/15 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse font-black" 
+                                      : "text-white/40 border-zinc-800 bg-white/[0.02]"
+                                  )}>
+                                    <Calendar className={cn("w-3.5 h-3.5", isOverdue ? "text-red-500" : "text-cyan-500/80")} />
+                                    {task.metadata.endDate}
+                                  </span>
+                                )
+                              })()}
+                              <div className="flex items-center gap-2 bg-white/[0.01] border border-zinc-900/50 px-2 py-0.5 rounded shrink-0">
+                                <span className="text-[9px] uppercase font-mono text-white/30 tracking-widest">{isRTL ? 'الوزن:' : 'Weight:'}</span>
+                                <ComplexityDashes weight={task.weight} color={currentTheme.color} />
+                              </div>
 
-                              <button
-                                onClick={(e) => { 
-                                  e.stopPropagation(); 
-                                  if (mission?.metadata?.type === 'squad') {
-                                    const currentRules = mission.metadata?.rules || {}
-                                    const isMemberOrLower = ['member', 'viewer', 'guest'].includes(normalizedRole)
-                                    if (!['owner', 'admin', 'member'].includes(normalizedRole) || (currentRules.no_delete && isMemberOrLower)) {
-                                      showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")
-                                      playError()
-                                      return
+                              <div className="flex items-center gap-x-1 shrink-0 ml-1">
+                                <button
+                                  onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    if (mission?.metadata?.type === 'squad') {
+                                      const currentRules = mission.metadata?.rules || {}
+                                      const isMemberOrLower = ['member', 'viewer', 'guest'].includes(normalizedRole)
+                                      if (!['owner', 'admin', 'member'].includes(normalizedRole) || (currentRules.no_delete && isMemberOrLower)) {
+                                        showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")
+                                        playError()
+                                        return
+                                      }
                                     }
-                                  }
-                                  deleteTask(task.id); 
-                                }}
-                                className="p-2.5 md:p-1.5 text-[var(--text-secondary)] hover:text-red-500 transition-all cursor-pointer"
-                                title="DELETE_TASK"
-                              >
-                                <Trash2 className="w-5 h-5 md:w-4 md:h-4" />
-                              </button>
+                                    deleteTask(task.id); 
+                                  }}
+                                  className="p-2.5 md:p-1.5 text-[var(--text-secondary)] hover:text-red-500 transition-all cursor-pointer"
+                                  title="DELETE_TASK"
+                                >
+                                  <Trash2 className="w-5 h-5 md:w-4 md:h-4" />
+                                </button>
+                              </div>
                             </div>
                           </div>
 {(hasVideo && videoDuration > 0) && (
