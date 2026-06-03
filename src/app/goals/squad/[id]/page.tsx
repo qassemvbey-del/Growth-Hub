@@ -590,7 +590,10 @@ export default function MissionDetailPage() {
         })
         setMission(goal)
       } else {
-        router.push('/goals/squad')
+        // router.push('/goals/squad')
+        if (window.location.pathname !== '/goals/squad') {
+          router.push('/goals/squad')
+        }
       }
       setLoading(false)
       return
@@ -632,7 +635,10 @@ export default function MissionDetailPage() {
         }
       }
     } else {
-      router.push('/goals/squad')
+      // router.push('/goals/squad')
+      if (window.location.pathname !== '/goals/squad') {
+        router.push('/goals/squad')
+      }
     }
     setLoading(false)
   }
