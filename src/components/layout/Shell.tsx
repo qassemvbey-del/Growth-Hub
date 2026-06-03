@@ -12,9 +12,9 @@ import { useSound } from '@/context/SoundContext'
 import { 
   LayoutGrid, Trophy, Target, FileText, User, Users, Settings, Zap, Bell, Flame, Bot, X, Home,
   Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp, CloudLightning,
-  Crosshair, Shield, CheckCircle, Menu, Search, Plus, StickyNote
+  Crosshair, Shield, CheckCircle, Menu, Search, Plus, StickyNote, Loader2
 } from 'lucide-react'
-
+import { useToast } from '@/components/ui/Toast'
 
 import { useInbox } from '@/hooks/useInbox'
 import InboxDropdown from '@/components/ui/InboxDropdown'
@@ -22,8 +22,6 @@ import PomodoroHUD from '@/components/ui/PomodoroHUD'
 import CoachPanel from '@/components/ui/CoachPanel'
 import OperatorGuide from '@/components/ui/OperatorGuide'
 import GlobalActionMenu from '@/components/ui/GlobalActionMenu'
-// import AuthModal from '@/components/auth/AuthModal'
-// import EntryGateModal from '@/components/auth/EntryGateModal'
 import LevelUpModal from '@/components/ui/LevelUpModal'
 import GlitchOverlay from '@/components/ui/GlitchOverlay'
 import CommandPalette from '@/components/ui/CommandPalette'
@@ -47,14 +45,11 @@ function WorkspaceLoader({ isRTL }: { isRTL: boolean }) {
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#050505] z-[9999] overflow-hidden select-none font-space p-6">
-      {/* Subtle Grid Background */}
       <div className="absolute inset-0 pointer-events-none cyber-grid opacity-[0.03] z-0" />
       <div className="absolute inset-0 pointer-events-none scanlines opacity-[0.01] z-0" />
       
       <div className="relative z-10 flex flex-col items-center gap-6">
-        {/* Dynamic cycling icon */}
         <div className="relative w-24 h-24 flex items-center justify-center">
-          {/* Subtle Ambient Glow behind the icon using the orange color */}
           <div 
             className="absolute w-20 h-20 rounded-full opacity-40 blur-xl transition-all duration-300 animate-pulse"
             style={{
@@ -81,9 +76,7 @@ function WorkspaceLoader({ isRTL }: { isRTL: boolean }) {
           </AnimatePresence>
         </div>
         
-        {/* Simple elegant text */}
         <p className="text-zinc-400 text-sm tracking-widest animate-pulse font-medium">
-          {/* {isRTL ? 'جاري تحميل مساحة العمل...' : 'Loading workspace...'} */}
           {isRTL ? 'مساحة العمل بتتحمل...' : 'Loading workspace...'}
         </p>
       </div>
@@ -98,11 +91,12 @@ interface ShellProps {
 }
 
 export default function Shell({ children, syncedMissions = [], onMissionsRefresh }: ShellProps) {
-  // 1. ALL HOOKS AT THE TOP
   const { isRTL, profile, calculateAccountability, lastAiMessage, t, currentTheme, isRankUpModalOpen, setIsRankUpModalOpen, isLoading, showAuthModal, setShowAuthModal, openCreateGoalModal } = useGrowth()
   const pathname = usePathname()
   const router = useRouter()
   const { playNeuralLink, playBlip } = useSound()
+  const { showToast } = useToast()
+
   const [aiOpen, setAiOpen] = useState(false)
   const [coachPanelOpen, setCoachPanelOpen] = useState(false)
   const [inboxOpen, setInboxOpen] = useState(false)
@@ -113,9 +107,64 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   const [activeLogIndex, setActiveLogIndex] = useState(0)
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false)
+  
+  // Real-time Mobile Search Overlay and Live Search States
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
+  const [searchResults, setSearchResults] = useState<{
+    goals: any[]
+    tasks: any[]
+    notes: any[]
+  }>({ goals: [], tasks: [], notes: [] })
+
   const searchInputRef = useRef<HTMLInputElement>(null)
+
+  // Live Search with 300ms Debounce
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults({ goals: [], tasks: [], notes: [] })
+      setIsSearching(false)
+      return
+    }
+
+    setIsSearching(true)
+    const delayDebounceTimer = setTimeout(async () => {
+      try {
+        const supabase = createClient()
+        
+        const [goalsRes, tasksRes, notesRes] = await Promise.all([
+          supabase
+            .from('goals')
+            .select('id, title, goal_type')
+            .ilike('title', `%${searchQuery}%`)
+            .limit(5),
+          supabase
+            .from('tasks')
+            .select('id, title, goal_id')
+            .ilike('title', `%${searchQuery}%`)
+            .limit(5),
+          supabase
+            .from('notes')
+            .select('id, title, content')
+            .or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`)
+            .limit(5)
+        ])
+
+        setSearchResults({
+          goals: goalsRes.data || [],
+          tasks: tasksRes.data || [],
+          notes: notesRes.data || []
+        })
+      } catch (err) {
+        console.error('Error executing live search queries:', err)
+      } finally {
+        setIsSearching(false)
+      }
+    }, 300)
+
+    return () => clearTimeout(delayDebounceTimer)
+  }, [searchQuery])
 
   useEffect(() => {
     setIsMobileNavOpen(false)
@@ -172,35 +221,28 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
   // ── NATIVE DRAG SIDEBAR SYSTEM (Framer Motion useMotionValue) ──
   const SIDEBAR_WIDTH = 280
-  // sidebarX: 0 = fully open, -SIDEBAR_WIDTH (LTR) or +SIDEBAR_WIDTH (RTL) = fully closed
   const sidebarX = useMotionValue(0)
-  // Whether the drawer is visually showing (for pointer-events on backdrop)
   const [isDrawerVisible, setIsDrawerVisible] = useState(false)
 
   // Keep isDrawerVisible in sync with sidebarX
   useEffect(() => {
     const unsubscribe = sidebarX.on('change', (latest) => {
-      // Drawer is visible if not fully closed
       const closedPos = isRTL ? SIDEBAR_WIDTH : -SIDEBAR_WIDTH
       setIsDrawerVisible(Math.abs(latest - closedPos) > 2)
     })
     return unsubscribe
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRTL])
 
-  // Snap sidebar to open/closed when isMobileNavOpen changes (hamburger, nav click, backdrop)
+  // Snap sidebar to open/closed when isMobileNavOpen changes
   useEffect(() => {
     const closedPos = isRTL ? SIDEBAR_WIDTH : -SIDEBAR_WIDTH
-    // Use spring-like animation via Framer's animate
     if (isMobileNavOpen) {
-      // Animate to 0 (open)
       const startVal = sidebarX.get()
       const duration = 250
       const startTime = performance.now()
       const animate = (now: number) => {
         const elapsed = now - startTime
         const progress = Math.min(elapsed / duration, 1)
-        // Ease out cubic
         const eased = 1 - Math.pow(1 - progress, 3)
         sidebarX.set(startVal + (0 - startVal) * eased)
         if (progress < 1) requestAnimationFrame(animate)
@@ -219,20 +261,16 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       }
       requestAnimationFrame(animate)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobileNavOpen, isRTL])
 
   // Initialize sidebarX to closed position on mount
   useEffect(() => {
     const closedPos = isRTL ? SIDEBAR_WIDTH : -SIDEBAR_WIDTH
     sidebarX.set(closedPos)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Update backdropOpacity transform range based on RTL
   const computedBackdropOpacity = useTransform(sidebarX, (v) => {
     const closedPos = isRTL ? SIDEBAR_WIDTH : -SIDEBAR_WIDTH
-    // 0 when at closedPos, 1 when at 0
     return 1 - Math.abs(v) / Math.abs(closedPos)
   })
 
@@ -243,13 +281,10 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
     let shouldOpen: boolean
     if (isRTL) {
-      // RTL: 0=open, SIDEBAR_WIDTH=closed
-      // Fast flick detection
       if (velocity < -300) shouldOpen = true
       else if (velocity > 300) shouldOpen = false
       else shouldOpen = currentX < threshold
     } else {
-      // LTR: 0=open, -SIDEBAR_WIDTH=closed
       if (velocity > 300) shouldOpen = true
       else if (velocity < -300) shouldOpen = false
       else shouldOpen = currentX > -threshold
@@ -331,55 +366,10 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   }, [networkStatus, prevStatus])
 
   const renderNetworkPill = (isMobile: boolean) => {
-    /*
-    if (networkStatus === 'OFFLINE') {
-      return (
-        <div className={cn(
-          "flex items-center gap-1.5 px-3 py-1 bg-black/85 border border-red-500/30 rounded-md backdrop-blur-md shrink-0 shadow-[0_0_15px_rgba(239,68,68,0.15)]", 
-          isMobile ? "max-w-[160px] md:max-w-none truncate" : ""
-        )}>
-          <span className="text-[9px] md:text-xs font-space font-black tracking-wider text-red-500 uppercase animate-pulse">
-            [ ⚠️ CONNECTION ERROR // OFFLINE MODE ]
-          </span>
-        </div>
-      )
-    }
-    if (networkStatus === 'LAG') {
-      return (
-        <div className={cn(
-          "flex items-center gap-1.5 px-3 py-1 bg-black/85 border border-amber-500/30 rounded-md backdrop-blur-md shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.15)]", 
-          isMobile ? "max-w-[170px] md:max-w-none truncate" : ""
-        )}>
-          <span className="text-[9px] md:text-xs font-space font-black tracking-wider text-amber-500 uppercase">
-            [ ⏳ NETWORK LAG // OPTIMISTIC SYNC ACTIVE ]
-          </span>
-        </div>
-      )
-    }
-    if (showSyncSuccess) {
-      return (
-        <div 
-          className={cn(
-            "flex items-center gap-1.5 px-3 py-1 bg-black/85 border rounded-md backdrop-blur-md transition-opacity duration-500 shrink-0", 
-            isMobile ? "max-w-[155px] md:max-w-none truncate" : ""
-          )}
-          style={{ 
-            borderColor: `${currentTheme.color}30`,
-            boxShadow: `0 0 15px ${currentTheme.color}15`
-          }}
-        >
-          <span className="text-[9px] md:text-xs font-space font-black tracking-wider uppercase animate-[pulse_2s_infinite]" style={{ color: currentTheme.color }}>
-            [ ⚡ WORKSPACE SYNCED ]
-          </span>
-        </div>
-      )
-    }
-    */
     return null
   }
 
   const [mounted, setMounted] = useState(false)
-
   const [shellIsRTL, setShellIsRTL] = useState(false)
 
   useEffect(() => {
@@ -398,35 +388,11 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
     setShellIsRTL(isRTL)
   }, [isRTL])
 
-
-
   useEffect(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.dir = shellIsRTL ? 'rtl' : 'ltr'
     }
   }, [shellIsRTL])
-
-  const getRoleIcon = (url?: string | null) => {
-    if (!url) return 'account_circle'
-    if (url.includes('omar')) return 'laptop_mac'
-    if (url.includes('maya')) return 'school'
-    if (url.includes('ismail')) return 'work'
-    if (url.includes('zain')) return 'rocket_launch'
-    if (url.includes('menna')) return 'videocam'
-    if (url.includes('nour')) return 'trending_up'
-    return 'cloud_sync'
-  }
-  
-  const getRoleIconComponent = (url?: string | null) => {
-    if (!url) return User
-    if (url.includes('omar')) return Laptop
-    if (url.includes('maya')) return GraduationCap
-    if (url.includes('ismail')) return Briefcase
-    if (url.includes('zain')) return Rocket
-    if (url.includes('menna')) return Video
-    if (url.includes('nour')) return TrendingUp
-    return CloudLightning
-  }
 
   const { reports, markAsRead, fetchReports } = useInbox()
   const unreadCount = useMemo(() => reports.filter(r => !r.is_read).length, [reports])
@@ -492,10 +458,9 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
     return () => window.removeEventListener('keydown', handleCtrlK, { capture: true })
   }, [])
 
-  // Global Escape & Enter keys listener to manage popups, modals, and actions
+  // Global Escape & Enter keys listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+Arrow scroll shortcuts
       if (e.ctrlKey && e.key === 'ArrowUp') {
         e.preventDefault()
         window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -511,8 +476,6 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
       const activeEl = document.activeElement
 
-      // Input/Textarea/Contenteditable Protection:
-      // Let standard browser behaviors and local keydown listeners handle text area typing and editing.
       if (
         activeEl && (
           activeEl.tagName === 'TEXTAREA' ||
@@ -528,9 +491,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         return
       }
 
-      // --- ESCAPE KEY ACTIONS ---
       if (e.key === 'Escape') {
-        // Blur inputs if focused
         if (activeEl && activeEl.tagName === 'INPUT') {
           (activeEl as HTMLElement).blur()
           e.stopPropagation()
@@ -538,8 +499,6 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
           return
         }
 
-        // CONDITION 1 (Active Modals):
-        // Check if any popup modal is open in the DOM.
         const isModalOpenInDOM = typeof document !== 'undefined' && (
           !!document.querySelector('.fixed.inset-0.backdrop-blur-md') ||
           !!document.querySelector('.fixed.inset-0.backdrop-blur-sm') ||
@@ -551,21 +510,18 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         const isModalOpen = isRankUpModalOpen || !!selectedReport || isModalOpenInDOM
 
         if (isModalOpen) {
-          // Close global modals managed by Shell/Context:
           if (isRankUpModalOpen) {
             setIsRankUpModalOpen(false)
           }
           if (selectedReport) {
             setSelectedReport(null)
           }
-          // Dispatch custom window event to notify child pages to close their local modals
           window.dispatchEvent(new CustomEvent('close-all-modals'))
           e.stopPropagation()
           e.preventDefault()
           return
         }
 
-        // CONDITION 2 (Active Dropdowns/Inbox/Panels):
         if (inboxOpen || coachPanelOpen || aiOpen || commandPaletteOpen) {
           setInboxOpen(false)
           setCoachPanelOpen(false)
@@ -576,31 +532,23 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
           return
         }
 
-        // CONDITION 3 (Page Navigation):
-        // DO NOT navigate back when Escape is pressed. Just stop propagation.
         e.stopPropagation()
         e.preventDefault()
       }
 
-      // --- ENTER KEY ACTIONS ---
       if (e.key === 'Enter') {
-        // Find if there is an active modal open in the DOM
         const modalEl = typeof document !== 'undefined' ? document.querySelector(
           '.fixed.inset-0.backdrop-blur-md, .fixed.inset-0.backdrop-blur-sm, .fixed.inset-0.bg-black\\/80, .fixed.inset-0.bg-white\\/90, .fixed.inset-0.bg-white\\/60'
         ) : null
 
         if (modalEl) {
-          // Find buttons in the active modal
           const buttons = Array.from(modalEl.querySelectorAll('button, [role="button"], input[type="submit"]')) as HTMLElement[]
-          
-          // Filter out disabled or invisible buttons
           const activeButtons = buttons.filter(btn => {
             if ((btn as any).disabled) return false
             if (btn.offsetParent === null) return false
             return true
           })
 
-          // Find confirm/submit/primary button by positive keywords
           const positiveKeywords = [
             'create', 'deploy', 'add', 'submit', 'confirm', 'save', 'scan', 'find', 'enter', 'yes', 'ok', 
             'تأكيد', 'إنشاء', 'حفظ', 'نعم', 'موافق', 'دخول', 'تفعيل', 'استخراج', 'إضافة'
@@ -611,7 +559,6 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
             return positiveKeywords.some(keyword => text.includes(keyword))
           })
 
-          // Fallback: If no keyword matched, grab the last button that isn't a cancel/close action
           if (!targetButton && activeButtons.length > 0) {
             const nonCancelButtons = activeButtons.filter(btn => {
               const text = btn.innerText?.toLowerCase() || ''
@@ -682,8 +629,6 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
     return Math.round(totalPct / syncedMissions.length)
   }, [syncedMissions, calculateAccountability])
 
-  // AI message bubble auto-open removed per user request
-
   const personality = useMemo(() => {
     const rank = profile?.rank || 'SILVER'
     if (rank === 'CONQUEROR') return 'SAVAGE'
@@ -732,11 +677,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         'pb-24 lg:pb-8',
         'lg:ps-72 lg:max-w-none'
       )}>
-        {/* ── DESKTOP TOP BAR (TRANSIENT TELEMETRY ONLY) ── */}
-        {/* bg-[var(--sidebar-bg)]/95 backdrop-blur-2xl border-b border-[var(--card-border)] */}
-        {/* <header className="hidden lg:flex w-full px-8 h-16 justify-end items-center border-b border-black/5 dark:border-white/5 bg-white/60 dark:bg-black/40 backdrop-blur-3xl z-[150] sticky top-0 transition-colors duration-500 relative header-target"> */}
-        {/* bg-white/60 dark:bg-black/40 backdrop-blur-3xl border-b-0 */}
-        {/* bg-transparent dark:bg-black/10 backdrop-blur-[40px] border-none */}
+        {/* ── DESKTOP TOP BAR ── */}
         <header className="hidden lg:flex w-full px-8 h-16 justify-end items-center bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-black/5 dark:border-white/[0.03] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] z-[150] sticky top-0 transition-colors duration-500 relative header-target">
           <div className="absolute -bottom-[1px] inset-inline-start-12 w-48 h-[1px] shadow-[0_0_15px_currentcolor]" style={{ backgroundColor: currentTheme.color, color: currentTheme.color }} />
 
@@ -749,7 +690,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
             {/* Real-time Network Radar */}
             {renderNetworkPill(false)}
 
-            {/* ⚡ XP: {xp_value} */}
+            {/* ⚡ XP */}
             <div className="flex items-center gap-2 border-e border-[var(--card-border)] pe-6 shrink-0" title={isRTL ? 'نقاط الخبرة' : 'XP Readout'}>
               <motion.span
                 className="shrink-0"
@@ -763,7 +704,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
               </span>
             </div>
 
-            {/* 🔥 {streak_days}d */}
+            {/* 🔥 Streak */}
             <div className="flex items-center gap-2 border-e border-[var(--card-border)] pe-6 shrink-0" title={isRTL ? 'سلسلة الأيام' : 'Streak'}>
               <Flame
                 className={cn('w-5 h-5 transition-all duration-500', streak > 0 ? 'scale-110 animate-pulse' : 'opacity-20')}
@@ -844,9 +785,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
             <AnimatedLogo className="text-lg md:text-xl tracking-[0.2em]" />
           </div>
 
-          {/* RIGHT: Exactly one action icon: 🔔 (Notifications) */}
+          {/* RIGHT: exactly 🔔 (Notifications) */}
           <div className="flex items-center gap-3">
-            {/* Real-time Network Radar */}
             {renderNetworkPill(true)}
 
             {/* 🔔 Notifications */}
@@ -878,113 +818,18 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
           </div>
         </header>
 
-        {/* ── AI COACH FLOATING MESSAGE DROPDOWN ── */}
-        {/* <AnimatePresence>
-          {aiOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              className={cn(
-                "absolute top-20 left-1/2 -translate-x-1/2 w-[90vw] max-w-[320px] md:max-w-[400px] glass-panel p-5 md:p-6 backdrop-blur-xl shadow-[0_0_50px_rgba(0,0,0,0.8)] space-y-4 z-[200]",
-                profile?.ai_personality === 'SAVAGE'
-                  ? "border-[#FF0055]/40 bg-white/95 dark:bg-[#050505]/95"
-                  : "border-cyan-400/40 bg-white/95 dark:bg-[#050505]/95"
-              )}
-            >
-              <div className="flex justify-between items-center border-b border-black/10 dark:border-white/10 pb-3">
-                <span className={cn(
-                  "text-[10px] md:text-[11px] font-space tracking-[0.3em] font-black uppercase",
-                  profile?.ai_personality === 'SAVAGE' ? "text-[#FF0055]" : "text-cyan-600 dark:text-cyan-400"
-                )}>
-                // {profile?.ai_name || (isRTL ? 'الـ Coach' : 'COACH')} // {profile?.ai_personality === 'SAVAGE' ? (isRTL ? 'النمط الشرس' : 'SAVAGE_MODE') : (isRTL ? 'متصل' : 'ONLINE')}
-                {profile?.ai_name || (isRTL ? 'الـ Coach' : 'Coach')} - {profile?.ai_personality === 'SAVAGE' ? (isRTL ? 'النمط الشرس' : 'Savage Mode') : (isRTL ? 'متصل' : 'Online')}
-                </span>
-                <button onClick={() => setAiOpen(false)} className="text-black/30 dark:text-white/30 hover:text-black dark:hover:text-white transition-all close-btn">
-                  <X className="w-4.5 h-4.5 md:w-5 md:h-5" />
-                </button>
-              </div>
-              <p className="text-[13px] md:text-[15px] font-space font-bold text-black/90 dark:text-white/90 leading-relaxed" dir="auto">
-                "{lastAiMessage}"
-              </p>
-              // <p className="text-[9px] font-space text-black/30 dark:text-white/30 tracking-widest uppercase">AUTO_CLOSE // 8S</p>
-              <p className="text-[9px] font-space text-black/30 dark:text-white/30 tracking-widest uppercase">Auto close in 8s</p>
-            </motion.div>
-          )}
-        </AnimatePresence> */}
-
         <div className="relative pb-0">
           {children}
         </div>
       </main>
 
-      {/* ── MOBILE BOTTOM NAVIGATION (COMMENTED OUT PER PRIORITY 1: BOTTOM BAR FAB) ── */}
-      {/* <nav
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-2 backdrop-blur-2xl border-t"
-        style={{
-          backgroundColor: 'var(--sidebar-bg)',
-          borderColor: 'var(--card-border)',
-          height: '64px',
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-        }}
-      >
-        {[
-          { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
-          { label: isRTL ? 'شخصي' : 'Goals', icon: Crosshair, href: '/goals/solo' },
-          { label: isRTL ? 'فريق' : 'Squad', icon: Shield, href: '/goals/squad' },
-          { label: isRTL ? 'الملاحظات' : 'Notes', icon: FileText, href: '/notes' },
-          { label: isRTL ? 'الإنجازات' : 'Wins', icon: Trophy, href: '/achievements' },
-        ].map(item => {
-          const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
-          return (
-            <motion.button
-              key={item.href}
-              onClick={() => { playBlip(); router.push(item.href) }}
-              whileTap={{ scale: 0.88 }}
-              className={cn(
-                "flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-colors duration-200 relative cursor-pointer min-w-0",
-                isActive ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
-              )}
-            >
-              {isActive && (
-                <motion.div
-                  layoutId="mobileNavIndicator"
-                  className="absolute top-0 inset-x-3 h-[2px] rounded-full"
-                  style={{ backgroundColor: currentTheme.color, boxShadow: `0 0 8px ${currentTheme.color}` }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                />
-              )}
-              {(() => {
-                const IconComponent = item.icon
-                return (
-                  <IconComponent
-                    className="w-5 h-5 transition-all duration-200"
-                    style={{ color: isActive ? currentTheme.color : undefined }}
-                  />
-                )
-              })()}
-              <span className={cn(
-                "text-[9px] font-space font-bold tracking-wider uppercase whitespace-nowrap transition-all duration-200",
-                isActive ? "opacity-100" : "opacity-60"
-              )}>
-                {item.label}
-              </span>
-            </motion.button>
-          )
-        })}
-      </nav> */}
-
-      {/* FAB moved outside this wrapper to avoid containing-block issues */}
-
-      {/* ── MOBILE SIDEBAR DRAWER (Always rendered, native drag) ── */}
-      {/* Backdrop: always in DOM, pointer-events controlled by isDrawerVisible */}
+      {/* ── MOBILE SIDEBAR DRAWER ── */}
       <motion.div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] lg:hidden"
         style={{ opacity: computedBackdropOpacity, pointerEvents: isDrawerVisible ? 'auto' : 'none' }}
         onClick={() => setIsMobileNavOpen(false)}
       />
 
-      {/* Drawer: always in DOM, translated off-screen when closed */}
       <motion.div
         drag="x"
         dragConstraints={isRTL
@@ -1093,7 +938,6 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         </div>
       </motion.div>
 
-
       <PomodoroHUD />
 
       <CoachPanel 
@@ -1107,16 +951,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         "inset-inline-start-72"
       )} />
 
-      {/* Central Command Hub commented out to comply with safety rules */}
-      {/* <div className="fixed bottom-8 ltr:left-8 rtl:right-8 flex items-center gap-4 z-[40]">
-        <OperatorGuide />
-        <GlobalActionMenu />
-      </div> */}
-
       <LevelUpModal />
       <GlitchOverlay active={isRankUpModalOpen} />
-
-      {/* Overlays */}
 
       <CommandPalette 
         isOpen={commandPaletteOpen} 
@@ -1124,12 +960,10 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         onOpenCoach={() => { setCoachPanelOpen(true); window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ai-coach' })); }}
         missions={syncedMissions}
       />
-      {/* <AuthModal /> */}
-      {/* <EntryGateModal /> */}
       <Tutorial />
       <GlobalCreateGoalModal />
 
-      {/* Mobile fullscreen overlay for notification list to prevent containing block issue */}
+      {/* Mobile fullscreen overlay for notification list */}
       <div className="lg:hidden">
         <InboxDropdown 
           isOpen={inboxOpen}
@@ -1150,7 +984,6 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
     </div>
 
     {/* ── MOBILE FLOATING ACTION BUTTON (FAB) SPEED DIAL ── */}
-    {/* Rendered outside the main wrapper to avoid transform/filter containing-block breaking position:fixed */}
     <div 
       className={cn(
         "lg:hidden fixed bottom-6 z-[100] flex flex-col items-end gap-3",
@@ -1158,7 +991,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       )}
       dir={shellIsRTL ? 'rtl' : 'ltr'}
     >
-      {/* Speed Dial Actions (appear above FAB) */}
+      {/* Speed Dial Actions */}
       <AnimatePresence>
         {isFabMenuOpen && (
           <motion.div
@@ -1173,13 +1006,13 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                 label: isRTL ? 'ملاحظة جديدة' : 'Add Note', 
                 icon: StickyNote, 
                 delay: 0.1,
-                action: () => { router.push('/notes'); setIsFabMenuOpen(false); playBlip(); }
+                action: () => { router.push('/notes?create=true'); setIsFabMenuOpen(false); playBlip(); }
               },
               { 
                 label: isRTL ? 'مهمة جديدة' : 'Add Task', 
                 icon: CheckCircle, 
                 delay: 0.05,
-                action: () => { setIsFabMenuOpen(false); playBlip(); }
+                action: () => { showToast(isRTL ? 'ميزة إنشاء المهام العامة قريباً.' : 'Global Task Creation coming soon.', 'info'); setIsFabMenuOpen(false); playBlip(); }
               },
               { 
                 label: isRTL ? 'هدف جديد' : 'Create Goal', 
@@ -1218,7 +1051,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
       {/* Bottom row: Search icon + Primary FAB */}
       <div className={cn("flex items-center gap-3", shellIsRTL ? "flex-row-reverse" : "")}>
-        {/* Search Icon Button */}
+        {/* Search Icon Button (Instant Full-Screen Overlay trigger) */}
         <motion.button
           onClick={() => {
             playBlip()
@@ -1231,7 +1064,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
           <Search className="w-5 h-5" />
         </motion.button>
 
-        {/* Primary FAB with rotation toggle */}
+        {/* Primary FAB */}
         <motion.button
           onClick={() => {
             playBlip()
@@ -1251,7 +1084,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       </div>
     </div>
 
-    {/* ── FAB BACKDROP (dims page when speed dial is open) ── */}
+    {/* ── FAB BACKDROP ── */}
     <AnimatePresence>
       {isFabMenuOpen && (
         <motion.div
@@ -1269,11 +1102,12 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
     <AnimatePresence>
       {isMobileSearchOpen && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="lg:hidden fixed inset-0 z-[300] bg-zinc-950/98 backdrop-blur-3xl flex flex-col"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 15 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="lg:hidden fixed inset-0 z-[300] bg-zinc-950/98 backdrop-blur-3xl flex flex-col font-space"
+          dir={isRTL ? 'rtl' : 'ltr'}
         >
           {/* Search Header */}
           <div className="flex items-center gap-3 p-4 border-b border-white/5">
@@ -1287,24 +1121,14 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                 type="search"
                 autoFocus
                 value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value)
-                  window.dispatchEvent(new CustomEvent('global-search', { detail: e.target.value }))
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setCommandPaletteOpen(true)
-                    setIsMobileSearchOpen(false)
-                    window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ctrl-k' }))
-                  }
-                }}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={isRTL ? 'ابحث في الأهداف، المهام، الملاحظات...' : 'Search goals, tasks, notes...'}
-                className="flex-1 bg-transparent border-none text-white outline-none text-base font-space font-bold placeholder:text-zinc-600"
+                className="flex-1 bg-transparent border-none text-white outline-none text-base font-bold placeholder:text-zinc-600"
               />
             </div>
             <button
               onClick={() => { setIsMobileSearchOpen(false); setSearchQuery(''); playBlip(); }}
-              className="h-12 px-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white font-space font-bold text-sm transition-colors cursor-pointer"
+              className="h-12 px-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white font-bold text-sm transition-colors cursor-pointer"
             >
               {isRTL ? 'إلغاء' : 'Cancel'}
             </button>
@@ -1312,8 +1136,13 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
           {/* Search Results Area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-6">
-            {searchQuery.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
+            {isSearching ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <Loader2 className="w-8 h-8 animate-spin" style={{ color: currentTheme.color }} />
+                <p className="text-zinc-500 text-sm font-semibold">{isRTL ? 'جاري استدعاء البيانات...' : 'Searching archives...'}</p>
+              </div>
+            ) : searchQuery.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-[60dvh] gap-4 text-center">
                 <div 
                   className="w-16 h-16 rounded-2xl flex items-center justify-center"
                   style={{ backgroundColor: `${currentTheme.color}15` }}
@@ -1321,59 +1150,117 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
                   <Search className="w-8 h-8" style={{ color: currentTheme.color, opacity: 0.6 }} />
                 </div>
                 <div>
-                  <p className="text-zinc-400 font-space font-bold text-base">
-                    {isRTL ? 'البحث الذكي جاهز' : 'Smart search ready'}
+                  <p className="text-zinc-400 font-bold text-base">
+                    {isRTL ? 'البحث المباشر النشط' : 'Live smart search'}
                   </p>
-                  <p className="text-zinc-600 font-space text-sm mt-1">
-                    {isRTL ? 'ابحث في الأهداف، المهام، والملاحظات في مكان واحد' : 'Find goals, tasks, and notes in one place'}
+                  <p className="text-zinc-600 text-sm mt-1">
+                    {isRTL ? 'اكتب للبحث في الأهداف والمهام والملاحظات فوراً' : 'Type to search goals, tasks, and notes instantly'}
+                  </p>
+                </div>
+              </div>
+            ) : (searchResults.goals.length === 0 && searchResults.tasks.length === 0 && searchResults.notes.length === 0) ? (
+              <div className="flex flex-col items-center justify-center h-[60dvh] text-center space-y-4">
+                <div className="text-red-500/20 text-7xl font-black select-none tracking-widest font-mono">
+                  000
+                </div>
+                <div>
+                  <p className="text-zinc-300 font-black tracking-widest text-sm uppercase">
+                    {isRTL ? '0 تطابقات وجدت' : '0 MATCHES FOUND'}
+                  </p>
+                  <p className="text-zinc-600 text-xs mt-1 font-bold">
+                    {isRTL ? 'لم نجد أي سجلات تطابق استعلامك.' : 'No records match your neural query.'}
                   </p>
                 </div>
               </div>
             ) : (
-              <>
+              <div className="space-y-6">
                 {/* Category: Goals */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Target className="w-4 h-4" style={{ color: currentTheme.color }} />
-                    <span className="text-xs font-space font-black uppercase tracking-wider" style={{ color: currentTheme.color }}>
-                      {isRTL ? 'الأهداف' : 'Goals'}
-                    </span>
+                {searchResults.goals.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3 px-1">
+                      <Target className="w-4 h-4" style={{ color: currentTheme.color }} />
+                      <span className="text-xs font-black uppercase tracking-wider" style={{ color: currentTheme.color }}>
+                        {isRTL ? '🎯 الأهداف' : '🎯 Goals'}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {searchResults.goals.map((goal) => (
+                        <button
+                          key={goal.id}
+                          onClick={() => {
+                            router.push(`/goals/${goal.goal_type === 'squad' ? 'squad' : 'solo'}`);
+                            setIsMobileSearchOpen(false);
+                            setSearchQuery('');
+                          }}
+                          className="w-full text-start p-3 bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl transition-all flex items-center justify-between"
+                        >
+                          <span className="text-sm font-bold text-zinc-200 truncate">{goal.title}</span>
+                          <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700/50">
+                            {goal.goal_type || 'solo'}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-4">
-                    <p className="text-zinc-500 font-space text-sm">
-                      {isRTL ? 'جاري البحث...' : 'Searching...'}
-                    </p>
-                  </div>
-                </div>
+                )}
+
                 {/* Category: Tasks */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <CheckCircle className="w-4 h-4" style={{ color: currentTheme.color }} />
-                    <span className="text-xs font-space font-black uppercase tracking-wider" style={{ color: currentTheme.color }}>
-                      {isRTL ? 'المهام' : 'Tasks'}
-                    </span>
+                {searchResults.tasks.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3 px-1">
+                      <CheckCircle className="w-4 h-4" style={{ color: currentTheme.color }} />
+                      <span className="text-xs font-black uppercase tracking-wider" style={{ color: currentTheme.color }}>
+                        {isRTL ? '✅ المهام' : '✅ Tasks'}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {searchResults.tasks.map((task) => (
+                        <button
+                          key={task.id}
+                          onClick={() => {
+                            router.push(`/goals/solo`);
+                            setIsMobileSearchOpen(false);
+                            setSearchQuery('');
+                          }}
+                          className="w-full text-start p-3 bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl transition-all flex items-center justify-between"
+                        >
+                          <span className="text-sm font-bold text-zinc-200 truncate">{task.title}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-4">
-                    <p className="text-zinc-500 font-space text-sm">
-                      {isRTL ? 'جاري البحث...' : 'Searching...'}
-                    </p>
-                  </div>
-                </div>
+                )}
+
                 {/* Category: Notes */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <StickyNote className="w-4 h-4" style={{ color: currentTheme.color }} />
-                    <span className="text-xs font-space font-black uppercase tracking-wider" style={{ color: currentTheme.color }}>
-                      {isRTL ? 'الملاحظات' : 'Notes'}
-                    </span>
+                {searchResults.notes.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3 px-1">
+                      <StickyNote className="w-4 h-4" style={{ color: currentTheme.color }} />
+                      <span className="text-xs font-black uppercase tracking-wider" style={{ color: currentTheme.color }}>
+                        {isRTL ? '📝 الملاحظات' : '📝 Notes'}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {searchResults.notes.map((note) => (
+                        <button
+                          key={note.id}
+                          onClick={() => {
+                            router.push(`/notes`);
+                            setIsMobileSearchOpen(false);
+                            setSearchQuery('');
+                          }}
+                          className="w-full text-start p-3 bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl transition-all flex flex-col gap-1"
+                        >
+                          <span className="text-sm font-bold text-zinc-200 truncate">{note.title || (isRTL ? 'ملاحظة غير معنونة' : 'Untitled Note')}</span>
+                          {note.content && (
+                            <span className="text-xs text-zinc-500 line-clamp-1">{note.content}</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-xl p-4">
-                    <p className="text-zinc-500 font-space text-sm">
-                      {isRTL ? 'جاري البحث...' : 'Searching...'}
-                    </p>
-                  </div>
-                </div>
-              </>
+                )}
+              </div>
             )}
           </div>
         </motion.div>
