@@ -1155,7 +1155,7 @@ export default function SquadGoalsPage() {
 
   return (
     <Shell>
-      <div className="max-w-7xl mx-auto p-6 md:p-12 space-y-12">
+      <div className="max-w-7xl mx-auto p-6 md:p-12 space-y-6 md:space-y-12">
         <motion.header
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1164,7 +1164,7 @@ export default function SquadGoalsPage() {
         >
           <div className="flex flex-row justify-between items-center w-full md:w-auto gap-4">
             <div className="space-y-1.5 min-w-0 flex-1">
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 md:gap-3">
                 {typeFilter === 'solo' ? (
                   <Target className="w-6 h-6 md:w-10 md:h-10 shrink-0" style={{ color: currentTheme.color }} />
                 ) : (
@@ -1179,6 +1179,14 @@ export default function SquadGoalsPage() {
                     <>{isRTL ? 'لوحة' : 'Goal'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Goals' : ' Canvas'}</span></>
                   )}
                 </h1>
+
+                {/* Compact XP/Rank Badge Chip in the title row */}
+                <div className="inline-flex items-center gap-1 border border-amber-500/20 bg-amber-500/5 px-2 py-0.5 md:px-2.5 md:py-1 rounded text-amber-500 shrink-0">
+                  <Sparkles className="w-3 h-3 animate-pulse" />
+                  <span className="text-[9px] md:text-[10px] font-space font-black uppercase tracking-wider select-none">
+                    {profile?.rank || 'SILVER'} • {profile?.xp || 0} XP
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -1196,6 +1204,7 @@ export default function SquadGoalsPage() {
           </div>
           
           {typeFilter === 'squad' ? (
+            /* Commented out legacy full-width button styling
             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
               <button
                 onClick={() => { playBlip(); setShowJoinGoal(true); }}
@@ -1213,6 +1222,24 @@ export default function SquadGoalsPage() {
                 {isRTL ? 'اعمل Squad Goal' : 'CREATE SQUAD GOAL'}
               </button>
             </div>
+            */
+            <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:flex-row sm:gap-3 md:w-auto">
+              <button
+                onClick={() => { playBlip(); setShowJoinGoal(true); }}
+                className="flex flex-row items-center justify-center gap-1 sm:gap-2 w-full md:w-auto h-11 px-2 sm:px-6 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-[9px] min-[375px]:text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-all duration-300 active:scale-[0.97] shadow-lg cursor-pointer animate-pulse"
+              >
+                <LinkIcon className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" />
+                {isRTL ? 'ادخل في Goal' : 'JOIN GOAL'}
+              </button>
+              <button
+                onClick={() => { playBlip(); setShowCreate(true); }}
+                className="flex flex-row items-center justify-center gap-1 sm:gap-2 w-full md:w-auto h-11 px-2 sm:px-6 rounded-md font-space text-[9px] min-[375px]:text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-all duration-300 hover:brightness-110 active:scale-[0.97] shadow-lg cursor-pointer"
+                style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
+              >
+                <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                {isRTL ? 'اعمل Squad Goal' : 'CREATE SQUAD GOAL'}
+              </button>
+            </div>
           ) : (
             <button
               onClick={() => { playBlip(); setShowCreate(true); }}
@@ -1226,10 +1253,9 @@ export default function SquadGoalsPage() {
           )}
         </motion.header>
 
-        {/* Command Bar for Solo and Squad Views */}
+        {/* Commented out legacy command bar code for XP and join squad
         {typeFilter && (
           <div className="w-full h-12 bg-white/5 dark:bg-zinc-900/30 border border-zinc-200/50 dark:border-zinc-800/80 rounded-md px-4 flex items-center justify-between backdrop-blur-md shadow-sm">
-            {/* Left side: Rank Badge */}
             <div className="flex items-center gap-2 border border-amber-500/20 bg-amber-500/5 px-3 py-1 rounded-md text-amber-500">
               <Sparkles className="w-3.5 h-3.5 animate-pulse" />
               <span className="text-[10px] font-space font-black uppercase tracking-widest select-none">
@@ -1237,7 +1263,6 @@ export default function SquadGoalsPage() {
               </span>
             </div>
             
-            {/* Right side: JOIN SQUAD button only for solo goal view */}
             {typeFilter === 'solo' && (
               <button
                 onClick={() => { playBlip(); setShowJoinGoal(true); }}
@@ -1247,6 +1272,20 @@ export default function SquadGoalsPage() {
                 {isRTL ? 'الانضمام للفريق' : 'JOIN A TEAM GOAL'}
               </button>
             )}
+          </div>
+        )}
+        */}
+
+        {/* Dynamic Command Bar - only rendered for solo filter to join a team */}
+        {typeFilter === 'solo' && (
+          <div className="w-full h-12 bg-white/5 dark:bg-zinc-900/30 border border-zinc-200/50 dark:border-zinc-800/80 rounded-md px-4 flex items-center justify-end backdrop-blur-md shadow-sm">
+            <button
+              onClick={() => { playBlip(); setShowJoinGoal(true); }}
+              className="flex items-center gap-1.5 px-3 h-8 border border-teal-500/40 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 rounded-md font-space text-[10px] font-black uppercase tracking-widest transition-all duration-300 active:scale-95 cursor-pointer"
+            >
+              <LinkIcon className="w-3.5 h-3.5" />
+              {isRTL ? 'الانضمام للفريق' : 'JOIN A TEAM GOAL'}
+            </button>
           </div>
         )}
 
