@@ -1159,61 +1159,60 @@ export default function SquadGoalsPage() {
   return (
     <Shell>
       <div className="max-w-7xl mx-auto p-6 md:p-12 space-y-12">
-        {/* Header */}
-        <header className="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-black/5 dark:border-white/5 pb-8">
-          <div className="space-y-4 text-center md:text-start">
-            <div className="flex items-center gap-4 justify-center md:justify-start">
-              {/* <Layers className="w-8 h-8 md:w-10 md:h-10 shrink-0" style={{ color: currentTheme.color }} /> */}
-              {typeFilter === 'solo' ? (
-                <Target className="w-8 h-8 md:w-10 md:h-10 shrink-0" style={{ color: currentTheme.color }} />
-              ) : (
-                <Users className="w-8 h-8 md:w-10 md:h-10 shrink-0" style={{ color: currentTheme.color }} />
-              )}
-              <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase not- text-black dark:text-white leading-none">
+        <motion.header
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 border-b border-black/5 dark:border-white/5 pb-6"
+        >
+          <div className="flex flex-row justify-between items-center w-full md:w-auto gap-4">
+            <div className="space-y-1.5 min-w-0 flex-1">
+              <div className="flex items-center gap-3">
                 {typeFilter === 'solo' ? (
-                  /* <>{isRTL ? 'أهداف' : 'PERSONAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' شخصية' : '_GOALS'}</span></> */
-                  // <>{isRTL ? 'Goals' : 'PERSONAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' شخصية' : '_GOALS'}</span></>
-                  <>{isRTL ? 'Goals' : 'Personal'}<span style={{ color: currentTheme.color }}>{isRTL ? ' شخصية' : ' Goals'}</span></>
-                ) : typeFilter === 'squad' ? (
-                  /* <>{isRTL ? 'أهداف' : 'TEAM' / 'SQUAD'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الفريق' : '_GOALS'}</span></> */
-                  // <>{isRTL ? 'Goals' : 'SQUAD'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Squad' : '_GOALS'}</span></>
-                  <>{isRTL ? 'Goals' : 'Squad'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Squad' : ' Goals'}</span></>
+                  <Target className="w-6 h-6 md:w-10 md:h-10 shrink-0" style={{ color: currentTheme.color }} />
                 ) : (
-                  /* <>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الأهداف' : '_CANVAS'}</span></> */
-                  // <>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Goals' : '_CANVAS'}</span></>
-                  <>{isRTL ? 'لوحة' : 'Goal'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Goals' : ' Canvas'}</span></>
+                  <Users className="w-6 h-6 md:w-10 md:h-10 shrink-0" style={{ color: currentTheme.color }} />
                 )}
-              </h1>
+                <h1 className="text-2xl md:text-6xl font-black font-space tracking-wider uppercase text-black dark:text-white leading-none truncate">
+                  {typeFilter === 'solo' ? (
+                    <>{isRTL ? 'Goals' : 'Personal'}<span style={{ color: currentTheme.color }}>{isRTL ? ' شخصية' : ' Goals'}</span></>
+                  ) : typeFilter === 'squad' ? (
+                    <>{isRTL ? 'Goals' : 'Squad'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Squad' : ' Goals'}</span></>
+                  ) : (
+                    <>{isRTL ? 'لوحة' : 'Goal'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Goals' : ' Canvas'}</span></>
+                  )}
+                </h1>
+              </div>
             </div>
-            {/* Comment out collaborative goals subtitle sentence to keep header clean */}
-            {/* <p className={cn("text-[11px] font-space tracking-[0.35em] uppercase font-bold", isRTL ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]")}>
-               {typeFilter === 'solo' ? (
-                 <>{isRTL ? 'أهداف شخصية نشطة' : 'PERSONAL GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
-               ) : typeFilter === 'squad' ? (
-                 <>{isRTL ? 'أهداف تعاونية نشطة' : 'COLLABORATIVE GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>
-               ) : (
-                 <>{isRTL ? 'الأهداف الأساسية النشطة' : 'Active Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'هدف نشط' : 'total'}</>
-               )}
-            </p> */}
+
+            {/* Mobile-only create/join CTA trigger next to title if not squad layout */}
+            {typeFilter !== 'squad' && (
+              <button
+                onClick={() => { playBlip(); setShowCreate(true); }}
+                className="flex md:hidden flex-row items-center justify-center gap-1.5 h-11 px-4 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-[0.97] shadow-lg shrink-0"
+                style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
+              >
+                <Plus className="w-4 h-4" />
+                {isRTL ? 'إنشاء' : 'Create'}
+              </button>
+            )}
           </div>
           
           {typeFilter === 'squad' ? (
-            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
               <button
                 onClick={() => { playBlip(); setShowJoinGoal(true); }}
-                className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-95 shadow-lg cursor-pointer animate-pulse"
+                className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-12 md:h-11 min-h-[48px] md:min-h-0 px-6 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-[0.97] shadow-lg cursor-pointer animate-pulse"
               >
                 <LinkIcon className="w-4.5 h-4.5" />
-                {/* {isRTL ? 'الانضمام لهدف' : 'JOIN GOAL'} */}
                 {isRTL ? 'ادخل في Goal' : 'JOIN GOAL'}
               </button>
               <button
                 onClick={() => { playBlip(); setShowCreate(true); }}
-                className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg cursor-pointer"
+                className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-12 md:h-11 min-h-[48px] md:min-h-0 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-[0.97] shadow-lg cursor-pointer"
                 style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
                 <Plus className="w-4 h-4" />
-                {/* {isRTL ? 'إنشاء هدف فريق' : 'CREATE SQUAD GOAL'} */}
                 {isRTL ? 'اعمل Squad Goal' : 'CREATE SQUAD GOAL'}
               </button>
             </div>
@@ -1228,7 +1227,7 @@ export default function SquadGoalsPage() {
               {typeFilter === 'solo' ? (isRTL ? 'اعمل Goal شخصي' : 'CREATE GOAL') : (isRTL ? 'اعمل Goal' : 'Create Goal')}
             </button>
           )}
-        </header>
+        </motion.header>
 
         {/* Command Bar for Solo and Squad Views */}
         {typeFilter && (

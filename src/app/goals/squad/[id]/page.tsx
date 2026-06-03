@@ -1747,7 +1747,7 @@ const { progress, isInRedZone } = useMemo(() => {
               {/* Premium Segmented Layout View Toggle switcher with Smart Time Filters */}
               <div className="flex flex-nowrap overflow-x-auto whitespace-nowrap w-full scrollbar-hide [&::-webkit-scrollbar]:hidden items-center gap-4 pb-2 md:pb-0 md:w-auto">
                 {/* Smart Time Filters */}
-                <div className="flex items-center gap-1.5 p-1 bg-black/40 border border-white/5 backdrop-blur-md rounded-md shrink-0">
+                <div className="flex overflow-x-auto flex-nowrap scrollbar-hide -webkit-overflow-scrolling-touch scroll-snap-x gap-2 px-4 pb-2.5 max-w-full items-center bg-black/40 border border-white/5 backdrop-blur-md rounded-full p-1 shrink-0">
                   {[
                     { key: 'ALL', label: isRTL ? 'الكل' : 'All Active' },
                     { key: 'WEEK', label: isRTL ? 'هذا الأسبوع' : 'Upcoming This Week' },
@@ -1758,12 +1758,12 @@ const { progress, isInRedZone } = useMemo(() => {
                       type="button"
                       onClick={() => { playBlip(); setTimeFilter(f.key as any); }}
                       className={cn(
-                        "px-2.5 py-1 rounded font-space text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap",
+                        "h-9 px-4 rounded-full text-[13px] font-space font-black uppercase tracking-wider transition-all duration-200 cursor-pointer whitespace-nowrap scroll-snap-align-start flex-shrink-0 min-w-fit flex items-center justify-center border",
                         timeFilter === f.key
-                          ? "bg-white/10 text-white font-black"
-                          : "text-white/40 hover:text-white/70"
+                          ? "text-black border-transparent shadow-md font-black"
+                          : "border-[var(--card-border)] text-white/40 hover:text-white/70"
                       )}
-                      style={timeFilter === f.key ? { color: missionColor, backgroundColor: `${missionColor}10` } : {}}
+                      style={timeFilter === f.key ? { color: '#000', backgroundColor: missionColor } : {}}
                     >
                       {f.label}
                     </button>

@@ -97,6 +97,18 @@
     text-align: right;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none !important;
+  }
+
   ::selection {
     background-color: var(--selection-bg, #39FF1433);
     color: var(--selection-text, #39FF14);
@@ -293,6 +305,7 @@
 * {
   -ms-overflow-style: none !important;  /* IE and Edge */
   scrollbar-width: none !important;  /* Firefox */
+  -webkit-overflow-scrolling: touch; /* Momentum scrolling on touch devices */
 }
 *::-webkit-scrollbar {
   display: none !important; /* Chrome, Safari and Opera */

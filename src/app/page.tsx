@@ -345,28 +345,22 @@ export default function Dashboard() {
         <div className="w-full flex flex-col items-center text-center space-y-2 sm:space-y-3">
           <div className="flex items-center gap-3 sm:gap-6">
             <div className="h-[1px] w-12 sm:w-20 md:w-32" style={{ background: `linear-gradient(to right, transparent, ${currentTheme.color}40)` }} />
-            {/* <motion.span
-              style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }}
-              animate={{ opacity: [0.3, 1, 0.3] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <Zap className="w-4.5 h-4.5 sm:w-5 sm:h-5 md:w-6 md:h-6 shrink-0" />
-            </motion.span> */}
             <div className="h-[1px] w-12 sm:w-20 md:w-32" style={{ background: `linear-gradient(to left, transparent, ${currentTheme.color}40)` }} />
           </div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight uppercase leading-none text-zinc-900 dark:text-white"
+            transition={{ duration: 0.3 }}
+            className="text-2xl md:text-5xl font-black tracking-tight uppercase leading-none text-zinc-900 dark:text-white"
           >
             {/* {isRTL ? 'منصة' : 'FOCUS'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'HUB'}</span> */}
             {isRTL ? 'منصة' : 'FOCUS'} <span style={{ color: currentTheme.color }}>{isRTL ? 'الـ Focus' : 'HUB'}</span>
           </motion.h1>
 
-          {/* <p className="text-[8px] sm:text-[10px] text-zinc-500 dark:text-white/40 tracking-[0.2em] sm:tracking-[0.4em] uppercase font-black">
-            {isRTL ? 'لوحة الإنتاجية والتركيز' : 'PRODUCTIVITY FOCUS MATRIX'} // {profile?.rank || 'MEMBER'}
-          </p> */}
+          <p className="text-[13px] text-zinc-500 dark:text-zinc-400 font-medium truncate max-w-[90vw]">
+            {isRTL ? 'لوحة المتابعة والتحكم بالأداء' : 'Your performance metrics and focus pipeline'}
+          </p>
         </div>
 
         {/* ── THE FOCUS PIPELINE (Top Section - Full Width - Commented out for Mobile Optimization) ──

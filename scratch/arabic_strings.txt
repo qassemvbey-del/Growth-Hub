@@ -1,0 +1,3888 @@
+File: src/app/achievements/page.tsx
+Line: 87
+Text: "if (!start || !end) return isRTL ? 'غير محدد' : 'N/A'"
+
+File: src/app/achievements/page.tsx
+Line: 92
+Text: "return days > 0 ? `${days} ${isRTL ? 'أيام' : 'DAYS'}` : (isRTL ? 'يوم واحد' : 'SINGLE_DAY')"
+
+File: src/app/achievements/page.tsx
+Line: 110
+Text: "<span className="font-black">إنجازاتي</span>"
+
+File: src/app/achievements/page.tsx
+Line: 119
+Text: "{isRTL ? 'المهام المكتملة' : 'Completed'} &nbsp;·&nbsp; {archived.length} {isRTL ? 'سجل' : 'total'}"
+
+File: src/app/achievements/page.tsx
+Line: 130
+Text: "{isRTL ? 'جاري تحميل الإنجازات...' : 'Loading wins...'}"
+
+File: src/app/achievements/page.tsx
+Line: 186
+Text: "{isRTL ? 'لا توجد جوائز بعد // أكمل هدفاً أولاً' : 'NO_WINS_YET // Complete a goal first'}"
+
+File: src/app/achievements/page.tsx
+Line: 204
+Text: "★ {isRTL ? 'مكتمل' : 'COMPLETE'}"
+
+File: src/app/achievements/page.tsx
+Line: 241
+Text: "{isRTL ? 'استعادة ←' : 'RESTORE →'}"
+
+File: src/app/achievements/page.tsx
+Line: 270
+Text: "<span className="text-[10px] md:text-xs font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'إنجاز مكتمل' : 'COMPLETED WIN'}</span>"
+
+File: src/app/achievements/page.tsx
+Line: 283
+Text: "<p className="text-[9px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase">{isRTL ? 'المدة' : 'DURATION'}</p>"
+
+File: src/app/achievements/page.tsx
+Line: 287
+Text: "<p className="text-[9px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase">{isRTL ? 'المهام' : 'TASKS'}</p>"
+
+File: src/app/achievements/page.tsx
+Line: 291
+Text: "<p className="text-[9px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase">{isRTL ? 'الإنجاز' : 'COMPLETION'}</p>"
+
+File: src/app/achievements/page.tsx
+Line: 295
+Text: "<p className="text-[9px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase">{isRTL ? 'التاريخ' : 'STAMP'}</p>"
+
+File: src/app/achievements/page.tsx
+Line: 303
+Text: "<h4 className="text-[11px] md:text-sm font-space tracking-[0.4em] uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'سجل المهام الفرعية' : 'Task Log'}</h4>"
+
+File: src/app/achievements/page.tsx
+Line: 311
+Text: "<span className="text-[10px] md:text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">{isRTL ? 'الثقل' : 'WEIGHT'}: {task.weight}</span>"
+
+File: src/app/achievements/page.tsx
+Line: 324
+Text: "{isRTL ? 'استعادة المهمة إلى الوضع النشط' : 'RESTORE_GOAL_TO_ACTIVE'}"
+
+File: src/app/actions/ai-magic.ts
+Line: 104
+Text: "If user input implies SCAN_STATUS (تحليل الوضع):"
+
+File: src/app/actions/ai-magic.ts
+Line: 105
+Text: ""وضعك دلوقتي:"
+
+File: src/app/actions/ai-magic.ts
+Line: 106
+Text: "✓ [mission اللي كويسة]"
+
+File: src/app/actions/ai-magic.ts
+Line: 107
+Text: "⚠ [mission اللي محتاج تركز فيها]"
+
+File: src/app/actions/ai-magic.ts
+Line: 108
+Text: "❌ [mission اللي في خطر]"
+
+File: src/app/actions/ai-magic.ts
+Line: 109
+Text: "الأولوية: [اسم المهمة الأهم دلوقتي]""
+
+File: src/app/actions/ai-magic.ts
+Line: 111
+Text: "If user input implies DAILY_PLAN (خطة النهارده):"
+
+File: src/app/actions/ai-magic.ts
+Line: 112
+Text: ""خطة النهارده:"
+
+File: src/app/actions/ai-magic.ts
+Line: 113
+Text: "١. [أول حاجة تعملها - اسم next_task من أهم مهمة]"
+
+File: src/app/actions/ai-magic.ts
+Line: 114
+Text: "٢. [تاني حاجة - next_task من مهمة تانية]"
+
+File: src/app/actions/ai-magic.ts
+Line: 115
+Text: "٣. [تالت حاجة - task تالتة]"
+
+File: src/app/actions/ai-magic.ts
+Line: 116
+Text: "مش محتاج أكتر من كده النهارده.""
+
+File: src/app/actions/ai-magic.ts
+Line: 118
+Text: "If user input implies CRITICAL_ALERT (تنبيهات خطيرة):"
+
+File: src/app/actions/ai-magic.ts
+Line: 119
+Text: ""⚠ تحذير:"
+
+File: src/app/actions/ai-magic.ts
+Line: 120
+Text: "[اسم المهمة] - باقي [X] أيام وإنت عند [X]%"
+
+File: src/app/actions/ai-magic.ts
+Line: 121
+Text: "[اسم المهمة] - باقي [X] أيام وإنت عند [X]%"
+
+File: src/app/actions/ai-magic.ts
+Line: 122
+Text: "لازم تخلص [عدد tasks] في اليوم عشان توصل.""
+
+File: src/app/actions/ai-magic.ts
+Line: 124
+Text: "If user input implies BRIEF_MISSION (بريف عن المهام):"
+
+File: src/app/actions/ai-magic.ts
+Line: 125
+Text: ""[اسم أهم Mission]:"
+
+File: src/app/actions/ai-magic.ts
+Line: 126
+Text: "- التقدم: [X]%"
+
+File: src/app/actions/ai-magic.ts
+Line: 127
+Text: "- باقي: [X] tasks"
+
+File: src/app/actions/ai-magic.ts
+Line: 128
+Text: "- الوقت: [X] أيام"
+
+File: src/app/actions/ai-magic.ts
+Line: 129
+Text: "- الخطوة الجاية: [اسم next_task]"
+
+File: src/app/actions/ai-magic.ts
+Line: 130
+Text: "- معدل المطلوب: [X tasks في اليوم]""
+
+File: src/app/actions/ai-magic.ts
+Line: 267
+Text: "Input: ["تعلم العربية..النحو الأساسي..الدرس 1", "تعلم العربية..النحو الأساسي..الدرس 2", "تعلم العربية..الإملاء..الدرس 3"]"
+
+File: src/app/actions/ai-magic.ts
+Line: 268
+Text: "Output: ["النحو الأساسي - الجزء الأول", "النحو الأساسي - الجزء الثاني", "الإملاء"]"
+
+File: src/app/api/coach/route.ts
+Line: 25
+Text: "Always respond in the requested language: ${language || 'en'}. If the language is 'ar', write in a very powerful, intense, direct Arabic/Egyptian tactical coaching tone (e.g. 'أنت متأخر في كذا، نفذ فوراً بدون حجج').`"
+
+File: src/app/api/missions/[id]/og/route.tsx
+Line: 84
+Text: "خطأ // ERROR 404"
+
+File: src/app/api/missions/[id]/og/route.tsx
+Line: 87
+Text: "المهمة غير موجودة // GOAL NOT FOUND"
+
+File: src/app/api/missions/[id]/og/route.tsx
+Line: 215
+Text: "اكتملت المهمة // GOAL COMPLETED"
+
+File: src/app/api/missions/[id]/og/route.tsx
+Line: 256
+Text: "const defaultAvatar = (profile?.gender === 'female' || profile?.gender === 'أنثى' || profile?.gender === 'Female') ? '/avatars/menna.svg' : '/avatars/omar.svg'"
+
+File: src/app/api/weather/route.ts
+Line: 33
+Text: "messageAr: 'الجو حلو النهاردة، فرصة ممتازة تخلص اللي وراك!',"
+
+File: src/app/api/weather/route.ts
+Line: 88
+Text: "let messageAr = 'الجو حلو النهاردة، فرصة ممتازة تخلص اللي وراك!'"
+
+File: src/app/api/weather/route.ts
+Line: 93
+Text: "messageAr = 'الجو حر النهاردة، كوباية ماية متلجة وركز في مهمتك!'"
+
+File: src/app/api/weather/route.ts
+Line: 96
+Text: "messageAr = 'الجو مشمس وجميل، أنسب وقت تحقق فيه أهدافك!'"
+
+File: src/app/api/weather/route.ts
+Line: 100
+Text: "messageAr = 'جو غيوم خفيف ولطيف، ركز وخلص أهداف النهاردة!'"
+
+File: src/app/api/weather/route.ts
+Line: 103
+Text: "messageAr = 'الجو ضباب برة، خلي تركيزك جوه الهاب مية في المية!'"
+
+File: src/app/api/weather/route.ts
+Line: 106
+Text: "messageAr = 'مطرة خفيفة بتشجع على التخطيط، كوباية شاي وركز!'"
+
+File: src/app/api/weather/route.ts
+Line: 109
+Text: "messageAr = 'صوت المطر برة مريح للأعصاب، أنسب وقت للتركيز العميق!'"
+
+File: src/app/api/weather/route.ts
+Line: 112
+Text: "messageAr = 'الجو برد وتلج، خليك دافي وركز في مشاريعك!'"
+
+File: src/app/api/weather/route.ts
+Line: 115
+Text: "messageAr = 'عاصفة ورعد برة؟ أحسن وقت تقعد في هدوء وتخلص اللي وراك!'"
+
+File: src/app/api/weather/route.ts
+Line: 118
+Text: "messageAr = 'الجو هادي ومناسب للشغل الرايق، ابدأ فوراً!'"
+
+File: src/app/auth/login/page.tsx
+Line: 58
+Text: "title: 'منصة الإنتاجية والنمو الشخصي',"
+
+File: src/app/auth/login/page.tsx
+Line: 60
+Text: "welcome: 'مرحباً بك مجدداً',"
+
+File: src/app/auth/login/page.tsx
+Line: 61
+Text: "desc: 'سجل الدخول فوراً للوصول إلى لوحة التحكم الشخصية ومساعد الذكاء الاصطناعي الذكي لتحقيق أهدافك.',"
+
+File: src/app/auth/login/page.tsx
+Line: 62
+Text: "button: 'الدخول بواسطة Google',"
+
+File: src/app/auth/login/page.tsx
+Line: 63
+Text: "signingIn: 'جاري تسجيل الدخول...',"
+
+File: src/app/auth/login/page.tsx
+Line: 64
+Text: "tagline: 'مساحة العمل المتكاملة لإدارة الأهداف والمهام بإنتاجية عالية.',"
+
+File: src/app/auth/login/page.tsx
+Line: 65
+Text: "feature1Title: 'محرك الأهداف الذكي',"
+
+File: src/app/auth/login/page.tsx
+Line: 66
+Text: "feature1Desc: 'تخطيط الأهداف الاستراتيجية الفردية والجماعية بدقة ووضوح.',"
+
+File: src/app/auth/login/page.tsx
+Line: 67
+Text: "feature2Title: 'التوجيه بالذكاء الاصطناعي',"
+
+File: src/app/auth/login/page.tsx
+Line: 68
+Text: "feature2Desc: 'مدربك الشخصي بالذكاء الاصطناعي المرافق لك على مدار الساعة لشحذ همتك.',"
+
+File: src/app/auth/login/page.tsx
+Line: 69
+Text: "feature3Title: 'نظام النقاط ومستويات النمو',"
+
+File: src/app/auth/login/page.tsx
+Line: 70
+Text: "feature3Desc: 'اكتسب مستويات متقدمة ونقاط خبرة (XP) مستمرة مع كل إنجاز مكتمل.',"
+
+File: src/app/auth/login/page.tsx
+Line: 71
+Text: "footer: 'منصة نمو وتطوير احترافية · جميع الحقوق محفوظة',"
+
+File: src/app/auth/login/page.tsx
+Line: 123
+Text: "<span>{lang === 'ar' ? 'English' : 'العربية'}</span>"
+
+File: src/app/auth/login/page.tsx
+Line: 240
+Text: "<span>{lang === 'ar' ? 'بيئة عمل آمنة ومحمية' : 'SECURE & PROTECTED WORKSPACE'}</span>"
+
+File: src/app/goals/squad/page.tsx
+Line: 137
+Text: "{mission.sync_to_dashboard ? (isRTL ? 'نشط' : 'ACTIVE') : (isRTL ? 'استعداد' : 'STANDBY')}"
+
+File: src/app/goals/squad/page.tsx
+Line: 297
+Text: "{completedTasks}/{totalTasks} {isRTL ? 'المهام' : 'TASKS'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 596
+Text: "? 'تم إرسال طلب الانضمام // بانتظار موافقة القائد'"
+
+File: src/app/goals/squad/page.tsx
+Line: 614
+Text: "setJoinErrorText(isRTL ? 'الطلب قيد الانتظار بالفعل // يرجى الانتظار' : 'REQUEST_PENDING // ALREADY SENT')"
+
+File: src/app/goals/squad/page.tsx
+Line: 618
+Text: "setJoinErrorText(isRTL ? 'تم رفض طلبك السابق // الوصول مصنف' : 'REQUEST_REJECTED // ACCESS CLASSIFIED')"
+
+File: src/app/goals/squad/page.tsx
+Line: 637
+Text: "showToast(isRTL ? 'تم نسخ الرابط' : 'INVITE LINK COPIED', 'success')"
+
+File: src/app/goals/squad/page.tsx
+Line: 648
+Text: "showToast(isRTL ? 'تم تحديث القاعدة!' : 'RULE UPDATED', 'success')"
+
+File: src/app/goals/squad/page.tsx
+Line: 651
+Text: "showToast(isRTL ? 'فشل التحديث!' : 'UPDATE FAILED', 'warning')"
+
+File: src/app/goals/squad/page.tsx
+Line: 882
+Text: "showToast(isRTL ? 'يجب إدخال اسم للهدف' : 'Goal title is required', 'warning')"
+
+File: src/app/goals/squad/page.tsx
+Line: 889
+Text: "showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')"
+
+File: src/app/goals/squad/page.tsx
+Line: 896
+Text: "showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')"
+
+File: src/app/goals/squad/page.tsx
+Line: 938
+Text: "showToast(isRTL ? 'تم حفظ الهدف محلياً' : 'Goal saved locally!', 'success')"
+
+File: src/app/goals/squad/page.tsx
+Line: 962
+Text: "? `سعة المحطة ممتلئة (${usedSlots.toFixed(1).replace('.0','')}/9 فتحات) - أتمم أو أزل مهمات موجودة.`"
+
+File: src/app/goals/squad/page.tsx
+Line: 1041
+Text: "showToast(isRTL ? 'تم إنشاء الهدف' : 'Goal activated!', 'success')"
+
+File: src/app/goals/squad/page.tsx
+Line: 1068
+Text: "{isRTL ? 'مزامنة أهداف مساحة العمل السحابية...' : 'SYNCING_CLOUD_WORKSPACE_OBJECTIVES...'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1131
+Text: "<>{isRTL ? 'أهداف' : 'PERSONAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' شخصية' : '_GOALS'}</span></>"
+
+File: src/app/goals/squad/page.tsx
+Line: 1133
+Text: "<>{isRTL ? 'أهداف' : /* 'TEAM' */ 'SQUAD'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الفريق' : '_GOALS'}</span></>"
+
+File: src/app/goals/squad/page.tsx
+Line: 1135
+Text: "<>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الأهداف' : '_CANVAS'}</span></>"
+
+File: src/app/goals/squad/page.tsx
+Line: 1142
+Text: "<>{isRTL ? 'أهداف شخصية نشطة' : 'PERSONAL GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>"
+
+File: src/app/goals/squad/page.tsx
+Line: 1144
+Text: "<>{isRTL ? 'أهداف تعاونية نشطة' : 'COLLABORATIVE GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>"
+
+File: src/app/goals/squad/page.tsx
+Line: 1146
+Text: "<>{isRTL ? 'الأهداف الأساسية النشطة' : 'Active Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'هدف نشط' : 'total'}</>"
+
+File: src/app/goals/squad/page.tsx
+Line: 1158
+Text: "{isRTL ? 'الانضمام لهدف' : 'JOIN GOAL'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1166
+Text: "{isRTL ? 'إنشاء هدف فريق' : /* 'CREATE TEAM GOAL' */ 'CREATE SQUAD GOAL'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1176
+Text: "{typeFilter === 'solo' ? (isRTL ? 'إنشاء هدف فردي' : 'CREATE GOAL') : (isRTL ? 'إنشاء هدف' : 'Create Goal')}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1199
+Text: "{isRTL ? 'الانضمام للفريق' : 'JOIN A TEAM GOAL'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1232
+Text: "مرحباً بك في منصتك الشخصية لإدارة الأهداف والإنتاجية. هذا النظام مصمم لمساعدتك على تنظيم يومك وبناء عادات مستدامة."
+
+File: src/app/goals/squad/page.tsx
+Line: 1235
+Text: "<li><span style={{ color: currentTheme.color }}>سعة التركيز (Focus Capacity):</span> تدعم واجهة العمل بحد أقصى 9 مهام نشطة في نفس الوقت لضمان تركيزك الكامل وتجنب تشتت الانتباه.</li>"
+
+File: src/app/goals/squad/page.tsx
+Line: 1236
+Text: "<li><span style={{ color: currentTheme.color }}>نقاط الإنجاز (XP System):</span> إكمال المهام يمنحك نقاط خبرة لتوثيق حجم مجهودك ومراقبة تزايد معدل إنتاجيتك بشكل ملموس.</li>"
+
+File: src/app/goals/squad/page.tsx
+Line: 1237
+Text: "<li><span style={{ color: currentTheme.color }}>مؤشر الالتزام:</span> التراجع عن متابعة أهدافك اليومية أو التكاسل لفترات طويلة يؤدي إلى انخفاض نقاطك تدريجياً، لتنبيهك بضرورة العودة للمسار الصحيح.</li>"
+
+File: src/app/goals/squad/page.tsx
+Line: 1284
+Text: "? (isRTL ? 'إنشاء هدف فريق' : /* 'Create Team Goal' */ 'Create Squad Goal')"
+
+File: src/app/goals/squad/page.tsx
+Line: 1285
+Text: ": (isRTL ? 'إنشاء هدف جديد' : 'Create New Goal')}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1292
+Text: "{isRTL ? 'العنوان' : 'Goal Title'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1297
+Text: "placeholder={isRTL ? 'ما الذي تريد تحقيقه؟...' : 'What do you want to achieve?...'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1307
+Text: "{isRTL ? 'تاريخ الاستحقاق (اختياري)' : 'Deadline (Optional)'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1321
+Text: "{isRTL ? 'تثبيت في اللوحة الرئيسة' : 'Pin to Dashboard'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1341
+Text: "{isRTL ? 'إلغاء' : 'Cancel'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1350
+Text: "{isRTL ? 'إنشاء هدف' : 'CREATE GOAL'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1365
+Text: "{isRTL ? 'مهامي' : 'My Tasks'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1369
+Text: "{allTasks.length} {isRTL ? 'مهام' : 'tasks'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1384
+Text: "{isRTL ? 'جميع المهام' : 'ALL TASKS'} ({allTasks.length})"
+
+File: src/app/goals/squad/page.tsx
+Line: 1446
+Text: "{task.weight || 3} {isRTL ? 'نقطة' : 'XP'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1455
+Text: "{isRTL ? 'لا توجد مهام في هذه القائمة.' : 'No tasks in this view.'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1473
+Text: "{isRTL ? 'لا توجد أهداف تقودها حالياً' : 'NO LEADING TEAM GOALS'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1491
+Text: "{isRTL ? 'لا توجد أهداف معينة لك حالياً' : 'NO ASSIGNED TEAM GOALS'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1552
+Text: "{isRTL ? 'تحذير: تشتيت التركيز' : 'WARNING: CONTEXT SWITCHING'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1559
+Text: "? '🚧 تشتيت التركيز يقلل الأداء الذهني بنسبة تصل إلى 40%.'"
+
+File: src/app/goals/squad/page.tsx
+Line: 1564
+Text: "? 'توجد مهام نشطة تستهلك سعة التركيز أو مهام حرجة قريبة من الموعد النهائي. إضافة هدف جديد سيقلل من جودة التنفيذ.'"
+
+File: src/app/goals/squad/page.tsx
+Line: 1571
+Text: "<span>{isRTL ? 'سعة التركيز النشطة:' : 'Active Focus Capacity:'}</span>"
+
+File: src/app/goals/squad/page.tsx
+Line: 1577
+Text: "<span>{isRTL ? 'المهام الحرجة القريبة:' : 'Critical Near-Deadline Goals:'}</span>"
+
+File: src/app/goals/squad/page.tsx
+Line: 1578
+Text: "<span className="text-[#FF0055] font-black">{warningCriticalCount} {isRTL ? 'مهام' : 'Goals'}</span>"
+
+File: src/app/goals/squad/page.tsx
+Line: 1592
+Text: "{isRTL ? 'استبدال المهمة' : 'FORCE SWAP'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1602
+Text: "{isRTL ? 'الاستمرار بالتركيز' : 'KEEP FOCUSING'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1663
+Text: "{isRTL ? 'لا توجد أهداف نشطة حالياً. استخدم لوحة الإنشاء بالأعلى للبدء.' : 'No active goals synced. Use the action panel above to initiate.'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1712
+Text: "{isRTL ? 'الانضمام للفريق' : 'JOIN_A_SQUAD'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1718
+Text: "{isRTL ? 'أدخل رمز الدعوة أو رابط الهدف' : 'Enter an invite code or paste a goal link'}"
+
+File: src/app/goals/squad/page.tsx
+Line: 1755
+Text: "{isRTL ? 'تم تقديم الطلب // بانتظار موافقة القائد' : 'REQUEST SUBMITTED // WAITING FOR APPROVAL'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 260
+Text: "showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 286
+Text: "showToast(isRTL ? "تم تعيين المهمة لك" : "TASK ASSIGNED TO YOU", "success")"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 299
+Text: "showToast(isRTL ? "تم إلغاء التعيين" : "TASK UNASSIGNED", "success")"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 303
+Text: "showToast(isRTL ? "هذه المهمة معينة بالفعل لشخص آخر" : "TASK ALREADY ASSIGNED TO ANOTHER MEMBER", "warning")"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 341
+Text: "showToast(isRTL ? 'تم نسخ صورة البطاقة بنجاح!' : 'CARD IMAGE COPIED TO CLIPBOARD', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 346
+Text: "showToast(isRTL ? 'الكارت غير متوفر حالياً // يعمل في البيئة الإنتاجية' : 'CARD_UNAVAILABLE // Works on production', 'warning')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 368
+Text: "showToast(isRTL ? 'تم تحميل الكارت بنجاح!' : 'GOAL CARD DOWNLOADED SUCCESSFULLY', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 373
+Text: "showToast(isRTL ? 'الكارت غير متوفر حالياً // يعمل في البيئة الإنتاجية' : 'CARD_UNAVAILABLE // Works on production', 'warning')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 563
+Text: "showToast(isRTL ? 'تم تنظيف العناوين بنجاح' : 'TITLES_CLEANED // OPTIMIZED', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 567
+Text: "showToast(isRTL ? 'فشل تنظيف العناوين' : 'CLEAN_ERROR', 'warning')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 842
+Text: "showToast(isRTL ? 'تم اكتمال المهمة! نقلت إلى الخزنة' : 'GOAL ACHIEVED! MOVED TO WINS', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 913
+Text: "showToast(isRTL ? 'فشل تحديث البيانات في قاعدة البيانات' : 'DATABASE_UPDATE_ERROR', 'warning')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 921
+Text: "showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 963
+Text: "showToast(isRTL ? 'فشل تحديث البيانات في قاعدة البيانات' : 'DATABASE_UPDATE_ERROR', 'warning')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1011
+Text: "showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1101
+Text: "showToast(isRTL ? 'فشل نقل المهمة' : 'TASK_MOVE_ERROR', 'warning')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1109
+Text: "showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1120
+Text: "showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1127
+Text: "showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1154
+Text: "showToast(isRTL ? 'تم إضافة الهدف محلياً' : 'TASK_SAVED', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1163
+Text: "showToast(isRTL ? 'تم إضافة الهدف' : 'TASK_SAVED', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1172
+Text: "showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1213
+Text: "showToast(isRTL ? 'تم التحديث' : 'GOAL UPDATED', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1238
+Text: "? `سعة المحطة ممتلئة (${usedSlots.toFixed(1).replace('.0','')}/9 فتحات) - أتمم أو أزل مهمات موجودة.`"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1251
+Text: "showToast(isRTL ? 'تم التحديث' : 'GOAL UPDATED', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1257
+Text: "showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1261
+Text: "if (!confirm(isRTL ? 'هل أنت متأكد من حذف هذه المهمة؟' : 'CONFIRM GOAL TERMINATION?')) return"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1268
+Text: "showToast(isRTL ? 'تم حذف المهمة' : 'GOAL DELETED', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1276
+Text: "showToast(isRTL ? `فشل الحذف: ${error.message}` : `DELETE FAILED: ${error.message}`, 'warning')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1278
+Text: "showToast(isRTL ? 'تم حذف المهمة' : 'GOAL DELETED', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1286
+Text: "showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1310
+Text: "showToast(isRTL ? "فشل تحديث القواعد" : "FAILED TO UPDATE TEAM RULES", "warning")"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1313
+Text: "showToast(isRTL ? "تم تحديث قواعد الفريق!" : "TEAM RULES UPDATED", "success")"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1319
+Text: "if (confirm(isRTL ? 'هل أنت متأكد من مغادرة الفريق؟' : 'Are you sure you want to leave the team?')) {"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1328
+Text: "showToast(isRTL ? 'فشل مغادرة الفريق' : 'FAILED TO LEAVE TEAM', 'warning')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1331
+Text: "showToast(isRTL ? 'لقد غادرت الفريق بنجاح' : 'YOU HAVE LEFT THE TEAM', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1357
+Text: "{isRTL ? 'جاري التحميل...' : 'LOADING WORKSPACE...'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1428
+Text: "title={isRTL ? 'حذف المهمة' : 'DELETE_GOAL'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1434
+Text: "<p className="text-[9px] font-space text-[var(--text-secondary)] tracking-[0.4em] uppercase font-black">{isRTL ? 'مكتمل' : 'Complete'}</p>"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1442
+Text: "<span>{isRTL ? 'إجمالي التركيز:' : 'Total Focus:'} <strong className="text-white font-black ml-1">{Math.floor(totalTimeInvested / 60)}h {totalTimeInvested % 60}m</strong></span>"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1446
+Text: "<span>{isRTL ? 'مكتمل:' : 'Done:'} <strong className="text-white font-black ml-1">{completedCount}</strong></span>"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1450
+Text: "<span>{isRTL ? 'المهام الإجمالية:' : 'Total Tasks:'} <strong className="text-white font-black ml-1">{totalCount}</strong></span>"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1548
+Text: "title={mission.sync_to_dashboard ? (isRTL ? 'إلغاء التثبيت من الواجهة' : 'UNPIN FROM DASHBOARD') : (isRTL ? 'تثبيت في الواجهة' : 'PIN TO DASHBOARD')}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1559
+Text: "(mission?.title === "Start Here 🚀" || mission?.title === "ابدأ من هنا 🚀") &&"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1563
+Text: "style={(mission?.title === "Start Here 🚀" || mission?.title === "ابدأ من هنا 🚀") &&"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1588
+Text: "{isRTL ? 'استيراد قائمة تشغيل' : 'IMPORT PLAYLIST'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1595
+Text: "{isRTL ? 'استيراد ذكي' : 'SMART IMPORT'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1609
+Text: "{isRTL ? 'الملاحظات' : 'NOTES'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1623
+Text: "{isRTL ? 'مشاركة' : 'SHARE'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1694
+Text: "<h2 className="text-[10px] font-black font-space text-[var(--text-secondary)] tracking-[0.5em] uppercase">{isRTL ? 'قائمة المهام' : 'TASKS'}</h2>"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1702
+Text: "{ key: 'ALL', label: isRTL ? 'الكل' : 'All Active' },"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1703
+Text: "{ key: 'WEEK', label: isRTL ? 'هذا الأسبوع' : 'Upcoming This Week' },"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1704
+Text: "{ key: 'OVERDUE', label: isRTL ? 'المتأخرة' : 'Overdue' }"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1736
+Text: "{isRTL ? 'قائمة' : 'LIST VIEW'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1750
+Text: "{isRTL ? 'كانبان' : 'BOARD VIEW'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 1847
+Text: "showToast(isRTL ? 'غير مسموح // ليست مهمتك' : 'RESTRICTED // NOT YOUR TASK', 'warning');"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2044
+Text: "showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2081
+Text: "placeholder={isRTL ? "إضافة مهمة سريعة... (Enter)" : "Quick add task... (Press Enter)"}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2136
+Text: "showToast(isRTL ? "فشل إنشاء المهمة" : "FAILED TO CREATE TASK", "warning")"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2173
+Text: "placeholder={isRTL ? 'إضافة مهمة... (ENTER)' : 'ADD_TASK... (PRESS ENTER)'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2182
+Text: "+ {isRTL ? 'إضافة' : 'ADD'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2193
+Text: "? "هذه الأشرطة تحدد وزن أو حجم المهمة. المهمة الأكبر تمنحك نقاط خبرة أكثر وتأخذ وقتاً أطول.""
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2214
+Text: "{isRTL ? "واضح إن الهدف ده فيه مهام كتير! إيه رأيك تكبر حجمه لـ Medium عشان يعكس مجهودك الحقيقي وتكسب نقاط XP أكتر؟" : "Looks like this goal has a lot of tasks! How about upgrading it to Medium to reflect your true effort and earn more XP?"}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2222
+Text: "{isRTL ? "المهام بدأت تزيد هنا! إيه رأيك تخليه Large؟ الحجم الأكبر هيديك مساحة أفضل وسقف XP أعلى يناسب تعبك." : "Tasks are piling up! Consider upgrading to Large to give yourself more space and unlock a higher XP ceiling."}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2259
+Text: "{isRTL ? 'الملاحظات' : 'NOTES'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2262
+Text: "{linkedNotes.length} {isRTL ? 'سجل مرتبط' : 'RECORDS LINKED TO THIS GOAL'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2277
+Text: "{isRTL ? 'لا توجد سجلات مرتبطة' : 'NO_INTEL_LINKED'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2280
+Text: "{isRTL ? 'اذهب إلى العقل وأنشئ ملاحظة مرتبطة بهذه المهمة' : 'Go to NOTES → NEW_LOG and link it to this goal'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2334
+Text: "showToast(isRTL ? 'تم استيراد قائمة التشغيل بنجاح' : 'PLAYLIST_IMPORTED // TASKS_DEPLOYED', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2363
+Text: "? `تم إضافة ${newTasks.length} مهمة بنجاح`"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2436
+Text: "{isRTL ? 'إدارة الفريق // العمليات' : 'SQUAD_CONTROL // OPERATIONS'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2455
+Text: "{isRTL ? 'أعضاء الفريق' : 'SQUAD MEMBERS'} ({squadMembers.length})"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2515
+Text: "{isRTL ? 'طلبات الانضمام المعلقة' : 'PENDING REQUESTS'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2521
+Text: "{isRTL ? 'لا توجد طلبات معلقة // الفريق آمن' : 'NO PENDING REQUESTS // SQUAD SECURE'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2554
+Text: "showToast(isRTL ? 'فشل قبول الطلب' : 'FAILED TO APPROVE', 'warning')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2564
+Text: "showToast(isRTL ? 'تم قبول العضو الجديد في الفريق!' : 'MEMBER APPROVED // JOINED SQUAD', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2573
+Text: "{isReviewing === req.id ? 'PROCESSING...' : (isRTL ? '✓ قبول' : '✓ APPROVE')}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2582
+Text: "showToast(isRTL ? 'فشل رفض الطلب' : 'FAILED TO REJECT', 'warning')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2585
+Text: "showToast(isRTL ? 'تم رفض طلب الانضمام' : 'MEMBER REJECTED // SQUAD SECURE', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2593
+Text: "{isReviewing === req.id ? 'PROCESSING...' : (isRTL ? '✗ رفض' : '✗ REJECT')}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2608
+Text: "{isRTL ? 'أدوار وأعضاء الفريق' : 'SQUAD ROLES & KICK'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2614
+Text: "{isRTL ? 'لا يوجد أعضاء آخرون في الفريق' : 'NO OTHER MEMBERS IN SQUAD'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2646
+Text: "if (confirm(isRTL ? `هل أنت متأكد من إزالة ${member.full_name} من الفريق؟` : `Are you sure you want to remove ${member.full_name} from the squad?`)) {"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2654
+Text: "showToast(isRTL ? 'فشل إزالة العضو' : 'FAILED TO REMOVE MEMBER', 'warning')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2657
+Text: "showToast(isRTL ? 'تم إزالة العضو من الفريق' : 'MEMBER REMOVED FROM SQUAD', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2676
+Text: "{isRTL ? 'الدور والامتيازات:' : 'ROLE & PERMISSIONS:'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2701
+Text: "showToast(isRTL ? 'فشل تحديث الدور' : 'FAILED TO UPDATE ROLE', 'warning')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2704
+Text: "showToast(isRTL ? 'تم تحديث الدور بنجاح!' : `ROLE UPDATED TO ${newRole.toUpperCase()}`, 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2730
+Text: "{isRTL ? 'قواعد الفريق // RULES' : 'SQUAD RULES'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2763
+Text: "<div className="text-zinc-400 font-bold">SYSTEM ROLE POLICIES // ضوابط الأدوار:</div>"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2764
+Text: "<div>• {isRTL ? 'الضيف (Guest) تنتهي صلاحيته بعد 7 أيام' : 'Guest access expires automatically after 7 days'}</div>"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2765
+Text: "<div>• {isRTL ? 'المشاهد والضيف لا يمكنهم تعديل أو نقل المهام' : 'Viewer & Guest cannot add, complete, or move tasks'}</div>"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2766
+Text: "<div>• {isRTL ? 'المشرفون (Admin) لا يمكنهم حذف الفريق' : 'Admins cannot terminate the squad'}</div>"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2779
+Text: "{isRTL ? '✗ مغادرة الفريق' : '✗ LEAVE SQUAD'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2820
+Text: "{isRTL ? 'ACCESS_KEY_GENERATOR // مشاركة الهدف' : 'ACCESS_KEY_GENERATOR'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2823
+Text: "{isRTL ? 'اختر طريقة مشاركة هذه المهمة' : 'Choose secure channel to export access'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2845
+Text: "{isRTL ? 'جارٍ توليد الكارت...' : 'GENERATING CARD...'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2859
+Text: "{isRTL ? 'دعوة كـ:' : 'INVITE AS:'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2886
+Text: "showToast(isRTL ? 'تم نسخ رابط الدعوة!' : 'SQUAD INVITE URL COPIED', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2917
+Text: "showToast(isRTL ? 'تم نسخ الرابط العام!' : 'PUBLIC VIEW LINK COPIED', 'success')"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2959
+Text: "{isRTL ? 'تحميل كارت الإنجاز' : 'DOWNLOAD ACHIEVEMENT STORY'}"
+
+File: src/app/goals/squad/[id]/page.tsx
+Line: 2962
+Text: "{isRTL ? 'تصدير تقدمك كصورة لمشاركتها' : 'Export progress metrics as custom image'}"
+
+File: src/app/missions/page.tsx
+Line: 122
+Text: "{mission.sync_to_dashboard ? (isRTL ? 'نشط' : 'ACTIVE') : (isRTL ? 'استعداد' : 'STANDBY')}"
+
+File: src/app/missions/page.tsx
+Line: 282
+Text: "{completedTasks}/{totalTasks} {isRTL ? 'المهام' : 'TASKS'}"
+
+File: src/app/missions/page.tsx
+Line: 477
+Text: "? 'تم إرسال طلب الانضمام // بانتظار موافقة القائد'"
+
+File: src/app/missions/page.tsx
+Line: 494
+Text: "setJoinErrorText(isRTL ? 'الطلب قيد الانتظار بالفعل // يرجى الانتظار' : 'REQUEST_PENDING // ALREADY SENT')"
+
+File: src/app/missions/page.tsx
+Line: 498
+Text: "setJoinErrorText(isRTL ? 'تم رفض طلبك السابق // الوصول مصنف' : 'REQUEST_REJECTED // ACCESS CLASSIFIED')"
+
+File: src/app/missions/page.tsx
+Line: 517
+Text: "showToast(isRTL ? 'تم نسخ الرابط' : 'INVITE LINK COPIED', 'success')"
+
+File: src/app/missions/page.tsx
+Line: 528
+Text: "showToast(isRTL ? 'تم تحديث القاعدة!' : 'RULE UPDATED', 'success')"
+
+File: src/app/missions/page.tsx
+Line: 531
+Text: "showToast(isRTL ? 'فشل التحديث!' : 'UPDATE FAILED', 'warning')"
+
+File: src/app/missions/page.tsx
+Line: 762
+Text: "showToast(isRTL ? 'يجب إدخال اسم للهدف' : 'Goal title is required', 'warning')"
+
+File: src/app/missions/page.tsx
+Line: 769
+Text: "showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')"
+
+File: src/app/missions/page.tsx
+Line: 776
+Text: "showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')"
+
+File: src/app/missions/page.tsx
+Line: 818
+Text: "showToast(isRTL ? 'تم حفظ الهدف محلياً' : 'Goal saved locally!', 'success')"
+
+File: src/app/missions/page.tsx
+Line: 842
+Text: "? `سعة المحطة ممتلئة (${usedSlots.toFixed(1).replace('.0', '')}/9 فتحات) - أتمم أو أزل مهمات موجودة.`"
+
+File: src/app/missions/page.tsx
+Line: 921
+Text: "showToast(isRTL ? 'تم إنشاء الهدف' : 'Goal activated!', 'success')"
+
+File: src/app/missions/page.tsx
+Line: 948
+Text: "{isRTL ? 'جاري مزامنة مساحة العمل...' : 'Syncing workspace...'}"
+
+File: src/app/missions/page.tsx
+Line: 1011
+Text: "<>{isRTL ? 'أهداف' : 'SOLO'}<span style={{ color: currentTheme.color }}>{isRTL ? ' فردية' : '_GOALS'}</span></>"
+
+File: src/app/missions/page.tsx
+Line: 1013
+Text: "<>{isRTL ? 'عمليات' : 'SQUAD'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الفريق' : '_OPS'}</span></>"
+
+File: src/app/missions/page.tsx
+Line: 1016
+Text: "/* <>{isRTL ? 'لوحة' : 'GOAL'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الأهداف' : '_CANVAS'}</span></> */"
+
+File: src/app/missions/page.tsx
+Line: 1017
+Text: "<>{isRTL ? 'أهداف' : 'SOLO'}<span style={{ color: currentTheme.color }}>{isRTL ? ' فردية' : '_GOALS'}</span></>"
+
+File: src/app/missions/page.tsx
+Line: 1023
+Text: "<>{isRTL ? 'أهداف شخصية نشطة' : 'PERSONAL GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>"
+
+File: src/app/missions/page.tsx
+Line: 1025
+Text: "<>{isRTL ? 'أهداف تعاونية نشطة' : 'COLLABORATIVE GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>"
+
+File: src/app/missions/page.tsx
+Line: 1028
+Text: "/* <>{isRTL ? 'الأهداف الأساسية النشطة' : 'Active Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'هدف نشط' : 'total'}</> */"
+
+File: src/app/missions/page.tsx
+Line: 1029
+Text: "<>{isRTL ? 'أهداف شخصية نشطة' : 'PERSONAL GOALS'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'ACTIVE'}</>"
+
+File: src/app/missions/page.tsx
+Line: 1041
+Text: "{isRTL ? 'الانضمام لهدف' : 'JOIN GOAL'}"
+
+File: src/app/missions/page.tsx
+Line: 1049
+Text: "{isRTL ? 'إنشاء هدف فريق' : 'CREATE SQUAD GOAL'}"
+
+File: src/app/missions/page.tsx
+Line: 1059
+Text: "{typeFilter === 'solo' ? (isRTL ? 'إنشاء هدف فردي' : 'CREATE GOAL') : (isRTL ? 'إنشاء هدف' : 'Create Goal')}"
+
+File: src/app/missions/page.tsx
+Line: 1104
+Text: "مرحباً بك في منصتك الشخصية لإدارة الأهداف والإنتاجية. هذا النظام مصمم لمساعدتك على تنظيم يومك وبناء عادات مستدامة."
+
+File: src/app/missions/page.tsx
+Line: 1107
+Text: "<li><span style={{ color: currentTheme.color }}>سعة التركيز (Focus Capacity):</span> تدعم واجهة العمل بحد أقصى 9 مهام نشطة في نفس الوقت لضمان تركيزك الكامل وتجنب تشتت الانتباه.</li>"
+
+File: src/app/missions/page.tsx
+Line: 1108
+Text: "<li><span style={{ color: currentTheme.color }}>نقاط الإنجاز (XP System):</span> إكمال المهام يمنحك نقاط خبرة لتوثيق حجم مجهودك ومراقبة تزايد معدل إنتاجيتك بشكل ملموس.</li>"
+
+File: src/app/missions/page.tsx
+Line: 1109
+Text: "<li><span style={{ color: currentTheme.color }}>مؤشر الالتزام:</span> التراجع عن متابعة أهدافك اليومية أو التكاسل لفترات طويلة يؤدي إلى انخفاض نقاطك تدريجياً، لتنبيهك بضرورة العودة للمسار الصحيح.</li>"
+
+File: src/app/missions/page.tsx
+Line: 1156
+Text: "? (isRTL ? 'إنشاء هدف فريق' : 'Create Squad Goal')"
+
+File: src/app/missions/page.tsx
+Line: 1157
+Text: ": (isRTL ? 'إنشاء هدف جديد' : 'Create New Goal')}"
+
+File: src/app/missions/page.tsx
+Line: 1164
+Text: "{isRTL ? 'العنوان' : 'Goal Title'}"
+
+File: src/app/missions/page.tsx
+Line: 1169
+Text: "placeholder={isRTL ? 'ما الذي تريد تحقيقه؟...' : 'What do you want to achieve?...'}"
+
+File: src/app/missions/page.tsx
+Line: 1179
+Text: "{isRTL ? 'تاريخ الاستحقاق (اختياري)' : 'Deadline (Optional)'}"
+
+File: src/app/missions/page.tsx
+Line: 1193
+Text: "{isRTL ? 'تثبيت في اللوحة الرئيسة' : 'Pin to Dashboard'}"
+
+File: src/app/missions/page.tsx
+Line: 1213
+Text: "{isRTL ? 'إلغاء' : 'Cancel'}"
+
+File: src/app/missions/page.tsx
+Line: 1222
+Text: "{isRTL ? 'إنشاء هدف' : 'CREATE GOAL'}"
+
+File: src/app/missions/page.tsx
+Line: 1237
+Text: "{isRTL ? 'مهامي' : 'My Tasks'}"
+
+File: src/app/missions/page.tsx
+Line: 1241
+Text: "{allTasks.length} {isRTL ? 'مهام' : 'tasks'}"
+
+File: src/app/missions/page.tsx
+Line: 1256
+Text: "{isRTL ? 'جميع المهام' : 'ALL TASKS'} ({allTasks.length})"
+
+File: src/app/missions/page.tsx
+Line: 1318
+Text: "{task.weight || 3} {isRTL ? 'نقطة' : 'XP'}"
+
+File: src/app/missions/page.tsx
+Line: 1327
+Text: "{isRTL ? 'لا توجد مهام في هذه القائمة.' : 'No tasks in this view.'}"
+
+File: src/app/missions/page.tsx
+Line: 1345
+Text: "{isRTL ? 'لا توجد أهداف تقودها حالياً' : 'NO COMMANDING SQUAD GOALS'}"
+
+File: src/app/missions/page.tsx
+Line: 1363
+Text: "{isRTL ? 'لا توجد أهداف معينة لك حالياً' : 'NO ASSIGNED SQUAD GOALS'}"
+
+File: src/app/missions/page.tsx
+Line: 1424
+Text: "{isRTL ? 'تحذير: تشتيت التركيز' : 'WARNING: CONTEXT SWITCHING'}"
+
+File: src/app/missions/page.tsx
+Line: 1431
+Text: "? '🚧 تشتيت التركيز يقلل الأداء الذهني بنسبة تصل إلى 40%.'"
+
+File: src/app/missions/page.tsx
+Line: 1436
+Text: "? 'توجد مهام نشطة تستهلك سعة التركيز أو مهام حرجة قريبة من الموعد النهائي. إضافة هدف جديد سيقلل من جودة التنفيذ.'"
+
+File: src/app/missions/page.tsx
+Line: 1443
+Text: "<span>{isRTL ? 'سعة التركيز النشطة:' : 'Active Focus Capacity:'}</span>"
+
+File: src/app/missions/page.tsx
+Line: 1449
+Text: "<span>{isRTL ? 'المهام الحرجة القريبة:' : 'Critical Near-Deadline Goals:'}</span>"
+
+File: src/app/missions/page.tsx
+Line: 1450
+Text: "<span className="text-[#FF0055] font-black">{warningCriticalCount} {isRTL ? 'مهام' : 'Goals'}</span>"
+
+File: src/app/missions/page.tsx
+Line: 1464
+Text: "{isRTL ? 'استبدال المهمة' : 'FORCE SWAP'}"
+
+File: src/app/missions/page.tsx
+Line: 1474
+Text: "{isRTL ? 'الاستمرار بالتركيز' : 'KEEP FOCUSING'}"
+
+File: src/app/missions/page.tsx
+Line: 1535
+Text: "{isRTL ? 'لا توجد أهداف نشطة حالياً. استخدم لوحة الإنشاء بالأعلى للبدء.' : 'No active goals synced. Use the action panel above to initiate.'}"
+
+File: src/app/missions/page.tsx
+Line: 1585
+Text: "{isRTL ? 'الانضمام للفريق' : 'JOIN_A_SQUAD'}"
+
+File: src/app/missions/page.tsx
+Line: 1591
+Text: "{isRTL ? 'أدخل رمز الدعوة أو رابط الهدف' : 'Enter an invite code or paste a goal link'}"
+
+File: src/app/missions/page.tsx
+Line: 1628
+Text: "{isRTL ? 'تم تقديم الطلب // بانتظار موافقة القائد' : 'REQUEST SUBMITTED // WAITING FOR APPROVAL'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 218
+Text: "showToast(isRTL ? "تم تعيين المهمة لك" : "TASK ASSIGNED TO YOU", "success")"
+
+File: src/app/missions/[id]/page.tsx
+Line: 231
+Text: "showToast(isRTL ? "تم إلغاء التعيين" : "TASK UNASSIGNED", "success")"
+
+File: src/app/missions/[id]/page.tsx
+Line: 235
+Text: "showToast(isRTL ? "هذه المهمة معينة بالفعل لشخص آخر" : "TASK ALREADY ASSIGNED TO ANOTHER MEMBER", "warning")"
+
+File: src/app/missions/[id]/page.tsx
+Line: 273
+Text: "showToast(isRTL ? 'تم نسخ صورة البطاقة بنجاح!' : 'CARD IMAGE COPIED TO CLIPBOARD', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 278
+Text: "showToast(isRTL ? 'الكارت غير متوفر حالياً // يعمل في البيئة الإنتاجية' : 'CARD_UNAVAILABLE // Works on production', 'warning')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 300
+Text: "showToast(isRTL ? 'تم تحميل الكارت بنجاح!' : 'GOAL CARD DOWNLOADED SUCCESSFULLY', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 305
+Text: "showToast(isRTL ? 'الكارت غير متوفر حالياً // يعمل في البيئة الإنتاجية' : 'CARD_UNAVAILABLE // Works on production', 'warning')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 495
+Text: "showToast(isRTL ? 'تم تنظيف العناوين بنجاح' : 'TITLES_CLEANED // OPTIMIZED', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 499
+Text: "showToast(isRTL ? 'فشل تنظيف العناوين' : 'CLEAN_ERROR', 'warning')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 734
+Text: "showToast(isRTL ? 'تم اكتمال المهمة! نقلت إلى الخزنة' : 'GOAL ACHIEVED! MOVED TO WINS', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 805
+Text: "showToast(isRTL ? 'فشل تحديث البيانات في قاعدة البيانات' : 'DATABASE_UPDATE_ERROR', 'warning')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 848
+Text: "showToast(isRTL ? 'فشل تحديث البيانات في قاعدة البيانات' : 'DATABASE_UPDATE_ERROR', 'warning')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 980
+Text: "showToast(isRTL ? 'فشل نقل المهمة' : 'TASK_MOVE_ERROR', 'warning')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 993
+Text: "showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1000
+Text: "showToast(isRTL ? 'برجاء الالتزام بلغة لائقة في النظام' : 'Please maintain professional language', 'warning')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1027
+Text: "showToast(isRTL ? 'تم إضافة الهدف محلياً' : 'TASK_SAVED', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1036
+Text: "showToast(isRTL ? 'تم إضافة الهدف' : 'TASK_SAVED', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1076
+Text: "showToast(isRTL ? 'تم التحديث' : 'GOAL UPDATED', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1101
+Text: "? `سعة المحطة ممتلئة (${usedSlots.toFixed(1).replace('.0','')}/9 فتحات) - أتمم أو أزل مهمات موجودة.`"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1114
+Text: "showToast(isRTL ? 'تم التحديث' : 'GOAL UPDATED', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1119
+Text: "if (!confirm(isRTL ? 'هل أنت متأكد من حذف هذه المهمة؟' : 'CONFIRM GOAL TERMINATION?')) return"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1126
+Text: "showToast(isRTL ? 'تم حذف المهمة' : 'GOAL DELETED', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1134
+Text: "showToast(isRTL ? `فشل الحذف: ${error.message}` : `DELETE FAILED: ${error.message}`, 'warning')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1136
+Text: "showToast(isRTL ? 'تم حذف المهمة' : 'GOAL DELETED', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1163
+Text: "showToast(isRTL ? "فشل تحديث القواعد" : "FAILED TO UPDATE SQUAD RULES", "warning")"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1166
+Text: "showToast(isRTL ? "تم تحديث قواعد الفريق!" : "SQUAD RULES UPDATED", "success")"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1172
+Text: "if (confirm(isRTL ? 'هل أنت متأكد من مغادرة الفريق؟' : 'Are you sure you want to leave the squad?')) {"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1181
+Text: "showToast(isRTL ? 'فشل مغادرة الفريق' : 'FAILED TO LEAVE SQUAD', 'warning')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1184
+Text: "showToast(isRTL ? 'لقد غادرت الفريق بنجاح' : 'YOU HAVE LEFT THE SQUAD', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1210
+Text: "{isRTL ? 'جاري مزامنة مساحة العمل...' : 'Syncing workspace...'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1278
+Text: "title={isRTL ? 'حذف المهمة' : 'DELETE_GOAL'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1284
+Text: "<p className="text-[9px] font-space text-[var(--text-secondary)] tracking-[0.4em] uppercase font-black">{isRTL ? 'مكتمل' : 'Complete'}</p>"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1292
+Text: "<span>{isRTL ? 'إجمالي التركيز:' : 'Total Focus:'} <strong className="text-white font-black ml-1">{Math.floor(totalTimeInvested / 60)}h {totalTimeInvested % 60}m</strong></span>"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1296
+Text: "<span>{isRTL ? 'مكتمل:' : 'Done:'} <strong className="text-white font-black ml-1">{completedCount}</strong></span>"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1300
+Text: "<span>{isRTL ? 'المهام الإجمالية:' : 'Total Tasks:'} <strong className="text-white font-black ml-1">{totalCount}</strong></span>"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1398
+Text: "title={mission.sync_to_dashboard ? (isRTL ? 'إلغاء التثبيت من الواجهة' : 'UNPIN FROM DASHBOARD') : (isRTL ? 'تثبيت في الواجهة' : 'PIN TO DASHBOARD')}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1409
+Text: "(mission?.title === "Start Here 🚀" || mission?.title === "ابدأ من هنا 🚀") &&"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1413
+Text: "style={(mission?.title === "Start Here 🚀" || mission?.title === "ابدأ من هنا 🚀") &&"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1438
+Text: "{isRTL ? 'استيراد قائمة تشغيل' : 'IMPORT PLAYLIST'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1445
+Text: "{isRTL ? 'استيراد ذكي' : 'SMART IMPORT'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1459
+Text: "{isRTL ? 'الملاحظات' : 'NOTES'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1473
+Text: "{isRTL ? 'مشاركة' : 'SHARE'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1541
+Text: "<h2 className="text-[10px] font-black font-space text-[var(--text-secondary)] tracking-[0.5em] uppercase">{isRTL ? 'قائمة المهام' : 'TASKS'}</h2>"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1549
+Text: "{ key: 'ALL', label: isRTL ? 'الكل' : 'All Active' },"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1550
+Text: "{ key: 'WEEK', label: isRTL ? 'هذا الأسبوع' : 'Upcoming This Week' },"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1551
+Text: "{ key: 'OVERDUE', label: isRTL ? 'المتأخرة' : 'Overdue' }"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1584
+Text: "{isRTL ? 'قائمة' : 'LIST VIEW'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1599
+Text: "{isRTL ? 'كانبان' : 'BOARD VIEW'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1697
+Text: "showToast(isRTL ? 'غير مسموح // ليست مهمتك' : 'RESTRICTED // NOT YOUR TASK', 'warning');"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1934
+Text: "placeholder={isRTL ? "إضافة مهمة سريعة... (Enter)" : "Quick add task... (Press Enter)"}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 1989
+Text: "showToast(isRTL ? "فشل إنشاء المهمة" : "FAILED TO CREATE TASK", "warning")"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2024
+Text: "placeholder={isRTL ? 'إضافة مهمة... (ENTER)' : 'ADD_TASK... (PRESS ENTER)'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2033
+Text: "+ {isRTL ? 'إضافة' : 'ADD'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2044
+Text: "? "هذه الأشرطة تحدد وزن أو حجم المهمة. المهمة الأكبر تمنحك نقاط خبرة أكثر وتأخذ وقتاً أطول.""
+
+File: src/app/missions/[id]/page.tsx
+Line: 2065
+Text: "{isRTL ? "واضح إن الهدف ده فيه مهام كتير! إيه رأيك تكبر حجمه لـ Medium عشان يعكس مجهودك الحقيقي وتكسب نقاط XP أكتر؟" : "Looks like this goal has a lot of tasks! How about upgrading it to Medium to reflect your true effort and earn more XP?"}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2073
+Text: "{isRTL ? "المهام بدأت تزيد هنا! إيه رأيك تخليه Large؟ الحجم الأكبر هيديك مساحة أفضل وسقف XP أعلى يناسب تعبك." : "Tasks are piling up! Consider upgrading to Large to give yourself more space and unlock a higher XP ceiling."}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2110
+Text: "{isRTL ? 'الملاحظات' : 'NOTES'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2113
+Text: "{linkedNotes.length} {isRTL ? 'سجل مرتبط' : 'RECORDS LINKED TO THIS GOAL'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2128
+Text: "{isRTL ? 'لا توجد سجلات مرتبطة' : 'NO_INTEL_LINKED'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2131
+Text: "{isRTL ? 'اذهب إلى العقل وأنشئ ملاحظة مرتبطة بهذه المهمة' : 'Go to NOTES → NEW_LOG and link it to this goal'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2185
+Text: "showToast(isRTL ? 'تم استيراد قائمة التشغيل بنجاح' : 'PLAYLIST_IMPORTED // TASKS_DEPLOYED', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2214
+Text: "? `تم إضافة ${newTasks.length} مهمة بنجاح`"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2287
+Text: "{isRTL ? 'إدارة الفريق // العمليات' : 'SQUAD_CONTROL // OPERATIONS'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2306
+Text: "{isRTL ? 'أعضاء الفريق' : 'SQUAD MEMBERS'} ({squadMembers.length})"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2366
+Text: "{isRTL ? 'طلبات الانضمام المعلقة' : 'PENDING REQUESTS'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2372
+Text: "{isRTL ? 'لا توجد طلبات معلقة // الفريق آمن' : 'NO PENDING REQUESTS // SQUAD SECURE'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2405
+Text: "showToast(isRTL ? 'فشل قبول الطلب' : 'FAILED TO APPROVE', 'warning')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2408
+Text: "showToast(isRTL ? 'تم قبول العضو الجديد في الفريق!' : 'MEMBER APPROVED // JOINED SQUAD', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2417
+Text: "{isReviewing === req.id ? 'PROCESSING...' : (isRTL ? '✓ قبول' : '✓ APPROVE')}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2426
+Text: "showToast(isRTL ? 'فشل رفض الطلب' : 'FAILED TO REJECT', 'warning')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2429
+Text: "showToast(isRTL ? 'تم رفض طلب الانضمام' : 'MEMBER REJECTED // SQUAD SECURE', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2437
+Text: "{isReviewing === req.id ? 'PROCESSING...' : (isRTL ? '✗ رفض' : '✗ REJECT')}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2452
+Text: "{isRTL ? 'أدوار وأعضاء الفريق' : 'SQUAD ROLES & KICK'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2458
+Text: "{isRTL ? 'لا يوجد أعضاء آخرون في الفريق' : 'NO OTHER MEMBERS IN SQUAD'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2490
+Text: "if (confirm(isRTL ? `هل أنت متأكد من إزالة ${member.full_name} من الفريق؟` : `Are you sure you want to remove ${member.full_name} from the squad?`)) {"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2498
+Text: "showToast(isRTL ? 'فشل إزالة العضو' : 'FAILED TO REMOVE MEMBER', 'warning')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2501
+Text: "showToast(isRTL ? 'تم إزالة العضو من الفريق' : 'MEMBER REMOVED FROM SQUAD', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2519
+Text: "{isRTL ? 'الدور:' : 'ROLE:'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2531
+Text: "showToast(isRTL ? 'فشل تحديث الدور' : 'FAILED TO UPDATE ROLE', 'warning')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2534
+Text: "showToast(isRTL ? 'تم تحديث الدور إلى عضو!' : 'ROLE UPDATED TO MEMBER', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2557
+Text: "showToast(isRTL ? 'فشل تحديث الدور' : 'FAILED TO UPDATE ROLE', 'warning')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2560
+Text: "showToast(isRTL ? 'تم تحديث الدور إلى مشرف!' : 'ROLE UPDATED TO CO-ADMIN', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2589
+Text: "{isRTL ? 'قواعد الفريق // RULES' : 'SQUAD RULES'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2632
+Text: "{isRTL ? '✗ مغادرة الفريق' : '✗ LEAVE SQUAD'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2673
+Text: "{isRTL ? 'ACCESS_KEY_GENERATOR // مشاركة الهدف' : 'ACCESS_KEY_GENERATOR'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2676
+Text: "{isRTL ? 'اختر طريقة مشاركة هذه المهمة' : 'Choose secure channel to export access'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2697
+Text: "{isRTL ? 'جارٍ توليد الكارت...' : 'GENERATING CARD...'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2723
+Text: "showToast(isRTL ? 'تم نسخ رابط الدعوة!' : 'SQUAD INVITE URL COPIED', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2754
+Text: "showToast(isRTL ? 'تم نسخ الرابط العام!' : 'PUBLIC VIEW LINK COPIED', 'success')"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2796
+Text: "{isRTL ? 'تحميل كارت الإنجاز' : 'DOWNLOAD ACHIEVEMENT STORY'}"
+
+File: src/app/missions/[id]/page.tsx
+Line: 2799
+Text: "{isRTL ? 'تصدير تقدمك كصورة لمشاركتها' : 'Export progress metrics as custom image'}"
+
+File: src/app/notes/page.tsx
+Line: 47
+Text: "setError(isRTL ? 'لم نجد نتائج لهذا الموضوع' : 'No results found for this topic')"
+
+File: src/app/notes/page.tsx
+Line: 56
+Text: "{isRTL ? 'و // ويكيبيديا' : 'W // WIKIPEDIA'}"
+
+File: src/app/notes/page.tsx
+Line: 63
+Text: "placeholder={loading ? (isRTL ? 'جاري البحث...' : 'Searching...') : (isRTL ? 'بحث سريع...' : 'Quick search...')}"
+
+File: src/app/notes/page.tsx
+Line: 72
+Text: "{loading ? '...' : (isRTL ? 'بحث' : 'GO')}"
+
+File: src/app/notes/page.tsx
+Line: 177
+Text: "title: task.title || (isRTL ? 'ملاحظة مهمة' : 'Task Note'),"
+
+File: src/app/notes/page.tsx
+Line: 218
+Text: "title: task.title || (isRTL ? 'ملاحظة مهمة' : 'Task Note'),"
+
+File: src/app/notes/page.tsx
+Line: 275
+Text: "if (confirm(isRTL ? 'هل تريد حذف هذه الملاحظة؟' : 'Delete this note?')) {"
+
+File: src/app/notes/page.tsx
+Line: 399
+Text: "{ label: isRTL ? '💡 فكرة' : '💡 Idea', value: 'idea' },"
+
+File: src/app/notes/page.tsx
+Line: 400
+Text: "{ label: isRTL ? '⚠️ هام' : '⚠️ Important', value: 'urgent' },"
+
+File: src/app/notes/page.tsx
+Line: 401
+Text: "{ label: isRTL ? '📚 مصدر' : '📚 Source', value: 'source' },"
+
+File: src/app/notes/page.tsx
+Line: 402
+Text: "{ label: isRTL ? '✅ مهمة' : '✅ Task', value: 'task' },"
+
+File: src/app/notes/page.tsx
+Line: 403
+Text: "{ label: isRTL ? '🔖 مرجع' : '🔖 Reference', value: 'reference' }"
+
+File: src/app/notes/page.tsx
+Line: 430
+Text: "title: newTitle || (isRTL ? 'ملاحظة غير معنونة' : 'Untitled Note'),"
+
+File: src/app/notes/page.tsx
+Line: 461
+Text: "{isRTL ? 'جاري تحميل الملاحظات...' : 'Loading notes...'}"
+
+File: src/app/notes/page.tsx
+Line: 515
+Text: "{isRTL ? 'الملاحظات' : 'NOTES'}"
+
+File: src/app/notes/page.tsx
+Line: 529
+Text: "placeholder={isRTL ? 'البحث في الملاحظات...' : 'Search notes...'}"
+
+File: src/app/notes/page.tsx
+Line: 542
+Text: "{isRTL ? 'إضافة ملاحظة' : 'Add Note'}"
+
+File: src/app/notes/page.tsx
+Line: 560
+Text: "{/* {isRTL ? '📝 ملاحظاتي الحرة' : '📝 Personal Notes'} */}"
+
+File: src/app/notes/page.tsx
+Line: 561
+Text: "{isRTL ? 'ملاحظاتي الحرة' : 'PERSONAL NOTES'}"
+
+File: src/app/notes/page.tsx
+Line: 573
+Text: "{/* {isRTL ? '💬 تعليقات المهام' : '💬 Task Comments'} */}"
+
+File: src/app/notes/page.tsx
+Line: 574
+Text: "{isRTL ? 'تعليقات المهام' : 'TASK COMMENTS'}"
+
+File: src/app/notes/page.tsx
+Line: 586
+Text: "{/* {isRTL ? '👁️ عرض الكل' : '👁️ Show All'} */}"
+
+File: src/app/notes/page.tsx
+Line: 587
+Text: "{isRTL ? 'عرض الكل' : 'SHOW ALL'}"
+
+File: src/app/notes/page.tsx
+Line: 593
+Text: "? `عرض ${filteredNotes.length} سجل من إجمالي ${notes.length}`"
+
+File: src/app/notes/page.tsx
+Line: 612
+Text: "placeholder={isRTL ? 'عنوان الملاحظة...' : 'Note title...'}"
+
+File: src/app/notes/page.tsx
+Line: 624
+Text: "{isRTL ? 'لوحة الملاحظة' : 'Note Canvas'}"
+
+File: src/app/notes/page.tsx
+Line: 638
+Text: "placeholder={isRTL ? 'اكتب ملاحظتك هنا...' : 'Write your note here...'}"
+
+File: src/app/notes/page.tsx
+Line: 670
+Text: "{isRTL ? 'ربط بالهدف (اختياري)' : 'Link to Goal (optional)'}"
+
+File: src/app/notes/page.tsx
+Line: 676
+Text: "{ value: '', label: isRTL ? '— بدون ربط —' : '— NO LINK —' },"
+
+File: src/app/notes/page.tsx
+Line: 686
+Text: "{isRTL ? 'اضغط ⌘+Enter للحفظ' : '⌘+Enter to save'}"
+
+File: src/app/notes/page.tsx
+Line: 689
+Text: "<button onClick={() => { setIsCreating(false); setNewContent(''); setNewTitle(''); setNewTag(''); setNewMissionId('') }} className="text-[var(--text-secondary)] font-space uppercase text-[10px] tracking-widest hover:text-[var(--text-primary)] transition-all">{isRTL ? 'إلغاء' : 'CANCEL'}</button>"
+
+File: src/app/notes/page.tsx
+Line: 695
+Text: "{isRTL ? 'حفظ' : 'Save'}"
+
+File: src/app/notes/page.tsx
+Line: 708
+Text: "{isRTL ? 'تصفية حسب الهدف' : 'Filter by Goal'}"
+
+File: src/app/notes/page.tsx
+Line: 721
+Text: "{isRTL ? 'جميع الأهداف' : 'ALL GOALS'}"
+
+File: src/app/notes/page.tsx
+Line: 754
+Text: "{isRTL ? 'الكل' : 'ALL'}"
+
+File: src/app/notes/page.tsx
+Line: 798
+Text: "? (isRTL ? 'نتائج البحث' : 'SEARCH RESULTS')"
+
+File: src/app/notes/page.tsx
+Line: 799
+Text: ": (isRTL ? 'الملاحظات' : 'NOTES')}"
+
+File: src/app/notes/page.tsx
+Line: 804
+Text: "? (isRTL ? 'لا توجد ملاحظات مطابقة' : 'No Matching Notes Found')"
+
+File: src/app/notes/page.tsx
+Line: 805
+Text: ": (isRTL ? 'لا توجد ملاحظات مضافة بعد' : 'No notes added yet')}"
+
+File: src/app/notes/page.tsx
+Line: 810
+Text: "? (isRTL ? 'جرب كلمات بحث مختلفة للعثور على ما تبحث عنه.' : 'Try different search terms to find what you\'re looking for.')"
+
+File: src/app/notes/page.tsx
+Line: 811
+Text: ": (isRTL ? 'لا توجد ملاحظات مضافة بعد. اضغط على زر "إضافة ملاحظة" لكتابة فكرتك الأولى.' : 'You haven\'t added any notes yet. Tap "Add Note" to write your first one.')}"
+
+File: src/app/notes/page.tsx
+Line: 831
+Text: ".slice(0, 60) || (isRTL ? 'ملاحظة فارغة...' : 'Empty note...')"
+
+File: src/app/notes/page.tsx
+Line: 883
+Text: "{note.title && note.title !== 'Untitled Note' ? note.title : (isRTL ? `ملاحظة — ${dateSuffix}` : `Note — ${dateSuffix}`)}"
+
+File: src/app/notes/page.tsx
+Line: 910
+Text: "{isRTL ? 'مدمج' : 'NESTED'}"
+
+File: src/app/notes/page.tsx
+Line: 970
+Text: "{isRTL ? `مرتبط بـ: ${editingNote.cups.title}` : `Linked to: ${editingNote.cups.title}`}"
+
+File: src/app/notes/page.tsx
+Line: 981
+Text: "placeholder={isRTL ? 'عنوان الملاحظة...' : 'Note title...'}"
+
+File: src/app/notes/page.tsx
+Line: 1061
+Text: "{isRTL ? 'محرر اللوحة' : 'Canvas Editor'}"
+
+File: src/app/notes/page.tsx
+Line: 1087
+Text: "{isRTL ? 'حفظ تلقائي' : 'Auto-saved'}"
+
+File: src/app/notifications/page.tsx
+Line: 62
+Text: "{isRTL ? 'الإشعارات' : 'NOTIFICATIONS'}"
+
+File: src/app/notifications/page.tsx
+Line: 66
+Text: "{isRTL ? 'إدارة التنبيهات والتقارير اليومية' : 'Manage your notifications and daily briefs'}"
+
+File: src/app/notifications/page.tsx
+Line: 77
+Text: "{isRTL ? 'تحديد الكل كمقروء' : 'Mark all as read'}"
+
+File: src/app/notifications/page.tsx
+Line: 86
+Text: "{ id: 'all', label: isRTL ? 'الكل' : 'ALL' },"
+
+File: src/app/notifications/page.tsx
+Line: 87
+Text: "{ id: 'unread', label: isRTL ? 'غير المقروء' : 'UNREAD' }"
+
+File: src/app/notifications/page.tsx
+Line: 109
+Text: "{isRTL ? 'جاري التحميل...' : 'Loading notifications...'}"
+
+File: src/app/notifications/page.tsx
+Line: 116
+Text: "? `لا توجد تنبيهات في قسم ${filter === 'all' ? 'الكل' : 'غير المقروء'}`"
+
+File: src/app/notifications/page.tsx
+Line: 171
+Text: "{isRTL ? 'مقروء' : 'Mark Read'}"
+
+File: src/app/notifications/page.tsx
+Line: 180
+Text: "title={isRTL ? 'الانتقال للهدف' : 'View Goal'}"
+
+File: src/app/page.tsx
+Line: 225
+Text: "return isRTL ? 'انضم إلى فريق لتتبع منافسيك.' : 'Join a squad to track your rivals.'"
+
+File: src/app/page.tsx
+Line: 230
+Text: "if (!myId) return isRTL ? 'سجل الدخول للمقارنة' : 'Log in to track rivals.'"
+
+File: src/app/page.tsx
+Line: 247
+Text: "? `أنت في الصدارة! يليك ${topMember.full_name || 'منافسك'} بفارق ${diff} XP.`"
+
+File: src/app/page.tsx
+Line: 252
+Text: "? `أنت متأخر بـ ${diff} XP عن ${topMember.full_name || 'المتصدر'}.`"
+
+File: src/app/page.tsx
+Line: 256
+Text: "return isRTL ? 'لا يوجد منافسين في هذا الفريق.' : 'No other active rivals in this squad.'"
+
+File: src/app/page.tsx
+Line: 259
+Text: "? 'ترتيبك في الفريق: شوف مركزك بين زمايلك.'"
+
+File: src/app/page.tsx
+Line: 346
+Text: "{isRTL ? 'منصة' : 'FOCUS'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'HUB'}</span>"
+
+File: src/app/page.tsx
+Line: 350
+Text: "{isRTL ? 'لوحة الإنتاجية والتركيز' : 'PRODUCTIVITY FOCUS MATRIX'} // {profile?.rank || 'MEMBER'}"
+
+File: src/app/page.tsx
+Line: 362
+Text: "{isRTL ? 'معدل التركيز اليومي' : 'DAILY FOCUS STATS'}"
+
+File: src/app/page.tsx
+Line: 418
+Text: "{isRTL ? 'التركيز اليومي' : 'DAILY FOCUS'}"
+
+File: src/app/page.tsx
+Line: 471
+Text: "{isRTL ? 'المنافسة' : 'RIVALRY'}"
+
+File: src/app/page.tsx
+Line: 519
+Text: "{isRTL ? 'الوارد التكتيكي العاجل' : 'ACTION INBOX // CRITICAL'}"
+
+File: src/app/page.tsx
+Line: 523
+Text: "{actionInboxTasks.length} {isRTL ? 'مهمة عاجلة' : 'IMMEDIATE'}"
+
+File: src/app/page.tsx
+Line: 585
+Text: "{/* {isRTL ? 'الوارد فارغ! جميع الالتزامات منجزة.' : 'INBOX CLEAR // NO OVERDUE TASKS'} */}"
+
+File: src/app/page.tsx
+Line: 586
+Text: "{isRTL ? 'عاش! مفيش أي مهام متأخرة عليك حالياً.' : "You're all caught up! Overdue tasks will appear here."}"
+
+File: src/app/page.tsx
+Line: 607
+Text: "{isRTL ? 'متتبع المنافسة' : 'THE RIVALRY TRACKER'}"
+
+File: src/app/page.tsx
+Line: 639
+Text: "{isRTL ? 'إدارة فرق العمل' : 'MANAGE TEAM WORKSPACES'}"
+
+File: src/app/page.tsx
+Line: 652
+Text: "{isRTL ? 'الأهداف المثبتة' : 'PINNED GOALS'}"
+
+File: src/app/page.tsx
+Line: 669
+Text: "(mission.title === "Start Here 🚀" || mission.title === "ابدأ من هنا 🚀") && "onboarding-start-goal""
+
+File: src/app/page.tsx
+Line: 710
+Text: "{isRTL ? 'لا توجد أهداف مثبتة. افتح هدفاً وثبّته في لوحة التحكم.' : 'No goals pinned. Open a goal and pin it to your Dashboard.'}"
+
+File: src/app/settings/page.tsx
+Line: 51
+Text: ": (isRTL ? 'المنظومة الذكية' : 'AI SYSTEM')"
+
+File: src/app/settings/page.tsx
+Line: 111
+Text: "showToast(isRTL ? 'تم حفظ التغييرات محلياً' : 'LOCAL SETTINGS UPDATED', 'success')"
+
+File: src/app/settings/page.tsx
+Line: 157
+Text: "showToast(isRTL ? 'تم حفظ التغييرات بنجاح' : 'SETTINGS_UPDATED_SUCCESSFULLY', 'success')"
+
+File: src/app/settings/page.tsx
+Line: 208
+Text: "showToast(isRTL ? 'تم حذف حسابك نهائياً بنجاح' : 'ACCOUNT_WIPED_SUCCESSFULLY', 'success')"
+
+File: src/app/settings/page.tsx
+Line: 224
+Text: "{isRTL ? 'جاري التحميل...' : 'LOADING USER DATA...'}"
+
+File: src/app/settings/page.tsx
+Line: 237
+Text: "{ id: 'ACCOUNT', label: isRTL ? 'الحساب' : 'ACCOUNT' },"
+
+File: src/app/settings/page.tsx
+Line: 238
+Text: "{ id: 'RANKS', label: isRTL ? 'الرتب والترقيات' : 'RANKS & SYSTEMS' },"
+
+File: src/app/settings/page.tsx
+Line: 240
+Text: "{ id: 'SYSTEM', label: isRTL ? 'النظام' : 'SYSTEM' }"
+
+File: src/app/settings/page.tsx
+Line: 254
+Text: "{isRTL ? 'تخصيص النظام' : 'SYSTEM CONFIGURATION'}"
+
+File: src/app/settings/page.tsx
+Line: 291
+Text: "{isRTL ? 'الفئات' : 'CATEGORIES'}"
+
+File: src/app/settings/page.tsx
+Line: 347
+Text: "{isRTL ? 'إعدادات الحساب الشخصي' : 'ACCOUNT CONFIGURATION'}"
+
+File: src/app/settings/page.tsx
+Line: 385
+Text: "{isRTL ? 'تغيير الشخصية' : 'CHANGE AVATAR'}"
+
+File: src/app/settings/page.tsx
+Line: 420
+Text: "{isRTL ? 'تغيير الشخصية' : 'CHANGE AVATAR'}"
+
+File: src/app/settings/page.tsx
+Line: 475
+Text: "placeholder={isRTL ? 'اختر' : 'SELECT'}"
+
+File: src/app/settings/page.tsx
+Line: 487
+Text: "{isRTL ? 'البريد الإلكتروني المتصل' : 'CONNECTED SECURITY EMAIL'}"
+
+File: src/app/settings/page.tsx
+Line: 497
+Text: "? 'حسابك الحالي مؤقت ومخزن محلياً. اضغط هنا لتأمين بياناتك ومزامنتها على السيرفر.'"
+
+File: src/app/settings/page.tsx
+Line: 522
+Text: "<span>{isRTL ? 'ربط الحساب بمزود جوجل' : 'LINK ACCOUNT WITH GOOGLE'}</span>"
+
+File: src/app/settings/page.tsx
+Line: 532
+Text: "{isRTL ? 'حذف الحساب بشكل نهائي' : 'PERMANENT DELETION'}"
+
+File: src/app/settings/page.tsx
+Line: 536
+Text: "? 'سيتم مسح جميع البيانات الخاصة بك نهائياً.'"
+
+File: src/app/settings/page.tsx
+Line: 549
+Text: "{isRTL ? 'حذف الحساب' : 'DELETE ACCOUNT'}"
+
+File: src/app/settings/page.tsx
+Line: 591
+Text: "{isRTL ? 'الحالة الآلية للمنظومة' : 'AUTOMATED SYSTEM SYNC'}"
+
+File: src/app/settings/page.tsx
+Line: 609
+Text: "{isRTL ? 'المزامنة مع الرتبة النشطة' : 'RANK-ALIGNED DIRECTIVE'}"
+
+File: src/app/settings/page.tsx
+Line: 613
+Text: "? 'يتم ضبط وتيرة التوجيهات وأسلوب المساعد الذكي تلقائياً بناءً على مستوى تقدمك الحالي.'"
+
+File: src/app/settings/page.tsx
+Line: 628
+Text: "{isRTL ? 'متزامن نشط' : 'SYNCHRONIZED'}"
+
+File: src/app/settings/page.tsx
+Line: 643
+Text: "{isRTL ? 'إعدادات النظام والصوت' : 'SYSTEM & AUDIO CALIBRATION'}"
+
+File: src/app/settings/page.tsx
+Line: 651
+Text: "{isRTL ? 'لغة واجهة النظام' : 'INTERFACE LANGUAGE'}"
+
+File: src/app/settings/page.tsx
+Line: 681
+Text: "{isRTL ? 'المظهر' : 'APPEARANCE'}"
+
+File: src/app/settings/page.tsx
+Line: 685
+Text: "{ key: 'dark', label: isRTL ? 'ليلي' : 'DARK' },"
+
+File: src/app/settings/page.tsx
+Line: 686
+Text: "{ key: 'light', label: isRTL ? 'نهاري' : 'LIGHT' }"
+
+File: src/app/settings/page.tsx
+Line: 718
+Text: "{isRTL ? 'مستوى الصوت العام' : 'MASTER SYSTEM VOLUME'}"
+
+File: src/app/settings/page.tsx
+Line: 729
+Text: "title={isRTL ? 'اختبار الصوت' : 'Test Sound'}"
+
+File: src/app/settings/page.tsx
+Line: 781
+Text: "{isRTL ? 'أصوات النظام' : 'System Sounds'}"
+
+File: src/app/settings/page.tsx
+Line: 784
+Text: "{isRTL ? 'تمكين المؤثرات الصوتية التفاعلية والاستجابات اللمسية.' : 'Enable interactive UI sound effects and haptic responses.'}"
+
+File: src/app/settings/page.tsx
+Line: 817
+Text: "? 'اختبار حزمة الصوت والتوليف التفاعلي الحالي.'"
+
+File: src/app/settings/page.tsx
+Line: 827
+Text: "{isRTL ? 'اختبار الصوت' : 'TEST SFX ENGINE'}"
+
+File: src/app/settings/page.tsx
+Line: 848
+Text: "{saving ? (isRTL ? 'جاري الحفظ...' : 'SAVING...') : t('save')}"
+
+File: src/app/settings/page.tsx
+Line: 987
+Text: "{isRTL ? 'تسجيل الخروج' : 'CONFIRM LOGOUT'}"
+
+File: src/app/settings/page.tsx
+Line: 990
+Text: "{isRTL ? 'تأكيد الخروج من النظام' : 'DISCONNECT_SESSION'}"
+
+File: src/app/settings/page.tsx
+Line: 996
+Text: "? 'هل أنت متأكد من رغبتك في تسجيل الخروج؟ نتمنى رؤيتك مجدداً في أقرب وقت.'"
+
+File: src/app/settings/page.tsx
+Line: 1007
+Text: "{isRTL ? 'نعم، تسجيل الخروج' : 'YES, LOGOUT'}"
+
+File: src/app/settings/page.tsx
+Line: 1018
+Text: "{isRTL ? 'إلغاء' : 'CANCEL'}"
+
+File: src/app/settings/page.tsx
+Line: 1048
+Text: "{isRTL ? 'تأكيد مسح الحساب والتقييم' : 'DELETE ACCOUNT & SURVEY'}"
+
+File: src/app/settings/page.tsx
+Line: 1063
+Text: "? 'تحذير: هذا الإجراء دائم ولا يمكن التراجع عنه. سيتم مسح جميع التقدم والبيانات بالكامل وبشكل نهائي.'"
+
+File: src/app/settings/page.tsx
+Line: 1071
+Text: "{isRTL ? '1. ما هو السبب الرئيسي لإلغاء الحساب؟' : '1. IS THERE SOMETHING SPECIFIC THAT BOTHERED YOU?'}"
+
+File: src/app/settings/page.tsx
+Line: 1076
+Text: "{ key: 'COMPLICATED', ar: 'صعوبة الاستخدام أو تعقيد الواجهة', en: 'Too complicated/hard to use' },"
+
+File: src/app/settings/page.tsx
+Line: 1077
+Text: "{ key: 'LATENCY', ar: 'بطء في استجابة النظام', en: 'AI coach response latency' },"
+
+File: src/app/settings/page.tsx
+Line: 1078
+Text: "{ key: 'CLUTTER', ar: 'تكدس بصري في التصميم', en: 'Too much visual clutter' },"
+
+File: src/app/settings/page.tsx
+Line: 1079
+Text: "{ key: 'FEATURES', ar: 'عدم وجود الميزات التي أحتاجها', en: 'Missing features I need' },"
+
+File: src/app/settings/page.tsx
+Line: 1080
+Text: "{ key: 'OTHER', ar: 'سبب آخر', en: 'Other reason' }"
+
+File: src/app/settings/page.tsx
+Line: 1108
+Text: "{isRTL ? '2. كيف تقيم تجربتك الإجمالية من 5؟' : '2. HOW WOULD YOU RATE THE HUB OUT OF 5?'}"
+
+File: src/app/settings/page.tsx
+Line: 1135
+Text: "{isRTL ? '3. هل وجدت بديلاً أفضل؟ (اختياري)' : '3. DID YOU FIND A BETTER ALTERNATIVE?'}"
+
+File: src/app/settings/page.tsx
+Line: 1142
+Text: "placeholder={isRTL ? "مثال: نعم، انتقلت لاستخدام أداة أخرى..." : "e.g. Yes, switched to another solution..."}"
+
+File: src/app/settings/page.tsx
+Line: 1156
+Text: "{isRTL ? 'تأكيد الحذف النهائي' : 'CONFIRM PERMANENT WIPE'}"
+
+File: src/app/settings/page.tsx
+Line: 1167
+Text: "{isRTL ? 'إلغاء' : 'CANCEL'}"
+
+File: src/app/vault/page.tsx
+Line: 115
+Text: "rank.id === 'SILVER' ? 'سيلفر' :"
+
+File: src/app/vault/page.tsx
+Line: 116
+Text: "rank.id === 'GOLD' ? 'جولد' :"
+
+File: src/app/vault/page.tsx
+Line: 117
+Text: "rank.id === 'PLATINUM' ? 'بلاتينوم' :"
+
+File: src/app/vault/page.tsx
+Line: 118
+Text: "rank.id === 'DIAMOND' ? 'دايموند' :"
+
+File: src/app/vault/page.tsx
+Line: 119
+Text: "rank.id === 'CROWN' ? 'كراون' :"
+
+File: src/app/vault/page.tsx
+Line: 120
+Text: "rank.id === 'ACE' ? 'ايس' : 'كونكر'"
+
+File: src/app/vault/page.tsx
+Line: 133
+Text: "status === 'EQUIPPED' ? 'نشط' :"
+
+File: src/app/vault/page.tsx
+Line: 134
+Text: "status === 'AVAILABLE' ? 'متاح' : 'غير متاح'"
+
+File: src/app/vault/page.tsx
+Line: 163
+Text: "{isRTL ? 'الخبرة المطلوبة' : 'XP REQUIRED'}"
+
+File: src/app/vault/page.tsx
+Line: 167
+Text: "isRTL ? 'المتصدر #1' : 'TOP #1 LEAD'"
+
+File: src/app/vault/page.tsx
+Line: 181
+Text: "{isRTL ? 'الميزة النشطة' : 'ACTIVE PERK'}"
+
+File: src/app/vault/page.tsx
+Line: 185
+Text: "rank.id === 'SILVER' ? 'الميزات القياسية مفتوحة' :"
+
+File: src/app/vault/page.tsx
+Line: 186
+Text: "rank.id === 'GOLD' ? 'لقب تحت الاسم (hasTitle)' :"
+
+File: src/app/vault/page.tsx
+Line: 187
+Text: "rank.id === 'PLATINUM' ? 'إطار حول الصورة (hasAvatarBorder)' :"
+
+File: src/app/vault/page.tsx
+Line: 188
+Text: "rank.id === 'DIAMOND' ? 'تفاعلات شات حصرية (hasExclusiveEmojis)' :"
+
+File: src/app/vault/page.tsx
+Line: 189
+Text: "rank.id === 'CROWN' ? 'توهج الاسم بالكامل (hasNameGlow)' :"
+
+File: src/app/vault/page.tsx
+Line: 190
+Text: "rank.id === 'ACE' ? 'بطاقة هوية بالهوفر (hasCallingCard)' : 'اللقب المتصدر الأول + كافة الميزات الحصرية'"
+
+File: src/app/vault/page.tsx
+Line: 202
+Text: "{isRTL ? 'ميزات الرتبة' : 'RANK UNLOCKS'}"
+
+File: src/app/vault/page.tsx
+Line: 206
+Text: "rank.id === 'SILVER' ? 'الوصول لصفحة الملاحظات والإعدادات' :"
+
+File: src/app/vault/page.tsx
+Line: 207
+Text: "rank.id === 'GOLD' ? 'لقب خاص يظهر أسفل اسمك كعضو مميز' :"
+
+File: src/app/vault/page.tsx
+Line: 208
+Text: "rank.id === 'PLATINUM' ? 'إطار نيون مضيء يحيط بصورتك الشخصية' :"
+
+File: src/app/vault/page.tsx
+Line: 209
+Text: "rank.id === 'DIAMOND' ? 'صلاحية استخدام تفاعلات حصرية وملصقات نيون في الشات' :"
+
+File: src/app/vault/page.tsx
+Line: 210
+Text: "rank.id === 'CROWN' ? 'تأثير توهج لوني مضيء لاسمك أينما يظهر' :"
+
+File: src/app/vault/page.tsx
+Line: 211
+Text: "rank.id === 'ACE' ? 'بطاقة تعريفية مخصصة تظهر عند تمرير الماوس على صورتك' : 'الحصول على لقب بطل المنصة باللون المتدرج المتحرك وكامل الصلاحيات'"
+
+File: src/app/vault/page.tsx
+Line: 240
+Text: "{isRTL ? 'تفعيل المظهر' : 'EQUIP THEME'}"
+
+File: src/app/vault/page.tsx
+Line: 251
+Text: "<p className="text-zinc-500 dark:text-white/40 font-black font-space text-2xl tracking-widest uppercase">{isRTL ? 'غير متاح' : 'LOCKED'}</p>"
+
+File: src/app/vault/page.tsx
+Line: 260
+Text: "isRTL ? 'يتطلب الصدارة #1 في المنصة' : 'REQUIRES TOP #1 IN THE PLATFORM'"
+
+File: src/app/vault/page.tsx
+Line: 262
+Text: "`${rank.threshold - xp} ${isRTL ? 'نقطة خبرة مطلوبة للتفعيل' : 'XP REQUIRED TO UNLOCK'}`"
+
+File: src/app/vault/page.tsx
+Line: 266
+Text: "{isRTL ? 'استمر في إنجاز أهدافك' : 'CONTINUE ACHIEVING GOALS'}"
+
+File: src/app/vault/page.tsx
+Line: 409
+Text: "{isRTL ? 'الرتب والترقيات' : 'RANKS & SYSTEMS'}"
+
+File: src/app/vault/page.tsx
+Line: 412
+Text: "{isRTL ? 'مستوى تقدمك الحالي' : 'Your Progress Status'} &nbsp;·&nbsp; {xp.toLocaleString()} XP"
+
+File: src/components/auth/AuthModal.tsx
+Line: 50
+Text: "{isRTL ? 'مزامنة حسابك' : 'Sync Your Account'}"
+
+File: src/components/auth/AuthModal.tsx
+Line: 57
+Text: "? 'تم حفظ مهمتك الأولى محلياً بنجاح. لمزامنة تقدمك، وتثبيت الـ Streak، وحفظ بياناتك بشكل دائم على السيرفر، يرجى تسجيل الدخول باستخدام حساب جوجل.'"
+
+File: src/components/auth/AuthModal.tsx
+Line: 76
+Text: "? (isRTL ? 'جاري الاتصال...' : 'Connecting...')"
+
+File: src/components/auth/AuthModal.tsx
+Line: 77
+Text: ": (isRTL ? 'تسجيل الدخول باستخدام جوجل' : 'Sign in with Google')}"
+
+File: src/components/auth/EntryGateModal.tsx
+Line: 63
+Text: "{isRTL ? 'مرحباً بك في Growth Hub' : 'Welcome to Growth Hub'}"
+
+File: src/components/auth/EntryGateModal.tsx
+Line: 70
+Text: "? 'يرجى اختيار طريقة الدخول المفضلة لديك لبدء تنظيم وإدارة أهدافك اليومية.'"
+
+File: src/components/auth/EntryGateModal.tsx
+Line: 91
+Text: "? (isRTL ? 'جاري الاتصال...' : 'Connecting...')"
+
+File: src/components/auth/EntryGateModal.tsx
+Line: 92
+Text: ": (isRTL ? 'التسجيل بواسطة حساب جوجل' : 'Sign in with Google')}"
+
+File: src/components/auth/EntryGateModal.tsx
+Line: 101
+Text: "<span>{isRTL ? 'المتابعة كمستخدم ضيف' : 'Continue as Guest'}</span>"
+
+File: src/components/layout/PWARegistration.tsx
+Line: 143
+Text: "{isRTL ? 'تثبيت التطبيق على جهازك' : 'INSTALL THE APP'}"
+
+File: src/components/layout/PWARegistration.tsx
+Line: 146
+Text: "{isRTL ? 'منصة التطوير والنمو' : 'GROWTH HUB // WEB APP'}"
+
+File: src/components/layout/PWARegistration.tsx
+Line: 154
+Text: "? 'قم بتثبيت التطبيق على شاشتك الرئيسية للحصول على وصول سريع وتصفح فائق السرعة في أي وقت.'"
+
+File: src/components/layout/PWARegistration.tsx
+Line: 164
+Text: "{isRTL ? 'إلغاء' : 'CANCEL'}"
+
+File: src/components/layout/PWARegistration.tsx
+Line: 177
+Text: "{isRTL ? 'تثبيت التطبيق' : 'INSTALL APP'}"
+
+File: src/components/layout/Shell.tsx
+Line: 85
+Text: "{isRTL ? 'جاري تحميل مساحة العمل...' : 'Loading workspace...'}"
+
+File: src/components/layout/Shell.tsx
+Line: 485
+Text: "'تأكيد', 'إنشاء', 'حفظ', 'نعم', 'موافق', 'دخول', 'تفعيل', 'استخراج', 'إضافة'"
+
+File: src/components/layout/Shell.tsx
+Line: 501
+Text: "text.includes('إلغاء') ||"
+
+File: src/components/layout/Shell.tsx
+Line: 502
+Text: "text.includes('رجوع') ||"
+
+File: src/components/layout/Shell.tsx
+Line: 503
+Text: "text.includes('إغلاق') ||"
+
+File: src/components/layout/Shell.tsx
+Line: 629
+Text: "<div className="flex items-center gap-2 border-e border-[var(--card-border)] pe-6 shrink-0" title={isRTL ? 'نقاط الخبرة' : 'XP Readout'}>"
+
+File: src/components/layout/Shell.tsx
+Line: 643
+Text: "<div className="flex items-center gap-2 border-e border-[var(--card-border)] pe-6 shrink-0" title={isRTL ? 'سلسلة الأيام' : 'Streak'}>"
+
+File: src/components/layout/Shell.tsx
+Line: 674
+Text: "title={isRTL ? 'الإشعارات' : 'Notifications'}"
+
+File: src/components/layout/Shell.tsx
+Line: 716
+Text: "title={isRTL ? 'القائمة' : 'Menu'}"
+
+File: src/components/layout/Shell.tsx
+Line: 727
+Text: "title={isRTL ? 'الملف الشخصي' : 'User Profile'}"
+
+File: src/components/layout/Shell.tsx
+Line: 779
+Text: "title={isRTL ? 'الإشعارات' : 'Notifications'}"
+
+File: src/components/layout/Shell.tsx
+Line: 806
+Text: "title={isRTL ? 'المدرب الذكي' : 'AI Coach'}"
+
+File: src/components/layout/Shell.tsx
+Line: 839
+Text: "{profile?.ai_name || (isRTL ? 'المدرب' : 'COACH')} // {profile?.ai_personality === 'SAVAGE' ? (isRTL ? 'نمط شرس' : 'SAVAGE_MODE') : (isRTL ? 'متصل' : 'ONLINE')}"
+
+File: src/components/layout/Shell.tsx
+Line: 861
+Text: "{ label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },"
+
+File: src/components/layout/Shell.tsx
+Line: 862
+Text: "{ label: isRTL ? 'شخصي' : 'Goals', icon: Crosshair, href: '/goals/solo' },"
+
+File: src/components/layout/Shell.tsx
+Line: 863
+Text: "{ label: isRTL ? 'فريق' : 'Squad', icon: Shield, href: '/goals/squad' },"
+
+File: src/components/layout/Shell.tsx
+Line: 864
+Text: "{ label: isRTL ? 'الملاحظات' : 'Notes', icon: FileText, href: '/notes' },"
+
+File: src/components/layout/Shell.tsx
+Line: 865
+Text: "{ label: isRTL ? 'الإنجازات' : 'Wins', icon: Trophy, href: '/achievements' },"
+
+File: src/components/layout/Shell.tsx
+Line: 1049
+Text: "{ label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },"
+
+File: src/components/layout/Shell.tsx
+Line: 1050
+Text: "{ label: isRTL ? 'أهدافي' : 'Goals', icon: Target, href: '/missions' },"
+
+File: src/components/layout/Shell.tsx
+Line: 1051
+Text: "{ label: isRTL ? 'شخصي' : 'Personal Goals', icon: User, href: '/goals/solo', indent: true },"
+
+File: src/components/layout/Shell.tsx
+Line: 1052
+Text: "{ label: isRTL ? 'فريق' : 'Team Goals', icon: Users, href: '/goals/squad', indent: true },"
+
+File: src/components/layout/Shell.tsx
+Line: 1053
+Text: "{ label: isRTL ? 'ملاحظاتي' : 'Notes', icon: FileText, href: '/notes' },"
+
+File: src/components/layout/Shell.tsx
+Line: 1054
+Text: "{ label: isRTL ? 'إنجازاتي' : 'Wins', icon: Trophy, href: '/achievements' },"
+
+File: src/components/layout/Shell.tsx
+Line: 1096
+Text: "<span>{isRTL ? 'الإعدادات' : 'Settings'}</span>"
+
+File: src/components/layout/Sidebar.tsx
+Line: 78
+Text: "{ icon: Home, label: mounted ? (isRTL ? 'الرئيسية' : "Home") : "Home", href: '/', shortcut: '01', exact: true },"
+
+File: src/components/layout/Sidebar.tsx
+Line: 79
+Text: "{ icon: Target, label: mounted ? (isRTL ? 'أهدافي' : 'Goals') : 'Goals', href: '/missions', shortcut: '02', exact: false },"
+
+File: src/components/layout/Sidebar.tsx
+Line: 80
+Text: "{ icon: FileText, label: mounted ? (isRTL ? 'ملاحظاتي' : 'Notes') : 'Notes', href: '/notes', shortcut: '03', exact: false },"
+
+File: src/components/layout/Sidebar.tsx
+Line: 81
+Text: "{ icon: Trophy, label: mounted ? (isRTL ? 'إنجازاتي' : 'Wins') : 'Wins', href: '/achievements', shortcut: '04', exact: false },"
+
+File: src/components/layout/Sidebar.tsx
+Line: 145
+Text: "profile?.rank === 'GOLD' ? 'المشغل الذهبي' :"
+
+File: src/components/layout/Sidebar.tsx
+Line: 146
+Text: "profile?.rank === 'PLATINUM' ? 'النخبة البلاتينية' :"
+
+File: src/components/layout/Sidebar.tsx
+Line: 147
+Text: "profile?.rank === 'DIAMOND' ? 'الماستر الماسي' :"
+
+File: src/components/layout/Sidebar.tsx
+Line: 148
+Text: "profile?.rank === 'CROWN' ? 'الملك المتوج' :"
+
+File: src/components/layout/Sidebar.tsx
+Line: 149
+Text: "profile?.rank === 'ACE' ? 'البطل القرمزي' : 'الفاتح الأعظم'"
+
+File: src/components/layout/Sidebar.tsx
+Line: 173
+Text: "? `${xpNeeded} نقطة إلى ${nextRankName === 'MAX RANK' ? 'أعلى رتبة' : nextRankName}`"
+
+File: src/components/layout/Sidebar.tsx
+Line: 187
+Text: "{mounted ? (isRTL ? 'القائمة' : 'MENU') : 'MENU'}"
+
+File: src/components/layout/Sidebar.tsx
+Line: 260
+Text: "{ label: mounted ? (isRTL ? 'شخصي' : 'Personal Goals') : 'Personal Goals', icon: User, href: '/goals/solo' },"
+
+File: src/components/layout/Sidebar.tsx
+Line: 261
+Text: "{ label: mounted ? (isRTL ? 'فريق' : 'Team Goals') : 'Team Goals', icon: Users, href: '/goals/squad' }"
+
+File: src/components/layout/Sidebar.tsx
+Line: 396
+Text: "{mounted ? (isRTL ? 'المدرب الذكي' : 'COACH') : 'COACH'}"
+
+File: src/components/layout/Sidebar.tsx
+Line: 425
+Text: "{mounted ? (isRTL ? 'الإعدادات' : 'Settings') : 'Settings'}"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 11
+Text: "{ id: 'omar', label: 'Omar', arLabel: 'عمر', gender: 'male', sub: 'Programmer', arSub: 'مبرمج', icon: 'laptop_mac' },"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 12
+Text: "{ id: 'maya', label: 'Maya', arLabel: 'مايا', gender: 'female', sub: 'Learner', arSub: 'متعلم', icon: 'school' },"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 13
+Text: "{ id: 'ismail', label: 'Ismail', arLabel: 'إسماعيل', gender: 'male', sub: 'Freelancer', arSub: 'مستقل', icon: 'work' },"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 14
+Text: "{ id: 'zain', label: 'Zain', arLabel: 'زين', gender: 'male', sub: 'Startup', arSub: 'رائد أعمال', icon: 'rocket_launch' },"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 15
+Text: "{ id: 'menna', label: 'Menna', arLabel: 'منة', gender: 'female', sub: 'Content Creator', arSub: 'صانعة محتوى', icon: 'videocam' },"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 16
+Text: "{ id: 'nour', label: 'Nour', arLabel: 'نور', gender: 'female', sub: 'Professional', arSub: 'موظف', icon: 'trending_up' },"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 52
+Text: "showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'UPDATE_FAILED', 'warning')"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 58
+Text: "const defaultAvatar = (profile?.gender === 'female' || profile?.gender === 'أنثى' || profile?.gender === 'Female') ? '/avatars/menna.svg' : '/avatars/omar.svg'"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 87
+Text: "showToast(isRTL ? 'تم تحديث الشخصية بنجاح!' : 'Profile updated successfully!', 'success')"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 92
+Text: "showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'UPDATE_FAILED', 'warning')"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 132
+Text: "{isRTL ? 'تخصيص الملف الشخصي والهوية' : 'USER_PROFILE // PERSONA SELECTION'}"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 136
+Text: "{isRTL ? 'اختر الشخصية المهنية الخاصة بك' : 'Select Active User Persona'}"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 168
+Text: "{isRTL ? 'حساب جوجل' : 'GOOGLE AUTH'}"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 204
+Text: "{isRTL ? 'صورة حساب جوجل' : 'Google Profile'}"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 207
+Text: "{isRTL ? 'مزامنة تلقائية مع حسابك' : 'Automatic OAuth Sync'}"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 248
+Text: "{isRTL ? 'شخصية مهنية' : 'PERSONA'}"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 322
+Text: "<span className="font-bold">{isRTL ? 'جارٍ الحفظ والمزامنة التكتيكية...' : 'SAVING & SYNCING CALIBRATION...'}</span>"
+
+File: src/components/ui/AvatarSelector.tsx
+Line: 327
+Text: "<span className="font-bold">{isRTL ? 'حفظ الشخصية وتفعيل المزامنة' : 'CONFIRM AVATAR SELECTION'}</span>"
+
+File: src/components/ui/CoachPanel.tsx
+Line: 29
+Text: "const [response, setResponse] = useState(profile?.language === 'ar' ? 'في انتظار الأوامر // اختر إجراء من الأسفل' : 'AWAITING_ORDERS // SELECT_ACTION_BELOW')"
+
+File: src/components/ui/CoachPanel.tsx
+Line: 79
+Text: "setResponse(profile?.language === 'ar' ? 'جاري فحص وتحليل خلايا البيانات الحية...' : 'ANALYZING_USER_DATA...')"
+
+File: src/components/ui/CoachPanel.tsx
+Line: 160
+Text: "setResponse(profile?.language === 'ar' ? 'فشل الاتصال المشفر بالمدرب السيبراني // يرجى الإعادة لاحقاً' : 'ENCRYPTED_LINK_FAILED // RETRY_LATER')"
+
+File: src/components/ui/CoachPanel.tsx
+Line: 203
+Text: "<span>{profile?.language === 'ar' ? `الطاقة المتبقية: ${energy}/3 مسحات تكتيكية` : `[ ENERGY: ${energy}/3 SCANS LEFT ]`}</span>"
+
+File: src/components/ui/CoachPanel.tsx
+Line: 248
+Text: "{profile?.language === 'ar' ? `${coachName} بيفكر...` : `${coachName}_PROCESSING...`}"
+
+File: src/components/ui/CoachPanel.tsx
+Line: 274
+Text: "? (profile?.language === 'ar' ? '⚠️ نفدت الطاقة // إعادة الشحن عند منتصف الليل' : '⚠️ RECHARGING UNTIL MIDNIGHT')"
+
+File: src/components/ui/CoachPanel.tsx
+Line: 281
+Text: "title={profile?.language === 'ar' ? 'كشف حساب' : 'REALITY CHECK'}"
+
+File: src/components/ui/CoachPanel.tsx
+Line: 282
+Text: "subtitle={profile?.language === 'ar' ? 'مواجهة وحشية بالمهام المتأخرة والمهملة' : 'Brutal check on overdue & ignored tasks'}"
+
+File: src/components/ui/CoachPanel.tsx
+Line: 291
+Text: "title={profile?.language === 'ar' ? 'أهم 3 مهام' : 'TOP 3 FOCUS'}"
+
+File: src/components/ui/CoachPanel.tsx
+Line: 292
+Text: "subtitle={profile?.language === 'ar' ? 'تحديد أهم 3 أولويات قصوى لليوم فوراً' : 'Extract the top 3 absolute priorities for today'}"
+
+File: src/components/ui/CoachPanel.tsx
+Line: 301
+Text: "title={profile?.language === 'ar' ? 'مكسب سريع' : 'QUICK WIN'}"
+
+File: src/components/ui/CoachPanel.tsx
+Line: 302
+Text: "subtitle={profile?.language === 'ar' ? 'مهمة سهلة في 5 دقائق لكسر حاجز الكسل' : 'Find the easiest 5-minute task to start with'}"
+
+File: src/components/ui/CoachPanel.tsx
+Line: 385
+Text: "'جاري تحليل البيانات... 🔍',"
+
+File: src/components/ui/CoachPanel.tsx
+Line: 386
+Text: "'مزامنة التقدم... ⚡',"
+
+File: src/components/ui/CoachPanel.tsx
+Line: 387
+Text: "`${userName} يعالج البيانات... 🧠`,"
+
+File: src/components/ui/CoachPanel.tsx
+Line: 388
+Text: "'تنظيم المحتوى... 📂',"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 35
+Text: "? `تم تفعيل المظهر ${isDark ? 'الداكن' : 'المضيء'}`"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 48
+Text: "? (isZen ? 'تم تفعيل وضع الزن (التركيز الكامل)' : 'تم إلغاء تفعيل وضع الزن')"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 217
+Text: "placeholder={isRTL ? "ابحث عن أمر، هدف، أو مهمة..." : "Type a command, goal, or task..."}"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 231
+Text: "<Command.Group heading={isRTL ? "إنشاء سريع ذكي" : "SMART QUICK CREATE"}>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 242
+Text: "<span className="font-semibold tracking-wide text-cyan-400">{isRTL ? `إنشاء هدف فرعي: "${search}"` : `Create Goal: "${search}"`}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 254
+Text: "{isRTL ? "لا توجد نتائج مطابقة" : "No active modules matched"}"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 259
+Text: "<Command.Group heading={isRTL ? "نتائج البحث الشامل" : "SEARCH RESULTS"}>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 278
+Text: "<span>{res.type === 'goal' ? (isRTL ? 'هدف' : 'GOAL') : (isRTL ? 'مهمة' : 'TASK')}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 288
+Text: "<Command.Group heading={isRTL ? "المستخدم مؤخراً" : "RECENTLY ACCESSED"}>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 304
+Text: "{item.type === 'goal' ? (isRTL ? 'هدف' : 'Goal') : item.type === 'task' ? (isRTL ? 'مهمة فرعية' : 'Task') : (isRTL ? 'رابط' : 'Navigation')}"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 309
+Text: "<span>{isRTL ? 'فتح' : 'OPEN'}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 319
+Text: "heading={isRTL ? "الإجراءات البرمجية" : "ACTIONS // COMMAND_LIST"}"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 332
+Text: "<span className="font-semibold tracking-wide">{isRTL ? "إنشاء هدف جديد" : "Create New Goal"}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 335
+Text: "<span>{isRTL ? "إجراء" : "ACTION"}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 350
+Text: "<span className="font-semibold tracking-wide">{isRTL ? "إنشاء مساحة عمل جماعية" : "Create Team Workspace"}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 353
+Text: "<span>{isRTL ? "إجراء" : "ACTION"}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 363
+Text: "heading={isRTL ? "الملاحة والتوجيه" : "NAVIGATION // MATRIX"}"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 376
+Text: "<span className="font-semibold tracking-wide">{isRTL ? "الذهاب للوحة التحكم" : "Go to Dashboard"}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 379
+Text: "<span>{isRTL ? "ملاحة" : "NAV"}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 394
+Text: "<span className="font-semibold tracking-wide">{isRTL ? "الذهاب إلى الخزنة (الرتب)" : "Go to Vault (Ranks)"}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 397
+Text: "<span>{isRTL ? "ملاحة" : "NAV"}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 412
+Text: "<span className="font-semibold tracking-wide">{isRTL ? "الذهاب إلى المدرب الشخصي" : "Go to Coach"}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 415
+Text: "<span>{isRTL ? "ملاحة" : "NAV"}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 425
+Text: "heading={isRTL ? "إعدادات المنظومة" : "SYSTEM // CONFIG"}"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 439
+Text: "<span className="font-semibold tracking-wide">{isRTL ? "تبديل المظهر الداكن / المضيء" : "Toggle Dark/Light Mode"}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 442
+Text: "<span>{isRTL ? "إعداد" : "SYS"}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 457
+Text: "<span className="font-semibold tracking-wide">{isRTL ? "تفعيل وضع الزن (التركيز الكامل)" : "Toggle Zen Mode (Deep Work)"}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 460
+Text: "<span>{isRTL ? "إعداد" : "SYS"}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 471
+Text: "<span>{isRTL ? "لوحة التوجيه السيبرانية" : "CYBERPUNK NAVIGATION CORE v3"}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 476
+Text: "<span>{isRTL ? "للتنقل" : "NAVIGATE"}</span>"
+
+File: src/components/ui/CommandPalette.tsx
+Line: 480
+Text: "<span>{isRTL ? "للتأكيد" : "SELECT"}</span>"
+
+File: src/components/ui/GlobalActionMenu.tsx
+Line: 43
+Text: "{isRTL ? 'إضافة هدف' : 'CREATE GOAL'}"
+
+File: src/components/ui/GlobalActionMenu.tsx
+Line: 52
+Text: "{isRTL ? 'إضافة ملاحظة' : 'CREATE NOTE'}"
+
+File: src/components/ui/InboxDropdown.tsx
+Line: 71
+Text: "{isRTL ? 'صندوق الوارد // الإشعارات' : 'NOTIFICATION INBOX'}"
+
+File: src/components/ui/InboxDropdown.tsx
+Line: 76
+Text: "{reports.filter(r => !r.is_read).length} {isRTL ? 'غير مقروء' : 'UNREAD'}"
+
+File: src/components/ui/InboxDropdown.tsx
+Line: 83
+Text: "title={isRTL ? 'تحديد الكل كمقروء' : 'Read All'}"
+
+File: src/components/ui/InboxDropdown.tsx
+Line: 86
+Text: "{isRTL ? 'قراءة الكل' : 'Read All'}"
+
+File: src/components/ui/InboxDropdown.tsx
+Line: 89
+Text: "<button onClick={onClose} className="p-1 -mr-1 text-black/40 dark:text-white/30 hover:text-black dark:hover:text-white transition-colors cursor-pointer" title={isRTL ? 'إغلاق' : 'Close'}>"
+
+File: src/components/ui/InboxDropdown.tsx
+Line: 98
+Text: "{ id: 'all', label: isRTL ? 'الكل' : 'ALL' },"
+
+File: src/components/ui/InboxDropdown.tsx
+Line: 99
+Text: "{ id: 'unread', label: isRTL ? 'غير المقروء' : 'UNREAD' },"
+
+File: src/components/ui/InboxDropdown.tsx
+Line: 100
+Text: "{ id: 'read', label: isRTL ? 'المقروء' : 'READ' }"
+
+File: src/components/ui/InboxDropdown.tsx
+Line: 140
+Text: "? `لا يوجد إشعارات في قسم ${filter === 'all' ? 'الكل' : filter === 'unread' ? 'غير المقروء' : 'المقروء'}`"
+
+File: src/components/ui/InboxDropdown.tsx
+Line: 202
+Text: "{isRTL ? 'عرض كل الإشعارات' : 'View All Notifications'}"
+
+File: src/components/ui/InlineGuideTip.tsx
+Line: 67
+Text: "{isRTL ? 'دليل سريع' : 'Quick Guide'}"
+
+File: src/components/ui/InlineGuideTip.tsx
+Line: 76
+Text: "<strong>إضافة سريعة:</strong> اضغط على <kbd className="bg-white/10 px-1.5 py-0.5 rounded text-xs font-mono border border-white/20 mx-1">Ctrl + K</kbd> (أو Cmd + K) في أي مكان لفتح لوحة التحكم السريعة (Command Palette) وإضافة مهمة بلمح البصر."
+
+File: src/components/ui/InlineGuideTip.tsx
+Line: 90
+Text: "<strong>سحب المنهج:</strong> اضغط على زرار 'استيراد قائمة تشغيل' بالأسفل، وارمي لينك كورس يوتيوب. السيستم هيقيس الفيديوهات أوتوماتيك ويوزع شُرط الصعوبة النسيبية بناءً على حجم الكورس."
+
+File: src/components/ui/KanbanBoard.tsx
+Line: 84
+Text: "{ id: 'to-do', name: isRTL ? 'المعلقة' : 'TO-DO', color: '#06B6D4', glowClass: 'shadow-[0_0_15px_rgba(6,182,212,0.15)] border-cyan-500/20 bg-cyan-950/10 text-cyan-400' },"
+
+File: src/components/ui/KanbanBoard.tsx
+Line: 85
+Text: "{ id: 'in-progress', name: isRTL ? 'قيد التنفيذ' : 'IN PROGRESS', color: '#F59E0B', glowClass: 'shadow-[0_0_15px_rgba(245,158,11,0.15)] border-amber-500/20 bg-amber-950/10 text-amber-400' },"
+
+File: src/components/ui/KanbanBoard.tsx
+Line: 86
+Text: "{ id: 'done', name: isRTL ? 'المكتملة' : 'DONE', color: '#10B981', glowClass: 'shadow-[0_0_15px_rgba(16,185,129,0.15)] border-emerald-500/20 bg-emerald-950/10 text-emerald-400' }"
+
+File: src/components/ui/LevelUpModal.tsx
+Line: 79
+Text: "{isRTL ? 'ترقية الرتبة' : 'RANK UPED'}"
+
+File: src/components/ui/LevelUpModal.tsx
+Line: 100
+Text: "? 'تم بنجاح تحديث ترخيص العضو. تم تفعيل ميزات النظام الإضافية للمستوى التالي.'"
+
+File: src/components/ui/LevelUpModal.tsx
+Line: 113
+Text: "{isRTL ? 'تحديث واجهة التحكم' : 'UPDATE DASHBOARD'}"
+
+File: src/components/ui/MissionAttachmentsModal.tsx
+Line: 134
+Text: "{isRTL ? '[ إغلاق المعاينة // Close Preview ]' : '[ Close Preview ]'}"
+
+File: src/components/ui/MissionAttachmentsModal.tsx
+Line: 476
+Text: "{isRTL ? 'المرفقات المزامنة' : 'Synced Attachments'}"
+
+File: src/components/ui/MissionAttachmentsModal.tsx
+Line: 514
+Text: "? `[ ${isRTL ? 'فتح جوجل درايف' : 'OPEN GOOGLE DRIVE'} ]`"
+
+File: src/components/ui/MissionAttachmentsModal.tsx
+Line: 515
+Text: ": `[ ${isRTL ? 'ربط جوجل درايف' : 'CONNECT GOOGLE DRIVE'} ]`"
+
+File: src/components/ui/MissionAttachmentsModal.tsx
+Line: 526
+Text: "<span>{isRTL ? 'ربط يدوي بالرابط' : 'Connect Manual Link'}</span>"
+
+File: src/components/ui/MissionAttachmentsModal.tsx
+Line: 540
+Text: "placeholder={isRTL ? 'اسم المرفق...' : 'ATTACHMENT_NAME...'}"
+
+File: src/components/ui/MissionAttachmentsModal.tsx
+Line: 561
+Text: "{adding ? <Loader2 className="w-4 h-4 animate-spin" /> : (isRTL ? 'إضافة' : 'ADD')}"
+
+File: src/components/ui/MissionAttachmentsModal.tsx
+Line: 581
+Text: "{isRTL ? 'لا توجد مرفقات مضافة بعد' : 'NO ATTACHMENTS SYNCD'}"
+
+File: src/components/ui/MissionAttachmentsModal.tsx
+Line: 637
+Text: "{isRTL ? 'مزامنة جوجل درايف // Google Drive Sync' : 'Google Drive Sync // Web Integration'}"
+
+File: src/components/ui/MissionAttachmentsModal.tsx
+Line: 640
+Text: "{isRTL ? 'إغلاق' : 'CLOSE'}"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 55
+Text: "title: 'دليل لوحة التحكم',"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 57
+Text: "'سعة التركيز محدودة بـ 9 وحدات. ركّز على الأهداف ذات الأولوية العالية.',"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 58
+Text: "'الأهداف المعرضة للتأخر تتطلب مراجعة عاجلة.',"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 59
+Text: "'مؤشر الطاقة يعرض مستوى التقدم الفعلي لأهدافك النشطة.'"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 63
+Text: "title: 'إدارة الأهداف',"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 65
+Text: "'قسّم الأهداف الكبيرة إلى مهام صغيرة يسهل إنجازها.',"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 66
+Text: "'استخدم أيقونة التقويم لمزامنة أهدافك مع تقويم جوجل.',"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 67
+Text: "'قم بأرشفة الأهداف المكتملة لتفريغ سعة التركيز المتوفرة.'"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 71
+Text: "title: 'الملاحظات والأفكار',"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 73
+Text: "'سجّل أفكارك فوراً قبل أن تتلاشى في الفراغ.',"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 74
+Text: "'استخدم وسوماً مثل #مهمة أو #فكرة لتصفية أرشيفك العقلي.',"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 75
+Text: "'البحث في شريط الذاكرة يسترجع أي سجل في أجزاء من الثانية.'"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 79
+Text: "title: 'مستويات التصنيف',"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 81
+Text: "'المستويات المتقدمة تتيح سمات واجهة فريدة وتوجيهات أكثر دقة من المساعد الذكي.',"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 82
+Text: "'تكتسب نقاط الخبرة (XP) بإنجاز مهام الأهداف وتحقيق النتائج.',"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 83
+Text: "'صل إلى رتبة التميز الفائقة (CONQUEROR) لتفعيل كافة توجيهات المساعد الذكي.'"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 87
+Text: "title: 'سجل الإنجازات',"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 89
+Text: "'الميداليات توثق استمرارية أدائك المتميز في الإنجاز.',"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 90
+Text: "'أكمل الأهداف المتتالية لفتح شارات تقديرية مميزة.',"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 91
+Text: "'كل إنجاز تسجله هنا يدعم تقدم رتبتك العامة.'"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 103
+Text: "title: isRTL ? 'النظام جاهز' : 'SYSTEM_READY',"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 105
+Text: "? ['ابدأ العمل على أهدافك اليوم. حافظ على تركيزك لتحقيق أفضل النتائج.']"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 143
+Text: "{isRTL ? 'دليل المشغل' : 'MEMBER_GUIDE'} // {content.title}"
+
+File: src/components/ui/OperatorGuide.tsx
+Line: 160
+Text: "{isRTL ? 'حافظ على التركيز' : 'STAY_FOCUSED // EXECUTE'}"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 49
+Text: "'جاري تحليل البيانات...',"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 50
+Text: "'مزامنة التقدم...',"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 51
+Text: "`${userName} يعالج البيانات...`,"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 52
+Text: "'تنظيم المحتوى...',"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 61
+Text: "'تحليل...',"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 62
+Text: "'مزامنة...',"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 63
+Text: "'معالجة...',"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 64
+Text: "'تنظيم...',"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 110
+Text: "setError(isRTL ? 'إشارة غير صالحة // ليس قائمة تشغيل' : 'INVALID_SIGNAL // NOT A PLAYLIST')"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 122
+Text: "setError(isRTL ? 'تم رفض الوصول // قائمة خاصة' : 'ACCESS_DENIED // PRIVATE_FEED')"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 132
+Text: "setError(isRTL ? 'خلاصة فارغة // لم يتم العثور على فيديوهات' : 'EMPTY_FEED // NO_VIDEOS_FOUND')"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 269
+Text: "{isRTL ? 'استيراد قائمة التشغيل' : 'PLAYLIST_IMPORT'}"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 281
+Text: "{isRTL ? 'رابط قائمة تشغيل يوتيوب' : 'YOUTUBE_PLAYLIST_URL'}"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 297
+Text: "{loading ? buttonMessages[loadingTextIndex] : (isRTL ? 'فحص' : 'SCAN')}"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 322
+Text: "? `تم العثور على: ${previewTasks.length} فيديو // المجموع: ${formatSeconds(totalDuration)}`"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 333
+Text: "{isRTL ? `المدة: ${formatSeconds(t.seconds)}` : `DURATION: ${formatSeconds(t.seconds)}`}"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 351
+Text: "{isRTL ? 'إلغاء' : 'CANCEL'}"
+
+File: src/components/ui/PlaylistImportModal.tsx
+Line: 359
+Text: "{confirming ? (isRTL ? 'جاري الإنشاء...' : 'CREATING...') : (isRTL ? 'إنشاء' : 'CREATE')}"
+
+File: src/components/ui/PomodoroHUD.tsx
+Line: 102
+Text: "{sessionType === 'FOCUS' ? (isRTL ? '⚡ وضع التركيز نشط' : '⚡ FOCUS_ACTIVE') : (isRTL ? '☕ فترة الاستراحة' : '☕ RECOVERY')}"
+
+File: src/components/ui/PomodoroHUD.tsx
+Line: 129
+Text: "<span className="text-[12px] font-black text-white tracking-widest uppercase">{isRTL ? 'إعدادات التايمر' : 'TIMER_CONFIG'}</span>"
+
+File: src/components/ui/PomodoroHUD.tsx
+Line: 133
+Text: "<label className={cn("font-black uppercase tracking-widest block text-[8px] text-zinc-400")}>{isRTL ? 'مدة التركيز (دقيقة)' : 'FOCUS_DURATION (MIN)'}</label>"
+
+File: src/components/ui/PomodoroHUD.tsx
+Line: 144
+Text: "<label className={cn("font-black uppercase tracking-widest block text-[8px] text-zinc-400")}>{isRTL ? 'مدة الراحة (دقيقة)' : 'BREAK_DURATION (MIN)'}</label>"
+
+File: src/components/ui/PomodoroHUD.tsx
+Line: 160
+Text: "{isRTL ? 'حفظ الإعدادات' : 'SAVE_CONFIG'}"
+
+File: src/components/ui/PomodoroHUD.tsx
+Line: 166
+Text: "<p className={cn("font-black uppercase tracking-widest block text-[8px] text-zinc-400")}>{isRTL ? 'المهمة الحالية:' : 'CURRENT_OBJECTIVE:'}</p>"
+
+File: src/components/ui/PomodoroHUD.tsx
+Line: 167
+Text: "<p className="text-[11px] font-bold text-white uppercase truncate">{taskName || (isRTL ? 'بدون عنوان' : 'UNTITLED_PROTOCOL')}</p>"
+
+File: src/components/ui/PomodoroHUD.tsx
+Line: 198
+Text: "{isRTL ? 'ابدأ التركيز' : 'START'}"
+
+File: src/components/ui/PomodoroHUD.tsx
+Line: 220
+Text: "{isActive ? (isRTL ? 'إيقاف' : 'STOP') : (isRTL ? 'إغلاق' : 'CLOSE')}"
+
+File: src/components/ui/PomodoroHUD.tsx
+Line: 255
+Text: "{isRTL ? 'تحذير: تشتيت التركيز' : 'WARNING: CONTEXT SWITCHING'}"
+
+File: src/components/ui/PomodoroHUD.tsx
+Line: 262
+Text: "? '🚧 تنبيه: التنقل المتكرر بين المهام يقلل الأداء الذهني بنسبة تصل إلى 40%.'"
+
+File: src/components/ui/PomodoroHUD.tsx
+Line: 267
+Text: "? 'التركيز هو الركيزة الأساسية للإنتاجية. الانتقال المتكرر بين المهام وتشتيت الانتباه يؤثر سلباً على سرعة وجودة إنجاز أهدافك الحالية.'"
+
+File: src/components/ui/PomodoroHUD.tsx
+Line: 273
+Text: "{isRTL ? 'المهمة البديلة المقترحة:' : 'TARGET OBJECTIVE:'}"
+
+File: src/components/ui/PomodoroHUD.tsx
+Line: 287
+Text: "{isRTL ? 'استبدال المهمة' : 'FORCE SWAP'}"
+
+File: src/components/ui/PomodoroHUD.tsx
+Line: 294
+Text: "{isRTL ? 'الاستمرار بالتركيز' : 'KEEP FOCUSING'}"
+
+File: src/components/ui/ReportModal.tsx
+Line: 158
+Text: "{isRTL ? '[ ⚡ الذهاب للمهمة ورؤية التعليق ]' : '[ ⚡ GO TO TASK / VIEW COMMENT ]'}"
+
+File: src/components/ui/ReportModal.tsx
+Line: 214
+Text: "{isRTL ? 'قيد المراجعة' : 'PENDING REVIEW'}"
+
+File: src/components/ui/ReportModal.tsx
+Line: 229
+Text: "{isRTL ? '[ ✗ رفض ]' : '[ ✗ REJECT ]'}"
+
+File: src/components/ui/ReportModal.tsx
+Line: 237
+Text: "{isRTL ? '[ ✓ قبول ]' : '[ ✓ APPROVE ]'}"
+
+File: src/components/ui/ReportModal.tsx
+Line: 244
+Text: "{isRTL ? 'APPROVED // تم قبول العضو للفريق' : 'APPROVED // MEMBER ADDED'}"
+
+File: src/components/ui/ReportModal.tsx
+Line: 251
+Text: "{isRTL ? 'REJECTED // تم رفض طلب الوصول' : 'REJECTED // ACCESS CLASSIFIED'}"
+
+File: src/components/ui/ReportModal.tsx
+Line: 265
+Text: "{isRTL ? 'تم منح الإذن // الفريق جاهز' : 'ACCESS GRANTED // SQUAD READY'}"
+
+File: src/components/ui/ReportModal.tsx
+Line: 276
+Text: "{isRTL ? '[ ⚡ دخول لوحة الفريق ]' : '[ ⚡ ENTER SQUAD CANVAS ]'}"
+
+File: src/components/ui/ReportModal.tsx
+Line: 287
+Text: "{isRTL ? 'الوصول مرفوض // هدف مصنف' : 'ACCESS DENIED // CLASSIFIED'}"
+
+File: src/components/ui/ReportModal.tsx
+Line: 292
+Text: "? 'تم رفض طلبك للانضمام إلى هذا الفريق من قبل القائد.'"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 32
+Text: "EMPTY_INPUT: isRTL ? 'يرجى لصق المحتوى أولاً' : 'Please paste some content first',"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 33
+Text: "NO_TASKS_FOUND: isRTL ? 'لم يتم العثور على مهام في هذا النص' : 'No tasks could be extracted from this content',"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 34
+Text: "ANALYSIS_FAILED: isRTL ? 'فشل التحليل، يرجى المحاولة مرة أخرى' : 'Analysis failed, please try again',"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 35
+Text: "'PROTOCOL_FAILURE: NO_API_KEY': isRTL ? 'خطأ في إعدادات النظام' : 'System configuration error',"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 66
+Text: "setError(isRTL ? 'يرجى تسجيل الدخول للمتابعة' : 'AUTH_REQUIRED')"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 156
+Text: "{isRTL ? 'الاستيراد الذكي' : 'SMART_IMPORT'}"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 165
+Text: "{isRTL ? 'معاينة' : 'PREVIEW'}"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 192
+Text: "? 'يرجى لصق النص المطلوب هنا: منهج دراسي، فهرس كتاب، قائمة دروس، أو أي محتوى آخر...'"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 201
+Text: "? 'يرجى لصق المحتوى هنا...'"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 214
+Text: "{pastedText.length.toLocaleString()} {isRTL ? 'حرف' : 'CHARS'}"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 252
+Text: "? (isRTL ? 'جاري التحليل...' : 'ANALYZING...')"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 253
+Text: ": (isRTL ? 'استخراج المهام ←' : 'FIND TASKS →')}"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 276
+Text: "{isRTL ? `تم استخراج ${extractedTasks.length} مهمة بنجاح` : `✓ FOUND ${extractedTasks.length} TASKS`}"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 279
+Text: "{isRTL ? 'يرجى مراجعة القائمة وتأكيد الإضافة' : 'REVIEW AND CONFIRM TO ADD'}"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 333
+Text: "{isRTL ? 'رجوع' : 'BACK'}"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 341
+Text: "{isRTL ? 'إلغاء' : 'CANCEL'}"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 359
+Text: "? (isRTL ? 'جاري الإضافة...' : 'ADDING...')"
+
+File: src/components/ui/SmartImportModal.tsx
+Line: 360
+Text: ": (isRTL ? 'إضافة المهام ✓' : 'ADD TASKS ✓')}"
+
+File: src/components/ui/SmartTaskPlayer.tsx
+Line: 233
+Text: "showToast('تم استئناف التشغيل من حيث توقفت', 'success')"
+
+File: src/components/ui/task-drawer/TaskDrawerChecklist.tsx
+Line: 34
+Text: "{isRTL ? 'المهام الفرعية // SUBTASKS' : 'CHECKLIST // SUBTASKS'}"
+
+File: src/components/ui/task-drawer/TaskDrawerChecklist.tsx
+Line: 40
+Text: "placeholder={isRTL ? 'مهمة فرعية جديدة...' : 'Add checklist item...'}"
+
+File: src/components/ui/task-drawer/TaskDrawerComments.tsx
+Line: 203
+Text: "title: task.title || (isRTL ? 'ملاحظة مهمة' : 'Task Note'),"
+
+File: src/components/ui/task-drawer/TaskDrawerComments.tsx
+Line: 225
+Text: "? `💬 ${senderName} ذكرك في تعليق`"
+
+File: src/components/ui/task-drawer/TaskDrawerComments.tsx
+Line: 228
+Text: "? `${senderName} ذكرك في تعليق على مهمة "${task.title}": "${noteText.substring(0, 100)}${noteText.length > 100 ? '...' : ''}"`"
+
+File: src/components/ui/task-drawer/TaskDrawerComments.tsx
+Line: 248
+Text: "{isRTL ? 'التعليقات' : 'COMMENTS'}"
+
+File: src/components/ui/task-drawer/TaskDrawerComments.tsx
+Line: 370
+Text: "{isRTL ? 'لا توجد تعليقات بعد' : 'No comments yet'}"
+
+File: src/components/ui/task-drawer/TaskDrawerComments.tsx
+Line: 387
+Text: "placeholder={isRTL ? 'اكتب تعليقاً...' : 'Write a comment...'}"
+
+File: src/components/ui/task-drawer/TaskDrawerComments.tsx
+Line: 477
+Text: "<span>{isRTL ? 'اختر أعضاء للإشارة' : 'SELECT MEMBERS TO MENTION'}</span>"
+
+File: src/components/ui/task-drawer/TaskDrawerComments.tsx
+Line: 507
+Text: "? (isRTL ? 'إلغاء تحديد الكل' : 'DESELECT ALL')"
+
+File: src/components/ui/task-drawer/TaskDrawerComments.tsx
+Line: 508
+Text: ": (isRTL ? 'تحديد الكل' : 'SELECT ALL')}"
+
+File: src/components/ui/task-drawer/TaskDrawerComments.tsx
+Line: 566
+Text: "{isRTL ? `تم (${selectedMentions.size})` : `DONE (${selectedMentions.size} SELECTED)`}"
+
+File: src/components/ui/task-drawer/TaskDrawerComments.tsx
+Line: 578
+Text: "{isRTL ? 'إشارة إلى عضو // SQUAD_MEMBERS' : 'MENTION SQUAD MEMBER'}"
+
+File: src/components/ui/task-drawer/TaskDrawerComments.tsx
+Line: 606
+Text: "{isRTL ? 'اختر رمز تعبيري // SELECT_EMOJI' : 'SELECT EMOJI'}"
+
+File: src/components/ui/task-drawer/TaskDrawerComments.tsx
+Line: 625
+Text: "{isRTL ? 'Enter للإرسال · Shift+Enter لسطر جديد' : 'Enter to send · Shift+Enter for new line'}"
+
+File: src/components/ui/task-drawer/TaskDrawerDescription.tsx
+Line: 23
+Text: "{isRTL ? 'وصف المهمة' : 'TASK DESCRIPTION'}"
+
+File: src/components/ui/task-drawer/TaskDrawerDescription.tsx
+Line: 36
+Text: "placeholder={isRTL ? "أضف وصفاً..." : "Add a description..."}"
+
+File: src/components/ui/task-drawer/TaskDrawerHeader.tsx
+Line: 77
+Text: "placeholder={isRTL ? "اسم المهمة..." : "Task Name..."}"
+
+File: src/components/ui/task-drawer/TaskDrawerHeader.tsx
+Line: 99
+Text: "placeholder={isRTL ? "اسم المهمة..." : "Task Name..."}"
+
+File: src/components/ui/task-drawer/TaskDrawerHeader.tsx
+Line: 118
+Text: "<span className="hidden sm:inline">{isRTL ? 'تركيز' : 'FOCUS'}</span>"
+
+File: src/components/ui/task-drawer/TaskDrawerHeader.tsx
+Line: 130
+Text: "const nextStatusAr = task.is_completed ? "تغيير مهمتك لغير مكتملة" : "أكمل مهمتك المعينة""
+
+File: src/components/ui/task-drawer/TaskDrawerHeader.tsx
+Line: 133
+Text: "? `✅ ${senderName} قام بـ ${nextStatusAr}`"
+
+File: src/components/ui/task-drawer/TaskDrawerHeader.tsx
+Line: 136
+Text: "? `${senderName} قام بـ ${nextStatusAr} في مهمتك المعينة "${task.title}"`"
+
+File: src/components/ui/task-drawer/TaskDrawerMetadata.tsx
+Line: 43
+Text: "{isRTL ? 'بيانات المهمة // METADATA' : 'TASK METADATA // PROFILE'}"
+
+File: src/components/ui/task-drawer/TaskDrawerMetadata.tsx
+Line: 63
+Text: "<span className="text-[10px] text-white/40 uppercase font-mono">{isRTL ? 'المكافأة' : 'XP REWARD'}</span>"
+
+File: src/components/ui/task-drawer/TaskDrawerMetadata.tsx
+Line: 70
+Text: "<span className="text-[10px] text-white/40 uppercase font-mono">{isRTL ? 'الموعد' : 'DEADLINE'}</span>"
+
+File: src/components/ui/task-drawer/TaskDrawerMetadata.tsx
+Line: 72
+Text: "{endDate || (isRTL ? 'غير محدد' : 'NOT SET')}"
+
+File: src/components/ui/task-drawer/TaskDrawerMetadata.tsx
+Line: 106
+Text: "📅 {endDate || (isRTL ? 'غير محدد' : 'NOT SET')}"
+
+File: src/components/ui/task-drawer/TaskDrawerMetadata.tsx
+Line: 109
+Text: "<span>📅 {endDate || (isRTL ? 'غير محدد' : 'NOT SET')}</span>"
+
+File: src/components/ui/task-drawer/TaskDrawerMetadata.tsx
+Line: 128
+Text: "{isRTL ? 'المسؤول' : 'ASSIGNED TO'}"
+
+File: src/components/ui/task-drawer/TaskDrawerMetadata.tsx
+Line: 156
+Text: "{isRTL ? 'إلغاء التعيين' : 'UNASSIGN'}"
+
+File: src/components/ui/task-drawer/TaskDrawerMetadata.tsx
+Line: 162
+Text: "<span>{isRTL ? 'المهمة غير معينة لأي عضو' : 'No one assigned yet'}</span>"
+
+File: src/components/ui/task-drawer/TaskDrawerMetadata.tsx
+Line: 174
+Text: "<span>{isRTL ? '⚙️ تعيين / تغيير المسؤول' : '⚙️ Assign / Change Operator'}</span>"
+
+File: src/components/ui/task-drawer/TaskDrawerMetadata.tsx
+Line: 202
+Text: "? `👤 تم تعيين مهمة جديدة لك`"
+
+File: src/components/ui/task-drawer/TaskDrawerMetadata.tsx
+Line: 205
+Text: "? `${senderName} قام بتعيين مهمة "${task.title}" لك`"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 88
+Text: "let actionTextAr = "تحديث المهمة""
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 92
+Text: "actionTextAr = `تغيير اسم المهمة إلى "${updates.title}"`"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 95
+Text: "actionTextAr = "تحديث وصف المهمة""
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 102
+Text: "actionTextAr = "تحديث قائمة المهام الفرعية""
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 106
+Text: "actionTextAr = "إضافة تعليق جديد""
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 109
+Text: "actionTextAr = "حذف تعليق""
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 113
+Text: "actionTextAr = "تحديث المرفقات""
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 119
+Text: "? `⚙️ ${senderName} قام بـ ${actionTextAr}`"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 122
+Text: "? `${senderName} قام بـ ${actionTextAr} في مهمتك المعينة "${task.title}"`"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 154
+Text: "alert(isRTL ? `الملف الشخصي: ${name} • الرتبة: ${member.rank || 'عضو'}` : `Member Profile: ${name} • Rank: ${member.rank || 'ROOKIE'}`)"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 157
+Text: "title={isRTL ? `عرض الملف الشخصي لـ ${name}` : `View ${name}'s profile`}"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 646
+Text: "? `${emoji} ${senderName} تفاعل على تعليقك`"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 649
+Text: "? `${senderName} تفاعل بـ ${emoji} على تعليقك في مهمة "${task.title}"`"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 667
+Text: "alert(isRTL ? 'تم نسخ رابط المهمة!' : 'Task link copied to clipboard!')"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 845
+Text: "{isRTL ? 'مشغل الفيديو // EMBEDDED PLAYER' : 'EMBEDDED VIDEO PLAYER // MEDIA'}"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 886
+Text: "{isRTL ? 'المرفقات // ATTACHMENTS' : 'DRIVE ATTACHMENTS // FILES'}"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 904
+Text: "<span>{isRTL ? 'إضافة رابط يدوياً' : 'Add Manual Link'}</span>"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 918
+Text: "placeholder={isRTL ? 'اسم المرفق...' : 'ATTACHMENT_NAME...'}"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 937
+Text: "{isAddingLink ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto text-black" /> : (isRTL ? 'إضافة' : 'ADD')}"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 1022
+Text: "<span>{isRTL ? 'تركيز' : 'START FOCUS'}</span>"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 1026
+Text: "{isRTL ? 'المهمة مكتملة' : 'TASK IS COMPLETED'}"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 1041
+Text: "const nextStatusAr = task.is_completed ? "تغيير مهمتك لغير مكتملة" : "أكمل مهمتك المعينة""
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 1044
+Text: "? `✅ ${senderName} قام بـ ${nextStatusAr}`"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 1047
+Text: "? `${senderName} قام بـ ${nextStatusAr} في مهمتك المعينة "${task.title}"`"
+
+File: src/components/ui/TaskDrawer.tsx
+Line: 1071
+Text: "if (confirm(isRTL ? 'هل أنت متأكد من حذف هذه المهمة؟' : 'Are you sure you want to delete this task?')) {"
+
+File: src/components/ui/Toast.tsx
+Line: 57
+Text: "let label = isRTL ? 'إشعار النظام' : 'AI_FEEDBACK'"
+
+File: src/components/ui/Toast.tsx
+Line: 62
+Text: "label = isRTL ? 'اكتملت العملية' : 'SYSTEM_SUCCESS'"
+
+File: src/components/ui/Toast.tsx
+Line: 66
+Text: "label = isRTL ? 'تنبيه النظام' : 'SYSTEM_WARNING'"
+
+File: src/components/ui/Tutorial.tsx
+Line: 29
+Text: "title: 'القائمة الجانبية للتحكم',"
+
+File: src/components/ui/Tutorial.tsx
+Line: 30
+Text: "text: 'يمكنك الانتقال بسرعة بين الأهداف، الملاحظات، لوحة الإنجازات، وإعدادات الحساب الشخصي.',"
+
+File: src/components/ui/Tutorial.tsx
+Line: 36
+Text: "title: 'ابدأ من هنا!',"
+
+File: src/components/ui/Tutorial.tsx
+Line: 37
+Text: "text: 'هذا هو هدفك الترحيبي الأول المجهز لمساعدتك. اضغط على الكارت لفتحه واستعراض المهام التفاعلية الأولى!',"
+
+File: src/components/ui/Tutorial.tsx
+Line: 159
+Text: "{isRTL ? `الخطوة ${currentStep + 1}/${steps.length}` : `STEP ${currentStep + 1}/${steps.length}`}"
+
+File: src/components/ui/Tutorial.tsx
+Line: 172
+Text: "{isRTL ? 'تخطي' : 'SKIP'}"
+
+File: src/components/ui/Tutorial.tsx
+Line: 182
+Text: "? (isRTL ? 'فهمت!' : 'GOT IT!')"
+
+File: src/components/ui/Tutorial.tsx
+Line: 183
+Text: ": (isRTL ? 'التالي' : 'NEXT')"
+
+File: src/context/GrowthContext.tsx
+Line: 282
+Text: "dashboard: 'الرئيسية',"
+
+File: src/context/GrowthContext.tsx
+Line: 283
+Text: "mission: 'الأهداف',"
+
+File: src/context/GrowthContext.tsx
+Line: 284
+Text: "brain: 'الأفكار والملاحظات',"
+
+File: src/context/GrowthContext.tsx
+Line: 285
+Text: "achievements: 'الإنجازات',"
+
+File: src/context/GrowthContext.tsx
+Line: 286
+Text: "vault: 'الخزنة',"
+
+File: src/context/GrowthContext.tsx
+Line: 287
+Text: "streak: 'سجل الأيام',"
+
+File: src/context/GrowthContext.tsx
+Line: 288
+Text: "exit: 'خروج',"
+
+File: src/context/GrowthContext.tsx
+Line: 289
+Text: "sync: 'جاري المزامنة',"
+
+File: src/context/GrowthContext.tsx
+Line: 290
+Text: "operator: 'العضو',"
+
+File: src/context/GrowthContext.tsx
+Line: 291
+Text: "status: 'متصل',"
+
+File: src/context/GrowthContext.tsx
+Line: 292
+Text: "createMission: 'إنشاء هدف جديد',"
+
+File: src/context/GrowthContext.tsx
+Line: 293
+Text: "task: 'مهمة فرعية',"
+
+File: src/context/GrowthContext.tsx
+Line: 294
+Text: "showOnDashboard: 'عرض في الرئيسية',"
+
+File: src/context/GrowthContext.tsx
+Line: 295
+Text: "save: 'حفظ',"
+
+File: src/context/GrowthContext.tsx
+Line: 296
+Text: "cancel: 'إلغاء',"
+
+File: src/context/GrowthContext.tsx
+Line: 297
+Text: "delete: 'حذف',"
+
+File: src/context/GrowthContext.tsx
+Line: 298
+Text: "edit: 'تعديل',"
+
+File: src/context/GrowthContext.tsx
+Line: 299
+Text: "deadline: 'الموعد النهائي',"
+
+File: src/context/GrowthContext.tsx
+Line: 300
+Text: "start_date: 'تاريخ البدء',"
+
+File: src/context/GrowthContext.tsx
+Line: 301
+Text: "end_date: 'تاريخ الانتهاء',"
+
+File: src/context/GrowthContext.tsx
+Line: 302
+Text: "title: 'العنوان',"
+
+File: src/context/GrowthContext.tsx
+Line: 303
+Text: "progress: 'التقدم',"
+
+File: src/context/GrowthContext.tsx
+Line: 304
+Text: "on_track: 'على المسار',"
+
+File: src/context/GrowthContext.tsx
+Line: 305
+Text: "late: 'متأخر',"
+
+File: src/context/GrowthContext.tsx
+Line: 306
+Text: "ahead: 'متقدم',"
+
+File: src/context/GrowthContext.tsx
+Line: 307
+Text: "addTask: 'إضافة مهمة فرعية',"
+
+File: src/context/GrowthContext.tsx
+Line: 308
+Text: "settings: 'الإعدادات',"
+
+File: src/context/GrowthContext.tsx
+Line: 309
+Text: "gender: 'الجنس',"
+
+File: src/context/GrowthContext.tsx
+Line: 310
+Text: "male: 'ذكر',"
+
+File: src/context/GrowthContext.tsx
+Line: 311
+Text: "female: 'أنثى',"
+
+File: src/context/GrowthContext.tsx
+Line: 312
+Text: "age: 'السن',"
+
+File: src/context/GrowthContext.tsx
+Line: 313
+Text: "fullName: 'الاسم بالكامل',"
+
+File: src/context/GrowthContext.tsx
+Line: 314
+Text: "aiName: 'اسم المساعد الذكي',"
+
+File: src/context/GrowthContext.tsx
+Line: 315
+Text: "aiPersonality: 'شخصية المساعد الذكي',"
+
+File: src/context/GrowthContext.tsx
+Line: 316
+Text: "gentle: 'هادئ',"
+
+File: src/context/GrowthContext.tsx
+Line: 317
+Text: "savage: 'حازم',"
+
+File: src/context/GrowthContext.tsx
+Line: 318
+Text: "logout: 'خروج',"
+
+File: src/context/GrowthContext.tsx
+Line: 319
+Text: "noTasks: 'لا توجد مهام فرعية مضافة حالياً. يرجى إضافة مهمة فرعية أدناه.',"
+
+File: src/context/GrowthContext.tsx
+Line: 320
+Text: "tapToEnter: 'انقر للدخول',"
+
+File: src/context/GrowthContext.tsx
+Line: 321
+Text: "purge: 'مسح',"
+
+File: src/context/GrowthContext.tsx
+Line: 322
+Text: "deploy: 'إنشاء',"
+
+File: src/context/GrowthContext.tsx
+Line: 323
+Text: "missionColor: 'لون الهدف',"
+
+File: src/context/GrowthContext.tsx
+Line: 324
+Text: "missionScale: 'حجم الهدف',"
+
+File: src/context/GrowthContext.tsx
+Line: 325
+Text: "details: 'تفاصيل',"
+
+File: src/context/GrowthContext.tsx
+Line: 326
+Text: "time: 'الوقت',"
+
+File: src/context/GrowthContext.tsx
+Line: 327
+Text: "notes: 'ملاحظات',"
+
+File: src/context/GrowthContext.tsx
+Line: 328
+Text: "attachments: 'المرفقات',"
+
+File: src/context/GrowthContext.tsx
+Line: 329
+Text: "noDescription: 'لا يوجد وصف متاح',"
+
+File: src/context/GrowthContext.tsx
+Line: 330
+Text: "writeNotePlaceholder: '[ اكتب ملحوظة جديدة للتاسك... ]',"
+
+File: src/context/GrowthContext.tsx
+Line: 331
+Text: "googleDriveLinkBtn: 'ربط ملف من Google Drive',"
+
+File: src/context/GrowthContext.tsx
+Line: 332
+Text: "googleDriveDesc: 'بضغطة واحدة، اربط ملفاتك مباشرة من حسابك الشخصي. لا يتم استهلاك أي مساحة من السيرفر.',"
+
+File: src/context/GrowthContext.tsx
+Line: 333
+Text: "taskDetail: 'تفاصيل المهمة',"
+
+File: src/context/GrowthContext.tsx
+Line: 334
+Text: "savedProgress: 'التقدم المحفوظ',"
+
+File: src/context/GrowthContext.tsx
+Line: 335
+Text: "coreTaskStatement: 'بيان المهمة الأساسية',"
+
+File: src/context/GrowthContext.tsx
+Line: 336
+Text: "writeDescriptionPlaceholder: 'اكتب وصفاً أو بياناً لهذه المهمة...',"
+
+File: src/context/GrowthContext.tsx
+Line: 337
+Text: "completed: 'مكتملة',"
+
+File: src/context/GrowthContext.tsx
+Line: 338
+Text: "inProgress: 'جاري العمل',"
+
+File: src/context/GrowthContext.tsx
+Line: 339
+Text: "priority: 'أولوية: ',"
+
+File: src/context/GrowthContext.tsx
+Line: 340
+Text: "high: 'عالية 🔥',"
+
+File: src/context/GrowthContext.tsx
+Line: 341
+Text: "regular: 'عادية',"
+
+File: src/context/GrowthContext.tsx
+Line: 342
+Text: "statusComplexity: 'الحالة والتقدير',"
+
+File: src/context/GrowthContext.tsx
+Line: 343
+Text: "currentStatus: 'الحالة الحالية',"
+
+File: src/context/GrowthContext.tsx
+Line: 344
+Text: "taskWeight: 'الوزن / الأهمية',"
+
+File: src/context/GrowthContext.tsx
+Line: 345
+Text: "timeTrackingTitle: 'تتبع الوقت وقريبًا',"
+
+File: src/context/GrowthContext.tsx
+Line: 346
+Text: "timeTrackingDesc: 'في التحديث القادم (Phase 2)، ستتمكن من بدء مؤقت بومودورو مخصص لكل مهمة وربطها بالكامل مع سجل التتبع الإجمالي.',"
+
+File: src/context/GrowthContext.tsx
+Line: 347
+Text: "addNote: 'إضافة ملحوظة',"
+
+File: src/context/GrowthContext.tsx
+Line: 348
+Text: "deleteAttachment: 'حذف المرفق',"
+
+File: src/context/GrowthContext.tsx
+Line: 349
+Text: "markIncomplete: 'إلغاء الإكمال',"
+
+File: src/context/GrowthContext.tsx
+Line: 350
+Text: "markCompleted: 'اعتماد كمكتملة',"
+
+File: src/context/GrowthContext.tsx
+Line: 351
+Text: "googleApiNotConfigured: 'مفاتيح Google API غير مهيأة بعد.',"
+
+File: src/context/GrowthContext.tsx
+Line: 696
+Text: "const spamWords = ['test', 'asdf', 'asd', 'testing', 'تجر', 'تجربة', 'المه', 'المهمة']"
+
+File: src/context/GrowthContext.tsx
+Line: 740
+Text: "isRTL ? "اسم المهمة غير واضح. تم تشغيل فلتر الجودة. تم منح 0 XP." : "Task name too vague. Quality filter triggered. 0 XP awarded.","
+
+File: src/context/GrowthContext.tsx
+Line: 745
+Text: "isRTL ? "تم اكتشاف سبام. تم إيقاف كسب نقاط الـ XP مؤقتاً لمدة 15 دقيقة." : "Spam detected. XP gain is on cooldown for 15 minutes.","
+
+File: src/context/GrowthContext.tsx
+Line: 850
+Text: "const defaultAvatar = (gender === 'female' || gender === 'أنثى' || gender === 'Female') ? '/avatars/menna.svg' : '/avatars/omar.svg';"
+
+File: src/context/GrowthContext.tsx
+Line: 890
+Text: "const seedGoalTitle = isAr ? "ابدأ من هنا 🚀" : "Start Here 🚀""
+
+File: src/context/GrowthContext.tsx
+Line: 909
+Text: ""اضغط على النيشان هنا عشان تقفل أول مهمة ليك وتكسب أول 10 XP.","
+
+File: src/context/GrowthContext.tsx
+Line: 910
+Text: ""اضغط `Ctrl + K` عشان تفتح الـ Command Palette. أسرع أداة للتحكم.","
+
+File: src/context/GrowthContext.tsx
+Line: 911
+Text: ""جرب تسحب كورس يوتيوب دلوقتي! اضغط على زرار Import Playlist فوق.","
+
+File: src/context/GrowthContext.tsx
+Line: 912
+Text: ""اضغط على أيقونة الـ Pin 📌 في الهدف ده، عشان يتثبت في الداشبورد.","
+
+File: src/context/GrowthContext.tsx
+Line: 913
+Text: ""افتح الـ AI Coach من القائمة.. عشان تاخد تقرير تكتيكي.","
+
+File: src/context/GrowthContext.tsx
+Line: 914
+Text: ""امسح الهدف التدريبي ده من سلة المهملات، وابدأ هدفك الحقيقي.""
+
+File: src/context/GrowthContext.tsx
+Line: 955
+Text: "const defaultAvatar = (gender === 'female' || gender === 'أنثى' || gender === 'Female') ? '/avatars/menna.svg' : '/avatars/omar.svg';"
+
+File: src/context/GrowthContext.tsx
+Line: 1055
+Text: "const seedGoalTitle = isAr ? "ابدأ من هنا 🚀" : "Start Here 🚀""
+
+File: src/context/GrowthContext.tsx
+Line: 1059
+Text: ""اضغط على النيشان هنا عشان تقفل أول مهمة ليك وتكسب أول 10 XP.","
+
+File: src/context/GrowthContext.tsx
+Line: 1060
+Text: ""اضغط `Ctrl + K` عشان تفتح الـ Command Palette. أسرع أداة للتحكم.","
+
+File: src/context/GrowthContext.tsx
+Line: 1061
+Text: ""جرب تسحب كورس يوتيوب دلوقتي! اضغط على زرار Import Playlist فوق.","
+
+File: src/context/GrowthContext.tsx
+Line: 1062
+Text: ""اضغط على أيقونة الـ Pin 📌 في الهدف ده، عشان يتثبت في الداشبورد.","
+
+File: src/context/GrowthContext.tsx
+Line: 1063
+Text: ""افتح الـ AI Coach من القائمة.. عشان تاخد تقرير تكتيكي.","
+
+File: src/context/GrowthContext.tsx
+Line: 1064
+Text: ""امسح الهدف التدريبي ده من سلة المهملات، وابدأ هدفك الحقيقي.""
+
+File: src/hooks/useInbox.ts
+Line: 90
+Text: "let nearestDeadlineStr = lang === 'ar' ? "لا يوجد" : "None""
+
+File: src/hooks/useInbox.ts
+Line: 91
+Text: "let nearestMissionTitle = lang === 'ar' ? "لا يوجد" : "None""
+
+File: src/hooks/useInbox.ts
+Line: 98
+Text: "nearestDeadlineStr = lang === 'ar' ? `${nearestMission.title} متبقي ${days} أيام` : `${nearestMission.title} in ${days} days`"
+
+File: src/hooks/useInbox.ts
+Line: 123
+Text: "const title = lang === 'ar' ? `📋 تقرير الأداء اليومي - ${new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}` : `📋 Brief ${new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`"
+
+File: src/hooks/useInbox.ts
+Line: 124
+Text: "const content = lang === 'ar' ? `ملخص حالة الإنتاجية اليومية:"
+
+File: src/hooks/useInbox.ts
+Line: 125
+Text: "- الأهداف النشطة: [${activeMissionsCount}]"
+
+File: src/hooks/useInbox.ts
+Line: 126
+Text: "- أقرب موعد نهائي: [${nearestMissionTitle}] متبقي [${nearestDays}] أيام"
+
+File: src/hooks/useInbox.ts
+Line: 127
+Text: "- نسبة التقدم العام: [${totalProgress}]%"
+
+File: src/hooks/useInbox.ts
+Line: 128
+Text: "- إجمالي نقاط الإنجاز (XP): [${totalXp}]` : `Today's Status:"
+
+File: src/hooks/useInbox.ts
+Line: 195
+Text: "const title = lang === 'ar' ? `⚠️ تنبيه الموعد النهائي: ${mission.title}` : `⚠️ Warning: ${mission.title}`"
+
+File: src/hooks/useInbox.ts
+Line: 196
+Text: "const content = lang === 'ar' ? `[${mission.title}] متبقي [${days}] أيام فقط!"
+
+File: src/hooks/useInbox.ts
+Line: 197
+Text: "نسبة الإنجاز الحالية: [${currentProgress}]%"
+
+File: src/hooks/useInbox.ts
+Line: 198
+Text: "معدل العمل المطلوب: إكمال [${tasksPerDay}] مهام يومياً للوفاء بالموعد المحدد.` : `[${mission.title}] only [${days}] days left!"
+
+File: src/hooks/useInbox.ts
+Line: 250
+Text: "const title = lang === 'ar' ? "✅ تم تحقيق الهدف بنجاح!" : "✅ Goal Achieved!""
+
+File: src/hooks/useInbox.ts
+Line: 251
+Text: "const content = lang === 'ar' ? `تهانينا! لقد أكملت العمل على هدف: [${mission.title}]"
+
+File: src/hooks/useInbox.ts
+Line: 252
+Text: "نقاط الإنجاز المكتسبة: +[${xpAmount}] نقطة"
+
+File: src/hooks/useInbox.ts
+Line: 253
+Text: "المدة المستغرقة: [${timeTaken}]"
+
+File: src/hooks/useInbox.ts
+Line: 254
+Text: "الخطوة التالية: يمكنك زيارة معرض الإنجازات لاستعراض الكأس الذهبي الموثق باسمك.` : `Congrats! You finished [${mission.title}]"
+
+File: src/hooks/useInbox.ts
+Line: 350
+Text: "activeMissionsTextAr += `- [${m.title}]: بنسبة إنجاز [${progress}%]\n`"
+
+File: src/hooks/useInbox.ts
+Line: 372
+Text: "recommendationsAr = `1. 💤 ركز هذا الأسبوع على مهمة واحدة صغيرة لكسر الجمود واسترجاع طاقتك.`"
+
+File: src/hooks/useInbox.ts
+Line: 376
+Text: "recommendationsAr = `1. 🚨 الهدف "${criticalGoalTitle}" يقترب من موعده النهائي وباقي ${criticalGoalDays} أيام فقط. ركز جهودك عليه أولاً.`"
+
+File: src/hooks/useInbox.ts
+Line: 380
+Text: "recommendationsAr = `1. 🚧 سعة التركيز لديك مرتفعة جداً (${usedSlots}/9). تجنب بدء أهداف جديدة قبل إنهاء الأهداف الحالية.`"
+
+File: src/hooks/useInbox.ts
+Line: 384
+Text: "recommendationsAr = `1. ⚡ أداء رائع! حافظ على هذا الإيقاع واستمر في كسب نقاط الخبرة والنمو الذاتي.`"
+
+File: src/hooks/useInbox.ts
+Line: 389
+Text: "const title = lang === 'ar' ? `📊 تقرير الأداء الأسبوعي` : `📊 Weekly Review`"
+
+File: src/hooks/useInbox.ts
+Line: 390
+Text: "const contentText = lang === 'ar' ? `📊 تقرير الأداء الأسبوعي // WEEKLY REVIEW"
+
+File: src/hooks/useInbox.ts
+Line: 392
+Text: "📅 مراجعة الأسبوع المنصرم:"
+
+File: src/hooks/useInbox.ts
+Line: 393
+Text: "- المهام المكتملة: [${completedCount}] مهمة"
+
+File: src/hooks/useInbox.ts
+Line: 394
+Text: "- إجمالي نقاط الخبرة المكتسبة: +[${totalWeeklyXp}] نقطة"
+
+File: src/hooks/useInbox.ts
+Line: 395
+Text: "- حالة الأهداف النشطة:"
+
+File: src/hooks/useInbox.ts
+Line: 396
+Text: "${activeMissionsTextAr || '- لا توجد أهداف نشطة حالياً.'}"
+
+File: src/hooks/useInbox.ts
+Line: 398
+Text: "🚀 تطلعات الأسبوع المقبل:"
+
+File: src/hooks/useInbox.ts
+Line: 399
+Text: "- سعة التركيز الحالية: ${usedSlots}/9 وحدات تركيز."
+
+File: src/hooks/useInbox.ts
+Line: 400
+Text: "- التوجيه المقترح لزيادة الإنتاجية: ${criticalGoalTitle ? `التركيز الفوري على إتمام "${criticalGoalTitle}"` : `الحفاظ على معدل الإنتاجية الحالي وتعزيز تقدمك`}"
+
+File: src/hooks/useInbox.ts
+Line: 402
+Text: "💡 التوصية المخصصة:"
+
+File: src/lib/profanityFilter.ts
+Line: 3
+Text: "const BAD_WORDS_AR = ["شرموط", "متناك", "عرص", "خرا", "خول", "قحبة", "كس", "زبر", "لبوة", "ابن المتناكة", "ابن الاحبة", "احبة", "منيوك"];"
+

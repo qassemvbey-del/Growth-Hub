@@ -117,6 +117,18 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
     setIsMobileNavOpen(false)
   }, [pathname])
 
+  // Prevent body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (isMobileNavOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isMobileNavOpen])
+
   useEffect(() => {
     if (showAuthModal) {
       setShowAuthModal(false)
@@ -658,7 +670,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       <Sidebar isRTL={isRTL} onOpenCoach={() => { setCoachPanelOpen(true); playNeuralLink(); window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ai-coach' })); }} />
 
       <main className={cn(
-        'flex-1 min-h-screen pb-0 lg:pb-0 transition-all duration-500 relative z-10 w-full max-w-full overflow-x-hidden',
+        'flex-1 min-h-screen transition-all duration-500 relative z-10 w-full max-w-full overflow-x-hidden',
+        'overflow-y-scroll overscroll-contain pb-6 lg:pb-0',
         'lg:ps-72 lg:max-w-none'
       )}>
         {/* ── DESKTOP TOP BAR (TRANSIENT TELEMETRY ONLY) ── */}
@@ -842,13 +855,21 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
           )}
         </AnimatePresence> */}
 
-        <div className="relative">
+        <div className="relative pb-20 lg:pb-0">
           {children}
         </div>
       </main>
 
-      {/* ── MOBILE BOTTOM NAVIGATION ──
-      <nav className="lg:hidden fixed bottom-0 w-full bg-[var(--sidebar-bg)] border-t border-[var(--card-border)] z-[200] flex items-center justify-around px-2 backdrop-blur-2xl">
+      {/* ── MOBILE BOTTOM NAVIGATION ── */}
+      <nav
+        className="lg:hidden fixed bottom-0 w-full z-[200] flex items-center justify-around px-2 backdrop-blur-2xl border-t"
+        style={{
+          backgroundColor: 'var(--sidebar-bg)',
+          borderColor: 'var(--card-border)',
+          height: '60px',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        }}
+      >
         {[
           { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
           { label: isRTL ? 'شخصي' : 'Goals', icon: Crosshair, href: '/goals/solo' },
@@ -856,35 +877,44 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
           { label: isRTL ? 'الملاحظات' : 'Notes', icon: FileText, href: '/notes' },
           { label: isRTL ? 'الإنجازات' : 'Wins', icon: Trophy, href: '/achievements' },
         ].map(item => {
-          const isActive = pathname === item.href
+          const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
           return (
-            <button
+            <motion.button
               key={item.href}
               onClick={() => { playBlip(); router.push(item.href) }}
+              whileTap={{ scale: 0.88 }}
               className={cn(
-                "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all relative cursor-pointer",
-                isActive ? "text-[var(--text-primary)] scale-105" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                "flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-colors duration-200 relative cursor-pointer min-w-0",
+                isActive ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
               )}
             >
-              {(() => {
-                const IconComponent = item.icon
-                return <IconComponent className="w-5 h-5" style={{ color: isActive ? currentTheme.color : undefined }} />
-              })()}
-              <span className="text-[10px] font-space font-bold tracking-wider uppercase whitespace-nowrap">
-                {item.label}
-              </span>
               {isActive && (
-                <motion.div 
+                <motion.div
                   layoutId="mobileNavIndicator"
-                  className="absolute top-0 inset-x-4 h-[2px]"
-                  style={{ backgroundColor: currentTheme.color, boxShadow: `0 0 10px ${currentTheme.color}` }}
+                  className="absolute top-0 inset-x-3 h-[2px] rounded-full"
+                  style={{ backgroundColor: currentTheme.color, boxShadow: `0 0 8px ${currentTheme.color}` }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
-            </button>
+              {(() => {
+                const IconComponent = item.icon
+                return (
+                  <IconComponent
+                    className="w-5 h-5 transition-all duration-200"
+                    style={{ color: isActive ? currentTheme.color : undefined }}
+                  />
+                )
+              })()}
+              <span className={cn(
+                "text-[9px] font-space font-bold tracking-wider uppercase whitespace-nowrap transition-all duration-200",
+                isActive ? "opacity-100" : "opacity-60"
+              )}>
+                {item.label}
+              </span>
+            </motion.button>
           )
         })}
       </nav>
-      ── */}
 
       {/* Commented out original narrow edge-touch trigger:
       {!isMobileNavOpen && (

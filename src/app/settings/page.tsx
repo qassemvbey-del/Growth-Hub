@@ -274,14 +274,19 @@ export default function SettingsPage() {
         <div className="w-full max-w-4xl space-y-6 sm:space-y-10">
           
           {/* Symmetrical Settings Header */}
-          <header className="space-y-3">
-            <h1 className="text-4xl md:text-6xl font-black font-space tracking-wider uppercase text-black dark:text-white leading-none">
+          <motion.header
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-1.5"
+          >
+            <h1 className="text-2xl md:text-6xl font-black font-space tracking-wider uppercase text-black dark:text-white leading-none">
               {t('settings')}
             </h1>
-            {/* <p className="text-[10px] md:text-xs font-space tracking-[0.5em] uppercase font-black opacity-50" style={{ color: currentTheme.color }}>
-              {isRTL ? 'تخصيص النظام' : 'SYSTEM CONFIGURATION'}
-            </p> */}
-          </header>
+            <p className="text-[13px] text-zinc-500 dark:text-zinc-400 font-medium truncate max-w-xs md:max-w-none block">
+              {isRTL ? 'إعدادات الحساب وتفضيلات النظام' : 'Manage your account configurations and system rules'}
+            </p>
+          </motion.header>
 
           {/* Symmetrical layout split (1/4 vertical left tab sidebar, 3/4 content tab cards) */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-8 items-start">

@@ -101,14 +101,18 @@ export default function WinsPage() {
       <div className="p-6 md:p-12 space-y-12 md:space-y-16">
 
             {/* Header */}
-            <div className="text-center space-y-4 relative">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="text-center space-y-2 relative"
+            >
               <div className="flex items-center justify-center gap-6 mb-2">
                 <div className="w-20 h-[1px] opacity-30" style={{ background: `linear-gradient(to right, transparent, ${currentTheme.color})` }} />
-                {/* <Medal className="text-3xl md:text-4xl w-8 h-8" style={{ color: currentTheme.color }} /> */}
-                <Trophy className="text-3xl md:text-4xl w-8 h-8" style={{ color: currentTheme.color }} />
+                <Trophy className="text-xl md:text-4xl w-6 h-6 md:w-8 md:h-8" style={{ color: currentTheme.color }} />
                 <div className="w-20 h-[1px] opacity-30" style={{ background: `linear-gradient(to left, transparent, ${currentTheme.color})` }} />
               </div>
-              <h1 className="text-4xl md:text-7xl font-black font-space tracking-wider uppercase not- text-[var(--text-primary)] leading-none">
+              <h1 className="text-2xl md:text-7xl font-black font-space tracking-wider uppercase text-[var(--text-primary)] leading-none">
                 {isRTL ? (
                   <span className="font-black">إنجازاتي</span>
                 ) : (
@@ -119,10 +123,10 @@ export default function WinsPage() {
                 )}
               </h1>
               {/* Removed uppercase class to allow correct casing */}
-              <p className="text-[11px] font-space text-[var(--text-secondary)] tracking-[0.35em] font-bold">
+              <p className="text-[13px] font-space text-[var(--text-secondary)] font-medium truncate max-w-xs md:max-w-none mx-auto block">
                 {isRTL ? 'المهام المكتملة' : 'Completed'} &nbsp;·&nbsp; {archived.length} {isRTL ? 'سجل' : 'total'}
               </p>
-            </div>
+            </motion.div>
 
         {loading ? (
           <div className="space-y-12 animate-pulse">
