@@ -73,13 +73,19 @@ export default function TaskDrawerHeader({
               />
             ) : (
               <div 
-                className="group flex items-center gap-1.5 cursor-pointer" 
-                onClick={() => setIsEditingGoal(true)}
+                className="group flex items-center gap-1.5"
               >
-                <span className="text-[12px] font-semibold text-orange-500 hover:opacity-80 transition-all uppercase">
+                <span className="text-[12px] font-semibold text-orange-500 uppercase select-none">
                   {goalLabel}
                 </span>
-                <Edit2 className="w-3 h-3 text-zinc-500 opacity-60 sm:opacity-0 group-hover:opacity-100 transition-all hover:text-white" />
+                <button
+                  type="button"
+                  onClick={() => setIsEditingGoal(true)}
+                  className="p-1 hover:bg-white/5 rounded transition-all cursor-pointer opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-white shrink-0"
+                  title={isRTL ? 'تعديل الهدف' : 'Edit Goal'}
+                >
+                  <Edit2 className="w-3 h-3" />
+                </button>
               </div>
             )
           )}

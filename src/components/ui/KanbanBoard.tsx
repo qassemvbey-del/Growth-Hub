@@ -139,7 +139,7 @@ export default function KanbanBoard({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full pt-4 select-none">
+    <div className="flex lg:grid lg:grid-cols-3 overflow-x-auto lg:overflow-x-visible gap-4 lg:gap-6 w-full pt-4 select-none snap-x scrollbar-none pb-4">
       {columns.map((col) => {
         const colTasks = tasks.filter(t => getTaskColumn(t) === col.id)
         const isOver = dragOverColumnId === col.id
@@ -151,7 +151,7 @@ export default function KanbanBoard({
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, col.id)}
             className={cn(
-              "flex flex-col gap-4 p-4 rounded-2xl min-h-[550px] transition-all duration-300 bg-zinc-950/40 border border-white/5 backdrop-blur-md relative overflow-hidden",
+              "flex flex-col gap-4 p-4 rounded-2xl min-h-[500px] lg:min-h-[550px] transition-all duration-300 bg-zinc-950/40 border border-white/5 backdrop-blur-md relative overflow-hidden w-[80vw] lg:w-auto shrink-0 snap-center lg:shrink",
               isOver ? "border-dashed" : ""
             )}
             style={isOver ? { borderColor: col.color, boxShadow: `0 0 20px ${col.color}22` } : {}}
@@ -164,16 +164,14 @@ export default function KanbanBoard({
               />
             )}
 
-            {/* Column Header Banner */}
-            <div className="flex items-center justify-between pb-3 border-b border-white/5 shrink-0">
-              <span 
-                className={cn(
-                  "text-[10px] font-space font-black px-3 py-1 rounded-md border tracking-widest uppercase",
-                  col.glowClass
-                )}
-              >
-                {col.name}
-              </span>
+            {/* Column Header Banner (Sticky with Dot Indicator) */}
+            <div className="sticky top-0 bg-[#09090f]/95 backdrop-blur-md flex items-center justify-between pb-3 border-b border-white/5 shrink-0 z-10 pt-1">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full shadow-[0_0_8px_currentcolor]" style={{ backgroundColor: col.color, color: col.color }} />
+                <span className="text-[10px] font-space font-bold tracking-widest uppercase text-zinc-300">
+                  {col.name}
+                </span>
+              </div>
               <span className="font-mono text-xs text-white/30 px-2 py-0.5 rounded-full bg-white/[0.02]">
                 {colTasks.length}
               </span>
@@ -187,17 +185,7 @@ export default function KanbanBoard({
               <AnimatePresence mode='popLayout'>
                 {colTasks.map((task) => {
                   const isDragging = draggingTaskId === task.id
-                  const taskMinutes = timeStatsMap[task.id] || 0
-                  const timeFormatted = taskMinutes >= 60
-                    ? `${Math.floor(taskMinutes / 60)}h ${taskMinutes % 60}m`
-                    : taskMinutes > 0 ? `${taskMinutes}m` : null
-
-                  const storedProgress = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`growth_hub_video_progress_${task.id}`) || '0') : 0
-                  const storedDuration = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`growth_hub_video_duration_${task.id}`) || '0') : 0
-                  const videoProgress = task.video_progress ?? storedProgress
-                  const videoDuration = task.video_duration ?? storedDuration
                   const hasVideo = !!(task.video_id || task.video_url)
-
                   const taskViewers = onlineUsers?.filter((u: any) => u.cursor_task_id === task.id && u.user_id !== currentUserId) || []
 
                   return (
@@ -211,7 +199,7 @@ export default function KanbanBoard({
                         onDragEnd={handleDragEnd}
                         onClick={() => setSelectedTask(task)}
                         className={cn(
-                          "p-4 rounded-xl border cursor-grab active:cursor-grabbing hover:bg-white/5 transition-all shadow-sm flex flex-col gap-3 relative overflow-hidden select-none bg-zinc-900/40 border-white/5",
+                          "p-3 rounded-lg border cursor-grab active:cursor-grabbing hover:bg-white/5 transition-all shadow-sm flex items-center justify-between gap-2.5 relative overflow-hidden select-none bg-zinc-900/40 border-white/5",
                           isDragging ? "opacity-20 scale-95 border-dashed border-white/20" : "opacity-100",
                           task.is_completed ? "opacity-50" : ""
                         )}
@@ -223,93 +211,61 @@ export default function KanbanBoard({
                           style={{ backgroundColor: task.is_completed ? 'var(--text-secondary)' : col.color }}
                         />
 
-                        {/* Header row: Checkbox + Title + Presence avatars */}
-                        <div className="flex items-start justify-between gap-2.5 min-w-0">
-                          <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                toggleTask(task.id, task.is_completed)
-                              }}
-                              className="shrink-0 cursor-pointer flex items-center justify-center"
-                            >
-                              {task.is_completed ? (
-                                <NeonIcon icon={CheckCircle2} interactive size={18} style={{ color: themeColor }} />
-                              ) : (
-                                <NeonIcon icon={Circle} interactive size={18} className="opacity-40 hover:opacity-80 text-white/60 hover:text-white transition-opacity" />
-                              )}
-                            </button>
-                            
-                            <p 
-                              className={cn(
-                                "text-sm font-space font-bold text-white/90 leading-tight uppercase truncate",
-                                task.is_completed && "text-[var(--text-secondary)] opacity-50 line-through"
-                              )}
-                            >
-                              {task.title}
-                            </p>
-                          </div>
-
-                          {/* Task Viewers Overlapping Avatar Pile (Absolute Positioning in Top-Right) */}
-                          {taskViewers.length > 0 && (
-                            <div className="absolute -top-2 -right-2 flex items-center -space-x-1 shrink-0 select-none z-20">
-                              {taskViewers.map((viewer: any) => (
-                                <div
-                                  key={viewer.user_id}
-                                  className="w-6 h-6 rounded-full border bg-zinc-950 flex items-center justify-center text-[7px] font-space font-black uppercase text-white shadow-md relative overflow-hidden shrink-0 ring-2 ring-cyan-500 animate-pulse z-10"
-                                  style={{ borderColor: viewer.session_color || 'cyan', boxShadow: `0 0 8px ${viewer.session_color || 'cyan'}55` }}
-                                  title={`${viewer.full_name || 'CO-OPERATIVE'} is viewing this task`}
-                                >
-                                  {viewer.avatar_url ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img
-                                      src={viewer.avatar_url}
-                                      alt={viewer.full_name}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  ) : (
-                                    <span>{viewer.full_name?.substring(0, 2) || 'OP'}</span>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                        {/* Checkbox + Title */}
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1 pl-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggleTask(task.id, task.is_completed)
+                            }}
+                            className="shrink-0 cursor-pointer flex items-center justify-center"
+                          >
+                            {task.is_completed ? (
+                              <CheckCircle2 className="w-4 h-4 text-emerald-500" style={{ color: themeColor }} />
+                            ) : (
+                              <Circle className="w-4 h-4 opacity-40 hover:opacity-80 text-zinc-500 hover:text-white transition-opacity" />
+                            )}
+                          </button>
+                          
+                          <span 
+                            className={cn(
+                              "text-sm font-medium text-zinc-200 truncate",
+                              task.is_completed && "text-zinc-500 line-through"
+                            )}
+                          >
+                            {task.title}
+                          </span>
                         </div>
 
-                          {/* Footer Row: Power, Timer or complexity metrics */}
-                          <div className="flex items-center justify-between gap-2 border-t border-white/5 pt-2.5">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              {timeFormatted && (
-                                <div className="flex items-center gap-1 text-[10px] font-mono text-white/45">
-                                  <Clock className="w-3 h-3" style={{ color: themeColor }} />
-                                  {timeFormatted}
-                                </div>
-                              )}
-                              {task.metadata?.endDate && (() => {
-                                const tDate = new Date(task.metadata.endDate)
-                                tDate.setHours(0,0,0,0)
-                                const todayDate = new Date()
-                                todayDate.setHours(0,0,0,0)
-                                const isOverdue = !task.is_completed && tDate < todayDate
-                                return (
-                                  <span className={cn(
-                                    "font-mono text-[9px] px-1.5 py-0.5 rounded border leading-none tracking-wider",
-                                    isOverdue 
-                                      ? "text-red-500 border-red-500/30 bg-red-950/15 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse font-black" 
-                                      : "text-white/40 border-white/5 bg-white/[0.02]"
-                                  )}>
-                                    📅 {task.metadata.endDate}
-                                  </span>
-                                )
-                              })()}
-                            </div>
+                        {/* Play icon if video task */}
+                        {hasVideo && !task.is_completed && (
+                          <Play className="w-3.5 h-3.5 text-zinc-500 shrink-0 mr-1" />
+                        )}
 
-                           <div className="flex items-center gap-1.5">
-                             <ComplexityDashes weight={task.weight} color={themeColor} />
-                             <div className="h-2.5 w-[1px] bg-white/10 shrink-0" />
-                             <span className="text-[9px] font-mono text-white/40">⚡{task.weight || 3}</span>
-                           </div>
-                         </div>
+                        {/* Task Viewers Overlapping Avatar Pile (Absolute Positioning in Top-Right) */}
+                        {taskViewers.length > 0 && (
+                          <div className="absolute -top-2 -right-2 flex items-center -space-x-1 shrink-0 select-none z-20">
+                            {taskViewers.map((viewer: any) => (
+                              <div
+                                key={viewer.user_id}
+                                className="w-6 h-6 rounded-full border bg-zinc-950 flex items-center justify-center text-[7px] font-space font-black uppercase text-white shadow-md relative overflow-hidden shrink-0 ring-2 ring-cyan-500 animate-pulse z-10"
+                                style={{ borderColor: viewer.session_color || 'cyan', boxShadow: `0 0 8px ${viewer.session_color || 'cyan'}55` }}
+                                title={`${viewer.full_name || 'CO-OPERATIVE'} is viewing this task`}
+                              >
+                                {viewer.avatar_url ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={viewer.avatar_url}
+                                    alt={viewer.full_name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <span>{viewer.full_name?.substring(0, 2) || 'OP'}</span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   )

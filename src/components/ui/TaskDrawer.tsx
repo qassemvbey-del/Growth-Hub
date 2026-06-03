@@ -1033,81 +1033,87 @@ export default function TaskDrawer({
 
         {/* Fixed Thumb-Zone Footer */}
         <div className="w-full z-[60] bg-[#09090b]/98 border-t border-white/5 p-4 flex items-center justify-center shrink-0 relative">
-          <div className="flex flex-col items-center gap-1">
-            <div className="flex items-center justify-center gap-8">
-              {/* Play/Focus Button */}
-              <button
-                type="button"
-                disabled={task.is_completed}
-                onClick={() => {
-                  if (videoDuration > 0) {
-                    updateConfig(Math.round(videoDuration / 60), breakDuration)
-                  }
-                  if (isCurrentTaskFocus) {
-                    if (isCurrentFocusActive) {
-                      pause()
-                    } else {
-                      resume()
-                    }
+          <div className="flex items-center justify-center gap-8">
+            {/* Play/Focus Button */}
+            <button
+              type="button"
+              disabled={task.is_completed}
+              onClick={() => {
+                if (videoDuration > 0) {
+                  updateConfig(Math.round(videoDuration / 60), breakDuration)
+                }
+                if (isCurrentTaskFocus) {
+                  if (isCurrentFocusActive) {
+                    pause()
                   } else {
-                    startFocus(task.title, task.id, goalId)
-                    onClose()
+                    resume()
                   }
-                }}
-                className={cn(
-                  "w-12 h-12 rounded-xl flex items-center justify-center transition-all bg-transparent active:scale-95 cursor-pointer",
-                  task.is_completed && "opacity-40 cursor-not-allowed"
-                )}
-                title={isCurrentFocusActive ? "PAUSE FOCUS" : "START FOCUS"}
-              >
-                {isCurrentFocusActive ? (
-                  <Pause className="w-5 h-5 text-orange-500 fill-current" />
-                ) : (
-                  <Play className="w-5 h-5 text-zinc-500 fill-current" />
-                )}
-              </button>
-
-              {/* Complete Button */}
-              <button
-                type="button"
-                onClick={() => {
-                  onComplete()
-                  
-                  // Send completion notification to assignee
-                  const assigneeId = task.assigned_to
-                  if (assigneeId && assigneeId !== currentUserId) {
-                    const senderName = profile?.full_name || 'Operator'
-                    const nextStatusEn = task.is_completed ? "set your task to incomplete" : "completed your task"
-                    const nextStatusAr = task.is_completed ? "تغيير مهمتك لغير مكتملة" : "أكمل مهمتك المعينة"
-                    
-                    const notifTitle = isRTL
-                      ? `✅ ${senderName} قام بـ ${nextStatusAr}`
-                      : `✅ ${senderName} ${nextStatusEn}`
-                    const notifContent = isRTL
-                      ? `${senderName} قام بـ ${nextStatusAr} في مهمتك المعينة "${task.title}"`
-                      : `${senderName} ${nextStatusEn} "${task.title}"`
-                      
-                    sendNotification(assigneeId, 'reaction', notifTitle, notifContent)
-                  }
+                } else {
+                  startFocus(task.title, task.id, goalId)
                   onClose()
-                }}
-                className="w-12 h-12 rounded-xl flex items-center justify-center transition-all bg-transparent active:scale-95 cursor-pointer"
-                title={task.is_completed ? t('markIncomplete') : t('markCompleted')}
-              >
-                {task.is_completed ? (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                ) : (
-                  <Circle className="w-5 h-5 text-zinc-500" />
-                )}
-              </button>
-            </div>
-
-            {/* Suggested video focus time */}
-            {videoDuration > 0 && !task.is_completed && (
-              <span className="text-[9px] text-orange-500/80 font-mono tracking-wider font-semibold">
-                ({isRTL ? `مقترح: ${Math.round(videoDuration / 60)} د` : `Suggested: ${Math.round(videoDuration / 60)} mins`})
+                }
+              }}
+              className={cn(
+                "flex items-center gap-2 px-3 py-2 rounded-xl transition-all hover:bg-white/5 active:scale-95 cursor-pointer",
+                task.is_completed && "opacity-45 cursor-not-allowed"
+              )}
+            >
+              {isCurrentFocusActive ? (
+                <Pause className="w-4 h-4 text-orange-500 fill-current" />
+              ) : (
+                <Play className="w-4 h-4 text-zinc-500 fill-current" />
+              )}
+              <span className={cn(
+                "text-[10px] font-bold tracking-wider",
+                isCurrentFocusActive ? "text-orange-500" : "text-zinc-400"
+              )}>
+                {isCurrentFocusActive 
+                  ? "PAUSE" 
+                  : (videoDuration > 0 
+                      ? `START (${Math.round(videoDuration / 60)} MINS)` 
+                      : "POMODORO"
+                    )}
               </span>
-            )}
+            </button>
+
+            {/* Complete Button */}
+            <button
+              type="button"
+              onClick={() => {
+                onComplete()
+                
+                // Send completion notification to assignee
+                const assigneeId = task.assigned_to
+                if (assigneeId && assigneeId !== currentUserId) {
+                  const senderName = profile?.full_name || 'Operator'
+                  const nextStatusEn = task.is_completed ? "set your task to incomplete" : "completed your task"
+                  const nextStatusAr = task.is_completed ? "تغيير مهمتك لغير مكتملة" : "أكمل مهمتك المعينة"
+                  
+                  const notifTitle = isRTL
+                    ? `✅ ${senderName} قام بـ ${nextStatusAr}`
+                    : `✅ ${senderName} ${nextStatusEn}`
+                  const notifContent = isRTL
+                    ? `${senderName} قام بـ ${nextStatusAr} في مهمتك المعينة "${task.title}"`
+                    : `${senderName} ${nextStatusEn} "${task.title}"`
+                    
+                  sendNotification(assigneeId, 'reaction', notifTitle, notifContent)
+                }
+                onClose()
+              }}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all hover:bg-white/5 active:scale-95 cursor-pointer"
+            >
+              {task.is_completed ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              ) : (
+                <Circle className="w-4 h-4 text-zinc-500" />
+              )}
+              <span className={cn(
+                "text-[10px] font-bold tracking-wider",
+                task.is_completed ? "text-emerald-500" : "text-zinc-400"
+              )}>
+                COMPLETE
+              </span>
+            </button>
           </div>
 
           {/* Delete Button (If handler is provided, absolutely positioned on the side to preserve central centering) */}
@@ -1121,7 +1127,7 @@ export default function TaskDrawer({
                     onClose()
                   }
                 }}
-                className="w-10 h-10 flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 text-red-500/70 hover:text-red-500 border border-red-500/20 rounded-xl transition-all cursor-pointer"
+                className="w-9 h-9 flex items-center justify-center bg-transparent hover:bg-red-500/10 text-zinc-500 hover:text-red-500 rounded-xl transition-all cursor-pointer"
                 title="DELETE TASK"
               >
                 <Trash2 className="w-4 h-4" />
