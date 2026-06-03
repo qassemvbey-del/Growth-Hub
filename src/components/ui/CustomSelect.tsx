@@ -129,7 +129,7 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute left-0 right-0 mt-1 bg-white dark:bg-[#0a0a0a] border rounded-md z-[9999] overflow-hidden"
+            className="absolute left-0 right-0 mt-1 bg-white dark:bg-[#0a0a0a] border rounded-md z-[9999] overflow-hidden min-w-[200px] w-full"
             style={{
               borderColor: `${currentTheme.color}50`,
               boxShadow: `0 4px 20px rgba(0,0,0,0.5), 0 0 15px ${currentTheme.color}15`
@@ -145,7 +145,7 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
                     setIsOpen(false)
                   }}
                   className={cn(
-                    "w-full text-left px-4 py-3 text-sm font-space uppercase tracking-widest transition-all flex items-center justify-between text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
+                    "w-full text-left px-4 py-3 text-sm md:text-base font-space uppercase tracking-widest transition-all flex items-center justify-between text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white cursor-pointer"
                   )}
                   style={option.value === value ? {
                     color: currentTheme.color,
