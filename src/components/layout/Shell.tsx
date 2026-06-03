@@ -681,21 +681,18 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   }
 
   return (
+    <>
     <div
       ref={mainWrapperRef}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       className={cn(
-        'min-h-screen bg-zinc-50 dark:bg-transparent text-foreground flex relative transition-colors duration-500',
+        'min-h-[100dvh] bg-zinc-50 dark:bg-transparent text-foreground flex relative transition-colors duration-500',
         networkStatus === 'OFFLINE' && 'connection-offline'
       )}
       style={{ 
         ['--selection-bg' as any]: `${currentTheme.color}33`, 
         ['--selection-text' as any]: currentTheme.color,
-        transform: 'translateZ(0)',
-        WebkitTransform: 'translateZ(0)',
-        backfaceVisibility: 'hidden',
-        WebkitBackfaceVisibility: 'hidden',
       }}
       dir={shellIsRTL ? 'rtl' : 'ltr'}
     >
@@ -717,11 +714,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       <Sidebar isRTL={isRTL} onOpenCoach={() => { setCoachPanelOpen(true); playNeuralLink(); window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ai-coach' })); }} />
 
       <main
-        ref={mainWrapperRef}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
         className={cn(
-        'flex-1 min-h-screen transition-all duration-500 relative z-10 w-full max-w-full overflow-x-hidden',
+        'flex-1 min-h-[100dvh] transition-all duration-500 relative z-10 w-full max-w-full overflow-x-hidden',
         'pb-24 lg:pb-8',
         'lg:ps-72 lg:max-w-none'
       )}>
@@ -967,79 +961,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         })}
       </nav> */}
 
-      {/* ── MOBILE FLOATING ACTION BUTTON (FAB) CONTAINER ── */}
-      <div 
-        className={cn(
-          "lg:hidden fixed bottom-6 z-[100] flex items-center gap-3",
-          shellIsRTL ? "left-6" : "right-6"
-        )}
-      >
-        {/* Expanding Search Button */}
-        <div 
-          className={cn(
-            "flex items-center h-14 bg-zinc-950/90 backdrop-blur-2xl border border-zinc-800 rounded-full transition-all duration-300 shadow-lg px-3.5",
-            searchExpanded ? "w-64" : "w-14 justify-center"
-          )}
-          style={{ 
-            borderColor: searchExpanded ? `${currentTheme.color}50` : undefined,
-            boxShadow: searchExpanded ? `0 0 20px ${currentTheme.color}25` : undefined
-          }}
-        >
-          <button
-            onClick={() => {
-              playBlip()
-              setSearchExpanded(!searchExpanded)
-              if (!searchExpanded) {
-                setTimeout(() => searchInputRef.current?.focus(), 150)
-              }
-            }}
-            className="flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer shrink-0 w-7 h-7"
-          >
-            {/* Search Icon or X Icon when expanded */}
-            {searchExpanded ? <X className="w-5 h-5" /> : (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            )}
-          </button>
-          
-          {searchExpanded && (
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value)
-                window.dispatchEvent(new CustomEvent('global-search', { detail: e.target.value }))
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  setCommandPaletteOpen(true)
-                  window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ctrl-k' }))
-                }
-              }}
-              placeholder={shellIsRTL ? "ابحث هنا..." : "Search..."}
-              className="flex-1 bg-transparent border-none text-white outline-none ps-2 text-sm font-space font-bold w-full"
-            />
-          )}
-        </div>
-
-        {/* Primary Plus FAB Button */}
-        <motion.button
-          onClick={() => {
-            playNeuralLink()
-            openCreateGoalModal({ goalType: 'solo' })
-          }}
-          whileTap={{ scale: 0.92 }}
-          className="w-14 h-14 rounded-full flex items-center justify-center text-black font-bold tracking-widest text-3xl shadow-lg cursor-pointer"
-          style={{ 
-            backgroundColor: currentTheme.color,
-            boxShadow: `0 0 20px ${currentTheme.color}50`
-          }}
-        >
-          +
-        </motion.button>
-      </div>
+      {/* FAB moved outside this wrapper to avoid containing-block issues */}
 
       {/* Commented out original narrow edge-touch trigger:
       {!isMobileNavOpen && (
@@ -1271,5 +1193,81 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         />
       </div>
     </div>
+
+    {/* ── MOBILE FLOATING ACTION BUTTON (FAB) CONTAINER ── */}
+    {/* Rendered outside the main wrapper to avoid transform/filter containing-block breaking position:fixed */}
+    <div 
+      className={cn(
+        "lg:hidden fixed bottom-6 z-[100] flex items-center gap-3",
+        shellIsRTL ? "left-6" : "right-6"
+      )}
+      dir={shellIsRTL ? 'rtl' : 'ltr'}
+    >
+      {/* Expanding Search Button */}
+      <div 
+        className={cn(
+          "flex items-center h-14 bg-zinc-950/90 backdrop-blur-2xl border border-zinc-800 rounded-full transition-all duration-300 shadow-lg px-3.5",
+          searchExpanded ? "w-64" : "w-14 justify-center"
+        )}
+        style={{ 
+          borderColor: searchExpanded ? `${currentTheme.color}50` : undefined,
+          boxShadow: searchExpanded ? `0 0 20px ${currentTheme.color}25` : undefined
+        }}
+      >
+        <button
+          onClick={() => {
+            playBlip()
+            setSearchExpanded(!searchExpanded)
+            if (!searchExpanded) {
+              setTimeout(() => searchInputRef.current?.focus(), 150)
+            }
+          }}
+          className="flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer shrink-0 w-7 h-7"
+        >
+          {searchExpanded ? <X className="w-5 h-5" /> : (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          )}
+        </button>
+        
+        {searchExpanded && (
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              window.dispatchEvent(new CustomEvent('global-search', { detail: e.target.value }))
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                setCommandPaletteOpen(true)
+                window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ctrl-k' }))
+              }
+            }}
+            placeholder={shellIsRTL ? "ابحث هنا..." : "Search..."}
+            className="flex-1 bg-transparent border-none text-white outline-none ps-2 text-sm font-space font-bold w-full"
+          />
+        )}
+      </div>
+
+      {/* Primary Plus FAB Button */}
+      <motion.button
+        onClick={() => {
+          playNeuralLink()
+          openCreateGoalModal({ goalType: 'solo' })
+        }}
+        whileTap={{ scale: 0.92 }}
+        className="w-14 h-14 rounded-full flex items-center justify-center text-black font-bold tracking-widest text-3xl shadow-lg cursor-pointer"
+        style={{ 
+          backgroundColor: currentTheme.color,
+          boxShadow: `0 0 20px ${currentTheme.color}50`
+        }}
+      >
+        +
+      </motion.button>
+    </div>
+    </>
   )
 }
