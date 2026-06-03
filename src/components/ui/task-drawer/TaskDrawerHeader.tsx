@@ -1,8 +1,8 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Link as LinkIcon, Play, RefreshCw, Circle, X, CheckCircle2 } from 'lucide-react'
+import { Link as LinkIcon, Play, RefreshCw, Circle, X, CheckCircle2, Edit2 } from 'lucide-react'
 import { NeonIcon } from '../NeonIcon'
 import CustomSelect from '../CustomSelect'
 import { cn } from '@/lib/utils'
@@ -47,24 +47,41 @@ export default function TaskDrawerHeader({
   handleCopyLink,
   goals
 }: TaskDrawerHeaderProps) {
+  const [isEditingGoal, setIsEditingGoal] = useState(false)
+  const currentGoal = goals.find(g => g.id === (task.goal_id || goalId))
+  const goalLabel = currentGoal ? currentGoal.title : (isRTL ? '— بدون ربط —' : '— NO LINK —')
+
   return (
     <div className="sticky top-0 bg-[#09090b]/90 backdrop-blur-md border-b border-white/5 z-[60] p-4 md:p-6 flex flex-col gap-3 shrink-0">
       <div className="flex items-center justify-between gap-3 w-full">
         {/* Goal Selector */}
         <div className="flex items-center gap-1.5 max-w-xs sm:max-w-md w-full sm:w-auto">
           {goals && goals.length > 0 && (
-            <CustomSelect
-              minimal
-              value={task.goal_id || goalId || ''}
-              onChange={async (val) => {
-                await updateTask(task.id, { goal_id: val || null })
-              }}
-              options={[
-                { value: '', label: isRTL ? '— بدون ربط —' : '— NO LINK —' },
-                ...goals.map(g => ({ value: g.id, label: g.title.toUpperCase() }))
-              ]}
-              className="w-full sm:w-auto min-w-[200px]"
-            />
+            isEditingGoal ? (
+              <CustomSelect
+                minimal
+                value={task.goal_id || goalId || ''}
+                onChange={async (val) => {
+                  await updateTask(task.id, { goal_id: val || null })
+                  setIsEditingGoal(false)
+                }}
+                options={[
+                  { value: '', label: isRTL ? '— بدون ربط —' : '— NO LINK —' },
+                  ...goals.map(g => ({ value: g.id, label: g.title.toUpperCase() }))
+                ]}
+                className="w-full sm:w-auto min-w-[200px]"
+              />
+            ) : (
+              <div 
+                className="group flex items-center gap-1.5 cursor-pointer" 
+                onClick={() => setIsEditingGoal(true)}
+              >
+                <span className="text-[12px] font-semibold text-orange-500 hover:opacity-80 transition-all uppercase">
+                  {goalLabel}
+                </span>
+                <Edit2 className="w-3 h-3 text-zinc-500 opacity-60 sm:opacity-0 group-hover:opacity-100 transition-all hover:text-white" />
+              </div>
+            )
           )}
         </div>
 
