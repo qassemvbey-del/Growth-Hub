@@ -12,9 +12,13 @@ interface CustomSelectProps {
   onChange: (value: string) => void
   placeholder?: string
   className?: string
+  compact?: boolean
 }
 
+/* Commented out original non-compact signature
 export default function CustomSelect({ options, value, onChange, placeholder = 'SELECT', className }: CustomSelectProps) {
+*/
+export default function CustomSelect({ options, value, onChange, placeholder = 'SELECT', className, compact = false }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const { currentTheme } = useGrowth()
@@ -44,6 +48,7 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
 
   return (
     <div className={cn("relative w-full", className)} ref={containerRef}>
+      {/* Commented out original button code
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -60,6 +65,25 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <HelpCircle />
+      </button>
+      */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          "w-full bg-black/5 dark:bg-black border rounded-md flex items-center justify-between text-zinc-900 dark:text-white font-space uppercase tracking-widest transition-all",
+          compact ? "px-2 py-1 text-[10px]" : "px-4 py-3 text-sm",
+          isOpen ? "border-transparent" : "border-zinc-200 dark:border-white/10"
+        )}
+        style={{
+          borderColor: isOpen ? currentTheme.color : undefined,
+          boxShadow: isOpen ? `0 0 10px ${currentTheme.color}30` : undefined
+        }}
+      >
+        <span className={cn(!selectedOption && "opacity-40")}>
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        <HelpCircle className={compact ? "w-3 h-3 ml-1" : "w-4 h-4 ml-2"} />
       </button>
 
       <AnimatePresence>
