@@ -112,6 +112,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   const [bootProgress, setBootProgress] = useState(0)
   const [activeLogIndex, setActiveLogIndex] = useState(0)
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
+  const [sidebarDragX, setSidebarDragX] = useState(0) // 0=closed, sidebarWidth=open
 
   useEffect(() => {
     setIsMobileNavOpen(false)
@@ -164,42 +165,107 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
   const desktopInboxRef = useRef<HTMLDivElement>(null)
   const mobileInboxRef = useRef<HTMLDivElement>(null)
+  const mainWrapperRef = useRef<HTMLDivElement>(null)
 
-  // Swipe Gestures
+  // ── REAL-TIME SWIPE GESTURE SYSTEM ──
+  const SIDEBAR_WIDTH = 280
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
+  const isDragging = useRef(false)
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX
     touchStartY.current = e.touches[0].clientY
+    isDragging.current = false
   }
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    const deltaX = e.changedTouches[0].clientX - touchStartX.current
-    const deltaY = e.changedTouches[0].clientY - touchStartY.current
+  const handleTouchMove = (e: TouchEvent) => {
+    const deltaX = e.touches[0].clientX - touchStartX.current
+    const deltaY = e.touches[0].clientY - touchStartY.current
 
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
-      if (shellIsRTL) {
-        if (deltaX < 0 && !isMobileNavOpen) {
-          setIsMobileNavOpen(true)
-          playBlip()
-        }
-        if (deltaX > 0 && isMobileNavOpen) {
-          setIsMobileNavOpen(false)
-          playBlip()
-        }
+    if (!isDragging.current) {
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+        isDragging.current = true
+      } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 10) {
+        return // let vertical scroll proceed
       } else {
-        if (deltaX > 0 && !isMobileNavOpen) {
-          setIsMobileNavOpen(true)
-          playBlip()
-        }
-        if (deltaX < 0 && isMobileNavOpen) {
-          setIsMobileNavOpen(false)
-          playBlip()
-        }
+        return
+      }
+    }
+
+    if (!isDragging.current) return
+    e.preventDefault() // only blocks scroll after horizontal confirmed
+
+    const isRTLNow = document.documentElement.dir === 'rtl'
+
+    if (isRTLNow) {
+      // RTL: swipe LEFT opens, swipe RIGHT closes
+      if (!isMobileNavOpen && deltaX < -10) {
+        const progress = Math.min(Math.abs(deltaX) / SIDEBAR_WIDTH, 1)
+        setSidebarDragX(progress * SIDEBAR_WIDTH)
+      } else if (isMobileNavOpen && deltaX > 10) {
+        const progress = Math.max(0, 1 - deltaX / SIDEBAR_WIDTH)
+        setSidebarDragX(progress * SIDEBAR_WIDTH)
+      }
+    } else {
+      // LTR: swipe RIGHT opens, swipe LEFT closes
+      if (!isMobileNavOpen && deltaX > 10) {
+        const progress = Math.min(deltaX / SIDEBAR_WIDTH, 1)
+        setSidebarDragX(progress * SIDEBAR_WIDTH)
+      } else if (isMobileNavOpen && deltaX < -10) {
+        const progress = Math.max(0, 1 - Math.abs(deltaX) / SIDEBAR_WIDTH)
+        setSidebarDragX(progress * SIDEBAR_WIDTH)
       }
     }
   }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!isDragging.current) return
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current
+    const threshold = SIDEBAR_WIDTH * 0.3
+    const isRTLNow = document.documentElement.dir === 'rtl'
+
+    if (isRTLNow) {
+      if (!isMobileNavOpen && Math.abs(deltaX) > threshold) {
+        setIsMobileNavOpen(true)
+        setSidebarDragX(SIDEBAR_WIDTH)
+        playBlip()
+      } else if (isMobileNavOpen && deltaX > threshold) {
+        setIsMobileNavOpen(false)
+        setSidebarDragX(0)
+        playBlip()
+      } else {
+        setSidebarDragX(isMobileNavOpen ? SIDEBAR_WIDTH : 0)
+      }
+    } else {
+      if (!isMobileNavOpen && deltaX > threshold) {
+        setIsMobileNavOpen(true)
+        setSidebarDragX(SIDEBAR_WIDTH)
+        playBlip()
+      } else if (isMobileNavOpen && Math.abs(deltaX) > threshold) {
+        setIsMobileNavOpen(false)
+        setSidebarDragX(0)
+        playBlip()
+      } else {
+        setSidebarDragX(isMobileNavOpen ? SIDEBAR_WIDTH : 0)
+      }
+    }
+    isDragging.current = false
+  }
+
+  // Passive:false so we can preventDefault inside handleTouchMove
+  useEffect(() => {
+    const el = mainWrapperRef.current
+    if (!el) return
+    el.addEventListener('touchmove', handleTouchMove, { passive: false })
+    return () => el.removeEventListener('touchmove', handleTouchMove)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobileNavOpen])
+
+  // Sync sidebarDragX when open/closed state changes (e.g. clicking backdrop)
+  useEffect(() => {
+    setSidebarDragX(isMobileNavOpen ? SIDEBAR_WIDTH : 0)
+  }, [isMobileNavOpen])
 
   // Real-time Network Radar States
   const [networkStatus, setNetworkStatus] = useState<'ONLINE' | 'OFFLINE' | 'LAG'>('ONLINE')
@@ -639,16 +705,20 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
   return (
     <div
+      ref={mainWrapperRef}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       className={cn(
-        /* 'min-h-screen bg-zinc-50 dark:bg-[#050505] text-foreground flex relative transition-colors duration-500', */
         'min-h-screen bg-zinc-50 dark:bg-transparent text-foreground flex relative transition-colors duration-500',
         networkStatus === 'OFFLINE' && 'connection-offline'
       )}
       style={{ 
         ['--selection-bg' as any]: `${currentTheme.color}33`, 
-        ['--selection-text' as any]: currentTheme.color 
+        ['--selection-text' as any]: currentTheme.color,
+        transform: 'translateZ(0)',
+        WebkitTransform: 'translateZ(0)',
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
       }}
       dir={shellIsRTL ? 'rtl' : 'ltr'}
     >
@@ -671,7 +741,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
       <main className={cn(
         'flex-1 min-h-screen transition-all duration-500 relative z-10 w-full max-w-full overflow-x-hidden',
-        'overflow-y-scroll overscroll-contain pb-6 lg:pb-0',
+        'pb-6 lg:pb-0',
         'lg:ps-72 lg:max-w-none'
       )}>
         {/* ── DESKTOP TOP BAR (TRANSIENT TELEMETRY ONLY) ── */}
@@ -928,42 +998,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         />
       )}
       */}
-      {/* Full-screen swipe-to-open gesture detector — RTL-aware */}
-      {!isMobileNavOpen && (
-        <div 
-          className="fixed inset-0 z-[9999] lg:hidden pointer-events-none"
-        >
-          <div 
-            className="absolute top-0 h-full w-10 pointer-events-auto touch-none"
-            style={{ [isRTL ? 'right' : 'left']: 0 }}
-            onTouchStart={(e) => {
-              const touch = e.touches[0]
-              ;(e.currentTarget as HTMLDivElement).dataset.startX = String(touch.clientX)
-              ;(e.currentTarget as HTMLDivElement).dataset.startY = String(touch.clientY)
-            }}
-            onTouchEnd={(e) => {
-              const el = e.currentTarget as HTMLDivElement
-              const startX = parseFloat(el.dataset.startX || '0')
-              const startY = parseFloat(el.dataset.startY || '0')
-              const endTouch = e.changedTouches[0]
-              const deltaX = endTouch.clientX - startX
-              const deltaY = Math.abs(endTouch.clientY - startY)
-              
-              // Only trigger if horizontal swipe ≥ 60px and not a vertical scroll
-              const threshold = 60
-              if (deltaY < 80) {
-                if (!isRTL && deltaX >= threshold) {
-                  setIsMobileNavOpen(true)
-                  playBlip()
-                } else if (isRTL && deltaX <= -threshold) {
-                  setIsMobileNavOpen(true)
-                  playBlip()
-                }
-              }
-            }}
-          />
-        </div>
-      )}
+      {/* Gesture is now handled by mainWrapperRef touchmove/touchend globally — no edge zone needed *}
 
       {/* ── MOBILE SIDEBAR DRAWER ── */}
       <AnimatePresence>
@@ -1000,26 +1035,16 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
             >
             */}
             <motion.div
-              drag="x"
-              dragConstraints={isRTL ? { left: 0, right: 300 } : { left: -300, right: 0 }}
-              dragElastic={0.1}
-              onDragEnd={(e, info) => { 
-                const offset = info.offset.x;
-                const velocity = info.velocity.x;
-                if (isRTL) {
-                  if (offset > 50 || velocity > 500) {
-                    setIsMobileNavOpen(false);
-                  }
-                } else {
-                  if (offset < -50 || velocity < -500) {
-                    setIsMobileNavOpen(false);
-                  }
-                }
+              initial={false}
+              animate={{
+                x: isRTL
+                  ? `${SIDEBAR_WIDTH - sidebarDragX}px`   // RTL: starts off-right
+                  : `-${SIDEBAR_WIDTH - sidebarDragX}px`,  // LTR: starts off-left
               }}
-              initial={{ x: isRTL ? '100%' : '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: isRTL ? '100%' : '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+              transition={isDragging.current
+                ? { duration: 0 }                          // instant while dragging
+                : { type: 'spring', stiffness: 400, damping: 35 } // spring on release
+              }
               className={cn(
                 "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-zinc-950/95 backdrop-blur-2xl shadow-2xl p-6 transform-gpu will-change-transform",
                 isRTL ? "right-0 border-l border-r-0" : "left-0 border-r"

@@ -90,6 +90,11 @@
     overflow-x: hidden !important;
     -webkit-font-smoothing: antialiased;
     transition: background-color 0.4s ease, color 0.4s ease;
+    /* GPU compositing: eliminates mobile rendering jank */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
 
   [dir="rtl"] {
