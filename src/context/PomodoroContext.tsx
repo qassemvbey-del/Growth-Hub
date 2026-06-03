@@ -57,45 +57,65 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   const { playSuccess, playBlip } = useSound()
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
-  const triggerWarningNotification = () => {
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      const origin = window.location.origin
-      const title = "⚡ SYSTEM ALERT: 1 Min Remaining!"
-      const options: any = {
-        body: `Focus session for task: "${taskName || 'Active Task'}" has 1 minute remaining.`,
-        icon: `${origin}/icons/icon-512.png`,
-        badge: `${origin}/icons/icon-192.png`,
-        vibrate: [200, 100, 200]
-      }
-      try {
-        new Notification(title, options)
-      } catch (err) {
-        console.error('Failed to trigger warning notification:', err)
-      }
+  const sendNotificationViaSW = (title: string, body: string, tag?: string) => {
+    if (typeof window === 'undefined') return
+    if ('Notification' in window && Notification.permission !== 'granted') return
+
+    const origin = window.location.origin
+    const payload = {
+      type: 'SHOW_NOTIFICATION',
+      title,
+      body,
+      icon: `${origin}/icons/icon-512.png`,
+      badge: `${origin}/icons/icon-192.png`,
+      tag: tag || 'pomodoro-timer',
+    }
+
+    // Primary: use Service Worker (works in background & locked screen)
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage(payload)
+      return
+    }
+
+    // Fallback: try standard Notification API (foreground only)
+    try {
+      new Notification(title, {
+        body,
+        icon: payload.icon,
+        badge: payload.badge,
+        vibrate: [200, 100, 200],
+        requireInteraction: true,
+      } as NotificationOptions)
+    } catch (err) {
+      console.error('Notification fallback failed:', err)
     }
   }
 
+  const requestNotificationPermission = () => {
+    if (typeof window === 'undefined') return
+    if (!('Notification' in window)) return
+    if (Notification.permission === 'granted' || Notification.permission === 'denied') return
+    showToast('Enable notifications to get alerted when your focus session ends.', 'info')
+    Notification.requestPermission()
+  }
+
+  const triggerWarningNotification = () => {
+    sendNotificationViaSW(
+      '⚡ 1 minute remaining',
+      `Your focus session for "${taskName || 'Active Task'}" is almost done.`,
+      'pomodoro-warning'
+    )
+  }
+
   const triggerCompletionNotification = () => {
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      const origin = window.location.origin
-      const isFocus = sessionType === 'FOCUS'
-      // const title = isFocus ? "🏆 GOAL ACCOMPLISHED" : "☕ BREAK OVER // RESUME FOCUS"
-      const title = isFocus ? "🏆 Goal Accomplished!" : "☕ Break over. Ready to resume focus?"
-      const options: any = {
-        body: isFocus 
-          ? `Completed focus session for task: "${taskName || 'Active Task'}".`
-          : "Your break has ended. Ready to deploy back to work?",
-        icon: `${origin}/icons/icon-512.png`,
-        badge: `${origin}/icons/icon-192.png`,
-        vibrate: [200, 100, 200],
-        requireInteraction: true
-      }
-      try {
-        new Notification(title, options)
-      } catch (err) {
-        console.error('Failed to trigger completion notification:', err)
-      }
-    }
+    const isFocus = sessionType === 'FOCUS'
+    sendNotificationViaSW(
+      isFocus ? '🏆 Focus session complete!' : '☕ Break over — ready to resume?',
+      isFocus
+        ? `Great work! You completed your focus session for "${taskName || 'Active Task'}".`
+        : 'Your break has ended. Time to get back to it.',
+      'pomodoro-complete'
+    )
   }
 
   // Load from localStorage
@@ -260,9 +280,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   }
 
   const startFocus = (name: string, tId?: string, cId?: string) => {
-        if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-      Notification.requestPermission();
-    }
+    requestNotificationPermission()
     if (isActive && sessionType === 'FOCUS' && taskId && taskId !== tId) {
       setPendingSwitchTask({ name, taskId: tId, goalId: cId })
       setShowSwitchWarning(true)
@@ -293,9 +311,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   }
 
   const startTimer = () => {
-        if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-      Notification.requestPermission();
-    }
+    requestNotificationPermission()
     setIsActive(true)
     setIsPaused(false)
     playBlip()
@@ -316,9 +332,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
   }
 
   const resume = () => {
-        if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-      Notification.requestPermission();
-    }
+    requestNotificationPermission()
     setIsPaused(false)
     playBlip()
   }

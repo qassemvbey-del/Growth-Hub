@@ -78,7 +78,7 @@ export default function TaskDrawer({
   onDelete
 }: TaskDrawerProps) {
   const { isRTL, t, addXp, profile, setIsTaskDrawerOpen } = useGrowth()
-  const { startFocus, isActive, isPaused, taskId: activePomodoroTaskId, pause, resume, updateConfig, breakDuration } = usePomodoro()
+  const { startFocus, startTimer, isActive, isPaused, taskId: activePomodoroTaskId, pause, resume, updateConfig, breakDuration } = usePomodoro()
   const isCurrentTaskFocus = activePomodoroTaskId === task.id
   const isCurrentFocusActive = isCurrentTaskFocus && isActive && !isPaused
 
@@ -1104,9 +1104,9 @@ export default function TaskDrawer({
         </div>
 
         {/* Fixed Thumb-Zone Footer */}
-        <div className="w-full z-[60] bg-[#09090b]/98 border-t border-white/5 p-4 flex items-center justify-center shrink-0 relative">
-          <div className="flex items-center justify-center gap-8">
-            {/* Play/Focus Button */}
+        <div className="w-full z-[60] bg-[#09090b]/98 border-t border-white/5 px-4 py-3 flex items-center justify-center shrink-0 relative">
+          <div className="flex items-center justify-center gap-6">
+            {/* Pomodoro / Focus Button */}
             <button
               type="button"
               disabled={task.is_completed}
@@ -1124,29 +1124,37 @@ export default function TaskDrawer({
                   }
                 } else {
                   startFocus(task.title, task.id, goalId)
-                  onClose()
+                  // Auto-start the timer — no navigation, stay in the drawer
+                  setTimeout(() => startTimer(), 50)
                 }
               }}
               className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-xl transition-all hover:bg-white/5 active:scale-95 cursor-pointer",
-                task.is_completed && "opacity-45 cursor-not-allowed"
+                "flex items-center gap-2.5 px-4 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer min-w-[120px] justify-center",
+                task.is_completed && "opacity-40 cursor-not-allowed",
+                isCurrentFocusActive
+                  ? "bg-orange-500/10 border border-orange-500/30 shadow-[0_0_12px_rgba(249,115,22,0.15)]"
+                  : isCurrentTaskFocus && !isCurrentFocusActive
+                    ? "bg-orange-500/5 border border-orange-500/20"
+                    : "bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/10"
               )}
             >
               {isCurrentFocusActive ? (
                 <Pause className="w-4 h-4 text-orange-500 fill-current" />
               ) : (
-                <Play className="w-4 h-4 text-zinc-500 fill-current" />
+                <Play className="w-4 h-4 fill-current" style={{ color: isCurrentTaskFocus ? '#F97316' : 'var(--text-secondary)' }} />
               )}
               <span className={cn(
-                "text-[10px] font-bold tracking-wider",
-                isCurrentFocusActive ? "text-orange-500" : "text-zinc-400"
+                "text-[10px] font-bold tracking-wider uppercase",
+                isCurrentFocusActive ? "text-orange-500" : isCurrentTaskFocus ? "text-orange-400" : "text-zinc-400"
               )}>
                 {isCurrentFocusActive 
-                  ? "PAUSE" 
-                  : (resolvedDuration > 0 
-                      ? `START (${Math.round(resolvedDuration / 60)} MINS)` 
-                      : "POMODORO"
-                    )}
+                  ? (isRTL ? "إيقاف" : "Pause")
+                  : isCurrentTaskFocus
+                    ? (isRTL ? "استكمال" : "Resume")
+                    : (resolvedDuration > 0 
+                        ? (isRTL ? `تركيز (${Math.round(resolvedDuration / 60)} د)` : `Focus (${Math.round(resolvedDuration / 60)} min)`)
+                        : (isRTL ? "تركيز" : "Focus")
+                      )}
               </span>
             </button>
  
@@ -1173,9 +1181,13 @@ export default function TaskDrawer({
                     
                   sendNotification(assigneeId, 'reaction', notifTitle, notifContent)
                 }
-                onClose()
               }}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all hover:bg-white/5 active:scale-95 cursor-pointer"
+              className={cn(
+                "flex items-center gap-2.5 px-4 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer min-w-[120px] justify-center",
+                task.is_completed
+                  ? "bg-emerald-500/10 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.15)]"
+                  : "bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/10"
+              )}
             >
               {task.is_completed ? (
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
@@ -1183,10 +1195,12 @@ export default function TaskDrawer({
                 <Circle className="w-4 h-4 text-zinc-500" />
               )}
               <span className={cn(
-                "text-[10px] font-bold tracking-wider",
+                "text-[10px] font-bold tracking-wider uppercase",
                 task.is_completed ? "text-emerald-500" : "text-zinc-400"
               )}>
-                COMPLETE
+                {task.is_completed 
+                  ? (isRTL ? "مكتملة" : "Done") 
+                  : (isRTL ? "إنهاء" : "Complete")}
               </span>
             </button>
           </div>
