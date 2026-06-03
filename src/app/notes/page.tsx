@@ -990,7 +990,7 @@ export default function NotesPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             <AnimatePresence mode="popLayout">
               {filteredNotes.map((note, idx) => {
                 const noteColor = currentTheme.color
@@ -1005,133 +1005,110 @@ export default function NotesPage() {
                   .trim()
                   .slice(0, 160) || (isRTL ? 'ملاحظة فارغة...' : 'Empty note...')
 
-                 return (
-                   <motion.div
-                     key={note.id}
-                     initial={{ opacity: 0, scale: 0.96 }}
-                     animate={{ opacity: 1, scale: 1 }}
-                     exit={{ opacity: 0, scale: 0.92 }}
-                     transition={{ delay: idx * 0.03 }}
-                     onClick={() => setEditingNote(note)}
-                     className={cn(
-                       /* Commented out original p-5 padding card class for safety rules
-                       "group relative p-5 border cursor-pointer transition-all duration-300 h-auto flex flex-col",
-                       */
-                       "group relative px-4 py-3 border cursor-pointer transition-all duration-300 h-auto flex flex-col",
-                       "bg-[var(--card-bg)] border-[var(--card-border)] hover:border-[var(--card-border)]/50",
-                       "backdrop-blur-xl",
-                       isRTL ? "text-right" : "text-left",
-                       note._isTaskNote && (isRTL 
-                         ? "border-r-2 border-indigo-500/50 shadow-[inset_-3px_0_10px_rgba(99,102,241,0.05)]" 
-                         : "border-l-2 border-indigo-500/50 shadow-[inset_3px_0_10px_rgba(99,102,241,0.05)]"
-                       )
-                     )}
-                   >
-                     {/* Neon top accent */}
-                     <div
-                       className="absolute top-0 left-0 right-0 h-[1px] opacity-60 group-hover:opacity-100 transition-opacity"
-                       style={{ background: `linear-gradient(90deg, transparent, ${noteColor}, transparent)` }}
-                     />
+                return (
+                  <motion.div
+                    key={note.id}
+                    initial={{ opacity: 0, scale: 0.96 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.92 }}
+                    transition={{ delay: idx * 0.03 }}
+                    onClick={() => setEditingNote(note)}
+                    className={cn(
+                      /* Commented out original card styles for safety rules
+                      "group relative px-4 py-3 border cursor-pointer transition-all duration-300 h-auto flex flex-col",
+                      "bg-[var(--card-bg)] border-[var(--card-border)] hover:border-[var(--card-border)]/50",
+                      "backdrop-blur-xl",
+                      */
+                      "group relative px-4 py-3 border cursor-pointer h-auto flex flex-col rounded-xl transition-all duration-300",
+                      "bg-zinc-900/10 dark:bg-zinc-900/30 border-zinc-200/50 dark:border-zinc-800/60 hover:bg-zinc-100/50 dark:hover:bg-zinc-900/50 hover:border-zinc-300 dark:hover:border-zinc-700",
+                      isRTL ? "text-right" : "text-left",
+                      note._isTaskNote && (isRTL 
+                        ? "border-r-2 border-indigo-500/50 shadow-[inset_-3px_0_10px_rgba(99,102,241,0.05)]" 
+                        : "border-l-2 border-indigo-500/50 shadow-[inset_3px_0_10px_rgba(99,102,241,0.05)]"
+                      )
+                    )}
+                  >
+                    {/* Neon top accent */}
+                    <div
+                      className="absolute top-0 left-0 right-0 h-[1px] opacity-60 group-hover:opacity-100 transition-opacity"
+                      style={{ background: `linear-gradient(90deg, transparent, ${noteColor}, transparent)` }}
+                    />
 
-                     {/* Commented out absolute top-right Goal badge for safety rules
-                     {linkedMission && (
-                       <div 
-                         onClick={(e) => {
-                           e.stopPropagation()
-                           const mId = linkedMission.id || note.goal_id
-                           if (mId) {
-                             const g = missions.find(m => m.id === mId)
-                             const isPublic = g?.metadata?.type === 'public'
-                             router.push(isPublic ? `/goals/public/${mId}` : `/goals/squad/${mId}`)
-                           }
-                         }}
-                         className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-md text-[8px] font-space font-black tracking-wider uppercase hover:bg-zinc-800 hover:scale-105 transition-all cursor-pointer z-10"
-                         style={{ backgroundColor: `${noteColor}15`, color: noteColor, border: `1px solid ${noteColor}30` }}
-                       >
-                         <Link className="text-[10px]" />
-                         <span className="max-w-[80px] truncate">{linkedMission.title}</span>
-                       </div>
-                     )}
-                     */}
+                    {/* Pin indicator */}
+                    {note.is_locked && (
+                      <div className="absolute top-3 left-3 opacity-50">
+                        <Pin className="text-sm w-3.5 h-3.5" style={{ color: noteColor }} />
+                      </div>
+                    )}
 
-                     {/* Pin indicator */}
-                     {note.is_locked && (
-                       <div className="absolute top-3 left-3 opacity-50">
-                         <Pin className="text-sm w-3.5 h-3.5" style={{ color: noteColor }} />
-                       </div>
-                     )}
+                    {/* Title */}
+                    {/* Commented out original large title text for safety rules
+                    <h3 className="text-xl font-black font-space text-[var(--text-primary)] mt-4 uppercase tracking-tighter truncate">
+                    */}
+                    <h3 className="text-sm font-semibold font-space text-[var(--text-primary)] mt-1 uppercase tracking-wide truncate">
+                      {note.title && note.title !== 'Untitled Note' ? note.title : (isRTL ? `ملاحظة — ${dateSuffix}` : `Note — ${dateSuffix}`)}
+                    </h3>
 
-                     {/* Title */}
-                     <h3 className="text-xl font-black font-space text-[var(--text-primary)] mt-4 uppercase tracking-tighter truncate">
-                       {note.title && note.title !== 'Untitled Note' ? note.title : (isRTL ? `ملاحظة — ${dateSuffix}` : `Note — ${dateSuffix}`)}
-                     </h3>
+                    {/* Preview */}
+                    {/* Commented out original preview sizing for safety rules
+                    <p className={cn(
+                       'text-xs leading-relaxed text-[var(--text-secondary)] mt-2 font-space line-clamp-3'
+                    )}>
+                    */}
+                    <p className="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400 mt-1.5 font-space line-clamp-3">
+                      "{plainText}"
+                    </p>
 
-                     {/* Preview */}
-                     <p className={cn(
-                        'text-xs leading-relaxed text-[var(--text-secondary)] mt-2 font-space line-clamp-3'
-                     )}>
-                       "{plainText}"
-                     </p>
-
-                     {/* Footer / Meta */}
-                     <div className="mt-3 pt-3 border-t border-[var(--card-border)]/30 flex items-center justify-between gap-2">
-                       <div className="flex flex-wrap items-center gap-2">
-                          {tagObj && (
-                           <span 
-                             className="px-1.5 py-0.5 border text-[9px] font-black font-space tracking-widest uppercase rounded"
-                             style={{ borderColor: `${noteColor}40`, color: noteColor, backgroundColor: `${noteColor}08` }}
-                           >
-                             {tagObj.label}
-                           </span>
-                         )}
-                         {note._isTaskNote && (
-                           /* Commented out nested badge with background for safety
-                           <span 
-                             className="flex items-center gap-1 text-[8px] font-mono text-indigo-400 font-bold uppercase tracking-wider bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 shrink-0"
-                             title="Embedded Task Note"
-                           >
-                             <Layers className="text-[10px]" />
-                             {isRTL ? 'مدمج' : 'NESTED'}
-                           </span>
-                           */
-                           <span 
-                             className="text-[10px] font-bold text-indigo-400/80 shrink-0 select-none mr-1"
-                             title={isRTL ? 'تعليق مدمج بالمهمة' : 'Nested Task Comment'}
-                           >
-                             ↳
-                           </span>
-                         )}
-                         <span className="text-[9px] font-space text-[var(--text-secondary)] font-black tracking-widest shrink-0">
-                           {date}
-                         </span>
-                         {linkedMission && (
-                           <div 
-                             onClick={(e) => {
-                               e.stopPropagation()
-                               const mId = linkedMission.id || note.goal_id
-                               if (mId) {
-                                 const g = missions.find(m => m.id === mId)
-                                 const isPublic = g?.metadata?.type === 'public'
-                                 router.push(isPublic ? `/goals/public/${mId}` : `/goals/squad/${mId}`)
-                               }
-                             }}
-                             className="flex items-center gap-1 text-[10px] text-zinc-500 hover:text-zinc-400 transition-all cursor-pointer select-none"
-                           >
-                             <Target className="w-3.5 h-3.5" style={{ color: noteColor }} />
-                             <span className="max-w-[100px] truncate font-space font-bold uppercase tracking-wider">{linkedMission.title}</span>
-                           </div>
-                         )}
-                       </div>
-                       
-                       <button
-                         onClick={(e) => { e.stopPropagation(); deleteNote(note.id) }}
-                         className="text-[var(--text-secondary)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all shrink-0"
-                       >
-                         <Trash2 className="text-base w-3.5 h-3.5" />
-                       </button>
-                     </div>
-                   </motion.div>
-                 )
+                    {/* Footer / Meta */}
+                    <div className="mt-auto pt-3 border-t border-zinc-200/20 dark:border-zinc-800/30 flex items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                         {tagObj && (
+                          <span 
+                            className="px-1.5 py-0.5 border text-[9px] font-black font-space tracking-widest uppercase rounded"
+                            style={{ borderColor: `${noteColor}40`, color: noteColor, backgroundColor: `${noteColor}08` }}
+                          >
+                            {tagObj.label}
+                          </span>
+                        )}
+                        {note._isTaskNote && (
+                          <span 
+                            className="text-[10px] font-bold text-indigo-400/80 shrink-0 select-none mr-1"
+                            title={isRTL ? 'تعليق مدمج بالمهمة' : 'Nested Task Comment'}
+                          >
+                            ↳
+                          </span>
+                        )}
+                        <span className="text-[9px] font-space text-[var(--text-secondary)] font-black tracking-widest shrink-0">
+                          {date}
+                        </span>
+                        {linkedMission && (
+                          <div 
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              const mId = linkedMission.id || note.goal_id
+                              if (mId) {
+                                const g = missions.find(m => m.id === mId)
+                                const isPublic = g?.metadata?.type === 'public'
+                                router.push(isPublic ? `/goals/public/${mId}` : `/goals/squad/${mId}`)
+                              }
+                            }}
+                            className="flex items-center gap-1 text-[10px] text-zinc-500 hover:text-zinc-400 transition-all cursor-pointer select-none"
+                          >
+                            <Target className="w-3.5 h-3.5" style={{ color: noteColor }} />
+                            <span className="max-w-[100px] truncate font-space font-bold uppercase tracking-wider">{linkedMission.title}</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <button
+                        onClick={(e) => { e.stopPropagation(); deleteNote(note.id) }}
+                        className="text-[var(--text-secondary)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                      >
+                        <Trash2 className="text-base w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </motion.div>
+                )
               })}
             </AnimatePresence>
           </div>
