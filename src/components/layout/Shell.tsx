@@ -171,11 +171,13 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   const SIDEBAR_WIDTH = 280
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
+  const dragStartX = useRef(0)
   const isDragging = useRef(false)
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX
     touchStartY.current = e.touches[0].clientY
+    dragStartX.current = isMobileNavOpen ? SIDEBAR_WIDTH : 0
     isDragging.current = false
   }
 
@@ -197,59 +199,31 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
     e.preventDefault() // only blocks scroll after horizontal confirmed
 
     const isRTLNow = document.documentElement.dir === 'rtl'
+    let nextDragX = dragStartX.current
 
     if (isRTLNow) {
       // RTL: swipe LEFT opens, swipe RIGHT closes
-      if (!isMobileNavOpen && deltaX < -10) {
-        const progress = Math.min(Math.abs(deltaX) / SIDEBAR_WIDTH, 1)
-        setSidebarDragX(progress * SIDEBAR_WIDTH)
-      } else if (isMobileNavOpen && deltaX > 10) {
-        const progress = Math.max(0, 1 - deltaX / SIDEBAR_WIDTH)
-        setSidebarDragX(progress * SIDEBAR_WIDTH)
-      }
+      nextDragX = dragStartX.current - deltaX
     } else {
       // LTR: swipe RIGHT opens, swipe LEFT closes
-      if (!isMobileNavOpen && deltaX > 10) {
-        const progress = Math.min(deltaX / SIDEBAR_WIDTH, 1)
-        setSidebarDragX(progress * SIDEBAR_WIDTH)
-      } else if (isMobileNavOpen && deltaX < -10) {
-        const progress = Math.max(0, 1 - Math.abs(deltaX) / SIDEBAR_WIDTH)
-        setSidebarDragX(progress * SIDEBAR_WIDTH)
-      }
+      nextDragX = dragStartX.current + deltaX
     }
+
+    const clampedDragX = Math.max(0, Math.min(SIDEBAR_WIDTH, nextDragX))
+    setSidebarDragX(clampedDragX)
   }
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (!isDragging.current) return
-    const deltaX = e.changedTouches[0].clientX - touchStartX.current
     const threshold = SIDEBAR_WIDTH * 0.3
-    const isRTLNow = document.documentElement.dir === 'rtl'
+    const shouldBeOpen = sidebarDragX > threshold
 
-    if (isRTLNow) {
-      if (!isMobileNavOpen && Math.abs(deltaX) > threshold) {
-        setIsMobileNavOpen(true)
-        setSidebarDragX(SIDEBAR_WIDTH)
-        playBlip()
-      } else if (isMobileNavOpen && deltaX > threshold) {
-        setIsMobileNavOpen(false)
-        setSidebarDragX(0)
-        playBlip()
-      } else {
-        setSidebarDragX(isMobileNavOpen ? SIDEBAR_WIDTH : 0)
-      }
-    } else {
-      if (!isMobileNavOpen && deltaX > threshold) {
-        setIsMobileNavOpen(true)
-        setSidebarDragX(SIDEBAR_WIDTH)
-        playBlip()
-      } else if (isMobileNavOpen && Math.abs(deltaX) > threshold) {
-        setIsMobileNavOpen(false)
-        setSidebarDragX(0)
-        playBlip()
-      } else {
-        setSidebarDragX(isMobileNavOpen ? SIDEBAR_WIDTH : 0)
-      }
+    if (shouldBeOpen !== isMobileNavOpen) {
+      playBlip()
     }
+
+    setIsMobileNavOpen(shouldBeOpen)
+    setSidebarDragX(shouldBeOpen ? SIDEBAR_WIDTH : 0)
     isDragging.current = false
   }
 
@@ -741,7 +715,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
       <main className={cn(
         'flex-1 min-h-screen transition-all duration-500 relative z-10 w-full max-w-full overflow-x-hidden',
-        'pb-6 lg:pb-0',
+        'pb-20 md:pb-0',
         'lg:ps-72 lg:max-w-none'
       )}>
         {/* ── DESKTOP TOP BAR (TRANSIENT TELEMETRY ONLY) ── */}
@@ -925,18 +899,18 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
           )}
         </AnimatePresence> */}
 
-        <div className="relative pb-20 lg:pb-0">
+        <div className="relative pb-0">
           {children}
         </div>
       </main>
 
       {/* ── MOBILE BOTTOM NAVIGATION ── */}
       <nav
-        className="lg:hidden fixed bottom-0 w-full z-[200] flex items-center justify-around px-2 backdrop-blur-2xl border-t"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-2 backdrop-blur-2xl border-t"
         style={{
           backgroundColor: 'var(--sidebar-bg)',
           borderColor: 'var(--card-border)',
-          height: '60px',
+          height: '64px',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
@@ -1038,12 +1012,12 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
               initial={false}
               animate={{
                 x: isRTL
-                  ? `${SIDEBAR_WIDTH - sidebarDragX}px`   // RTL: starts off-right
-                  : `-${SIDEBAR_WIDTH - sidebarDragX}px`,  // LTR: starts off-left
+                  ? (SIDEBAR_WIDTH - sidebarDragX)
+                  : (sidebarDragX - SIDEBAR_WIDTH),
               }}
               transition={isDragging.current
-                ? { duration: 0 }                          // instant while dragging
-                : { type: 'spring', stiffness: 400, damping: 35 } // spring on release
+                ? { type: 'tween', duration: 0 }
+                : { type: 'spring', stiffness: 400, damping: 35 }
               }
               className={cn(
                 "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-zinc-950/95 backdrop-blur-2xl shadow-2xl p-6 transform-gpu will-change-transform",
