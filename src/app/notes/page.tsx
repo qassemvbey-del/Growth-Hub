@@ -592,7 +592,7 @@ export default function NotesPage() {
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder={isRTL ? 'البحث في الملاحظات...' : 'Search notes...'}
                 className={cn(
-                  "h-11 w-full md:w-64 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-md font-space text-[11px] text-[var(--text-primary)] tracking-wide outline-none focus:outline-none focus:ring-2 focus:border-transparent transition-all",
+                  "h-11 w-full md:w-64 bg-white/5 border border-white/5 rounded-2xl font-space text-[11px] text-[var(--text-primary)] tracking-wide outline-none focus:outline-none focus:ring-2 focus:border-transparent transition-all",
                   isRTL ? "pr-10 pl-4" : "pl-10 pr-4"
                 )}
                 style={{ ['--tw-ring-color' as any]: `${currentTheme.color}55` }}
@@ -990,7 +990,7 @@ export default function NotesPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <AnimatePresence mode="popLayout">
               {filteredNotes.map((note, idx) => {
                 const noteColor = currentTheme.color
@@ -1019,11 +1019,11 @@ export default function NotesPage() {
                       "bg-[var(--card-bg)] border-[var(--card-border)] hover:border-[var(--card-border)]/50",
                       "backdrop-blur-xl",
                       */
-                      "group relative px-4 py-3 border cursor-pointer h-auto flex flex-col rounded-xl transition-all duration-300",
+                      "group relative p-4 border cursor-pointer h-auto flex flex-col rounded-2xl transition-all duration-300",
                       /* Commented out original border settings for safety rules
                       "bg-zinc-900/10 dark:bg-zinc-900/30 border-zinc-200/50 dark:border-zinc-800/60 hover:bg-zinc-100/50 dark:hover:bg-zinc-900/50 hover:border-zinc-300 dark:hover:border-zinc-700",
                       */
-                      "bg-zinc-900/10 dark:bg-zinc-900/30 border-zinc-200/10 dark:border-zinc-800/40 hover:bg-zinc-100/50 dark:hover:bg-zinc-900/50 hover:border-zinc-300 dark:hover:border-zinc-700",
+                      "bg-zinc-900/20 backdrop-blur-xl border-white/5 hover:bg-zinc-900/30 hover:border-white/10",
                       isRTL ? "text-right" : "text-left",
                       note._isTaskNote && (isRTL 
                         ? "border-r-2 border-indigo-500/50 shadow-[inset_-3px_0_10px_rgba(99,102,241,0.05)]" 
@@ -1047,7 +1047,7 @@ export default function NotesPage() {
                     {/* Group Title and Preview into space-y-0.5 */}
                     <div className="flex flex-col space-y-0.5">
                       {/* Title */}
-                      <h3 className="text-sm font-semibold font-space text-[var(--text-primary)] uppercase tracking-wide truncate">
+                      <h3 className="text-sm font-medium font-space text-[var(--text-primary)] uppercase tracking-wide truncate">
                         {note.title && note.title !== 'Untitled Note' ? note.title : (isRTL ? `ملاحظة — ${dateSuffix}` : `Note — ${dateSuffix}`)}
                       </h3>
 
@@ -1138,7 +1138,7 @@ export default function NotesPage() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.93, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-[calc(100%-2rem)] mx-auto md:max-w-3xl p-5 md:p-12 pb-28 relative border border-[var(--card-border)] bg-[var(--card-bg)] backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.8)] flex flex-col h-auto min-h-[300px] max-h-[90vh] overflow-hidden rounded-md my-auto"
+              className="w-[calc(100%-2rem)] mx-auto md:max-w-3xl p-5 md:p-12 pb-28 relative border border-white/5 bg-zinc-900/20 backdrop-blur-xl shadow-[0_0_80px_rgba(0,0,0,0.8)] flex flex-col h-auto min-h-[300px] max-h-[90vh] overflow-hidden rounded-3xl my-auto"
             >
               {/* Neon top bar */}
               <div
@@ -1271,12 +1271,12 @@ export default function NotesPage() {
               </div>
 
               {/* Sticky Footer */}
-              <div className="pt-4 mt-2 border-t border-[var(--card-border)] flex justify-end items-center shrink-0">
-                <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                   <span className="text-[9px] font-space tracking-widest uppercase font-black">
+              <div className="pt-4 mt-2 flex justify-end items-center shrink-0">
+                <div className="flex items-center gap-3 text-zinc-600">
+                   <span className="text-[10px] font-space tracking-widest uppercase font-normal">
                      {isRTL ? 'حفظ تلقائي' : 'Auto-saved'}
                    </span>
-                  <Save className="text-xl w-5 h-5" />
+                  <Save className="text-sm w-4 h-4" />
                 </div>
               </div>
             </motion.div>
