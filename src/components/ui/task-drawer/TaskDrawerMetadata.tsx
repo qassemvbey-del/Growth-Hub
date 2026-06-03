@@ -129,15 +129,28 @@ export default function TaskDrawerMetadata({
             todayDate.setHours(0,0,0,0)
             return tDate < todayDate
           })()
-          const displayVal = hasDate ? formatDeadline(endDate) : (isRTL ? 'غير محدد' : 'NOT SET')
+          const displayVal = hasDate ? formatDeadline(endDate) : (isRTL ? 'تحديد موعد' : 'SET DEADLINE')
           return (
-            <div className="flex items-center gap-2">
-              <label className={cn(
-                "relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono font-bold border cursor-pointer transition-all shrink-0",
-                isOverdue
-                  ? "bg-red-500/10 border-red-500 text-red-500 font-bold"
-                  : "border-white/5 bg-white/[0.02] text-white/70 hover:bg-white/[0.05] hover:text-white"
-              )}>
+            <div className="flex items-center gap-2 relative z-[9999]">
+              <label 
+                onClick={(e) => {
+                  // Find nested input and invoke showPicker() to bypass focus-trap / backdrop click blockages
+                  const input = e.currentTarget.querySelector('input')
+                  if (input && typeof input.showPicker === 'function') {
+                    try {
+                      input.showPicker()
+                    } catch (err) {
+                      console.warn('Native showPicker failed, relying on click/focus:', err)
+                    }
+                  }
+                }}
+                className={cn(
+                  "relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono font-bold border cursor-pointer transition-all shrink-0 select-none",
+                  isOverdue
+                    ? "bg-red-500/10 border-red-500 text-red-500 font-bold"
+                    : "border-white/5 bg-white/[0.02] text-white/70 hover:bg-white/[0.05] hover:text-white"
+                )}
+              >
                 <Calendar className="w-3.5 h-3.5" />
                 <span>{displayVal}</span>
                 <input
@@ -148,7 +161,8 @@ export default function TaskDrawerMetadata({
                     const updatedMetadata = { ...task.metadata, endDate: selectedDate }
                     await updateTask(task.id, { metadata: updatedMetadata })
                   }}
-                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-[9999]"
+                  onClick={(e) => e.stopPropagation()}
                 />
               </label>
 
