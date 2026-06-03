@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk, Tajawal, Exo_2 } from "next/font/google";
 import "./globals.css";
 import { GrowthProvider } from "@/context/GrowthContext";
@@ -16,13 +16,18 @@ const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space
 const tajawal = Tajawal({ weight: ["400", "500", "700", "800", "900"], subsets: ["arabic"], variable: "--font-tajawal", preload: false });
 const exo2 = Exo_2({ subsets: ["latin"], weight: ["700", "800", "900"], variable: "--font-exo2", preload: false });
 
-// export const metadata: Metadata = {
-//   title: "Growth Hub | Life Optimization Interface",
-//   description: "Professional high-fidelity life management system",
-// };
 export const metadata: Metadata = {
   title: "Growth Hub | Level Up Your Learning",
   description: "Track your goals, crush your courses, and level up with your squad",
+};
+
+export const viewport: Viewport = {
+  themeColor: '#050505',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({
@@ -51,18 +56,12 @@ export default function RootLayout({
                   document.documentElement.style.setProperty('--color-neon-green', cachedColor);
                   document.documentElement.style.setProperty('--color-primary', cachedColor);
                   document.documentElement.style.setProperty('--theme-color', cachedColor);
-                  var metaThemeColor = document.querySelector('meta[name="theme-color"]');
-                  // if (metaThemeColor) metaThemeColor.setAttribute('content', cachedColor);
-                  if (metaThemeColor) metaThemeColor.setAttribute('content', '#050505');
                 } catch (e) {}
               })();
             `
           }} />
         )}
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=0" />
         <link rel="manifest" href="/manifest.json" />
-        {/* <meta name="theme-color" content="#B0C4DE" /> */}
-        <meta name="theme-color" content="#050505" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Growth Hub" />

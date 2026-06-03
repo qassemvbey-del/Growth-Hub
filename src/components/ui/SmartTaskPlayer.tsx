@@ -145,6 +145,11 @@ export default function SmartTaskPlayer({
         const finalUrl = `${base}?enablejsapi=1&start=${Math.floor(time)}&rel=0&playsinline=1&modestbranding=1&iv_load_policy=3${originParam}`
         
         setIframeUrl(finalUrl)
+
+        if (time > 2) {
+          const isRTL = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
+          showToast(isRTL ? 'تم استئناف التشغيل من حيث توقفت' : 'Resumed playback', 'success')
+        }
       }
       setIsReady(true)
     }
@@ -226,13 +231,6 @@ export default function SmartTaskPlayer({
               JSON.stringify({ time, duration: dur })
             )
             localStorage.setItem(`growth_hub_video_progress_${taskId}`, time.toString())
-
-            // Toast feedback for auto-seek on first seek match (only if progress > 2 seconds)
-            if (!hasSeeked.current && time > 2) {
-              hasSeeked.current = true
-              const isRTL = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
-              showToast(isRTL ? 'تم استئناف التشغيل من حيث توقفت' : 'Resumed playback', 'success')
-            }
 
             if (onProgressUpdate) {
               onProgressUpdate(time, dur)
