@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Link as LinkIcon, Play, RefreshCw, Circle, X, CheckCircle2, Edit2 } from 'lucide-react'
+import { Link as LinkIcon, Play, RefreshCw, Circle, X, CheckCircle2, Edit2, ListTodo } from 'lucide-react'
 import { NeonIcon } from '../NeonIcon'
 import CustomSelect from '../CustomSelect'
 import { cn } from '@/lib/utils'
@@ -98,7 +98,7 @@ export default function TaskDrawerHeader({
             onClick={onComplete}
             className="status-pill border border-orange-500/50 text-orange-500 rounded-full px-2 py-0.5 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
           >
-            {task.is_completed ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Circle className="w-3.5 h-3.5" />}
+            {task.is_completed ? <ListTodo className="w-3.5 h-3.5" /> : <Circle className="w-3.5 h-3.5" />}
             <span className="uppercase">{task.is_completed ? t('completed') : t('inProgress')}</span>
           </button>
 

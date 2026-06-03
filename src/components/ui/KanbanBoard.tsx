@@ -213,6 +213,7 @@ export default function KanbanBoard({
 
                         {/* Checkbox + Title */}
                         <div className="flex items-center gap-2.5 min-w-0 flex-1 pl-1">
+                          {/* 
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
@@ -226,6 +227,7 @@ export default function KanbanBoard({
                               <Circle className="w-4 h-4 opacity-40 hover:opacity-80 text-zinc-500 hover:text-white transition-opacity" />
                             )}
                           </button>
+                          */}
                           
                           <span 
                             className={cn(

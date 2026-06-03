@@ -10,7 +10,7 @@ import {
   X, ChevronDown, ChevronUp, Check, Calendar, Lock, Plus, 
   Trash2, Loader2, RefreshCw, FolderOpen, Paperclip, ExternalLink, 
   StickyNote, Link as LinkIcon, Smile, AtSign, Send, MessageSquare, Play, Pause,
-  PlusSquare, Target, Circle, CheckCircle2} from 'lucide-react'
+  PlusSquare, Target, Circle, CheckCircle2, ListTodo} from 'lucide-react'
 import { NeonIcon } from './NeonIcon'
 import { cn } from '@/lib/utils'
 import TaskDrawerHeader from './task-drawer/TaskDrawerHeader'
@@ -1190,7 +1190,7 @@ export default function TaskDrawer({
               )}
             >
               {task.is_completed ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                <ListTodo className="w-4 h-4 text-emerald-500" />
               ) : (
                 <Circle className="w-4 h-4 text-zinc-500" />
               )}

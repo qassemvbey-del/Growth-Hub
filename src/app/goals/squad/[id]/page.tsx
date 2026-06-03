@@ -1905,9 +1905,9 @@ const { progress, isInRedZone } = useMemo(() => {
                                  </button>
                               </div>
 
-                              {/* CENTER: Title + Detail Row */}
+                              {/* CENTER: Title */}
                               <div className={cn(
-                                "flex-1 min-w-0 flex flex-col",
+                                "flex-1 min-w-[120px] md:min-w-[200px] flex flex-col justify-center",
                                 isRTL ? "items-end text-right" : "items-start text-left"
                               )}>
                                 <span className={cn(
@@ -1916,42 +1916,47 @@ const { progress, isInRedZone } = useMemo(() => {
                                 )}>
                                   {task.title}
                                 </span>
-                                <div className={cn("flex items-center gap-3 mt-1 w-full", isRTL ? "justify-end" : "justify-start")}>
-                                  {hasVideo ? (
-                                    <>
-                                      <svg width="13" height="13" viewBox="0 0 24 24" fill={currentTheme.color} className="shrink-0">
-                                        <path d="M19.59 6.69a4.83 4.83 0 0 0-3.39-3.39C14.76 3 12 3 12 3s-2.76 0-4.2.3a4.83 4.83 0 0 0-3.39 3.39A48.6 48.6 0 0 0 4 12a48.6 48.6 0 0 0 .41 5.31 4.83 4.83 0 0 0 3.39 3.39C9.24 21 12 21 12 21s2.76 0 4.2-.3a4.83 4.83 0 0 0 3.39-3.39A48.6 48.6 0 0 0 20 12a48.6 48.6 0 0 0-.41-5.31zM10 15V9l5 3z"/>
-                                      </svg>
-                                      <span className="font-mono text-[11px] text-[#FFFFFF] tracking-wider">
-                                        {formatVideoTime(videoProgress)} / {formatVideoTime(videoDuration)}
-                                      </span>
-                                    </>
-                                  ) : timeFormatted ? (
-                                    <span className="font-mono text-[11px] text-white/50 bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-md tracking-wider inline-flex items-center">
-                                      {timeFormatted}
+                              </div>
+
+                              {/* RIGHT: Details (Video, Date, Weight) */}
+                              <div className={cn(
+                                "flex items-center gap-2 shrink-0 flex-wrap",
+                                isRTL ? "flex-row-reverse" : "flex-row"
+                              )}>
+                                {hasVideo ? (
+                                  <div className="flex items-center gap-1.5 shrink-0 bg-white/[0.03] border border-zinc-800 px-2 py-0.5 rounded text-[11px] font-mono text-white/60">
+                                    <Play className="w-3.5 h-3.5 fill-current" style={{ color: currentTheme.color }} />
+                                    <span className="font-mono text-[11px] text-[#FFFFFF] tracking-wider">
+                                      {formatVideoTime(videoProgress)} / {formatVideoTime(videoDuration)}
                                     </span>
-                                  ) : null}
-                                  {task.metadata?.endDate && (() => {
-                                    const tDate = new Date(task.metadata.endDate)
-                                    tDate.setHours(0,0,0,0)
-                                    const todayDate = new Date()
-                                    todayDate.setHours(0,0,0,0)
-                                    const isOverdue = !task.is_completed && tDate < todayDate
-                                    return (
-                                      <span className={cn(
-                                        "font-mono text-[10px] px-2 py-0.5 rounded-md tracking-wider inline-flex items-center gap-1 border",
-                                        isOverdue 
-                                          ? "text-red-500 border-red-500/30 bg-red-950/15 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse font-black" 
-                                          : "text-white/40 border-white/5 bg-white/[0.02]"
-                                      )}>
-                                        📅 {task.metadata.endDate}
-                                      </span>
-                                    )
-                                  })()}
-                                  <div className={cn("flex items-center gap-2", isRTL ? "mr-auto" : "ml-auto")}>
-                                    <span className="text-[9px] uppercase font-mono text-white/30 tracking-widest">Weight:</span>
-                                    <ComplexityDashes weight={task.weight} color={currentTheme.color} />
                                   </div>
+                                ) : timeFormatted ? (
+                                  <span className="font-mono text-[11px] text-white/50 bg-white/[0.03] border border-zinc-800 px-2 py-0.5 rounded tracking-wider inline-flex items-center gap-1.5">
+                                    <Timer className="w-3.5 h-3.5" style={{ color: currentTheme.color }} />
+                                    {timeFormatted}
+                                  </span>
+                                ) : null}
+                                {task.metadata?.endDate && (() => {
+                                  const tDate = new Date(task.metadata.endDate)
+                                  tDate.setHours(0,0,0,0)
+                                  const todayDate = new Date()
+                                  todayDate.setHours(0,0,0,0)
+                                  const isOverdue = !task.is_completed && tDate < todayDate
+                                  return (
+                                    <span className={cn(
+                                      "font-mono text-[10px] px-2 py-0.5 rounded tracking-wider inline-flex items-center gap-1.5 border shrink-0",
+                                      isOverdue 
+                                        ? "text-red-500 border-red-500/30 bg-red-950/15 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse font-black" 
+                                        : "text-white/40 border-zinc-800 bg-white/[0.02]"
+                                    )}>
+                                      <Calendar className={cn("w-3.5 h-3.5", isOverdue ? "text-red-500" : "text-cyan-500/80")} />
+                                      {task.metadata.endDate}
+                                    </span>
+                                  )
+                                })()}
+                                <div className="flex items-center gap-2 bg-white/[0.01] border border-zinc-900/50 px-2 py-0.5 rounded shrink-0">
+                                  <span className="text-[9px] uppercase font-mono text-white/30 tracking-widest">{isRTL ? 'الوزن:' : 'Weight:'}</span>
+                                  <ComplexityDashes weight={task.weight} color={currentTheme.color} />
                                 </div>
                               </div>
                             </div>
@@ -2054,6 +2059,7 @@ const { progress, isInRedZone } = useMemo(() => {
 
                             {/* Right side: Action Buttons (Play, Timer, Trash) */}
                             <div className="flex items-center gap-x-1 shrink-0">
+                              {/* 
                               {hasVideo && (
                                 <button
                                   onClick={(e) => { e.stopPropagation(); setSelectedTask(task); }}
@@ -2077,6 +2083,7 @@ const { progress, isInRedZone } = useMemo(() => {
                               >
                                 <Timer className="w-5 h-5 md:w-4 md:h-4" />
                               </button>
+                              */}
 
                               <button
                                 onClick={(e) => { 
