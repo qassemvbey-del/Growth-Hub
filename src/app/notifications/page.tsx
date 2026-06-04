@@ -5,14 +5,17 @@ import Shell from '@/components/layout/Shell'
 import { useInbox } from '@/hooks/useInbox'
 import { useGrowth } from '@/context/GrowthContext'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Inbox, ArrowLeft, ExternalLink, AlertCircle, UserPlus, CheckCircle2, Trophy, Bell } from 'lucide-react'
+import { Check, Inbox, ArrowLeft, ExternalLink, AlertCircle, UserPlus, CheckCircle2, Trophy, Bell, ChevronDown, ChevronUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
+
+const stripEmojis = (str?: string | null) => str ? str.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim() : '';
 
 export default function NotificationsPage() {
   const { reports, loading, markAsRead, fetchReports } = useInbox()
   const { isRTL } = useGrowth()
   const [filter, setFilter] = useState<'ALL' | 'UNREAD' | 'ALERTS' | 'SQUAD'>('ALL')
+  const [expandedIds, setExpandedIds] = useState<string[]>([])
   const router = useRouter()
 
   const filteredReports = useMemo(() => {
@@ -34,6 +37,12 @@ export default function NotificationsPage() {
       await markAsRead(r.id)
     }
     fetchReports()
+  }
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => 
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    )
   }
 
   return (
@@ -121,6 +130,7 @@ export default function NotificationsPage() {
                 {filteredReports.map((report) => {
                   const bodyText = report.content?.text || (typeof report.content === 'string' ? report.content : '')
                   const formattedBody = bodyText.replace(/\[(.*?)\]/g, '$1') // Strip brackets
+                  const isExpanded = expandedIds.includes(report.id)
 
                   const getIcon = () => {
                     switch (report.type) {
@@ -159,16 +169,38 @@ export default function NotificationsPage() {
                             />
                           )}
                           <h3 className="text-sm font-bold text-zinc-100 uppercase truncate">
-                            {report.title}
+                            {stripEmojis(report.title)}
                           </h3>
                           <span className="text-[10px] text-zinc-500 uppercase font-mono ml-auto">
                             {new Date(report.created_at).toLocaleDateString()} {new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
                         
-                        <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
-                          {formattedBody}
+                        <p className={cn(
+                          "text-sm text-zinc-300 leading-relaxed",
+                          isExpanded ? "whitespace-pre-wrap" : "line-clamp-3 text-zinc-400"
+                        )}>
+                          {stripEmojis(formattedBody)}
                         </p>
+
+                        {formattedBody.length > 120 && (
+                          <button
+                            onClick={() => toggleExpand(report.id)}
+                            className="flex items-center gap-1 mt-1 text-xs text-zinc-500 hover:text-orange-500 transition-colors cursor-pointer"
+                          >
+                            {isExpanded ? (
+                              <>
+                                <span>{isRTL ? 'عرض أقل' : 'Show Less'}</span>
+                                <ChevronUp className="w-3.5 h-3.5" />
+                              </>
+                            ) : (
+                              <>
+                                <span>{isRTL ? 'عرض المزيد' : 'Show More'}</span>
+                                <ChevronDown className="w-3.5 h-3.5" />
+                              </>
+                            )}
+                          </button>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0 self-start">
@@ -187,7 +219,12 @@ export default function NotificationsPage() {
                           <button
                             onClick={() => {
                               const targetGoalId = report.content.goal_id || report.content.cup_id || report.content.mission_id
-                              router.push(`/goals/${targetGoalId}`)
+                              const isSquad = report.type === 'squad_join_request' || report.type === 'squad_member_completed_task' || report.content?.isSquad || report.content?.squadId
+                              if (isSquad) {
+                                router.push(`/goals/squad/${targetGoalId}`)
+                              } else {
+                                router.push(`/goals/${targetGoalId}`)
+                              }
                             }}
                             className="p-1.5 bg-white/[0.02] hover:bg-white/5 border border-white/10 text-white/50 hover:text-white rounded-lg transition-all cursor-pointer"
                             title={isRTL ? 'الانتقال للهدف' : 'View Goal'}

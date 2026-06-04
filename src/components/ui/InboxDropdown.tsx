@@ -25,6 +25,8 @@ interface Props {
   themeColor: string
 }
 
+const stripEmojis = (str?: string | null) => str ? str.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim() : '';
+
 export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMarkAllRead, themeColor }: Props) {
   const router = useRouter()
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all')
@@ -43,7 +45,12 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
     onRead(report)
     const targetGoalId = report.content?.goal_id || report.content?.cup_id || report.content?.mission_id
     if (targetGoalId) {
-      router.push(`/goals/${targetGoalId}`)
+      const isSquad = report.type === 'squad_join_request' || report.type === 'squad_member_completed_task' || report.content?.isSquad || report.content?.squadId
+      if (isSquad) {
+        router.push(`/goals/squad/${targetGoalId}`)
+      } else {
+        router.push(`/goals/${targetGoalId}`)
+      }
     } else {
       router.push('/notifications')
     }
@@ -184,14 +191,14 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
                   <div className="flex-1 min-w-0 space-y-1">
                     <div className="flex justify-between items-start gap-2">
                       <span className="text-sm font-bold text-zinc-100 uppercase truncate">
-                        {report.title}
+                        {stripEmojis(report.title)}
                       </span>
                       <span className="text-xs text-zinc-500 whitespace-nowrap">
                         {new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
                     <p className="line-clamp-2 text-sm text-zinc-400">
-                      {cleanBody || report.title}
+                      {stripEmojis(cleanBody || report.title)}
                     </p>
                   </div>
                 </motion.button>
