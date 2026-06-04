@@ -200,7 +200,8 @@ const MissionAttachmentsModal = ({
   onCountChange,
 }: Props) => {
   const supabase = createClient()
-  const { isRTL } = useGrowth()
+  // const { isRTL } = useGrowth()
+  const { isRTL, profile, refreshProfile } = useGrowth()
   const [newName, setNewName] = useState('')
   const [newUrl, setNewUrl] = useState('')
   const [adding, setAdding] = useState(false)
@@ -227,11 +228,49 @@ const MissionAttachmentsModal = ({
     setIsDriveConnected(true)
   }
 
-  // Check for a valid cached token on mount
+  // // Check for a valid cached token on mount
+  // useEffect(() => {
+  //   if (getCachedToken()) setIsDriveConnected(true)
+  // // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [])
   useEffect(() => {
-    if (getCachedToken()) setIsDriveConnected(true)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    if (typeof window === 'undefined') return
+    const token = getCachedToken()
+    if (token) {
+      setIsDriveConnected(true)
+    } else if (profile?.drive_connected && profile.id !== 'guest') {
+      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+      const google = (window as any).google
+      if (clientId && google?.accounts?.oauth2) {
+        try {
+          const tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: clientId,
+            scope: 'https://www.googleapis.com/auth/drive.readonly',
+            callback: (response: any) => {
+              if (response.error !== undefined) {
+                console.error("Silent OAuth failed:", response.error)
+                const supabaseClient = createClient()
+                supabaseClient.from('profiles').update({ drive_connected: false }).eq('id', profile.id).then(() => {
+                  refreshProfile()
+                })
+                return
+              }
+              cacheToken(response.access_token)
+            },
+            error_callback: () => {
+              const supabaseClient = createClient()
+              supabaseClient.from('profiles').update({ drive_connected: false }).eq('id', profile.id).then(() => {
+                refreshProfile()
+              })
+            }
+          })
+          tokenClient.requestAccessToken({ prompt: 'none' })
+        } catch (e) {
+          console.error("Silent OAuth initialization error:", e)
+        }
+      }
+    }
+  }, [profile?.drive_connected, profile?.id])
 
   // ── Load Google API Scripts Client-Side ────────────────────────────────────
   useEffect(() => {
@@ -295,6 +334,7 @@ const MissionAttachmentsModal = ({
     }
 
     // ── 2. Silent renewal first, interactive as fallback ──────────────────
+    /*
     const tryAuth = (prompt: string, fallback?: () => void) => {
       try {
         const tokenClient = google.accounts.oauth2.initTokenClient({
@@ -322,6 +362,44 @@ const MissionAttachmentsModal = ({
     }
 
     tryAuth('none', () => tryAuth('select_account'))
+    */
+    const tryAuth = (prompt: string, fallback?: () => void) => {
+      try {
+        const tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: 'https://www.googleapis.com/auth/drive.readonly',
+          callback: (response: any) => {
+            if (response.error !== undefined) {
+              if (fallback) { fallback(); return }
+              console.error('GIS authentication error:', response)
+              return
+            }
+            cacheToken(response.access_token)
+            if (profile && profile.id !== 'guest') {
+              const supabaseClient = createClient()
+              supabaseClient.from('profiles').update({ drive_connected: true }).eq('id', profile.id).then(() => {
+                refreshProfile()
+              })
+            }
+            launchGooglePicker(response.access_token)
+          },
+          error_callback: (err: any) => {
+            if (fallback) { fallback(); return }
+            console.error('Silent OAuth failed:', err)
+          }
+        })
+        tokenClient.requestAccessToken({ prompt })
+      } catch (err) {
+        if (fallback) { fallback(); return }
+        console.error('Error connecting Google Drive:', err)
+      }
+    }
+
+    if (profile?.drive_connected) {
+      tryAuth('none', () => tryAuth('consent'))
+    } else {
+      tryAuth('consent')
+    }
   }
 
   // ── Launch Google Picker ─────────────────────────────────────────────────

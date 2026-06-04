@@ -30,6 +30,8 @@ export interface Profile {
   blocked: boolean
   last_seen: string | null
   email: string | null
+  drive_connected?: boolean
+  drive_refresh_token?: string | null
 }
 
 export const THEME_PACKAGES = {
@@ -1210,7 +1212,22 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
       } else {
         const hasLocalAuth = typeof window !== 'undefined' && !!localStorage.getItem('growth-hub-auth-token')
         const hasCachedProfile = typeof window !== 'undefined' && !!localStorage.getItem('cached_profile')
+        /*
         if (hasLocalAuth && hasCachedProfile) {
+          console.log('HYDRATION_INTEGRATION: Active cached session and local tokens present. Bypassing redirect.')
+        } else {
+        */
+        let isCachedGuest = false
+        if (hasCachedProfile && typeof window !== 'undefined') {
+          try {
+            const cachedP = JSON.parse(localStorage.getItem('cached_profile') || '{}')
+            if (cachedP?.id === 'guest') {
+              isCachedGuest = true
+            }
+          } catch (e) {}
+        }
+
+        if (hasLocalAuth && hasCachedProfile && !isCachedGuest) {
           console.log('HYDRATION_INTEGRATION: Active cached session and local tokens present. Bypassing redirect.')
         } else {
           // --- GUEST MODE IMPLEMENTATION ---

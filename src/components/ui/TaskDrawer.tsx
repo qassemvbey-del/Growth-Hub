@@ -77,7 +77,8 @@ export default function TaskDrawer({
   missionOwnerId = null,
   onDelete
 }: TaskDrawerProps) {
-  const { isRTL, t, addXp, profile, setIsTaskDrawerOpen } = useGrowth()
+  // const { isRTL, t, addXp, profile, setIsTaskDrawerOpen } = useGrowth()
+  const { isRTL, t, addXp, profile, setIsTaskDrawerOpen, refreshProfile } = useGrowth()
   const { startFocus, startTimer, isActive, isPaused, taskId: activePomodoroTaskId, pause, resume, updateConfig, breakDuration } = usePomodoro()
   const isCurrentTaskFocus = activePomodoroTaskId === task.id
   const isCurrentFocusActive = isCurrentTaskFocus && isActive && !isPaused
@@ -247,12 +248,51 @@ export default function TaskDrawer({
   const [isAddingLink, setIsAddingLink] = useState(false)
   const [isDriveConnected, setIsDriveConnected] = useState(false)
 
+  // useEffect(() => {
+  //   if (typeof window === 'undefined') return
+  //   const token = localStorage.getItem('gd_access_token')
+  //   const expiry = parseInt(localStorage.getItem('gd_expires_at') || '0', 10)
+  //   if (token && Date.now() < expiry) setIsDriveConnected(true)
+  // }, [])
   useEffect(() => {
     if (typeof window === 'undefined') return
     const token = localStorage.getItem('gd_access_token')
     const expiry = parseInt(localStorage.getItem('gd_expires_at') || '0', 10)
-    if (token && Date.now() < expiry) setIsDriveConnected(true)
-  }, [])
+    if (token && Date.now() < expiry) {
+      setIsDriveConnected(true)
+    } else if (profile?.drive_connected && profile.id !== 'guest') {
+      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+      const google = (window as any).google
+      if (clientId && google?.accounts?.oauth2) {
+        try {
+          const tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: clientId,
+            scope: 'https://www.googleapis.com/auth/drive.readonly',
+            callback: (response: any) => {
+              if (response.error !== undefined) {
+                console.error("Silent OAuth failed:", response.error)
+                const supabaseClient = createClient()
+                supabaseClient.from('profiles').update({ drive_connected: false }).eq('id', profile.id).then(() => {
+                  refreshProfile()
+                })
+                return
+              }
+              cacheToken(response.access_token)
+            },
+            error_callback: () => {
+              const supabaseClient = createClient()
+              supabaseClient.from('profiles').update({ drive_connected: false }).eq('id', profile.id).then(() => {
+                refreshProfile()
+              })
+            }
+          })
+          tokenClient.requestAccessToken({ prompt: 'none' })
+        } catch (e) {
+          console.error("Silent OAuth initialization error:", e)
+        }
+      }
+    }
+  }, [profile?.drive_connected, profile?.id])
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   useEffect(() => {
@@ -440,6 +480,14 @@ export default function TaskDrawer({
               return
             }
             cacheToken(response.access_token)
+            
+            if (profile && profile.id !== 'guest') {
+              const supabaseClient = createClient()
+              supabaseClient.from('profiles').update({ drive_connected: true }).eq('id', profile.id).then(() => {
+                refreshProfile()
+              })
+            }
+            
             createPicker(response.access_token)
           },
           error_callback: (err: any) => {
@@ -455,7 +503,16 @@ export default function TaskDrawer({
       }
     }
 
-    tryAuth('none', () => tryAuth('select_account'))
+    // if (profile?.drive_connected) {
+    //   tryAuth('none', () => tryAuth('select_account'))
+    // } else {
+    //   tryAuth('select_account')
+    // }
+    if (profile?.drive_connected) {
+      tryAuth('none', () => tryAuth('consent'))
+    } else {
+      tryAuth('consent')
+    }
 
     function createPicker(accessToken: string | null) {
       const view = new google.picker.DocsView(google.picker.ViewId.DOCS)

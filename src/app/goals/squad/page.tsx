@@ -987,7 +987,8 @@ export default function SquadGoalsPage() {
       // Guest Flow Support
       if (!user) {
         const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-        if (guestGoals.length >= 1) {
+        // if (guestGoals.length >= 1) {
+        if (guestGoals.length >= 5) {
           setShowAuthModal(true)
           playError()
           setIsSubmitting(false)

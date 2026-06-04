@@ -109,7 +109,8 @@ export default function GlobalCreateGoalModal() {
       // ── Guest flow ──────────────────────────────────────────────────────
       if (!user) {
         const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-        if (guestGoals.length >= 1) {
+        // if (guestGoals.length >= 1) {
+        if (guestGoals.length >= 5) {
           setShowAuthModal(true)
           playError()
           return
