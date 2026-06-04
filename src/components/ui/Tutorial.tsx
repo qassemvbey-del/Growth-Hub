@@ -41,7 +41,7 @@ const STEPS_AR = [
 ]
 
 export default function Tutorial() {
-  const { tutorialActive, setTutorialActive, profile, isRTL, currentTheme } = useGrowth()
+  const { isTourActive, setIsTourActive, profile, isRTL, currentTheme } = useGrowth()
   const [currentStep, setCurrentStep] = useState(0)
   const [spotlightRect, setSpotlightRect] = useState<DOMRect | null>(null)
   const [coords, setCoords] = useState({ top: 150, left: 200 })
@@ -49,7 +49,7 @@ export default function Tutorial() {
   const steps = isRTL ? STEPS_AR : STEPS_EN
 
   useEffect(() => {
-    if (tutorialActive) {
+    if (isTourActive) {
       updateSpotlight()
       window.addEventListener('resize', updateSpotlight)
       window.addEventListener('scroll', updateSpotlight, true)
@@ -58,7 +58,7 @@ export default function Tutorial() {
         window.removeEventListener('scroll', updateSpotlight, true)
       }
     }
-  }, [tutorialActive, currentStep])
+  }, [isTourActive, currentStep])
 
   const updateSpotlight = () => {
     const activeSteps = isRTL ? STEPS_AR : STEPS_EN
@@ -103,13 +103,11 @@ export default function Tutorial() {
     }
   }, [spotlightRect, currentStep, isRTL])
 
-  if (!tutorialActive) return null
+  if (!isTourActive) return null
 
   const finish = () => {
-    setTutorialActive(false)
-    if (profile) {
-      localStorage.setItem(`tutorial_done_${profile.id}`, 'true')
-    }
+    setIsTourActive(false)
+    localStorage.setItem('tour_completed', 'true')
   }
 
   const next = () => {

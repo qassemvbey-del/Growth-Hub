@@ -16,7 +16,8 @@ import AvatarSelector from '@/components/ui/AvatarSelector'
 import { VaultContent } from '../vault/page'
 
 export default function SettingsPage() {
-  const { profile, setProfile, isLoading, refreshProfile, mounted, t, isRTL, currentTheme } = useGrowth()
+  // const { profile, setProfile, isLoading, refreshProfile, mounted, t, isRTL, currentTheme } = useGrowth()
+  const { profile, setProfile, isLoading, refreshProfile, mounted, t, isRTL, currentTheme, restartTour } = useGrowth()
   const { showToast } = useToast()
   const router = useRouter()
   const supabase = createClient()
@@ -911,6 +912,35 @@ export default function SettingsPage() {
                                 {isRTL ? 'تثبيت التطبيق' : 'Install App'}
                               </button>
                             )}
+                          </div>
+                        </div>
+
+                        {/* Onboarding Tour Guide Restart Section */}
+                        <div className="space-y-4 border-b border-white/10 pb-6">
+                          <label className="text-xs font-space text-[var(--text-secondary)] tracking-widest uppercase font-black">
+                            {isRTL ? 'الجولة التعريفية' : 'Onboarding Tour'}
+                          </label>
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="space-y-1">
+                              <p className="text-xs font-space text-white tracking-widest uppercase font-black">
+                                {isRTL ? 'إعادة تشغيل الجولة التعريفية' : 'Restart Interactive Tour'}
+                              </p>
+                              <p className="text-[10px] font-space text-white/40 tracking-wider">
+                                {isRTL 
+                                  ? 'أعد تشغيل الجولة التعريفية التفاعلية لتوضيح كيفية استخدام واجهة النظام.' 
+                                  : 'Restart the walkthrough to show you how to navigate the workspace.'}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                playBlip()
+                                restartTour()
+                              }}
+                              className="px-5 py-2.5 border border-white/20 text-white/80 hover:bg-white/5 hover:border-white/45 active:scale-95 transition-all duration-300 font-space font-black text-xs rounded-lg uppercase tracking-wider whitespace-nowrap text-center"
+                            >
+                              {isRTL ? 'إعادة التشغيل' : 'Restart Tour'}
+                            </button>
                           </div>
                         </div>
 

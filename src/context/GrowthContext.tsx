@@ -447,6 +447,9 @@ interface GrowthContextType {
   isRTL: boolean
   tutorialActive: boolean
   setTutorialActive: (active: boolean) => void
+  isTourActive: boolean
+  setIsTourActive: (active: boolean) => void
+  restartTour: () => void
   refreshProfile: () => Promise<void>
   t: (key: keyof typeof TRANSLATIONS['en']) => string
   mounted: boolean
@@ -548,7 +551,103 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
     return true
   })
   const [tutorialActive, setTutorialActive] = useState(false)
+  const [isTourActive, setIsTourActive] = useState(false)
   const [mounted, setMounted] = useState(false)
+
+  const generateHelpGoal = async (userId: string) => {
+    const isAr = (profile?.language || 'en') === 'ar'
+    const seedGoalTitle = isAr ? "مرحباً بك في Growth Hub 🚀" : "Welcome to Growth Hub 🚀"
+
+    if (userId === 'guest') {
+      const fakeId = 'local_' + Math.random().toString(36).substring(2, 9)
+      const arSteps = [
+        "أنشئ مهمتك الأولى لتنظيم يومك.",
+        "حدد موعداً نهائياً للمهمة لمتابعة وقتك."
+      ]
+      const enSteps = [
+        "Create your first task",
+        "Set a deadline"
+      ]
+      const steps = isAr ? arSteps : enSteps
+      const newLocalGoal = {
+        id: fakeId,
+        user_id: 'guest',
+        title: seedGoalTitle,
+        status: 'active',
+        size: 'md',
+        is_archived: false,
+        sync_to_dashboard: true,
+        isPinned: true,
+        is_pinned: true,
+        created_at: new Date().toISOString(),
+        metadata: { defaultView: 'list', is_tutorial: true },
+        tasks: steps.map((step) => ({
+          id: 'local_task_' + Math.random().toString(36).substring(2, 9),
+          goal_id: fakeId,
+          title: step,
+          weight: 3,
+          is_completed: false
+        }))
+      }
+      localStorage.setItem('guest_goals', JSON.stringify([newLocalGoal]))
+      return
+    }
+
+    const { data: newGoal, error: goalError } = await supabase
+      .from('goals')
+      .insert({
+        user_id: userId,
+        title: seedGoalTitle,
+        status: 'active',
+        size: 'md',
+        is_archived: false,
+        sync_to_dashboard: true,
+        is_pinned: true,
+        isPinned: true,
+        metadata: { defaultView: 'list', is_tutorial: true }
+      })
+      .select()
+      .single()
+
+    if (goalError) {
+      console.error('generateHelpGoal // GOAL_CREATION_FAILED:', goalError)
+      return
+    }
+
+    if (newGoal) {
+      const arSteps = [
+        "أنشئ مهمتك الأولى لتنظيم يومك.",
+        "حدد موعداً نهائياً للمهمة لمتابعة وقتك."
+      ]
+      const enSteps = [
+        "Create your first task",
+        "Set a deadline"
+      ]
+      const steps = isAr ? arSteps : enSteps
+      const taskPayloads = steps.map((step) => ({
+        goal_id: newGoal.id,
+        title: step,
+        weight: 3,
+        is_completed: false
+      }))
+      const { error: tasksError } = await supabase.from('tasks').insert(taskPayloads)
+      if (tasksError) {
+        console.error('generateHelpGoal // TASKS_CREATION_FAILED:', tasksError)
+      }
+    }
+  }
+
+  const restartTour = () => {
+    localStorage.removeItem('tour_completed')
+    localStorage.removeItem('onboarding_completed')
+    localStorage.removeItem('onboarding_complete')
+    if (profile && profile.id) {
+      localStorage.removeItem(`tutorial_done_${profile.id}`)
+    }
+    setIsTourActive(true)
+    setTutorialActive(true)
+    router.push('/goals')
+  }
   // const [lastAiMessage, setLastAiMessage] = useState('SYSTEM_ONLINE // STANDING_BY')
   const [lastAiMessage, setLastAiMessage] = useState('System Online — Standing By')
   const [isRankUpModalOpen, setIsRankUpModalOpen] = useState(false)
@@ -1071,9 +1170,9 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
 
           // Seeding and Tutorial Logic
           try {
-            const hasCompletedOnboarding = typeof window !== 'undefined' && localStorage.getItem('onboarding_completed') === 'true'
+            const hasCompletedTour = typeof window !== 'undefined' && localStorage.getItem('tour_completed') === 'true'
 
-            if (!hasCompletedOnboarding) {
+            if (!hasCompletedTour) {
               const { count, error: countError } = await supabase
                 .from('goals')
                 .select('id', { count: 'exact', head: true })
@@ -1081,61 +1180,11 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
                 .eq('is_archived', false)
 
               if (isNewUser || (!countError && count === 0)) {
-                // Ensure we don't duplicate Welcome Goal if it was already created but count failed
-                const { count: dbCount } = await supabase
-                  .from('goals')
-                  .select('id', { count: 'exact', head: true })
-                  .eq('user_id', user.id)
-
-                if (dbCount === 0) {
-                  const isAr = (profileData.language || 'en') === 'ar'
-                  const seedGoalTitle = isAr ? "ابدأ من هنا 🚀" : "Start Here 🚀"
-                  const { data: newCup } = await supabase
-                    .from('goals')
-                    .insert({
-                      user_id: user.id,
-                      title: seedGoalTitle,
-                      status: 'active',
-                      size: 'md',
-                      is_archived: false,
-                      sync_to_dashboard: true,
-                      is_pinned: true,
-                      isPinned: true,
-                      metadata: { defaultView: 'list', is_tutorial: true }
-                    })
-                    .select()
-                    .single()
-
-                  if (newCup) {
-                    const arSteps = [
-                      "اضغط على النيشان هنا عشان تقفل أول مهمة ليك وتكسب أول 10 XP.",
-                      "اضغط `Ctrl + K` عشان تفتح الـ Command Palette. أسرع أداة للتحكم.",
-                      "جرب تسحب كورس يوتيوب دلوقتي! اضغط على زرار Import Playlist فوق.",
-                      "اضغط على أيقونة الـ Pin 📌 في الهدف ده، عشان يتثبت في الداشبورد.",
-                      "افتح الـ AI Coach من القائمة.. عشان تاخد تقرير تكتيكي.",
-                      "إعلن انتصارك: علم على الدايرة الأخيرة دي عشان توصل لـ 100% وتنقل المهمة دي لصفحة الـ Wins!"
-                    ]
-                    const enSteps = [
-                      "Click the target circle here to complete your first task and earn 10 XP.",
-                      "Press `Ctrl + K` to open the Command Palette. The fastest tool for control.",
-                      "Try importing a YouTube course now! Click the Import Playlist button above.",
-                      "Click the Pin 📌 icon on this goal to lock it in the dashboard.",
-                      "Open the AI Coach from the menu to get a tactical report.",
-                      "CLAIM YOUR VICTORY: Check this final circle to hit 100% and warp this mission to your WINS dashboard!"
-                    ]
-                    const steps = isAr ? arSteps : enSteps
-                    const taskPayloads = steps.map((step, idx) => ({
-                      goal_id: newCup.id,
-                      title: step,
-                      weight: 3,
-                      is_completed: false,
-                      metadata: idx === 2 ? { is_tutorial_import: true } : {}
-                    }))
-                    await supabase.from('tasks').insert(taskPayloads)
-                  }
-                }
+                await generateHelpGoal(user.id)
                 setTutorialActive(true)
+                setIsTourActive(true)
                 if (typeof window !== 'undefined') {
+                  localStorage.setItem('tour_completed', 'true')
                   localStorage.setItem('onboarding_completed', 'true')
                 }
               }
@@ -1184,56 +1233,19 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
             localStorage.setItem('cached_profile', JSON.stringify(guestProfile));
             
             // Seed tutorial goals for guests if empty (Point 2)
-            const guestGoalsStr = localStorage.getItem('guest_goals')
-            const guestGoals = guestGoalsStr ? JSON.parse(guestGoalsStr) : []
-            if (guestGoals.length === 0) {
-              const isAr = storedLang === 'ar'
-              const seedGoalTitle = isAr ? "ابدأ من هنا 🚀" : "Start Here 🚀"
-              const fakeId = 'local_' + Math.random().toString(36).substring(2, 9)
-              
-              const arSteps = [
-                "اضغط على النيشان هنا عشان تقفل أول مهمة ليك وتكسب أول 10 XP.",
-                "اضغط `Ctrl + K` عشان تفتح الـ Command Palette. أسرع أداة للتحكم.",
-                "جرب تسحب كورس يوتيوب دلوقتي! اضغط على زرار Import Playlist فوق.",
-                "اضغط على أيقونة الـ Pin 📌 في الهدف ده، عشان يتثبت في الداشبورد.",
-                "افتح الـ AI Coach من القائمة.. عشان تاخد تقرير تكتيكي.",
-                // "امسح الهدف التدريبي ده من سلة المهملات، وابدأ هدفك الحقيقي."
-                "إعلن انتصارك: علم على الدايرة الأخيرة دي عشان توصل لـ 100% وتنقل المهمة دي لصفحة الـ Wins!"
-              ]
-              const enSteps = [
-                "Click the target circle here to complete your first task and earn 10 XP.",
-                "Press `Ctrl + K` to open the Command Palette. The fastest tool for control.",
-                "Try importing a YouTube course now! Click the Import Playlist button above.",
-                "Click the Pin 📌 icon on this goal to lock it in the dashboard.",
-                "Open the AI Coach from the menu to get a tactical report.",
-                // "Delete this training goal from the trash, and start your real goal."
-                "CLAIM YOUR VICTORY: Check this final circle to hit 100% and warp this mission to your WINS dashboard!"
-              ]
-              const steps = isAr ? arSteps : enSteps
-              const newLocalGoal = {
-                id: fakeId,
-                user_id: 'guest',
-                title: seedGoalTitle,
-                status: 'active',
-                size: 'md',
-                is_archived: false,
-                sync_to_dashboard: true,
-                isPinned: true,
-                is_pinned: true,
-                created_at: new Date().toISOString(),
-                metadata: { defaultView: 'list', is_tutorial: true },
-                tasks: steps.map((step, idx) => ({
-                  id: 'local_task_' + Math.random().toString(36).substring(2, 9),
-                  // cup_id: fakeId,
-                  goal_id: fakeId,
-                  title: step,
-                  weight: 3,
-                  is_completed: false,
-                  metadata: idx === 2 ? { is_tutorial_import: true } : {}
-                }))
+            const hasCompletedTour = typeof window !== 'undefined' && localStorage.getItem('tour_completed') === 'true'
+            if (!hasCompletedTour) {
+              const guestGoalsStr = localStorage.getItem('guest_goals')
+              const guestGoals = guestGoalsStr ? JSON.parse(guestGoalsStr) : []
+              if (guestGoals.length === 0) {
+                await generateHelpGoal('guest')
+                setTutorialActive(true)
+                setIsTourActive(true)
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('tour_completed', 'true')
+                  localStorage.setItem('onboarding_completed', 'true')
+                }
               }
-              localStorage.setItem('guest_goals', JSON.stringify([newLocalGoal]))
-              setTutorialActive(true)
             }
           }
         }
@@ -1308,6 +1320,8 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
       isLoading,
       isRTL,
       tutorialActive, setTutorialActive,
+      isTourActive, setIsTourActive,
+      restartTour,
       refreshProfile,
       t,
       mounted,
