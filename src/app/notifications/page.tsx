@@ -2,22 +2,24 @@
 
 import React, { useState, useMemo } from 'react'
 import Shell from '@/components/layout/Shell'
-import { useInbox, Report } from '@/hooks/useInbox'
+import { useInbox } from '@/hooks/useInbox'
 import { useGrowth } from '@/context/GrowthContext'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Bell, Check, Inbox, Trash2, ArrowLeft, ExternalLink } from 'lucide-react'
+import { Check, Inbox, ArrowLeft, ExternalLink, AlertCircle, UserPlus, CheckCircle2, Trophy, Bell } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
 export default function NotificationsPage() {
   const { reports, loading, markAsRead, fetchReports } = useInbox()
-  const { isRTL, currentTheme } = useGrowth()
-  const [filter, setFilter] = useState<'all' | 'unread'>('all')
+  const { isRTL } = useGrowth()
+  const [filter, setFilter] = useState<'ALL' | 'UNREAD' | 'ALERTS' | 'SQUAD'>('ALL')
   const router = useRouter()
 
   const filteredReports = useMemo(() => {
     return reports.filter((r) => {
-      if (filter === 'unread') return !r.is_read
+      if (filter === 'UNREAD') return !r.is_read
+      if (filter === 'ALERTS') return r.type === 'deadline_alert' || r.type === 'overdue_task'
+      if (filter === 'SQUAD') return r.type === 'squad_join_request' || r.type === 'squad_member_completed_task'
       return true
     })
   }, [reports, filter])
@@ -34,31 +36,9 @@ export default function NotificationsPage() {
     fetchReports()
   }
 
-  // Determine standard title icons based on type
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'deadline_alert':
-        return '📅'
-      // case 'mission_complete':
-      //   return '✅'
-      // case 'weekly_review':
-      //   return '📊'
-      case 'overdue_task':
-        return '🚨'
-      case 'squad_join_request':
-        return '👥'
-      case 'squad_member_completed_task':
-        return '✅'
-      case 'rank_up':
-        return '🎉'
-      default:
-        return '✉️'
-    }
-  }
-
   return (
     <Shell>
-      <div className="w-full min-h-[calc(100vh-64px)] py-8 md:py-12 px-4 md:px-12 max-w-4xl mx-auto font-space space-y-8">
+      <div className="w-full min-h-[calc(100vh-64px)] py-8 md:py-12 px-4 max-w-3xl mx-auto font-space space-y-8">
         
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-black/5 dark:border-white/5">
@@ -93,21 +73,27 @@ export default function NotificationsPage() {
         </div>
 
         {/* Filter Controls */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <style>{`
+            .no-scrollbar::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
           {[
-            { id: 'all', label: isRTL ? 'الكل' : 'ALL' },
-            { id: 'unread', label: isRTL ? 'غير المقروء' : 'UNREAD' }
+            { id: 'ALL', label: isRTL ? 'الكل' : 'ALL' },
+            { id: 'UNREAD', label: isRTL ? 'غير المقروء' : 'UNREAD' },
+            { id: 'ALERTS', label: isRTL ? 'التنبيهات' : 'ALERTS' },
+            { id: 'SQUAD', label: isRTL ? 'الفريق' : 'SQUAD' }
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setFilter(tab.id as any)}
               className={cn(
-                "px-4 py-2 rounded-xl text-[10px] font-space font-black uppercase tracking-widest border transition-all hover:scale-[1.03] active:scale-[0.97] cursor-pointer",
+                "px-4 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer whitespace-nowrap",
                 filter === tab.id 
-                  ? "bg-black/5 dark:bg-white/10 border-black/10 dark:border-white/20 font-bold" 
-                  : "border-transparent text-black/40 dark:text-white/40 hover:text-black/60 dark:hover:text-white/60"
+                  ? "bg-orange-500 text-white" 
+                  : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:text-white"
               )}
-              style={filter === tab.id ? { color: currentTheme.color, borderColor: `${currentTheme.color}44` } : {}}
             >
               {tab.label}
             </button>
@@ -125,16 +111,32 @@ export default function NotificationsPage() {
               <Inbox className="w-10 h-10 stroke-[1.5]" />
               <p className="text-[10px] font-space font-black uppercase tracking-widest text-center px-4">
                 {isRTL 
-                  ? `لا توجد تنبيهات في قسم ${filter === 'all' ? 'الكل' : 'غير المقروء'}` 
-                  : `No notifications in ${filter.toUpperCase()}`}
+                  ? `لا توجد تنبيهات في قسم ${filter === 'ALL' ? 'الكل' : filter === 'UNREAD' ? 'غير المقروء' : filter}` 
+                  : `No notifications in ${filter}`}
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-black/5 dark:divide-white/5 border border-black/5 dark:border-white/5 rounded-2xl overflow-hidden bg-white/[0.01] dark:bg-black/[0.01] backdrop-blur-md">
+            <div className="space-y-4">
               <AnimatePresence initial={false}>
                 {filteredReports.map((report) => {
                   const bodyText = report.content?.text || (typeof report.content === 'string' ? report.content : '')
                   const formattedBody = bodyText.replace(/\[(.*?)\]/g, '$1') // Strip brackets
+
+                  const getIcon = () => {
+                    switch (report.type) {
+                      case 'deadline_alert':
+                      case 'overdue_task':
+                        return <AlertCircle className="text-red-500 w-5 h-5 shrink-0" />
+                      case 'squad_join_request':
+                        return <UserPlus className="text-blue-500 w-5 h-5 shrink-0" />
+                      case 'squad_member_completed_task':
+                        return <CheckCircle2 className="text-emerald-500 w-5 h-5 shrink-0" />
+                      case 'rank_up':
+                        return <Trophy className="text-orange-500 w-5 h-5 shrink-0" />
+                      default:
+                        return <Bell className="text-zinc-500 w-5 h-5 shrink-0" />
+                    }
+                  }
 
                   return (
                     <motion.div
@@ -143,35 +145,33 @@ export default function NotificationsPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       className={cn(
-                        "p-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 transition-all hover:bg-black/[0.01] dark:hover:bg-white/[0.01]",
-                        !report.is_read && "bg-black/[0.01] dark:bg-white/[0.02]"
+                        "bg-zinc-900/40 border border-zinc-800 rounded-xl p-4 flex gap-4 relative",
+                        !report.is_read && "border-orange-500/30 bg-orange-500/[0.02]"
                       )}
                     >
-                      <div className="space-y-2 flex-1 min-w-0">
+                      {getIcon()}
+                      
+                      <div className="flex-1 min-w-0 space-y-2">
                         <div className="flex items-center gap-2 flex-wrap">
                           {!report.is_read && (
                             <span 
-                              className="w-2 h-2 rounded-full shrink-0 shadow-[0_0_8px_currentcolor]" 
-                              style={{ backgroundColor: currentTheme.color, color: currentTheme.color }} 
+                              className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0 shadow-[0_0_8px_#f97316]" 
                             />
                           )}
-                          <span className="text-base shrink-0">{getNotificationIcon(report.type)}</span>
-                          <h3 
-                            className="text-sm font-black uppercase tracking-tight text-zinc-900 dark:text-zinc-100 truncate"
-                            style={!report.is_read ? { color: currentTheme.color } : {}}
-                          >
+                          <h3 className="text-sm font-bold text-zinc-100 uppercase truncate">
                             {report.title}
                           </h3>
-                          <span className="text-[9px] font-mono text-zinc-500 uppercase">
-                            {new Date(report.created_at).toLocaleDateString()} at {new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          <span className="text-[10px] text-zinc-500 uppercase font-mono ml-auto">
+                            {new Date(report.created_at).toLocaleDateString()} {new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
-                        <p className="text-xs text-zinc-500 dark:text-white/60 whitespace-pre-line leading-relaxed">
+                        
+                        <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
                           {formattedBody}
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                      <div className="flex items-center gap-2 shrink-0 self-start">
                         {!report.is_read && (
                           <button
                             onClick={async () => {
@@ -187,7 +187,6 @@ export default function NotificationsPage() {
                           <button
                             onClick={() => {
                               const targetGoalId = report.content.goal_id || report.content.cup_id || report.content.mission_id
-                              // router.push(`/missions/${report.content.cup_id || report.content.mission_id}`)
                               router.push(`/goals/${targetGoalId}`)
                             }}
                             className="p-1.5 bg-white/[0.02] hover:bg-white/5 border border-white/10 text-white/50 hover:text-white rounded-lg transition-all cursor-pointer"

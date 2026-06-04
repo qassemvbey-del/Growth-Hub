@@ -1,6 +1,6 @@
 'use client'
 
-import { Inbox, X, ArrowRight, CheckCheck } from 'lucide-react'
+import { Inbox, X, ArrowRight, CheckCheck, AlertCircle, UserPlus, CheckCircle2, Trophy, Bell } from 'lucide-react'
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -41,9 +41,6 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
 
   const handleNotificationClick = (report: Report) => {
     onRead(report)
-    // if (report.content?.cup_id || report.content?.mission_id) {
-    //   router.push(`/missions/${report.content.cup_id || report.content.mission_id}`)
-    // }
     const targetGoalId = report.content?.goal_id || report.content?.cup_id || report.content?.mission_id
     if (targetGoalId) {
       router.push(`/goals/${targetGoalId}`)
@@ -72,7 +69,6 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
           <div className="flex items-center gap-2">
             <Inbox className="text-sm w-3.5 h-3.5" style={{ color: themeColor }} />
             <span className="text-[10px] font-space font-black tracking-[0.2em] uppercase opacity-50">
-              {/* {isRTL ? 'صندوق الوارد // الإشعارات' : 'NOTIFICATION INBOX'} */}
               {isRTL ? 'الإشعارات' : 'Notifications'}
             </span>
           </div>
@@ -114,8 +110,8 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
               className={cn(
                 "px-3 py-1 rounded-full text-[8px] md:text-[9px] font-space font-black uppercase tracking-widest border transition-all hover:scale-[1.03] active:scale-[0.97] cursor-pointer",
                 filter === tab.id 
-                  ? "bg-black/5 dark:bg-white/10 border-black/10 dark:border-white/20 font-bold" 
-                  : "border-transparent text-black/40 dark:text-white/20 hover:text-black/60 dark:hover:text-white/40"
+                   ? "bg-black/5 dark:bg-white/10 border-black/10 dark:border-white/20 font-bold" 
+                   : "border-transparent text-black/40 dark:text-white/20 hover:text-black/60 dark:hover:text-white/40"
               )}
               style={filter === tab.id ? { color: themeColor, borderColor: `${themeColor}44` } : {}}
             >
@@ -155,6 +151,22 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
               const bodyText = report.content?.text || (typeof report.content === 'string' ? report.content : '')
               const cleanBody = bodyText.replace(/\[(.*?)\]/g, '$1') // Strip brackets
 
+              const getIcon = () => {
+                switch (report.type) {
+                  case 'deadline_alert':
+                  case 'overdue_task':
+                    return <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
+                  case 'squad_join_request':
+                    return <UserPlus className="w-5 h-5 text-blue-500 shrink-0" />
+                  case 'squad_member_completed_task':
+                    return <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                  case 'rank_up':
+                    return <Trophy className="w-5 h-5 text-orange-500 shrink-0" />
+                  default:
+                    return <Bell className="w-5 h-5 text-zinc-500 shrink-0" />
+                }
+              }
+
               return (
                 <motion.button
                   key={report.id}
@@ -163,35 +175,25 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
                   exit={{ opacity: 0, y: -10 }}
                   onClick={() => handleNotificationClick(report)}
                   className={cn(
-                    "w-full px-5 py-4 flex flex-col gap-1 transition-all",
-                    isRTL ? "text-right" : "text-left",
-                    !report.is_read 
-                      ? "bg-black/[0.02] dark:bg-white/5 hover:bg-black/[0.04] dark:hover:bg-white/10" 
-                      : "hover:bg-black/[0.02] dark:hover:bg-white/5"
+                    "w-full flex gap-3 p-3 hover:bg-zinc-800/50 transition-colors border-b border-zinc-800/50 last:border-0",
+                    isRTL ? "text-right flex-row-reverse" : "text-left flex-row",
+                    !report.is_read && "border-l-2 border-orange-500 bg-orange-500/5"
                   )}
                 >
-                  <div className="flex justify-between items-center gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      {!report.is_read && (
-                        <div 
-                          className="w-1.5 h-1.5 rounded-full shrink-0 shadow-[0_0_8px_currentcolor]" 
-                          style={{ backgroundColor: themeColor, color: themeColor }} 
-                        />
-                      )}
-                      <span 
-                        className="text-[11px] font-space font-bold uppercase tracking-tight truncate max-w-[200px]" 
-                        style={{ color: !report.is_read ? themeColor : 'inherit' }}
-                      >
+                  {getIcon()}
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex justify-between items-start gap-2">
+                      <span className="text-sm font-bold text-zinc-100 uppercase truncate">
                         {report.title}
                       </span>
+                      <span className="text-xs text-zinc-500 whitespace-nowrap">
+                        {new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
                     </div>
-                    <span className="text-[8px] font-space text-black/30 dark:text-white/20 shrink-0">
-                      {new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
+                    <p className="line-clamp-2 text-sm text-zinc-400">
+                      {cleanBody || report.title}
+                    </p>
                   </div>
-                  <p className="text-[11px] font-space text-black/60 dark:text-white/50 truncate w-full mt-0.5">
-                    {cleanBody || report.title}
-                  </p>
                 </motion.button>
               )
             })
@@ -199,7 +201,6 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
         </AnimatePresence>
       </div>
 
-      {/* Prominent link to View All Notifications Page */}
       <div className="px-5 py-3.5 border-t border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] flex justify-center">
         <button 
           onClick={() => {
