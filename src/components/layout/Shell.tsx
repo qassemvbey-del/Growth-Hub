@@ -846,7 +846,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         {/* ── MOBILE TOP BAR ── */}
         <header className="flex lg:hidden w-full h-14 px-4 items-center justify-between bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-black/5 dark:border-white/[0.03] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] z-[150] sticky top-0 transition-colors duration-500 relative">
           {/* LEFT: Hamburger Menu Icon */}
-          <div className="flex items-center">
+          <div className="flex items-center order-first rtl:order-last">
             <button
               onClick={() => { setIsMobileNavOpen(true); playBlip(); }}
               className="w-11 h-11 flex items-center justify-center bg-[var(--input-bg)] border border-[var(--card-border)] rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-white/20 transition-all cursor-pointer active:scale-95 shrink-0"
@@ -862,7 +862,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
           </div>
 
           {/* RIGHT: exactly 🔔 (Notifications) */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 order-last rtl:order-first">
             {renderNetworkPill(true)}
 
             {/* 🔔 Notifications */}
@@ -963,9 +963,9 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
         <div className="flex-1 space-y-2 overflow-y-auto">
           {[
             { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
-            { label: isRTL ? 'الـ Goals' : 'Goals', icon: Target, href: '/goals' },
-            { label: isRTL ? 'شخصي' : 'Solo Goals', icon: User, href: '/goals/solo', indent: true },
-            { label: isRTL ? 'Squad' : 'Squad Goals', icon: Users, href: '/goals/squad', indent: true },
+            { label: isRTL ? 'الأهداف' : 'Goals', icon: Target, href: '/goals' },
+            { label: isRTL ? 'أهدافي' : 'Solo Goals', icon: User, href: '/goals/solo', indent: true },
+            { label: isRTL ? 'الفريق' : 'Squad Goals', icon: Users, href: '/goals/squad', indent: true },
             { label: isRTL ? 'ملاحظاتي' : 'Notes', icon: FileText, href: '/notes' },
             { label: isRTL ? 'إنجازاتي' : 'Wins', icon: Trophy, href: '/achievements' },
           ].map(item => {

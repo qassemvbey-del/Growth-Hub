@@ -107,12 +107,13 @@ export default function SettingsPage() {
     return () => window.removeEventListener('close-all-modals', handleCloseAll)
   }, [])
 
-  const handleSave = async () => {
+  const handleSaveDirectly = async (updatedData: typeof formData, customDarkMode?: boolean) => {
     setSaving(true)
 
     // Apply theme on save
-    const themeKey = isDarkMode ? 'dark' : 'light'
-    document.documentElement.classList.toggle('dark', isDarkMode)
+    const activeDarkMode = customDarkMode !== undefined ? customDarkMode : isDarkMode
+    const themeKey = activeDarkMode ? 'dark' : 'light'
+    document.documentElement.classList.toggle('dark', activeDarkMode)
     localStorage.setItem('theme', themeKey)
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -122,41 +123,39 @@ export default function SettingsPage() {
       if (profile) {
         const optimistic = {
           ...profile,
-          full_name: formData.full_name || profile.full_name,
-          ai_name: formData.ai_name || null,
-          language: formData.language as any,
-          gender: formData.gender || profile.gender,
-          age: formData.age ? parseInt(formData.age) : profile.age,
+          full_name: updatedData.full_name || profile.full_name,
+          ai_name: updatedData.ai_name || null,
+          language: updatedData.language as any,
+          gender: updatedData.gender || profile.gender,
+          age: updatedData.age ? parseInt(updatedData.age) : profile.age,
         }
         setProfile(optimistic)
         if (typeof window !== 'undefined') {
           localStorage.setItem('cached_profile', JSON.stringify(optimistic))
-          localStorage.setItem('language', formData.language)
-          localStorage.setItem('cached_name', formData.full_name)
+          localStorage.setItem('language', updatedData.language)
+          localStorage.setItem('cached_name', updatedData.full_name)
         }
       }
-      showToast(isRTL ? 'تم حفظ التغييرات محلياً' : 'LOCAL SETTINGS UPDATED', 'success')
+      showToast(updatedData.language === 'ar' ? 'تم الحفظ ✓' : 'Saved ✓', 'success')
       setSaving(false)
       return
     }
 
-    // ── OPTIMISTIC UPDATE: immediately push changes to context so all
-    //    components (CoachPanel, Shell header, Sidebar) see the new name
-    //    before the DB round-trip completes.
+    // ── OPTIMISTIC UPDATE: immediately push changes to context
     if (profile) {
       const optimistic = {
         ...profile,
-        full_name: formData.full_name || profile.full_name,
-        ai_name: formData.ai_name || null,
-        language: formData.language as any,
-        gender: formData.gender || profile.gender,
-        age: formData.age ? parseInt(formData.age) : profile.age,
+        full_name: updatedData.full_name || profile.full_name,
+        ai_name: updatedData.ai_name || null,
+        language: updatedData.language as any,
+        gender: updatedData.gender || profile.gender,
+        age: updatedData.age ? parseInt(updatedData.age) : profile.age,
       }
       setProfile(optimistic)
       if (typeof window !== 'undefined') {
         localStorage.setItem('cached_profile', JSON.stringify(optimistic))
-        localStorage.setItem('language', formData.language)
-        localStorage.setItem('cached_name', formData.full_name)
+        localStorage.setItem('language', updatedData.language)
+        localStorage.setItem('cached_name', updatedData.full_name)
       }
     }
 
@@ -164,11 +163,11 @@ export default function SettingsPage() {
       .from('profiles')
       .upsert({
         id: user.id,
-        full_name: formData.full_name,
-        age: formData.age ? parseInt(formData.age) : null,
-        language: formData.language,
-        ai_name: formData.ai_name || null,
-        gender: formData.gender || null,
+        full_name: updatedData.full_name,
+        age: updatedData.age ? parseInt(updatedData.age) : null,
+        language: updatedData.language,
+        ai_name: updatedData.ai_name || null,
+        gender: updatedData.gender || null,
         xp: profile?.xp || 0,
         onboarded: profile?.onboarded ?? true,
         updated_at: new Date().toISOString()
@@ -177,19 +176,18 @@ export default function SettingsPage() {
       })
 
     if (!error) {
-      localStorage.setItem('language', formData.language)
-      localStorage.setItem('cached_name', formData.full_name)
-      // Background DB sync — don't await to keep UI snappy
+      localStorage.setItem('language', updatedData.language)
+      localStorage.setItem('cached_name', updatedData.full_name)
       refreshProfile()
-      // showToast(isRTL ? 'تم حفظ التغييرات بنجاح' : 'SETTINGS_UPDATED_SUCCESSFULLY', 'success')
-      showToast(isRTL ? 'تم حفظ التغييرات بنجاح' : 'Settings updated successfully', 'success')
+      showToast(updatedData.language === 'ar' ? 'تم الحفظ ✓' : 'Saved ✓', 'success')
     } else {
-      // showToast('UPDATE_ERROR', 'warning')
-      showToast('Failed to update settings', 'warning')
-      alert('Save failed: ' + error.message)
+      showToast(updatedData.language === 'ar' ? 'فشل حفظ الإعدادات ⚠️' : 'Failed to update settings ⚠️', 'warning')
+      console.error('Save failed:', error)
     }
     setSaving(false)
   }
+
+  const handleSave = () => handleSaveDirectly(formData)
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -466,6 +464,7 @@ export default function SettingsPage() {
                           <input
                             value={formData.full_name}
                             onChange={e => setFormData({ ...formData, full_name: e.target.value })}
+                            onBlur={() => handleSaveDirectly({ ...formData, full_name: formData.full_name })}
                             className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl px-4 py-2 sm:py-3.5 font-space text-sm font-bold text-[var(--text-primary)] outline-none focus:ring-2 focus:border-transparent transition-all"
                             style={{ ['--tw-ring-color' as any]: `${currentTheme.color}55` }}
                           />
@@ -492,6 +491,7 @@ export default function SettingsPage() {
                                 }
                               }
                             }}
+                            onBlur={() => handleSaveDirectly(formData)}
                             className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl px-4 py-2 sm:py-3.5 font-space text-sm font-bold text-[var(--text-primary)] outline-none focus:ring-2 focus:border-transparent transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             style={{ ['--tw-ring-color' as any]: `${currentTheme.color}55` }}
                           />
@@ -633,6 +633,7 @@ export default function SettingsPage() {
                           <input
                             value={formData.ai_name}
                             onChange={e => setFormData({ ...formData, ai_name: e.target.value })}
+                            onBlur={() => handleSaveDirectly({ ...formData, ai_name: formData.ai_name })}
                             className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl px-4 py-2 sm:py-3.5 font-space text-sm font-bold text-[var(--text-primary)] outline-none focus:ring-2 focus:border-transparent transition-all"
                             style={{ ['--tw-ring-color' as any]: `${currentTheme.color}55` }}
                           />
@@ -641,7 +642,7 @@ export default function SettingsPage() {
                         {/* Dynamic read-only status badge showing the current automated state synced directly to rank color */}
                         <div className="space-y-2">
                           <label className="font-space tracking-widest uppercase font-black text-xs text-[var(--text-secondary)]">
-                            {isRTL ? 'الحالة الآلية للمنظومة' : 'AUTOMATED SYSTEM SYNC'}
+                            {isRTL ? 'الإعدادات التلقائية' : 'AUTOMATED SYSTEM SYNC'}
                           </label>
                           
                           <div 
@@ -659,7 +660,7 @@ export default function SettingsPage() {
                               </span>
                               <div className="space-y-0.5">
                                 <p className="font-space font-black text-xs text-white uppercase tracking-wider">
-                                  {isRTL ? 'المزامنة مع الرتبة النشطة' : 'RANK-ALIGNED DIRECTIVE'}
+                                  {isRTL ? 'تحديث أسلوب المساعد تلقائياً مع رتبتك' : 'RANK-ALIGNED DIRECTIVE'}
                                 </p>
                                 <p className="text-[10px] font-space text-white/40 tracking-wider">
                                   {isRTL 
@@ -678,7 +679,7 @@ export default function SettingsPage() {
                                 textShadow: `0 0 8px ${currentTheme.color}40`
                               }}
                             >
-                              {isRTL ? 'متزامن نشط' : 'SYNCHRONIZED'}
+                              {isRTL ? 'مفعّل' : 'SYNCHRONIZED'}
                             </div>
                           </div>
                         </div>
@@ -713,9 +714,11 @@ export default function SettingsPage() {
                               <button
                                 key={l.key}
                                 type="button"
-                                onClick={() => {
-                                  setFormData({ ...formData, language: l.key as any })
+                               onClick={async () => {
                                   playBlip()
+                                  const updated = { ...formData, language: l.key as any }
+                                  setFormData(updated)
+                                  await handleSaveDirectly(updated)
                                 }}
                                 className={cn(
                                   'px-4 py-1.5 font-space text-[10px] font-black transition-all rounded-md uppercase tracking-wider',
@@ -746,10 +749,11 @@ export default function SettingsPage() {
                                 <button
                                   key={theme.key}
                                   type="button"
-                                  onClick={() => {
+                                  onClick={async () => {
                                     playBlip()
                                     const setDark = theme.key === 'dark'
                                     setIsDarkMode(setDark)
+                                    await handleSaveDirectly(formData, setDark)
                                   }}
                                   className={cn(
                                     'px-4 py-1.5 flex items-center gap-1.5 font-space text-[10px] font-black transition-all rounded-md uppercase tracking-wider',
@@ -859,6 +863,7 @@ export default function SettingsPage() {
                               if (!nextMute) {
                                 setTimeout(() => playBlip(), 50)
                               }
+                              showToast(formData.language === 'ar' ? 'تم الحفظ ✓' : 'Saved ✓', 'success')
                             }}
                             className={cn(
                               "w-12 h-6 rounded-full transition-all relative border flex items-center px-1 cursor-pointer",
@@ -1308,7 +1313,7 @@ export default function SettingsPage() {
         )}
       </AnimatePresence>
 
-      {/* Sticky Save Footer Bar */}
+      {/* Sticky Save Footer Bar commented out to enable seamless auto-save UX
       <div className="fixed bottom-0 left-0 w-full p-4 bg-zinc-950/80 backdrop-blur-md border-t border-zinc-800 z-40 flex items-center justify-center">
         <div className="w-full max-w-4xl flex justify-end px-4">
           <button
@@ -1321,6 +1326,7 @@ export default function SettingsPage() {
           </button>
         </div>
       </div>
+      */}
 
       {/* AVATAR SELECTOR MODAL */}
       {isAvatarSelectorOpen && (

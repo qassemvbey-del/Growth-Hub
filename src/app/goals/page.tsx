@@ -121,17 +121,17 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
             </p>
             {typeFilter === 'solo' && (
               <span className="text-[8px] font-space tracking-widest font-black uppercase text-zinc-500 opacity-60 bg-zinc-500/10 border border-zinc-500/20 px-1.5 py-0.5 rounded-md">
-                ◆ SOLO
+                {isRTL ? '◆ فردي' : '◆ SOLO'}
               </span>
             )}
             {typeFilter === 'squad' && (
               mission.user_id === profile?.id ? (
                 <span className="text-[8px] font-space tracking-widest font-black uppercase text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-[0_0_8px_rgba(245,158,11,0.1)]">
-                  👑 ADMIN
+                  {isRTL ? '👑 مشرف' : '👑 ADMIN'}
                 </span>
               ) : (
                 <span className="text-[8px] font-space tracking-widest font-black uppercase text-zinc-400 bg-zinc-400/10 border border-zinc-400/20 px-1.5 py-0.5 rounded-md">
-                  MEMBER
+                  {isRTL ? 'عضو' : 'MEMBER'}
                 </span>
               )
             )}
@@ -1042,21 +1042,21 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 )}
                 <h1 className="text-2xl md:text-6xl font-black font-space tracking-wider uppercase text-black dark:text-white leading-none truncate">
                   {typeFilter === 'solo' ? (
-                    <>{isRTL ? 'أهداف' : 'Solo'}<span style={{ color: currentTheme.color }}>{isRTL ? ' فردية' : ' Goals'}</span></>
+                    <>{isRTL ? 'أهدافي' : 'Solo'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الشخصية' : ' Goals'}</span></>
                   ) : typeFilter === 'squad' ? (
                     <>{isRTL ? 'عمليات' : 'Squad'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الفريق' : ' Goals'}</span></>
                   ) : (
-                    <>{isRTL ? 'أهداف' : 'Solo'}<span style={{ color: currentTheme.color }}>{isRTL ? ' فردية' : ' Goals'}</span></>
+                    <>{isRTL ? 'أهدافي' : 'Solo'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الشخصية' : ' Goals'}</span></>
                   )}
                 </h1>
               </div>
               <p className={cn("text-[13px] font-space font-medium truncate max-w-xs md:max-w-none block", isRTL ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]")}>
                 {typeFilter === 'solo' ? (
-                  <>{isRTL ? 'أهداف شخصية نشطة' : 'Personal Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'Active'}</>
+                  <>{isRTL ? 'هدف نشط' : 'Personal Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'Active'}</>
                 ) : typeFilter === 'squad' ? (
                   <>{isRTL ? 'أهداف تعاونية نشطة' : 'Collaborative Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'Active'}</>
                 ) : (
-                  <>{isRTL ? 'أهداف شخصية نشطة' : 'Personal Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'Active'}</>
+                  <>{isRTL ? 'هدف نشط' : 'Personal Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'Active'}</>
                 )}
               </p>
             </div>
@@ -1066,7 +1066,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
               <button
                 onClick={() => { playBlip(); setShowCreate(true); }}
                 className="flex md:hidden flex-row items-center justify-center gap-1.5 h-11 px-4 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-[0.97] shadow-lg shrink-0"
-                style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
+                style={{ backgroundColor: currentTheme.color, color: '#00', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
                 <Plus className="text-[16px] leading-none" />
                 {isRTL ? 'إنشاء' : 'Create'}
@@ -1081,15 +1081,15 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-12 md:h-11 min-h-[48px] md:min-h-0 px-6 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-[0.97] shadow-lg cursor-pointer animate-pulse"
               >
                 <Link className="text-[16px] leading-none" />
-                {isRTL ? 'الانضمام لهدف' : 'JOIN GOAL'}
+                {isRTL ? 'انضم لهدف' : 'JOIN GOAL'}
               </button>
               <button
                 onClick={() => { playBlip(); setShowCreate(true); }}
                 className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-12 md:h-11 min-h-[48px] md:min-h-0 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-[0.97] shadow-lg"
-                style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
+                style={{ backgroundColor: currentTheme.color, color: '#00', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
                 <Plus className="text-[16px] leading-none" />
-                {isRTL ? 'إنشاء هدف فريق' : 'CREATE SQUAD GOAL'}
+                {isRTL ? 'أنشئ هدف جماعي' : 'CREATE SQUAD GOAL'}
               </button>
             </div>
           ) : (
@@ -1097,10 +1097,10 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
             <button
               onClick={() => { playBlip(); setShowCreate(true); }}
               className="hidden md:flex flex-row items-center justify-center gap-2 w-full md:w-auto h-12 md:h-11 min-h-[48px] md:min-h-0 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-[0.97] shadow-lg"
-              style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
+              style={{ backgroundColor: currentTheme.color, color: '#00', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
             >
               <Plus className="text-[16px] leading-none" />
-              {typeFilter === 'solo' ? (isRTL ? 'إنشاء هدف فردي' : 'CREATE GOAL') : (isRTL ? 'إنشاء هدف' : 'Create Goal')}
+              {typeFilter === 'solo' ? (isRTL ? 'إنشاء هدف شخصي' : 'CREATE GOAL') : (isRTL ? 'إنشاء هدف' : 'Create Goal')}
             </button>
           )}
         </motion.header>
@@ -1764,17 +1764,17 @@ return (
           </p>
           {typeFilter === 'solo' && (
             <span className="text-[8px] font-space tracking-widest font-black uppercase text-zinc-500 opacity-60 bg-zinc-500/10 border border-zinc-500/20 px-1.5 py-0.5 rounded-md">
-              ◆ SOLO
+              {isRTL ? '◆ فردي' : '◆ SOLO'}
             </span>
           )}
           {typeFilter === 'squad' && (
             mission.user_id === profile?.id ? (
               <span className="text-[8px] font-space tracking-widest font-black uppercase text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-[0_0_8px_rgba(245,158,11,0.1)]">
-                👑 ADMIN
+                {isRTL ? '👑 مشرف' : '👑 ADMIN'}
               </span>
             ) : (
               <span className="text-[8px] font-space tracking-widest font-black uppercase text-zinc-400 bg-zinc-400/10 border border-zinc-400/20 px-1.5 py-0.5 rounded-md">
-                MEMBER
+                {isRTL ? 'عضو' : 'MEMBER'}
               </span>
             )
           )}

@@ -144,17 +144,17 @@ export default function SquadGoalsPage() {
             </p>
             {typeFilter === 'solo' && (
               <span className="text-[8px] font-space tracking-widest font-black uppercase text-zinc-500 opacity-60 bg-zinc-500/10 border border-zinc-500/20 px-1.5 py-0.5 rounded-md">
-                ◆ SOLO
+                {isRTL ? '◆ فردي' : '◆ SOLO'}
               </span>
             )}
             {typeFilter === 'squad' && (
               mission.user_id === profile?.id ? (
                 <span className="text-[8px] font-space tracking-widest font-black uppercase text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-[0_0_8px_rgba(245,158,11,0.1)]">
-                  👑 ADMIN
+                  {isRTL ? '👑 مشرف' : '👑 ADMIN'}
                 </span>
               ) : (
                 <span className="text-[8px] font-space tracking-widest font-black uppercase text-zinc-400 bg-zinc-400/10 border border-zinc-400/20 px-1.5 py-0.5 rounded-md">
-                  MEMBER
+                  {isRTL ? 'عضو' : 'MEMBER'}
                 </span>
               )
             )}
@@ -2008,17 +2008,17 @@ return (
           </p>
           {typeFilter === 'solo' && (
             <span className="text-[8px] font-space tracking-widest font-black uppercase text-zinc-500 opacity-60 bg-zinc-500/10 border border-zinc-500/20 px-1.5 py-0.5 rounded-md">
-              ◆ SOLO
+              {isRTL ? '◆ فردي' : '◆ SOLO'}
             </span>
           )}
           {typeFilter === 'squad' && (
             mission.user_id === profile?.id ? (
               <span className="text-[8px] font-space tracking-widest font-black uppercase text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-[0_0_8px_rgba(245,158,11,0.1)]">
-                👑 ADMIN
+                {isRTL ? '👑 مشرف' : '👑 ADMIN'}
               </span>
             ) : (
               <span className="text-[8px] font-space tracking-widest font-black uppercase text-zinc-400 bg-zinc-400/10 border border-zinc-400/20 px-1.5 py-0.5 rounded-md">
-                MEMBER
+                {isRTL ? 'عضو' : 'MEMBER'}
               </span>
             )
           )}

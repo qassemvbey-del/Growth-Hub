@@ -124,20 +124,20 @@ export default function LoginPage() {
   // Simplified Translation Dictionaries with Gamified Gaming wording
   const t = {
     ar: {
-      title: 'مساحة عملك الإنتاجية التفاعلية',
+      title: 'مساحتك للتطور',
       subtitle: 'GROWTH HUB',
-      welcome: 'أهلاً بيك من تاني',
-      desc: 'سجل دخولك دلوقتي عشان تدخل على الـ Dashboard بتاعتك وتتكلم مع مساعد الـ AI عشان تحقق الـ Goals بتاعتك.',
-      button: 'ادخل بـ Google',
-      guestButton: 'المتابعة كضيف',
+      welcome: 'أهلاً بك من جديد',
+      desc: 'سجّل دخولك للوصول للوحة التحكم والتحدث مع مساعدك الذكي لتحقيق أهدافك',
+      button: 'الدخول بـ Google',
+      guestButton: 'المتابعة كزائر',
       signingIn: 'بندخلك دلوقتي...',
-      tagline: 'مكان شغل متكامل عشان تدير الـ Goals والـ Tasks بتاعتك بإنتاجية عالية.',
+      tagline: 'مكان متكامل لإدارة أهدافك ومهامك بإنتاجية عالية.',
       feature1Title: 'Focus Goals',
-      feature1Desc: 'تابع الـ Goals بتاعتك اليومية بكل سهولة.',
+      feature1Desc: 'تابع أهدافك اليومية بسهولة',
       feature2Title: 'Smart AI Coach',
-      feature2Desc: 'توجيه ذكي بالـ AI Coach عشان تفضل مركز.',
+      feature2Desc: 'احصل على توجيه ذكي يساعدك تفضل مركّز',
       feature3Title: 'Level Up',
-      feature3Desc: 'جمع XP، ارفع الـ Rank بتاعك، وخلص الـ Tasks بتاعتك.',
+      feature3Desc: 'ارفع رتبتك، أنجز مهامك، واكسب XP',
       footer: 'منصة تطوير شخصي احترافية · كل الحقوق محفوظة',
     },
     en: {
@@ -192,7 +192,7 @@ export default function LoginPage() {
       <div className="fixed inset-0 pointer-events-none opacity-[0.02] scanlines z-20" />
 
       {/* LANGUAGE SELECTOR TOP BAR */}
-      <div className="absolute top-6 right-6 z-50 flex items-center gap-3">
+      <div className="absolute top-6 end-6 z-50 flex items-center gap-3">
         <button 
           onClick={toggleLanguage}
           className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-200/20 dark:bg-white/5 border border-zinc-300/30 dark:border-white/10 hover:bg-zinc-200/30 dark:hover:bg-white/10 transition-all text-xs font-bold text-zinc-800 dark:text-white font-space uppercase"
@@ -232,7 +232,7 @@ export default function LoginPage() {
           {/* Feature Highlights Grid */}
           <div className="my-12 md:my-0 space-y-8 max-w-md flex flex-col gap-6">
             {/* Feature 1 */}
-            <motion.div variants={childVariants} className="group hover:bg-zinc-200/10 dark:hover:bg-white/5 transition-all rounded-xl p-2 -ml-2 flex gap-4 duration-300 cursor-pointer">
+            <motion.div variants={childVariants} className="group hover:bg-zinc-200/10 dark:hover:bg-white/5 transition-all rounded-xl p-2 -ms-2 flex gap-4 duration-300 cursor-pointer">
               <div className="w-10 h-10 rounded-xl bg-zinc-200/20 dark:bg-white/5 border border-zinc-300/30 dark:border-white/10 flex items-center justify-center shrink-0 text-zinc-700 dark:text-white/75">
                 <Target className="w-5 h-5" />
               </div>
@@ -245,7 +245,7 @@ export default function LoginPage() {
             </motion.div>
 
             {/* Feature 2 */}
-            <motion.div variants={childVariants} className="group hover:bg-zinc-200/10 dark:hover:bg-white/5 transition-all rounded-xl p-2 -ml-2 flex gap-4 duration-300 cursor-pointer">
+            <motion.div variants={childVariants} className="group hover:bg-zinc-200/10 dark:hover:bg-white/5 transition-all rounded-xl p-2 -ms-2 flex gap-4 duration-300 cursor-pointer">
               <div className="w-10 h-10 rounded-xl bg-zinc-200/20 dark:bg-white/5 border border-zinc-300/30 dark:border-white/10 flex items-center justify-center shrink-0 text-zinc-700 dark:text-white/75">
                 <Zap className="w-5 h-5" />
               </div>
@@ -258,7 +258,7 @@ export default function LoginPage() {
             </motion.div>
 
             {/* Feature 3 */}
-            <motion.div variants={childVariants} className="group hover:bg-zinc-200/10 dark:hover:bg-white/5 transition-all rounded-xl p-2 -ml-2 flex gap-4 duration-300 cursor-pointer">
+            <motion.div variants={childVariants} className="group hover:bg-zinc-200/10 dark:hover:bg-white/5 transition-all rounded-xl p-2 -ms-2 flex gap-4 duration-300 cursor-pointer">
               <div className="w-10 h-10 rounded-xl bg-zinc-200/20 dark:bg-white/5 border border-zinc-300/30 dark:border-white/10 flex items-center justify-center shrink-0 text-zinc-700 dark:text-white/75">
                 <Trophy className="w-5 h-5" />
               </div>
@@ -339,7 +339,7 @@ export default function LoginPage() {
             {/* Secure lock telemetry indicator */}
             <div className="flex items-center justify-center gap-2 text-[9px] font-monospace text-zinc-500 dark:text-white/30 uppercase tracking-widest pt-4 border-t border-zinc-200/50 dark:border-white/5">
               <Shield className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500/60" />
-              <span className={`animate-pulse ${hoverTextClass}`}>{lang === 'ar' ? 'مكان شغل آمن ومحمي' : 'SECURE & PROTECTED WORKSPACE'}</span>
+              <span className={`animate-pulse ${hoverTextClass}`}>{lang === 'ar' ? 'بيئة آمنة ومحمية' : 'SECURE & PROTECTED WORKSPACE'}</span>
             </div>
 
           </motion.div>

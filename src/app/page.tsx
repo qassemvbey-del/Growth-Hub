@@ -367,7 +367,7 @@ export default function Dashboard() {
             className="text-2xl md:text-5xl font-black tracking-tight uppercase leading-none text-zinc-900 dark:text-white"
           >
             {/* {isRTL ? 'منصة' : 'FOCUS'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'HUB'}</span> */}
-            {isRTL ? 'منصة' : 'FOCUS'} <span style={{ color: currentTheme.color }}>{isRTL ? 'الـ Focus' : 'HUB'}</span>
+            {isRTL ? 'لوحة' : 'FOCUS'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'HUB'}</span>
           </motion.h1>
 
           <p className="text-[13px] text-zinc-500 dark:text-zinc-400 font-medium truncate max-w-[90vw]">
@@ -440,7 +440,7 @@ export default function Dashboard() {
                 {/* <NeonIcon icon={Zap} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} /> */}
                 <span className="text-[9px] sm:text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase truncate">
                   {/* {isRTL ? 'الـ Focus اليومي' : 'DAILY FOCUS'} */}
-                  {isRTL ? 'الـ Focus اليومي' : 'Daily Focus'}
+                  {isRTL ? 'تركيزك اليومي' : 'Daily Focus'}
                 </span>
               </div>
               <div className="text-[10px] sm:text-lg font-black tracking-tight shrink-0">
@@ -542,12 +542,11 @@ export default function Dashboard() {
                 {/* <NeonIcon icon={Activity} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} /> */}
                 <h2 className="text-[10px] sm:text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase">
                   {/* {isRTL ? 'الوارد التكتيكي العاجل' : 'ACTION INBOX // CRITICAL'} */}
-                  {isRTL ? 'الوارد العاجل' : 'Action Inbox'}
+                  {isRTL ? 'المهام العاجلة' : 'Action Inbox'}
                 </h2>
               </div>
               <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[10px] font-black border shrink-0" style={{ color: currentTheme.color, borderColor: `${currentTheme.color}30`, backgroundColor: `${currentTheme.color}15` }}>
-                {/* {actionInboxTasks.length} {isRTL ? 'مهمة عاجلة' : 'IMMEDIATE'} */}
-                {actionInboxTasks.length} {isRTL ? 'Task عاجل' : 'IMMEDIATE'}
+                {actionInboxTasks.length} {isRTL ? 'مهمة عاجلة' : 'IMMEDIATE'}
               </span>
             </div>
 
@@ -611,7 +610,7 @@ export default function Dashboard() {
                   <p className="text-[9px] sm:text-xs text-zinc-500 dark:text-white/30 uppercase tracking-widest">
                     {/* {isRTL ? 'الوارد فارغ! جميع الالتزامات منجزة.' : 'INBOX CLEAR // NO OVERDUE TASKS'} */}
                     {/* {isRTL ? 'عاش! مفيش أي مهام متأخرة عليك حالياً.' : "You're all caught up! Overdue tasks will appear here."} */}
-                    {isRTL ? 'عاش! مفيش أي Tasks متأخرة عليك دلوقتي.' : "You're all caught up! Overdue tasks will appear here."}
+                    {isRTL ? 'عاش! مفيش أي مهام متأخرة عليك دلوقتي.' : "You're all caught up! Overdue tasks will appear here."}
                   </p>
                 </div>
               )}
@@ -678,7 +677,7 @@ export default function Dashboard() {
             {/* <NeonIcon icon={Target} className="text-2xl w-6 h-6 shrink-0" style={{ color: currentTheme.color }} /> */}
             <h2 className="text-sm font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">
               {/* {isRTL ? 'الأهداف المثبتة' : 'PINNED GOALS'} */}
-              {isRTL ? 'الـ Goals المثبتة' : 'PINNED GOALS'}
+              {isRTL ? 'الأهداف المثبّتة' : 'PINNED GOALS'}
             </h2>
           </div>
 
@@ -706,7 +705,7 @@ export default function Dashboard() {
                    <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: isInRedZone ? '#ef4444' : customColor }} />
 
                    <div className="flex justify-between items-start gap-1.5 sm:gap-2">
-                     <h3 className="text-xs sm:text-sm font-black uppercase tracking-wide truncate max-w-[75%] text-zinc-100 font-space">
+                     <h3 className="font-black uppercase tracking-wide truncate max-w-[120px] md:max-w-none text-sm md:text-base text-zinc-100 font-space">
                       {mission.title}
                     </h3>
                     <span 
@@ -738,7 +737,7 @@ export default function Dashboard() {
               <div className="col-span-full py-12 text-center border border-dashed border-white/5 rounded-xl">
                 <p className="text-xs uppercase tracking-widest text-zinc-500 font-bold">
                   {/* {isRTL ? 'لا توجد أهداف مثبتة. افتح هدفاً وثبّته في لوحة التحكم.' : 'No goals pinned. Open a goal and pin it to your Dashboard.'} */}
-                  {isRTL ? 'مفيش Goals مثبتة. افتح Goal وثبته في الـ Dashboard.' : 'No goals pinned. Open a goal and pin it to your Dashboard.'}
+                  {isRTL ? 'لا توجد أهداف مثبتة. افتح هدفاً وثبّته في لوحة التحكم.' : 'No goals pinned. Open a goal and pin it to your Dashboard.'}
                 </p>
               </div>
             )}

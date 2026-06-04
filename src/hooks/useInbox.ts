@@ -193,7 +193,7 @@ export function useInbox() {
               const remainingTasks = totalTasksCount - doneTasksCount
               const tasksPerDay = days > 0 ? (remainingTasks / days).toFixed(1) : remainingTasks
 
-              const title = lang === 'ar' ? `⚠️ تنبيه الموعد النهائي: ${mission.title}` : `⚠️ Warning: ${mission.title}`
+              const title = lang === 'ar' ? `⚠️ تحذير: ${mission.title}` : `⚠️ Warning: ${mission.title}`
               const content = lang === 'ar' ? `[${mission.title}] متبقي [${days}] أيام فقط!
 نسبة الإنجاز الحالية: [${currentProgress}]%
 معدل العمل المطلوب: إكمال [${tasksPerDay}] مهام يومياً للوفاء بالموعد المحدد.` : `[${mission.title}] only [${days}] days left!
@@ -311,7 +311,7 @@ Next step: Visit the Wins page to view your golden cup.`
             .maybeSingle()
 
           if (!existing) {
-            const title = lang === 'ar' ? `⚠️ اقتراب الموعد النهائي: ${goal.title}` : `⚠️ Deadline Warning: ${goal.title}`
+            const title = lang === 'ar' ? `⚠️ تحذير: ${goal.title}` : `⚠️ Deadline Warning: ${goal.title}`
             const contentText = lang === 'ar' 
               ? `موعد الهدف [${goal.title}] النهائي بعد [${diffDays}] أيام` 
               : `[${goal.title}] deadline is in [${diffDays}] days`
@@ -502,7 +502,7 @@ Next step: Visit the Wins page to view your golden cup.`
         recommendationsList.push("Maintain current productive tempo")
       }
 
-      const title = lang === 'ar' ? `📊 تقرير الأداء الأسبوعي` : `📊 Weekly Review`
+      const title = lang === 'ar' ? `📊 مراجعة أسبوعية` : `📊 Weekly Review`
       /*
       const contentText = lang === 'ar' ? `📊 تقرير الأداء الأسبوعي // WEEKLY REVIEW
 

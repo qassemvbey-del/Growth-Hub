@@ -82,7 +82,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
     { icon: Trophy, label: mounted ? (isRTL ? 'إنجازاتي' : 'Wins') : 'Wins', href: '/achievements', shortcut: '04', exact: false },
     */
     // { icon: Target, label: mounted ? (isRTL ? 'الـ Goals' : 'Goals') : 'Goals', href: '/missions', shortcut: '02', exact: false },
-    { icon: Target, label: mounted ? (isRTL ? 'الـ Goals' : 'Goals') : 'Goals', href: '/goals', shortcut: '02', exact: false },
+    { icon: Target, label: mounted ? (isRTL ? 'الأهداف' : 'Goals') : 'Goals', href: '/goals', shortcut: '02', exact: false },
     { icon: FileText, label: mounted ? (isRTL ? 'ملاحظاتي' : 'Notes') : 'Notes', href: '/notes', shortcut: '03', exact: false },
     { icon: Trophy, label: mounted ? (isRTL ? 'إنجازاتي' : 'Wins') : 'Wins', href: '/achievements', shortcut: '04', exact: false },
   ]
@@ -98,7 +98,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
     /* bg-[var(--sidebar-bg)] border-[var(--card-border)] */
     /* bg-white/60 dark:bg-black/40 backdrop-blur-3xl border-x-0 shadow-[20px_0_50px...] */
     <aside className={cn(
-      "hidden lg:flex w-72 bg-transparent dark:bg-gradient-to-r dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-r border-black/5 dark:border-white/[0.03] shadow-[10px_0_30px_-10px_rgba(0,0,0,0.3)] h-screen fixed top-0 flex-col z-[110] sidebar-target transition-all duration-300",
+      "hidden lg:flex w-72 bg-transparent dark:bg-gradient-to-r dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-e border-black/5 dark:border-white/[0.03] shadow-[10px_0_30px_-10px_rgba(0,0,0,0.3)] rtl:shadow-[-10px_0_30px_-10px_rgba(0,0,0,0.3)] h-screen fixed top-0 flex-col z-[110] sidebar-target transition-all duration-300",
       "inset-inline-start-0"
     )}>
       {/* ── ULTRA-PREMIUM IDENTITY LAYER ── */}
@@ -183,12 +183,11 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
             <span className="text-zinc-500 dark:text-zinc-400 uppercase text-left leading-tight">
               {mounted
                 ? (isRTL
-                    /* ? `${xpNeeded} نقطة إلى ${nextRankName === 'MAX RANK' ? 'أعلى رتبة' : nextRankName}` */
-                    ? `${xpNeeded} XP لحد ${nextRankName === 'MAX RANK' ? 'أعلى Rank' : nextRankName}`
+                    ? `${xpNeeded} XP إلى ${nextRankName === 'MAX RANK' ? 'أعلى رتبة' : nextRankName}`
                     : `${xpNeeded}xp to ${nextRankName}`)
                 : `800xp to PLATINUM`}
             </span>
-            <span className="text-xs font-bold shrink-0 pl-2" style={{ color: currentTheme.color }}>
+            <span className="text-xs font-bold shrink-0 ps-2" style={{ color: currentTheme.color }}>
               {progressPct.toFixed(0)}%
             </span>
           </div>
@@ -441,10 +440,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                   <NeonIcon
                     icon={item.icon}
                     interactive
-                    className={cn(
-                      "w-5 h-5 transition-all duration-300",
-                      isRTL ? "ml-4" : "mr-4"
-                    )}
+                    className="w-5 h-5 transition-all duration-300 me-4"
                     style={{ 
                       color: (isGoalsActive && !pathname.startsWith('/goals/'))
                         ? currentTheme.color 
@@ -464,7 +460,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                     {item.label}
                   </span>
 
-                  <div className="flex items-center gap-2 shrink-0 select-none">
+                  <div className="flex items-center gap-2 shrink-0 select-none rtl:hidden">
                     <span 
                       className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black transition-colors duration-300"
                       style={{ 
@@ -483,11 +479,11 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
-                      className="overflow-hidden flex flex-col gap-1.5 mt-1.5 pl-4"
+                      className="overflow-hidden flex flex-col gap-1.5 mt-1.5 ps-4"
                     >
                       {[
-                        { label: mounted ? (isRTL ? 'شخصي' : 'Solo Goals') : 'Solo Goals', icon: User, href: '/goals/solo' },
-                        { label: mounted ? (isRTL ? 'Squad' : 'Squad Goals') : 'Squad Goals', icon: Users, href: '/goals/squad' }
+                        { label: mounted ? (isRTL ? 'أهدافي' : 'Solo Goals') : 'Solo Goals', icon: User, href: '/goals/solo' },
+                        { label: mounted ? (isRTL ? 'الفريق' : 'Squad Goals') : 'Squad Goals', icon: Users, href: '/goals/squad' }
                       ].map((subItem, subIdx) => {
                         const isSubActive = pathname === subItem.href
                         const isSubHovered = hoveredIndex === (100 + subIdx)
@@ -508,10 +504,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                             <NeonIcon 
                               icon={subItem.icon}
                               interactive
-                              className={cn(
-                                "w-4 h-4 transition-all duration-300",
-                                isRTL ? "ml-4" : "mr-4"
-                              )}
+                              className="w-4 h-4 transition-all duration-300 me-4"
                               style={{ 
                                 color: isSubActive 
                                   ? currentTheme.color 
@@ -559,10 +552,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               <NeonIcon
                 icon={item.icon}
                 interactive
-                className={cn(
-                  "w-5 h-5 transition-all duration-300",
-                  isRTL ? "ml-4" : "mr-4"
-                )}
+                className="w-5 h-5 transition-all duration-300 me-4"
                 style={{ 
                   color: isActive 
                     ? currentTheme.color 
@@ -584,7 +574,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               </span>
 
               <span 
-                className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black transition-colors duration-300"
+                className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black transition-colors duration-300 rtl:hidden"
                 style={{ 
                   color: isHovered ? `${currentTheme.color}66` : undefined 
                 }}
@@ -616,7 +606,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                 <NeonIcon icon={Bot} className="w-5 h-5" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }} />
               </motion.span>
               <span className="font-space font-black text-xs tracking-[0.3em] uppercase text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors font-space">
-                {mounted ? (isRTL ? 'الـ Coach' : 'Coach') : 'Coach'}
+                {mounted ? (isRTL ? 'المساعد' : 'Coach') : 'Coach'}
               </span>
             </div>
           </button>

@@ -2492,15 +2492,15 @@ const { progress, isInRedZone } = useMemo(() => {
                                         <div className="flex items-center gap-2">
                                           {isMemberOwner ? (
                                             <span className="px-1.5 py-0.5 text-[8px] font-black tracking-widest bg-amber-950/30 border border-amber-500/30 text-amber-400 rounded-md">
-                                              👑 OWNER
+                                              {isRTL ? '👑 مالك' : '👑 OWNER'}
                                             </span>
                                           ) : isMemberCoAdmin ? (
                                             <span className="px-1.5 py-0.5 text-[8px] font-black tracking-widest bg-teal-950/30 border border-teal-500/30 text-teal-400 rounded-md">
-                                              CO-ADMIN
+                                              {isRTL ? 'مشرف' : 'CO-ADMIN'}
                                             </span>
                                           ) : (
                                             <span className="px-1.5 py-0.5 text-[8px] font-black tracking-widest bg-zinc-900 border border-white/10 text-zinc-400 rounded-md">
-                                              MEMBER
+                                              {isRTL ? 'عضو' : 'MEMBER'}
                                             </span>
                                           )}
                                         </div>
