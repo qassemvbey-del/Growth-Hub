@@ -379,6 +379,18 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
     }
   }, [mounted])
 
+  useEffect(() => {
+    const handleRefresh = () => {
+      fetchMissions()
+    }
+    window.addEventListener('refresh-goals', handleRefresh)
+    window.addEventListener('goal-created', handleRefresh)
+    return () => {
+      window.removeEventListener('refresh-goals', handleRefresh)
+      window.removeEventListener('goal-created', handleRefresh)
+    }
+  }, [])
+
   // Handle auto-join URL param (?join=CODE)
   useEffect(() => {
     if (mounted) {

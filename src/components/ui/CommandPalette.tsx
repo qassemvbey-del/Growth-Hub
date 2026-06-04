@@ -180,7 +180,8 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={onClose}
-              className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm"
+              // className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm"
+              className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm"
             />
 
             {/* Modal Container */}
@@ -189,7 +190,8 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.95, y: -20, opacity: 0 }}
               className={cn(
-                "w-full max-w-2xl bg-[#09090b]/95 border-2 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden relative z-50",
+                // "w-full max-w-2xl bg-[#09090b]/95 border-2 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden relative z-50",
+                "w-full max-w-2xl bg-[#09090b]/95 border-2 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden relative z-[101]",
                 isRTL ? "text-right" : "text-left"
               )}
               style={{ 

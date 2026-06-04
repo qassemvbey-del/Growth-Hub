@@ -450,6 +450,7 @@ interface GrowthContextType {
   isTourActive: boolean
   setIsTourActive: (active: boolean) => void
   restartTour: () => void
+  fetchGoals: () => Promise<void>
   refreshProfile: () => Promise<void>
   t: (key: keyof typeof TRANSLATIONS['en']) => string
   mounted: boolean
@@ -647,6 +648,12 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
     setIsTourActive(true)
     setTutorialActive(true)
     router.push('/goals')
+  }
+
+  const fetchGoals = async () => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('refresh-goals'))
+    }
   }
   // const [lastAiMessage, setLastAiMessage] = useState('SYSTEM_ONLINE // STANDING_BY')
   const [lastAiMessage, setLastAiMessage] = useState('System Online — Standing By')
@@ -1181,6 +1188,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
 
               if (isNewUser || (!countError && count === 0)) {
                 await generateHelpGoal(user.id)
+                await fetchGoals()
                 setTutorialActive(true)
                 setIsTourActive(true)
                 if (typeof window !== 'undefined') {
@@ -1239,6 +1247,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
               const guestGoals = guestGoalsStr ? JSON.parse(guestGoalsStr) : []
               if (guestGoals.length === 0) {
                 await generateHelpGoal('guest')
+                await fetchGoals()
                 setTutorialActive(true)
                 setIsTourActive(true)
                 if (typeof window !== 'undefined') {
@@ -1322,6 +1331,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
       tutorialActive, setTutorialActive,
       isTourActive, setIsTourActive,
       restartTour,
+      fetchGoals,
       refreshProfile,
       t,
       mounted,

@@ -53,6 +53,18 @@ export default function Dashboard() {
     }
   }, [mounted])
 
+  useEffect(() => {
+    const handleRefresh = () => {
+      fetchDashboardMissions()
+    }
+    window.addEventListener('refresh-goals', handleRefresh)
+    window.addEventListener('goal-created', handleRefresh)
+    return () => {
+      window.removeEventListener('refresh-goals', handleRefresh)
+      window.removeEventListener('goal-created', handleRefresh)
+    }
+  }, [])
+
   const playBlip = () => {
     if (typeof window !== 'undefined') {
       const audio = new Audio('/sounds/blip.mp3')
