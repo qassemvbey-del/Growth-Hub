@@ -67,25 +67,39 @@ const getRankColor = (rank?: string) => {
 }
 
 function WorkspaceLoader({ isRTL, rank: propRank }: { isRTL: boolean; rank?: string }) {
-  const [cachedRank, setCachedRank] = useState<string | undefined>(undefined)
-  const [iconIndex, setIconIndex] = useState(0)
-
-  useEffect(() => {
+  // const [cachedRank, setCachedRank] = useState<string | undefined>(undefined)
+  // useEffect(() => {
+  //   if (typeof window !== 'undefined') {
+  //     const cached = localStorage.getItem('cached_profile')
+  //     if (cached) {
+  //       try {
+  //         const prof = JSON.parse(cached)
+  //         if (prof?.rank) {
+  //           setCachedRank(prof.rank)
+  //         }
+  //       } catch (e) {}
+  //     }
+  //   }
+  // }, [])
+  const [cachedRank] = useState<string>(() => {
     if (typeof window !== 'undefined') {
+      const directRank = localStorage.getItem('cached_profile_rank')
+      if (directRank) return directRank
+
       const cached = localStorage.getItem('cached_profile')
       if (cached) {
         try {
           const prof = JSON.parse(cached)
-          if (prof?.rank) {
-            setCachedRank(prof.rank)
-          }
+          if (prof?.rank) return prof.rank
         } catch (e) {}
       }
     }
-  }, [])
+    return 'SILVER'
+  })
 
   const rank = propRank || cachedRank || 'SILVER'
   const rankColor = getRankColor(rank)
+  const [iconIndex, setIconIndex] = useState(0)
 
   // Cycle rapidly (every 150ms) through Lucide icons: Target, Zap, Swords, Flame, Hexagon
   const icons = [Target, Zap, Briefcase, Flame, Rocket]

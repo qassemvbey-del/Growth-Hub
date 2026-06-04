@@ -109,29 +109,31 @@ export default function TaskDrawerMetadata({
           📅 {endDate || (isRTL ? 'غير محدد' : 'NOT SET')}
         </span> */}
         {(() => {
-          const hasDate = !!endDate
+          // const hasDate = !!endDate
+          // const isOverdue = (() => {
+          //   if (!endDate || task.is_completed) return false
+          //   const tDate = new Date(endDate)
+          //   tDate.setHours(0,0,0,0)
+          //   const todayDate = new Date()
+          //   todayDate.setHours(0,0,0,0)
+          //   return tDate < todayDate
+          // })()
+          // const displayVal = hasDate ? formatDeadline(endDate) : (isRTL ? 'تحديد موعد' : 'SET DEADLINE')
+          const taskDeadline = endDate || task.metadata?.endDate || task.metadata?.dueDate || task.deadline || task.metadata?.deadline
+          const hasDate = !!taskDeadline && taskDeadline !== "NOT SET" && taskDeadline !== "SET DEADLINE" && taskDeadline !== "غير محدد" && taskDeadline !== "تحديد موعد"
           const isOverdue = (() => {
-            if (!endDate || task.is_completed) return false
-            const tDate = new Date(endDate)
+            if (!hasDate || task.is_completed) return false
+            const tDate = new Date(taskDeadline)
             tDate.setHours(0,0,0,0)
             const todayDate = new Date()
             todayDate.setHours(0,0,0,0)
             return tDate < todayDate
           })()
-          const displayVal = hasDate ? formatDeadline(endDate) : (isRTL ? 'تحديد موعد' : 'SET DEADLINE')
+          const displayVal = hasDate ? formatDeadline(taskDeadline) : (isRTL ? 'تحديد موعد' : 'SET DEADLINE')
+
           return (
             <div className="flex items-center gap-2 relative z-[9999]">
               <label 
-                onClick={(e) => {
-                  const input = e.currentTarget.querySelector('input')
-                  if (input && typeof input.showPicker === 'function') {
-                    try {
-                      input.showPicker()
-                    } catch (err) {
-                      console.warn('Native showPicker failed, relying on click/focus:', err)
-                    }
-                  }
-                }}
                 className={cn(
                   "relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono font-bold border cursor-pointer transition-all shrink-0 select-none",
                   isOverdue
@@ -139,18 +141,25 @@ export default function TaskDrawerMetadata({
                     : "border-white/5 bg-white/[0.02] text-white/70 hover:bg-white/[0.05] hover:text-white"
                 )}
               >
-                <Calendar className="w-3.5 h-3.5 pointer-events-none" />
-                <span className="pointer-events-none">{displayVal}</span>
+                <Calendar className="w-3.5 h-3.5" />
+                <span>{displayVal}</span>
                 <input
                   type="date"
-                  value={endDate ? endDate.substring(0, 10) : ''}
+                  value={taskDeadline ? String(taskDeadline).substring(0, 10) : ''}
                   onChange={async (e) => {
                     const selectedDate = e.target.value
                     const updatedMetadata = { ...task.metadata, endDate: selectedDate }
                     await updateTask(task.id, { metadata: updatedMetadata })
                   }}
-                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-[9999]"
-                  onClick={(e) => e.stopPropagation()}
+                  className="absolute inset-0 z-10 w-full h-full opacity-0 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (typeof e.currentTarget.showPicker === 'function') {
+                      try {
+                        e.currentTarget.showPicker()
+                      } catch (err) {}
+                    }
+                  }}
                 />
               </label>
 
@@ -158,7 +167,7 @@ export default function TaskDrawerMetadata({
                 <button
                   type="button"
                   onClick={() => {
-                    const cleanDate = endDate.replace(/-/g, '').substring(0, 8)
+                    const cleanDate = String(taskDeadline).replace(/-/g, '').substring(0, 8)
                     const dates = `${cleanDate}T230000/${cleanDate}T235900`
                     const title = encodeURIComponent(`[Growth Hub] ${task.title}`)
                     const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://playgrowthhub.com'
@@ -166,7 +175,7 @@ export default function TaskDrawerMetadata({
                     const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=Growth_Hub`
                     window.open(googleUrl, '_blank')
                   }}
-                  className="p-1.5 hover:bg-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors"
+                  className="p-1.5 hover:bg-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors cursor-pointer"
                   title="Export deadline to Google Calendar"
                 >
                   <CalendarPlus size={14} />
