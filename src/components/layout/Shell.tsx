@@ -672,7 +672,9 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
       if (inboxOpen) {
         const clickedInsideDesktop = desktopInboxRef.current?.contains(target)
         const clickedInsideMobile = mobileInboxRef.current?.contains(target)
-        if (!clickedInsideDesktop && !clickedInsideMobile) {
+        // Also check if the click is inside the mobile bottom sheet (which is portaled to fixed position)
+        const clickedInsideBottomSheet = (target as Element)?.closest?.('[data-inbox-sheet]')
+        if (!clickedInsideDesktop && !clickedInsideMobile && !clickedInsideBottomSheet) {
           setInboxOpen(false)
         }
       }
@@ -868,7 +870,8 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
             {/* 🔔 Notifications */}
             <div className="relative" ref={mobileInboxRef}>
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation()
                   setInboxOpen(!inboxOpen)
                   setAiOpen(false)
                   playBlip()

@@ -224,6 +224,7 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            data-inbox-sheet
             className="fixed bottom-0 left-0 right-0 h-[70vh] w-full bg-white/95 dark:bg-[#050505]/95 backdrop-blur-2xl z-[250] rounded-t-3xl border-t border-black/10 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden md:hidden"
           >
             {/* Drag Handle */}

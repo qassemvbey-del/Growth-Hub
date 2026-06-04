@@ -280,7 +280,7 @@ export default function GlobalCreateGoalModal() {
               <label className="text-[10px] font-black tracking-widest uppercase text-zinc-400">
                 {isRTL ? 'الموعد النهائي (اختياري)' : 'Deadline (Optional)'}
               </label>
-              <div className="relative w-full">
+              <div className="relative w-full" onClick={(e) => e.stopPropagation()}>
                 {/* Styled Wrapper Button */}
                 <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--text-primary)] hover:bg-[var(--card-hover)] transition-colors cursor-pointer w-full">
                   <Calendar className="w-4 h-4 shrink-0" style={{ color: currentTheme.color }} />

@@ -717,12 +717,12 @@ export default function Dashboard() {
                  >
                    <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: isInRedZone ? '#ef4444' : customColor }} />
 
-                   <div className="flex justify-between items-start gap-1.5 sm:gap-2">
+                   <div className="flex justify-between items-start gap-1.5 sm:gap-2 min-w-0">
                       {/* Commented out per rule "Never delete code, only comment it out" */}
                       {/* <h3 className="font-black uppercase tracking-wide truncate max-w-[120px] md:max-w-none text-sm md:text-base text-zinc-100 font-space">
                        {mission.title}
                       </h3> */}
-                      <h3 className="uppercase tracking-wide truncate max-w-[140px] md:max-w-none text-sm md:text-base font-medium text-zinc-100 font-space">
+                      <h3 className="uppercase tracking-wide truncate min-w-0 flex-1 text-sm md:text-base font-medium text-zinc-100 font-space">
                        {mission.title}
                       </h3>
                     <span 

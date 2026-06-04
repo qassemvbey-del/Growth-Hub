@@ -141,7 +141,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
           {/* <h3 className="text-base md:text-lg font-space font-black uppercase text-[var(--text-primary)] truncate mt-1">
             {mission.title}
           </h3> */}
-          <h3 className="text-sm md:text-base font-medium font-space uppercase text-[var(--text-primary)] truncate max-w-[140px] md:max-w-none mt-1">
+          <h3 className="text-sm font-semibold font-space uppercase text-[var(--text-primary)] truncate min-w-0 mt-1">
             {mission.title}
           </h3>
 
@@ -1069,8 +1069,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
             {typeFilter !== 'squad' && (
               <button
                 onClick={() => { playBlip(); setShowCreate(true); }}
-                className="flex md:hidden flex-row items-center justify-center gap-1.5 h-11 px-4 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-[0.97] shadow-lg shrink-0"
-                style={{ backgroundColor: currentTheme.color, color: '#00', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
+                className="flex md:hidden flex-row items-center justify-center gap-1.5 h-11 px-4 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-[0.97] shadow-lg shrink-0 text-white"
+                style={{ backgroundColor: currentTheme.color, boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
                 <Plus className="text-[16px] leading-none" />
                 {isRTL ? 'إنشاء' : 'Create'}
@@ -1089,19 +1089,19 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
               </button>
               <button
                 onClick={() => { playBlip(); setShowCreate(true); }}
-                className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-12 md:h-11 min-h-[48px] md:min-h-0 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-[0.97] shadow-lg"
-                style={{ backgroundColor: currentTheme.color, color: '#00', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
+                className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-12 md:h-11 min-h-[48px] md:min-h-0 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-[0.97] shadow-lg text-white"
+                style={{ backgroundColor: currentTheme.color, boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
                 <Plus className="text-[16px] leading-none" />
                 {isRTL ? 'أنشئ هدف جماعي' : 'CREATE SQUAD GOAL'}
               </button>
             </div>
           ) : (
-            /* Desktop-only CTA */
+            /* Desktop-only CTA — hidden on mobile since a mobile btn is already in header */
             <button
               onClick={() => { playBlip(); setShowCreate(true); }}
-              className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg cursor-pointer"
-              style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
+              className="hidden md:flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg cursor-pointer text-white"
+              style={{ backgroundColor: currentTheme.color, boxShadow: `0 4px 20px ${currentTheme.color}33` }}
             >
               <Plus className="w-4 h-4" />
               {typeFilter === 'solo' ? (isRTL ? 'أنشئ هدفاً شخصياً' : 'CREATE GOAL') : (isRTL ? 'أنشئ هدفاً' : 'Create Goal')}
