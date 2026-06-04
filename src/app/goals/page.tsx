@@ -137,7 +137,11 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
             )}
           </div>
 
-          <h3 className="text-base md:text-lg font-space font-black uppercase text-[var(--text-primary)] truncate mt-1">
+          {/* Commented out per rule "Never delete code, only comment it out" */}
+          {/* <h3 className="text-base md:text-lg font-space font-black uppercase text-[var(--text-primary)] truncate mt-1">
+            {mission.title}
+          </h3> */}
+          <h3 className="text-sm md:text-base font-medium font-space uppercase text-[var(--text-primary)] truncate max-w-[140px] md:max-w-none mt-1">
             {mission.title}
           </h3>
 
@@ -484,8 +488,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
         setJoinStatus('success')
         showToast(
           isRTL
-            ? 'تم إرسال طلب الانضمام // بانتظار موافقة القائد'
-            : 'JOIN REQUEST SUBMITTED // WAITING FOR OWNER APPROVAL',
+            ? 'تم إرسال طلب الانضمام، بانتظار موافقة القائد'
+            : 'Join request sent — waiting for the owner to approve',
           'success'
         )
         playDeploy()
@@ -1042,11 +1046,11 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 )}
                 <h1 className="text-2xl md:text-6xl font-black font-space tracking-wider uppercase text-black dark:text-white leading-none truncate">
                   {typeFilter === 'solo' ? (
-                    <>{isRTL ? 'أهدافي' : 'Solo'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الشخصية' : ' Goals'}</span></>
+                    <>{isRTL ? 'أهدافي' : 'Personal'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الشخصية' : ' Goals'}</span></>
                   ) : typeFilter === 'squad' ? (
-                    <>{isRTL ? 'عمليات' : 'Squad'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الفريق' : ' Goals'}</span></>
+                    <>{isRTL ? 'الأهداف' : 'Squad'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الجماعية' : ' Goals'}</span></>
                   ) : (
-                    <>{isRTL ? 'أهدافي' : 'Solo'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الشخصية' : ' Goals'}</span></>
+                    <>{isRTL ? 'لوحة' : 'Goal'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الأهداف' : ' Canvas'}</span></>
                   )}
                 </h1>
               </div>
@@ -1096,11 +1100,11 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
             /* Desktop-only CTA */
             <button
               onClick={() => { playBlip(); setShowCreate(true); }}
-              className="hidden md:flex flex-row items-center justify-center gap-2 w-full md:w-auto h-12 md:h-11 min-h-[48px] md:min-h-0 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-[0.97] shadow-lg"
-              style={{ backgroundColor: currentTheme.color, color: '#00', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
+              className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg cursor-pointer"
+              style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
             >
-              <Plus className="text-[16px] leading-none" />
-              {typeFilter === 'solo' ? (isRTL ? 'إنشاء هدف شخصي' : 'CREATE GOAL') : (isRTL ? 'إنشاء هدف' : 'Create Goal')}
+              <Plus className="w-4 h-4" />
+              {typeFilter === 'solo' ? (isRTL ? 'أنشئ هدفاً شخصياً' : 'CREATE GOAL') : (isRTL ? 'أنشئ هدفاً' : 'Create Goal')}
             </button>
           )}
         </motion.header>
@@ -1531,10 +1535,10 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 <>
                   <div className="space-y-2">
                     <h3 className="text-2xl font-black font-space tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
-                      No Solo Goals Yet
+                      {isRTL ? 'لا توجد أهداف بعد' : 'No Solo Goals Yet'}
                     </h3>
                     <p className="text-zinc-500 dark:text-zinc-600 text-sm font-space">
-                      Create your first personal goal to begin
+                      {isRTL ? 'أنشئ هدفك الشخصي الأول للبدء' : 'Create your first personal goal to begin'}
                     </p>
                   </div>
                   <button
@@ -1543,7 +1547,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
                   >
                     <Plus className="text-[16px] leading-none" />
-                    Create Goal
+                    {isRTL ? 'أنشئ هدفاً' : 'Create Goal'}
                   </button>
                 </>
               ) : typeFilter === 'squad' ? (
@@ -1551,10 +1555,10 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                   <div className="space-y-2 flex flex-col items-center justify-center select-none">
                     <Users2 className="text-5xl text-zinc-600 dark:text-zinc-500 mb-2 animate-pulse w-12 h-12" />
                     <h3 className="text-2xl font-black font-space tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
-                      No squad goals yet
+                      {isRTL ? 'لا توجد أهداف بعد' : 'No squad goals yet'}
                     </h3>
                     <p className="text-zinc-500 dark:text-zinc-600 text-sm font-space">
-                      Lead a squad or join one with an invite code
+                      {isRTL ? 'قُد فريقاً أو انضم لأحدها برمز دعوة' : 'Lead a squad or join one with an invite code'}
                     </p>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-4">
@@ -1563,7 +1567,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       className="flex flex-row items-center justify-center gap-2 h-11 px-6 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-95 shadow-lg cursor-pointer animate-pulse"
                     >
                       <Link className="text-[16px] leading-none" />
-                      Join with Code
+                      {isRTL ? 'انضم برمز' : 'Join with Code'}
                     </button>
                     <button
                       onClick={() => { playBlip(); setShowCreate(true); }}
@@ -1571,7 +1575,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
                     >
                       <Plus className="text-[16px] leading-none" />
-                      Create Squad Goal
+                      {isRTL ? 'أنشئ هدفاً جماعياً' : 'Create Team Goal'}
                     </button>
                   </div>
                 </>

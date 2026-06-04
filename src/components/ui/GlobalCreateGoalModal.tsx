@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, RefreshCw } from 'lucide-react'
+import { X, RefreshCw, Calendar } from 'lucide-react'
 import { useGrowth } from '@/context/GrowthContext'
 import { useToast } from '@/components/ui/Toast'
 import { useSound } from '@/context/SoundContext'
@@ -280,13 +280,24 @@ export default function GlobalCreateGoalModal() {
               <label className="text-[10px] font-black tracking-widest uppercase text-zinc-400">
                 {isRTL ? 'الموعد النهائي (اختياري)' : 'Deadline (Optional)'}
               </label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={e => setEndDate(e.target.value)}
-                className="w-full bg-white/[0.03] border border-white/10 focus:border-[var(--theme-color)] py-2.5 px-4 text-sm font-bold text-white outline-none transition-all rounded-md date-input-tactical"
-                style={{ colorScheme: 'dark', borderColor: 'rgba(255,255,255,0.08)', ['--theme-color' as any]: currentTheme.color }}
-              />
+              <div className="relative w-full">
+                {/* Styled Wrapper Button */}
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--text-primary)] hover:bg-[var(--card-hover)] transition-colors cursor-pointer w-full">
+                  <Calendar className="w-4 h-4 shrink-0" style={{ color: currentTheme.color }} />
+                  <span className="truncate">
+                    {endDate ? endDate : (isRTL ? 'اختر تاريخ الانتهاء' : 'Select deadline')}
+                  </span>
+                </div>
+
+                {/* Hidden native input date overlay */}
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={e => setEndDate(e.target.value)}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  style={{ colorScheme: 'dark' }}
+                />
+              </div>
             </div>
 
             {/* Pin to Dashboard */}

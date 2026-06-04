@@ -160,7 +160,11 @@ export default function SquadGoalsPage() {
             )}
           </div>
 
-          <h3 className="text-base md:text-lg font-space font-black uppercase text-[var(--text-primary)] truncate mt-1">
+          {/* Commented out per rule "Never delete code, only comment it out" */}
+          {/* <h3 className="text-base md:text-lg font-space font-black uppercase text-[var(--text-primary)] truncate mt-1">
+            {mission.title}
+          </h3> */}
+          <h3 className="text-sm md:text-base font-medium font-space uppercase text-[var(--text-primary)] truncate max-w-[140px] md:max-w-none mt-1">
             {mission.title}
           </h3>
 
@@ -621,12 +625,9 @@ export default function SquadGoalsPage() {
 
         setJoinStatus('success')
         showToast(
-          /* isRTL 
-            ? 'تم إرسال طلب الانضمام // بانتظار موافقة القائد' 
-            : 'JOIN REQUEST SUBMITTED // WAITING FOR OWNER APPROVAL', */
           isRTL 
-            ? 'طلب الانضمام اتبعت // مستنيين موافقة القائد' 
-            : 'JOIN REQUEST SUBMITTED // WAITING FOR OWNER APPROVAL',
+            ? 'تم إرسال طلب الانضمام، بانتظار موافقة القائد' 
+            : 'Join request sent — waiting for the owner to approve',
           'success'
         )
         playDeploy()
@@ -1229,11 +1230,11 @@ export default function SquadGoalsPage() {
                 )}
                 <h1 className="text-2xl md:text-6xl font-black font-space tracking-wider uppercase text-black dark:text-white leading-none truncate">
                   {typeFilter === 'solo' ? (
-                    <>{isRTL ? 'Goals' : 'Personal'}<span style={{ color: currentTheme.color }}>{isRTL ? ' شخصية' : ' Goals'}</span></>
+                    <>{isRTL ? 'أهدافي' : 'Personal'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الشخصية' : ' Goals'}</span></>
                   ) : typeFilter === 'squad' ? (
-                    <>{isRTL ? 'Goals' : 'Squad'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Squad' : ' Goals'}</span></>
+                    <>{isRTL ? 'الأهداف' : 'Squad'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الجماعية' : ' Goals'}</span></>
                   ) : (
-                    <>{isRTL ? 'لوحة' : 'Goal'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الـ Goals' : ' Canvas'}</span></>
+                    <>{isRTL ? 'لوحة' : 'Goal'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الأهداف' : ' Canvas'}</span></>
                   )}
                 </h1>
 
@@ -1286,7 +1287,7 @@ export default function SquadGoalsPage() {
                 className="flex flex-row items-center justify-center gap-1 sm:gap-2 w-full md:w-auto h-11 px-2 sm:px-6 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-[9px] min-[375px]:text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-all duration-300 active:scale-[0.97] shadow-lg cursor-pointer animate-pulse"
               >
                 <LinkIcon className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" />
-                {isRTL ? 'ادخل في Goal' : 'JOIN GOAL'}
+                {isRTL ? 'انضم لهدف' : 'JOIN GOAL'}
               </button>
               <button
                 onClick={() => { playBlip(); setShowCreate(true); }}
@@ -1294,7 +1295,7 @@ export default function SquadGoalsPage() {
                 style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
                 <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                {isRTL ? 'اعمل Squad Goal' : 'CREATE SQUAD GOAL'}
+                {isRTL ? 'أنشئ هدفاً جماعياً' : 'CREATE SQUAD GOAL'}
               </button>
             </div>
           ) : (
@@ -1773,10 +1774,10 @@ export default function SquadGoalsPage() {
                 <>
                   <div className="space-y-2">
                     <h3 className="text-2xl font-black font-space tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
-                      No Solo Goals Yet
+                      {isRTL ? 'لا توجد أهداف بعد' : 'No Solo Goals Yet'}
                     </h3>
                     <p className="text-zinc-500 dark:text-zinc-600 text-sm font-space">
-                      Create your first personal goal to begin
+                      {isRTL ? 'أنشئ هدفك الشخصي الأول للبدء' : 'Create your first personal goal to begin'}
                     </p>
                   </div>
                   <button
@@ -1785,7 +1786,7 @@ export default function SquadGoalsPage() {
                     style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
                   >
                     <Plus className="w-4 h-4 text-black" />
-                    Create Goal
+                    {isRTL ? 'أنشئ هدفاً' : 'Create Goal'}
                   </button>
                 </>
               ) : typeFilter === 'squad' ? (
@@ -1793,10 +1794,10 @@ export default function SquadGoalsPage() {
                   <div className="space-y-2 flex flex-col items-center justify-center select-none">
                     <Users className="w-12 h-12 text-zinc-500 mb-2 animate-pulse" />
                     <h3 className="text-2xl font-black font-space tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
-                      No team goals yet
+                      {isRTL ? 'لا توجد أهداف بعد' : 'No team goals yet'}
                     </h3>
                     <p className="text-zinc-500 dark:text-zinc-600 text-sm font-space">
-                      Lead a team or join one with an invite code
+                      {isRTL ? 'قُد فريقاً أو انضم لأحدها برمز دعوة' : 'Lead a team or join one with an invite code'}
                     </p>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-4">
@@ -1805,7 +1806,7 @@ export default function SquadGoalsPage() {
                       className="flex flex-row items-center justify-center gap-2 h-11 px-6 rounded-sm border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-95 shadow-lg cursor-pointer animate-pulse"
                     >
                       <LinkIcon className="w-4 h-4" />
-                      Join with Code
+                      {isRTL ? 'انضم برمز' : 'Join with Code'}
                     </button>
                     <button
                       onClick={() => { playBlip(); setShowCreate(true); }}
@@ -1813,7 +1814,7 @@ export default function SquadGoalsPage() {
                       style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
                     >
                       <Plus className="w-4 h-4 text-black" />
-                      Create Team Goal
+                      {isRTL ? 'أنشئ هدفاً جماعياً' : 'Create Team Goal'}
                     </button>
                   </div>
                 </>

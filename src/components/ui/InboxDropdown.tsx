@@ -57,20 +57,24 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
     onClose()
   }
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -10, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -10, scale: 0.95 }}
-      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-      className={cn(
-        "fixed inset-0 w-full h-full max-w-full bg-white/95 dark:bg-[#050505]/95 backdrop-blur-2xl z-[250] flex flex-col overflow-hidden md:absolute md:inset-auto md:top-full md:mt-4 md:w-[90vw] md:max-w-[360px] md:h-auto md:rounded-2xl border border-black/10 dark:border-white/10 shadow-[0_15px_50px_rgba(0,0,0,0.5)]",
-        isRTL ? "md:left-0 md:right-auto" : "md:right-0 md:left-auto"
-      )}
-      style={{ 
-        boxShadow: `0 0 30px ${themeColor}15, 0 15px 50px rgba(0,0,0,0.5)`
-      }}
-    >
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'deadline_alert':
+      case 'overdue_task':
+        return <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
+      case 'squad_join_request':
+        return <UserPlus className="w-5 h-5 text-blue-500 shrink-0" />
+      case 'squad_member_completed_task':
+        return <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+      case 'rank_up':
+        return <Trophy className="w-5 h-5 text-orange-500 shrink-0" />
+      default:
+        return <Bell className="w-5 h-5 text-zinc-500 shrink-0" />
+    }
+  }
+
+  const renderContent = () => (
+    <>
       <div className="px-5 py-4 border-b border-black/5 dark:border-white/5 flex flex-col gap-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -130,7 +134,7 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
 
       {/* Invisible scrollable container with max-h-96 */}
       <div 
-        className="flex-1 md:max-h-96 overflow-y-auto divide-y divide-black/5 dark:divide-white/5"
+        className="flex-1 overflow-y-auto divide-y divide-black/5 dark:divide-white/5"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         <style>{`
@@ -141,74 +145,48 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
         `}</style>
         <AnimatePresence initial={false}>
           {filteredReports.length === 0 ? (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="py-12 flex flex-col items-center justify-center gap-3 opacity-20"
-            >
+            <div className="py-12 flex flex-col items-center justify-center gap-3 opacity-20">
               <Inbox className="text-4xl w-10 h-10" />
               <p className="text-[10px] font-space font-black uppercase tracking-widest text-center px-4">
                 {isRTL 
                   ? `لا يوجد إشعارات في قسم ${filter === 'all' ? 'الكل' : filter === 'unread' ? 'غير المقروء' : 'المقروء'}` 
                   : `NO REPORTS IN ${filter.toUpperCase()}`}
               </p>
-            </motion.div>
+            </div>
           ) : (
             filteredReports.map(report => {
               const bodyText = report.content?.text || (typeof report.content === 'string' ? report.content : '')
               const cleanBody = bodyText.replace(/\[(.*?)\]/g, '$1') // Strip brackets
 
-              const getIcon = () => {
-                switch (report.type) {
-                  case 'deadline_alert':
-                  case 'overdue_task':
-                    return <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
-                  case 'squad_join_request':
-                    return <UserPlus className="w-5 h-5 text-blue-500 shrink-0" />
-                  case 'squad_member_completed_task':
-                    return <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                  case 'rank_up':
-                    return <Trophy className="w-5 h-5 text-orange-500 shrink-0" />
-                  default:
-                    return <Bell className="w-5 h-5 text-zinc-500 shrink-0" />
-                }
-              }
-
               return (
-                <motion.button
+                <div
                   key={report.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
                   onClick={() => handleNotificationClick(report)}
                   className={cn(
-                    "w-full flex gap-3 p-3 hover:bg-zinc-800/50 transition-colors border-b border-zinc-800/50 last:border-0",
-                    isRTL ? "text-right flex-row-reverse" : "text-left flex-row",
-                    !report.is_read && "border-l-2 border-orange-500 bg-orange-500/5"
+                    "flex items-start gap-3 p-3 rounded-xl hover:bg-[var(--card-hover)] cursor-pointer transition-colors",
+                    !report.is_read && "border-s-2 border-orange-500 bg-orange-500/5"
                   )}
                 >
-                  {getIcon()}
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex justify-between items-start gap-2">
-                      <span className="text-sm font-bold text-zinc-100 uppercase truncate">
-                        {stripEmojis(report.title)}
-                      </span>
-                      <span className="text-xs text-zinc-500 whitespace-nowrap">
+                  <div className="text-xl mt-0.5">{getIcon(report.type)}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm font-medium truncate text-zinc-100">{stripEmojis(report.title)}</p>
+                      <span className="text-xs text-[var(--text-muted)] shrink-0 ms-2">
                         {new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
-                    <p className="line-clamp-2 text-sm text-zinc-400">
+                    <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">
                       {stripEmojis(cleanBody || report.title)}
                     </p>
                   </div>
-                </motion.button>
+                </div>
               )
             })
           )}
         </AnimatePresence>
       </div>
 
-      <div className="px-5 py-3.5 border-t border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] flex justify-center">
+      <div className="px-5 py-3.5 border-t border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] flex justify-center shrink-0">
         <button 
           onClick={() => {
             router.push('/notifications')
@@ -220,6 +198,61 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
-    </motion.div>
+    </>
+  )
+
+  return (
+    <>
+      {/* Mobile Bottom Sheet Backdrop */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[240] md:hidden cursor-pointer"
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Bottom Sheet */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed bottom-0 left-0 right-0 h-[70vh] w-full bg-white/95 dark:bg-[#050505]/95 backdrop-blur-2xl z-[250] rounded-t-3xl border-t border-black/10 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden md:hidden"
+          >
+            {/* Drag Handle */}
+            <div className="w-12 h-1.5 bg-zinc-300 dark:bg-zinc-800 rounded-full mx-auto my-3 shrink-0" />
+            {renderContent()}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop Floating Dropdown */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+            className={cn(
+              "hidden md:flex md:flex-col md:absolute md:top-full md:mt-4 md:w-[90vw] md:max-w-[360px] md:h-auto md:rounded-2xl border border-black/10 dark:border-white/10 shadow-[0_15px_50px_rgba(0,0,0,0.5)] z-[250]",
+              isRTL ? "md:left-0 md:right-auto" : "md:right-0 md:left-auto"
+            )}
+            style={{ 
+              boxShadow: `0 0 30px ${themeColor}15, 0 15px 50px rgba(0,0,0,0.5)`
+            }}
+          >
+            {renderContent()}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   )
 }
