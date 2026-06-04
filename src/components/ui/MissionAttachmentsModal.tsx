@@ -14,17 +14,19 @@ import { cn } from '@/lib/utils'
 // ── Types ──────────────────────────────────────────────────────────────────
 interface Attachment {
   id: string
-  // mission_id: string
   goal_id: string
   user_id: string
   name: string
   url: string
   file_type: string
   created_at: string
+  profiles?: {
+    full_name: string | null
+    avatar_url: string | null
+  } | null
 }
 
 interface Props {
-  // missionId: string
   goalId: string
   missionTitle: string
   themeColor: string
@@ -34,6 +36,7 @@ interface Props {
   loading: boolean
   onClose: () => void
   onCountChange?: (count: number) => void
+  canAddAttachment?: boolean
 }
 
 // ── Extract Google Drive File ID ───────────────────────────────────────────
@@ -198,6 +201,7 @@ const MissionAttachmentsModal = ({
   loading,
   onClose,
   onCountChange,
+  canAddAttachment = true,
 }: Props) => {
   const supabase = createClient()
   // const { isRTL } = useGrowth()
@@ -718,26 +722,40 @@ const MissionAttachmentsModal = ({
                               {att.name}
                             </p>
                             <p className="font-space text-[8px] uppercase tracking-widest text-zinc-500 dark:text-white/25 mt-0.5">
-                              {/* {att.file_type.toUpperCase()} // {new Date(att.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} */}
                               {att.file_type.toUpperCase()} - {new Date(att.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                             </p>
+                            {att.profiles && (
+                              <div className="flex items-center gap-1.5 mt-1.5">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={att.profiles.avatar_url || '/avatars/omar.svg'}
+                                  alt={att.profiles.full_name || 'User'}
+                                  className="w-4 h-4 rounded-full border border-white/10"
+                                />
+                                <span className="text-[8px] text-zinc-400 font-space uppercase">
+                                  {att.profiles.full_name || 'Operator'}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <button
-                            onClick={(e) => handleDelete(att.id, e)}
-                            disabled={deletingId === att.id}
-                            className="w-7 h-7 flex items-center justify-center border border-zinc-200 dark:border-white/5 text-zinc-500 dark:text-white/25 hover:border-red-500/60 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-lg cursor-pointer"
-                          >
-                            {deletingId === att.id ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                            ) : (
-                              <X className="text-xs w-3 h-3" />
-                            )}
-                          </button>
-                        </div>
+                        {canAddAttachment && (
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              onClick={(e) => handleDelete(att.id, e)}
+                              disabled={deletingId === att.id}
+                              className="w-7 h-7 flex items-center justify-center border border-zinc-200 dark:border-white/5 text-zinc-500 dark:text-white/25 hover:border-red-500/60 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-lg cursor-pointer"
+                            >
+                              {deletingId === att.id ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <X className="text-xs w-3 h-3" />
+                              )}
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       {/* Hover subtle indicators */}
@@ -748,7 +766,7 @@ const MissionAttachmentsModal = ({
                     </div>
                   )
                 })}
-               </div>
+              </div>
             )}
           </div>
 

@@ -538,7 +538,7 @@ export default function MissionDetailPage() {
     setModalLoading(true)
     const { data } = await supabase
       .from('goal_attachments')
-      .select('*')
+      .select('*, profiles(full_name, avatar_url)')
       .eq('goal_id', id)
       .order('created_at', { ascending: false })
     if (data) {
@@ -2384,6 +2384,12 @@ const { progress, isInRedZone } = useMemo(() => {
             setActiveAttachments([])
           }}
           onCountChange={count => setAttachmentCount(count)}
+          canAddAttachment={(() => {
+            const myMemberRow = squadMembers.find((m: any) => m.id === profile?.id || m.user_id === profile?.id)
+            const isOwner = mission?.user_id === profile?.id || myMemberRow?.role === 'owner'
+            const isMember = !!myMemberRow
+            return !!(isOwner || isMember)
+          })()}
         />
       )}
 

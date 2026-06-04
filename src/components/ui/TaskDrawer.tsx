@@ -82,6 +82,10 @@ export default function TaskDrawer({
   const { startFocus, startTimer, isActive, isPaused, taskId: activePomodoroTaskId, pause, resume, updateConfig, breakDuration } = usePomodoro()
   const isCurrentTaskFocus = activePomodoroTaskId === task.id
   const isCurrentFocusActive = isCurrentTaskFocus && isActive && !isPaused
+ 
+  const isGoalOwner = !!(profile?.id && missionOwnerId && profile.id === missionOwnerId)
+  const isAssignee = !!(profile?.id && task?.assigned_to && profile.id === task.assigned_to)
+  const canAddAttachment = !isSquad || isGoalOwner || isAssignee
 
   useEffect(() => {
     setIsTaskDrawerOpen(true)
@@ -537,7 +541,17 @@ export default function TaskDrawer({
             else if (mimeType.includes('image')) fileType = 'image'
 
             const attachments = task.metadata?.attachments || []
-            const newAttachment = { id: fileId, name: fileName, url: fileUrl, type: fileType }
+            const newAttachment = {
+              id: fileId,
+              name: fileName,
+              url: fileUrl,
+              type: fileType,
+              uploaded_by: {
+                id: profile?.id || 'unknown',
+                name: profile?.full_name || 'Operator',
+                avatar_url: profile?.avatar_url || '/avatars/omar.svg'
+              }
+            }
             const updatedAttachments = [newAttachment, ...attachments]
             const updatedMetadata = { ...task.metadata, attachments: updatedAttachments }
             await updateTask(task.id, { metadata: updatedMetadata })
@@ -548,6 +562,20 @@ export default function TaskDrawer({
 
       const picker = pickerBuilder.build()
       picker.setVisible(true)
+    }
+  }
+
+  const handleDisconnectDrive = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (confirm(isRTL ? 'هل تريد إلغاء ربط جوجل درايف؟' : 'Do you want to unlink Google Drive?')) {
+      localStorage.removeItem('gd_access_token')
+      localStorage.removeItem('gd_expires_at')
+      setIsDriveConnected(false)
+      if (profile && profile.id !== 'guest') {
+        const sb = createClient()
+        await sb.from('profiles').update({ drive_connected: false }).eq('id', profile.id)
+        await refreshProfile()
+      }
     }
   }
 
@@ -568,7 +596,17 @@ export default function TaskDrawer({
     if (!name || !url) return
     setIsAddingLink(true)
     const fileType = detectFileType(url)
-    const newAttachment = { id: `manual_${Date.now()}`, name, url, type: fileType }
+    const newAttachment = {
+      id: `manual_${Date.now()}`,
+      name,
+      url,
+      type: fileType,
+      uploaded_by: {
+        id: profile?.id || 'unknown',
+        name: profile?.full_name || 'Operator',
+        avatar_url: profile?.avatar_url || '/avatars/omar.svg'
+      }
+    }
     const attachments = task.metadata?.attachments || []
     const updatedAttachments = [newAttachment, ...attachments]
     const updatedMetadata = { ...task.metadata, attachments: updatedAttachments }
@@ -1033,64 +1071,81 @@ export default function TaskDrawer({
               {isRTL ? 'المرفقات - Attachments' : 'Drive Attachments'}
              </h3>
             
-            <div className="space-y-2">
-              <button
-                onClick={handleGoogleDrivePicker}
-                className="w-full flex items-center gap-2 py-1.5 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/90"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/Google_Drive_icon_(2020).svg" alt="Drive" className="w-3.5 h-3.5 shrink-0" />
-                <span className="font-medium tracking-wide uppercase">{isRTL ? 'جوجل درايف' : 'Google Drive'}</span>
-                <span className="ml-auto text-[10px] text-zinc-500 font-mono">
-                  {isDriveConnected ? 'Open' : 'Connect'}
-                </span>
-              </button>
-
-              <button
-                onClick={() => setShowManualLink(!showManualLink)}
-                className="w-full flex items-center gap-2 py-1.5 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/40 hover:text-white/70"
-              >
-                <LinkIcon className="w-3.5 h-3.5 shrink-0" />
-                <span className="font-medium tracking-wide uppercase">{isRTL ? 'إضافة رابط يدوياً' : 'Add Manual Link'}</span>
-                <span className="ml-auto text-[10px] font-mono">{showManualLink ? '▲' : '▼'}</span>
-              </button>
-
-              <AnimatePresence>
-                {showManualLink && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="flex flex-col gap-2 overflow-hidden"
+            {canAddAttachment && (
+              <div className="space-y-2">
+                <div className="w-full flex items-center justify-between gap-2 py-1.5 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 font-space text-xs">
+                  <button
+                    onClick={handleGoogleDrivePicker}
+                    className="flex items-center gap-2 flex-1 text-left cursor-pointer text-white/90"
                   >
-                    <input
-                      type="text"
-                      placeholder={isRTL ? 'اسم المرفق...' : 'ATTACHMENT_NAME...'}
-                      value={manualLinkName}
-                      onChange={e => setManualLinkName(e.target.value)}
-                      className="w-full bg-zinc-900/80 border border-white/8 py-2.5 px-4 font-space text-xs font-black text-white uppercase tracking-widest outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
-                    />
-                    <div className="flex gap-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/Google_Drive_icon_(2020).svg" alt="Drive" className="w-3.5 h-3.5 shrink-0" />
+                    <span className="font-medium tracking-wide uppercase">
+                      {isDriveConnected ? (isRTL ? 'إضافة من درايف' : 'ADD FROM DRIVE') : (isRTL ? 'ربط جوجل درايف' : 'CONNECT GOOGLE DRIVE')}
+                    </span>
+                    {isDriveConnected && (
+                      <span className="ml-auto text-[10px] text-emerald-500 font-bold tracking-wider animate-pulse">
+                        {isRTL ? 'متصل' : 'CONNECTED'}
+                      </span>
+                    )}
+                  </button>
+                  {isDriveConnected && (
+                    <button
+                      onClick={handleDisconnectDrive}
+                      className="p-1 hover:bg-white/10 rounded text-white/40 hover:text-red-400 transition-colors cursor-pointer"
+                      title={isRTL ? 'إلغاء ربط جوجل درايف' : 'Unlink Google Drive'}
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => setShowManualLink(!showManualLink)}
+                  className="w-full flex items-center gap-2 py-1.5 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/40 hover:text-white/70"
+                >
+                  <LinkIcon className="w-3.5 h-3.5 shrink-0" />
+                  <span className="font-medium tracking-wide uppercase">{isRTL ? 'إضافة رابط يدوياً' : 'Add Manual Link'}</span>
+                  <span className="ml-auto text-[10px] font-mono">{showManualLink ? '▲' : '▼'}</span>
+                </button>
+
+                <AnimatePresence>
+                  {showManualLink && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="flex flex-col gap-2 overflow-hidden"
+                    >
                       <input
-                        type="url"
-                        placeholder="HTTPS://..."
-                        value={manualLinkUrl}
-                        onChange={e => setManualLinkUrl(e.target.value)}
-                        className="flex-1 bg-zinc-900/80 border border-white/8 py-2.5 px-4 font-space text-xs font-black text-white uppercase tracking-widest outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
+                        type="text"
+                        placeholder={isRTL ? 'اسم المرفق...' : 'ATTACHMENT_NAME...'}
+                        value={manualLinkName}
+                        onChange={e => setManualLinkName(e.target.value)}
+                        className="w-full bg-zinc-900/80 border border-white/8 py-2.5 px-4 font-space text-xs font-black text-white uppercase tracking-widest outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
                       />
-                      <button
-                        onClick={handleAddManualLink}
-                        disabled={isAddingLink || !manualLinkName.trim() || !manualLinkUrl.trim()}
-                        className="py-2.5 px-4 font-space font-black uppercase tracking-widest text-[10px] text-black transition-all rounded-md shrink-0 cursor-pointer disabled:opacity-40"
-                        style={{ backgroundColor: themeColor }}
-                      >
-                        {isAddingLink ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto text-black" /> : (isRTL ? 'إضافة' : 'ADD')}
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                      <div className="flex gap-2">
+                        <input
+                          type="url"
+                          placeholder="HTTPS://..."
+                          value={manualLinkUrl}
+                          onChange={e => setManualLinkUrl(e.target.value)}
+                          className="flex-1 bg-zinc-900/80 border border-white/8 py-2.5 px-4 font-space text-xs font-black text-white uppercase tracking-widest outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
+                        />
+                        <button
+                          onClick={handleAddManualLink}
+                          disabled={isAddingLink || !manualLinkName.trim() || !manualLinkUrl.trim()}
+                          className="py-2.5 px-4 font-space font-black uppercase tracking-widest text-[10px] text-black transition-all rounded-md shrink-0 cursor-pointer disabled:opacity-40"
+                          style={{ backgroundColor: themeColor }}
+                        >
+                          {isAddingLink ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto text-black" /> : (isRTL ? 'إضافة' : 'ADD')}
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
 
             {/* Render List of Drive Files */}
             {(() => {
@@ -1113,19 +1168,37 @@ export default function TaskDrawer({
                           <Paperclip className="w-4 h-4 shrink-0" style={{ color: themeColor }} />
                           <div className="min-w-0">
                             <p className="font-space font-black text-xs text-white/90 uppercase truncate tracking-wide">{att.name}</p>
-                            <p className="font-space text-[9px] uppercase tracking-widest text-white/30 mt-0.5">{typeKey.toUpperCase()}</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="font-space text-[9px] uppercase tracking-widest text-white/30">{typeKey.toUpperCase()}</span>
+                              {att.uploaded_by && (
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[9px] text-white/20">•</span>
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={att.uploaded_by.avatar_url || '/avatars/omar.svg'}
+                                    alt={att.uploaded_by.name || 'User'}
+                                    className="w-3.5 h-3.5 rounded-full border border-white/10"
+                                  />
+                                  <span className="text-[8px] text-zinc-400 font-space uppercase">
+                                    {att.uploaded_by.name || 'Operator'}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
-                        <button
-                          onClick={async (e) => {
-                            e.stopPropagation()
-                            const updated = attachments.filter((_: any, i: number) => i !== idx)
-                            await updateTask(task.id, { metadata: { ...task.metadata, attachments: updated } })
-                          }}
-                          className="w-7 h-7 flex items-center justify-center border border-white/5 text-white/25 hover:border-red-500/50 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-md shrink-0 cursor-pointer"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
+                        {canAddAttachment && (
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation()
+                              const updated = attachments.filter((_: any, i: number) => i !== idx)
+                              await updateTask(task.id, { metadata: { ...task.metadata, attachments: updated } })
+                            }}
+                            className="w-7 h-7 flex items-center justify-center border border-white/5 text-white/25 hover:border-red-500/50 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-md shrink-0 cursor-pointer"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        )}
                       </div>
                     )
                   })}

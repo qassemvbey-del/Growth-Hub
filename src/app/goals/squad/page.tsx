@@ -937,8 +937,7 @@ export default function SquadGoalsPage() {
     
     const { data } = await supabase
       .from('goal_attachments')
-      .select('*')
-      // .eq('mission_id', missionId)
+      .select('*, profiles(full_name, avatar_url)')
       .eq('goal_id', missionId)
       .order('created_at', { ascending: false })
     
@@ -1664,7 +1663,6 @@ export default function SquadGoalsPage() {
           {/* ── ATTACHMENTS MODAL (rendered once, outside cards) ── */}
           {attachmentMissionId && (
             <MissionAttachmentsModal
-              // missionId={attachmentMissionId}
               goalId={attachmentMissionId}
               missionTitle={missions.find(m => m.id === attachmentMissionId)?.title ?? ''}
               themeColor={currentTheme.color}
@@ -1677,6 +1675,13 @@ export default function SquadGoalsPage() {
                 setActiveAttachments([])
               }}
               onCountChange={count => handleAttachmentCountChange(attachmentMissionId, count)}
+              canAddAttachment={(() => {
+                const currentMission = missions.find(m => m.id === attachmentMissionId)
+                if (!currentMission) return false
+                const isOwner = currentMission.user_id === profile?.id
+                const isMember = (goalMembersMap[currentMission.id] || []).some((m: any) => m.id === profile?.id)
+                return !!(isOwner || isMember)
+              })()}
             />
           )}
 

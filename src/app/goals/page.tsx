@@ -756,8 +756,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
 
     const { data } = await supabase
       .from('goal_attachments')
-      .select('*')
-      // .eq('mission_id', missionId)
+      .select('*, profiles(full_name, avatar_url)')
       .eq('goal_id', missionId)
       .order('created_at', { ascending: false })
 
@@ -1428,7 +1427,6 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
           {/* ── ATTACHMENTS MODAL (rendered once, outside cards) ── */}
           {attachmentMissionId && (
             <MissionAttachmentsModal
-              // missionId={attachmentMissionId}
               goalId={attachmentMissionId}
               missionTitle={missions.find(m => m.id === attachmentMissionId)?.title ?? ''}
               themeColor={currentTheme.color}
@@ -1441,6 +1439,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 setActiveAttachments([])
               }}
               onCountChange={count => handleAttachmentCountChange(attachmentMissionId, count)}
+              canAddAttachment={true}
             />
           )}
 
