@@ -285,6 +285,35 @@
     box-shadow: 0 0 15px var(--theme-color)55 !important;
     outline: none !important;
   }
+
+  /* Force dark mode picker on browsers supporting calendar picker colour scheme styling */
+  input[type="date"]::-webkit-datetime-edit,
+  input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+  input[type="date"]::-webkit-datetime-edit-text,
+  input[type="date"]::-webkit-datetime-edit-month-field,
+  input[type="date"]::-webkit-datetime-edit-day-field,
+  input[type="date"]::-webkit-datetime-edit-year-field {
+    color: #f4f4f5 !important;
+  }
+  
+  /* Global overlay style overrides for calendar popovers */
+  div[data-role="calendar"],
+  .rdp,
+  .rdp-months,
+  .rdp-caption,
+  .rdp-table,
+  .rdp-cell,
+  .rdp-button,
+  [data-radix-popper-content-wrapper] {
+    background-color: #09090b !important;
+    color: #f4f4f5 !important;
+    border-color: #27272a !important;
+  }
+  
+  /* Browser calendar dialog picker modal styling */
+  ::-webkit-calendar-picker-indicator {
+    filter: invert(1) !important;
+  }
 }
 
 /* Cyberpunk Scrollbar Styling - Commented out to hide scrollbars globally

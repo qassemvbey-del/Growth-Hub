@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Circle, Calendar } from 'lucide-react'
+import { Circle, Calendar, CalendarPlus } from 'lucide-react'
 import { NeonIcon } from '../NeonIcon'
 import { cn } from '@/lib/utils'
 
@@ -134,7 +134,6 @@ export default function TaskDrawerMetadata({
             <div className="flex items-center gap-2 relative z-[9999]">
               <label 
                 onClick={(e) => {
-                  // Find nested input and invoke showPicker() to bypass focus-trap / backdrop click blockages
                   const input = e.currentTarget.querySelector('input')
                   if (input && typeof input.showPicker === 'function') {
                     try {
@@ -151,8 +150,8 @@ export default function TaskDrawerMetadata({
                     : "border-white/5 bg-white/[0.02] text-white/70 hover:bg-white/[0.05] hover:text-white"
                 )}
               >
-                <Calendar className="w-3.5 h-3.5" />
-                <span>{displayVal}</span>
+                <Calendar className="w-3.5 h-3.5 pointer-events-none" />
+                <span className="pointer-events-none">{displayVal}</span>
                 <input
                   type="date"
                   value={endDate ? endDate.substring(0, 10) : ''}
@@ -178,11 +177,10 @@ export default function TaskDrawerMetadata({
                     const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=Growth_Hub`
                     window.open(googleUrl, '_blank')
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono font-bold border border-white/5 bg-white/[0.02] text-white/50 hover:bg-white/[0.05] hover:text-[#14b8a6] cursor-pointer transition-all"
+                  className="p-1.5 hover:bg-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors"
                   title="Export deadline to Google Calendar"
                 >
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>EXPORT</span>
+                  <CalendarPlus size={14} />
                 </button>
               )}
             </div>
