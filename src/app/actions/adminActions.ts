@@ -120,29 +120,116 @@ export async function toggleBlockUser(userId: string, blocked: boolean) {
   return { success: true }
 }
 
+async function purgeUserDataCascading(supabaseAdmin: ReturnType<typeof createAdminClient>, userId: string) {
+  // 1. Get all goal IDs
+  const { data: goals, error: goalsError } = await supabaseAdmin
+    .from('goals')
+    .select('id')
+    .eq('user_id', userId)
+
+  if (goalsError) {
+    console.error('PURGE_SEQUENCE // GET_GOALS_FAILED:', goalsError)
+    throw goalsError
+  }
+
+  const goalIds = goals?.map(g => g.id) || []
+
+  // 2. Delete attachments
+  await supabaseAdmin.from('goal_attachments').delete().eq('user_id', userId)
+  if (goalIds.length > 0) {
+    await supabaseAdmin.from('goal_attachments').delete().in('goal_id', goalIds)
+  }
+
+  // 3. Delete inbox reports
+  await supabaseAdmin.from('inbox_reports').delete().eq('user_id', userId)
+
+  // 4. Delete squad join requests
+  await supabaseAdmin.from('squad_join_requests').delete().eq('user_id', userId)
+  if (goalIds.length > 0) {
+    await supabaseAdmin.from('squad_join_requests').delete().in('goal_id', goalIds)
+  }
+
+  // 5. Delete notes
+  await supabaseAdmin.from('notes').delete().eq('user_id', userId)
+  if (goalIds.length > 0) {
+    await supabaseAdmin.from('notes').delete().in('goal_id', goalIds)
+  }
+
+  // 6. Delete time logs
+  await supabaseAdmin.from('time_logs').delete().eq('user_id', userId)
+  if (goalIds.length > 0) {
+    await supabaseAdmin.from('time_logs').delete().in('goal_id', goalIds)
+  }
+
+  // 7. Delete task completion log
+  await supabaseAdmin.from('task_completion_log').delete().eq('user_id', userId)
+
+  // 8. Delete task progress
+  await supabaseAdmin.from('task_progress').delete().eq('user_id', userId)
+
+  // 9. Nullify parent_id in tasks to break self-referential hierarchy, then delete tasks
+  if (goalIds.length > 0) {
+    await supabaseAdmin.from('tasks').update({ parent_id: null }).in('goal_id', goalIds)
+    await supabaseAdmin.from('tasks').delete().in('goal_id', goalIds)
+  }
+  await supabaseAdmin.from('tasks').delete().eq('assigned_to', userId)
+
+  // 10. Delete goal members
+  await supabaseAdmin.from('goal_members').delete().eq('user_id', userId)
+  if (goalIds.length > 0) {
+    await supabaseAdmin.from('goal_members').delete().in('goal_id', goalIds)
+  }
+
+  // 11. Delete goals
+  await supabaseAdmin.from('goals').delete().eq('user_id', userId)
+
+  // 12. Delete rank up logs
+  await supabaseAdmin.from('rank_up_logs').delete().eq('user_id', userId)
+
+  // 13. Delete xp logs
+  await supabaseAdmin.from('xp_logs').delete().eq('user_id', userId)
+
+  // 14. Delete profiles
+  const { error: profileError } = await supabaseAdmin.from('profiles').delete().eq('id', userId)
+  if (profileError) {
+    console.error('PURGE_SEQUENCE // PROFILE_DELETE_FAILED:', profileError)
+    throw profileError
+  }
+}
+
 export async function deleteUser(userId: string) {
-  await checkAdmin()
-  const supabase = createAdminClient()
+  try {
+    await checkAdmin()
+    const supabase = createAdminClient()
 
-  console.log('PURGE_SEQUENCE // INITIATED_FOR_MEMBER:', userId)
+    console.log('PURGE_SEQUENCE // INITIATED_FOR_MEMBER:', userId)
 
-  // Call PostgreSQL RPC to purge all user data in a single transactional procedure
-  const { error: rpcError } = await supabase.rpc('purge_user_data', { target_user_id: userId })
-  if (rpcError) {
-    console.error('PURGE_SEQUENCE // DB_PURGE_FAILED:', rpcError)
-    throw rpcError
+    // Commented out original RPC sequence:
+    /*
+    const { error: rpcError } = await supabase.rpc('purge_user_data', { target_user_id: userId })
+    if (rpcError) {
+      console.error('PURGE_SEQUENCE // DB_PURGE_FAILED:', rpcError)
+      throw rpcError
+    }
+    */
+
+    // Perform manual cascading deletes
+    await purgeUserDataCascading(supabase, userId)
+
+    // Delete from auth.users
+    const { error } = await supabase.auth.admin.deleteUser(userId)
+    
+    if (error) {
+      console.error('PURGE_SEQUENCE // AUTH_DELETE_FAILED:', error)
+      throw error
+    }
+
+    console.log('PURGE_SEQUENCE // COMPLETE_FOR_MEMBER:', userId)
+    return { success: true }
+  } catch (error: any) {
+    console.error('PURGE_SEQUENCE // SERVER_ACTION_ERROR:', error)
+    return { success: false, error: error.message }
   }
-
-  // Delete from auth.users
-  const { error } = await supabase.auth.admin.deleteUser(userId)
-  
-  if (error) {
-    console.error('PURGE_SEQUENCE // AUTH_DELETE_FAILED:', error)
-    throw error
-  }
-
-  console.log('PURGE_SEQUENCE // COMPLETE_FOR_MEMBER:', userId)
-  return { success: true }
 }
 
 export async function getRecentActivity() {
@@ -192,33 +279,43 @@ export async function getGoalAnalytics() {
 }
 
 export async function deleteOwnAccount() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    throw new Error('UNAUTHORIZED_ACCESS // NOT_LOGGED_IN')
+    if (!user) {
+      throw new Error('UNAUTHORIZED_ACCESS // NOT_LOGGED_IN')
+    }
+
+    const userId = user.id
+    const supabaseAdmin = createAdminClient()
+
+    console.log('SELF_DESTRUCTION_SEQUENCE // INITIATED_BY_USER:', userId)
+
+    // Commented out original RPC sequence:
+    /*
+    const { error: rpcError } = await supabaseAdmin.rpc('purge_user_data', { target_user_id: userId })
+    if (rpcError) {
+      console.error('SELF_DESTRUCTION_SEQUENCE // DB_PURGE_FAILED:', rpcError)
+      throw rpcError
+    }
+    */
+
+    // Perform manual cascading deletes
+    await purgeUserDataCascading(supabaseAdmin, userId)
+
+    // Final Boss: Delete from auth.users
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(userId)
+    
+    if (error) {
+      console.error('SELF_DESTRUCTION_SEQUENCE // AUTH_DELETE_FAILED:', error)
+      throw error
+    }
+
+    console.log('SELF_DESTRUCTION_SEQUENCE // COMPLETE_FOR_USER:', userId)
+    return { success: true }
+  } catch (error: any) {
+    console.error('SELF_DESTRUCTION_SEQUENCE // SERVER_ACTION_ERROR:', error)
+    return { success: false, error: error.message }
   }
-
-  const userId = user.id
-  const supabaseAdmin = createAdminClient()
-
-  console.log('SELF_DESTRUCTION_SEQUENCE // INITIATED_BY_USER:', userId)
-
-  // Call PostgreSQL RPC to purge all user data in a single transactional procedure
-  const { error: rpcError } = await supabaseAdmin.rpc('purge_user_data', { target_user_id: userId })
-  if (rpcError) {
-    console.error('SELF_DESTRUCTION_SEQUENCE // DB_PURGE_FAILED:', rpcError)
-    throw rpcError
-  }
-
-  // Final Boss: Delete from auth.users
-  const { error } = await supabaseAdmin.auth.admin.deleteUser(userId)
-  
-  if (error) {
-    console.error('SELF_DESTRUCTION_SEQUENCE // AUTH_DELETE_FAILED:', error)
-    throw error
-  }
-
-  console.log('SELF_DESTRUCTION_SEQUENCE // COMPLETE_FOR_USER:', userId)
-  return { success: true }
 }

@@ -959,7 +959,9 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
           .maybeSingle()
         
         const storedLang = typeof window !== 'undefined' ? localStorage.getItem('language') as Language : null
-        
+        let profileData: Profile | null = null
+        let isNewUser = false
+
         if (data) {
           const gender = data.gender || user.user_metadata?.gender || null;
           const age = data.age || user.user_metadata?.age || user.user_metadata?.age_range?.min || null;
@@ -977,7 +979,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
           const defaultAvatar = (gender === 'female' || gender === 'أنثى' || gender === 'Female') ? '/avatars/menna.svg' : '/avatars/omar.svg';
           const resolvedAvatarUrl = customAvatar || googleAvatar || defaultAvatar;
 
-          const profileData = {
+          profileData = {
             ...data,
             language: data.language || storedLang || 'en',
             full_name,
@@ -995,87 +997,9 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
             last_seen: data.last_seen,
             email: user.email || null
           } as Profile
-          setProfile(profileData)
-
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('cached_profile', JSON.stringify(profileData))
-            if (profileData.language) {
-               localStorage.setItem('language', profileData.language)
-            }
-          }
-
-          // Dynamic Seeding Logic for Authenticated Mode (Point 2)
-          try {
-            const { count, error: countError } = await supabase
-              .from('goals')
-              .select('id', { count: 'exact', head: true })
-              .eq('user_id', user.id)
-              .eq('is_archived', false)
-
-            if (!countError && count === 0) {
-              const isAr = (profileData.language || 'en') === 'ar'
-              const seedGoalTitle = isAr ? "ابدأ من هنا 🚀" : "Start Here 🚀"
-              const { data: newCup } = await supabase
-                .from('goals')
-                .insert({
-                  user_id: user.id,
-                  title: seedGoalTitle,
-                  status: 'active',
-                  size: 'md',
-                  is_archived: false,
-                  sync_to_dashboard: true,
-                  is_pinned: true,
-                  isPinned: true,
-                  metadata: { defaultView: 'list', is_tutorial: true }
-                })
-                .select()
-                .single()
-
-              if (newCup) {
-                const arSteps = [
-                  "اضغط على النيشان هنا عشان تقفل أول مهمة ليك وتكسب أول 10 XP.",
-                  "اضغط `Ctrl + K` عشان تفتح الـ Command Palette. أسرع أداة للتحكم.",
-                  "جرب تسحب كورس يوتيوب دلوقتي! اضغط على زرار Import Playlist فوق.",
-                  "اضغط على أيقونة الـ Pin 📌 في الهدف ده، عشان يتثبت في الداشبورد.",
-                  "افتح الـ AI Coach من القائمة.. عشان تاخد تقرير تكتيكي.",
-                  // "امسح الهدف التدريبي ده من سلة المهملات، وابدأ هدفك الحقيقي."
-                  "إعلن انتصارك: علم على الدايرة الأخيرة دي عشان توصل لـ 100% وتنقل المهمة دي لصفحة الـ Wins!"
-                ]
-                const enSteps = [
-                  "Click the target circle here to complete your first task and earn 10 XP.",
-                  "Press `Ctrl + K` to open the Command Palette. The fastest tool for control.",
-                  "Try importing a YouTube course now! Click the Import Playlist button above.",
-                  "Click the Pin 📌 icon on this goal to lock it in the dashboard.",
-                  "Open the AI Coach from the menu to get a tactical report.",
-                  // "Delete this training goal from the trash, and start your real goal."
-                  "CLAIM YOUR VICTORY: Check this final circle to hit 100% and warp this mission to your WINS dashboard!"
-                ]
-                const steps = isAr ? arSteps : enSteps
-                const taskPayloads = steps.map((step, idx) => ({
-                  // cup_id: newCup.id,
-                  goal_id: newCup.id,
-                  title: step,
-                  weight: 3,
-                  is_completed: false,
-                  metadata: idx === 2 ? { is_tutorial_import: true } : {}
-                }))
-                await supabase.from('tasks').insert(taskPayloads)
-                setTutorialActive(true)
-              }
-            }
-          } catch (seedErr) {
-            console.error('Seeding tutorial failed:', seedErr)
-          }
-
-          // Blocked Check
-          if (data.blocked) {
-            router.push('/blocked')
-            return
-          }
-
-
         } else {
           console.log('PROFILE_MISSING: Auto-creating profile for', user.id)
+          isNewUser = true
           const gender = user.user_metadata?.gender || null;
           const age = user.user_metadata?.age || user.user_metadata?.age_range?.min || null;
           const full_name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
@@ -1103,18 +1027,13 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
             .single()
 
           if (!createError && newProfile) {
-            const newProfileData = {
+            profileData = {
               ...newProfile,
               avatar_url: resolvedAvatarUrl,
               custom_avatar: customAvatar,
               google_avatar_url: googleAvatar,
               email: user.email || null
             } as Profile
-            setProfile(newProfileData)
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('cached_profile', JSON.stringify(newProfileData))
-              localStorage.setItem('onboarding_complete', 'true')
-            }
           } else {
             if (process.env.NODE_ENV === 'development') {
               console.error('PROFILE_CREATION_FAILED:', createError)
@@ -1122,7 +1041,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
               console.warn('PROFILE_CREATION_SILENCED: metadata fallback active.')
             }
             
-            const fallbackProfileData = {
+            profileData = {
               id: user.id,
               full_name,
               avatar_url: resolvedAvatarUrl,
@@ -1137,11 +1056,98 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
               google_avatar_url: googleAvatar,
               email: user.email || null
             } as Profile
-            setProfile(fallbackProfileData)
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('cached_profile', JSON.stringify(fallbackProfileData))
-              localStorage.setItem('onboarding_complete', 'true')
+          }
+        }
+
+        if (profileData) {
+          setProfile(profileData)
+
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('cached_profile', JSON.stringify(profileData))
+            if (profileData.language) {
+               localStorage.setItem('language', profileData.language)
             }
+          }
+
+          // Seeding and Tutorial Logic
+          try {
+            const hasCompletedOnboarding = typeof window !== 'undefined' && localStorage.getItem('onboarding_completed') === 'true'
+
+            if (!hasCompletedOnboarding) {
+              const { count, error: countError } = await supabase
+                .from('goals')
+                .select('id', { count: 'exact', head: true })
+                .eq('user_id', user.id)
+                .eq('is_archived', false)
+
+              if (isNewUser || (!countError && count === 0)) {
+                // Ensure we don't duplicate Welcome Goal if it was already created but count failed
+                const { count: dbCount } = await supabase
+                  .from('goals')
+                  .select('id', { count: 'exact', head: true })
+                  .eq('user_id', user.id)
+
+                if (dbCount === 0) {
+                  const isAr = (profileData.language || 'en') === 'ar'
+                  const seedGoalTitle = isAr ? "ابدأ من هنا 🚀" : "Start Here 🚀"
+                  const { data: newCup } = await supabase
+                    .from('goals')
+                    .insert({
+                      user_id: user.id,
+                      title: seedGoalTitle,
+                      status: 'active',
+                      size: 'md',
+                      is_archived: false,
+                      sync_to_dashboard: true,
+                      is_pinned: true,
+                      isPinned: true,
+                      metadata: { defaultView: 'list', is_tutorial: true }
+                    })
+                    .select()
+                    .single()
+
+                  if (newCup) {
+                    const arSteps = [
+                      "اضغط على النيشان هنا عشان تقفل أول مهمة ليك وتكسب أول 10 XP.",
+                      "اضغط `Ctrl + K` عشان تفتح الـ Command Palette. أسرع أداة للتحكم.",
+                      "جرب تسحب كورس يوتيوب دلوقتي! اضغط على زرار Import Playlist فوق.",
+                      "اضغط على أيقونة الـ Pin 📌 في الهدف ده، عشان يتثبت في الداشبورد.",
+                      "افتح الـ AI Coach من القائمة.. عشان تاخد تقرير تكتيكي.",
+                      "إعلن انتصارك: علم على الدايرة الأخيرة دي عشان توصل لـ 100% وتنقل المهمة دي لصفحة الـ Wins!"
+                    ]
+                    const enSteps = [
+                      "Click the target circle here to complete your first task and earn 10 XP.",
+                      "Press `Ctrl + K` to open the Command Palette. The fastest tool for control.",
+                      "Try importing a YouTube course now! Click the Import Playlist button above.",
+                      "Click the Pin 📌 icon on this goal to lock it in the dashboard.",
+                      "Open the AI Coach from the menu to get a tactical report.",
+                      "CLAIM YOUR VICTORY: Check this final circle to hit 100% and warp this mission to your WINS dashboard!"
+                    ]
+                    const steps = isAr ? arSteps : enSteps
+                    const taskPayloads = steps.map((step, idx) => ({
+                      goal_id: newCup.id,
+                      title: step,
+                      weight: 3,
+                      is_completed: false,
+                      metadata: idx === 2 ? { is_tutorial_import: true } : {}
+                    }))
+                    await supabase.from('tasks').insert(taskPayloads)
+                  }
+                }
+                setTutorialActive(true)
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('onboarding_completed', 'true')
+                }
+              }
+            }
+          } catch (seedErr) {
+            console.error('Seeding tutorial failed:', seedErr)
+          }
+
+          // Blocked Check
+          if (profileData.blocked) {
+            router.push('/blocked')
+            return
           }
         }
       } else {
