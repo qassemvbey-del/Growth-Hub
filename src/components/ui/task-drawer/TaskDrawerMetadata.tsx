@@ -92,18 +92,7 @@ export default function TaskDrawerMetadata({
 
       {/* Redesigned Compact Inline Metadata Pills */}
       <div className="flex flex-wrap gap-2 text-xs">
-        {/* Status Pill */}
-        <span 
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-space font-bold border"
-          style={{
-            borderColor: task.is_completed ? '#10B98130' : `${themeColor}30`,
-            backgroundColor: task.is_completed ? '#10B98105' : `${themeColor}05`,
-            color: task.is_completed ? '#10B981' : themeColor
-          }}
-        >
-          <span className={`w-1.5 h-1.5 rounded-full ${task.is_completed ? 'bg-emerald-500 shadow-[0_0_6px_#10B981]' : 'bg-amber-500'}`} style={!task.is_completed ? { backgroundColor: themeColor, boxShadow: `0 0 6px ${themeColor}` } : {}} />
-          {task.is_completed ? t('completed') : t('inProgress')}
-        </span>
+
 
         {/* Difficulty Weight Pill */}
         <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md font-mono font-bold border border-white/5 bg-white/[0.02] text-white/80">

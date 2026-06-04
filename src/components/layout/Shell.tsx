@@ -782,29 +782,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
               </span>
             </div>
 
-            {/* Desktop Search Button */}
-            <button
-              onClick={() => {
-                playBlip()
-                setCommandPaletteOpen(true)
-              }}
-              className="flex items-center justify-center w-10 h-10 rounded-full transition-all border bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:border-white/20 hover:text-[var(--text-primary)] cursor-pointer"
-              title={isRTL ? 'بحث' : 'Search'}
-            >
-              <Search className="w-5 h-5" />
-            </button>
 
-            {/* Desktop Add Goal Button */}
-            <button
-              onClick={() => {
-                playNeuralLink()
-                openCreateGoalModal({ goalType: 'solo' })
-              }}
-              className="flex items-center justify-center w-10 h-10 rounded-full transition-all border bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:border-white/20 hover:text-[var(--text-primary)] cursor-pointer"
-              title={isRTL ? 'هدف جديد' : 'New Goal'}
-            >
-              <Plus className="w-5 h-5" />
-            </button>
 
             {/* 🔔 Inbox Dropdown */}
             <div className="relative shrink-0" ref={desktopInboxRef}>

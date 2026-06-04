@@ -1198,9 +1198,9 @@ export default function TaskDrawer({
                 "text-[10px] font-bold tracking-wider uppercase",
                 task.is_completed ? "text-emerald-500" : "text-zinc-400"
               )}>
-                {task.is_completed 
-                  ? (isRTL ? "مكتملة" : "Done") 
-                  : (isRTL ? "إنهاء" : "Complete")}
+              {task.is_completed 
+                ? (isRTL ? "تم" : "Done") 
+                : (isRTL ? "مكتملة" : "Complete")}
               </span>
             </button>
           </div>
