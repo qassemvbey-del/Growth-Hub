@@ -580,9 +580,32 @@ export default function SquadGoalsPage() {
         // Fetch goal ID to update the role on join request
         const { data: cupData } = await supabase
           .from('goals')
-          .select('id')
+          .select('id, title, user_id')
           .eq('metadata->>invite_code', code)
           .single()
+        
+        if (cupData) {
+          const userName = profile?.full_name || 'Someone'
+          const targetUserId = cupData.user_id
+          const goalName = cupData.title
+          
+          const notifTitle = isRTL ? `👥 طلب انضمام للفريق` : `👥 Squad Join Request`
+          const notifContent = isRTL 
+            ? `يريد [${userName}] الانضمام إلى [${goalName}]` 
+            : `[${userName}] wants to join [${goalName}]`
+
+          await supabase.from('inbox_reports').insert({
+            user_id: targetUserId,
+            type: 'squad_join_request',
+            title: notifTitle,
+            content: {
+              text: notifContent,
+              goal_id: cupData.id,
+              sender_id: profile?.id,
+              sender_name: userName
+            }
+          })
+        }
         
         if (cupData && joinRoleInput && ['admin', 'member', 'viewer', 'guest'].includes(joinRoleInput)) {
           const { data: { user } } = await supabase.auth.getUser()
@@ -845,6 +868,40 @@ export default function SquadGoalsPage() {
             // cup_id: task.cup_id,
             completed_at: new Date().toISOString()
           }])
+
+          if (mission && mission.metadata?.type === 'squad') {
+            const { data: members } = await supabase
+              .from('goal_members')
+              .select('user_id')
+              .eq('goal_id', mission.id)
+            
+            if (members) {
+              const userName = profile?.full_name || 'Someone'
+              const goalName = mission.title
+              
+              const notifTitle = isRTL ? `✅ إكمال مهمة في الفريق` : `✅ Squad Task Completed`
+              const notifContent = isRTL 
+                ? `أكمل [${userName}] مهمة في [${goalName}]` 
+                : `[${userName}] completed a task in [${goalName}]`
+
+              for (const member of members) {
+                if (member.user_id && member.user_id !== user.id) {
+                  await supabase.from('inbox_reports').insert({
+                    user_id: member.user_id,
+                    type: 'squad_member_completed_task',
+                    title: notifTitle,
+                    content: {
+                      text: notifContent,
+                      goal_id: mission.id,
+                      task_id: task.id,
+                      sender_id: user.id,
+                      sender_name: userName
+                    }
+                  })
+                }
+              }
+            }
+          }
         }
       }
     }

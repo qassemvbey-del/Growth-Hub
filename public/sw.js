@@ -37,30 +37,71 @@ self.addEventListener('fetch', event => {
 })
 
 // Background Notification Support via postMessage
+// self.addEventListener('message', event => {
+//   if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
+//     const { title, body, icon, badge, tag } = event.data
+//     self.registration.showNotification(title, {
+//       body: body || '',
+//       icon: icon || '/icons/icon-512.png',
+//       badge: badge || '/icons/icon-192.png',
+//       vibrate: [200, 100, 200],
+//       requireInteraction: true,
+//       tag: tag || 'pomodoro-timer',
+//       renotify: true,
+//     })
+//   }
+// })
+// 
+// // When user taps the notification, focus the app window
+// self.addEventListener('notificationclick', event => {
+//   event.notification.close()
+//   event.waitUntil(
+//     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
+//       if (clients.length > 0) {
+//         return clients[0].focus()
+//       }
+//       return self.clients.openWindow('/')
+//     })
+//   )
+// })
+
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
-    const { title, body, icon, badge, tag } = event.data
+    const { title, body, icon, badge, tag, actions } = event.data
     self.registration.showNotification(title, {
       body: body || '',
       icon: icon || '/icons/icon-512.png',
-      badge: badge || '/icons/icon-192.png',
+      badge: badge || '/icons/badge-icon.png',
       vibrate: [200, 100, 200],
       requireInteraction: true,
       tag: tag || 'pomodoro-timer',
       renotify: true,
+      actions: actions || [
+        { action: 'pause', title: '⏸ Pause Focus' },
+        { action: 'open', title: '🚀 Open Task' }
+      ]
     })
   }
 })
 
-// When user taps the notification, focus the app window
 self.addEventListener('notificationclick', event => {
   event.notification.close()
-  event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
-      if (clients.length > 0) {
-        return clients[0].focus()
-      }
-      return self.clients.openWindow('/')
-    })
-  )
+  if (event.action === 'pause') {
+    event.waitUntil(
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
+        clients.forEach(client => {
+          client.postMessage({ action: 'pause' })
+        })
+      })
+    )
+  } else {
+    event.waitUntil(
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
+        if (clients.length > 0) {
+          return clients[0].focus()
+        }
+        return self.clients.openWindow('/')
+      })
+    )
+  }
 })

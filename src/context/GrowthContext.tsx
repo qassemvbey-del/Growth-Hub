@@ -871,6 +871,22 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
       const nextRank = data.rank || 'SILVER'
       if (prevRank !== nextRank) {
         triggerRankUp(prevRank, nextRank)
+
+        const isRTL = profile.language === 'ar'
+        const notifTitle = isRTL ? '🎉 ترقية الرتبة!' : '🎉 Rank Up!'
+        const notifContent = isRTL 
+          ? `لقد وصلت إلى رتبة ${nextRank}! استمر في التقدم.` 
+          : `You reached ${nextRank}! Keep going.`
+
+        await supabase.from('inbox_reports').insert({
+          user_id: profile.id,
+          type: 'rank_up',
+          title: notifTitle,
+          content: {
+            text: notifContent,
+            rank: nextRank
+          }
+        })
       }
       setProfile({ ...profile, ...data } as Profile)
     }

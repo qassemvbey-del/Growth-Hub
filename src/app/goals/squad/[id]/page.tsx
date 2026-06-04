@@ -1008,6 +1008,41 @@ export default function MissionDetailPage() {
           user_id: user.id,
           completed_at: new Date().toISOString()
         })
+
+        if (mission?.metadata?.type === 'squad') {
+          const { data: members } = await supabase
+            .from('goal_members')
+            .select('user_id')
+            .eq('goal_id', id)
+          
+          if (members) {
+            const userName = profile?.full_name || 'Someone'
+            const goalName = mission.title
+            
+            const notifTitle = isRTL ? `✅ إكمال مهمة في الفريق` : `✅ Squad Task Completed`
+            const notifContent = isRTL 
+              ? `أكمل [${userName}] مهمة في [${goalName}]` 
+              : `[${userName}] completed a task in [${goalName}]`
+
+            for (const member of members) {
+              if (member.user_id && member.user_id !== user.id) {
+                await supabase.from('inbox_reports').insert({
+                  user_id: member.user_id,
+                  type: 'squad_member_completed_task',
+                  title: notifTitle,
+                  content: {
+                    text: notifContent,
+                    goal_id: id,
+                    task_id: taskId,
+                    sender_id: user.id,
+                    sender_name: userName
+                  }
+                })
+              }
+            }
+          }
+        }
+
         const taskIndex = mission.tasks.findIndex((t: any) => t.id === taskId)
         const task = mission.tasks[taskIndex]
         if (task) {
@@ -1132,6 +1167,41 @@ export default function MissionDetailPage() {
               user_id: user.id,
               completed_at: new Date().toISOString()
             })
+
+            if (mission?.metadata?.type === 'squad') {
+              const { data: members } = await supabase
+                .from('goal_members')
+                .select('user_id')
+                .eq('goal_id', id)
+              
+              if (members) {
+                const userName = profile?.full_name || 'Someone'
+                const goalName = mission.title
+                
+                const notifTitle = isRTL ? `✅ إكمال مهمة في الفريق` : `✅ Squad Task Completed`
+                const notifContent = isRTL 
+                  ? `أكمل [${userName}] مهمة في [${goalName}]` 
+                  : `[${userName}] completed a task in [${goalName}]`
+
+                for (const member of members) {
+                  if (member.user_id && member.user_id !== user.id) {
+                    await supabase.from('inbox_reports').insert({
+                      user_id: member.user_id,
+                      type: 'squad_member_completed_task',
+                      title: notifTitle,
+                      content: {
+                        text: notifContent,
+                        goal_id: id,
+                        task_id: taskId,
+                        sender_id: user.id,
+                        sender_name: userName
+                      }
+                    })
+                  }
+                }
+              }
+            }
+
             const sizeStr = mission.size?.toLowerCase() || 'md'
             let xpCeiling = 8
             if (sizeStr === 'sm' || sizeStr === 's' || sizeStr === 'small') xpCeiling = 4

@@ -9,7 +9,7 @@ import { useGrowth } from '@/context/GrowthContext'
 
 interface Report {
   id: string
-  type: 'daily_brief' | 'deadline_alert' | 'mission_complete' | 'weekly_review' | 'squad_join_request' | 'squad_join_approved' | 'squad_join_rejected'
+  type: 'daily_brief' | 'deadline_alert' | 'mission_complete' | 'weekly_review' | 'squad_join_request' | 'squad_join_approved' | 'squad_join_rejected' | 'overdue_task' | 'squad_member_completed_task' | 'rank_up'
   title: string
   content: any
   is_read: boolean
@@ -82,7 +82,11 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
             </span>
             {onMarkAllRead && reports.some(r => !r.is_read) && (
               <button
-                onClick={onMarkAllRead}
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onMarkAllRead()
+                }}
                 className="flex items-center gap-1 text-[8px] font-space font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all cursor-pointer"
                 style={{ color: themeColor }}
                 title={isRTL ? 'تحديد الكل كمقروء' : 'Read All'}

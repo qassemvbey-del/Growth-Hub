@@ -22,7 +22,11 @@ export default function NotificationsPage() {
     })
   }, [reports, filter])
 
-  const handleMarkAllRead = async () => {
+  const handleMarkAllRead = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
     const unread = reports.filter(r => !r.is_read)
     for (const r of unread) {
       await markAsRead(r.id)
@@ -35,10 +39,18 @@ export default function NotificationsPage() {
     switch (type) {
       case 'deadline_alert':
         return '📅'
-      case 'mission_complete':
+      // case 'mission_complete':
+      //   return '✅'
+      // case 'weekly_review':
+      //   return '📊'
+      case 'overdue_task':
+        return '🚨'
+      case 'squad_join_request':
+        return '👥'
+      case 'squad_member_completed_task':
         return '✅'
-      case 'weekly_review':
-        return '📊'
+      case 'rank_up':
+        return '🎉'
       default:
         return '✉️'
     }
@@ -70,7 +82,7 @@ export default function NotificationsPage() {
           <div className="flex items-center gap-3">
             {reports.some(r => !r.is_read) && (
               <button
-                onClick={handleMarkAllRead}
+                onClick={(e) => handleMarkAllRead(e)}
                 className="flex items-center gap-1.5 px-4 py-2 bg-white/[0.02] hover:bg-white/5 border border-white/10 text-white/70 font-space font-black uppercase tracking-widest hover:text-white transition-all text-[10px] rounded-xl shrink-0 cursor-pointer"
               >
                 <Check className="w-3.5 h-3.5" />

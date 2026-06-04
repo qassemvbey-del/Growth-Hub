@@ -62,18 +62,39 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     if ('Notification' in window && Notification.permission !== 'granted') return
 
     const origin = window.location.origin
+    // const payload = {
+    //   type: 'SHOW_NOTIFICATION',
+    //   title,
+    //   body,
+    //   icon: `${origin}/icons/icon-512.png`,
+    //   badge: `${origin}/icons/icon-192.png`,
+    //   tag: tag || 'pomodoro-timer',
+    // }
     const payload = {
       type: 'SHOW_NOTIFICATION',
       title,
       body,
       icon: `${origin}/icons/icon-512.png`,
-      badge: `${origin}/icons/icon-192.png`,
+      badge: `${origin}/icons/badge-icon.png`,
       tag: tag || 'pomodoro-timer',
+      actions: [
+        { action: 'pause', title: '⏸ Pause Focus' },
+        { action: 'open', title: '🚀 Open Task' }
+      ]
     }
 
     // Primary: use Service Worker directly from registration (highly reliable on mobile PWAs)
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.ready.then((registration) => {
+        // registration.showNotification(title, {
+        //   body,
+        //   icon: payload.icon,
+        //   badge: payload.badge,
+        //   vibrate: [200, 100, 200],
+        //   requireInteraction: true,
+        //   tag: payload.tag,
+        //   renotify: true,
+        // } as unknown as NotificationOptions)
         registration.showNotification(title, {
           body,
           icon: payload.icon,
@@ -82,6 +103,7 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
           requireInteraction: true,
           tag: payload.tag,
           renotify: true,
+          actions: payload.actions
         } as unknown as NotificationOptions).catch(err => {
           console.error('registration.showNotification failed:', err)
         })
@@ -91,11 +113,18 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
 
     // Fallback: try standard Notification API (foreground only)
     try {
+      // new Notification(title, {
+      //   body,
+      //   icon: payload.icon,
+      //   badge: payload.badge,
+      //   requireInteraction: true,
+      // } as NotificationOptions)
       new Notification(title, {
         body,
         icon: payload.icon,
         badge: payload.badge,
         requireInteraction: true,
+        actions: payload.actions
       } as NotificationOptions)
     } catch (err) {
       console.error('Notification fallback failed:', err)
@@ -374,6 +403,42 @@ export function PomodoroProvider({ children }: { children: React.ReactNode }) {
     setGoalId(undefined)
     playBlip()
   }
+
+  // Listen to messages from the Service Worker (e.g. pause action)
+  // useEffect(() => {
+  //   if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return
+  // 
+  //   const handleSWMessage = (event: MessageEvent) => {
+  //     if (event.data && event.data.action === 'pause') {
+  //       pause()
+  //     }
+  //   }
+  // 
+  //   navigator.serviceWorker.addEventListener('message', handleSWMessage)
+  //   return () => {
+  //     navigator.serviceWorker.removeEventListener('message', handleSWMessage)
+  //   }
+  // }, [pause])
+
+  const pauseRef = useRef(pause)
+  useEffect(() => {
+    pauseRef.current = pause
+  }, [pause])
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return
+
+    const handleSWMessage = (event: MessageEvent) => {
+      if (event.data && event.data.action === 'pause') {
+        pauseRef.current()
+      }
+    }
+
+    navigator.serviceWorker.addEventListener('message', handleSWMessage)
+    return () => {
+      navigator.serviceWorker.removeEventListener('message', handleSWMessage)
+    }
+  }, [])
 
   const toggleMinimize = () => {
     setIsMinimized(!isMinimized)

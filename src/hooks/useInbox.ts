@@ -8,7 +8,8 @@ import { useToast } from '@/components/ui/Toast'
 export interface Report {
   id: string
   user_id: string
-  type: 'daily_brief' | 'deadline_alert' | 'mission_complete' | 'weekly_review'
+  // type: 'daily_brief' | 'deadline_alert' | 'mission_complete' | 'weekly_review'
+  type: 'daily_brief' | 'deadline_alert' | 'mission_complete' | 'weekly_review' | 'overdue_task' | 'squad_join_request' | 'squad_member_completed_task' | 'rank_up'
   title: string
   content: any
   is_read: boolean
@@ -278,6 +279,121 @@ Next step: Visit the Wins page to view your golden cup.`
     }
   }
 
+  const checkGoalDeadlines = async (userId: string, lang: string) => {
+    try {
+      const { data: goals } = await supabase
+        .from('goals')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_archived', false)
+        .neq('status', 'complete')
+
+      if (!goals) return
+
+      for (const goal of goals) {
+        if (!goal.end_date) continue
+        
+        const targetDate = new Date(goal.end_date)
+        targetDate.setHours(0,0,0,0)
+        const todayDate = new Date()
+        todayDate.setHours(0,0,0,0)
+        const diffTime = targetDate.getTime() - todayDate.getTime()
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+        if (diffDays === 3 || diffDays === 1) {
+          const uniqueTag = `deadline_${goal.id}_${diffDays}`
+          const { data: existing } = await supabase
+            .from('inbox_reports')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('type', 'deadline_alert')
+            .eq('content->>unique_tag', uniqueTag)
+            .maybeSingle()
+
+          if (!existing) {
+            const title = lang === 'ar' ? `⚠️ اقتراب الموعد النهائي: ${goal.title}` : `⚠️ Deadline Warning: ${goal.title}`
+            const contentText = lang === 'ar' 
+              ? `موعد الهدف [${goal.title}] النهائي بعد [${diffDays}] أيام` 
+              : `[${goal.title}] deadline is in [${diffDays}] days`
+
+            await supabase.from('inbox_reports').insert({
+              user_id: userId,
+              type: 'deadline_alert',
+              title,
+              content: {
+                text: contentText,
+                goal_id: goal.id,
+                unique_tag: uniqueTag
+              }
+            })
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error checking goal deadlines:', e)
+    }
+  }
+
+  const checkOverdueTasks = async (userId: string, lang: string) => {
+    try {
+      const { data: goals } = await supabase
+        .from('goals')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('is_archived', false)
+
+      if (!goals || goals.length === 0) return
+      const goalIds = goals.map((g: any) => g.id)
+
+      const { data: tasks } = await supabase
+        .from('tasks')
+        .select('*')
+        .in('goal_id', goalIds)
+        .eq('is_completed', false)
+
+      if (!tasks) return
+
+      const todayStr = new Date().toISOString().split('T')[0]
+
+      for (const task of tasks) {
+        const deadlineStr = task.metadata?.endDate || task.metadata?.startDate || null
+        if (!deadlineStr) continue
+
+        if (deadlineStr < todayStr) {
+          const uniqueTag = `overdue_${task.id}`
+          const { data: existing } = await supabase
+            .from('inbox_reports')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('type', 'overdue_task')
+            .eq('content->>unique_tag', uniqueTag)
+            .maybeSingle()
+
+          if (!existing) {
+            const title = lang === 'ar' ? `🚨 مهمة متأخرة: ${task.title}` : `🚨 Overdue Task: ${task.title}`
+            const contentText = lang === 'ar'
+              ? `المهمة [${task.title}] متأخرة`
+              : `[${task.title}] is overdue`
+
+            await supabase.from('inbox_reports').insert({
+              user_id: userId,
+              type: 'overdue_task',
+              title,
+              content: {
+                text: contentText,
+                goal_id: task.goal_id,
+                task_id: task.id,
+                unique_tag: uniqueTag
+              }
+            })
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error checking overdue tasks:', e)
+    }
+  }
+
   const generateWeeklyReview = async (userId: string, lang: string, userCreatedAt: string) => {
     if (isGeneratingWeekly.has(userId)) return
     isGeneratingWeekly.add(userId)
@@ -513,8 +629,17 @@ ${recommendationsEn}`
       await fetchReports()
       // Commented out to prevent notification spam loop
       // await generateDailyBrief(user.id, lang)
-      await generateWeeklyReview(user.id, lang, userCreatedAt)
-      await checkDeadlinesAndCompletions(user.id, lang)
+      // await generateWeeklyReview(user.id, lang, userCreatedAt)
+      // await checkDeadlinesAndCompletions(user.id, lang)
+
+      const todayStr = new Date().toISOString().split('T')[0]
+      const lastCheck = localStorage.getItem('last_deadline_check')
+      if (lastCheck !== todayStr) {
+        await checkGoalDeadlines(user.id, lang)
+        await checkOverdueTasks(user.id, lang)
+        localStorage.setItem('last_deadline_check', todayStr)
+        await fetchReports()
+      }
     }
     init()
 
