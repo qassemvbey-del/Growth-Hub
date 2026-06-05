@@ -1283,7 +1283,7 @@ export default function MissionDetailPage() {
         return next
       })
       setNewTaskTitle('')
-      showToast(isRTL ? 'تم إضافة الهدف محلياً' : 'TASK_SAVED', 'success')
+      // showToast(isRTL ? 'تم إضافة الهدف محلياً' : 'TASK_SAVED', 'success')
       return
     }
 
@@ -1292,7 +1292,7 @@ export default function MissionDetailPage() {
     if (data) {
       setMission((prev: any) => ({ ...prev, tasks: [...prev.tasks, data] }))
       setNewTaskTitle('')
-      showToast(isRTL ? 'تم إضافة الهدف' : 'TASK_SAVED', 'success')
+      // showToast(isRTL ? 'تم إضافة الهدف' : 'TASK_SAVED', 'success')
     }
   }
 
@@ -1342,7 +1342,7 @@ export default function MissionDetailPage() {
         localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
         return next
       })
-      showToast(isRTL ? 'تم التحديث' : 'GOAL UPDATED', 'success')
+      // showToast(isRTL ? 'تم التحديث' : 'GOAL UPDATED', 'success')
       return
     }
 
@@ -1380,7 +1380,7 @@ export default function MissionDetailPage() {
     const { error } = await supabase.from('goals').update(updates).eq('id', id)
     if (!error) {
       setMission((prev: any) => ({ ...prev, ...updates }))
-      showToast(isRTL ? 'تم التحديث' : 'GOAL UPDATED', 'success')
+      // showToast(isRTL ? 'تم التحديث' : 'GOAL UPDATED', 'success')
     }
   }
 

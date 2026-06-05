@@ -72,9 +72,9 @@ export default function Tutorial() {
 
   useEffect(() => {
     if (spotlightRect && typeof window !== 'undefined') {
-      const popupWidth = 360
+      const margin = window.innerWidth < 640 ? 16 : 24
+      const popupWidth = Math.min(360, window.innerWidth - margin * 2)
       const popupHeight = 240
-      const margin = 24
       
       let top = 0
       let left = 0
@@ -139,7 +139,7 @@ export default function Tutorial() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3 }}
-            className="absolute p-6 rounded-md border bg-zinc-950/95 border-white/10 text-white pointer-events-auto shadow-2xl z-[700] w-[360px]"
+            className="absolute p-6 rounded-md border bg-zinc-950/95 border-white/10 text-white pointer-events-auto shadow-2xl z-[700] w-[calc(100vw-32px)] sm:w-[360px]"
             style={{
               top: `${coords.top}px`,
               left: `${coords.left}px`,

@@ -38,9 +38,15 @@
     }
   }
 
+  @keyframes page-fade-in {
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
   --animate-scanline: scanline 12s linear infinite;
   /* --animate-aurora-blob: aurora-blob 20s infinite ease-in-out; */
   --animate-aurora-blob: aurora-blob 10s infinite ease-in-out;
+  --animate-page-fade-in: page-fade-in 0.3s ease-out forwards;
 }
 
 :root {
