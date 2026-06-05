@@ -446,7 +446,8 @@ export default function Shell({ children }: ShellProps) {
     const handleTouchStart = (e: TouchEvent) => {
       startX = e.touches[0].clientX
       startY = e.touches[0].clientY
-      const edgeSize = 80
+      // const edgeSize = 80
+      const edgeSize = 120
       const screenWidth = window.innerWidth
       if (!isMobileNavOpen) {
         tracking = isRTL 
