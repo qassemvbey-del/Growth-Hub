@@ -137,7 +137,8 @@ export default function GlobalCreateGoalModal() {
         // Dispatch event so any mounted page can refresh its list
         window.dispatchEvent(new CustomEvent('goal-created', { detail: newLocalGoal }))
         // router.push(`/missions/${fakeId}`)
-        router.push(`/goals/${fakeId}`)
+        // router.push(`/goals/${fakeId}`)
+        router.push(`/goals/solo`)
         return
       }
 
@@ -211,7 +212,8 @@ export default function GlobalCreateGoalModal() {
 
         // Navigate into the new goal
         // router.push(`/missions/${data.id}`)
-        const targetPath = goalType === 'squad' ? `/goals/squad/${data.id}` : `/goals/${data.id}`
+        // const targetPath = goalType === 'squad' ? `/goals/squad/${data.id}` : `/goals/${data.id}`
+        const targetPath = goalType === 'squad' ? `/goals/squad/${data.id}` : `/goals/solo`
         router.push(targetPath)
       } else {
         showToast(isRTL ? 'مش اشتغل — جرب تاني' : 'Creation failed — try again', 'warning')
