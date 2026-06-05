@@ -749,7 +749,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
 
       <main
         className={cn(
-        'flex-1 min-h-[100dvh] transition-all duration-500 relative z-10 w-full max-w-full overflow-x-hidden',
+        'flex-1 min-h-[100dvh] relative z-10 w-full max-w-full overflow-x-hidden',
         'pb-24 lg:pb-8',
         'lg:ps-72 lg:max-w-none'
       )}>
