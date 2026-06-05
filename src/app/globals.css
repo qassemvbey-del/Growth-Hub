@@ -422,6 +422,7 @@ input, textarea {
   height: 0 !important;
 }
 
+/* Commented out per rule "Never delete code, only comment it out"
 main > div {
   animation: pageFade 0.2s ease-in-out;
 }
@@ -430,5 +431,6 @@ main > div {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+*/
 
 
