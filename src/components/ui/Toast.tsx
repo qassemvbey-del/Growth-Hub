@@ -46,7 +46,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       {mounted && (
         <div 
-          className={`fixed top-4 z-[99999] flex flex-col gap-2 w-full px-4 pointer-events-none left-1/2 -translate-x-1/2 md:top-6 md:left-auto md:translate-x-0 ${isRTL ? 'md:left-6' : 'md:right-6'} max-w-[310px] md:max-w-[350px]`}
+          // className={`fixed top-4 z-[99999] flex flex-col gap-2 w-full px-4 pointer-events-none left-1/2 -translate-x-1/2 md:top-6 md:left-auto md:translate-x-0 ${isRTL ? 'md:left-6' : 'md:right-6'} max-w-[310px] md:max-w-[350px]`}
+          className={`fixed top-16 z-[99999] flex flex-col gap-2 w-full px-4 pointer-events-none left-1/2 -translate-x-1/2 md:top-6 md:left-auto md:translate-x-0 ${isRTL ? 'md:left-6' : 'md:right-6'} max-w-[310px] md:max-w-[350px]`}
           dir={isRTL ? 'rtl' : 'ltr'}
         >
           <AnimatePresence>
@@ -69,10 +70,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               return (
                 <motion.div
                   key={toast.id}
+                  /*
                   initial={{ opacity: 0, y: -25, scale: 0.92 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -15, scale: 0.95 }}
                   transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                  */
+                  initial={{ opacity: 0, y: -10, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                  transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                   className="pointer-events-auto"
                 >
                   <div 
