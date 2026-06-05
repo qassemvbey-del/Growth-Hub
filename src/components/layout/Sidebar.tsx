@@ -98,7 +98,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
     /* bg-[var(--sidebar-bg)] border-[var(--card-border)] */
     /* bg-white/60 dark:bg-black/40 backdrop-blur-3xl border-x-0 shadow-[20px_0_50px...] */
     <aside className={cn(
-      "hidden lg:flex w-72 bg-transparent dark:bg-gradient-to-r dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-e border-black/5 dark:border-white/[0.03] shadow-[10px_0_30px_-10px_rgba(0,0,0,0.3)] rtl:shadow-[-10px_0_30px_-10px_rgba(0,0,0,0.3)] h-screen fixed top-0 flex-col z-[110] sidebar-target transition-all duration-300",
+      "hidden lg:flex w-72 bg-transparent dark:bg-gradient-to-r dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-e border-black/5 dark:border-white/[0.03] shadow-[10px_0_30px_-10px_rgba(0,0,0,0.3)] rtl:shadow-[-10px_0_30px_-10px_rgba(0,0,0,0.3)] h-screen fixed top-0 flex-col z-[110] sidebar-target",
       "inset-inline-start-0"
     )}>
       {/* ── ULTRA-PREMIUM IDENTITY LAYER ── */}
@@ -562,7 +562,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               
               <span className={cn(
                 "font-space tracking-[0.2em] font-semibold flex-grow transition-colors duration-300",
-                isRTL ? "text-[15px]" : "text-[11px]"
+                "text-[13px]"
               )}
               style={{ 
                 color: isActive 
