@@ -384,7 +384,12 @@ export default function Shell({ children }: ShellProps) {
       if (isRTL) {
         isDragging = startX > screenWidth - edgeSize
       } else {
-        isDragging = startX < edgeSize || isMobileNavOpen
+        // isDragging = startX < edgeSize || isMobileNavOpen
+        if (isMobileNavOpen) {
+          isDragging = true
+        } else {
+          isDragging = startX < edgeSize
+        }
       }
     }
 
