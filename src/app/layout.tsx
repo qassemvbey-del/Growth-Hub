@@ -36,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className="dark">
+    <html lang="en" suppressHydrationWarning className="dark" style={{ WebkitTextSizeAdjust: '100%', textSizeAdjust: '100%' }}>
       <head>
         {typeof window === 'undefined' && (
           <script id="theme-lang-script" dangerouslySetInnerHTML={{
@@ -48,6 +48,8 @@ export default function RootLayout({
                   var isRTL = lang === 'ar';
                   document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
                   document.documentElement.lang = isRTL ? 'ar' : 'en';
+                  document.documentElement.style.webkitTextSizeAdjust = '100%';
+                  document.documentElement.style.textSizeAdjust = '100%';
                   var targetSize = isRTL ? '140%' : '100%';
                   var targetLH = isRTL ? '1.8' : 'normal';
                   document.documentElement.style.fontSize = targetSize;
