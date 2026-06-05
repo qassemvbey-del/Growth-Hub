@@ -1306,11 +1306,25 @@ export default function Shell({ children }: ShellProps) {
                   delay: 0.05,
                   action: () => { showToast(isRTL ? 'ميزة إنشاء المهام العامة قريباً.' : 'Global Task Creation coming soon.', 'info'); setIsFabMenuOpen(false); playBlip(); }
                 },
+                /*
                 { 
                   label: isRTL ? 'هدف جديد' : 'Create Goal', 
                   icon: Target, 
                   delay: 0,
                   action: () => { openCreateGoalModal({ goalType: 'solo' }); setIsFabMenuOpen(false); playNeuralLink(); }
+                },
+                */
+                { 
+                  label: isRTL ? 'هدف شخصي' : 'Solo Goal', 
+                  icon: User, 
+                  delay: 0,
+                  action: () => { openCreateGoalModal({ goalType: 'solo' }); setIsFabMenuOpen(false); playNeuralLink(); }
+                },
+                { 
+                  label: isRTL ? 'هدف فريق' : 'Squad Goal', 
+                  icon: Users, 
+                  delay: 0,
+                  action: () => { openCreateGoalModal({ goalType: 'squad' }); setIsFabMenuOpen(false); playNeuralLink(); }
                 },
               ].map((item, i) => (
                 <motion.button
