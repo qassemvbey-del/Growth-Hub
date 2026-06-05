@@ -1044,7 +1044,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 ) : (
                   <Users className="text-xl md:text-4xl w-6 h-6 md:w-8 md:h-8 shrink-0" style={{ color: currentTheme.color }} />
                 )}
-                <h1 className="text-2xl md:text-6xl font-black font-space tracking-wider uppercase text-black dark:text-white leading-none truncate">
+                <h1 className="text-lg md:text-6xl font-black font-space tracking-wider uppercase text-black dark:text-white leading-none truncate">
                   {typeFilter === 'solo' ? (
                     <>{isRTL ? 'أهدافي' : 'Personal'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الشخصية' : ' Goals'}</span></>
                   ) : typeFilter === 'squad' ? (
@@ -1054,7 +1054,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                   )}
                 </h1>
               </div>
-              <p className={cn("text-[13px] font-space font-medium truncate max-w-xs md:max-w-none block", isRTL ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]")}>
+              {/* Subtitle — hidden on mobile to avoid duplication with the count badge in command bar */}
+              <p className={cn("hidden md:block text-[13px] font-space font-medium truncate max-w-xs md:max-w-none", isRTL ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]")}>
                 {typeFilter === 'solo' ? (
                   <>{isRTL ? 'هدف نشط' : 'Personal Goals'} &nbsp;·&nbsp; {missions.length} {isRTL ? 'نشط' : 'Active'}</>
                 ) : typeFilter === 'squad' ? (

@@ -511,7 +511,7 @@ export default function Dashboard() {
                     </option>
                   ))}
                 </select> */
-                <select
+                /* <select
                   value={selectedSquadId}
                   onChange={(e) => { playBlip(); setSelectedSquadId(e.target.value); }}
                   className="bg-[var(--card)] border border-[var(--border)] rounded-xl py-2 px-4 shadow-lg text-sm outline-none cursor-pointer truncate max-w-[200px] shrink-0 font-space font-medium text-zinc-300"
@@ -519,6 +519,18 @@ export default function Dashboard() {
                 >
                   {squadsList.map((sq) => (
                     <option key={sq.id} value={sq.id} className="py-2 px-4 bg-[var(--card)] hover:bg-[var(--card-hover)] text-white text-sm">
+                      {sq.title}
+                    </option>
+                  ))}
+                </select> */
+                <select
+                  value={selectedSquadId}
+                  onChange={(e) => { playBlip(); setSelectedSquadId(e.target.value); }}
+                  className="bg-zinc-900 border border-zinc-700 rounded-lg py-1 px-2 text-[10px] sm:text-[11px] outline-none cursor-pointer truncate max-w-[90px] sm:max-w-[130px] shrink-0 font-space font-bold text-zinc-200"
+                  style={{ colorScheme: 'dark', borderColor: `${currentTheme.color}40`, color: currentTheme.color }}
+                >
+                  {squadsList.map((sq) => (
+                    <option key={sq.id} value={sq.id} className="bg-zinc-900 text-zinc-200">
                       {sq.title}
                     </option>
                   ))}
@@ -718,13 +730,16 @@ export default function Dashboard() {
                    <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: isInRedZone ? '#ef4444' : customColor }} />
 
                    <div className="flex justify-between items-start gap-1.5 sm:gap-2 min-w-0">
-                      {/* Commented out per rule "Never delete code, only comment it out" */}
-                      {/* <h3 className="font-black uppercase tracking-wide truncate max-w-[120px] md:max-w-none text-sm md:text-base text-zinc-100 font-space">
-                       {mission.title}
-                      </h3> */}
-                      <h3 className="uppercase tracking-wide truncate min-w-0 flex-1 text-sm md:text-base font-medium text-zinc-100 font-space">
-                       {mission.title}
-                      </h3>
+                       {/* Commented out per rule "Never delete code, only comment it out" */}
+                       {/* <h3 className="font-black uppercase tracking-wide truncate max-w-[120px] md:max-w-none text-sm md:text-base text-zinc-100 font-space">
+                        {mission.title}
+                       </h3> */}
+                       {/* <h3 className="uppercase tracking-wide truncate min-w-0 flex-1 text-sm md:text-base font-medium text-zinc-100 font-space">
+                        {mission.title}
+                       </h3> */}
+                       <h3 className="tracking-wide truncate min-w-0 flex-1 text-xs sm:text-sm font-semibold text-zinc-100 font-space">
+                        {mission.title}
+                       </h3>
                     <span 
                       className="text-xs font-black font-mono shrink-0"
                       style={{ color: isInRedZone ? '#ef4444' : customColor }}
