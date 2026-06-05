@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import Shell from '@/components/layout/Shell'
+// import Shell from '@/components/layout/Shell'
 import { useInbox } from '@/hooks/useInbox'
 import { useGrowth } from '@/context/GrowthContext'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -46,7 +46,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <Shell>
+    <>
       <div className="w-full min-h-[calc(100vh-64px)] py-8 md:py-12 px-4 max-w-3xl mx-auto font-space space-y-8">
         
         {/* Header */}
@@ -242,6 +242,6 @@ export default function NotificationsPage() {
         </div>
 
       </div>
-    </Shell>
+    </>
   )
 }

@@ -5,7 +5,7 @@ import { FileText, Keyboard, Layers, Link, Pin, Plus, Save, Search, Trash2, X, B
 */
 import { FileText, Keyboard, Layers, Link, Pin, Plus, Save, Search, Trash2, X, Bold, Italic, Target } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
-import Shell from '@/components/layout/Shell'
+// import Shell from '@/components/layout/Shell'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase'
@@ -500,7 +500,7 @@ export default function NotesPage() {
   }
 
   if (loading) return (
-    <Shell>
+    <>
       <div className="p-4 md:p-12 space-y-10">
         {/* Subtle holographic connection subtitle */}
         <div className="text-center md:text-left">
@@ -550,11 +550,11 @@ export default function NotesPage() {
           ))}
         </div>
       </div>
-    </Shell>
+    </>
   )
 
   return (
-    <Shell>
+    <>
       <div className="p-4 md:p-12 space-y-10">
         {/* Header */}
         <header className="flex flex-col gap-4 w-full">
@@ -1283,6 +1283,6 @@ export default function NotesPage() {
           </motion.div>
         )}
       </AnimatePresence>
-    </Shell>
+    </>
   )
 }

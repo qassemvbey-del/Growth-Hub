@@ -3,7 +3,7 @@
 import { AlertTriangle, CheckCircle2, FileText, HelpCircle, Lock, LogOut, Star, User, Brain, Settings as SettingsIcon, Moon, Sun, Trophy, Volume2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Shell from '@/components/layout/Shell'
+// import Shell from '@/components/layout/Shell'
 import { useGrowth } from '@/context/GrowthContext'
 import { createClient } from '@/lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -246,11 +246,11 @@ export default function SettingsPage() {
   }
 
   if (isLoading || !mounted) return (
-    <Shell>
+    <>
       <div className="p-16 font-space animate-pulse tracking-widest text-sm md:text-base" style={{ color: currentTheme.color }}>
         {isRTL ? 'جاري التحميل...' : 'LOADING USER DATA...'}
       </div>
-    </Shell>
+    </>
   )
 
   const getTabIcon = (id: 'ACCOUNT' | 'RANKS' | 'AI_COACH' | 'SYSTEM', className?: string) => {
@@ -268,7 +268,7 @@ export default function SettingsPage() {
   ] as const
 
   return (
-    <Shell>
+    <>
       <div className="min-h-[calc(100dvh-64px)] p-2 sm:p-6 md:p-12 pb-32 flex flex-col items-center">
         <div className="w-full max-w-4xl space-y-6 sm:space-y-10">
           
@@ -1333,6 +1333,6 @@ export default function SettingsPage() {
         <AvatarSelector onClose={() => setIsAvatarSelectorOpen(false)} />
       )}
 
-    </Shell>
+    </>
   )
 }

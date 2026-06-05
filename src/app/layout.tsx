@@ -8,6 +8,7 @@ import { PomodoroProvider } from "@/context/PomodoroContext";
 import NeuralMesh from "@/components/ui/NeuralMesh";
 import PWARegistration from "@/components/layout/PWARegistration";
 import GlobalCursor from "@/components/ui/GlobalCursor";
+import Shell from '@/components/layout/Shell';
 
 import Script from "next/script";
 
@@ -82,7 +83,9 @@ export default function RootLayout({
                 <NeuralMesh />
                 <PWARegistration />
                 <GlobalCursor />
-                {children}
+                <Shell>
+                  {children}
+                </Shell>
               </PomodoroProvider>
             </ToastProvider>
           </GrowthProvider>

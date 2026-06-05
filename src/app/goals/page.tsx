@@ -3,7 +3,7 @@
 // import { AlertTriangle, ArrowRight, Calendar, Check, CheckCircle2, HelpCircle, Info, Kanban, Layers, Link, List, Plus, RefreshCw, Users2, Zap, Trophy, Award, Shield, Settings, Star, X, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard, Circle } from 'lucide-react'
 import { AlertTriangle, ArrowRight, Calendar, Check, CheckCircle2, HelpCircle, Info, Kanban, Layers, Link, List, Plus, RefreshCw, Users2, Zap, Trophy, Award, Shield, Settings, Star, X, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard, Circle, Target, Users } from 'lucide-react'
 import { NeonIcon } from '@/components/ui/NeonIcon'
-import Shell from '@/components/layout/Shell'
+// import Shell from '@/components/layout/Shell'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
 import { cn } from '@/lib/utils'
@@ -966,7 +966,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
   })
 
   if (loading || !mounted) return (
-    <Shell>
+    <>
       <div className="max-w-7xl mx-auto p-6 md:p-12 space-y-12">
         {/* Subtle holographic subtitle */}
         <div className="text-center md:text-left">
@@ -1023,11 +1023,11 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
           ))}
         </div>
       </div>
-    </Shell>
+    </>
   )
 
   return (
-    <Shell>
+    <>
       <div className="max-w-7xl mx-auto p-6 md:p-12 space-y-12">
         {/* Header */}
         <motion.header
@@ -1734,7 +1734,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
           </motion.div>
         )}
       </AnimatePresence>
-    </Shell>
+    </>
   )
 }
 

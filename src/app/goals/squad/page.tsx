@@ -1,6 +1,6 @@
 'use client'
 
-import Shell from '@/components/layout/Shell'
+// import Shell from '@/components/layout/Shell'
 import { NeonIcon } from '@/components/ui/NeonIcon'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
@@ -1150,7 +1150,7 @@ export default function SquadGoalsPage() {
   })
 
   if (loading || !mounted) return (
-    <Shell>
+    <>
       <div className="max-w-7xl mx-auto p-6 md:p-12 space-y-12">
         {/* Subtle holographic subtitle */}
         <div className="text-center md:text-left">
@@ -1208,11 +1208,11 @@ export default function SquadGoalsPage() {
           ))}
         </div>
       </div>
-    </Shell>
+    </>
   )
 
   return (
-    <Shell>
+    <>
       <div className="max-w-7xl mx-auto p-6 md:p-12 space-y-6 md:space-y-12">
         <motion.header
           initial={{ opacity: 0, y: 8 }}
@@ -1974,7 +1974,7 @@ export default function SquadGoalsPage() {
           </motion.div>
         )}
       </AnimatePresence>
-    </Shell>
+    </>
   )
 }
 

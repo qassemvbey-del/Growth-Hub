@@ -3,7 +3,7 @@
 import { Lock } from 'lucide-react'
 import React from 'react'
 import { motion, useMotionValue, useSpring, useMotionTemplate } from 'framer-motion'
-import Shell from '@/components/layout/Shell'
+// import Shell from '@/components/layout/Shell'
 import EnergyCell from '@/components/ui/EnergyCell'
 import { useGrowth } from '@/context/GrowthContext'
 import { cn } from '@/lib/utils'
@@ -441,10 +441,10 @@ export function VaultContent() {
 
 export default function VaultPage() {
   return (
-    <Shell>
+    <>
       <main className="p-4 md:p-12 min-h-screen">
         <VaultContent />
       </main>
-    </Shell>
+    </>
   )
 }

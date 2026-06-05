@@ -3,7 +3,7 @@
 // import { CheckCircle2, Lock, Medal, X } from 'lucide-react'
 import { CheckCircle2, Lock, Medal, X, Trophy } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
-import Shell from '@/components/layout/Shell'
+// import Shell from '@/components/layout/Shell'
 import EnergyCell from '@/components/ui/EnergyCell'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
@@ -97,7 +97,7 @@ export default function WinsPage() {
   if (!mounted) return null
 
   return (
-    <Shell>
+    <>
       <div className="p-6 md:p-12 space-y-12 md:space-y-16">
 
             {/* Header */}
@@ -350,6 +350,6 @@ export default function WinsPage() {
           )}
         </AnimatePresence>
       </div>
-    </Shell>
+    </>
   )
 }

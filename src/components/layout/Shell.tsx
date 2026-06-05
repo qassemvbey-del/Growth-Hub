@@ -156,13 +156,19 @@ function WorkspaceLoader({ isRTL, rank: propRank }: { isRTL: boolean; rank?: str
   )
 }
 
+/*
 interface ShellProps {
   children: React.ReactNode
   syncedMissions?: any[]
   onMissionsRefresh?: () => void
 }
+*/
+interface ShellProps {
+  children: React.ReactNode
+}
 
-export default function Shell({ children, syncedMissions = [], onMissionsRefresh }: ShellProps) {
+// export default function Shell({ children, syncedMissions = [], onMissionsRefresh }: ShellProps) {
+export default function Shell({ children }: ShellProps) {
   const { isRTL, profile, calculateAccountability, lastAiMessage, t, currentTheme, isRankUpModalOpen, setIsRankUpModalOpen, isLoading, showAuthModal, setShowAuthModal, openCreateGoalModal, isTaskDrawerOpen } = useGrowth()
   const pathname = usePathname()
   const router = useRouter()
@@ -179,6 +185,23 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
   const [activeLogIndex, setActiveLogIndex] = useState(0)
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false)
+  
+  const [syncedMissions, setSyncedMissions] = useState<any[]>([])
+
+  useEffect(() => {
+    const fetchMissions = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase
+        .from('goals')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_archived', false)
+      if (data) setSyncedMissions(data)
+    }
+    fetchMissions()
+  }, [])
   
   // Real-time Mobile Search Overlay and Live Search States
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false)

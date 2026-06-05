@@ -3,7 +3,7 @@
 import { NeonIcon } from '@/components/ui/NeonIcon'
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import Shell from '@/components/layout/Shell'
+// import Shell from '@/components/layout/Shell'
 import EnergyCell from '@/components/ui/EnergyCell'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
@@ -1484,16 +1484,16 @@ const { progress, isInRedZone } = useMemo(() => {
   }, [squadMembers])
 
   if (loading || !mounted) return (
-    <Shell>
+    <>
       <div className="p-16 font-space animate-pulse tracking-widest text-sm uppercase" style={{ color: currentTheme.color }}>
         {isRTL ? 'جاري التحميل...' : 'LOADING WORKSPACE...'}
       </div>
-    </Shell>
+    </>
   )
 
   if (!mission) {
     return (
-      <Shell>
+      <>
         <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center font-space">
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -1528,7 +1528,7 @@ const { progress, isInRedZone } = useMemo(() => {
             </div>
           </motion.div>
         </div>
-      </Shell>
+      </>
     )
   }
 
@@ -1538,7 +1538,7 @@ const { progress, isInRedZone } = useMemo(() => {
   const totalCount = mission?.tasks?.length || 0
 
   return (
-    <Shell>
+    <>
       <div className="w-full max-w-7xl mx-auto px-4 md:px-8 p-4 md:p-12 space-y-8 md:space-y-12">
         
         {/* Mission Header Overview */}
@@ -3005,6 +3005,6 @@ const { progress, isInRedZone } = useMemo(() => {
         />
       )}
       </div>
-    </Shell>
+    </>
   )
 }

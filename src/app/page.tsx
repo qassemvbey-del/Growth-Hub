@@ -346,7 +346,8 @@ export default function Dashboard() {
   }
 
   return (
-    <Shell syncedMissions={missions} onMissionsRefresh={fetchDashboardMissions}>
+    <Shell>
+      {/* <Shell syncedMissions={missions} onMissionsRefresh={fetchDashboardMissions}> */}
       <div 
         className="w-full min-h-[calc(100dvh-64px)] font-space relative"
         style={{ background: `radial-gradient(ellipse at 50% 0%, ${currentTheme.color}45 0%, transparent 55%), radial-gradient(ellipse at 80% 20%, ${currentTheme.color}30 0%, transparent 45%)` }}
