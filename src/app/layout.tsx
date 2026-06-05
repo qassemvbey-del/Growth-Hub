@@ -50,10 +50,14 @@ export default function RootLayout({
                   document.documentElement.lang = isRTL ? 'ar' : 'en';
                   document.documentElement.style.webkitTextSizeAdjust = '100%';
                   document.documentElement.style.textSizeAdjust = '100%';
+                  /* Commented out per rule "Never delete code, only comment it out"
                   var targetSize = isRTL ? '140%' : '100%';
                   var targetLH = isRTL ? '1.8' : 'normal';
                   document.documentElement.style.fontSize = targetSize;
                   document.documentElement.style.lineHeight = targetLH;
+                  */
+                  document.documentElement.style.fontSize = '100%';
+                  document.documentElement.style.lineHeight = 'normal';
                   var cachedColor = localStorage.getItem('cached_theme_color') || '#22c55e';
                   document.documentElement.style.setProperty('--color-neon-green', cachedColor);
                   document.documentElement.style.setProperty('--color-primary', cachedColor);
