@@ -758,9 +758,12 @@ export default function Dashboard() {
                        {/* <h3 className="uppercase tracking-wide truncate min-w-0 flex-1 text-sm md:text-base font-medium text-zinc-100 font-space">
                         {mission.title}
                        </h3> */}
-                       <h3 className="tracking-wide truncate min-w-0 flex-1 text-xs sm:text-sm font-semibold text-zinc-100 font-space">
-                        {mission.title}
-                       </h3>
+                        {/* <h3 className="tracking-wide truncate min-w-0 flex-1 text-xs sm:text-sm font-semibold text-zinc-100 font-space">
+                         {mission.title}
+                        </h3> */}
+                        <h3 className="tracking-wide truncate min-w-0 flex-1 font-semibold text-zinc-100 font-space" style={{ fontSize: '0.75rem', lineHeight: '1.25rem' }}>
+                         {mission.title}
+                        </h3>
                     <span 
                       className="text-xs font-black font-mono shrink-0"
                       style={{ color: isInRedZone ? '#ef4444' : customColor }}
