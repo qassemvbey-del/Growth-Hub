@@ -1329,6 +1329,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
     if (document.documentElement.dir !== dir) document.documentElement.dir = dir
     if (document.documentElement.lang !== lang) document.documentElement.lang = lang
     
+    /* Commented out per rule "Never delete code, only comment it out"
     const targetSize = lang === 'ar' ? '140%' : '100%'
     const targetLH = lang === 'ar' ? '1.8' : 'normal'
     
@@ -1338,6 +1339,9 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
     if (document.documentElement.style.lineHeight !== targetLH) {
       document.documentElement.style.lineHeight = targetLH
     }
+    */
+    document.documentElement.style.fontSize = '100%'
+    document.documentElement.style.lineHeight = 'normal'
   }, [profile?.language, isRTL, mounted])
 
   return (

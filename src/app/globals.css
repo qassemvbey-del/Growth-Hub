@@ -125,6 +125,7 @@
   }
 
   /* Global Typography Scaling for Arabic & English */
+  /* Commented out per rule "Never delete code, only comment it out"
   [lang='ar'], [dir='rtl'], .arabic-text {
     font-family: 'Cairo', sans-serif !important;
     font-size: 15px !important;
@@ -138,6 +139,7 @@
     font-weight: 900 !important;
     letter-spacing: 0 !important;
   }
+  */
 
   [lang='en'] {
     font-family: var(--font-space), sans-serif !important;
