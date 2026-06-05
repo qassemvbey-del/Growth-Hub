@@ -957,7 +957,8 @@ export default function Shell({ children }: ShellProps) {
       {/* Edge swipe zone - 20px from left/right edge to open sidebar */}
       {!isMobileNavOpen && (
         <motion.div
-          className="fixed top-0 bottom-0 w-5 z-[199] lg:hidden"
+          // className="fixed top-0 bottom-0 w-5 z-[199] lg:hidden"
+          className="fixed top-0 bottom-0 w-16 z-[199] lg:hidden"
           style={{ [isRTL ? 'right' : 'left']: 0 }}
           drag="x"
           dragConstraints={isRTL 
@@ -988,6 +989,15 @@ export default function Shell({ children }: ShellProps) {
         dragElastic={0.05}
         dragMomentum={false}
         onDragEnd={handleSidebarDragEnd}
+        onDrag={(_e, info) => {
+          const currentX = sidebarX.get()
+          const delta = info.delta.x
+          const newX = Math.max(
+            isRTL ? 0 : -SIDEBAR_WIDTH,
+            Math.min(isRTL ? SIDEBAR_WIDTH : 0, currentX + delta)
+          )
+          sidebarX.set(newX)
+        }}
         style={{ 
           x: sidebarX, 
           borderColor: `${currentTheme.color}50`, 
