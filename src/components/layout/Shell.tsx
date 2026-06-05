@@ -1131,13 +1131,11 @@ export default function Shell({ children }: ShellProps) {
           sidebarX.set(newX)
         }}
         style={{ 
-          x: sidebarX, 
-          borderColor: `${currentTheme.color}50`, 
-          boxShadow: isRTL ? `-10px 0 40px ${currentTheme.color}40` : `10px 0 40px ${currentTheme.color}40` 
+          x: sidebarX
         }}
         className={cn(
-          "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-zinc-950/95 backdrop-blur-2xl shadow-2xl p-6 transform-gpu will-change-transform touch-pan-y",
-          isRTL ? "right-0 border-l border-r-0" : "left-0 border-r"
+          "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-black/50 backdrop-blur-xl p-6 transform-gpu will-change-transform touch-pan-y",
+          isRTL ? "right-0 border-s border-white/10" : "left-0 border-e border-white/10"
         )}
       >
         {/* Header of Drawer */}
@@ -1175,6 +1173,122 @@ export default function Shell({ children }: ShellProps) {
         </div>
 
         {/* Navigation Items */}
+        <div className="flex-1 space-y-1.5 overflow-y-auto">
+          {[
+            { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
+            { label: isRTL ? 'الأهداف' : 'Goals', icon: Target, href: '/goals' },
+            { label: isRTL ? 'أهدافي' : 'Solo Goals', icon: User, href: '/goals/solo', indent: true },
+            { label: isRTL ? 'الفريق' : 'Squad Goals', icon: Users, href: '/goals/squad', indent: true },
+            { label: isRTL ? 'ملاحظاتي' : 'Notes', icon: FileText, href: '/notes' },
+            { label: isRTL ? 'إنجازاتي' : 'Wins', icon: Trophy, href: '/achievements' },
+          ].map(item => {
+            const isActive = pathname === item.href
+            const IconComponent = item.icon
+            return (
+              <button
+                key={item.href}
+                onClick={() => { playBlip(); router.push(item.href); setIsMobileNavOpen(false); }}
+                className={cn(
+                  "w-full flex items-center gap-3 py-2.5 px-3 rounded-lg font-space text-sm font-medium transition-all relative cursor-pointer",
+                  item.indent 
+                    ? "ms-6 ps-4 border-s border-white/5 text-xs py-2" 
+                    : "",
+                  isActive 
+                    ? "text-[var(--text-primary)]" 
+                    : "text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
+                )}
+                style={isActive ? { 
+                  color: currentTheme.color, 
+                  backgroundColor: `${currentTheme.color}15`,
+                } : {}}
+              >
+                <IconComponent className={item.indent ? "w-4 h-4 shrink-0" : "w-5 h-5 shrink-0"} />
+                <span>{item.label}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Footer Settings Toggle */}
+        <div className="pt-4 border-t border-white/5 mt-auto">
+          <button
+            onClick={() => { router.push('/settings'); setIsMobileNavOpen(false); playBlip(); }}
+            className={cn(
+              "w-full flex items-center gap-3 py-2.5 px-3 rounded-lg font-space text-sm font-medium transition-all relative cursor-pointer",
+              pathname === '/settings'
+                ? "text-[var(--text-primary)]" 
+                : "text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
+            )}
+            style={pathname === '/settings' ? { 
+              color: currentTheme.color, 
+              backgroundColor: `${currentTheme.color}15`,
+            } : {}}
+          >
+            <Settings className="w-5 h-5 shrink-0" />
+            <span>{isRTL ? 'الإعدادات' : 'Settings'}</span>
+          </button>
+        </div>
+      </motion.div>
+
+      {/* ORIGINAL_MOBILE_DRAWER_CODE_FOR_REFERENCE:
+      <motion.div
+        drag="x"
+        dragConstraints={isRTL
+          ? { left: 0, right: SIDEBAR_WIDTH }
+          : { left: -SIDEBAR_WIDTH, right: 0 }
+        }
+        dragElastic={0.05}
+        dragMomentum={false}
+        onDragEnd={handleSidebarDragEnd}
+        onDrag={(_e, info) => {
+          const currentX = sidebarX.get()
+          const delta = info.delta.x
+          const newX = Math.max(
+            isRTL ? 0 : -SIDEBAR_WIDTH,
+            Math.min(isRTL ? SIDEBAR_WIDTH : 0, currentX + delta)
+          )
+          sidebarX.set(newX)
+        }}
+        style={{ 
+          x: sidebarX, 
+          borderColor: `${currentTheme.color}50`, 
+          boxShadow: isRTL ? `-10px 0 40px ${currentTheme.color}40` : `10px 0 40px ${currentTheme.color}40` 
+        }}
+        className={cn(
+          "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-zinc-950/95 backdrop-blur-2xl shadow-2xl p-6 transform-gpu will-change-transform touch-pan-y",
+          isRTL ? "right-0 border-l border-r-0" : "left-0 border-r"
+        )}
+      >
+        <div className="flex justify-between items-center mb-8">
+          <AnimatedLogo className="text-lg tracking-[0.2em]" />
+          <button 
+            onClick={() => { setIsMobileNavOpen(false); playBlip(); }}
+            className="w-8 h-8 flex items-center justify-center bg-white/5 border border-white/10 rounded-full text-white/50 hover:text-white transition-all cursor-pointer active:scale-95"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="flex flex-col items-center text-center pb-6 border-b border-white/5 mb-6">
+          <div 
+            onClick={() => { router.push('/settings'); setIsMobileNavOpen(false); }}
+            className="relative p-1 rounded-full bg-gradient-to-tr shadow-lg cursor-pointer"
+            style={{ backgroundImage: `linear-gradient(to top right, ${currentTheme.color}, ${currentTheme.color}88, transparent, ${currentTheme.color})`, boxShadow: `0 0 20px ${currentTheme.color}33` }}
+          >
+            <div className="w-16 h-16 rounded-full bg-[#050505] p-0.5 overflow-hidden flex items-center justify-center">
+              {mounted && profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="User" className="w-[90%] h-[90%] mx-auto object-contain rounded-full" />
+              ) : (
+                <User className="w-8 h-8 text-[var(--text-secondary)]" />
+              )}
+            </div>
+          </div>
+          <span className="text-sm font-space font-black mt-3 text-zinc-100 truncate max-w-[200px]">
+            {profile?.full_name || 'USER'}
+          </span>
+          <span className="text-[10px] font-space font-black uppercase tracking-[0.2em] opacity-80 mt-1" style={{ color: currentTheme.color }}>
+            XP: {profile?.xp || 0}
+          </span>
+        </div>
         <div className="flex-1 space-y-2 overflow-y-auto">
           {[
             { label: isRTL ? 'الرئيسية' : 'Home', icon: Home, href: '/' },
@@ -1213,8 +1327,6 @@ export default function Shell({ children }: ShellProps) {
             )
           })}
         </div>
-
-        {/* Footer Settings Toggle */}
         <div className="pt-4 border-t border-white/5">
           <button
             onClick={() => { router.push('/settings'); setIsMobileNavOpen(false); playBlip(); }}
@@ -1228,6 +1340,7 @@ export default function Shell({ children }: ShellProps) {
           </button>
         </div>
       </motion.div>
+      */}
 
       <PomodoroHUD />
 
