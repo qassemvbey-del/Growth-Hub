@@ -721,7 +721,7 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
     <div
       ref={mainWrapperRef}
       className={cn(
-        'min-h-[100dvh] bg-zinc-50 dark:bg-transparent text-foreground flex relative transition-colors duration-500',
+        'min-h-[100dvh] bg-zinc-50 dark:bg-transparent text-foreground flex relative',
         networkStatus === 'OFFLINE' && 'connection-offline'
       )}
       style={{ 
