@@ -364,13 +364,19 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="text-2xl md:text-5xl font-black tracking-tight uppercase leading-none text-zinc-900 dark:text-white"
+            className={cn(
+              "font-black tracking-tight uppercase leading-none text-zinc-900 dark:text-white",
+              isRTL ? "text-xl md:text-4xl" : "text-2xl md:text-5xl"
+            )}
           >
             {/* {isRTL ? 'منصة' : 'FOCUS'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'HUB'}</span> */}
             {isRTL ? 'لوحة' : 'FOCUS'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'HUB'}</span>
           </motion.h1>
 
-          <p className="text-[13px] text-zinc-500 dark:text-zinc-400 font-medium truncate max-w-[90vw]">
+          <p className={cn(
+            "font-medium truncate max-w-[90vw]",
+            isRTL ? "text-[11px] text-zinc-500 dark:text-zinc-400" : "text-[13px] text-zinc-500 dark:text-zinc-400"
+          )}>
             {isRTL ? 'لوحة المتابعة والتحكم بالأداء' : 'Your performance metrics and focus pipeline'}
           </p>
         </div>
@@ -438,7 +444,10 @@ export default function Dashboard() {
             <div className="flex justify-between items-center gap-1.5">
               <div className="flex items-center gap-1 sm:gap-2 min-w-0">
                 {/* <NeonIcon icon={Zap} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} /> */}
-                <span className="text-[9px] sm:text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase truncate">
+                <span className={cn(
+                  "font-black tracking-widest text-[var(--text-secondary)] uppercase truncate",
+                  isRTL ? "text-[8px] sm:text-[10px]" : "text-[9px] sm:text-xs"
+                )}>
                   {/* {isRTL ? 'الـ Focus اليومي' : 'DAILY FOCUS'} */}
                   {isRTL ? 'تركيزك اليومي' : 'Daily Focus'}
                 </span>
@@ -492,7 +501,10 @@ export default function Dashboard() {
             <div className="flex justify-between items-center gap-1.5">
               <div className="flex items-center gap-1 sm:gap-2 min-w-0">
                 {/* <NeonIcon icon={Users} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} /> */}
-                <span className="text-[9px] sm:text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase truncate">
+                <span className={cn(
+                  "font-black tracking-widest text-[var(--text-secondary)] uppercase truncate",
+                  isRTL ? "text-[8px] sm:text-[10px]" : "text-[9px] sm:text-xs"
+                )}>
                   {isRTL ? 'المنافسة' : 'RIVALRY'}
                 </span>
               </div>
@@ -540,7 +552,10 @@ export default function Dashboard() {
 
             <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 mt-1.5">
               {/* <Swords className="w-4.5 h-4.5 sm:w-6 sm:h-6 shrink-0 animate-pulse" style={{ color: currentTheme.color }} /> */}
-              <p className="text-[9px] sm:text-xs font-black tracking-wide text-zinc-100 uppercase leading-tight flex-1 line-clamp-2 break-words whitespace-normal">
+              <p className={cn(
+                "font-black tracking-wide text-zinc-100 uppercase leading-tight flex-1 line-clamp-2 break-words whitespace-normal",
+                isRTL ? "text-[8px] sm:text-[10px]" : "text-[9px] sm:text-xs"
+              )}>
                 {computedRivalryText}
               </p>
             </div>
@@ -565,7 +580,10 @@ export default function Dashboard() {
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 {/* <NeonIcon icon={Activity} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} /> */}
-                <h2 className="text-[10px] sm:text-xs font-black tracking-widest text-[var(--text-secondary)] uppercase">
+                <h2 className={cn(
+                  "font-black tracking-widest text-[var(--text-secondary)] uppercase",
+                  isRTL ? "text-[9px] sm:text-[11px]" : "text-[10px] sm:text-xs"
+                )}>
                   {/* {isRTL ? 'الوارد التكتيكي العاجل' : 'ACTION INBOX // CRITICAL'} */}
                   {isRTL ? 'المهام العاجلة' : 'Action Inbox'}
                 </h2>
@@ -700,7 +718,10 @@ export default function Dashboard() {
         <div className="w-full space-y-6 pt-8 border-t border-[var(--card-border)]">
           <div className="flex items-center gap-3">
             {/* <NeonIcon icon={Target} className="text-2xl w-6 h-6 shrink-0" style={{ color: currentTheme.color }} /> */}
-            <h2 className="text-sm font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">
+            <h2 className={cn(
+              "font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-widest",
+              isRTL ? "text-xs" : "text-sm"
+            )}>
               {/* {isRTL ? 'الأهداف المثبتة' : 'PINNED GOALS'} */}
               {isRTL ? 'الأهداف المثبّتة' : 'PINNED GOALS'}
             </h2>
