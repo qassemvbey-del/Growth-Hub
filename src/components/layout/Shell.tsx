@@ -371,6 +371,66 @@ export default function Shell({ children }: ShellProps) {
     return 1 - Math.abs(v) / Math.abs(closedPos)
   })
 
+  useEffect(() => {
+    let startX = 0
+    let startY = 0
+    let isDragging = false
+
+    const handleTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX
+      startY = e.touches[0].clientY
+      const edgeSize = 40
+      const screenWidth = window.innerWidth
+      if (isRTL) {
+        isDragging = startX > screenWidth - edgeSize
+      } else {
+        isDragging = startX < edgeSize || isMobileNavOpen
+      }
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDragging) return
+      const currentX = e.touches[0].clientX
+      const currentY = e.touches[0].clientY
+      const diffX = Math.abs(currentX - startX)
+      const diffY = Math.abs(currentY - startY)
+      if (diffY > diffX) { isDragging = false; return }
+      const delta = currentX - startX
+      startX = currentX
+      const newX = Math.max(
+        isRTL ? 0 : -SIDEBAR_WIDTH,
+        Math.min(isRTL ? SIDEBAR_WIDTH : 0, sidebarX.get() + delta)
+      )
+      sidebarX.set(newX)
+    }
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!isDragging) return
+      isDragging = false
+      const velocity = 0
+      const currentX = sidebarX.get()
+      const threshold = SIDEBAR_WIDTH * 0.3
+      let shouldOpen: boolean
+      if (isRTL) {
+        shouldOpen = currentX < threshold
+      } else {
+        shouldOpen = currentX > -threshold
+      }
+      if (shouldOpen !== isMobileNavOpen) playBlip()
+      setIsMobileNavOpen(shouldOpen)
+    }
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true })
+    document.addEventListener('touchmove', handleTouchMove, { passive: true })
+    document.addEventListener('touchend', handleTouchEnd, { passive: true })
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart)
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [isRTL, isMobileNavOpen, sidebarX, playBlip])
+
   const handleSidebarDragEnd = (_e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const velocity = info.velocity.x
     const currentX = sidebarX.get()
@@ -954,7 +1014,8 @@ export default function Shell({ children }: ShellProps) {
         onDragEnd={handleSidebarDragEnd}
       />
 
-      {/* Edge swipe zone - 20px from left/right edge to open sidebar */}
+      {/*
+      {/* Edge swipe zone - 20px from left/right edge to open sidebar *\/
       {!isMobileNavOpen && (
         <motion.div
           // className="fixed top-0 bottom-0 w-5 z-[199] lg:hidden"
@@ -980,6 +1041,7 @@ export default function Shell({ children }: ShellProps) {
           onDragEnd={handleSidebarDragEnd}
         />
       )}
+      */}
 
       <motion.div
         drag="x"
