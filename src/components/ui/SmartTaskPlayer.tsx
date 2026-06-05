@@ -148,7 +148,7 @@ export default function SmartTaskPlayer({
 
         if (time > 2) {
           const isRTL = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
-          showToast(isRTL ? 'تم استئناف التشغيل من حيث توقفت' : 'Resumed playback', 'success')
+          // showToast(isRTL ? 'تم استئناف التشغيل من حيث توقفت' : 'Resumed playback', 'success')
         }
       }
       setIsReady(true)

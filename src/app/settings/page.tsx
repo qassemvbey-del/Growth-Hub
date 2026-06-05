@@ -136,7 +136,7 @@ export default function SettingsPage() {
           localStorage.setItem('cached_name', updatedData.full_name)
         }
       }
-      showToast(updatedData.language === 'ar' ? 'تم الحفظ ✓' : 'Saved ✓', 'success')
+      // showToast(updatedData.language === 'ar' ? 'تم الحفظ ✓' : 'Saved ✓', 'success')
       setSaving(false)
       return
     }
@@ -179,7 +179,7 @@ export default function SettingsPage() {
       localStorage.setItem('language', updatedData.language)
       localStorage.setItem('cached_name', updatedData.full_name)
       refreshProfile()
-      showToast(updatedData.language === 'ar' ? 'تم الحفظ ✓' : 'Saved ✓', 'success')
+      // showToast(updatedData.language === 'ar' ? 'تم الحفظ ✓' : 'Saved ✓', 'success')
     } else {
       showToast(updatedData.language === 'ar' ? 'فشل حفظ الإعدادات ⚠️' : 'Failed to update settings ⚠️', 'warning')
       console.error('Save failed:', error)
@@ -863,7 +863,7 @@ export default function SettingsPage() {
                               if (!nextMute) {
                                 setTimeout(() => playBlip(), 50)
                               }
-                              showToast(formData.language === 'ar' ? 'تم الحفظ ✓' : 'Saved ✓', 'success')
+                               // showToast(formData.language === 'ar' ? 'تم الحفظ ✓' : 'Saved ✓', 'success')
                             }}
                             className={cn(
                               "w-12 h-6 rounded-full transition-all relative border flex items-center px-1 cursor-pointer",

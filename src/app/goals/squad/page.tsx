@@ -1023,7 +1023,7 @@ export default function SquadGoalsPage() {
         setEndDate('')
         setDefaultView('list')
         /* showToast(isRTL ? 'تم حفظ الهدف محلياً' : 'Goal saved locally!', 'success') */
-        showToast(isRTL ? 'الـ Goal اتحفظ عندك محلياً' : 'Goal saved locally!', 'success')
+        // showToast(isRTL ? 'الـ Goal اتحفظ عندك محلياً' : 'Goal saved locally!', 'success')
         playDeploy()
         router.push(`/goals/squad/${fakeId}`)
         return
@@ -1130,7 +1130,7 @@ export default function SquadGoalsPage() {
         setEndDate('')
         setDefaultView('list')
         /* showToast(isRTL ? 'تم إنشاء الهدف' : 'Goal activated!', 'success') */
-        showToast(isRTL ? 'الـ Goal اتعمل' : 'Goal activated!', 'success')
+        // showToast(isRTL ? 'الـ Goal اتعمل' : 'Goal activated!', 'success')
         playDeploy()
         router.push(`/goals/squad/${data.id}`)
       }
