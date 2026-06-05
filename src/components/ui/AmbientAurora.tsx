@@ -17,8 +17,14 @@ export default function AmbientAurora({ themeColor }: AmbientAuroraProps) {
         className="absolute w-[45vw] h-[45vw] rounded-full mix-blend-screen filter blur-[120px] md:blur-[150px] opacity-60 -top-20 -left-20 animate-aurora-blob"
         style={{ backgroundColor: themeColor }}
       /> */}
+      {/*
       <div 
         className="absolute w-[25vw] h-[25vw] rounded-full mix-blend-screen filter blur-[120px] md:blur-[150px] opacity-20 -top-20 -left-20 animate-aurora-blob"
+        style={{ backgroundColor: themeColor }}
+      />
+      */}
+      <div 
+        className="absolute w-[80vw] h-[80vw] md:w-[25vw] md:h-[25vw] rounded-full mix-blend-screen filter blur-[80px] md:blur-[150px] opacity-20 -top-20 -left-20 animate-aurora-blob"
         style={{ backgroundColor: themeColor }}
       />
 
@@ -31,8 +37,14 @@ export default function AmbientAurora({ themeColor }: AmbientAuroraProps) {
         className="absolute w-[40vw] h-[40vw] rounded-full mix-blend-screen filter blur-[120px] md:blur-[150px] opacity-55 -bottom-10 -right-10 bg-fuchsia-500/40 animate-aurora-blob [animation-delay:4s]"
       />
       */}
+      {/*
       <div 
         className="absolute w-[40vw] h-[40vw] rounded-full mix-blend-screen filter blur-[120px] md:blur-[150px] opacity-30 -bottom-10 -right-10 animate-aurora-blob [animation-delay:4s]"
+        style={{ backgroundColor: `${themeColor}30` }}
+      />
+      */}
+      <div 
+        className="absolute w-[90vw] h-[90vw] md:w-[40vw] md:h-[40vw] rounded-full mix-blend-screen filter blur-[80px] md:blur-[150px] opacity-20 -bottom-10 -right-10 animate-aurora-blob [animation-delay:4s]"
         style={{ backgroundColor: `${themeColor}30` }}
       />
 
@@ -45,8 +57,14 @@ export default function AmbientAurora({ themeColor }: AmbientAuroraProps) {
         className="absolute w-[35vw] h-[35vw] rounded-full mix-blend-screen filter blur-[120px] md:blur-[150px] opacity-50 top-1/3 left-1/3 bg-blue-600/40 animate-aurora-blob [animation-delay:8s]"
       />
       */}
+      {/*
       <div 
         className="absolute w-[35vw] h-[35vw] rounded-full mix-blend-screen filter blur-[120px] md:blur-[150px] opacity-25 top-1/3 left-1/3 animate-aurora-blob [animation-delay:8s]"
+        style={{ backgroundColor: `${themeColor}25` }}
+      />
+      */}
+      <div 
+        className="absolute w-[70vw] h-[70vw] md:w-[35vw] md:h-[35vw] rounded-full mix-blend-screen filter blur-[80px] md:blur-[150px] opacity-15 top-1/3 left-1/3 animate-aurora-blob [animation-delay:8s]"
         style={{ backgroundColor: `${themeColor}25` }}
       />
 
@@ -56,8 +74,14 @@ export default function AmbientAurora({ themeColor }: AmbientAuroraProps) {
         className="absolute w-[38vw] h-[38vw] rounded-full mix-blend-screen filter blur-[120px] md:blur-[150px] opacity-35 bottom-10 left-10 bg-emerald-500/35 animate-aurora-blob [animation-delay:12s]"
       />
       */}
+      {/*
       <div 
         className="absolute w-[38vw] h-[38vw] rounded-full mix-blend-screen filter blur-[120px] md:blur-[150px] opacity-20 bottom-10 left-10 animate-aurora-blob [animation-delay:12s]"
+        style={{ backgroundColor: `${themeColor}20` }}
+      />
+      */}
+      <div 
+        className="absolute w-[75vw] h-[75vw] md:w-[38vw] md:h-[38vw] rounded-full mix-blend-screen filter blur-[80px] md:blur-[150px] opacity-15 bottom-10 left-10 animate-aurora-blob [animation-delay:12s]"
         style={{ backgroundColor: `${themeColor}20` }}
       />
     </div>
