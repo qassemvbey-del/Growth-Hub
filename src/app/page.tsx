@@ -4,7 +4,7 @@ import { Activity, AlertTriangle, BarChart3, Lightbulb, Target, Zap, Crosshair, 
 import { NeonIcon } from '@/components/ui/NeonIcon'
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import Shell from '@/components/layout/Shell'
+// import Shell from '@/components/layout/Shell'
 import EnergyCell from '@/components/ui/EnergyCell'
 import { createClient } from '@/lib/supabase'
 import { useGrowth } from '@/context/GrowthContext'
@@ -346,7 +346,9 @@ export default function Dashboard() {
   }
 
   return (
-    <Shell>
+    <>
+      {/* Shell is now in layout.tsx */}
+      {/* <Shell> */}
       {/* <Shell syncedMissions={missions} onMissionsRefresh={fetchDashboardMissions}> */}
       <div 
         className="w-full min-h-[calc(100dvh-64px)] font-space relative"
@@ -803,6 +805,7 @@ export default function Dashboard() {
 
         </div>
       </div>
-    </Shell>
+    {/* </Shell> */}
+    </>
   )
 }
