@@ -64,6 +64,7 @@ export default function AnimatedLogo({ className = "" }: { className?: string })
       {text.split('').map((char, i) => (
         <motion.span
           key={i}
+          /* Commented out per rule "Never delete code, only comment it out"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
@@ -71,6 +72,7 @@ export default function AnimatedLogo({ className = "" }: { className?: string })
             delay: i * 0.05,
             ease: "easeOut"
           }}
+          */
           className={`font-black uppercase inline-block cursor-default relative ${getLetterColor(char, i)}`}
         >
           {/* Main Letter */}
