@@ -371,6 +371,7 @@ export default function Shell({ children }: ShellProps) {
     return 1 - Math.abs(v) / Math.abs(closedPos)
   })
 
+  /*
   useEffect(() => {
     let startX = 0
     let startY = 0
@@ -415,6 +416,68 @@ export default function Shell({ children }: ShellProps) {
       const velocity = 0
       const currentX = sidebarX.get()
       const threshold = SIDEBAR_WIDTH * 0.3
+      let shouldOpen: boolean
+      if (isRTL) {
+        shouldOpen = currentX < threshold
+      } else {
+        shouldOpen = currentX > -threshold
+      }
+      if (shouldOpen !== isMobileNavOpen) playBlip()
+      setIsMobileNavOpen(shouldOpen)
+    }
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true })
+    document.addEventListener('touchmove', handleTouchMove, { passive: true })
+    document.addEventListener('touchend', handleTouchEnd, { passive: true })
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart)
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [isRTL, isMobileNavOpen, sidebarX, playBlip])
+  */
+
+  useEffect(() => {
+    let startX = 0
+    let startY = 0
+    let tracking = false
+
+    const handleTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX
+      startY = e.touches[0].clientY
+      const edgeSize = 80
+      const screenWidth = window.innerWidth
+      if (!isMobileNavOpen) {
+        tracking = isRTL 
+          ? startX > screenWidth - edgeSize 
+          : startX < edgeSize
+      } else {
+        tracking = true
+      }
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!tracking) return
+      const currentX = e.touches[0].clientX
+      const currentY = e.touches[0].clientY
+      const diffX = Math.abs(currentX - startX)
+      const diffY = Math.abs(currentY - startY)
+      if (diffY > diffX + 10) { tracking = false; return }
+      const delta = currentX - startX
+      startX = currentX
+      const newX = Math.max(
+        isRTL ? 0 : -SIDEBAR_WIDTH,
+        Math.min(isRTL ? SIDEBAR_WIDTH : 0, sidebarX.get() + delta)
+      )
+      sidebarX.set(newX)
+    }
+
+    const handleTouchEnd = () => {
+      if (!tracking) return
+      tracking = false
+      const currentX = sidebarX.get()
+      const threshold = SIDEBAR_WIDTH * 0.4
       let shouldOpen: boolean
       if (isRTL) {
         shouldOpen = currentX < threshold
