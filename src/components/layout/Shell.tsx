@@ -926,11 +926,58 @@ export default function Shell({ children }: ShellProps) {
       </main>
 
       {/* ── MOBILE SIDEBAR DRAWER ── */}
+      {/*
       <motion.div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] lg:hidden"
         style={{ opacity: computedBackdropOpacity, pointerEvents: isDrawerVisible ? 'auto' : 'none' }}
         onClick={() => setIsMobileNavOpen(false)}
       />
+      */}
+      {/* Backdrop - click or swipe to close */}
+      <motion.div
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] lg:hidden"
+        style={{ opacity: computedBackdropOpacity, pointerEvents: isDrawerVisible ? 'auto' : 'none' }}
+        onClick={() => setIsMobileNavOpen(false)}
+        drag="x"
+        dragConstraints={isRTL ? { left: 0, right: 0 } : { left: 0, right: 0 }}
+        dragElastic={0}
+        onDrag={(_e, info) => {
+          const closedPos = isRTL ? SIDEBAR_WIDTH : -SIDEBAR_WIDTH
+          const currentX = sidebarX.get()
+          const delta = info.delta.x
+          const newX = Math.max(
+            isRTL ? 0 : -SIDEBAR_WIDTH,
+            Math.min(isRTL ? SIDEBAR_WIDTH : 0, currentX + delta)
+          )
+          sidebarX.set(newX)
+        }}
+        onDragEnd={handleSidebarDragEnd}
+      />
+
+      {/* Edge swipe zone - 20px from left/right edge to open sidebar */}
+      {!isMobileNavOpen && (
+        <motion.div
+          className="fixed top-0 bottom-0 w-5 z-[199] lg:hidden"
+          style={{ [isRTL ? 'right' : 'left']: 0 }}
+          drag="x"
+          dragConstraints={isRTL 
+            ? { left: 0, right: SIDEBAR_WIDTH }
+            : { left: -SIDEBAR_WIDTH, right: 0 }
+          }
+          dragElastic={0.05}
+          dragMomentum={false}
+          onDrag={(_e, info) => {
+            const currentX = sidebarX.get()
+            const delta = info.delta.x
+            const newX = Math.max(
+              isRTL ? 0 : -SIDEBAR_WIDTH,
+              Math.min(isRTL ? SIDEBAR_WIDTH : 0, currentX + delta)
+            )
+            sidebarX.set(newX)
+          }}
+          onDragEnd={handleSidebarDragEnd}
+        />
+      )}
 
       <motion.div
         drag="x"
