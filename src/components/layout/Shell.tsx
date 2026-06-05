@@ -958,7 +958,8 @@ export default function Shell({ children }: ShellProps) {
       {!isMobileNavOpen && (
         <motion.div
           // className="fixed top-0 bottom-0 w-5 z-[199] lg:hidden"
-          className="fixed top-0 bottom-0 w-16 z-[199] lg:hidden"
+          // className="fixed top-0 bottom-0 w-16 z-[199] lg:hidden"
+          className="fixed top-0 bottom-0 w-10 z-[199] lg:hidden"
           style={{ [isRTL ? 'right' : 'left']: 0 }}
           drag="x"
           dragConstraints={isRTL 
