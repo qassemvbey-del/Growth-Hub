@@ -897,18 +897,9 @@ export default function Shell({ children, syncedMissions = [], onMissionsRefresh
           </div>
         </header>
 
-        <AnimatePresence mode="sync">
-          <motion.div
-            key={pathname}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15, ease: 'easeInOut' }}
-            className="relative pb-0"
-          >
-            {children}
-          </motion.div>
-        </AnimatePresence>
+        <div className="relative pb-0">
+          {children}
+        </div>
       </main>
 
       {/* ── MOBILE SIDEBAR DRAWER ── */}

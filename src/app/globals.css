@@ -422,4 +422,13 @@ input, textarea {
   height: 0 !important;
 }
 
+main > div {
+  animation: pageFade 0.2s ease-in-out;
+}
+
+@keyframes pageFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 
