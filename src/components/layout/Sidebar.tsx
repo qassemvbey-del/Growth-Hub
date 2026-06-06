@@ -213,13 +213,13 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
 
                   <ChevronDown
                     className={cn(
-                      "w-3.5 h-3.5 shrink-0 transition-transform duration-200 me-1.5 rtl:me-0 rtl:ms-1.5",
+                      "w-3.5 h-3.5 shrink-0 transition-transform duration-200 me-1.5 rtl:me-auto rtl:ms-2 rtl:order-first",
                       isGoalsExpanded ? "rotate-180" : ""
                     )}
                     style={{ color: isHovered ? currentTheme.color : undefined }}
                   />
                   <span
-                    className="text-[9px] font-body text-[var(--text-secondary)]/30 font-medium transition-colors duration-300 shrink-0"
+                    className="text-[9px] font-body text-[var(--text-secondary)]/30 font-medium transition-colors duration-300 shrink-0 rtl:hidden"
                     style={{ color: isHovered ? `${currentTheme.color}66` : undefined }}
                   >
                     {item.shortcut}
@@ -266,7 +266,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                               }}
                             />
 
-                            <span className="font-body font-medium flex-grow overflow-hidden truncate transition-colors duration-300 text-xs"
+                            <span className="font-body font-medium flex-grow overflow-hidden truncate transition-colors duration-300 text-xs rtl:order-first rtl:text-right"
                             style={{ 
                               color: isSubActive 
                                 ? currentTheme.color 
@@ -325,7 +325,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               </span>
 
               <span 
-                className="text-[9px] font-body text-[var(--text-secondary)]/30 font-medium transition-colors duration-300 shrink-0"
+                className="text-[9px] font-body text-[var(--text-secondary)]/30 font-medium transition-colors duration-300 shrink-0 rtl:hidden"
                 style={{ 
                   color: isHovered ? `${currentTheme.color}66` : undefined 
                 }}
@@ -603,13 +603,13 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
 
                   <ChevronDown
                     className={cn(
-                      "w-3.5 h-3.5 shrink-0 transition-transform duration-200 me-1.5 rtl:me-0 rtl:ms-1.5",
+                      "w-3.5 h-3.5 shrink-0 transition-transform duration-200 me-1.5 rtl:me-auto rtl:ms-2 rtl:order-first",
                       isGoalsExpanded ? "rotate-180" : ""
                     )}
                     style={{ color: isHovered ? currentTheme.color : undefined }}
                   />
                   <span
-                    className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black transition-colors duration-300 shrink-0"
+                    className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black transition-colors duration-300 shrink-0 rtl:hidden"
                     style={{ color: isHovered ? `${currentTheme.color}66` : undefined }}
                   >
                     {item.shortcut}
@@ -657,7 +657,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                             />
 
                             <span className={cn(
-                              "font-space tracking-[0.2em] font-semibold flex-grow transition-colors duration-300 text-[12px] truncate"
+                              "font-space tracking-[0.2em] font-semibold flex-grow transition-colors duration-300 text-[12px] truncate rtl:order-first rtl:text-right"
                             )}
                             style={{ 
                               color: isSubActive 
@@ -717,7 +717,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               </span>
 
               <span 
-                className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black transition-colors duration-300 shrink-0"
+                className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black transition-colors duration-300 shrink-0 rtl:hidden"
                 style={{ 
                   color: isHovered ? `${currentTheme.color}66` : undefined 
                 }}
