@@ -909,6 +909,17 @@ export default function MissionDetailPage() {
   }, [id])
 
   const onUpdateTask = async (taskId: string, updates: any) => {
+    // Force "no_date_changes" rule check
+    const isDeadlineChange = updates.metadata && 'endDate' in updates.metadata
+    if (isDeadlineChange && mission?.metadata?.rules?.no_date_changes) {
+      const isPrivileged = ['owner', 'admin'].includes(normalizedRole)
+      if (!isPrivileged) {
+        showToast(isRTL ? "⚠️ لا يمكنك تغيير الموعد النهائي بسبب قواعد الفريق" : "⚠️ You cannot change deadlines due to team rules", "warning")
+        playError()
+        return
+      }
+    }
+
     const isLocal = typeof id === 'string' && id.startsWith('local_')
 
     if (isLocal) {
@@ -1052,7 +1063,7 @@ export default function MissionDetailPage() {
           else if (sizeStr === 'lg' || sizeStr === 'l' || sizeStr === 'large') xpCeiling = 20
 
           if (taskIndex < xpCeiling) {
-            await addXp(task.weight * 10, task.title)
+            await addXp(task.weight * 10, task.title, task.id)
           }
           playSuccess()
         }
@@ -1208,7 +1219,7 @@ export default function MissionDetailPage() {
             else if (sizeStr === 'lg' || sizeStr === 'l' || sizeStr === 'large') xpCeiling = 20
 
             if (taskIndex < xpCeiling) {
-              await addXp(task.weight * 10, task.title)
+              await addXp(task.weight * 10, task.title, task.id)
             }
             playSuccess()
           }

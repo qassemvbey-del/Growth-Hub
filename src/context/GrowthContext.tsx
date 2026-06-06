@@ -457,7 +457,7 @@ interface GrowthContextType {
   t: (key: keyof typeof TRANSLATIONS['en']) => string
   mounted: boolean
   currentTheme: typeof THEME_PACKAGES['SILVER']
-  addXp: (amount: number, taskTitle?: string) => Promise<void>
+  addXp: (amount: number, taskTitle?: string, taskId?: string) => Promise<void>
   lastAiMessage: string
   setLastAiMessage: (msg: string) => void
   changeTheme: (themeId: string) => Promise<void>
@@ -926,10 +926,45 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const addXp = async (amount: number, taskTitle?: string) => {
+  const addXp = async (amount: number, taskTitle?: string, taskId?: string) => {
     if (!profile) return
     
-    const { xpToAward, reason, silent } = checkXpAward(amount, taskTitle)
+    let resolvedAmount = amount
+    if (amount > 0 && taskId && taskId !== 'guest') {
+      try {
+        const { data: taskData } = await supabase
+          .from('tasks')
+          .select('metadata, deadline, goal_id')
+          .eq('id', taskId)
+          .single()
+        
+        if (taskData && taskData.goal_id) {
+          const { data: goalData } = await supabase
+            .from('goals')
+            .select('metadata')
+            .eq('id', taskData.goal_id)
+            .single()
+          
+          if (goalData && goalData.metadata?.rules?.xp_multiplier) {
+            const taskDeadline = taskData.metadata?.endDate || taskData.metadata?.dueDate || taskData.deadline || taskData.metadata?.deadline
+            const hasDate = !!taskDeadline && taskDeadline !== "NOT SET" && taskDeadline !== "SET DEADLINE" && taskDeadline !== "غير محدد" && taskDeadline !== "تحديد موعد"
+            
+            if (hasDate) {
+              const tDate = new Date(taskDeadline)
+              tDate.setHours(23, 59, 59, 999) // end of deadline day
+              const isOverdue = tDate.getTime() < Date.now()
+              if (isOverdue) {
+                resolvedAmount = Math.round(amount / 2)
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error calculating xp_multiplier penalty:', err)
+      }
+    }
+    
+    const { xpToAward, reason, silent } = checkXpAward(resolvedAmount, taskTitle)
     
     // Update daily tasks count only on positive XP award attempts (which represent a task completion)
     if (amount > 0) {
