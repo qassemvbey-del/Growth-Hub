@@ -368,7 +368,7 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
             className={cn(
-              "font-black tracking-tight uppercase leading-none text-zinc-900 dark:text-white",
+              "font-black tracking-tight leading-none text-zinc-900 dark:text-white",
               isRTL ? "text-xl md:text-4xl" : "text-2xl md:text-5xl"
             )}
           >
@@ -436,22 +436,16 @@ export default function Dashboard() {
           
           {/* 1. Daily Focus Stats */}
           <div 
-            className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-6 space-y-2 sm:space-y-4 shadow-xl relative overflow-hidden flex flex-col justify-between transition-all duration-300"
-            style={{ 
-              borderColor: `${currentTheme.color}50`,
-              boxShadow: `0 0 25px ${currentTheme.color}35`
-            }}
+            className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 space-y-2 sm:space-y-4 shadow-xl relative overflow-hidden flex flex-col justify-between transition-all duration-150 hover:-translate-y-0.5"
           >
             <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r" style={{ backgroundImage: `linear-gradient(to right, ${currentTheme.color}, transparent)` }} />
             
             <div className="flex justify-between items-center gap-1.5">
               <div className="flex items-center gap-1 sm:gap-2 min-w-0">
-                {/* <NeonIcon icon={Zap} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} /> */}
                 <span className={cn(
-                  "font-black tracking-widest text-[var(--text-secondary)] uppercase truncate",
+                  "font-semibold text-[var(--text-secondary)] truncate",
                   isRTL ? "text-[8px] sm:text-[10px]" : "text-[9px] sm:text-xs"
                 )}>
-                  {/* {isRTL ? 'الـ Focus اليومي' : 'DAILY FOCUS'} */}
                   {isRTL ? 'تركيزك اليومي' : 'Daily Focus'}
                 </span>
               </div>
@@ -493,22 +487,17 @@ export default function Dashboard() {
 
           {/* 2. Rivalry Tracker */}
           <div 
-            className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-6 space-y-2 sm:space-y-4 shadow-xl relative overflow-hidden transition-all duration-300 flex flex-col justify-between"
-            style={{ 
-              borderColor: currentTheme.color,
-              boxShadow: `0 0 30px ${currentTheme.color}45`
-            }}
+            className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 space-y-2 sm:space-y-4 shadow-xl relative overflow-hidden transition-all duration-150 hover:-translate-y-0.5 flex flex-col justify-between"
           >
             <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: currentTheme.color }} />
             
             <div className="flex justify-between items-center gap-1.5">
               <div className="flex items-center gap-1 sm:gap-2 min-w-0">
-                {/* <NeonIcon icon={Users} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} /> */}
                 <span className={cn(
-                  "font-black tracking-widest text-[var(--text-secondary)] uppercase truncate",
+                  "font-semibold text-[var(--text-secondary)] truncate",
                   isRTL ? "text-[8px] sm:text-[10px]" : "text-[9px] sm:text-xs"
                 )}>
-                  {isRTL ? 'المنافسة' : 'RIVALRY'}
+                  {isRTL ? 'المنافسة' : 'Rivalry'}
                 </span>
               </div>
               
@@ -554,9 +543,8 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 mt-1.5">
-              {/* <Swords className="w-4.5 h-4.5 sm:w-6 sm:h-6 shrink-0 animate-pulse" style={{ color: currentTheme.color }} /> */}
               <p className={cn(
-                "font-black tracking-wide text-zinc-100 uppercase leading-tight flex-1 line-clamp-2 break-words whitespace-normal",
+                "font-medium text-zinc-100 leading-tight flex-1 line-clamp-2 break-words whitespace-normal",
                 isRTL ? "text-[8px] sm:text-[10px]" : "text-[9px] sm:text-xs"
               )}>
                 {computedRivalryText}
@@ -573,26 +561,20 @@ export default function Dashboard() {
           
           {/* Action Inbox */}
           <div 
-            className="w-full bg-white/60 dark:bg-black/40 backdrop-blur-3xl border rounded-xl sm:rounded-2xl p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 shadow-xl relative overflow-hidden"
-            style={{ 
-              borderColor: `${currentTheme.color}40`,
-              boxShadow: `0 0 30px ${currentTheme.color}30`
-            }}
+            className="w-full bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 shadow-xl relative overflow-hidden"
           >
             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r to-transparent" style={{ backgroundImage: `linear-gradient(to right, ${currentTheme.color}, transparent)` }} />
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                {/* <NeonIcon icon={Activity} className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: currentTheme.color }} /> */}
                 <h2 className={cn(
-                  "font-black tracking-widest text-[var(--text-secondary)] uppercase",
+                  "font-semibold text-[var(--text-secondary)]",
                   isRTL ? "text-[9px] sm:text-[11px]" : "text-[10px] sm:text-xs"
                 )}>
-                  {/* {isRTL ? 'الوارد التكتيكي العاجل' : 'ACTION INBOX // CRITICAL'} */}
                   {isRTL ? 'المهام العاجلة' : 'Action Inbox'}
                 </h2>
               </div>
-              <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[10px] font-black border shrink-0" style={{ color: currentTheme.color, borderColor: `${currentTheme.color}30`, backgroundColor: `${currentTheme.color}15` }}>
-                {actionInboxTasks.length} {isRTL ? 'مهمة عاجلة' : 'IMMEDIATE'}
+              <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[10px] font-medium border shrink-0 transition-colors duration-200" style={{ color: currentTheme.color, borderColor: `${currentTheme.color}30`, backgroundColor: `${currentTheme.color}15` }}>
+                {actionInboxTasks.length} {isRTL ? 'مهمة' : 'tasks'}
               </span>
             </div>
 
@@ -625,8 +607,8 @@ export default function Dashboard() {
                       </button>
 
                       <div className="flex flex-col min-w-0 flex-1">
-                        <span className="text-xs sm:text-sm font-black text-white/95 uppercase truncate leading-tight">{task.title}</span>
-                        <span className="text-[8px] sm:text-[9px] text-zinc-500 font-bold uppercase tracking-wider mt-0.5 truncate">{task.missionTitle}</span>
+                        <span className="text-xs sm:text-sm font-semibold text-white/95 truncate leading-tight">{task.title}</span>
+                        <span className="text-[8px] sm:text-[9px] text-zinc-500 font-medium tracking-wide mt-0.5 truncate">{task.missionTitle}</span>
                       </div>
                     </div>
 
@@ -718,15 +700,13 @@ export default function Dashboard() {
         </div>
 
         {/* ── PINNED GOALS (Bottom Section - Full Width Grid) ── */}
-        <div className="w-full space-y-6 pt-8 border-t border-[var(--card-border)]">
+        <div className="w-full space-y-6 pt-8 border-t border-white/10">
           <div className="flex items-center gap-3">
-            {/* <NeonIcon icon={Target} className="text-2xl w-6 h-6 shrink-0" style={{ color: currentTheme.color }} /> */}
             <h2 className={cn(
-              "font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-widest",
+              "font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight",
               isRTL ? "text-xs" : "text-sm"
             )}>
-              {/* {isRTL ? 'الأهداف المثبتة' : 'PINNED GOALS'} */}
-              {isRTL ? 'الأهداف المثبّتة' : 'PINNED GOALS'}
+              {isRTL ? 'الأهداف المثبّتة' : 'Pinned Goals'}
             </h2>
           </div>
 
@@ -739,17 +719,12 @@ export default function Dashboard() {
                return (
                  <div
                    key={mission.id}
-                   // onClick={() => router.push(`/missions/${mission.id}`)}
                    onClick={() => router.push(mission.metadata?.type === 'public' ? `/goals/public/${mission.id}` : `/goals/squad/${mission.id}`)}
                    className={cn(
-                      "relative group cursor-pointer p-3 sm:p-5 rounded-xl border bg-white/60 dark:bg-black/40 backdrop-blur-3xl transition-all overflow-hidden flex flex-col gap-2.5 sm:gap-4",
-                      isInRedZone ? "border-red-500/40" : "border-white/5 hover:border-white/10",
+                      "relative group cursor-pointer p-3 sm:p-5 rounded-xl border bg-white/60 dark:bg-black/40 backdrop-blur-3xl transition-all duration-150 overflow-hidden flex flex-col gap-2.5 sm:gap-4 hover:-translate-y-0.5",
+                      isInRedZone ? "border-red-500/40" : "border-white/10 hover:border-white/20",
                       (mission.title === "Start Here 🚀" || mission.title === "ابدأ من هنا 🚀") && "onboarding-start-goal"
                     )}
-                    style={{
-                      boxShadow: isInRedZone ? '0 0 20px rgba(239,68,68,0.3)' : `0 0 25px ${customColor}25`,
-                      borderColor: isInRedZone ? undefined : `${customColor}45`
-                    }}
                  >
                    <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: isInRedZone ? '#ef4444' : customColor }} />
 
@@ -793,10 +768,9 @@ export default function Dashboard() {
             })}
 
             {pinnedGoals.length === 0 && (
-              <div className="col-span-full py-12 text-center border border-dashed border-white/5 rounded-xl">
-                <p className="text-xs uppercase tracking-widest text-zinc-500 font-bold">
-                  {/* {isRTL ? 'لا توجد أهداف مثبتة. افتح هدفاً وثبّته في لوحة التحكم.' : 'No goals pinned. Open a goal and pin it to your Dashboard.'} */}
-                  {isRTL ? 'لا توجد أهداف مثبتة. افتح هدفاً وثبّته في لوحة التحكم.' : 'No goals pinned. Open a goal and pin it to your Dashboard.'}
+              <div className="col-span-full py-12 text-center border border-dashed border-white/10 rounded-xl">
+                <p className="text-xs text-zinc-500 font-medium">
+                  {isRTL ? 'لا توجد أهداف مثبتة. افتح هدفاً وثبّته في لوحة التحكم.' : 'No goals pinned yet. Open a goal and pin it to your dashboard.'}
                 </p>
               </div>
             )}

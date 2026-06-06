@@ -565,8 +565,11 @@ export default function NotesPage() {
             className="flex items-center justify-between w-full"
           >
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl md:text-6xl font-black font-space tracking-wider uppercase text-black dark:text-white leading-none">
-                {isRTL ? 'الملاحظات' : 'NOTES'}
+              <h1 className={cn(
+                "font-black font-heading tracking-tight text-black dark:text-white leading-none",
+                isRTL ? "text-2xl md:text-5xl" : "text-2xl md:text-5xl"
+              )}>
+                {isRTL ? 'الملاحظات' : 'Notes'}
               </h1>
               <span className="inline-flex items-center justify-center px-3 py-1 bg-white/10 rounded-md text-sm font-space font-bold text-white/50 tracking-normal normal-case">
                 {filteredNotes.length}
@@ -576,9 +579,9 @@ export default function NotesPage() {
             {/* Mobile Add Note Button (placed in row with title on mobile) */}
             <button
               onClick={() => setIsCreating(true)}
-              className="flex md:hidden flex-row items-center justify-center gap-2 h-11 px-4 bg-white/5 border border-white/10 text-white/70 font-space font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all duration-300 text-xs rounded-md shrink-0 active:scale-[0.97]"
+              className="flex md:hidden flex-row items-center justify-center gap-2 h-11 px-4 bg-white/5 border border-white/10 text-white/70 font-medium transition-all duration-150 text-sm rounded-xl shrink-0 active:scale-[0.97] hover:bg-white/10 hover:text-white"
             >
-              <Plus className="text-[16px] leading-none" />
+              <Plus className="w-4 h-4" />
               {isRTL ? 'إضافة' : 'Add'}
             </button>
           </motion.div>
@@ -602,10 +605,10 @@ export default function NotesPage() {
             {/* Desktop Add Note Button */}
             <button
               onClick={() => setIsCreating(true)}
-              className="hidden md:flex flex-row items-center justify-center gap-2 h-11 px-5 bg-white/5 border border-white/10 text-white/70 font-space font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all duration-300 text-xs rounded-md shrink-0 active:scale-[0.97]"
+              className="hidden md:flex flex-row items-center justify-center gap-2 h-11 px-5 bg-white/5 border border-white/10 text-white/70 font-medium transition-all duration-150 text-sm rounded-xl shrink-0 active:scale-[0.97] hover:bg-white/10 hover:text-white"
             >
-              <Plus className="text-[16px] leading-none" />
-              {isRTL ? 'إضافة ملاحظة' : 'Add Note'}
+              <Plus className="w-4 h-4" />
+              {isRTL ? 'إضافة ملاحظة' : 'New Note'}
             </button>
           </div>
         </header>
@@ -691,10 +694,10 @@ export default function NotesPage() {
             </button>
           </div>
 
-          <div className="text-[10px] font-monospace text-[var(--text-secondary)]/60 uppercase tracking-widest hidden sm:block">
+          <div className="text-[10px] text-[var(--text-secondary)]/60 tracking-wide hidden sm:block">
             {isRTL 
-              ? `عرض ${filteredNotes.length} سجل من إجمالي ${notes.length}`
-              : `Showing ${filteredNotes.length} logs of ${notes.length}`}
+              ? `عرض ${filteredNotes.length} من إجمالي ${notes.length}`
+              : `Showing ${filteredNotes.length} of ${notes.length}`}
           </div>
         </div>
 

@@ -112,13 +112,13 @@ export default function WinsPage() {
                 <Trophy className="text-xl md:text-4xl w-6 h-6 md:w-8 md:h-8" style={{ color: currentTheme.color }} />
                 <div className="w-20 h-[1px] opacity-30" style={{ background: `linear-gradient(to left, transparent, ${currentTheme.color})` }} />
               </div>
-              <h1 className="text-2xl md:text-7xl font-black font-space tracking-wider uppercase text-[var(--text-primary)] leading-none">
+              <h1 className="text-2xl md:text-7xl font-black font-heading tracking-tight text-[var(--text-primary)] leading-none">
                 {isRTL ? (
                   <span className="font-black">إنجازاتي</span>
                 ) : (
                   <>
-                    <span className="font-black">MY</span>{' '}
-                    <span className="font-black" style={{ color: currentTheme.color }}>WINS</span>
+                    <span className="font-black">My </span>
+                    <span className="font-black" style={{ color: currentTheme.color }}>Wins</span>
                   </>
                 )}
               </h1>
@@ -244,13 +244,13 @@ export default function WinsPage() {
                     </div>
                   </div>
 
-                  <p className="text-xs md:text-sm font-space font-black text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] tracking-widest uppercase text-center transition-all max-w-[120px] leading-tight truncate mt-2">
+                  <p className="text-xs md:text-sm font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] tracking-tight text-center transition-all max-w-[120px] leading-tight truncate mt-2">
                     {mission.title}
                   </p>
 
                   <button
                     onClick={(e) => { e.preventDefault(); unarchive(mission.id, e as any) }}
-                    className="text-[8px] md:text-[10px] font-space text-[var(--text-secondary)]/50 hover:text-[var(--text-primary)] transition-all tracking-widest uppercase mt-1"
+                    className="text-[8px] md:text-[10px] text-[var(--text-secondary)]/50 hover:text-[var(--text-primary)] transition-all tracking-wide mt-1 active:scale-[0.97]"
                   >
                     {/* {isRTL ? 'استعادة ←' : 'RESTORE →'} */}
                     {isRTL ? 'استعادة ←' : 'Restore →'}
@@ -282,10 +282,9 @@ export default function WinsPage() {
                   <div className="space-y-4">
                     <div className="flex items-center gap-3">
                       <Medal className="text-sm w-3.5 h-3.5" style={{ color: currentTheme.color }} />
-                      {/* <span className="text-[10px] md:text-xs font-space tracking-widest uppercase font-black" style={{ color: currentTheme.color }}>{isRTL ? 'إنجاز مكتمل' : 'COMPLETED WIN'}</span> */}
                       <span className="text-[10px] md:text-xs font-space tracking-widest font-black" style={{ color: currentTheme.color }}>{isRTL ? 'إنجاز مكتمل' : 'Completed Win'}</span>
                     </div>
-                    <h2 className="text-2xl md:text-4xl font-space font-black uppercase text-[var(--text-primary)] tracking-tighter">
+                    <h2 className="text-2xl md:text-4xl font-heading font-black text-[var(--text-primary)] tracking-tight">
                       {selectedMission.title}
                     </h2>
                   </div>

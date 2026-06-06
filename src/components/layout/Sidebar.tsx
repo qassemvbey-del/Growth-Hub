@@ -83,50 +83,50 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
 
   return (
     <aside className={cn(
-      "hidden lg:flex w-72 bg-black/50 backdrop-blur-xl border-e border-white/10 h-screen fixed top-0 flex-col z-[110] sidebar-target",
+      "hidden lg:flex w-[220px] bg-black/50 backdrop-blur-xl border-e border-white/10 h-screen fixed top-0 flex-col z-[110] sidebar-target",
       "inset-inline-start-0"
     )}>
       {/* ── PROFILE IDENTITY LAYER ── */}
-      <div className="pt-12 px-8 flex flex-col items-center text-center relative overflow-hidden group pb-8 bg-transparent">
+      <div className="pt-12 px-6 flex flex-col items-center text-center relative overflow-hidden group pb-8 bg-transparent">
         <div className={cn(
           "relative p-1.5 rounded-full bg-gradient-to-tr shadow-2xl group-hover:scale-105 transition-transform duration-500 cursor-pointer",
           mounted && perks.hasAvatarBorder ? "ring-4 ring-offset-2 ring-[var(--theme-color)] ring-offset-[var(--sidebar-bg)] animate-pulse" : ""
         )} onClick={() => router.push('/settings')} style={{ backgroundImage: `linear-gradient(to top right, ${currentTheme.color}, ${currentTheme.color}88, transparent, ${currentTheme.color})`, boxShadow: `0 0 30px ${currentTheme.color}50` }}>
-          <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-zinc-100/80 dark:bg-white/10 backdrop-blur-md p-1 overflow-hidden flex items-center justify-center border border-black/20 dark:border-white/10 shadow-inner">
+          <div className="w-20 h-20 rounded-full bg-zinc-100/80 dark:bg-white/10 backdrop-blur-md p-1 overflow-hidden flex items-center justify-center border border-black/20 dark:border-white/10 shadow-inner">
             {mounted && profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="User" className="w-[90%] h-[90%] mx-auto object-contain p-1 rounded-full shadow-md" />
             ) : (
-              <NeonIcon icon={UserCircle2} size={48} className="text-[var(--text-secondary)]" />
+              <NeonIcon icon={UserCircle2} size={40} className="text-[var(--text-secondary)]" />
             )}
           </div>
           {mounted && profile?.avatar_url && (
             <div 
-              className="absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center border-2 border-[var(--sidebar-bg)] shadow-lg z-20 backdrop-blur-md"
+              className="absolute bottom-0 right-0 w-6 h-6 rounded-full flex items-center justify-center border border-[var(--sidebar-bg)] shadow-lg z-20 backdrop-blur-md"
               style={{ 
                 backgroundColor: currentTheme.color, 
                 color: '#000000',
-                boxShadow: `0 0 15px ${currentTheme.color}` 
+                boxShadow: `0 0 10px ${currentTheme.color}` 
               }}
               title="Active Persona Role"
             >
               {(() => {
                 const IconComponent = getRoleIconComponent(profile.avatar_url)
-                return <NeonIcon icon={IconComponent} size={16} className="text-black" />
+                return <NeonIcon icon={IconComponent} size={12} className="text-black" />
               })()}
             </div>
           )}
         </div>
 
         <span className={cn(
-          "text-base font-space font-black truncate max-w-[220px] transition-all tracking-wide mt-4 text-center",
+          "text-sm font-heading font-medium truncate max-w-[180px] transition-all mt-4 text-center",
           mounted && perks.hasNameGlow ? getRankNeonClass(profile?.rank || '') : "text-zinc-900 dark:text-zinc-100"
         )}>
           {mounted ? (profile?.full_name || cachedName || (t ? t('operator') : 'USER')) : 'USER'}
         </span>
 
         {mounted && perks.hasTitle && (
-          <span className="text-[10px] font-space font-black uppercase tracking-[0.2em] opacity-80 mt-1" style={{ color: currentTheme.color }}>
-            [ {isRTL ? (
+          <span className="text-xs font-body font-medium opacity-80 mt-1" style={{ color: currentTheme.color }}>
+            {isRTL ? (
               profile?.rank === 'GOLD' ? 'الأوبريتور الذهبي' :
               profile?.rank === 'PLATINUM' ? 'النخبة البلاتينية' :
               profile?.rank === 'DIAMOND' ? 'الماستر الماسي' :
@@ -138,24 +138,24 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               profile?.rank === 'DIAMOND' ? 'Diamond Master' :
               profile?.rank === 'CROWN' ? 'Crown Monarch' :
               profile?.rank === 'ACE' ? 'Ace Champion' : 'Conqueror Supreme'
-            )} ]
+            )}
           </span>
         )}
 
         <div className="flex items-center gap-1.5 mt-2">
-          <span className={cn("text-xs font-space font-black tracking-widest uppercase text-center", mounted ? getRankNeonClass(profile?.rank || '') : '')}>
-            ◆ {mounted ? (profile?.rank || 'SILVER') : 'SILVER'}
+          <span className={cn("text-xs font-body font-medium text-center", mounted ? getRankNeonClass(profile?.rank || '') : '')}>
+            ◆ {mounted ? (profile?.rank ? profile.rank.charAt(0) + profile.rank.slice(1).toLowerCase() : 'Silver') : 'Silver'}
           </span>
         </div>
 
-        <div className="w-full space-y-1.5 mt-5 px-2">
-          <div className="flex justify-between items-center w-full text-[11px] font-space tracking-wider font-black">
-            <span className="text-zinc-500 dark:text-zinc-400 uppercase text-left leading-tight">
+        <div className="w-full space-y-1.5 mt-5 px-1">
+          <div className="flex justify-between items-center w-full text-[11px] font-body font-medium">
+            <span className="text-zinc-500 dark:text-zinc-400 text-left leading-tight">
               {mounted
                 ? (isRTL
-                    ? `${xpNeeded} XP إلى ${nextRankName === 'MAX RANK' ? 'أعلى رتبة' : nextRankName}`
-                    : `${xpNeeded}xp to ${nextRankName}`)
-                : `800xp to PLATINUM`}
+                    ? `${xpNeeded} XP إلى ${nextRankName === 'MAX RANK' ? 'أعلى رتبة' : (nextRankName ? nextRankName.charAt(0) + nextRankName.slice(1).toLowerCase() : '')}`
+                    : `${xpNeeded} XP to ${nextRankName === 'MAX RANK' ? 'Max Rank' : (nextRankName ? nextRankName.charAt(0) + nextRankName.slice(1).toLowerCase() : '')}`)
+                : `800 XP to Platinum`}
             </span>
             <span className="text-xs font-bold shrink-0 ps-2" style={{ color: currentTheme.color }}>
               {progressPct.toFixed(0)}%
@@ -165,16 +165,16 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
       </div>
 
       {/* ── NAVIGATION MATRIX ── */}
-      <nav className="flex-grow px-4 py-8 space-y-1.5 overflow-y-auto font-space">
-        <h3 className="px-6 text-[9px] font-space tracking-[0.8em] text-[var(--text-secondary)]/50 uppercase mb-6 font-black font-space">
-          {mounted ? (isRTL ? 'القائمة' : 'MENU') : 'MENU'}
+      <nav className="flex-grow px-4 py-8 space-y-1.5 overflow-y-auto font-body">
+        <h3 className="px-4 text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2 font-medium font-body">
+          {mounted ? (isRTL ? 'القائمة' : 'Menu') : 'Menu'}
         </h3>
         {MENU_ITEMS.map((item, idx) => {
           if (item.shortcut === '02') {
             const isGoalsActive = pathname.startsWith('/goals')
             const isHovered = hoveredIndex === idx
             return (
-              <div key={item.href} className="flex flex-col w-full">
+              <div key={item.href} className="flex flex-col w-full font-body">
                 <button
                   type="button"
                   onClick={() => {
@@ -184,16 +184,16 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                   onMouseEnter={() => setHoveredIndex(idx)}
                   onMouseLeave={() => setHoveredIndex(null)}
                   className={cn(
-                    "flex items-center p-3 px-6 rounded-md transition-all duration-300 relative group overflow-hidden min-h-[44px] w-full text-left cursor-pointer",
+                    "flex items-center p-3 px-6 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[44px] w-full text-left cursor-pointer",
                      isGoalsActive && !pathname.startsWith('/goals/')
-                       ? "bg-white/5 text-[var(--text-primary)] border border-white/5 shadow-sm" 
-                       : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-white/5 hover:bg-white/5"
+                       ? "bg-white/5 text-[var(--text-primary)] border border-white/10 shadow-sm" 
+                       : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-white/10 hover:bg-white/5"
                   )}
                 >
                   <NeonIcon
                     icon={item.icon}
                     interactive
-                    className="w-5 h-5 transition-all duration-300 me-4"
+                    className="w-4 h-4 transition-all duration-300 me-3"
                     style={{ 
                       color: (isGoalsActive && !pathname.startsWith('/goals/'))
                         ? currentTheme.color 
@@ -202,7 +202,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                   />
                   
                   <span className={cn(
-                    "font-space tracking-wide font-medium flex-grow transition-colors duration-300 text-sm"
+                    "font-body font-medium flex-grow transition-colors duration-300 text-sm"
                   )}
                   style={{ 
                     color: (isGoalsActive && !pathname.startsWith('/goals/'))
@@ -215,7 +215,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
 
                   <div className="flex items-center gap-2 shrink-0 select-none rtl:hidden">
                     <span 
-                      className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black transition-colors duration-300"
+                      className="text-[9px] font-body text-[var(--text-secondary)]/30 font-medium transition-colors duration-300"
                       style={{ 
                         color: isHovered ? `${currentTheme.color}66` : undefined 
                       }}
@@ -232,7 +232,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
-                      className="overflow-hidden flex flex-col gap-1 mt-1 ps-4 border-s border-white/5 ms-6"
+                      className="overflow-hidden flex flex-col gap-1 mt-1 ps-4 border-s border-white/10 ms-6"
                     >
                       {[
                         { label: mounted ? (isRTL ? 'أهدافي' : 'Solo Goals') : 'Solo Goals', icon: User, href: '/goals/solo' },
@@ -248,9 +248,9 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                             onMouseEnter={() => setHoveredIndex(100 + subIdx)}
                             onMouseLeave={() => setHoveredIndex(null)}
                             className={cn(
-                              "flex items-center p-2 px-3 rounded-md transition-all duration-300 relative group overflow-hidden min-h-[34px] border border-transparent",
+                              "flex items-center p-2 px-3 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[34px] border border-transparent",
                               isSubActive 
-                                ? "bg-white/5 text-[var(--text-primary)] border border-white/5 shadow-sm" 
+                                ? "bg-white/5 text-[var(--text-primary)] border border-white/10 shadow-sm" 
                                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5"
                             )}
                           >
@@ -266,12 +266,12 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                             />
 
                             <span className={cn(
-                              "font-space font-medium flex-grow transition-colors duration-300 text-xs"
+                              "font-body font-medium flex-grow transition-colors duration-300 text-xs"
                             )}
                             style={{ 
                               color: isSubActive 
                                 ? currentTheme.color 
-                                : (isSubHovered ? currentTheme.color : undefined)
+                                 : (isSubHovered ? currentTheme.color : undefined)
                             }}
                             >
                               {subItem.label}
@@ -296,16 +296,16 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               onMouseEnter={() => setHoveredIndex(idx)}
               onMouseLeave={() => setHoveredIndex(null)}
               className={cn(
-                "flex items-center p-3 px-6 rounded-md transition-all duration-300 relative group overflow-hidden min-h-[44px]",
+                "flex items-center p-3 px-6 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[44px]",
                  isActive 
-                   ? "bg-white/5 text-[var(--text-primary)] border border-white/5 shadow-sm" 
-                   : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-white/5 hover:bg-white/5"
+                   ? "bg-white/5 text-[var(--text-primary)] border border-white/10 shadow-sm" 
+                   : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-white/10 hover:bg-white/5"
               )}
             >
               <NeonIcon
                 icon={item.icon}
                 interactive
-                className="w-5 h-5 transition-all duration-300 me-4"
+                className="w-4 h-4 transition-all duration-300 me-3"
                 style={{ 
                   color: isActive 
                     ? currentTheme.color 
@@ -314,7 +314,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               />
               
               <span className={cn(
-                "font-space font-medium flex-grow transition-colors duration-300 text-sm"
+                "font-body font-medium flex-grow transition-colors duration-300 text-sm"
               )}
               style={{ 
                 color: isActive 
@@ -326,7 +326,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               </span>
 
               <span 
-                className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black transition-colors duration-300 rtl:hidden"
+                className="text-[9px] font-body text-[var(--text-secondary)]/30 font-medium transition-colors duration-300 rtl:hidden"
                 style={{ 
                   color: isHovered ? `${currentTheme.color}66` : undefined 
                 }}
@@ -342,7 +342,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
           <button
             type="button"
             onClick={() => onOpenCoach?.()}
-            className="w-full group relative flex items-center justify-between p-4 rounded-md border transition-all duration-300 overflow-hidden cursor-pointer shadow-lg active:scale-98"
+            className="w-full group relative flex items-center justify-between p-4 rounded-md border transition-all duration-150 active:scale-[0.97] hover:brightness-105 overflow-hidden cursor-pointer shadow-lg"
             style={{
               backgroundColor: `${currentTheme.color}15`,
               borderColor: `${currentTheme.color}50`,
@@ -355,9 +355,9 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                 animate={{ opacity: [1, 0.4, 1], scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <NeonIcon icon={Bot} className="w-5 h-5" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }} />
+                <NeonIcon icon={Bot} className="w-4 h-4" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }} />
               </motion.span>
-              <span className="font-space font-black text-xs tracking-[0.3em] uppercase text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors font-space">
+              <span className="font-heading font-medium text-xs text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors">
                 {mounted ? (isRTL ? 'المساعد' : 'Coach') : 'Coach'}
               </span>
             </div>
@@ -366,21 +366,21 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
       </nav>
 
       {/* ── Docked Settings ── */}
-      <div className="p-4 mt-auto border-t border-white/5 flex flex-col bg-transparent shrink-0">
+      <div className="p-4 mt-auto border-t border-white/10 flex flex-col bg-transparent shrink-0">
         <Link 
           href="/settings" 
           onClick={playBlip}
           onMouseEnter={() => setIsSettingsHovered(true)}
           onMouseLeave={() => setIsSettingsHovered(false)}
           className={cn(
-            "flex items-center gap-4 p-3 px-6 rounded-md transition-all duration-300 relative group overflow-hidden min-h-[44px]",
+            "flex items-center gap-4 p-3 px-6 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[44px]",
             pathname === '/settings'
               ? "bg-white/5 text-[var(--text-primary)] shadow-sm"
               : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5"
           )}
         >
-          <NeonIcon icon={Sliders} interactive className="w-5 h-5 transition-colors duration-300" style={{ color: (pathname === '/settings' || isSettingsHovered) ? currentTheme.color : undefined }} />
-          <span className="font-space font-medium text-sm transition-colors duration-300 text-zinc-900 dark:text-zinc-100">
+          <NeonIcon icon={Sliders} interactive className="w-4 h-4 transition-colors duration-300" style={{ color: (pathname === '/settings' || isSettingsHovered) ? currentTheme.color : undefined }} />
+          <span className="font-body font-medium text-sm transition-colors duration-300 text-zinc-900 dark:text-zinc-100">
             {mounted ? (isRTL ? 'الإعدادات' : 'Settings') : 'Settings'}
           </span>
         </Link>

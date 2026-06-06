@@ -104,56 +104,57 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
         transition={{ delay: idx * 0.05 }}
         onClick={() => { playBlip(); router.push(mission.metadata?.type === 'public' ? `/goals/public/${mission.id}` : `/goals/squad/${mission.id}`); }}
         className={cn(
-          "group relative flex flex-row items-center justify-between bg-[var(--card-bg)] border border-[var(--card-border)] hover:border-[var(--card-border)]/50 cursor-pointer transition-all rounded-md shadow-xl overflow-hidden",
-          typeFilter === 'squad' && "border-l-4",
-          "p-3"
+          "group relative flex flex-row items-center justify-between card-base cursor-pointer overflow-hidden p-4",
+          "border border-white/10 dark:border-white/10 light:border-black/8 hover:-translate-y-0.5 hover:border-orange-500/20 active:scale-[0.97] transition-all duration-150"
         )}
-        style={typeFilter === 'squad' ? { borderLeftColor: mission.color || color } : {}}
+        style={typeFilter === 'squad' ? { borderInlineStart: `4px solid ${mission.color || color}` } : {}}
       >
-        <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: isInRedZone ? '#FF0055' : (mission.color || color) }} />
-
         {/* Left Section: Info and Controls */}
-        <div className="flex flex-col flex-1 min-w-0 pr-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <SizeIconComp className="w-3.5 h-3.5 opacity-40 shrink-0" style={{ color: isInRedZone ? '#FF0055' : (mission.color || color) }} />
-            <p className="text-[8px] font-space tracking-[0.3em] uppercase font-black opacity-40">
-              {mission.sync_to_dashboard ? (isRTL ? 'نشط' : 'ACTIVE') : (isRTL ? 'استعداد' : 'STANDBY')}
-            </p>
+        <div className="flex flex-col flex-1 min-w-0 pr-3 text-start">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <SizeIconComp className="w-3.5 h-3.5 opacity-60 shrink-0" style={{ color: isInRedZone ? '#FF0055' : (mission.color || color) }} />
+            
+            <span className={cn(
+              "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors duration-200",
+              mission.sync_to_dashboard 
+                ? "bg-teal-500/10 text-teal-600 dark:text-teal-400" 
+                : "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400"
+            )}>
+              <span className={cn("w-1 h-1 rounded-full inline-block", mission.sync_to_dashboard ? "bg-teal-500" : "bg-zinc-400")} />
+              {mission.sync_to_dashboard ? (isRTL ? 'نشط' : 'Active') : (isRTL ? 'استعداد' : 'Standby')}
+            </span>
+
             {typeFilter === 'solo' && (
-              <span className="text-[8px] font-space tracking-widest font-black uppercase text-zinc-500 opacity-60 bg-zinc-500/10 border border-zinc-500/20 px-1.5 py-0.5 rounded-md">
-                {isRTL ? '◆ فردي' : '◆ SOLO'}
+              <span className="inline-flex items-center rounded-full bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 px-2 py-0.5 text-[10px] font-medium transition-colors duration-200">
+                {isRTL ? 'فردي' : 'Solo'}
               </span>
             )}
             {typeFilter === 'squad' && (
               mission.user_id === profile?.id ? (
-                <span className="text-[8px] font-space tracking-widest font-black uppercase text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-[0_0_8px_rgba(245,158,11,0.1)]">
-                  {isRTL ? '👑 مشرف' : '👑 ADMIN'}
+                <span className="inline-flex items-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 text-[10px] font-medium transition-colors duration-200">
+                  {isRTL ? '👑 مشرف' : '👑 Admin'}
                 </span>
               ) : (
-                <span className="text-[8px] font-space tracking-widest font-black uppercase text-zinc-400 bg-zinc-400/10 border border-zinc-400/20 px-1.5 py-0.5 rounded-md">
-                  {isRTL ? 'عضو' : 'MEMBER'}
+                <span className="inline-flex items-center rounded-full bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 px-2 py-0.5 text-[10px] font-medium transition-colors duration-200">
+                  {isRTL ? 'عضو' : 'Member'}
                 </span>
               )
             )}
           </div>
 
-          {/* Commented out per rule "Never delete code, only comment it out" */}
-          {/* <h3 className="text-base md:text-lg font-space font-black uppercase text-[var(--text-primary)] truncate mt-1">
-            {mission.title}
-          </h3> */}
-          <h3 className="text-sm font-semibold font-space uppercase text-[var(--text-primary)] truncate min-w-0 mt-1">
+          <h3 className="text-sm md:text-base font-heading font-medium text-[var(--text-primary)] truncate min-w-0 mt-2">
             {mission.title}
           </h3>
 
           {typeFilter === 'squad' && (
-            <div className="flex flex-col gap-1.5 my-1.5 py-1 border-y border-zinc-800/40 select-none">
+            <div className="flex flex-col gap-1.5 my-2 py-1.5 border-y border-zinc-800/20 dark:border-zinc-800/40 select-none">
               <div className="flex items-center justify-between flex-wrap gap-1.5">
                 <div className="flex items-center -space-x-1.5">
                   {(goalMembersMap[mission.id] || []).slice(0, 4).map((member: any) => (
                     <div
                       key={member.id}
                       className={cn(
-                        "w-5 h-5 rounded-full border bg-zinc-900 flex items-center justify-center text-[7px] font-space font-black uppercase text-white shadow-md relative overflow-hidden shrink-0",
+                        "w-5 h-5 rounded-full border bg-zinc-900 flex items-center justify-center text-[7px] font-body font-medium text-white shadow-md relative overflow-hidden shrink-0",
                         getRankBorderClass(member.rank)
                       )}
                       title={`${member.full_name} (${member.rank || 'MEMBER'}) - ${member.role}`}
@@ -172,21 +173,21 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                   ))}
 
                   {(goalMembersMap[mission.id] || []).length > 4 && (
-                    <div className="w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[6px] font-space font-black text-teal-400 shadow-md shrink-0">
+                    <div className="w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[6px] font-body font-medium text-teal-400 shadow-md shrink-0">
                       +{(goalMembersMap[mission.id] || []).length - 4}
                     </div>
                   )}
                 </div>
 
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[8px] font-space font-black text-zinc-400 uppercase tracking-wider">
-                    {(goalMembersMap[mission.id] || []).length} MEMBER{((goalMembersMap[mission.id] || []).length !== 1) ? 'S' : ''}
+                  <span className="text-[10px] font-body font-medium text-zinc-500 dark:text-zinc-400">
+                    {(goalMembersMap[mission.id] || []).length} {isRTL ? 'أعضاء' : 'Members'}
                   </span>
-                  <span className="text-zinc-600 text-[8px] font-space font-black">•</span>
+                  <span className="text-zinc-400 dark:text-zinc-600 text-[8px] font-body font-medium">•</span>
                   <div className="flex items-center gap-1">
                     <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[8px] font-space font-black text-emerald-400 uppercase tracking-wider">
-                      {goalActiveTodayMap[mission.id] || 0} ACTIVE
+                    <span className="text-[10px] font-body font-medium text-emerald-600 dark:text-emerald-400">
+                      {goalActiveTodayMap[mission.id] || 0} {isRTL ? 'نشط اليوم' : 'Active'}
                     </span>
                   </div>
                 </div>
@@ -194,33 +195,33 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
             </div>
           )}
 
-          <div className="flex items-center gap-3 flex-wrap mt-1">
-            <p className="text-[8px] font-space text-[var(--text-secondary)] uppercase font-black tracking-widest">
-              {completedTasks}/{totalTasks} {isRTL ? 'المهام' : 'TASKS'}
+          <div className="flex items-center gap-3 flex-wrap mt-1.5">
+            <p className="text-xs font-body text-[var(--text-secondary)]">
+              {completedTasks}/{totalTasks} {isRTL ? 'المهام' : 'Tasks'}
             </p>
             {(mission.start_date || mission.end_date) && (
-              <p className="text-[7px] font-space text-[var(--text-secondary)]/50 uppercase tracking-wider">
+              <p className="text-[10px] font-body text-[var(--text-secondary)]/60">
                 {fmtDate(mission.start_date)} → {fmtDate(mission.end_date)}
               </p>
             )}
           </div>
 
-          <div className="w-full h-[1.5px] bg-[var(--input-bg)] relative mt-2 mb-2">
+          <div className="w-full h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full relative mt-2.5 mb-2.5 overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${percentage}%` }}
-              className="h-full absolute top-0 start-0"
-              style={{ backgroundColor: isInRedZone ? '#FF0055' : (mission.color || color), boxShadow: `0 0 10px ${isInRedZone ? '#FF0055' : (mission.color || color)}` }}
+              className="h-full rounded-full progress-fill absolute top-0 start-0"
+              style={{ backgroundColor: isInRedZone ? '#FF0055' : (mission.color || color) }}
             />
           </div>
 
           {/* Action Buttons inside Left Column */}
-          <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap mt-1">
             {typeFilter === 'squad' && mission.metadata?.invite_code && (
               <button
                 onClick={(e) => handleCopyInviteLink(e, mission.metadata.invite_code)}
-                className="relative flex items-center justify-center w-6 h-6 border border-[var(--card-border)] hover:border-teal-400/50 hover:bg-teal-500/5 transition-all rounded-md shrink-0"
-                title="COPY_INVITE_CODE"
+                className="relative flex items-center justify-center w-6 h-6 border border-white/10 dark:border-white/10 hover:border-teal-400/50 hover:bg-teal-500/5 transition-all rounded-md shrink-0 active:scale-[0.97]"
+                title="Copy Invite Link"
               >
                 <Link className="text-[10px] text-teal-400 w-3 h-3" />
               </button>
@@ -255,10 +256,10 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 window.open(googleUrl, '_blank');
                 playBlip();
               }}
-              className="relative flex items-center justify-center w-6 h-6 border border-[var(--card-border)] transition-all rounded-md shrink-0"
+              className="relative flex items-center justify-center w-6 h-6 border border-white/10 dark:border-white/10 transition-all rounded-md shrink-0 active:scale-[0.97]"
               onMouseEnter={e => e.currentTarget.style.borderColor = `${(mission.color || color)}60`}
               onMouseLeave={e => e.currentTarget.style.borderColor = ''}
-              title="ADD_TO_GOOGLE_CALENDAR"
+              title="Add to Google Calendar"
             >
               <Calendar className="text-[10px] w-3 h-3" />
             </button>
@@ -268,10 +269,10 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 e.stopPropagation();
                 openAttachments(mission.id);
               }}
-              className="relative flex items-center justify-center w-6 h-6 border border-[var(--card-border)] transition-all rounded-md shrink-0"
+              className="relative flex items-center justify-center w-6 h-6 border border-white/10 dark:border-white/10 transition-all rounded-md shrink-0 active:scale-[0.97]"
               onMouseEnter={e => e.currentTarget.style.borderColor = `${(mission.color || color)}60`}
               onMouseLeave={e => e.currentTarget.style.borderColor = ''}
-              title="ATTACHMENTS"
+              title="Attachments"
               style={{
                 borderColor: (attachmentCounts[mission.id] || 0) > 0 ? `${(mission.color || color)}44` : undefined,
                 boxShadow: (attachmentCounts[mission.id] || 0) > 0 ? `0 0 10px ${(mission.color || color)}22` : undefined
@@ -280,7 +281,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
               <HelpCircle className="text-[10px] w-3 h-3" />
               {(attachmentCounts[mission.id] || 0) > 0 && (
                 <span className="absolute -top-1 -right-1 w-3 h-3 text-black text-[7px] font-black flex items-center justify-center rounded-full shadow-lg"
-                  style={{ backgroundColor: (mission.color || color), boxShadow: `0 0 6px ${(mission.color || color)}` }}
+                  style={{ backgroundColor: (mission.color || color) }}
                 >
                   {attachmentCounts[mission.id]}
                 </span>
@@ -309,7 +310,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     playBlip();
                     setActiveRulesGoalId(activeRulesGoalId === mission.id ? null : mission.id);
                   }}
-                  className="text-[var(--text-secondary)] hover:text-white transition-colors p-1 flex items-center justify-center shrink-0"
+                  className="text-[var(--text-secondary)] hover:text-white transition-colors p-1 flex items-center justify-center shrink-0 active:scale-[0.97]"
                 >
                   <Settings className="w-3.5 h-3.5" />
                 </button>
@@ -320,11 +321,11 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       initial={{ opacity: 0, scale: 0.95, y: 10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                      className="absolute right-0 top-full mt-2 w-64 bg-zinc-950/95 border border-zinc-800 rounded-md p-4 shadow-2xl backdrop-blur-md z-[150] space-y-3 font-space text-left"
+                      className="absolute right-0 top-full mt-2 w-64 bg-zinc-950/95 border border-white/10 rounded-md p-4 shadow-2xl backdrop-blur-md z-[150] space-y-3 font-body text-left"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <p className="text-[10px] font-black tracking-widest text-zinc-500 uppercase border-b border-zinc-800/80 pb-1.5">
-                        SQUAD RULES // OWNER ONLY
+                      <p className="text-[10px] font-medium tracking-wide text-zinc-500 border-b border-zinc-800 pb-1.5">
+                        Squad Rules
                       </p>
 
                       <label className="flex items-center justify-between text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer select-none">

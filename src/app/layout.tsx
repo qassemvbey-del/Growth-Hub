@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk, Tajawal, Exo_2 } from "next/font/google";
+// Commented out per rule "Never delete code, only comment it out"
+// import { Inter, Space_Grotesk, Tajawal, Exo_2 } from "next/font/google";
+import { Space_Grotesk, Inter, Tajawal } from 'next/font/google';
 import "./globals.css";
 import { GrowthProvider } from "@/context/GrowthContext";
 import { SoundProvider } from "@/context/SoundContext";
@@ -12,10 +14,33 @@ import Shell from '@/components/layout/Shell';
 
 import Script from "next/script";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter", preload: false });
-const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space", preload: false });
-const tajawal = Tajawal({ weight: ["400", "500", "700", "800", "900"], subsets: ["arabic"], variable: "--font-tajawal", preload: false });
-const exo2 = Exo_2({ subsets: ["latin"], weight: ["700", "800", "900"], variable: "--font-exo2", preload: false });
+// Commented out per rule "Never delete code, only comment it out"
+// const inter = Inter({ subsets: ["latin"], variable: "--font-inter", preload: false });
+// const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space", preload: false });
+// const tajawal = Tajawal({ weight: ["400", "500", "700", "800", "900"], subsets: ["arabic"], variable: "--font-tajawal", preload: false });
+// const exo2 = Exo_2({ subsets: ["latin"], weight: ["700", "800", "900"], variable: "--font-exo2", preload: false });
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['500', '600'],
+  variable: '--font-heading',
+  display: 'swap'
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-body',
+  display: 'swap'
+});
+
+const tajawal = Tajawal({
+  subsets: ['arabic'],
+  weight: ['400', '500', '700'],
+  variable: '--font-arabic',
+  display: 'swap'
+});
+
 
 export const metadata: Metadata = {
   title: "Growth Hub | Level Up Your Learning",
@@ -75,7 +100,9 @@ export default function RootLayout({
         <link rel="icon" type="image/svg+xml" href="/icon.svg" />
         <link rel="apple-touch-icon" href="/icon.svg" />
       </head>
-      <body className={`${inter.variable} ${spaceGrotesk.variable} ${tajawal.variable} ${exo2.variable} antialiased text-lg md:text-xl`}>
+      {/* Commented out per rule "Never delete code, only comment it out" */}
+      {/* <body className={`${inter.variable} ${spaceGrotesk.variable} ${tajawal.variable} ${exo2.variable} antialiased text-lg md:text-xl`}> */}
+      <body className={`${inter.variable} ${spaceGrotesk.variable} ${tajawal.variable} antialiased text-lg md:text-xl`}>
         <SoundProvider>
           <GrowthProvider>
             <ToastProvider>

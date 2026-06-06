@@ -329,7 +329,7 @@ export default function SettingsPage() {
         
         {/* Settings Header */}
         <header className="space-y-1 text-start">
-          <h1 className="text-2xl md:text-5xl font-black font-space tracking-wider uppercase text-black dark:text-white leading-none">
+          <h1 className="text-2xl md:text-4xl font-black font-heading tracking-tight text-black dark:text-white leading-none">
             {t('settings')}
           </h1>
           <p className="text-[13px] text-zinc-500 dark:text-zinc-400 font-medium">
@@ -361,8 +361,8 @@ export default function SettingsPage() {
                 </div>
               </button>
               <div className="flex-1 min-w-0 text-start">
-                <h4 className="font-space font-black text-sm text-white tracking-wider uppercase truncate">
-                  {profile?.full_name || 'MEMBER'}
+                <h4 className="font-medium text-sm text-white truncate">
+                  {profile?.full_name || (isRTL ? 'عضو' : 'Member')}
                 </h4>
                 <p className="text-[10px] text-zinc-500 truncate mt-0.5">
                   {userEmail || (isRTL ? 'حساب محلي مؤقت' : 'Temporary Local Account')}
@@ -464,7 +464,7 @@ export default function SettingsPage() {
                   <Trophy className="w-6 h-6" style={{ color: activeRank.color }} />
                 </div>
                 <div>
-                  <h4 className="font-space font-black text-sm uppercase tracking-wider text-white">
+                  <h4 className="font-medium text-sm text-white">
                     {activeRank.name}
                   </h4>
                   <p className="text-[10px] text-zinc-500 font-mono">
@@ -769,11 +769,11 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <h3 className="font-space font-black text-xl text-white uppercase tracking-widest leading-none">
-                  {isRTL ? 'تسجيل الخروج' : 'CONFIRM LOGOUT'}
+                <h3 className="font-semibold text-xl text-white leading-none">
+                  {isRTL ? 'تسجيل الخروج' : 'Log out?'}
                 </h3>
-                <p className="text-[9px] font-space tracking-[0.25em] uppercase font-black" style={{ color: currentTheme.color }}>
-                  {isRTL ? 'تأكيد الخروج من النظام' : 'DISCONNECT_SESSION'}
+                <p className="text-[9px] font-medium" style={{ color: currentTheme.color }}>
+                  {isRTL ? 'تأكيد الخروج من الجلسة' : 'Confirm logout'}
                 </p>
               </div>
 
@@ -799,9 +799,9 @@ export default function SettingsPage() {
                     setIsLogoutModalOpen(false)
                     playBlip()
                   }}
-                  className="w-full bg-transparent border border-white/10 hover:bg-white/5 text-white/60 hover:text-white py-3 font-space font-black text-xs uppercase tracking-widest rounded-xl transition-all duration-300 cursor-pointer"
+                  className="w-full bg-transparent border border-white/10 hover:bg-white/5 text-white/60 hover:text-white py-3 font-medium text-sm rounded-xl transition-all duration-150 cursor-pointer active:scale-[0.97]"
                 >
-                  {isRTL ? 'إلغاء' : 'CANCEL'}
+                  {isRTL ? 'إلغاء' : 'Cancel'}
                 </button>
               </div>
             </motion.div>
@@ -830,11 +830,11 @@ export default function SettingsPage() {
                   <AlertTriangle className="text-red-500 text-2xl font-bold w-6 h-6" />
                 </div>
                 <div className="text-start">
-                  <h3 className="font-space font-black text-lg text-red-500 uppercase tracking-widest leading-tight">
-                    {isRTL ? 'تأكيد مسح الحساب والتقييم' : 'DELETE ACCOUNT & SURVEY'}
+                  <h3 className="font-semibold text-lg text-red-500 leading-tight">
+                    {isRTL ? 'تأكيد حذف الحساب' : 'Delete account?'}
                   </h3>
-                  <p className="text-[8px] md:text-[9px] font-space text-red-500/60 tracking-[0.2em] uppercase font-black">
-                    WARNING // PERMANENT_ACCOUNT_DESTRUCTION
+                  <p className="text-[10px] text-red-500/60 mt-0.5">
+                    {isRTL ? 'هذا الإجراء دائم ولا يمكن التراجع عنه' : 'This action is permanent and cannot be undone.'}
                   </p>
                 </div>
               </div>
@@ -853,8 +853,8 @@ export default function SettingsPage() {
 
                 {/* Question 1: What bothered you? */}
                 <div className="space-y-3">
-                  <label className="text-[10px] md:text-xs font-space text-white/50 tracking-widest uppercase font-black">
-                    {isRTL ? '1. ما هو السبب الرئيسي لإلغاء الحساب؟' : '1. IS THERE SOMETHING SPECIFIC THAT BOTHERED YOU?'}
+                  <label className="text-[10px] md:text-xs text-white/50 block font-medium">
+                    {isRTL ? '1. ما هو سبب حذف الحساب؟' : '1. What made you leave?'}
                   </label>
                   
                   <div className="grid grid-cols-1 gap-2">
@@ -873,7 +873,7 @@ export default function SettingsPage() {
                           playBlip()
                         }}
                         className={cn(
-                          "w-full p-4 border rounded-xl text-xs font-bold font-space text-start transition-all uppercase tracking-wider flex items-center justify-between cursor-pointer",
+                          "w-full p-4 border rounded-xl text-xs font-medium text-start transition-all duration-150 flex items-center justify-between cursor-pointer active:scale-[0.97]",
                           surveyBothered === opt.key
                             ? "bg-red-500/10 border-red-500/50 text-white"
                             : "bg-white/[0.02] border-white/5 text-white/50 hover:text-white hover:border-white/10"
@@ -890,8 +890,8 @@ export default function SettingsPage() {
 
                 {/* Question 2: Star rating */}
                 <div className="space-y-3">
-                  <label className="text-[10px] md:text-xs font-space text-white/50 tracking-widest uppercase font-black block">
-                    {isRTL ? '2. كيف تقيم تجربتك الإجمالية من 5؟' : '2. HOW WOULD YOU RATE THE HUB OUT OF 5?'}
+                  <label className="text-[10px] md:text-xs text-white/50 font-medium block">
+                    {isRTL ? '2. كيف تقيم تجربتك من 5؟' : '2. How would you rate your experience out of 5?'}
                   </label>
                   
                   <div className="flex items-center gap-3 justify-center py-2 bg-white/[0.02] border border-white/5 rounded-xl">
@@ -917,8 +917,8 @@ export default function SettingsPage() {
 
                 {/* Question 3: Better alternative? */}
                 <div className="space-y-3">
-                  <label className="text-[10px] md:text-xs font-space text-white/50 tracking-widest uppercase font-black block">
-                    {isRTL ? '3. هل وجدت بديلاً أفضل؟ (اختياري)' : '3. DID YOU FIND A BETTER ALTERNATIVE?'}
+                  <label className="text-[10px] md:text-xs text-white/50 font-medium block">
+                    {isRTL ? '3. هل وجدت بديلاً أفضل؟ (اختياري)' : '3. Did you find a better alternative? (optional)'}
                   </label>
                   
                   <textarea
@@ -937,9 +937,9 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={handlePermanentlyDeleteAccount}
-                  className="w-full bg-red-600 hover:bg-red-500 text-white py-3.5 font-space font-black text-xs uppercase tracking-widest rounded-xl transition-all duration-300 shadow-lg shadow-red-600/10 cursor-pointer active:scale-98 font-bold"
+                  className="w-full bg-red-600 hover:bg-red-500 text-white py-3.5 font-semibold text-sm rounded-xl transition-all duration-150 shadow-lg shadow-red-600/10 cursor-pointer active:scale-[0.97]"
                 >
-                  {isRTL ? 'تأكيد الحذف النهائي' : 'CONFIRM PERMANENT WIPE'}
+                  {isRTL ? 'تأكيد الحذف النهائي' : 'Yes, delete my account'}
                 </button>
 
                 <button
@@ -948,9 +948,9 @@ export default function SettingsPage() {
                     setIsDeleteModalOpen(false)
                     playBlip()
                   }}
-                  className="w-full bg-transparent border border-white/10 hover:bg-white/5 text-white/60 hover:text-white py-3 font-space font-black text-xs uppercase tracking-widest rounded-xl transition-all duration-300 cursor-pointer"
+                  className="w-full bg-transparent border border-white/10 hover:bg-white/5 text-white/60 hover:text-white py-3 font-medium text-sm rounded-xl transition-all duration-150 cursor-pointer active:scale-[0.97]"
                 >
-                  {isRTL ? 'إلغاء' : 'CANCEL'}
+                  {isRTL ? 'إلغاء' : 'Cancel'}
                 </button>
               </div>
 

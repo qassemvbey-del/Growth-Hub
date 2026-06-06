@@ -1150,7 +1150,7 @@ export default function Shell({ children }: ShellProps) {
         </div>
 
         {/* Profile Panel */}
-        <div className="flex flex-col items-center text-center pb-6 border-b border-white/5 mb-6">
+        <div className="flex flex-col items-center text-center pb-6 border-b border-white/10 mb-6">
           <div 
             onClick={() => { router.push('/settings'); setIsMobileNavOpen(false); }}
             className="relative p-1 rounded-full bg-gradient-to-tr shadow-lg cursor-pointer"
@@ -1160,14 +1160,14 @@ export default function Shell({ children }: ShellProps) {
               {mounted && profile?.avatar_url ? (
                 <img src={profile.avatar_url} alt="User" className="w-[90%] h-[90%] mx-auto object-contain rounded-full" />
               ) : (
-                <User className="w-8 h-8 text-[var(--text-secondary)]" />
+                <User className="w-6 h-6 text-[var(--text-secondary)]" />
               )}
             </div>
           </div>
-          <span className="text-sm font-space font-black mt-3 text-zinc-100 truncate max-w-[200px]">
-            {profile?.full_name || 'USER'}
+          <span className="text-sm font-heading font-medium mt-3 text-zinc-100 truncate max-w-[200px]">
+            {profile?.full_name || 'User'}
           </span>
-          <span className="text-[10px] font-space font-black uppercase tracking-[0.2em] opacity-80 mt-1" style={{ color: currentTheme.color }}>
+          <span className="text-xs font-body font-medium mt-1" style={{ color: currentTheme.color }}>
             XP: {profile?.xp || 0}
           </span>
         </div>
@@ -1190,9 +1190,9 @@ export default function Shell({ children }: ShellProps) {
                 key={item.href}
                 onClick={() => { playBlip(); router.push(item.href); setIsMobileNavOpen(false); }}
                 className={cn(
-                  "w-full flex items-center gap-3 py-2.5 px-3 rounded-lg font-space text-sm font-medium transition-all relative cursor-pointer",
+                  "w-full flex items-center gap-3 py-2.5 px-4 rounded-lg font-body text-sm font-medium transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative cursor-pointer",
                   item.indent 
-                    ? "ms-6 ps-4 border-s border-white/5 text-xs py-2" 
+                    ? "ms-6 ps-4 border-s border-white/10 text-xs py-2" 
                     : "",
                   isActive 
                     ? "text-[var(--text-primary)]" 
@@ -1203,7 +1203,7 @@ export default function Shell({ children }: ShellProps) {
                   backgroundColor: `${currentTheme.color}15`,
                 } : {}}
               >
-                <IconComponent className={item.indent ? "w-4 h-4 shrink-0" : "w-5 h-5 shrink-0"} />
+                <IconComponent className="w-4 h-4 shrink-0" />
                 <span>{item.label}</span>
               </button>
             )

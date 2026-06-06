@@ -20,11 +20,19 @@ export default {
         "surface-accent": "#201f1f",
       },
       fontFamily: {
-        space: ["Space Grotesk", "sans-serif"],
-        inter: ["Inter", "sans-serif"],
-        arabic: ["Tajawal", "sans-serif"],
+        // Commented out per rule "Never delete code, only comment it out"
+        // space: ["Space Grotesk", "sans-serif"],
+        // inter: ["Inter", "sans-serif"],
+        // arabic: ["Tajawal", "sans-serif"],
+        // marker: ["Permanent Marker", "cursive"],
+        // exo: ["var(--font-exo2)", "sans-serif"],
+        heading: ['var(--font-heading)', 'var(--font-arabic)', 'sans-serif'],
+        body: ['var(--font-body)', 'var(--font-arabic)', 'sans-serif'],
+        space: ['var(--font-heading)', 'sans-serif'],
+        inter: ['var(--font-body)', 'sans-serif'],
+        arabic: ['var(--font-arabic)', 'sans-serif'],
         marker: ["Permanent Marker", "cursive"],
-        exo: ["var(--font-exo2)", "sans-serif"],
+        exo: ['var(--font-heading)', 'sans-serif'],
       },
       borderRadius: {
         DEFAULT: "0.125rem",

@@ -1,5 +1,6 @@
 /* @tailwindcss */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Cairo:wght@400;600;700;900&display=swap');
+/* Commented out per rule "Never delete code, only comment it out" */
+/* @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Cairo:wght@400;600;700;900&display=swap'); */
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
 @import "tailwindcss";
@@ -15,8 +16,8 @@
   --color-foreground: var(--text-base);
   --color-surface: var(--bg-surface);
 
-  --font-space: "Space Grotesk", sans-serif;
-  --font-tajawal: "Tajawal", sans-serif;
+  --font-space: var(--font-heading), sans-serif;
+  --font-tajawal: var(--font-arabic), sans-serif;
 
   @keyframes scanline {
     0% { transform: translateY(-100%); }
@@ -55,12 +56,16 @@
   --bg-surface: #ffffff;
   
   /* Light mode styles */
-  --card-bg: #f0f0f0;
-  --card-border: rgba(0,0,0,0.1);
+  --card-bg: #E8EFF2;
+  --card-border: #C8D8DF;
   --text-primary: #0a0a0a;
   --text-secondary: rgba(0,0,0,0.6);
   --input-bg: rgba(0,0,0,0.05);
   --sidebar-bg: #e8e8e8;
+
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+  --font-arabic: var(--font-arabic);
 }
 
 :root.dark {
@@ -81,6 +86,40 @@
   * {
     font-style: normal !important;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading), sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  body, p, span, div, button, input, textarea, select {
+    font-family: var(--font-body), sans-serif;
+    font-weight: 400;
+  }
+
+  [dir="rtl"] h1,
+  [dir="rtl"] h2,
+  [dir="rtl"] h3,
+  [dir="rtl"] h4,
+  [dir="rtl"] h5,
+  [dir="rtl"] h6 {
+    font-family: var(--font-arabic), sans-serif;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  [dir="rtl"] body,
+  [dir="rtl"] p,
+  [dir="rtl"] span,
+  [dir="rtl"] div,
+  [dir="rtl"] button,
+  [dir="rtl"] input,
+  [dir="rtl"] textarea,
+  [dir="rtl"] select {
+    font-family: var(--font-arabic), sans-serif;
+    font-weight: 400;
   }
   
   /* Apply user-select: none to navigation buttons, tabs, and interactive UI elements */
@@ -130,23 +169,8 @@
     color: var(--selection-text, #39FF14);
   }
 
-  /* Global Typography Scaling for Arabic & English */
-  /* Commented out per rule "Never delete code, only comment it out"
-  [lang='ar'], [dir='rtl'], .arabic-text {
-    font-family: 'Cairo', sans-serif !important;
-    font-size: 15px !important;
-    direction: rtl;
-    text-align: right;
-  }
-
-  [lang='ar'] h1, [lang='ar'] h2, [lang='ar'] h3, [lang='ar'] .header-text,
-  [dir='rtl'] h1, [dir='rtl'] h2, [dir='rtl'] h3, [dir='rtl'] .header-text {
-    font-size: 1.5rem !important;
-    font-weight: 900 !important;
-    letter-spacing: 0 !important;
-  }
-  */
-
+  /* Global Typography Scaling for Arabic & English - Commented out */
+  /*
   [lang='en'] {
     font-family: var(--font-space), sans-serif !important;
     font-weight: 700 !important;
@@ -156,6 +180,7 @@
   [lang='en'] h1, [lang='en'] h2, [lang='en'] h3, [lang='en'] h4, [lang='en'] h5, [lang='en'] h6, [lang='en'] .header-text {
     font-weight: 900 !important;
   }
+  */
 
   /* Exclude icons from forced font-family */
   .material-symbols-outlined {
@@ -438,5 +463,39 @@ main > div {
   to { opacity: 1; }
 }
 */
+
+/* Card Design System */
+.card-base {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  transition: all 150ms ease;
+}
+
+.card-base:hover {
+  border-color: rgba(249, 115, 22, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Goal cards specifically */
+.goal-card {
+  border-radius: 16px;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  padding: 16px;
+  transition: all 150ms ease;
+}
+
+.goal-card:hover {
+  border-color: rgba(249, 115, 22, 0.25);
+  transform: translateY(-1px);
+}
+
+/* RTL progress bar fill */
+[dir="rtl"] .progress-fill {
+  margin-left: auto;
+  margin-right: 0;
+}
+
 
 
