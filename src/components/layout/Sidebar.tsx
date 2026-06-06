@@ -575,7 +575,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                   onMouseEnter={() => setHoveredIndex(idx)}
                   onMouseLeave={() => setHoveredIndex(null)}
                   className={cn(
-                    "flex items-center p-3 px-6 rounded-md transition-all duration-300 relative group overflow-hidden min-h-[44px] w-full text-left cursor-pointer",
+                    "flex items-center p-3 px-6 rounded-md transition-all duration-300 relative group overflow-hidden min-h-[44px] w-full text-left rtl:text-right cursor-pointer rtl:flex-row-reverse",
                      isGoalsActive && !pathname.startsWith('/goals/')
                        ? "bg-[var(--input-bg)] text-[var(--text-primary)] border border-[var(--card-border)] shadow-sm" 
                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-[var(--card-border)] hover:bg-[var(--input-bg)]"
@@ -584,7 +584,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                   <NeonIcon
                     icon={item.icon}
                     interactive
-                    className="w-5 h-5 transition-all duration-300 me-4"
+                    className="w-5 h-5 transition-all duration-300 me-4 rtl:ms-4 rtl:me-0 shrink-0"
                     style={{ 
                       color: (isGoalsActive && !pathname.startsWith('/goals/'))
                         ? currentTheme.color 
@@ -593,7 +593,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                   />
                   
                   <span className={cn(
-                    "font-space tracking-[0.2em] font-semibold flex-grow transition-colors duration-300 text-[14px]"
+                    "font-space tracking-[0.2em] font-semibold flex-grow transition-colors duration-300 text-[14px] truncate"
                   )}
                   style={{ 
                     color: (isGoalsActive && !pathname.startsWith('/goals/'))
@@ -623,7 +623,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
-                      className="overflow-hidden flex flex-col gap-1.5 mt-1.5 ps-4"
+                      className="overflow-hidden flex flex-col gap-1.5 mt-1.5 ps-4 rtl:ps-0 rtl:pe-4 border-l rtl:border-l-0 rtl:border-r border-white/5 ms-6 rtl:ms-0 rtl:me-6"
                     >
                       {[
                         { label: mounted ? (isRTL ? 'أهدافي' : 'Solo Goals') : 'Solo Goals', icon: User, href: '/goals/solo' },
@@ -639,7 +639,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                             onMouseEnter={() => setHoveredIndex(100 + subIdx)}
                             onMouseLeave={() => setHoveredIndex(null)}
                             className={cn(
-                              "flex items-center p-2.5 px-4 rounded-md transition-all duration-300 relative group overflow-hidden min-h-[38px] border border-transparent",
+                              "flex items-center p-2.5 px-4 rounded-md transition-all duration-300 relative group overflow-hidden min-h-[38px] border border-transparent rtl:flex-row-reverse rtl:text-right",
                               isSubActive 
                                 ? "bg-[var(--input-bg)] text-[var(--text-primary)] border-[var(--card-border)] shadow-sm" 
                                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--input-bg)]"
@@ -648,7 +648,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                             <NeonIcon 
                               icon={subItem.icon}
                               interactive
-                              className="w-4 h-4 transition-all duration-300 me-4"
+                              className="w-4 h-4 transition-all duration-300 me-4 rtl:ms-4 rtl:me-0 shrink-0"
                               style={{ 
                                 color: isSubActive 
                                   ? currentTheme.color 
@@ -657,7 +657,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                             />
 
                             <span className={cn(
-                              "font-space tracking-[0.2em] font-semibold flex-grow transition-colors duration-300 text-[12px]"
+                              "font-space tracking-[0.2em] font-semibold flex-grow transition-colors duration-300 text-[12px] truncate"
                             )}
                             style={{ 
                               color: isSubActive 
@@ -687,7 +687,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               onMouseEnter={() => setHoveredIndex(idx)}
               onMouseLeave={() => setHoveredIndex(null)}
               className={cn(
-                "flex items-center p-3 px-6 rounded-md transition-all duration-300 relative group overflow-hidden min-h-[44px]",
+                "flex items-center p-3 px-6 rounded-md transition-all duration-300 relative group overflow-hidden min-h-[44px] rtl:flex-row-reverse rtl:text-right",
                  isActive 
                    ? "bg-[var(--input-bg)] text-[var(--text-primary)] border border-[var(--card-border)] shadow-sm" 
                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-[var(--card-border)] hover:bg-[var(--input-bg)]"
@@ -696,7 +696,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               <NeonIcon
                 icon={item.icon}
                 interactive
-                className="w-5 h-5 transition-all duration-300 me-4"
+                className="w-5 h-5 transition-all duration-300 me-4 rtl:ms-4 rtl:me-0 shrink-0"
                 style={{ 
                   color: isActive 
                     ? currentTheme.color 
@@ -705,8 +705,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               />
               
               <span className={cn(
-                "font-space tracking-[0.2em] font-semibold flex-grow transition-colors duration-300",
-                "text-[13px]"
+                "font-space tracking-[0.2em] font-semibold flex-grow transition-colors duration-300 text-[13px] truncate"
               )}
               style={{ 
                 color: isActive 

@@ -234,7 +234,7 @@ export default function SquadGoalsPage() {
               initial={{ width: 0 }}
               animate={{ width: `${percentage}%` }}
               className="h-full rounded-full progress-fill absolute top-0 start-0"
-              style={{ backgroundColor: isInRedZone ? '#FF0055' : (percentage === 100 ? '#14b8a6' : '#f97316') }}
+              style={{ backgroundColor: percentage === 100 ? '#14b8a6' : (isInRedZone ? '#ef4444' : '#f97316') }}
             />
           </div>
 
@@ -1229,9 +1229,9 @@ export default function SquadGoalsPage() {
                 ) : (
                   <Users className="w-6 h-6 md:w-10 md:h-10 shrink-0" style={{ color: currentTheme.color }} />
                 )}
-                <h1 className="text-2xl md:text-6xl font-black font-space tracking-wider uppercase text-black dark:text-white leading-none truncate">
+                <h1 className="text-2xl md:text-6xl font-black font-space tracking-wider text-black dark:text-white leading-none truncate">
                   {typeFilter === 'solo' ? (
-                    <>{isRTL ? 'أهدافي' : 'Personal'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الشخصية' : ' Goals'}</span></>
+                    <>{isRTL ? 'أهدافي' : 'Solo'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الشخصية' : ' Goals'}</span></>
                   ) : typeFilter === 'squad' ? (
                     <>{isRTL ? 'الأهداف' : 'Squad'}<span style={{ color: currentTheme.color }}>{isRTL ? ' الجماعية' : ' Goals'}</span></>
                   ) : (
@@ -2160,8 +2160,8 @@ return (
           animate={{ width: `${percentage}%` }}
           className="h-full absolute top-0 start-0"
           style={{ 
-            backgroundColor: isInRedZone ? '#FF0055' : (percentage === 100 ? '#14b8a6' : '#f97316'), 
-            boxShadow: `0 0 10px ${isInRedZone ? '#FF0055' : (percentage === 100 ? '#14b8a6' : '#f97316')}` 
+            backgroundColor: percentage === 100 ? '#14b8a6' : (isInRedZone ? '#ef4444' : '#f97316'), 
+            boxShadow: `0 0 10px ${percentage === 100 ? '#14b8a6' : (isInRedZone ? '#ef4444' : '#f97316')}` 
           }}
         />
       </div>
