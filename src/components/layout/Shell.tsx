@@ -1134,7 +1134,7 @@ export default function Shell({ children }: ShellProps) {
           x: sidebarX
         }}
         className={cn(
-          "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col bg-black/50 backdrop-blur-xl p-6 transform-gpu will-change-transform touch-pan-y",
+          "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col !bg-black/50 !backdrop-blur-xl p-6 transform-gpu will-change-transform touch-pan-y",
           isRTL ? "right-0 border-s border-white/10" : "left-0 border-e border-white/10"
         )}
       >
@@ -1181,6 +1181,7 @@ export default function Shell({ children }: ShellProps) {
             { label: isRTL ? 'الفريق' : 'Squad Goals', icon: Users, href: '/goals/squad', indent: true },
             { label: isRTL ? 'ملاحظاتي' : 'Notes', icon: FileText, href: '/notes' },
             { label: isRTL ? 'إنجازاتي' : 'Wins', icon: Trophy, href: '/achievements' },
+            { label: isRTL ? 'الإعدادات' : 'Settings', icon: Settings, href: '/settings' },
           ].map(item => {
             const isActive = pathname === item.href
             const IconComponent = item.icon
@@ -1209,7 +1210,7 @@ export default function Shell({ children }: ShellProps) {
           })}
         </div>
 
-        {/* Footer Settings Toggle */}
+        {/* Footer Settings Toggle commented out to merge directly under Wins
         <div className="pt-4 border-t border-white/5 mt-auto">
           <button
             onClick={() => { router.push('/settings'); setIsMobileNavOpen(false); playBlip(); }}
@@ -1228,6 +1229,7 @@ export default function Shell({ children }: ShellProps) {
             <span>{isRTL ? 'الإعدادات' : 'Settings'}</span>
           </button>
         </div>
+        */}
       </motion.div>
 
       {/* ORIGINAL_MOBILE_DRAWER_CODE_FOR_REFERENCE:

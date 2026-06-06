@@ -2433,13 +2433,15 @@ const { progress, isInRedZone } = useMemo(() => {
                             {/* Panel Header */}
                             <div className="flex items-center justify-between p-6 border-b border-white/10 bg-white/[0.01]">
                               <div className="space-y-1">
-                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[#14b8a6] flex items-center gap-2">
-                                  <Shield className="w-3.5 h-3.5" />
-                                  {isRTL ? 'إدارة الفريق // العمليات' : 'SQUAD_CONTROL // OPERATIONS'}
+                                <h3 className="text-sm font-medium text-zinc-100 flex items-center gap-2">
+                                  <Shield className="w-4 h-4 text-[#14b8a6]" />
+                                  {isRTL ? 'إدارة الفريق' : 'Squad Management'}
                                 </h3>
+                                {/* Removed ID block to purge cyberpunk aesthetics
                                 <p className="text-[10px] text-[var(--text-secondary)] font-bold tracking-wider uppercase">
                                   ID: {mission?.id?.substring(0, 8)}
                                 </p>
+                                */}
                               </div>
                               <button
                                 onClick={() => { playBlip(); setShowSquadPanel(false); }}
@@ -2453,8 +2455,8 @@ const { progress, isInRedZone } = useMemo(() => {
                             <div className="flex-1 overflow-y-auto p-6 space-y-8">
                               {/* SECTION 1: MEMBERS (Always visible) */}
                               <div className="space-y-4">
-                                <h4 className="text-[10px] font-black tracking-[0.3em] uppercase text-zinc-500 border-b border-white/5 pb-1">
-                                  {isRTL ? 'أعضاء الفريق' : 'SQUAD MEMBERS'} ({squadMembers.length})
+                                <h4 className="text-xs font-semibold text-zinc-400 border-b border-white/5 pb-2">
+                                  {isRTL ? 'أعضاء الفريق' : 'Squad Members'} ({squadMembers.length})
                                 </h4>
 
                                 <div className="space-y-3">
@@ -2464,7 +2466,8 @@ const { progress, isInRedZone } = useMemo(() => {
                                     const onlinePresence = onlineUsers.find((ou: any) => ou.user_id === member.id)
                                     
                                     return (
-                                      <div key={member.id} className="flex items-center justify-between p-3 border border-white/5 bg-white/[0.02] rounded-md">
+                                      <div key={member.id} className="flex items-center justify-between p-3 border border-white/5 bg-white/[0.02] rounded-md gap-4 flex-wrap sm:flex-nowrap">
+                                        {/* LEFT SIDE: Avatar, Name, Rank badge */}
                                         <div className="flex items-center gap-3">
                                           <div className="relative shrink-0">
                                             {member.avatar_url ? (
@@ -2481,28 +2484,92 @@ const { progress, isInRedZone } = useMemo(() => {
                                             />
                                           </div>
                                           <div className="flex flex-col">
-                                            <span className="text-xs font-bold">{member.full_name}</span>
-                                            <span className="text-[8px] font-black text-white/40 tracking-wider flex items-center gap-1">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                              <span className="text-xs font-bold text-zinc-100">{member.full_name}</span>
+                                              {isMemberOwner ? (
+                                                <span className="px-1.5 py-0.5 text-[8px] font-medium tracking-wide bg-amber-950/30 border border-amber-500/30 text-amber-400 rounded-md">
+                                                  {isRTL ? 'مالك' : 'Owner'}
+                                                </span>
+                                              ) : isMemberCoAdmin ? (
+                                                <span className="px-1.5 py-0.5 text-[8px] font-medium tracking-wide bg-teal-950/30 border border-teal-500/30 text-teal-400 rounded-md">
+                                                  {isRTL ? 'مشرف' : 'Co-Admin'}
+                                                </span>
+                                              ) : (
+                                                <span className="px-1.5 py-0.5 text-[8px] font-medium tracking-wide bg-zinc-900 border border-white/10 text-zinc-400 rounded-md">
+                                                  {isRTL ? 'عضو' : 'Member'}
+                                                </span>
+                                              )}
+                                            </div>
+                                            <span className="text-[8px] text-white/40 tracking-wider flex items-center gap-1 mt-0.5">
                                               <CheckCircle2 className="w-2 h-2 text-[#14b8a6]" />
                                               {member.rank || 'ROOKIE'}
                                             </span>
                                           </div>
                                         </div>
 
-                                        <div className="flex items-center gap-2">
-                                          {isMemberOwner ? (
-                                            <span className="px-1.5 py-0.5 text-[8px] font-black tracking-widest bg-amber-950/30 border border-amber-500/30 text-amber-400 rounded-md">
-                                              {isRTL ? '👑 مالك' : '👑 OWNER'}
-                                            </span>
-                                          ) : isMemberCoAdmin ? (
-                                            <span className="px-1.5 py-0.5 text-[8px] font-black tracking-widest bg-teal-950/30 border border-teal-500/30 text-teal-400 rounded-md">
-                                              {isRTL ? 'مشرف' : 'CO-ADMIN'}
-                                            </span>
-                                          ) : (
-                                            <span className="px-1.5 py-0.5 text-[8px] font-black tracking-widest bg-zinc-900 border border-white/10 text-zinc-400 rounded-md">
-                                              {isRTL ? 'عضو' : 'MEMBER'}
-                                            </span>
+                                        {/* RIGHT SIDE: Role dropdown and Kick button directly here */}
+                                        <div className="flex items-center gap-2 ms-auto shrink-0">
+                                          {/* Role select dropdown (Owner only can modify, and not for their own row) */}
+                                          {isOwner && member.id !== mission?.user_id && member.user_id !== mission?.user_id && (
+                                            <select
+                                              value={member.role || 'member'}
+                                              onChange={async (e) => {
+                                                const newRole = e.target.value
+                                                if (newRole === member.role) return
+                                                playBlip()
+                                                const { error } = await supabase
+                                                  .from('goal_members')
+                                                  .update({ role: newRole })
+                                                  .eq('id', member.member_row_id)
+                                                if (error) {
+                                                  showToast(isRTL ? 'فشل تحديث الدور' : 'FAILED TO UPDATE ROLE', 'warning')
+                                                  playError()
+                                                } else {
+                                                  showToast(isRTL ? 'تم تحديث الدور بنجاح!' : `Role updated to ${newRole}`, 'success')
+                                                  playSuccess()
+                                                  await fetchMission()
+                                                }
+                                              }}
+                                              className="bg-zinc-900 border border-white/10 text-zinc-300 py-1 px-2 rounded-md text-[10px] outline-none focus:border-teal-500/50 cursor-pointer font-space transition-all h-8"
+                                            >
+                                              <option value="admin">ADMIN</option>
+                                              <option value="member">MEMBER</option>
+                                              <option value="viewer">VIEWER</option>
+                                              <option value="guest">GUEST</option>
+                                            </select>
                                           )}
+
+                                          {/* Kick button */}
+                                          {isAdmin && member.id !== mission?.user_id && member.user_id !== mission?.user_id && (() => {
+                                            const canKick = isOwner ? true : (isCoAdmin && member.role === 'member')
+                                            if (!canKick) return null
+                                            return (
+                                              <button
+                                                onClick={async () => {
+                                                  if (confirm(isRTL ? `هل أنت متأكد من إزالة ${member.full_name} من الفريق؟` : `Are you sure you want to remove ${member.full_name} from the squad?`)) {
+                                                    playBlip()
+                                                    const { error } = await supabase
+                                                      .from('goal_members')
+                                                      .delete()
+                                                      .eq('id', member.member_row_id)
+                                                    
+                                                    if (error) {
+                                                      showToast(isRTL ? 'فشل إزالة العضو' : 'FAILED TO REMOVE MEMBER', 'warning')
+                                                      playError()
+                                                    } else {
+                                                      showToast(isRTL ? 'تم إزالة العضو من الفريق' : 'Member removed from squad', 'success')
+                                                      playSuccess()
+                                                      await fetchMission() // Reload members
+                                                    }
+                                                  }
+                                                }}
+                                                className="w-8 h-8 rounded border border-red-500/20 hover:border-red-500/50 bg-red-500/5 hover:bg-red-500/15 flex items-center justify-center text-red-400 hover:text-red-300 transition-all cursor-pointer"
+                                                title="Kick"
+                                              >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                              </button>
+                                            )
+                                          })()}
                                         </div>
                                       </div>
                                     )
@@ -2513,14 +2580,14 @@ const { progress, isInRedZone } = useMemo(() => {
                               {/* SECTION 2: PENDING JOIN REQUESTS (Admins only) */}
                               {isAdmin && (
                                 <div className="space-y-4">
-                                  <h4 className="text-[10px] font-black tracking-[0.3em] uppercase text-zinc-500 border-b border-white/5 pb-1">
-                                    {isRTL ? 'طلبات الانضمام المعلقة' : 'PENDING REQUESTS'}
+                                  <h4 className="text-xs font-semibold text-zinc-400 border-b border-white/5 pb-2">
+                                    {isRTL ? 'طلبات الانضمام المعلقة' : 'Pending Requests'}
                                   </h4>
 
                                   {pendingRequests.length === 0 ? (
                                     <div className="text-center py-6 border border-dashed border-white/5 rounded-md bg-white/[0.01]">
-                                      <p className="text-[10px] font-black tracking-widest text-zinc-600 uppercase">
-                                        {isRTL ? 'لا توجد طلبات معلقة // الفريق آمن' : 'NO PENDING REQUESTS // SQUAD SECURE'}
+                                      <p className="text-xs text-zinc-500">
+                                        {isRTL ? 'لا توجد طلبات انضمام' : 'No pending requests'}
                                       </p>
                                     </div>
                                   ) : (
@@ -2603,7 +2670,7 @@ const { progress, isInRedZone } = useMemo(() => {
                                 </div>
                               )}
 
-                              {/* SECTION 3: ROLE MANAGEMENT & KICK ACTIONS (Admins only) */}
+                              {/* SECTION 3: ROLE MANAGEMENT & KICK ACTIONS commented out to eliminate duplication in primary member row
                               {isAdmin && (
                                 <div className="space-y-4">
                                   <h4 className="text-[10px] font-black tracking-[0.3em] uppercase text-zinc-500 border-b border-white/5 pb-1">
@@ -2670,7 +2737,7 @@ const { progress, isInRedZone } = useMemo(() => {
                                               )}
                                             </div>
 
-                                            {/* Role management controls (Owner only) */}
+                                            {/* Role management controls (Owner only) *\/}
                                             {isOwner && (
                                               <div className="flex flex-col gap-2 w-full mt-1.5 pt-1.5 border-t border-white/5">
                                                 <div className="flex items-center justify-between">
@@ -2724,6 +2791,7 @@ const { progress, isInRedZone } = useMemo(() => {
                                   )}
                                 </div>
                               )}
+                              */}
 
                               {/* SECTION 4: SQUAD RULES (Admins only) */}
                               {isAdmin && (
