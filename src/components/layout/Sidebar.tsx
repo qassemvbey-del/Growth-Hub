@@ -11,7 +11,7 @@ import { useSound } from '@/context/SoundContext'
 import { 
   LayoutGrid, Target, FileText, Trophy, UserCircle2, Sliders, Bot,
   Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp, CloudLightning,
-  Shield, Home, User, Users
+  Shield, Home, User, Users, ChevronDown
 } from 'lucide-react'
 import { NeonIcon } from '../ui/NeonIcon'
 
@@ -184,7 +184,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                   onMouseEnter={() => setHoveredIndex(idx)}
                   onMouseLeave={() => setHoveredIndex(null)}
                   className={cn(
-                    "flex items-center p-3 px-6 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[44px] w-full text-left cursor-pointer",
+                    "flex items-center p-3 px-6 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[44px] w-full text-left rtl:text-right cursor-pointer rtl:flex-row-reverse",
                      isGoalsActive && !pathname.startsWith('/goals/')
                        ? "bg-white/5 text-[var(--text-primary)] border border-white/10 shadow-sm" 
                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-white/10 hover:bg-white/5"
@@ -193,7 +193,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                   <NeonIcon
                     icon={item.icon}
                     interactive
-                    className="w-4 h-4 transition-all duration-300 me-3"
+                    className="w-4 h-4 transition-all duration-300 me-3 rtl:ms-3 rtl:me-0 shrink-0"
                     style={{ 
                       color: (isGoalsActive && !pathname.startsWith('/goals/'))
                         ? currentTheme.color 
@@ -201,9 +201,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                     }}
                   />
                   
-                  <span className={cn(
-                    "font-body font-medium flex-grow transition-colors duration-300 text-sm"
-                  )}
+                  <span className="font-body font-medium flex-grow overflow-hidden truncate max-w-full transition-colors duration-300 text-sm"
                   style={{ 
                     color: (isGoalsActive && !pathname.startsWith('/goals/'))
                       ? currentTheme.color 
@@ -213,16 +211,13 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                     {item.label}
                   </span>
 
-                  <div className="flex items-center gap-2 shrink-0 select-none rtl:hidden">
-                    <span 
-                      className="text-[9px] font-body text-[var(--text-secondary)]/30 font-medium transition-colors duration-300"
-                      style={{ 
-                        color: isHovered ? `${currentTheme.color}66` : undefined 
-                      }}
-                    >
-                      {item.shortcut}
-                    </span>
-                  </div>
+                  <ChevronDown
+                    className={cn(
+                      "w-3.5 h-3.5 shrink-0 transition-transform duration-200 ms-auto rtl:ms-0 rtl:me-auto rtl:order-first",
+                      isGoalsExpanded ? "rotate-180" : ""
+                    )}
+                    style={{ color: isHovered ? currentTheme.color : undefined }}
+                  />
                 </button>
 
                 <AnimatePresence initial={false}>
@@ -232,7 +227,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
-                      className="overflow-hidden flex flex-col gap-1 mt-1 ps-4 border-s border-white/10 ms-6"
+                      className="overflow-hidden flex flex-col gap-1 mt-1 ps-4 rtl:ps-0 rtl:pe-4 border-s rtl:border-s-0 rtl:border-e border-white/10 ms-6 rtl:ms-0 rtl:me-6"
                     >
                       {[
                         { label: mounted ? (isRTL ? 'أهدافي' : 'Solo Goals') : 'Solo Goals', icon: User, href: '/goals/solo' },
@@ -248,7 +243,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                             onMouseEnter={() => setHoveredIndex(100 + subIdx)}
                             onMouseLeave={() => setHoveredIndex(null)}
                             className={cn(
-                              "flex items-center p-2 px-3 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[34px] border border-transparent",
+                              "flex items-center p-2 px-3 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[34px] border border-transparent rtl:flex-row-reverse rtl:text-right",
                               isSubActive 
                                 ? "bg-white/5 text-[var(--text-primary)] border border-white/10 shadow-sm" 
                                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5"
@@ -257,7 +252,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                             <NeonIcon 
                               icon={subItem.icon}
                               interactive
-                              className="w-3.5 h-3.5 transition-all duration-300 me-3 shrink-0"
+                              className="w-3.5 h-3.5 transition-all duration-300 me-3 rtl:ms-3 rtl:me-0 shrink-0"
                               style={{ 
                                 color: isSubActive 
                                   ? currentTheme.color 
@@ -265,13 +260,11 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                               }}
                             />
 
-                            <span className={cn(
-                              "font-body font-medium flex-grow transition-colors duration-300 text-xs"
-                            )}
+                            <span className="font-body font-medium flex-grow overflow-hidden truncate transition-colors duration-300 text-xs"
                             style={{ 
                               color: isSubActive 
                                 ? currentTheme.color 
-                                 : (isSubHovered ? currentTheme.color : undefined)
+                                : (isSubHovered ? currentTheme.color : undefined)
                             }}
                             >
                               {subItem.label}
@@ -592,9 +585,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                     }}
                   />
                   
-                  <span className={cn(
-                    "font-space tracking-[0.2em] font-semibold flex-grow transition-colors duration-300 text-[14px] truncate"
-                  )}
+                  <span className="font-space tracking-[0.2em] font-semibold flex-grow overflow-hidden truncate max-w-full transition-colors duration-300 text-[14px]"
                   style={{ 
                     color: (isGoalsActive && !pathname.startsWith('/goals/'))
                       ? currentTheme.color 
@@ -604,16 +595,13 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                     {item.label}
                   </span>
 
-                  <div className="flex items-center gap-2 shrink-0 select-none rtl:hidden">
-                    <span 
-                      className="text-[9px] font-space text-[var(--text-secondary)]/30 font-black transition-colors duration-300"
-                      style={{ 
-                        color: isHovered ? `${currentTheme.color}66` : undefined 
-                      }}
-                    >
-                      {item.shortcut}
-                    </span>
-                  </div>
+                  <ChevronDown
+                    className={cn(
+                      "w-3.5 h-3.5 shrink-0 transition-transform duration-200 ms-auto rtl:ms-0 rtl:me-auto rtl:order-first",
+                      isGoalsExpanded ? "rotate-180" : ""
+                    )}
+                    style={{ color: isHovered ? currentTheme.color : undefined }}
+                  />
                 </button>
 
                 <AnimatePresence initial={false}>
