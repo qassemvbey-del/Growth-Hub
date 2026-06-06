@@ -211,7 +211,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
               initial={{ width: 0 }}
               animate={{ width: `${percentage}%` }}
               className="h-full rounded-full progress-fill absolute top-0 start-0"
-              style={{ backgroundColor: isInRedZone ? '#FF0055' : (mission.color || color) }}
+              style={{ backgroundColor: isInRedZone ? '#FF0055' : (percentage === 100 ? '#14b8a6' : '#f97316') }}
             />
           </div>
 
@@ -1388,11 +1388,11 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
             <div className="space-y-10 w-full">
               {/* COMMANDING SECTION */}
               <div>
-                <h2 className="text-xl font-bold text-teal-400 mb-4">COMMANDING</h2>
+                <h2 className="text-xl font-bold text-teal-400 mb-4">Commanding</h2>
                 {commandingMissions.length === 0 ? (
                   <div className="py-12 text-center border border-dashed border-white/5 rounded-md bg-white/[0.01]">
                     <p className="text-[10px] font-space font-black tracking-widest text-zinc-500 uppercase">
-                      {isRTL ? 'لا توجد أهداف تقودها حالياً' : 'NO COMMANDING SQUAD GOALS'}
+                      {isRTL ? 'لا توجد أهداف تقودها حالياً' : 'No commanding squad goals'}
                     </p>
                   </div>
                 ) : (
@@ -1406,11 +1406,11 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
 
               {/* ASSIGNED SECTION */}
               <div>
-                <h2 className="text-xl font-bold text-zinc-400 mb-4 mt-8">ASSIGNED</h2>
+                <h2 className="text-xl font-bold text-zinc-400 mb-4 mt-8">Assigned</h2>
                 {assignedMissions.length === 0 ? (
                   <div className="py-12 text-center border border-dashed border-white/5 rounded-md bg-white/[0.01]">
                     <p className="text-[10px] font-space font-black tracking-widest text-zinc-500 uppercase">
-                      {isRTL ? 'لا توجد أهداف معينة لك حالياً' : 'NO ASSIGNED SQUAD GOALS'}
+                      {isRTL ? 'لا توجد أهداف معينة لك حالياً' : 'No assigned squad goals'}
                     </p>
                   </div>
                 ) : (
@@ -1919,7 +1919,10 @@ return (
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
           className="h-full absolute top-0 start-0"
-          style={{ backgroundColor: isInRedZone ? '#FF0055' : (mission.color || color), boxShadow: `0 0 10px ${isInRedZone ? '#FF0055' : (mission.color || color)}` }}
+          style={{ 
+            backgroundColor: isInRedZone ? '#FF0055' : (percentage === 100 ? '#14b8a6' : '#f97316'), 
+            boxShadow: `0 0 10px ${isInRedZone ? '#FF0055' : (percentage === 100 ? '#14b8a6' : '#f97316')}` 
+          }}
         />
       </div>
 

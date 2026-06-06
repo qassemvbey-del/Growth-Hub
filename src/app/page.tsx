@@ -372,8 +372,8 @@ export default function Dashboard() {
               isRTL ? "text-xl md:text-4xl" : "text-2xl md:text-5xl"
             )}
           >
-            {/* {isRTL ? 'منصة' : 'FOCUS'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'HUB'}</span> */}
-            {isRTL ? 'لوحة' : 'FOCUS'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'HUB'}</span>
+            {/* {isRTL ? 'منصة' : 'Focus'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'Hub'}</span> */}
+            {isRTL ? 'لوحة' : 'Focus'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'Hub'}</span>
           </motion.h1>
 
           <p className={cn(

@@ -234,7 +234,7 @@ export default function SquadGoalsPage() {
               initial={{ width: 0 }}
               animate={{ width: `${percentage}%` }}
               className="h-full rounded-full progress-fill absolute top-0 start-0"
-              style={{ backgroundColor: isInRedZone ? '#FF0055' : (mission.color || color) }}
+              style={{ backgroundColor: isInRedZone ? '#FF0055' : (percentage === 100 ? '#14b8a6' : '#f97316') }}
             />
           </div>
 
@@ -1620,11 +1620,11 @@ export default function SquadGoalsPage() {
             <div className="space-y-10 w-full">
               {/* COMMANDING SECTION */}
               <div>
-                <h2 className="text-xl font-bold text-teal-400 mb-4">LEADING</h2>
+                <h2 className="text-xl font-bold text-teal-400 mb-4">Leading</h2>
                 {commandingMissions.length === 0 ? (
                   <div className="py-12 text-center border border-dashed border-white/5 rounded-xl bg-white/[0.01]">
                     <p className="text-[10px] font-space font-black tracking-widest text-zinc-500 uppercase">
-                      {isRTL ? 'لا توجد أهداف تقودها حالياً' : 'NO LEADING TEAM GOALS'}
+                      {isRTL ? 'لا توجد أهداف تقودها حالياً' : 'No leading team goals'}
                     </p>
                   </div>
                 ) : (
@@ -1638,11 +1638,11 @@ export default function SquadGoalsPage() {
 
               {/* ASSIGNED SECTION */}
               <div>
-                <h2 className="text-xl font-bold text-zinc-400 mb-4 mt-8">ASSIGNED</h2>
+                <h2 className="text-xl font-bold text-zinc-400 mb-4 mt-8">Assigned</h2>
                 {assignedMissions.length === 0 ? (
                   <div className="py-12 text-center border border-dashed border-white/5 rounded-xl bg-white/[0.01]">
                     <p className="text-[10px] font-space font-black tracking-widest text-zinc-500 uppercase">
-                      {isRTL ? 'لا توجد أهداف معينة لك حالياً' : 'NO ASSIGNED TEAM GOALS'}
+                      {isRTL ? 'لا توجد أهداف معينة لك حالياً' : 'No assigned team goals yet'}
                     </p>
                   </div>
                 ) : (
@@ -2159,7 +2159,10 @@ return (
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
           className="h-full absolute top-0 start-0"
-          style={{ backgroundColor: isInRedZone ? '#FF0055' : (mission.color || color), boxShadow: `0 0 10px ${isInRedZone ? '#FF0055' : (mission.color || color)}` }}
+          style={{ 
+            backgroundColor: isInRedZone ? '#FF0055' : (percentage === 100 ? '#14b8a6' : '#f97316'), 
+            boxShadow: `0 0 10px ${isInRedZone ? '#FF0055' : (percentage === 100 ? '#14b8a6' : '#f97316')}` 
+          }}
         />
       </div>
 

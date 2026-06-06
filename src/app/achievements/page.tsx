@@ -198,7 +198,7 @@ export default function WinsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8 items-end justify-items-center">
+          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8 items-end justify-items-center justify-center">
             {archived.map((mission, i) => {
               const color = mission.color || '#39FF14'
 
