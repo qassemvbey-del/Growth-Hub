@@ -789,7 +789,7 @@ export default function MissionDetailPage() {
 
     const PALETTE = ['#1D9E75', '#BA7517', '#7F77DD', '#D85A30', '#378ADD']
 
-    const channel = supabase.channel('workspace', {
+    const channel = supabase.channel(`workspace:${id}`, {
       config: {
         presence: {
           key: profile.id,

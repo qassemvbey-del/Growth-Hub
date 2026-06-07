@@ -509,26 +509,35 @@ export default function SquadGoalsPage() {
   }, [mounted, profile?.id])
 
   const extractCode = (input: string) => {
-    let clean = input.trim().toUpperCase()
+    let clean = input.trim()
     try {
       const url = new URL(clean)
+      
+      // Check if it's a public goal share link
+      const publicMatch = url.pathname.match(
+        /\/goals\/public\/([a-f0-9-]{36})/i
+      )
+      if (publicMatch) {
+        // Redirect to public goal page instead
+        router.push(`/goals/public/${publicMatch[1]}`)
+        return null
+      }
+      
+      // Check for ?join= parameter
       const joinParam = url.searchParams.get('join')
       if (joinParam) {
         clean = joinParam.trim().toUpperCase()
       }
     } catch (e) {
-      // Direct code
+      // Direct code input
+      clean = clean.toUpperCase()
     }
     return clean
   }
 
   const handleScanCode = async () => {
     const code = extractCode(joinCodeInput)
-    if (!code) {
-      setJoinStatus('invalid')
-      setJoinErrorText('INVALID_CODE // TRY AGAIN')
-      return
-    }
+    if (!code) return // was redirected to public page
 
     setJoinStatus('scanning')
     playBlip()
@@ -567,6 +576,7 @@ export default function SquadGoalsPage() {
 
   const handleConfirmJoin = async () => {
     const code = extractCode(joinCodeInput)
+    if (!code) return
     setJoinStatus('scanning')
     playBlip()
 

@@ -1,3 +1,4 @@
+-- NOTE: THIS SQL MUST BE RUN MANUALLY IN SUPABASE SQL EDITOR TO APPLY THE NEW review_squad_join_request FUNCTION SIGNATURE.
 -- 1. Add columns to goals table with IF NOT EXISTS
 ALTER TABLE goals 
 ADD COLUMN IF NOT EXISTS requires_approval BOOLEAN DEFAULT true;

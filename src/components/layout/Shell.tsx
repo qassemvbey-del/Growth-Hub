@@ -659,6 +659,7 @@ export default function Shell({ children }: ShellProps) {
   useEffect(() => {
     if (!profile?.id) return
     const supabase = createClient()
+    console.log('Realtime subscription set up for:', profile?.id)
     const channel = supabase
       .channel('inbox_changes')
       .on('postgres_changes', {
