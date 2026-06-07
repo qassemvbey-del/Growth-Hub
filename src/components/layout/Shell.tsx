@@ -656,6 +656,26 @@ export default function Shell({ children }: ShellProps) {
   const { reports, markAsRead, fetchReports } = useInbox()
   const unreadCount = useMemo(() => reports.filter(r => !r.is_read).length, [reports])
 
+  useEffect(() => {
+    if (!profile?.id) return
+    const supabase = createClient()
+    const channel = supabase
+      .channel('inbox_changes')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public', 
+        table: 'inbox_reports',
+        filter: `user_id=eq.${profile.id}`
+      }, (payload: any) => {
+        fetchReports()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [profile?.id, fetchReports])
+
   // Smart Notification Toast States
   const [activeToast, setActiveToast] = useState<{
     id: string
@@ -734,7 +754,7 @@ export default function Shell({ children }: ShellProps) {
       return ['daily_brief', 'weekly_review', 'deadline_alert', 'overdue_task'].includes(type)
     }
 
-    const joinReq = newUnreadReports.find(r => r.type === 'squad_join_request')
+    const joinReq = newUnreadReports.find(r => r.type === 'squad_join_request' || (r.type as string) === 'join_request')
     if (joinReq) {
       shouldTrigger = true
       targetReport = joinReq
@@ -787,6 +807,8 @@ export default function Shell({ children }: ShellProps) {
     if (!activeToast || !activeToast.requestId) return
     const supabase = createClient()
     try {
+      // Commented out per rule "Never delete code, only comment it out":
+      /*
       // Get request details
       const { data: requestData, error: reqError } = await supabase
         .from('squad_join_requests')
@@ -839,6 +861,14 @@ export default function Shell({ children }: ShellProps) {
           },
           is_read: false
         })
+      */
+
+      const { data, error } = await supabase.rpc('review_squad_join_request', {
+        p_request_id: activeToast.requestId,
+        p_action: 'approve'
+      })
+
+      if (error) throw error
 
       showToast(isRTL ? "تم قبول الطلب" : "Join request approved", "success")
       
@@ -857,6 +887,8 @@ export default function Shell({ children }: ShellProps) {
     if (!activeToast || !activeToast.requestId) return
     const supabase = createClient()
     try {
+      // Commented out per rule "Never delete code, only comment it out":
+      /*
       // Get request details
       const { data: requestData, error: reqError } = await supabase
         .from('squad_join_requests')
@@ -898,6 +930,14 @@ export default function Shell({ children }: ShellProps) {
           },
           is_read: false
         })
+      */
+
+      const { data, error } = await supabase.rpc('review_squad_join_request', {
+        p_request_id: activeToast.requestId,
+        p_action: 'reject'
+      })
+
+      if (error) throw error
 
       showToast(isRTL ? "تم رفض الطلب" : "Join request declined", "success")
       
@@ -2098,7 +2138,7 @@ export default function Shell({ children }: ShellProps) {
     </AnimatePresence>
 
     <AnimatePresence>
-      {showNotificationPopup && activeToast && (
+      {showNotificationPopup && activeToast && (((activeToast.type as string) === 'join_request') || activeToast.type === 'squad_join_request') && (
         <motion.div
           variants={popupVariants}
           initial="hidden"

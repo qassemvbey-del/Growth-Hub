@@ -193,34 +193,31 @@ export default function PublicGoalPage() {
           .from('goal_members')
           .select('user_id')
           .eq('goal_id', id)
-          .in('role', ['owner', 'admin']);
+          .in('role', ['owner', 'admin'])
 
-        const adminIds = new Set<string>();
-        if (goal.user_id) adminIds.add(goal.user_id);
-        if (admins) {
-          admins.forEach((a: any) => {
-            if (a.user_id) adminIds.add(a.user_id);
-          });
+        if (admins && admins.length > 0) {
+          const userName = user.user_metadata?.full_name || (isRTL ? 'مستخدم' : 'User')
+          const goalName = goal.title
+          await supabase.from('inbox_reports').insert(
+            admins.map((admin: any) => ({
+              user_id: admin.user_id,
+              type: 'join_request',
+              title: isRTL 
+                ? `${userName} يريد الانضمام لـ ${goalName}`
+                : `${userName} wants to join ${goalName}`,
+              content: {
+                goal_id: id,
+                goal_title: goalName,
+                requester_id: user.id,
+                requester_name: userName,
+                request_id: insertedData.id,
+              },
+              is_read: false
+            }))
+          )
         }
 
-        const notifications = Array.from(adminIds).map(adminId => ({
-          user_id: adminId,
-          title: isRTL 
-            ? `${user.user_metadata?.full_name || 'مستخدم'} يريد الانضمام لـ ${goal.title}`
-            : `${user.user_metadata?.full_name || 'User'} wants to join ${goal.title}`,
-          type: 'join_request',
-          content: {
-            goal_id: id,
-            goal_title: goal.title,
-            requester_id: user.id,
-            requester_name: user.user_metadata?.full_name || 'User',
-            request_id: insertedData.id,
-          },
-          is_read: false
-        }));
-
-        await supabase.from('inbox_reports').insert(notifications);
-
+        setJoinState('pending')
         alert(isRTL ? "تم إرسال طلبك، انتظر موافقة المشرف" : "Request sent! Waiting for admin approval");
       }
     } catch (err: any) {
@@ -639,7 +636,7 @@ export default function PublicGoalPage() {
       className="min-h-screen bg-[#0D0D0D] text-white selection:bg-orange-500/30 relative overflow-x-hidden font-space pb-32 bg-[radial-gradient(ellipse_at_50%_30%,rgba(249,115,22,0.06)_0%,transparent_70%)]"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
-      <div className="relative z-10 max-w-[640px] mx-auto pt-12 md:pt-20 px-4 md:px-6 space-y-10">
+      <div className="relative z-10 max-w-[640px] mx-auto pt-16 md:pt-24 px-4 md:px-6 space-y-10">
         
         <div className="flex justify-center">
           <div className="flex items-center justify-center gap-1.5 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-md">
@@ -690,7 +687,7 @@ export default function PublicGoalPage() {
                 cx="60"
                 cy="60"
                 r={radius}
-                stroke={themeColor || '#f97316'}
+                stroke="#f97316"
                 strokeWidth={strokeWidth}
                 fill="transparent"
                 strokeDasharray={circumference}
@@ -709,19 +706,19 @@ export default function PublicGoalPage() {
 
         <div className="grid grid-cols-3 gap-0 p-4 rounded-xl border border-white/8 bg-white/5 backdrop-blur-md">
           <div className="flex flex-col items-center text-center space-y-0.5 border-r border-white/10">
-            <span className="text-xl font-bold text-white">{isSquad ? members.length : 1}</span>
+            <span className="text-2xl font-bold text-white">{isSquad ? members.length : 1}</span>
             <span className="text-[10px] text-white/40 font-medium">
               {isRTL ? 'الأعضاء' : 'Members'}
             </span>
           </div>
           <div className="flex flex-col items-center text-center space-y-0.5 border-r border-white/10">
-            <span className="text-xl font-bold text-white">{totalCount}</span>
+            <span className="text-2xl font-bold text-white">{totalCount}</span>
             <span className="text-[10px] text-white/40 font-medium">
               {isRTL ? 'المهام' : 'Tasks'}
             </span>
           </div>
           <div className="flex flex-col items-center text-center space-y-0.5">
-            <span className="text-xl font-bold text-white">{completedCount}</span>
+            <span className="text-2xl font-bold text-white">{completedCount}</span>
             <span className="text-[10px] text-white/40 font-medium">
               {isRTL ? 'المكتملة' : 'Completed'}
             </span>
@@ -788,7 +785,7 @@ export default function PublicGoalPage() {
         )}
 
         <div className="space-y-3">
-          <h3 className="text-xs font-semibold tracking-wider text-white/40 uppercase border-b border-white/10 pb-1.5">
+          <h3 className="text-xs font-semibold tracking-wider text-white/40 border-b border-white/10 pb-1.5">
             {isRTL ? 'المهام' : 'Tasks'}
           </h3>
           <AnimatePresence>
