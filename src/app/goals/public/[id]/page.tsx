@@ -302,39 +302,72 @@ export default function PublicGoalPage() {
   }
 
   if (error || !goal) {
+//     /*
+//     return (
+//       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-6 text-center font-space relative overflow-hidden">
+//         {/* Simple grid background */}
+//         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-20" />
+//         
+//         <motion.div
+//           initial={{ opacity: 0, scale: 0.95, y: 10 }}
+//           animate={{ opacity: 1, scale: 1, y: 0 }}
+//           className="w-full max-w-lg bg-black/80 border border-[#FF0055]/30 backdrop-blur-xl p-8 md:p-12 rounded-2xl shadow-[0_0_50px_rgba(255,0,85,0.15)] relative z-10"
+//         >
+//           <div className="absolute top-0 inset-x-0 h-1 bg-[#FF0055]" />
+//           <div className="flex flex-col items-center gap-6">
+//             <Lock className="text-5xl text-[#FF0055] animate-pulse w-12 h-12" />
+//             <div className="space-y-2">
+//               <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-[#FF0055]">
+//                 CLASSIFIED_GOAL // ACCESS DENIED
+//               </h2>
+//               <p className="text-xs md:text-sm font-bold text-zinc-400 max-w-sm leading-relaxed">
+//                 This goal does not exist or is not public.
+//               </p>
+//             </div>
+//             <button
+//               onClick={() => router.push('/')}
+//               className="mt-4 flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300"
+//             >
+//               <Home className="text-base w-4 h-4" />
+//               RETURN TO BASE
+//             </button>
+//           </div>
+//         </motion.div>
+//       </div>
+//     )
+//     */
+
     return (
-      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-6 text-center font-space relative overflow-hidden">
-        {/* Simple grid background */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-20" />
+      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-6 text-center font-space relative overflow-hidden bg-[radial-gradient(ellipse_at_50%_30%,rgba(249,115,22,0.06)_0%,transparent_70%)]">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-10" />
         
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          className="w-full max-w-lg bg-black/80 border border-[#FF0055]/30 backdrop-blur-xl p-8 md:p-12 rounded-2xl shadow-[0_0_50px_rgba(255,0,85,0.15)] relative z-10"
+          className="w-full max-w-md bg-white/[0.02] border border-white/10 backdrop-blur-xl p-8 md:p-10 rounded-2xl relative z-10 space-y-6"
         >
-          <div className="absolute top-0 inset-x-0 h-1 bg-[#FF0055]" />
-          <div className="flex flex-col items-center gap-6">
-            <Lock className="text-5xl text-[#FF0055] animate-pulse w-12 h-12" />
+          <div className="flex flex-col items-center gap-5">
+            <Lock size={48} className="text-teal-400" />
             <div className="space-y-2">
-              <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-[#FF0055]">
-                CLASSIFIED_GOAL // ACCESS DENIED
+              <h2 className="text-xl md:text-2xl font-semibold text-white">
+                {isRTL ? "هذا الهدف خاص" : "This goal is private"}
               </h2>
-              <p className="text-xs md:text-sm font-bold text-zinc-400 max-w-sm leading-relaxed">
-                This goal does not exist or is not public.
+              <p className="text-sm text-white/50 max-w-xs leading-relaxed mx-auto">
+                {isRTL ? "اطلب من صاحب الهدف يشاركك رابط الدعوة" : "Ask the goal owner to share an invite link with you."}
               </p>
             </div>
             <button
               onClick={() => router.push('/')}
-              className="mt-4 flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300"
+              className="mt-2 px-6 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-black font-semibold text-sm transition-all duration-300 shadow-lg shadow-orange-500/20 active:scale-[0.98]"
             >
-              <Home className="text-base w-4 h-4" />
-              RETURN TO BASE
+              {isRTL ? "الرئيسية" : "Go Home"}
             </button>
           </div>
         </motion.div>
       </div>
     )
   }
+
 
 //   /*
 //   return (
