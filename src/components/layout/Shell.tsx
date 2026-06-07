@@ -805,7 +805,11 @@ export default function Shell({ children }: ShellProps) {
   }, [reports, pathname, inboxOpen, isRTL])
 
   const handleAcceptNotification = async () => {
-    if (!activeToast || !activeToast.requestId) return
+    if (!activeToast?.requestId) {
+      console.error('No requestId in toast:', activeToast)
+      showToast(isRTL ? "لا يوجد معرّف طلب في الإشعار" : "Request ID missing — cannot process", "warning")
+      return
+    }
     const supabase = createClient()
     try {
       // Commented out per rule "Never delete code, only comment it out":
@@ -885,7 +889,11 @@ export default function Shell({ children }: ShellProps) {
   }
 
   const handleRejectNotification = async () => {
-    if (!activeToast || !activeToast.requestId) return
+    if (!activeToast?.requestId) {
+      console.error('No requestId in toast:', activeToast)
+      showToast(isRTL ? "لا يوجد معرّف طلب في الإشعار" : "Request ID missing — cannot process", "warning")
+      return
+    }
     const supabase = createClient()
     try {
       // Commented out per rule "Never delete code, only comment it out":

@@ -111,16 +111,23 @@ export default function PublicGoalPage() {
             user_id: admin.user_id,
             type: 'member_joined',
             title: isRTL ? 'عضو جديد انضم' : 'New member joined',
-            message: isRTL 
-              ? `${userName} انضم لـ ${goalName}`
-              : `${userName} joined ${goalName}`,
-            goal_id: id
+            content: {
+              goal_id: id,
+              goal_title: goalName,
+              user_id: user.id,
+              user_name: userName,
+              message: isRTL
+                ? `${userName} انضم لـ ${goalName}`
+                : `${userName} joined ${goalName}`
+            },
+            is_read: false
           }))
           
           await supabase
             .from('inbox_reports')
             .insert(notifications)
         }
+
 
         /*
         // Fetch squad owner and admins to notify
@@ -202,20 +209,24 @@ export default function PublicGoalPage() {
             admins.map((admin: any) => ({
               user_id: admin.user_id,
               type: 'join_request',
-              title: isRTL 
-                ? `${userName} يريد الانضمام لـ ${goalName}`
-                : `${userName} wants to join ${goalName}`,
+              title: isRTL
+                ? `${userName} يريد الانضمام`
+                : `${userName} wants to join`,
               content: {
                 goal_id: id,
                 goal_title: goalName,
                 requester_id: user.id,
                 requester_name: userName,
                 request_id: insertedData.id,
+                message: isRTL
+                  ? `${userName} يريد الانضمام لـ ${goalName}`
+                  : `${userName} wants to join ${goalName}`
               },
               is_read: false
             }))
           )
         }
+
 
         setJoinState('pending')
         alert(isRTL ? "تم إرسال طلبك، انتظر موافقة المشرف" : "Request sent! Waiting for admin approval");
