@@ -787,20 +787,126 @@ export default function Shell({ children }: ShellProps) {
     if (!activeToast || !activeToast.requestId) return
     const supabase = createClient()
     try {
-      const { error } = await supabase.rpc('review_squad_join_request', {
-        p_request_id: activeToast.requestId,
-        p_action: 'approve'
-      })
-      if (!error) {
-        showToast(isRTL ? "تم قبول الطلب" : "Join request approved", "success")
-        if (activeToast.id) {
-          markAsRead(activeToast.id)
-        }
-      } else {
-        showToast(isRTL ? "حدث خطأ أثناء معالجة الطلب" : "Error processing request", "warning")
+      // Get request details
+      const { data: requestData, error: reqError } = await supabase
+        .from('squad_join_requests')
+        .select('*')
+        .eq('id', activeToast.requestId)
+        .maybeSingle()
+
+      if (reqError || !requestData) {
+        showToast(isRTL ? "الطلب غير صالح أو معالج بالفعل" : "Request invalid or already processed", "warning")
+        return
+      }
+
+      // Move user to goal_members
+      const { error: insertError } = await supabase
+        .from('goal_members')
+        .insert({
+          goal_id: requestData.goal_id,
+          user_id: requestData.user_id,
+          role: 'member'
+        })
+
+      if (insertError) throw insertError
+
+      // Update request status to approved
+      const { error: updateError } = await supabase
+        .from('squad_join_requests')
+        .update({ status: 'approved', reviewed_at: new Date().toISOString() })
+        .eq('id', activeToast.requestId)
+
+      if (updateError) throw updateError
+
+      // Notify the user who requested to join
+      const { data: goalData } = await supabase
+        .from('goals')
+        .select('title')
+        .eq('id', requestData.goal_id)
+        .maybeSingle()
+
+      await supabase
+        .from('inbox_reports')
+        .insert({
+          user_id: requestData.user_id,
+          title: isRTL
+            ? `تمت الموافقة على طلبك للانضمام لـ ${goalData?.title || 'الهدف'}`
+            : `Your request to join ${goalData?.title || 'the goal'} was approved`,
+          type: 'join_approved',
+          content: {
+            goal_id: requestData.goal_id,
+            goal_title: goalData?.title
+          },
+          is_read: false
+        })
+
+      showToast(isRTL ? "تم قبول الطلب" : "Join request approved", "success")
+      
+      if (activeToast.id) {
+        markAsRead(activeToast.id)
       }
     } catch (err) {
-      console.error(err)
+      console.error('Error accepting notification:', err)
+      showToast(isRTL ? "حدث خطأ أثناء معالجة الطلب" : "Error processing request", "warning")
+    }
+    setShowNotificationPopup(false)
+    setActiveToast(null)
+  }
+
+  const handleRejectNotification = async () => {
+    if (!activeToast || !activeToast.requestId) return
+    const supabase = createClient()
+    try {
+      // Get request details
+      const { data: requestData, error: reqError } = await supabase
+        .from('squad_join_requests')
+        .select('*')
+        .eq('id', activeToast.requestId)
+        .maybeSingle()
+
+      if (reqError || !requestData) {
+        showToast(isRTL ? "الطلب غير صالح أو معالج بالفعل" : "Request invalid or already processed", "warning")
+        return
+      }
+
+      // Update request status to rejected
+      const { error: updateError } = await supabase
+        .from('squad_join_requests')
+        .update({ status: 'rejected', reviewed_at: new Date().toISOString() })
+        .eq('id', activeToast.requestId)
+
+      if (updateError) throw updateError
+
+      // Notify the user who requested to join
+      const { data: goalData } = await supabase
+        .from('goals')
+        .select('title')
+        .eq('id', requestData.goal_id)
+        .maybeSingle()
+
+      await supabase
+        .from('inbox_reports')
+        .insert({
+          user_id: requestData.user_id,
+          title: isRTL
+            ? `تم رفض طلبك للانضمام لـ ${goalData?.title || 'الهدف'}`
+            : `Your request to join ${goalData?.title || 'the goal'} was declined`,
+          type: 'join_declined',
+          content: {
+            goal_id: requestData.goal_id,
+            goal_title: goalData?.title
+          },
+          is_read: false
+        })
+
+      showToast(isRTL ? "تم رفض الطلب" : "Join request declined", "success")
+      
+      if (activeToast.id) {
+        markAsRead(activeToast.id)
+      }
+    } catch (err) {
+      console.error('Error rejecting notification:', err)
+      showToast(isRTL ? "حدث خطأ أثناء معالجة الطلب" : "Error processing request", "warning")
     }
     setShowNotificationPopup(false)
     setActiveToast(null)
@@ -2019,9 +2125,9 @@ export default function Shell({ children }: ShellProps) {
                   className="flex-1 h-7 rounded-lg bg-teal-500 hover:bg-teal-400 text-white text-[11px] font-semibold transition-all duration-150 active:scale-[0.97] cursor-pointer">
                   {isRTL ? "قبول" : "Accept"}
                 </button>
-                <button onClick={handleDismissNotification}
-                  className="flex-1 h-7 rounded-lg bg-white/8 hover:bg-white/12 border border-white/10 text-white/70 text-[11px] transition-all duration-150 active:scale-[0.97] cursor-pointer">
-                  {isRTL ? "لاحقاً" : "Later"}
+                <button onClick={handleRejectNotification}
+                  className="flex-1 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-[11px] font-semibold transition-all duration-150 active:scale-[0.97] cursor-pointer">
+                  {isRTL ? "رفض" : "Reject"}
                 </button>
               </div>
             </div>

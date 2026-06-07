@@ -41,6 +41,15 @@ export default function Dashboard() {
     if (mounted) {
       const checkAuth = async () => {
         const { data: { user } } = await supabase.auth.getUser()
+        
+        // Auto-redirect if there's a pending goal to join
+        const pending = localStorage.getItem('pendingJoinGoal')
+        if (pending && user) {
+          localStorage.removeItem('pendingJoinGoal')
+          router.push(`/goals/public/${pending}?autojoin=true`)
+          return
+        }
+
         const entryPathSelected = localStorage.getItem('entry_path_selected') === 'true'
         if (!user && !entryPathSelected) {
           router.push('/auth/login')

@@ -3067,6 +3067,7 @@ const { progress, isInRedZone } = useMemo(() => {
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.95, y: 15, opacity: 0 }}
               className="bg-white/60 dark:bg-[#09090b]/80 backdrop-blur-3xl border border-white/10 rounded-2xl p-6 max-w-md w-full relative overflow-hidden shadow-2xl space-y-6"
+              onClick={e => e.stopPropagation()}
             >
               {/* Header */}
               <div className="flex justify-between items-start pb-3 border-b border-white/5">
@@ -3076,7 +3077,7 @@ const { progress, isInRedZone } = useMemo(() => {
                     {isRTL ? 'مشاركة الهدف' : 'Share Goal'}
                   </h3>
                   <p className="text-xs text-white/50 mt-1">
-                    {isRTL ? 'اختر طريقة المشاركة' : 'Choose how to share'}
+                    {isRTL ? 'إعدادات الوصول والمشاركة للهدف' : 'Access and sharing settings for this goal'}
                   </p>
                 </div>
                 <button
@@ -3087,117 +3088,91 @@ const { progress, isInRedZone } = useMemo(() => {
                 </button>
               </div>
 
-              {/* Share Options Rows */}
-              <div className="space-y-4 relative">
-                {isGeneratingCard && (
-                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white/60 dark:bg-black/40 backdrop-blur-3xl rounded-xl border border-white/5">
-                    <div className="relative w-12 h-12">
-                      <div className="absolute inset-0 rounded-full border-t-2 border-l-2 border-transparent animate-spin" style={{ borderTopColor: missionColor, borderLeftColor: missionColor, filter: `drop-shadow(0 0 6px ${missionColor})` }} />
-                    </div>
-                    <span className="text-xs font-medium text-white animate-pulse">
-                      {isRTL ? 'جاري التحميل...' : 'Loading...'}
-                    </span>
-                  </div>
-                )}
-
-                {/* Option 1: Private invite (Squad Goals only) */}
-                {mission?.metadata?.type === 'squad' && (
-                  <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all duration-150">
-                    <div className="flex items-start gap-3 min-w-0 flex-1">
-                      <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center shrink-0">
-                        <LinkIcon className="w-5 h-5 text-teal-400" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold text-white truncate">
-                          {isRTL ? "دعوة خاصة" : "Private Invite"}
-                        </h4>
-                        <p className="text-xs text-white/50 mt-0.5 leading-tight">
-                          {isRTL ? "يحتاج موافقتك قبل الانضمام" : "Requires your approval to join"}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => {
-                        playBlip()
-                        const inviteUrl = `${window.location.origin}/goals/squad?join=${mission.metadata?.invite_code || ''}`
-                        navigator.clipboard.writeText(inviteUrl)
-                        setCopiedRow('invite')
-                        setTimeout(() => setCopiedRow(null), 2000)
-                        showToast(isRTL ? 'تم نسخ رابط الدعوة!' : 'SQUAD INVITE URL COPIED', 'success')
-                        playSuccess()
-                      }}
-                      className="ml-3 shrink-0 h-9 px-4 bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/20 text-teal-400 hover:text-teal-300 text-xs font-semibold rounded-xl transition-all duration-150 active:scale-[0.97]"
-                    >
-                      {copiedRow === 'invite' ? (isRTL ? "تم النسخ ✓" : "Copied ✓") : (isRTL ? "نسخ الرابط" : "Copy Link")}
-                    </button>
-                  </div>
-                )}
-
-                {/* Option 2: Public View */}
-                <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all duration-150">
-                  <div className="flex items-start gap-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center shrink-0">
-                      <Eye className="w-5 h-5 text-cyan-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-semibold text-white truncate">
-                        {isRTL ? "مشاهدة عامة" : "Public View"}
-                      </h4>
-                      <p className="text-xs text-white/50 mt-0.5 leading-tight">
-                        {isRTL ? "أي شخص يقدر يشوف تقدمك" : "Anyone can view your progress"}
-                      </p>
-                    </div>
-                  </div>
+              {/* Link Input Row */}
+              <div className="space-y-2">
+                <span className="text-xs font-semibold text-white/40 block">
+                  {isRTL ? 'رابط المشاركة' : 'Invite Link'}
+                </span>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={typeof window !== 'undefined' ? `${window.location.origin}/goals/public/${id}` : ''}
+                    className="flex-grow bg-white/5 border border-white/10 py-2 px-3 rounded-xl text-xs text-zinc-300 outline-none select-all focus:border-teal-500/30"
+                  />
                   <button
-                    onClick={async () => {
+                    onClick={() => {
                       playBlip()
-                      const publicUrl = `${window.location.origin}/goals/public/${id}`
-                      navigator.clipboard.writeText(publicUrl)
-                      setCopiedRow('public')
+                      const inviteUrl = `${window.location.origin}/goals/public/${id}`
+                      navigator.clipboard.writeText(inviteUrl)
+                      setCopiedRow('invite')
                       setTimeout(() => setCopiedRow(null), 2000)
-                      showToast(isRTL ? 'تم نسخ الرابط العام!' : 'PUBLIC VIEW LINK COPIED', 'success')
+                      showToast(isRTL ? 'تم نسخ الرابط!' : 'INVITE LINK COPIED', 'success')
                       playSuccess()
-
-                      const currentMetadata = mission?.metadata || {}
-                      if (currentMetadata.public_share !== 'true' && currentMetadata.public_share !== true) {
-                        const newMetadata = { ...currentMetadata, public_share: true }
-                        setMission((prev: any) => {
-                          if (!prev) return prev
-                          return { ...prev, metadata: newMetadata }
-                        })
-                        await supabase
-                          .from('goals')
-                          .update({ metadata: newMetadata })
-                          .eq('id', id)
-                      }
                     }}
-                    className="ml-3 shrink-0 h-9 px-4 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 text-cyan-400 hover:text-cyan-300 text-xs font-semibold rounded-xl transition-all duration-150 active:scale-[0.97]"
+                    className="shrink-0 h-9 px-4 bg-teal-500 text-black text-xs font-semibold rounded-xl transition-all duration-150 active:scale-[0.97]"
                   >
-                    {copiedRow === 'public' ? (isRTL ? "تم النسخ ✓" : "Copied ✓") : (isRTL ? "نسخ الرابط" : "Copy Link")}
+                    {copiedRow === 'invite' ? (isRTL ? "تم النسخ ✓" : "Copied ✓") : (isRTL ? "نسخ" : "Copy")}
                   </button>
                 </div>
+              </div>
 
-                {/* Option 3: Achievement Card */}
-                <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all duration-150">
-                  <div className="flex items-start gap-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
-                      <Trophy className="w-5 h-5 text-orange-500" />
+              {/* Google Sheets Style Access Control */}
+              <div className="space-y-3">
+                <span className="text-xs font-semibold text-white/40 block">
+                  {isRTL ? 'الوصول العام' : 'General Access'}
+                </span>
+                
+                <div className="space-y-2.5">
+                  <label className="flex items-start gap-3 p-3.5 bg-white/5 border border-white/10 rounded-2xl cursor-pointer hover:bg-white/10 transition-all duration-150">
+                    <input
+                      type="radio"
+                      name="sharing_mode"
+                      checked={mission?.is_public === true && mission?.requires_approval === false}
+                      onChange={async () => {
+                        setMission((prev: any) => ({ ...prev, is_public: true, requires_approval: false }));
+                        await supabase
+                          .from('goals')
+                          .update({ is_public: true, requires_approval: false })
+                          .eq('id', id);
+                        showToast(isRTL ? 'تم التحديث: انضمام مباشر' : 'Updated: Anyone can join', 'success');
+                      }}
+                      className="mt-1 accent-orange-500 w-4 h-4 shrink-0"
+                    />
+                    <div className="flex-1">
+                      <span className="text-sm font-semibold text-white block">
+                        {isRTL ? 'أي شخص عنده الرابط' : 'Anyone with the link'}
+                      </span>
+                      <span className="text-xs text-white/50 block mt-0.5 leading-tight">
+                        {isRTL ? 'ينضم تلقائياً كعضو' : 'Joins automatically as a member'}
+                      </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-semibold text-white truncate">
-                        {isRTL ? "كارت الإنجاز" : "Achievement Card"}
-                      </h4>
-                      <p className="text-xs text-white/50 mt-0.5 leading-tight">
-                        {isRTL ? "شارك تقدمك كصورة" : "Share your progress as an image"}
-                      </p>
+                  </label>
+
+                  <label className="flex items-start gap-3 p-3.5 bg-white/5 border border-white/10 rounded-2xl cursor-pointer hover:bg-white/10 transition-all duration-150">
+                    <input
+                      type="radio"
+                      name="sharing_mode"
+                      checked={mission?.requires_approval !== false}
+                      onChange={async () => {
+                        setMission((prev: any) => ({ ...prev, is_public: true, requires_approval: true }));
+                        await supabase
+                          .from('goals')
+                          .update({ is_public: true, requires_approval: true })
+                          .eq('id', id);
+                        showToast(isRTL ? 'تم التحديث: يتطلب الموافقة' : 'Updated: Requires approval', 'success');
+                      }}
+                      className="mt-1 accent-orange-500 w-4 h-4 shrink-0"
+                    />
+                    <div className="flex-1">
+                      <span className="text-sm font-semibold text-white block">
+                        {isRTL ? 'يحتاج موافقتي' : 'Requires approval'}
+                      </span>
+                      <span className="text-xs text-white/50 block mt-0.5 leading-tight">
+                        {isRTL ? 'بتوافق على كل طلب انضمام' : 'You approve each join request'}
+                      </span>
                     </div>
-                  </div>
-                  <button
-                    onClick={downloadCardImage}
-                    className="ml-3 shrink-0 h-9 px-4 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 text-orange-500 hover:text-orange-400 text-xs font-semibold rounded-xl transition-all duration-150 active:scale-[0.97]"
-                  >
-                    {isRTL ? "تحميل" : "Download"}
-                  </button>
+                  </label>
                 </div>
               </div>
 
@@ -3208,7 +3183,7 @@ const { progress, isInRedZone } = useMemo(() => {
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                 </span>
                 <span className="text-xs font-medium text-emerald-400">
-                  Ready to Share
+                  {isRTL ? 'جاهز للمشاركة' : 'Ready to Share'}
                 </span>
               </div>
             </motion.div>

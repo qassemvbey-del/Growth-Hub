@@ -46,7 +46,170 @@ export default function PublicGoalPage() {
   const [timeInvested, setTimeInvested] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [user, setUser] = useState<any>(null)
   const supabase = createClient()
+
+  useEffect(() => {
+    async function checkSession() {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    checkSession()
+  }, [supabase])
+
+  const handleJoinGoal = async () => {
+    if (!user) {
+      localStorage.setItem('pendingJoinGoal', id as string);
+      router.push('/auth/login');
+      return;
+    }
+
+    try {
+      // Check if already a member
+      const { data: existingMember } = await supabase
+        .from('goal_members')
+        .select('*')
+        .eq('goal_id', id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (existingMember) {
+        alert(isRTL ? 'أنت عضو بالفعل في هذا الهدف!' : 'You are already a member of this goal!');
+        router.push(`/goals/squad/${id}`);
+        return;
+      }
+
+      // Check if requires_approval is true (default is true if not explicitly false)
+      const requiresApproval = goal.requires_approval !== false;
+
+      if (!requiresApproval) {
+        // Case 1: Direct Join
+        const { error: joinError } = await supabase
+          .from('goal_members')
+          .insert({
+            goal_id: id,
+            user_id: user.id,
+            role: 'member'
+          });
+
+        if (joinError) throw joinError;
+
+        // Fetch squad owner and admins to notify
+        const { data: admins } = await supabase
+          .from('goal_members')
+          .select('user_id')
+          .eq('goal_id', id)
+          .in('role', ['owner', 'admin']);
+
+        const adminIds = new Set<string>();
+        if (goal.user_id) adminIds.add(goal.user_id);
+        if (admins) {
+          admins.forEach((a: any) => {
+            if (a.user_id) adminIds.add(a.user_id);
+          });
+        }
+
+        const notifications = Array.from(adminIds).map(adminId => ({
+          user_id: adminId,
+          title: isRTL 
+            ? `${user.user_metadata?.full_name || 'مستخدم'} انضم لـ ${goal.title}`
+            : `${user.user_metadata?.full_name || 'User'} joined ${goal.title}`,
+          type: 'join_direct',
+          content: {
+            goal_id: id,
+            goal_title: goal.title,
+            user_id: user.id,
+            user_name: user.user_metadata?.full_name || 'User',
+          },
+          is_read: false
+        }));
+
+        await supabase.from('inbox_reports').insert(notifications);
+
+        alert(isRTL ? 'تم الانضمام بنجاح!' : 'Successfully joined the goal!');
+        router.push(`/goals/squad/${id}`);
+      } else {
+        // Case 2: Requires Approval
+        // Check if request already pending
+        const { data: existingRequest } = await supabase
+          .from('squad_join_requests')
+          .select('*')
+          .eq('goal_id', id)
+          .eq('user_id', user.id)
+          .eq('status', 'pending')
+          .maybeSingle();
+
+        if (existingRequest) {
+          alert(isRTL ? 'طلبك قيد الانتظار بالفعل.' : 'Your request is already pending.');
+          return;
+        }
+
+        // Insert pending join request
+        const { data: insertedData, error: requestError } = await supabase
+          .from('squad_join_requests')
+          .insert({
+            goal_id: id,
+            user_id: user.id,
+            status: 'pending',
+            role: 'member'
+          })
+          .select()
+          .single();
+
+        if (requestError) throw requestError;
+
+        // Fetch squad owner and admins to notify
+        const { data: admins } = await supabase
+          .from('goal_members')
+          .select('user_id')
+          .eq('goal_id', id)
+          .in('role', ['owner', 'admin']);
+
+        const adminIds = new Set<string>();
+        if (goal.user_id) adminIds.add(goal.user_id);
+        if (admins) {
+          admins.forEach((a: any) => {
+            if (a.user_id) adminIds.add(a.user_id);
+          });
+        }
+
+        const notifications = Array.from(adminIds).map(adminId => ({
+          user_id: adminId,
+          title: isRTL 
+            ? `${user.user_metadata?.full_name || 'مستخدم'} يريد الانضمام لـ ${goal.title}`
+            : `${user.user_metadata?.full_name || 'User'} wants to join ${goal.title}`,
+          type: 'join_request',
+          content: {
+            goal_id: id,
+            goal_title: goal.title,
+            requester_id: user.id,
+            requester_name: user.user_metadata?.full_name || 'User',
+            request_id: insertedData.id,
+          },
+          is_read: false
+        }));
+
+        await supabase.from('inbox_reports').insert(notifications);
+
+        alert(isRTL ? "تم إرسال طلبك، انتظر موافقة المشرف" : "Request sent! Waiting for admin approval");
+      }
+    } catch (err: any) {
+      console.error('Error joining goal:', err);
+      alert(isRTL ? 'حدث خطأ أثناء الانضمام.' : 'An error occurred while joining.');
+    }
+  };
+
+  useEffect(() => {
+    if (user && goal && typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search)
+      if (searchParams.get('autojoin') === 'true') {
+        const url = new URL(window.location.href)
+        url.searchParams.delete('autojoin')
+        window.history.replaceState({}, '', url.toString())
+        handleJoinGoal()
+      }
+    }
+  }, [user, goal])
 
   useEffect(() => {
     async function fetchData() {
@@ -62,8 +225,9 @@ export default function PublicGoalPage() {
           throw new Error('Not found or classified')
         }
 
-        // Must explicitly have public_share = 'true'
-        if (cup.metadata?.public_share !== 'true' && cup.metadata?.public_share !== true) {
+        // Must explicitly have public_share = 'true' or is_public = true
+        const isGoalPublic = cup.is_public === true || cup.metadata?.public_share === 'true' || cup.metadata?.public_share === true;
+        if (!isGoalPublic) {
           throw new Error('Not public')
         }
 
@@ -350,38 +514,28 @@ export default function PublicGoalPage() {
 //             JOIN GROWTH HUB
 //             <ArrowRight className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" />
 //           </button>
-//         </div>
-//       </div>
-//     </div>
-//   )
-//   */
-
-
   const formatRank = (rank: string) => {
     if (!rank) return isRTL ? 'مبتدئ' : 'Rookie'
     return rank.charAt(0).toUpperCase() + rank.slice(1).toLowerCase()
   }
 
-  // SVG Progress Ring calculations
   const radius = 50
   const strokeWidth = 8
   const circumference = 2 * Math.PI * radius
   const safeProgress = Math.min(Math.max(progress, 0), 100)
   const strokeDashoffset = circumference - (safeProgress / 100) * circumference
 
-  // Limit tasks list to first 5
   const allTasks = goal.tasks || []
   const visibleTasks = allTasks.slice(0, 5)
   const hasMoreTasks = allTasks.length > 5
 
   return (
     <div 
-      className="min-h-screen bg-[#050505] text-white selection:bg-orange-500/30 relative overflow-x-hidden font-space pb-36 bg-[radial-gradient(ellipse_at_50%_30%,rgba(249,115,22,0.06)_0%,transparent_70%)]"
+      className="min-h-screen bg-[#050505] text-white selection:bg-orange-500/30 relative overflow-x-hidden font-space pb-32 bg-[radial-gradient(ellipse_at_50%_30%,rgba(249,115,22,0.06)_0%,transparent_70%)]"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       <div className="relative z-10 max-w-[640px] mx-auto pt-12 md:pt-20 px-4 md:px-6 space-y-10">
         
-        {/* Top Header Badge */}
         <div className="flex justify-center">
           <div className="flex items-center justify-center gap-1.5 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-md">
             <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
@@ -391,7 +545,6 @@ export default function PublicGoalPage() {
           </div>
         </div>
 
-        {/* Goal Hero Section */}
         <div className="flex flex-col items-center text-center space-y-5">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight break-words max-w-full">
             {goal.title}
@@ -417,7 +570,6 @@ export default function PublicGoalPage() {
           </div>
         </div>
 
-        {/* Progress Ring Section */}
         <div className="flex flex-col items-center justify-center py-4 relative">
           <div className="relative w-[120px] h-[120px] flex items-center justify-center">
             <svg className="w-full h-full transform -rotate-95">
@@ -450,7 +602,6 @@ export default function PublicGoalPage() {
           </div>
         </div>
 
-        {/* Stats Row */}
         <div className="grid grid-cols-3 gap-0 p-4 rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-md">
           <div className="flex flex-col items-center text-center space-y-0.5 border-r border-white/10">
             <span className="text-xl font-bold text-white">{isSquad ? members.length : 1}</span>
@@ -472,7 +623,6 @@ export default function PublicGoalPage() {
           </div>
         </div>
 
-        {/* Squad Stack (Only if Squad) */}
         {isSquad && members.length > 0 && (
           <div className="flex flex-col items-center gap-2 py-2">
             <div className="flex items-center justify-center -space-x-2.5">
@@ -496,7 +646,6 @@ export default function PublicGoalPage() {
           </div>
         )}
 
-        {/* Tasks List */}
         <div className="space-y-3">
           <h3 className="text-xs font-semibold tracking-wider text-white/40 uppercase border-b border-white/10 pb-1.5">
             {isRTL ? 'المهام' : 'Tasks'}
@@ -514,7 +663,6 @@ export default function PublicGoalPage() {
                     : "bg-white/[0.02] border-white/10"
                 )}
               >
-                {/* Index & Checkbox */}
                 <div className="flex items-center gap-2.5 shrink-0">
                   <span className="font-bold text-[10px] text-white/20 w-4 text-right">
                     {String(index + 1).padStart(2, '0')}
@@ -530,7 +678,6 @@ export default function PublicGoalPage() {
                   </div>
                 </div>
 
-                {/* Title */}
                 <div className="flex-1 min-w-0">
                   <span className={cn(
                     "text-sm font-medium block truncate",
@@ -561,19 +708,16 @@ export default function PublicGoalPage() {
 
       </div>
 
-      {/* Sticky Footer CTA */}
-      <div className="fixed bottom-0 inset-x-0 p-6 bg-gradient-to-t from-[#050505] via-[#050505] to-transparent z-50 flex flex-col items-center justify-end pointer-events-none">
+      <div className="fixed bottom-0 inset-x-0 p-6 bg-[linear-gradient(to_top,#0D0D0D_50%,rgba(13,13,13,0.8)_75%,transparent_100%)] h-36 z-50 flex flex-col items-center justify-end pointer-events-none">
         <div className="pointer-events-auto flex flex-col items-center gap-2 max-w-sm w-full">
           <p className="text-[10px] font-medium tracking-normal text-white/40 text-center">
             {isRTL ? 'تمت مشاركته عبر Growth Hub' : 'Shared via Growth Hub'}
           </p>
           <button
-            onClick={() => router.push('/')}
-            className="w-full px-5 py-3.5 rounded-xl font-semibold text-xs tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-orange-500/10 flex items-center justify-center gap-2 group bg-orange-500 hover:bg-orange-600 text-black border border-orange-500/40"
+            onClick={handleJoinGoal}
+            className="w-full h-14 rounded-2xl bg-orange-500 hover:bg-orange-600 text-black font-semibold text-sm transition-all duration-300 shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2"
           >
-            <Zap className="w-4 h-4 fill-current" />
-            {isRTL ? 'انضم الآن للـ Growth Hub' : 'Join Growth Hub'}
-            <ArrowRight className="w-4 h-4 opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+            {isRTL ? 'انضم للهدف' : 'Join Goal'}
           </button>
         </div>
       </div>
