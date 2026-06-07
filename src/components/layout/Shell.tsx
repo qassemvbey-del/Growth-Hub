@@ -12,7 +12,7 @@ import { useSound } from '@/context/SoundContext'
 import { 
   LayoutGrid, Trophy, Target, FileText, User, Users, Settings, Zap, Bell, Flame, Bot, X, Home,
   Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp, CloudLightning,
-  Crosshair, Shield, CheckCircle, Menu, Search, Plus, StickyNote, Loader2
+  Crosshair, Shield, CheckCircle, Menu, Search, Plus, StickyNote, Loader2, UserPlus
 } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 
@@ -163,6 +163,39 @@ interface ShellProps {
   onMissionsRefresh?: () => void
 }
 */
+const bellVariants = {
+  shake: {
+    rotate: [0, 15, -12, 10, -8, 5, 0],
+    transition: { duration: 0.6, delay: 0.2 }
+  }
+}
+
+const arrowVariants = {
+  hidden: { pathLength: 0, opacity: 0 },
+  visible: { 
+    pathLength: 1, 
+    opacity: [0, 1, 1, 0],
+    transition: { duration: 1.2, ease: "easeInOut" as const }
+  }
+}
+
+const popupVariants = {
+  hidden: { opacity: 0, y: -8, scale: 0.95 },
+  visible: { 
+    opacity: 1, y: 0, scale: 1,
+    transition: { 
+      type: "spring" as const, 
+      stiffness: 400, 
+      damping: 25,
+      delay: 0.8
+    }
+  },
+  exit: { 
+    opacity: 0, y: -8, scale: 0.95,
+    transition: { duration: 0.2 }
+  }
+}
+
 interface ShellProps {
   children: React.ReactNode
 }
@@ -623,6 +656,164 @@ export default function Shell({ children }: ShellProps) {
   const { reports, markAsRead, fetchReports } = useInbox()
   const unreadCount = useMemo(() => reports.filter(r => !r.is_read).length, [reports])
 
+  // Smart Notification Toast States
+  const [activeToast, setActiveToast] = useState<{
+    id: string
+    type: string
+    title: string
+    requesterName: string
+    goalName: string
+    goalId?: string
+    requestId?: string
+  } | null>(null)
+  
+  const [showNotificationPopup, setShowNotificationPopup] = useState(false)
+  const [arrowVisible, setArrowVisible] = useState(false)
+  const [bellShaking, setBellShaking] = useState(false)
+  
+  const lastActivityRef = useRef<number>(Date.now())
+  const lastShownTimeRef = useRef<number>(0)
+  const prevReportsRef = useRef<any[]>(reports)
+  
+  // Track user activity for idle state
+  useEffect(() => {
+    const updateActivity = () => {
+      lastActivityRef.current = Date.now()
+    }
+    window.addEventListener('mousemove', updateActivity)
+    window.addEventListener('keydown', updateActivity)
+    window.addEventListener('click', updateActivity)
+    window.addEventListener('scroll', updateActivity)
+    return () => {
+      window.removeEventListener('mousemove', updateActivity)
+      window.removeEventListener('keydown', updateActivity)
+      window.removeEventListener('click', updateActivity)
+      window.removeEventListener('scroll', updateActivity)
+    }
+  }, [])
+
+  // Auto-dismiss popup after 6 seconds
+  useEffect(() => {
+    if (showNotificationPopup) {
+      const timer = setTimeout(() => {
+        setShowNotificationPopup(false)
+        setActiveToast(null)
+      }, 6000)
+      return () => clearTimeout(timer)
+    }
+  }, [showNotificationPopup])
+
+  // Smart Bell notification trigger checking
+  useEffect(() => {
+    if (!reports || reports.length === 0) return
+    
+    const prevReports = prevReportsRef.current
+    prevReportsRef.current = reports
+    
+    if (prevReports.length === 0) return
+
+    const newReports = reports.filter(r => !prevReports.some(pr => pr.id === r.id))
+    if (newReports.length === 0) return
+
+    const newUnreadReports = newReports.filter(r => !r.is_read)
+    if (newUnreadReports.length === 0) return
+    
+    const onNotificationsPage = pathname === '/notifications' || inboxOpen
+    if (onNotificationsPage) return
+    
+    const now = Date.now()
+    if (now - lastShownTimeRef.current < 180000) return
+
+    const isIdle = now - lastActivityRef.current > 300000
+
+    let shouldTrigger = false
+    let targetReport = null
+
+    // Filter system/automated notifications
+    const isSystemNotification = (type: string) => {
+      return ['daily_brief', 'weekly_review', 'deadline_alert', 'overdue_task'].includes(type)
+    }
+
+    const joinReq = newUnreadReports.find(r => r.type === 'squad_join_request')
+    if (joinReq) {
+      shouldTrigger = true
+      targetReport = joinReq
+    } else {
+      const interestingNotif = newUnreadReports.find(r => !isSystemNotification(r.type))
+      if (interestingNotif) {
+        if (isIdle || newUnreadReports.length > 0) {
+          shouldTrigger = true
+          targetReport = interestingNotif
+        }
+      }
+    }
+
+    if (shouldTrigger && targetReport) {
+      lastShownTimeRef.current = now
+      
+      const reqName = targetReport.content?.requester_name || targetReport.content?.sender_name || (isRTL ? "مستخدم" : "Someone")
+      const gName = targetReport.content?.goal_title || targetReport.content?.goal_name || (isRTL ? "الهدف" : "the goal")
+      
+      setActiveToast({
+        id: targetReport.id,
+        type: targetReport.type,
+        title: targetReport.title,
+        requesterName: reqName,
+        goalName: gName,
+        goalId: targetReport.content?.goal_id,
+        requestId: targetReport.content?.request_id
+      })
+      
+      // Step 1: Bell shakes (0.6s)
+      setBellShaking(true)
+      setTimeout(() => setBellShaking(false), 600)
+      
+      // Step 2: Animated arrow draws pointing UP (1.2s total visible, pathLength draws over 0.7s)
+      setArrowVisible(true)
+      
+      // Step 3: Popup slides in (delay 0.8s)
+      setTimeout(() => {
+        setShowNotificationPopup(true)
+      }, 800)
+      
+      // Step 4: Arrow fades out after 1.2s
+      setTimeout(() => {
+        setArrowVisible(false)
+      }, 1200)
+    }
+  }, [reports, pathname, inboxOpen, isRTL])
+
+  const handleAcceptNotification = async () => {
+    if (!activeToast || !activeToast.requestId) return
+    const supabase = createClient()
+    try {
+      const { error } = await supabase.rpc('review_squad_join_request', {
+        p_request_id: activeToast.requestId,
+        p_action: 'approve'
+      })
+      if (!error) {
+        showToast(isRTL ? "تم قبول الطلب" : "Join request approved", "success")
+        if (activeToast.id) {
+          markAsRead(activeToast.id)
+        }
+      } else {
+        showToast(isRTL ? "حدث خطأ أثناء معالجة الطلب" : "Error processing request", "warning")
+      }
+    } catch (err) {
+      console.error(err)
+    }
+    setShowNotificationPopup(false)
+    setActiveToast(null)
+  }
+
+  const handleDismissNotification = () => {
+    if (activeToast && activeToast.id) {
+      markAsRead(activeToast.id)
+    }
+    setShowNotificationPopup(false)
+    setActiveToast(null)
+  }
+
   useEffect(() => {
     async function calculateStreak() {
       const supabase = createClient()
@@ -968,7 +1159,9 @@ export default function Shell({ children }: ShellProps) {
                 )}
                 title={isRTL ? 'الإشعارات' : 'Notifications'}
               >
-                <Bell className="w-5 h-5" />
+                <motion.div animate={bellShaking ? "shake" : ""} variants={bellVariants}>
+                  <Bell className="w-5 h-5" />
+                </motion.div>
                 {unreadCount > 0 && (
                   <span 
                     className="absolute -top-1 -right-1 w-4 h-4 bg-[#FF0055] text-white text-[8px] font-black flex items-center justify-center rounded-full shadow-[0_0_10px_#FF0055]"
@@ -1036,7 +1229,9 @@ export default function Shell({ children }: ShellProps) {
                 )}
                 title={isRTL ? 'الإشعارات' : 'Notifications'}
               >
-                <Bell className="w-[18px] h-[18px]" />
+                <motion.div animate={bellShaking ? "shake" : ""} variants={bellVariants}>
+                  <Bell className="w-[18px] h-[18px]" />
+                </motion.div>
                 {unreadCount > 0 && (
                   <span 
                     className="absolute -top-1 -right-1 w-4 h-4 bg-[#FF0055] text-white text-[8px] font-black flex items-center justify-center rounded-full shadow-[0_0_10px_#FF0055]"
@@ -1390,6 +1585,7 @@ export default function Shell({ children }: ShellProps) {
     </div>
 
     {/* ── MOBILE FLOATING ACTION BUTTON (FAB) SPEED DIAL ── */}
+    {/* ORIGINAL FAB SPEED DIAL COMMENTED OUT
     {!isTaskDrawerOpen && (
       <div 
         className={cn(
@@ -1398,7 +1594,6 @@ export default function Shell({ children }: ShellProps) {
         )}
         dir={shellIsRTL ? 'rtl' : 'ltr'}
       >
-        {/* Speed Dial Actions */}
         <AnimatePresence>
           {isFabMenuOpen && (
             <motion.div
@@ -1421,14 +1616,6 @@ export default function Shell({ children }: ShellProps) {
                   delay: 0.05,
                   action: () => { showToast(isRTL ? 'ميزة إنشاء المهام العامة قريباً.' : 'Global Task Creation coming soon.', 'info'); setIsFabMenuOpen(false); playBlip(); }
                 },
-                /*
-                { 
-                  label: isRTL ? 'هدف جديد' : 'Create Goal', 
-                  icon: Target, 
-                  delay: 0,
-                  action: () => { openCreateGoalModal({ goalType: 'solo' }); setIsFabMenuOpen(false); playNeuralLink(); }
-                },
-                */
                 { 
                   label: isRTL ? 'هدف شخصي' : 'Solo Goal', 
                   icon: User, 
@@ -1470,9 +1657,7 @@ export default function Shell({ children }: ShellProps) {
           )}
         </AnimatePresence>
 
-        {/* Bottom row: Search icon + Primary FAB */}
         <div className={cn("flex items-center gap-3", shellIsRTL ? "flex-row-reverse" : "")}>
-          {/* Search Icon Button */}
           <motion.button
             onClick={() => {
               playBlip()
@@ -1485,7 +1670,6 @@ export default function Shell({ children }: ShellProps) {
             <Search className="w-5 h-5" />
           </motion.button>
 
-          {/* Primary FAB */}
           <motion.button
             onClick={() => {
               playBlip()
@@ -1506,7 +1690,6 @@ export default function Shell({ children }: ShellProps) {
       </div>
     )}
 
-    {/* ── FAB BACKDROP ── */}
     <AnimatePresence>
       {isFabMenuOpen && (
         <motion.div
@@ -1519,6 +1702,64 @@ export default function Shell({ children }: ShellProps) {
         />
       )}
     </AnimatePresence>
+    */}
+    {(() => {
+      const FAB_PAGES = [
+        '/',           // Home/Dashboard
+        '/goals',      // Goals hub
+        '/goals/solo', // Solo goals
+        '/goals/squad',// Squad goals
+        '/notes',      // Notes
+      ]
+
+      const showFAB = FAB_PAGES.some(page => 
+        pathname === page || 
+        (page === '/' && pathname === '/')
+      )
+
+      if (isTaskDrawerOpen || !showFAB) return null
+
+      return (
+        <div 
+          className={cn(
+            "lg:hidden fixed bottom-6 z-[100] flex items-center gap-3",
+            shellIsRTL ? "left-6 flex-row-reverse" : "right-6"
+          )}
+        >
+          {/* Search Icon Button */}
+          <motion.button
+            onClick={() => {
+              playBlip()
+              setIsMobileSearchOpen(true)
+            }}
+            whileTap={{ scale: 0.9 }}
+            className="w-14 h-14 rounded-full flex items-center justify-center bg-zinc-900/90 backdrop-blur-2xl border border-zinc-800 shadow-lg cursor-pointer text-zinc-400 hover:text-white transition-colors"
+          >
+            <Search className="w-5 h-5" />
+          </motion.button>
+
+          {/* Primary FAB */}
+          <motion.button
+            onClick={() => {
+              playBlip()
+              if (pathname === '/notes') {
+                router.push('/notes?create=true')
+              } else {
+                openCreateGoalModal({ goalType: 'solo' })
+              }
+            }}
+            whileTap={{ scale: 0.92 }}
+            className="w-14 h-14 rounded-full flex items-center justify-center text-black shadow-lg cursor-pointer"
+            style={{ 
+              backgroundColor: currentTheme.color,
+              boxShadow: `0 0 20px ${currentTheme.color}50`
+            }}
+          >
+            <Plus className="w-7 h-7" strokeWidth={2.5} />
+          </motion.button>
+        </div>
+      )
+    })()}
 
     {/* ── FULL-SCREEN MOBILE SMART SEARCH OVERLAY ── */}
     <AnimatePresence>
@@ -1723,6 +1964,67 @@ export default function Shell({ children }: ShellProps) {
                 )}
               </div>
             )}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    {/* Smart Bell Notification Toast & Arrow */}
+    <AnimatePresence>
+      {arrowVisible && (
+        <motion.svg
+          className="fixed top-16 right-8 w-8 h-12 z-[250] pointer-events-none"
+          viewBox="0 0 32 48"
+          fill="none"
+          stroke={currentTheme.color}
+          strokeWidth="2"
+          strokeLinecap="round"
+          initial="hidden"
+          animate="visible"
+          exit="hidden"
+        >
+          <motion.path
+            d="M 16 40 L 16 12 M 16 12 L 8 20 M 16 12 L 24 20"
+            variants={arrowVariants}
+          />
+        </motion.svg>
+      )}
+    </AnimatePresence>
+
+    <AnimatePresence>
+      {showNotificationPopup && activeToast && (
+        <motion.div
+          variants={popupVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          className="fixed top-16 right-4 z-[200]"
+        >
+          <div className="flex items-start gap-3 p-4 bg-[var(--card)] dark:bg-[#121214]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-xl w-[260px]">
+            <div className="w-9 h-9 rounded-full bg-orange-500/15 flex items-center justify-center shrink-0">
+              <UserPlus size={16} className="text-orange-500"/>
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-white mb-0.5">
+                {isRTL ? "طلب انضمام جديد" : "New join request"}
+              </p>
+              <p className="text-[11px] text-white/60 mb-3 leading-relaxed">
+                {activeToast.requesterName} {isRTL ? 
+                  `يريد الانضمام لـ ${activeToast.goalName}` : 
+                  `wants to join ${activeToast.goalName}`}
+              </p>
+              <div className="flex gap-2">
+                <button onClick={handleAcceptNotification}
+                  className="flex-1 h-7 rounded-lg bg-teal-500 hover:bg-teal-400 text-white text-[11px] font-semibold transition-all duration-150 active:scale-[0.97] cursor-pointer">
+                  {isRTL ? "قبول" : "Accept"}
+                </button>
+                <button onClick={handleDismissNotification}
+                  className="flex-1 h-7 rounded-lg bg-white/8 hover:bg-white/12 border border-white/10 text-white/70 text-[11px] transition-all duration-150 active:scale-[0.97] cursor-pointer">
+                  {isRTL ? "لاحقاً" : "Later"}
+                </button>
+              </div>
+            </div>
           </div>
         </motion.div>
       )}

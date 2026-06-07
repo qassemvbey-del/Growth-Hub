@@ -1,7 +1,7 @@
 'use client'
 
 // import { AlertTriangle, ArrowRight, Calendar, Check, CheckCircle2, HelpCircle, Info, Kanban, Layers, Link, List, Plus, RefreshCw, Users2, Zap, Trophy, Award, Shield, Settings, Star, X, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard, Circle } from 'lucide-react'
-import { AlertTriangle, ArrowRight, Calendar, Check, CheckCircle2, HelpCircle, Info, Kanban, Layers, Link, List, Plus, RefreshCw, Users2, Zap, Trophy, Award, Shield, Settings, Star, X, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard, Circle, Target, Users } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Calendar, Check, CheckCircle2, HelpCircle, Info, Kanban, Layers, Link, List, Plus, RefreshCw, Users2, Zap, Trophy, Award, Shield, Settings, Star, X, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard, Circle, Target, Users, UserPlus } from 'lucide-react'
 import { NeonIcon } from '@/components/ui/NeonIcon'
 // import Shell from '@/components/layout/Shell'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -1598,6 +1598,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
       </div>
 
       {/* JOIN SQUAD GOAL MODAL (Part 4) */}
+      {/* ORIGINAL JOIN SQUAD GOAL MODAL COMMENTED OUT
       <AnimatePresence>
         {showJoinGoal && (
           <motion.div
@@ -1617,8 +1618,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
               exit={{ scale: 0.9 }}
               onClick={e => e.stopPropagation()}
               className={cn(
-                /* bg-zinc-950/95 border */
-                "w-[calc(100%-2rem)] mx-auto md:max-w-md bg-white/60 dark:bg-black/40 backdrop-blur-3xl border-black/5 dark:border-white/5 border p-6 md:p-8 space-y-6 rounded-md shadow-2xl my-auto max-h-[90vh] overflow-y-auto relative text-left transition-all duration-300",
+                "w-[calc(100%-2rem)] mx-auto md:max-w-md bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 border p-6 md:p-8 space-y-6 rounded-md shadow-2xl my-auto max-h-[90vh] overflow-y-auto relative text-left transition-all duration-300",
                 joinStatus === 'invalid' ? 'border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.2)]' :
                   joinStatus === 'valid' ? 'border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.2)]' :
                     'border-teal-500/30'
@@ -1664,7 +1664,6 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       )}
                     />
 
-                    {/* Status Message */}
                     {joinStatus === 'invalid' && (
                       <p className="text-[10px] font-space font-black text-red-500 uppercase tracking-widest text-center animate-bounce">
                         {joinErrorText}
@@ -1687,7 +1686,6 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     )}
                   </div>
 
-                  {/* Main Scan/Confirm Button */}
                   {joinStatus === 'valid' ? (
                     <button
                       onClick={handleConfirmJoin}
@@ -1728,6 +1726,119 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                   </div>
                   <p className="text-[10px] font-space text-zinc-500 uppercase tracking-widest text-center select-none">
                     Ask someone to share their squad goal link
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      */}
+      <AnimatePresence>
+        {showJoinGoal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-white/90 dark:bg-black/90 backdrop-blur-md p-4 overflow-y-auto"
+            onClick={() => {
+              setShowJoinGoal(false);
+              setJoinStatus('idle');
+              setJoinCodeInput('');
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9 }}
+              onClick={e => e.stopPropagation()}
+              className={cn(
+                "w-[calc(100%-2rem)] mx-auto md:max-w-md bg-white/60 dark:bg-black/40 backdrop-blur-3xl border p-6 md:p-8 space-y-6 rounded-2xl shadow-2xl my-auto max-h-[90vh] overflow-y-auto relative text-left transition-all duration-300",
+                joinStatus === 'invalid' ? 'border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.2)]' : 'border-white/10'
+              )}
+            >
+              <button
+                onClick={() => {
+                  setShowJoinGoal(false);
+                  setJoinStatus('idle');
+                  setJoinCodeInput('');
+                }}
+                className="absolute top-4 right-4 rtl:left-4 rtl:right-auto text-[var(--text-secondary)] hover:text-white transition-colors p-1 flex items-center justify-center shrink-0 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 text-orange-500">
+                  <UserPlus className="w-6 h-6 text-orange-500" />
+                  <h2 className="text-xl font-heading font-medium text-white">
+                    {isRTL ? 'انضم لهدف' : 'Join a Goal'}
+                  </h2>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <input
+                      value={joinCodeInput}
+                      onChange={(e) => {
+                        setJoinCodeInput(e.target.value);
+                        if (joinStatus !== 'idle') setJoinStatus('idle');
+                      }}
+                      placeholder={isRTL ? "الصق الرابط أو الكود هنا..." : "Paste the invite link or code..."}
+                      className={cn(
+                        "w-full bg-white/5 border px-4 py-3 rounded-xl text-sm outline-none transition-all placeholder:text-zinc-550 text-white font-sans",
+                        joinStatus === 'invalid' ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-orange-500/50'
+                      )}
+                    />
+
+                    {/* Status Message */}
+                    {joinStatus === 'invalid' && (
+                      <p className="text-xs text-red-500 text-center font-medium">
+                        {joinErrorText === 'INVALID_CODE // TRY AGAIN' 
+                          ? (isRTL ? "رابط غير صحيح، جرب مرة أخرى" : "Invalid link, please try again")
+                          : (joinErrorText.includes('REQUEST_PENDING') 
+                              ? (isRTL ? "تم إرسال الطلب بالفعل وهو قيد الانتظار" : "A join request is already pending for this goal")
+                              : (joinErrorText.includes('REQUEST_REJECTED')
+                                  ? (isRTL ? "تم رفض طلبك السابق" : "Your previous join request was rejected")
+                                  : (isRTL ? "رابط غير صحيح، جرب مرة أخرى" : "Invalid link, please try again")
+                                )
+                            )
+                        }
+                      </p>
+                    )}
+                    {joinStatus === 'valid' && (
+                      <p className="text-xs text-emerald-400 text-center font-medium">
+                        {isRTL ? `تم العثور على الهدف: ${scannedGoalName}` : `Goal found: ${scannedGoalName}`}
+                      </p>
+                    )}
+                    {joinStatus === 'already_member' && (
+                      <p className="text-xs text-amber-500 text-center font-medium">
+                        {isRTL ? "أنت عضو بالفعل في هذا الفريق" : "You are already a member of this squad"}
+                      </p>
+                    )}
+                    {joinStatus === 'success' && (
+                      <p className="text-xs text-emerald-400 text-center font-medium animate-pulse">
+                        {isRTL ? "تم إرسال طلب الانضمام بنجاح" : "Join request sent successfully"}
+                      </p>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={joinStatus === 'valid' ? handleConfirmJoin : handleScanCode}
+                    disabled={joinStatus === 'scanning' || !joinCodeInput.trim() || joinStatus === 'success'}
+                    className="w-full h-12 bg-orange-500 hover:bg-orange-400 text-white font-medium text-sm rounded-xl transition-all duration-150 active:scale-[0.97] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center cursor-pointer shadow-lg shadow-orange-500/20"
+                  >
+                    {joinStatus === 'scanning' ? (
+                      isRTL ? "جاري التحقق..." : "Verifying..."
+                    ) : (
+                      isRTL ? "انضم الآن" : "Join Now"
+                    )}
+                  </button>
+                </div>
+
+                <div className="text-center pt-2">
+                  <p className="text-xs text-zinc-500 font-medium">
+                    {isRTL ? "أو اطلب من صاحبك يشاركك رابط الدعوة" : "Or ask someone to share their invite link"}
                   </p>
                 </div>
               </div>
