@@ -117,6 +117,18 @@ export default function PublicGoalPage() {
   const isSquad = goal?.metadata?.type === 'squad'
   const themeColor = goal?.color || '#39FF14'
 
+  const isRTL = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      if (document.dir === 'rtl' || document.documentElement.lang === 'ar' || document.documentElement.dir === 'rtl') {
+        return true
+      }
+    }
+    if (goal?.title && /[\u0600-\u06FF]/.test(goal.title)) {
+      return true
+    }
+    return false
+  }, [goal])
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center font-space text-white/50 tracking-widest text-sm uppercase animate-pulse">
@@ -160,104 +172,324 @@ export default function PublicGoalPage() {
     )
   }
 
-  return (
-    <div className="min-h-screen bg-[#050505] text-white selection:bg-teal-500/30 relative overflow-x-hidden font-space pb-32">
-      {/* Neural Grid Background */}
-      <div className="fixed inset-0 z-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
-      <div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_top,#1a1a1a_0%,#050505_100%)] pointer-events-none" />
+//   /*
+//   return (
+//     <div className="min-h-screen bg-[#050505] text-white selection:bg-teal-500/30 relative overflow-x-hidden font-space pb-32">
+//       {/* Neural Grid Background */}
+//       <div className="fixed inset-0 z-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
+//       <div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_top,#1a1a1a_0%,#050505_100%)] pointer-events-none" />
+// 
+//       <div className="relative z-10 max-w-[800px] mx-auto pt-8 md:pt-16 px-4 md:px-8 space-y-12">
+//         {/* Top Header Logo */}
+//         <div className="flex justify-center">
+//           <div className="px-4 py-1 border border-white/10 rounded-full bg-white/5 backdrop-blur-md flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.02)]">
+//             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: themeColor, boxShadow: `0 0 10px ${themeColor}` }} />
+//             <span className="text-[10px] font-black tracking-[0.3em] uppercase opacity-80">GROWTH_HUB</span>
+//           </div>
+//         </div>
+// 
+//         {/* Goal Hero Section */}
+//         <div className="flex flex-col items-center text-center space-y-6">
+//           <h1 className="text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter leading-tight break-words max-w-full drop-shadow-2xl">
+//             {goal.title}
+//           </h1>
+//           
+//           <div className="flex items-center gap-3 bg-white/5 border border-white/10 pr-4 pl-1.5 py-1.5 rounded-full backdrop-blur-sm">
+//             {goal.profiles?.avatar_url ? (
+//               <img src={goal.profiles.avatar_url} alt="Owner" className="w-8 h-8 rounded-full border border-white/20 object-cover" />
+//             ) : (
+//               <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
+//                 <User className="text-[16px] opacity-50" />
+//               </div>
+//             )}
+//             <div className="flex flex-col items-start text-left">
+//               <span className="text-[11px] font-bold uppercase tracking-wider">{goal.profiles?.full_name || 'UNKNOWN OPERATOR'}</span>
+//               <span className="text-[9px] font-black tracking-[0.2em] text-white/50 uppercase flex items-center gap-1">
+//                 <Shield className="text-[10px]" />
+//                 {goal.profiles?.rank || 'ROOKIE'}
+//               </span>
+//             </div>
+//           </div>
+//         </div>
+// 
+//         {/* Crystal & Progress */}
+//         <div className="flex flex-col items-center justify-center py-8 relative">
+//           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-gradient-to-tr from-transparent via-teal-500/5 to-transparent rounded-full blur-3xl opacity-50 pointer-events-none" style={{ backgroundImage: `radial-gradient(circle, ${themeColor}15 0%, transparent 70%)` }} />
+//           
+//           <ProgressCup percentage={progress} isInRedZone={isInRedZone} />
+//           
+//           <div className="w-full max-w-sm h-[2px] bg-white/10 mt-12 relative rounded-full overflow-hidden">
+//             <motion.div
+//               initial={{ width: 0 }}
+//               animate={{ width: `${Math.round(progress)}%` }}
+//               transition={{ duration: 1, ease: 'easeOut' }}
+//               className="absolute top-0 left-0 h-full rounded-full"
+//               style={{ backgroundColor: themeColor, boxShadow: `0 0 15px ${themeColor}` }}
+//             />
+//           </div>
+//         </div>
+// 
+//         {/* Stats Row */}
+//         <div className="grid grid-cols-3 gap-2 md:gap-4 p-4 md:p-6 rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-md shadow-xl">
+//           <div className="flex flex-col items-center text-center space-y-1 border-r border-white/10">
+//             <CheckSquare className="text-lg mb-1 w-[18px] h-[18px]" style={{ color: themeColor }} />
+//             <span className="text-xl md:text-2xl font-black">{totalCount}</span>
+//             <span className="text-[8px] md:text-[9px] uppercase tracking-[0.2em] opacity-40 font-bold">Total Tasks</span>
+//           </div>
+//           <div className="flex flex-col items-center text-center space-y-1 border-r border-white/10">
+//             <HelpCircle />
+//             <span className="text-xl md:text-2xl font-black">{completedCount}</span>
+//             <span className="text-[8px] md:text-[9px] uppercase tracking-[0.2em] opacity-40 font-bold">Completed</span>
+//           </div>
+//           <div className="flex flex-col items-center text-center space-y-1">
+//             <HelpCircle />
+//             <span className="text-xl md:text-2xl font-black">{Math.floor(timeInvested / 60)}h {timeInvested % 60}m</span>
+//             <span className="text-[8px] md:text-[9px] uppercase tracking-[0.2em] opacity-40 font-bold">Invested</span>
+//           </div>
+//         </div>
+// 
+//         {/* Squad Stack */}
+//         {isSquad && members.length > 0 && (
+//           <div className="flex flex-col items-center gap-3 py-4">
+//             <span className="text-[10px] font-black tracking-[0.3em] uppercase opacity-50 text-center">SQUAD DEPLOYED</span>
+//             <div className="flex items-center justify-center -space-x-3">
+//               {members.slice(0, 5).map((m, i) => (
+//                 <div key={m.id || i} className="relative group cursor-default">
+//                   {m.avatar_url ? (
+//                     <img src={m.avatar_url} alt={m.full_name} className="w-10 h-10 rounded-full border-2 border-[#050505] object-cover relative z-10" />
+//                   ) : (
+//                     <div className="w-10 h-10 rounded-full bg-zinc-800 border-2 border-[#050505] flex items-center justify-center relative z-10">
+//                       <span className="text-xs font-bold">{m.full_name?.charAt(0) || '?'}</span>
+//                     </div>
+//                   )}
+//                   {/* Tooltip */}
+//                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-2 py-1 bg-white/10 backdrop-blur-md rounded border border-white/20 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
+//                     {m.full_name}
+//                   </div>
+//                 </div>
+//               ))}
+//               {members.length > 5 && (
+//                 <div className="w-10 h-10 rounded-full bg-white/10 border-2 border-[#050505] flex items-center justify-center relative z-10 backdrop-blur-sm">
+//                   <span className="text-xs font-black">+{members.length - 5}</span>
+//                 </div>
+//               )}
+//             </div>
+//           </div>
+//         )}
+// 
+//         {/* Tasks List */}
+//         <div className="space-y-4">
+//           <h3 className="text-[10px] font-black tracking-[0.5em] uppercase opacity-50 border-b border-white/10 pb-2 mb-4">MISSION LOG</h3>
+//           <AnimatePresence>
+//             {(goal.tasks || []).map((task: any, index: number) => (
+//               <motion.div
+//                 key={task.id}
+//                 initial={{ opacity: 0, y: 10 }}
+//                 animate={{ opacity: 1, y: 0 }}
+//                 className={cn(
+//                   "flex items-center gap-4 p-4 md:p-5 border rounded-xl shadow-sm space-y-0",
+//                   task.is_completed 
+//                     ? "bg-white/[0.01] border-white/[0.05] opacity-40" 
+//                     : "bg-white/[0.03] border-white/10"
+//                 )}
+//               >
+//                 {/* Index & Status */}
+//                 <div className="flex items-center gap-3 shrink-0">
+//                   <span className="font-black text-[11px] text-white/20 w-5 text-right">
+//                     {String(index + 1).padStart(2, '0')}
+//                   </span>
+//                   <div 
+//                     className="w-6 h-6 rounded-full border-2 flex items-center justify-center"
+//                     style={{
+//                       borderColor: task.is_completed ? themeColor : 'rgba(255,255,255,0.1)',
+//                       backgroundColor: task.is_completed ? themeColor : 'transparent'
+//                     }}
+//                   >
+//                     {task.is_completed && <Check className="text-black text-sm font-black w-3.5 h-3.5" />}
+//                   </div>
+//                 </div>
+// 
+//                 {/* Title */}
+//                 <div className="flex-1 min-w-0">
+//                   <span className={cn(
+//                     "text-base md:text-[17px] font-bold tracking-tight uppercase block truncate",
+//                     task.is_completed ? "line-through opacity-70" : "text-white"
+//                   )}>
+//                     {task.title}
+//                   </span>
+//                 </div>
+//               </motion.div>
+//             ))}
+//             {(!goal.tasks || goal.tasks.length === 0) && (
+//               <div className="text-center py-8 opacity-30 text-xs tracking-widest font-bold">
+//                 NO TASKS FOUND
+//               </div>
+//             )}
+//           </AnimatePresence>
+//         </div>
+// 
+//       </div>
+// 
+//       {/* Sticky Footer CTA */}
+//       <div className="fixed bottom-0 inset-x-0 p-6 md:p-8 bg-gradient-to-t from-[#050505] via-[#050505] to-transparent z-50 flex flex-col items-center justify-end pointer-events-none">
+//         <div className="pointer-events-auto flex flex-col items-center gap-3 max-w-sm w-full">
+//           <p className="text-[10px] uppercase font-bold tracking-widest opacity-40 text-center">
+//             This goal was shared from Growth Hub
+//           </p>
+//           <button
+//             onClick={() => router.push('/')}
+//             className="w-full px-6 py-4 rounded-xl font-black uppercase tracking-[0.2em] text-xs transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-2xl flex items-center justify-center gap-2 group border"
+//             style={{
+//               backgroundColor: themeColor,
+//               color: '#050505',
+//               borderColor: `${themeColor}40`,
+//               boxShadow: `0 10px 40px -10px ${themeColor}`
+//             }}
+//           >
+//             <Zap className="" />
+//             JOIN GROWTH HUB
+//             <ArrowRight className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   )
+//   */
 
-      <div className="relative z-10 max-w-[800px] mx-auto pt-8 md:pt-16 px-4 md:px-8 space-y-12">
-        {/* Top Header Logo */}
+
+  const formatRank = (rank: string) => {
+    if (!rank) return isRTL ? 'مبتدئ' : 'Rookie'
+    return rank.charAt(0).toUpperCase() + rank.slice(1).toLowerCase()
+  }
+
+  // SVG Progress Ring calculations
+  const radius = 50
+  const strokeWidth = 8
+  const circumference = 2 * Math.PI * radius
+  const safeProgress = Math.min(Math.max(progress, 0), 100)
+  const strokeDashoffset = circumference - (safeProgress / 100) * circumference
+
+  // Limit tasks list to first 5
+  const allTasks = goal.tasks || []
+  const visibleTasks = allTasks.slice(0, 5)
+  const hasMoreTasks = allTasks.length > 5
+
+  return (
+    <div 
+      className="min-h-screen bg-[#050505] text-white selection:bg-orange-500/30 relative overflow-x-hidden font-space pb-36 bg-[radial-gradient(ellipse_at_50%_30%,rgba(249,115,22,0.06)_0%,transparent_70%)]"
+      dir={isRTL ? 'rtl' : 'ltr'}
+    >
+      <div className="relative z-10 max-w-[640px] mx-auto pt-12 md:pt-20 px-4 md:px-6 space-y-10">
+        
+        {/* Top Header Badge */}
         <div className="flex justify-center">
-          <div className="px-4 py-1 border border-white/10 rounded-full bg-white/5 backdrop-blur-md flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.02)]">
-            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: themeColor, boxShadow: `0 0 10px ${themeColor}` }} />
-            <span className="text-[10px] font-black tracking-[0.3em] uppercase opacity-80">GROWTH_HUB</span>
+          <div className="flex items-center justify-center gap-1.5 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+            <span className="text-[11px] font-medium tracking-normal text-white/90">
+              Growth Hub
+            </span>
           </div>
         </div>
 
         {/* Goal Hero Section */}
-        <div className="flex flex-col items-center text-center space-y-6">
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter leading-tight break-words max-w-full drop-shadow-2xl">
+        <div className="flex flex-col items-center text-center space-y-5">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight break-words max-w-full">
             {goal.title}
           </h1>
           
-          <div className="flex items-center gap-3 bg-white/5 border border-white/10 pr-4 pl-1.5 py-1.5 rounded-full backdrop-blur-sm">
+          <div className="flex items-center gap-2.5 bg-white/5 border border-white/10 pr-3.5 pl-1.5 py-1.5 rounded-full backdrop-blur-sm">
             {goal.profiles?.avatar_url ? (
-              <img src={goal.profiles.avatar_url} alt="Owner" className="w-8 h-8 rounded-full border border-white/20 object-cover" />
+              <img src={goal.profiles.avatar_url} alt="Owner" className="w-7 h-7 rounded-full border border-white/20 object-cover" />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
-                <User className="text-[16px] opacity-50" />
+              <div className="w-7 h-7 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
+                <User className="w-4 h-4 opacity-50" />
               </div>
             )}
             <div className="flex flex-col items-start text-left">
-              <span className="text-[11px] font-bold uppercase tracking-wider">{goal.profiles?.full_name || 'UNKNOWN OPERATOR'}</span>
-              <span className="text-[9px] font-black tracking-[0.2em] text-white/50 uppercase flex items-center gap-1">
-                <Shield className="text-[10px]" />
-                {goal.profiles?.rank || 'ROOKIE'}
+              <span className="text-xs font-medium text-white/90">
+                {goal.profiles?.full_name || (isRTL ? 'مستخدم غير معروف' : 'Unknown User')}
+              </span>
+              <span className="text-[10px] text-white/50 flex items-center gap-1">
+                <Shield className="w-3 h-3" />
+                {formatRank(goal.profiles?.rank)}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Crystal & Progress */}
-        <div className="flex flex-col items-center justify-center py-8 relative">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-gradient-to-tr from-transparent via-teal-500/5 to-transparent rounded-full blur-3xl opacity-50 pointer-events-none" style={{ backgroundImage: `radial-gradient(circle, ${themeColor}15 0%, transparent 70%)` }} />
-          
-          <ProgressCup percentage={progress} isInRedZone={isInRedZone} />
-          
-          <div className="w-full max-w-sm h-[2px] bg-white/10 mt-12 relative rounded-full overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${Math.round(progress)}%` }}
-              transition={{ duration: 1, ease: 'easeOut' }}
-              className="absolute top-0 left-0 h-full rounded-full"
-              style={{ backgroundColor: themeColor, boxShadow: `0 0 15px ${themeColor}` }}
-            />
+        {/* Progress Ring Section */}
+        <div className="flex flex-col items-center justify-center py-4 relative">
+          <div className="relative w-[120px] h-[120px] flex items-center justify-center">
+            <svg className="w-full h-full transform -rotate-95">
+              <circle
+                cx="60"
+                cy="60"
+                r={radius}
+                className="stroke-white/5"
+                strokeWidth={strokeWidth}
+                fill="transparent"
+              />
+              <circle
+                cx="60"
+                cy="60"
+                r={radius}
+                stroke={themeColor || '#f97316'}
+                strokeWidth={strokeWidth}
+                fill="transparent"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                strokeLinecap="round"
+                className="transition-all duration-1000 ease-out"
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center flex-col">
+              <span className="text-2xl font-bold text-white leading-none">
+                {Math.round(progress)}%
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-3 gap-2 md:gap-4 p-4 md:p-6 rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-md shadow-xl">
-          <div className="flex flex-col items-center text-center space-y-1 border-r border-white/10">
-            <CheckSquare className="text-lg mb-1 w-[18px] h-[18px]" style={{ color: themeColor }} />
-            <span className="text-xl md:text-2xl font-black">{totalCount}</span>
-            <span className="text-[8px] md:text-[9px] uppercase tracking-[0.2em] opacity-40 font-bold">Total Tasks</span>
+        <div className="grid grid-cols-3 gap-0 p-4 rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-md">
+          <div className="flex flex-col items-center text-center space-y-0.5 border-r border-white/10">
+            <span className="text-xl font-bold text-white">{isSquad ? members.length : 1}</span>
+            <span className="text-[10px] text-white/40 font-medium">
+              {isRTL ? 'الأعضاء' : 'Members'}
+            </span>
           </div>
-          <div className="flex flex-col items-center text-center space-y-1 border-r border-white/10">
-            <HelpCircle />
-            <span className="text-xl md:text-2xl font-black">{completedCount}</span>
-            <span className="text-[8px] md:text-[9px] uppercase tracking-[0.2em] opacity-40 font-bold">Completed</span>
+          <div className="flex flex-col items-center text-center space-y-0.5 border-r border-white/10">
+            <span className="text-xl font-bold text-white">{totalCount}</span>
+            <span className="text-[10px] text-white/40 font-medium">
+              {isRTL ? 'المهام' : 'Tasks'}
+            </span>
           </div>
-          <div className="flex flex-col items-center text-center space-y-1">
-            <HelpCircle />
-            <span className="text-xl md:text-2xl font-black">{Math.floor(timeInvested / 60)}h {timeInvested % 60}m</span>
-            <span className="text-[8px] md:text-[9px] uppercase tracking-[0.2em] opacity-40 font-bold">Invested</span>
+          <div className="flex flex-col items-center text-center space-y-0.5">
+            <span className="text-xl font-bold text-white">{completedCount}</span>
+            <span className="text-[10px] text-white/40 font-medium">
+              {isRTL ? 'المكتملة' : 'Completed'}
+            </span>
           </div>
         </div>
 
-        {/* Squad Stack */}
+        {/* Squad Stack (Only if Squad) */}
         {isSquad && members.length > 0 && (
-          <div className="flex flex-col items-center gap-3 py-4">
-            <span className="text-[10px] font-black tracking-[0.3em] uppercase opacity-50 text-center">SQUAD DEPLOYED</span>
-            <div className="flex items-center justify-center -space-x-3">
+          <div className="flex flex-col items-center gap-2 py-2">
+            <div className="flex items-center justify-center -space-x-2.5">
               {members.slice(0, 5).map((m, i) => (
                 <div key={m.id || i} className="relative group cursor-default">
                   {m.avatar_url ? (
-                    <img src={m.avatar_url} alt={m.full_name} className="w-10 h-10 rounded-full border-2 border-[#050505] object-cover relative z-10" />
+                    <img src={m.avatar_url} alt={m.full_name} className="w-8 h-8 rounded-full border-2 border-[#050505] object-cover relative z-10" />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-zinc-800 border-2 border-[#050505] flex items-center justify-center relative z-10">
+                    <div className="w-8 h-8 rounded-full bg-zinc-800 border-2 border-[#050505] flex items-center justify-center relative z-10">
                       <span className="text-xs font-bold">{m.full_name?.charAt(0) || '?'}</span>
                     </div>
                   )}
-                  {/* Tooltip */}
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-2 py-1 bg-white/10 backdrop-blur-md rounded border border-white/20 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
-                    {m.full_name}
-                  </div>
                 </div>
               ))}
               {members.length > 5 && (
-                <div className="w-10 h-10 rounded-full bg-white/10 border-2 border-[#050505] flex items-center justify-center relative z-10 backdrop-blur-sm">
-                  <span className="text-xs font-black">+{members.length - 5}</span>
+                <div className="w-8 h-8 rounded-full bg-white/10 border-2 border-[#050505] flex items-center justify-center relative z-10 backdrop-blur-sm">
+                  <span className="text-[10px] font-bold">+{members.length - 5}</span>
                 </div>
               )}
             </div>
@@ -265,51 +497,63 @@ export default function PublicGoalPage() {
         )}
 
         {/* Tasks List */}
-        <div className="space-y-4">
-          <h3 className="text-[10px] font-black tracking-[0.5em] uppercase opacity-50 border-b border-white/10 pb-2 mb-4">MISSION LOG</h3>
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold tracking-wider text-white/40 uppercase border-b border-white/10 pb-1.5">
+            {isRTL ? 'المهام' : 'Tasks'}
+          </h3>
           <AnimatePresence>
-            {(goal.tasks || []).map((task: any, index: number) => (
+            {visibleTasks.map((task: any, index: number) => (
               <motion.div
                 key={task.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className={cn(
-                  "flex items-center gap-4 p-4 md:p-5 border rounded-xl shadow-sm space-y-0",
+                  "flex items-center gap-3.5 p-3.5 border rounded-xl space-y-0",
                   task.is_completed 
-                    ? "bg-white/[0.01] border-white/[0.05] opacity-40" 
-                    : "bg-white/[0.03] border-white/10"
+                    ? "bg-white/[0.01] border-white/[0.05] opacity-50" 
+                    : "bg-white/[0.02] border-white/10"
                 )}
               >
-                {/* Index & Status */}
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="font-black text-[11px] text-white/20 w-5 text-right">
+                {/* Index & Checkbox */}
+                <div className="flex items-center gap-2.5 shrink-0">
+                  <span className="font-bold text-[10px] text-white/20 w-4 text-right">
                     {String(index + 1).padStart(2, '0')}
                   </span>
                   <div 
-                    className="w-6 h-6 rounded-full border-2 flex items-center justify-center"
+                    className="w-5 h-5 rounded-full border flex items-center justify-center"
                     style={{
-                      borderColor: task.is_completed ? themeColor : 'rgba(255,255,255,0.1)',
-                      backgroundColor: task.is_completed ? themeColor : 'transparent'
+                      borderColor: task.is_completed ? (themeColor || '#f97316') : 'rgba(255,255,255,0.1)',
+                      backgroundColor: task.is_completed ? (themeColor || '#f97316') : 'transparent'
                     }}
                   >
-                    {task.is_completed && <Check className="text-black text-sm font-black w-3.5 h-3.5" />}
+                    {task.is_completed && <Check className="text-black w-3 h-3 stroke-[3]" />}
                   </div>
                 </div>
 
                 {/* Title */}
                 <div className="flex-1 min-w-0">
                   <span className={cn(
-                    "text-base md:text-[17px] font-bold tracking-tight uppercase block truncate",
-                    task.is_completed ? "line-through opacity-70" : "text-white"
+                    "text-sm font-medium block truncate",
+                    task.is_completed ? "line-through text-white/60" : "text-white"
                   )}>
                     {task.title}
                   </span>
                 </div>
               </motion.div>
             ))}
-            {(!goal.tasks || goal.tasks.length === 0) && (
-              <div className="text-center py-8 opacity-30 text-xs tracking-widest font-bold">
-                NO TASKS FOUND
+            
+            {hasMoreTasks && (
+              <div className="pt-2 text-center">
+                <div className="h-[1px] bg-white/10 mb-4 opacity-50" />
+                <span className="text-xs text-white/50">
+                  {isRTL ? 'سجل الدخول لرؤية باقي المهام...' : 'Sign in to view all tasks...'}
+                </span>
+              </div>
+            )}
+
+            {allTasks.length === 0 && (
+              <div className="text-center py-6 text-xs text-white/30">
+                {isRTL ? 'لا توجد مهام حالياً' : 'No tasks yet.'}
               </div>
             )}
           </AnimatePresence>
@@ -318,24 +562,18 @@ export default function PublicGoalPage() {
       </div>
 
       {/* Sticky Footer CTA */}
-      <div className="fixed bottom-0 inset-x-0 p-6 md:p-8 bg-gradient-to-t from-[#050505] via-[#050505] to-transparent z-50 flex flex-col items-center justify-end pointer-events-none">
-        <div className="pointer-events-auto flex flex-col items-center gap-3 max-w-sm w-full">
-          <p className="text-[10px] uppercase font-bold tracking-widest opacity-40 text-center">
-            This goal was shared from Growth Hub
+      <div className="fixed bottom-0 inset-x-0 p-6 bg-gradient-to-t from-[#050505] via-[#050505] to-transparent z-50 flex flex-col items-center justify-end pointer-events-none">
+        <div className="pointer-events-auto flex flex-col items-center gap-2 max-w-sm w-full">
+          <p className="text-[10px] font-medium tracking-normal text-white/40 text-center">
+            {isRTL ? 'تمت مشاركته عبر Growth Hub' : 'Shared via Growth Hub'}
           </p>
           <button
             onClick={() => router.push('/')}
-            className="w-full px-6 py-4 rounded-xl font-black uppercase tracking-[0.2em] text-xs transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-2xl flex items-center justify-center gap-2 group border"
-            style={{
-              backgroundColor: themeColor,
-              color: '#050505',
-              borderColor: `${themeColor}40`,
-              boxShadow: `0 10px 40px -10px ${themeColor}`
-            }}
+            className="w-full px-5 py-3.5 rounded-xl font-semibold text-xs tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-orange-500/10 flex items-center justify-center gap-2 group bg-orange-500 hover:bg-orange-600 text-black border border-orange-500/40"
           >
-            <Zap className="" />
-            JOIN GROWTH HUB
-            <ArrowRight className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+            <Zap className="w-4 h-4 fill-current" />
+            {isRTL ? 'انضم الآن للـ Growth Hub' : 'Join Growth Hub'}
+            <ArrowRight className="w-4 h-4 opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" />
           </button>
         </div>
       </div>

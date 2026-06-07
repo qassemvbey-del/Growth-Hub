@@ -1858,7 +1858,7 @@ export default function SquadGoalsPage() {
                 "w-[calc(100%-2rem)] mx-auto md:max-w-md bg-zinc-950/95 border backdrop-blur-md p-6 md:p-8 space-y-6 rounded-2xl shadow-2xl my-auto max-h-[90vh] overflow-y-auto relative text-left transition-all duration-300",
                 joinStatus === 'invalid' ? 'border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.2)]' :
                 joinStatus === 'valid' ? 'border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.2)]' :
-                'border-teal-500/30'
+                'border-white/10'
               )}
             >
               <button 
@@ -1873,20 +1873,14 @@ export default function SquadGoalsPage() {
               </button>
 
               <div className="space-y-6">
-                <div className="flex items-center gap-3 text-teal-400">
-                  <UserPlus className="w-6 h-6 animate-pulse text-teal-400" />
-                  <h2 className="text-xl font-space font-black uppercase tracking-widest">
-                    {/* {isRTL ? 'الانضمام للفريق' : 'JOIN_A_SQUAD'} */}
-                    {isRTL ? 'ادخل الـ Squad' : 'JOIN_A_SQUAD'}
+                <div className="flex items-center gap-3 text-orange-500">
+                  <UserPlus className="w-5 h-5 text-orange-500" />
+                  <h2 className="text-lg font-semibold text-white">
+                    {isRTL ? 'انضم لهدف' : 'Join a Goal'}
                   </h2>
                 </div>
 
                 <div className="space-y-4">
-                  <p className="text-xs font-space text-zinc-400 uppercase tracking-wider">
-                    {/* {isRTL ? 'أدخل رمز الدعوة أو رابط الهدف' : 'Enter an invite code or paste a goal link'} */}
-                    {isRTL ? 'اكتب كود الدعوة أو لينك الـ Goal' : 'Enter an invite code or paste a goal link'}
-                  </p>
-
                   <div className="space-y-2">
                     <input
                       value={joinCodeInput}
@@ -1894,35 +1888,40 @@ export default function SquadGoalsPage() {
                         setJoinCodeInput(e.target.value);
                         if (joinStatus !== 'idle') setJoinStatus('idle');
                       }}
-                      placeholder="PASTE CODE OR LINK HERE..."
+                      placeholder={isRTL ? "الصق الرابط أو الكود هنا..." : "Paste the invite link or code..."}
                       className={cn(
-                        "w-full bg-zinc-900/80 border text-center font-mono py-3 px-4 rounded-xl text-sm tracking-widest uppercase outline-none transition-all placeholder:text-zinc-600 placeholder:font-sans",
-                        joinStatus === 'invalid' ? 'border-red-500 text-red-400 focus:border-red-400' :
-                        joinStatus === 'valid' ? 'border-emerald-500 text-emerald-400 focus:border-emerald-400' :
-                        'border-zinc-800 text-teal-400 focus:border-teal-500'
+                        "w-full bg-white/5 border px-4 py-3 text-center text-sm rounded-xl outline-none transition-all placeholder:text-zinc-500",
+                        joinStatus === 'invalid' ? 'border-red-500/50 focus:border-red-500 text-red-400' :
+                        joinStatus === 'valid' ? 'border-emerald-500/50 focus:border-emerald-500 text-emerald-400' :
+                        'border-white/10 text-white focus:border-orange-500/50'
                       )}
                     />
 
                     {/* Status Message */}
                     {joinStatus === 'invalid' && (
-                      <p className="text-[10px] font-space font-black text-red-500 uppercase tracking-widest text-center animate-bounce">
-                        {joinErrorText}
+                      <p className="text-xs text-red-500 text-center animate-bounce">
+                        {joinErrorText.includes('INVALID_CODE') || joinErrorText.includes('Invalid') 
+                          ? (isRTL ? "رابط غير صحيح، جرب مرة أخرى" : "Invalid link, please try again")
+                          : (joinErrorText.includes('REQUEST_PENDING') 
+                              ? (isRTL ? "الطلب قيد الانتظار بالفعل" : "Your request is already pending")
+                              : (joinErrorText.includes('REQUEST_REJECTED')
+                                  ? (isRTL ? "تم رفض طلبك السابق" : "Your previous request was rejected")
+                                  : joinErrorText))}
                       </p>
                     )}
                     {joinStatus === 'valid' && (
-                      <p className="text-[10px] font-space font-black text-emerald-400 uppercase tracking-widest text-center animate-pulse">
-                        SQUAD FOUND: {scannedGoalName}
+                      <p className="text-xs text-emerald-400 text-center animate-pulse">
+                        {isRTL ? `تم العثور على الفريق: ${scannedGoalName}` : `Squad found: ${scannedGoalName}`}
                       </p>
                     )}
                     {joinStatus === 'already_member' && (
-                      <p className="text-[10px] font-space font-black text-amber-500 uppercase tracking-widest text-center">
-                        YOU ARE ALREADY IN THIS SQUAD
+                      <p className="text-xs text-amber-500 text-center">
+                        {isRTL ? 'أنت عضو بالفعل في هذا الفريق' : 'You are already in this squad'}
                       </p>
                     )}
                     {joinStatus === 'success' && (
-                      <p className="text-[10px] font-space font-black text-emerald-400 uppercase tracking-widest text-center animate-pulse">
-                        {/* {isRTL ? 'تم تقديم الطلب // بانتظار موافقة القائد' : 'REQUEST SUBMITTED // WAITING FOR APPROVAL'} */}
-                        {isRTL ? 'الطلب اتبعت // مستنيين موافقة القائد' : 'REQUEST SUBMITTED // WAITING FOR APPROVAL'}
+                      <p className="text-xs text-emerald-400 text-center animate-pulse">
+                        {isRTL ? 'تم تقديم الطلب بنجاح' : 'Request submitted successfully'}
                       </p>
                     )}
                   </div>
@@ -1931,35 +1930,32 @@ export default function SquadGoalsPage() {
                   {joinStatus === 'valid' ? (
                     <button
                       onClick={handleConfirmJoin}
-                      className="w-full h-11 bg-emerald-500 hover:bg-emerald-400 text-black font-space font-black text-xs uppercase tracking-widest transition-all duration-300 rounded-sm cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center justify-center gap-1.5"
+                      className="w-full h-12 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-all duration-300 rounded-xl cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center justify-center gap-1.5"
                     >
-                      <CheckCircle2 className="w-4 h-4 text-black" />
-                      [ ✓ CONFIRM JOIN ]
+                      {isRTL ? 'تأكيد الانضمام' : 'Confirm Join'}
                     </button>
                   ) : (
                     <button
                       onClick={handleScanCode}
                       disabled={joinStatus === 'scanning' || !joinCodeInput.trim()}
                       className={cn(
-                        "w-full h-11 font-space font-black text-xs uppercase tracking-widest transition-all duration-300 rounded-sm cursor-pointer shadow-[0_0_15px_rgba(20,184,166,0.2)] flex items-center justify-center gap-1.5",
-                        joinStatus === 'scanning' ? "bg-teal-900/50 text-teal-400 border border-teal-500/20" : "bg-teal-500 hover:bg-teal-400 text-black"
+                        "w-full h-12 font-semibold text-sm transition-all duration-300 rounded-xl cursor-pointer flex items-center justify-center gap-1.5",
+                        joinStatus === 'scanning' 
+                          ? "bg-zinc-800 text-zinc-500 border border-white/5 cursor-not-allowed" 
+                          : "bg-orange-500 hover:bg-orange-600 text-black shadow-lg shadow-orange-500/20"
                       )}
                     >
                       {joinStatus === 'scanning' ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin text-teal-400" />
-                          SCANNING...
-                        </>
+                        isRTL ? 'جاري التحقق...' : 'Checking...'
                       ) : (
-                        <>
-                          <Zap className="w-4 h-4 text-black fill-current" />
-                          [ ⚡ JOIN NOW ]
-                        </>
+                        isRTL ? 'انضم الآن' : 'Join Now'
                       )}
                     </button>
                   )}
                 </div>
 
+                {/* Commented out old separator and invite helper */}
+                {/* 
                 <div className="flex flex-col items-center justify-center space-y-4">
                   <div className="flex items-center justify-center w-full gap-4">
                     <div className="h-[1px] bg-zinc-800 flex-1" />
@@ -1970,6 +1966,7 @@ export default function SquadGoalsPage() {
                     Ask someone to share their squad goal link
                   </p>
                 </div>
+                */}
               </div>
             </motion.div>
           </motion.div>
