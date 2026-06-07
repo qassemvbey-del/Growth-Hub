@@ -221,6 +221,10 @@ export default function PublicGoalPage() {
           .eq('id', id)
           .single()
 
+        console.log('Goal data:', cup)
+        console.log('is_public:', cup?.is_public)
+        console.log('requires_approval:', cup?.requires_approval)
+
         if (cupError || !cup) {
           throw new Error('Not found or classified')
         }
@@ -302,6 +306,9 @@ export default function PublicGoalPage() {
   }
 
   if (error || !goal) {
+    console.log('Showing private because:', 
+      'is_public =', goal?.is_public,
+      'condition result =', !goal?.is_public)
 //     /*
 //     return (
 //       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-6 text-center font-space relative overflow-hidden">
