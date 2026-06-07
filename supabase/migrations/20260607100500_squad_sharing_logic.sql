@@ -61,3 +61,64 @@ USING (
     ))
   )
 );
+
+-- 6. Function to review squad join request
+DROP FUNCTION IF EXISTS review_squad_join_request(uuid,text);
+
+CREATE OR REPLACE FUNCTION review_squad_join_request(
+  p_request_id UUID,
+  p_action TEXT
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  req RECORD;
+  new_status TEXT;
+BEGIN
+  -- Map p_action to new_status ('approve' -> 'approved', 'reject' -> 'rejected')
+  IF p_action = 'approve' THEN
+    new_status := 'approved';
+  ELSE
+    new_status := 'rejected';
+  END IF;
+
+  SELECT sjr.*, g.title as goal_title 
+  INTO req
+  FROM squad_join_requests sjr
+  JOIN goals g ON g.id = sjr.goal_id
+  WHERE sjr.id = p_request_id;
+  
+  UPDATE squad_join_requests 
+  SET status = new_status,
+      reviewed_at = now()
+  WHERE id = p_request_id;
+  
+  IF new_status = 'approved' THEN
+    INSERT INTO goal_members (goal_id, user_id, role)
+    VALUES (req.goal_id, req.user_id, COALESCE(req.role, 'member'))
+    ON CONFLICT DO NOTHING;
+    
+    INSERT INTO inbox_reports 
+    (user_id, type, title, message, goal_id)
+    VALUES (
+      req.user_id,
+      'join_approved',
+      'Request Approved',
+      'Your request to join ' || req.goal_title || ' was approved',
+      req.goal_id
+    );
+  ELSE
+    INSERT INTO inbox_reports 
+    (user_id, type, title, message, goal_id)
+    VALUES (
+      req.user_id,
+      'join_rejected',
+      'Request Declined', 
+      'Your request to join ' || req.goal_title || ' was declined',
+      req.goal_id
+    );
+  END IF;
+END;
+$$;

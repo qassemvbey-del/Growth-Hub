@@ -46,6 +46,7 @@ export default function Dashboard() {
         const pending = localStorage.getItem('pendingJoinGoal')
         if (pending && user) {
           localStorage.removeItem('pendingJoinGoal')
+          localStorage.removeItem('pendingJoinMessage')
           router.push(`/goals/public/${pending}?autojoin=true`)
           return
         }

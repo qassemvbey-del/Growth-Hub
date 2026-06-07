@@ -77,6 +77,8 @@ export default function LoginPage() {
   // Commented out per rule "Never delete code, only comment it out":
   // const mouse = useMousePosition()
 
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null)
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedLang = localStorage.getItem('language') as 'ar' | 'en'
@@ -84,6 +86,11 @@ export default function LoginPage() {
         setLang(savedLang)
       } else {
         localStorage.setItem('language', 'ar')
+      }
+      
+      const msg = localStorage.getItem('pendingJoinMessage')
+      if (msg) {
+        setPendingMessage(msg)
       }
     }
   }, [])
@@ -289,6 +296,12 @@ export default function LoginPage() {
           >
             {/* Subtle top border glow */}
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-teal-500/50 to-transparent" />
+
+            {pendingMessage && (
+              <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-sm text-center font-medium">
+                {pendingMessage}
+              </div>
+            )}
 
             {/* Card Header */}
             <div className="space-y-3 text-center md:text-left">

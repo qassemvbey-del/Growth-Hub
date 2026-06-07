@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, Check, CheckSquare, HelpCircle, Home, Lock, Shield, User, Zap } from 'lucide-react'
+import { ArrowRight, Check, CheckSquare, Clock, HelpCircle, Home, Lock, Shield, User, Zap } from 'lucide-react'
 import React, { useEffect, useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -47,6 +47,8 @@ export default function PublicGoalPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [user, setUser] = useState<any>(null)
+  const [joinState, setJoinState] = useState<'none' | 'pending' | 'approved'>('none')
+  const [isMember, setIsMember] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -60,6 +62,7 @@ export default function PublicGoalPage() {
   const handleJoinGoal = async () => {
     if (!user) {
       localStorage.setItem('pendingJoinGoal', id as string);
+      localStorage.setItem('pendingJoinMessage', isRTL ? `سجّل دخولك للانضمام لـ "${goal?.title || 'الهدف'}"` : `Sign in to join "${goal?.title || 'Goal'}"`);
       router.push('/auth/login');
       return;
     }
@@ -94,6 +97,32 @@ export default function PublicGoalPage() {
 
         if (joinError) throw joinError;
 
+        // Notify all admins of the goal
+        const { data: admins } = await supabase
+          .from('goal_members')
+          .select('user_id')
+          .eq('goal_id', id)
+          .in('role', ['owner', 'admin'])
+
+        if (admins) {
+          const userName = user.user_metadata?.full_name || (isRTL ? 'مستخدم' : 'User')
+          const goalName = goal?.title || 'Goal'
+          const notifications = admins.map((admin: any) => ({
+            user_id: admin.user_id,
+            type: 'member_joined',
+            title: isRTL ? 'عضو جديد انضم' : 'New member joined',
+            message: isRTL 
+              ? `${userName} انضم لـ ${goalName}`
+              : `${userName} joined ${goalName}`,
+            goal_id: id
+          }))
+          
+          await supabase
+            .from('inbox_reports')
+            .insert(notifications)
+        }
+
+        /*
         // Fetch squad owner and admins to notify
         const { data: admins } = await supabase
           .from('goal_members')
@@ -125,6 +154,7 @@ export default function PublicGoalPage() {
         }));
 
         await supabase.from('inbox_reports').insert(notifications);
+        */
 
         alert(isRTL ? 'تم الانضمام بنجاح!' : 'Successfully joined the goal!');
         router.push(`/goals/squad/${id}`);
@@ -212,6 +242,41 @@ export default function PublicGoalPage() {
   }, [user, goal])
 
   useEffect(() => {
+    async function checkMembershipAndRequest() {
+      if (!user || !id) return
+      try {
+        const { data: member } = await supabase
+          .from('goal_members')
+          .select('*')
+          .eq('goal_id', id)
+          .eq('user_id', user.id)
+          .maybeSingle()
+        
+        if (member) {
+          setIsMember(true)
+          return
+        }
+
+        const { data: existingRequest } = await supabase
+          .from('squad_join_requests')
+          .select('status')
+          .eq('goal_id', id)
+          .eq('user_id', user.id)
+          .maybeSingle()
+          
+        if (existingRequest?.status === 'approved') {
+          router.push(`/goals/squad/${id}`)
+        } else if (existingRequest?.status === 'pending') {
+          setJoinState('pending')
+        }
+      } catch (err) {
+        console.error('Error checking join request status:', err)
+      }
+    }
+    checkMembershipAndRequest()
+  }, [user, id, supabase, router])
+
+  useEffect(() => {
     async function fetchData() {
       try {
         // Fetch goal + tasks
@@ -283,7 +348,7 @@ export default function PublicGoalPage() {
   const completedCount = goal?.tasks?.filter((t: any) => t.is_completed).length || 0
   const totalCount = goal?.tasks?.length || 0
   const isSquad = goal?.metadata?.type === 'squad'
-  const themeColor = goal?.color || '#39FF14'
+  const themeColor = '#f97316'
 
   const isRTL = useMemo(() => {
     if (typeof window !== 'undefined') {
@@ -571,7 +636,7 @@ export default function PublicGoalPage() {
 
   return (
     <div 
-      className="min-h-screen bg-[#050505] text-white selection:bg-orange-500/30 relative overflow-x-hidden font-space pb-32 bg-[radial-gradient(ellipse_at_50%_30%,rgba(249,115,22,0.06)_0%,transparent_70%)]"
+      className="min-h-screen bg-[#0D0D0D] text-white selection:bg-orange-500/30 relative overflow-x-hidden font-space pb-32 bg-[radial-gradient(ellipse_at_50%_30%,rgba(249,115,22,0.06)_0%,transparent_70%)]"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       <div className="relative z-10 max-w-[640px] mx-auto pt-12 md:pt-20 px-4 md:px-6 space-y-10">
@@ -642,7 +707,7 @@ export default function PublicGoalPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-0 p-4 rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-md">
+        <div className="grid grid-cols-3 gap-0 p-4 rounded-xl border border-white/8 bg-white/5 backdrop-blur-md">
           <div className="flex flex-col items-center text-center space-y-0.5 border-r border-white/10">
             <span className="text-xl font-bold text-white">{isSquad ? members.length : 1}</span>
             <span className="text-[10px] text-white/40 font-medium">
@@ -662,6 +727,42 @@ export default function PublicGoalPage() {
             </span>
           </div>
         </div>
+
+        {!isMember && (
+          joinState === 'pending' ? (
+            <div className="px-4 mt-6">
+              <div className="w-full p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center gap-3">
+                <Clock size={20} className="text-orange-400 shrink-0"/>
+                <div>
+                  <p className="text-sm font-medium text-white">
+                    {isRTL ? "طلبك قيد المراجعة" : "Request pending"}
+                  </p>
+                  <p className="text-xs text-white/50 mt-0.5">
+                    {isRTL 
+                      ? "بتنتظر موافقة المشرف"
+                      : "Waiting for admin approval"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="px-4 mt-6 mb-4">
+              <button
+                onClick={handleJoinGoal}
+                className="w-full h-12 rounded-2xl bg-orange-500 hover:bg-orange-400 active:scale-[0.97] transition-all duration-150 text-white font-semibold text-sm flex items-center justify-center gap-2">
+                {isRTL ? "انضم للهدف" : "Join Goal"}
+              </button>
+              
+              {goal.requires_approval && (
+                <p className="text-center text-xs text-white/40 mt-2">
+                  {isRTL 
+                    ? "يحتاج موافقة المشرف"
+                    : "Requires admin approval"}
+                </p>
+              )}
+            </div>
+          )
+        )}
 
         {isSquad && members.length > 0 && (
           <div className="flex flex-col items-center gap-2 py-2">
@@ -699,8 +800,8 @@ export default function PublicGoalPage() {
                 className={cn(
                   "flex items-center gap-3.5 p-3.5 border rounded-xl space-y-0",
                   task.is_completed 
-                    ? "bg-white/[0.01] border-white/[0.05] opacity-50" 
-                    : "bg-white/[0.02] border-white/10"
+                    ? "bg-white/5 border-white/8 opacity-50" 
+                    : "bg-white/5 border-white/8"
                 )}
               >
                 <div className="flex items-center gap-2.5 shrink-0">
@@ -710,18 +811,18 @@ export default function PublicGoalPage() {
                   <div 
                     className="w-5 h-5 rounded-full border flex items-center justify-center"
                     style={{
-                      borderColor: task.is_completed ? (themeColor || '#f97316') : 'rgba(255,255,255,0.1)',
-                      backgroundColor: task.is_completed ? (themeColor || '#f97316') : 'transparent'
+                      borderColor: task.is_completed ? '#06b6d4' : 'rgba(255,255,255,0.1)',
+                      backgroundColor: task.is_completed ? 'rgba(6,182,212,0.1)' : 'transparent'
                     }}
                   >
-                    {task.is_completed && <Check className="text-black w-3 h-3 stroke-[3]" />}
+                    {task.is_completed && <Check className="text-teal-400 w-3 h-3 stroke-[3]" />}
                   </div>
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <span className={cn(
                     "text-sm font-medium block truncate",
-                    task.is_completed ? "line-through text-white/60" : "text-white"
+                    task.is_completed ? "line-through text-white/30" : "text-white"
                   )}>
                     {task.title}
                   </span>
@@ -748,6 +849,7 @@ export default function PublicGoalPage() {
 
       </div>
 
+      {/*
       <div className="fixed bottom-0 inset-x-0 p-6 bg-[linear-gradient(to_top,#0D0D0D_50%,rgba(13,13,13,0.8)_75%,transparent_100%)] h-36 z-50 flex flex-col items-center justify-end pointer-events-none">
         <div className="pointer-events-auto flex flex-col items-center gap-2 max-w-sm w-full">
           <p className="text-[10px] font-medium tracking-normal text-white/40 text-center">
@@ -761,6 +863,7 @@ export default function PublicGoalPage() {
           </button>
         </div>
       </div>
+      */}
     </div>
   )
 }
