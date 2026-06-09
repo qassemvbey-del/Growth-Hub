@@ -10,7 +10,7 @@ import {
   X, ChevronDown, ChevronUp, Check, Calendar, Lock, Plus, 
   Trash2, Loader2, RefreshCw, FolderOpen, Paperclip, ExternalLink, 
   StickyNote, Link as LinkIcon, Smile, AtSign, Send, MessageSquare, Play, Pause,
-  PlusSquare, Target, Circle, CheckCircle2, ListTodo} from 'lucide-react'
+  PlusSquare, Target, Circle, CheckCircle2, ListTodo, Video} from 'lucide-react'
 import { NeonIcon } from './NeonIcon'
 import { cn } from '@/lib/utils'
 import TaskDrawerHeader from './task-drawer/TaskDrawerHeader'
@@ -261,6 +261,9 @@ export default function TaskDrawer({
   const [manualLinkUrl, setManualLinkUrl] = useState('')
   const [isAddingLink, setIsAddingLink] = useState(false)
   const [isDriveConnected, setIsDriveConnected] = useState(false)
+  const [isAttachOpen, setIsAttachOpen] = useState(false)
+  const [youtubeUrlInput, setYoutubeUrlInput] = useState('')
+  const [showYoutubeInput, setShowYoutubeInput] = useState(false)
 
   // useEffect(() => {
   //   if (typeof window === 'undefined') return
@@ -627,6 +630,23 @@ export default function TaskDrawer({
     setIsAddingLink(false)
   }
 
+  const handleAttachYoutubeVideo = async () => {
+    const url = youtubeUrlInput.trim()
+    if (!url) return
+    const videoId = getYouTubeId(url)
+    if (!videoId) {
+      alert(isRTL ? 'رابط يوتيوب غير صالح' : 'Invalid YouTube URL')
+      return
+    }
+    const updatedMetadata = {
+      ...task.metadata,
+      youtube_url: url
+    }
+    await updateTask(task.id, { metadata: updatedMetadata })
+    setYoutubeUrlInput('')
+    setShowYoutubeInput(false)
+  }
+
   // --- REAL-TIME WORKSPACE PRESENCE FOR TASK DRAWER ---
   useEffect(() => {
     if (isGuest || !task?.id) return
@@ -839,7 +859,7 @@ export default function TaskDrawer({
   */
 
   // --- RESTORED ORIGINAL VIDEO PLAYER LOGIC (REVERSED EXTRACTION NUKE) ---
-  const resolvedVideoUrl = task.video_url || task.metadata?.videoUrl || task.metadata?.mediaUrl || task.metadata?.youtubeUrl || (() => {
+  const resolvedVideoUrl = task.video_url || task.metadata?.videoUrl || task.metadata?.mediaUrl || task.metadata?.youtubeUrl || task.metadata?.youtube_url || (() => {
     const attachments = task.metadata?.attachments || []
     const youtubeAttach = attachments.find((att: any) => 
       att.url && (att.url.includes('youtube.com') || att.url.includes('youtu.be') || att.url.includes('mp4'))
@@ -1096,21 +1116,153 @@ export default function TaskDrawer({
                 
                 {canAddAttachment && (
                   <div className="space-y-2">
+                    {/* Accordion Attach Resource Button */}
+                    <button
+                      type="button"
+                      onClick={() => setIsAttachOpen(!isAttachOpen)}
+                      className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 font-space text-xs text-white/90 border border-white/10 cursor-pointer"
+                    >
+                      <Paperclip className="w-3.5 h-3.5 shrink-0" />
+                      <span className="font-bold">{isRTL ? 'إضافة ملحقات' : 'Attach Resource'}</span>
+                      <span className="ml-auto text-[10px] font-mono">{isAttachOpen ? '▲' : '▼'}</span>
+                    </button>
+
+                    {/* Accordion Expanded Submenu with smooth Tailwind transitions */}
+                    <div 
+                      className={cn(
+                        "transition-all duration-200 ease-in-out overflow-hidden space-y-2", 
+                        isAttachOpen ? "max-h-[500px] opacity-100 mt-2" : "max-h-0 opacity-0 pointer-events-none"
+                      )}
+                    >
+                      <div className="p-3 bg-white/[0.02] border border-white/5 rounded-md space-y-2">
+                        {/* Option 1: Google Drive Link */}
+                        <button
+                          type="button"
+                          onClick={handleGoogleDrivePicker}
+                          className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 font-space text-xs text-left cursor-pointer text-white/90"
+                        >
+                          <img src="/Google_Drive_icon_(2020).svg" alt="Drive" className="w-3.5 h-3.5 shrink-0" />
+                          <span className="font-medium">
+                            {isDriveConnected ? (isRTL ? 'إضافة من درايف' : 'Add from Drive') : (isRTL ? 'ربط جوجل درايف' : 'Link Google Drive')}
+                          </span>
+                          {isDriveConnected && (
+                            <span className="ml-auto text-[10px] text-emerald-500 font-bold tracking-wider animate-pulse">
+                              {isRTL ? 'متصل' : 'Connected'}
+                            </span>
+                          )}
+                        </button>
+
+                        {/* Option 2: Add Custom Link */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowManualLink(!showManualLink);
+                            setShowYoutubeInput(false);
+                          }}
+                          className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/80 hover:text-white"
+                        >
+                          <LinkIcon className="w-3.5 h-3.5 shrink-0" />
+                          <span className="font-medium">{isRTL ? 'إضافة رابط يدوياً' : 'Add Manual Link'}</span>
+                        </button>
+
+                        {/* Option 3: Attach YouTube Video (only if task doesn't have a video yet) */}
+                        {!hasVideo && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowYoutubeInput(!showYoutubeInput);
+                              setShowManualLink(false);
+                            }}
+                            className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/80 hover:text-white"
+                          >
+                            <Video className="w-3.5 h-3.5 shrink-0 text-red-500" />
+                            <span className="font-medium">{isRTL ? 'ربط فيديو يوتيوب' : 'Attach YouTube Video'}</span>
+                          </button>
+                        )}
+
+                        {/* Manual Link Input Form */}
+                        <AnimatePresence>
+                          {showManualLink && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="flex flex-col gap-2 overflow-hidden pt-2 border-t border-white/5"
+                            >
+                              <input
+                                type="text"
+                                placeholder={isRTL ? 'اسم المرفق...' : 'Attachment name...'}
+                                value={manualLinkName}
+                                onChange={e => setManualLinkName(e.target.value)}
+                                className="w-full bg-zinc-900/80 border border-white/8 py-2 px-3 font-space text-xs font-medium text-white outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
+                              />
+                              <div className="flex gap-2">
+                                <input
+                                  type="url"
+                                  placeholder="https://..."
+                                  value={manualLinkUrl}
+                                  onChange={e => setManualLinkUrl(e.target.value)}
+                                  className="flex-1 bg-zinc-900/80 border border-white/8 py-2 px-3 font-space text-xs font-medium text-white outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={handleAddManualLink}
+                                  disabled={isAddingLink || !manualLinkName.trim() || !manualLinkUrl.trim()}
+                                  className="py-2 px-3 font-space font-medium text-[10px] text-black transition-all rounded-md shrink-0 cursor-pointer disabled:opacity-40"
+                                  style={{ backgroundColor: themeColor }}
+                                >
+                                  {isAddingLink ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto text-black" /> : (isRTL ? 'إضافة' : 'Add')}
+                                </button>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+
+                        {/* YouTube Video Link Input Form */}
+                        <AnimatePresence>
+                          {showYoutubeInput && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="flex flex-col gap-2 overflow-hidden pt-2 border-t border-white/5"
+                            >
+                              <div className="flex gap-2">
+                                <input
+                                  type="url"
+                                  placeholder={isRTL ? 'رابط فيديو يوتيوب...' : 'YouTube URL...'}
+                                  value={youtubeUrlInput}
+                                  onChange={e => setYoutubeUrlInput(e.target.value)}
+                                  className="flex-1 bg-zinc-900/80 border border-white/8 py-2 px-3 font-space text-xs font-medium text-white outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={handleAttachYoutubeVideo}
+                                  disabled={!youtubeUrlInput.trim()}
+                                  className="py-2 px-3 font-space font-medium text-[10px] text-black transition-all rounded-md shrink-0 cursor-pointer disabled:opacity-40"
+                                  style={{ backgroundColor: themeColor }}
+                                >
+                                  {isRTL ? 'ربط' : 'Attach'}
+                                </button>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+
+                    {/* Commented out original static buttons per safety rules:
                     <div className="w-full flex items-center justify-between gap-2 py-1.5 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 font-space text-xs">
                       <button
                         onClick={handleGoogleDrivePicker}
                         className="flex items-center gap-2 flex-1 text-left cursor-pointer text-white/90"
                       >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src="/Google_Drive_icon_(2020).svg" alt="Drive" className="w-3.5 h-3.5 shrink-0" />
                         <span className="font-medium">
                           {isDriveConnected ? (isRTL ? 'إضافة من درايف' : 'Add from Drive') : (isRTL ? 'ربط جوجل درايف' : 'Link Google Drive')}
                         </span>
                         {isDriveConnected && (
                           <span className="ml-auto text-[10px] text-emerald-500 font-bold tracking-wider animate-pulse">
-                            {/* Commented out per safety rules:
-                            {isRTL ? 'متصل' : 'CONNECTED'}
-                            */}
                             {isRTL ? 'متصل' : 'Connected'}
                           </span>
                         )}
@@ -1134,49 +1286,7 @@ export default function TaskDrawer({
                       <span className="font-medium">{isRTL ? 'إضافة رابط يدوياً' : 'Add Manual Link'}</span>
                       <span className="ml-auto text-[10px] font-mono">{showManualLink ? '▲' : '▼'}</span>
                     </button>
-
-                    <AnimatePresence>
-                      {showManualLink && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="flex flex-col gap-2 overflow-hidden"
-                        >
-                          <input
-                            type="text"
-                            // Commented out per safety rules:
-                            // placeholder={isRTL ? 'اسم المرفق...' : 'ATTACHMENT_NAME...'}
-                            placeholder={isRTL ? 'اسم المرفق...' : 'Attachment name...'}
-                            value={manualLinkName}
-                            onChange={e => setManualLinkName(e.target.value)}
-                            className="w-full bg-zinc-900/80 border border-white/8 py-2.5 px-4 font-space text-xs font-medium text-white outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
-                          />
-                          <div className="flex gap-2">
-                            <input
-                              type="url"
-                              // Commented out per safety rules:
-                              // placeholder="HTTPS://..."
-                              placeholder="https://..."
-                              value={manualLinkUrl}
-                              onChange={e => setManualLinkUrl(e.target.value)}
-                              className="flex-1 bg-zinc-900/80 border border-white/8 py-2.5 px-4 font-space text-xs font-medium text-white outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
-                            />
-                            <button
-                              onClick={handleAddManualLink}
-                              disabled={isAddingLink || !manualLinkName.trim() || !manualLinkUrl.trim()}
-                              className="py-2.5 px-4 font-space font-medium text-[10px] text-black transition-all rounded-md shrink-0 cursor-pointer disabled:opacity-40"
-                              style={{ backgroundColor: themeColor }}
-                            >
-                              {/* Commented out per safety rules:
-                              {isAddingLink ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto text-black" /> : (isRTL ? 'إضافة' : 'ADD')}
-                              */}
-                              {isAddingLink ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto text-black" /> : (isRTL ? 'إضافة' : 'Add')}
-                            </button>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    */}
                   </div>
                 )}
 
