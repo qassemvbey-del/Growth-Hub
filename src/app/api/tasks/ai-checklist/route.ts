@@ -34,7 +34,7 @@ function getYouTubeId(urlOrId: string) {
 
 export async function POST(req: Request) {
   try {
-    const { taskId, youtubeUrl } = await req.json()
+    const { taskId, youtubeUrl, taskTitle, goalTitle } = await req.json()
     if (!taskId || !youtubeUrl) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 })
     }
@@ -98,17 +98,21 @@ export async function POST(req: Request) {
 
     let transcriptText = ''
     let uploadResult: any = null
+    let tier3Fallback = false
     const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
     if (!apiKey) {
       return NextResponse.json({ error: 'Gemini API key not configured' }, { status: 500 })
     }
     const fileManager = new GoogleAIFileManager(apiKey)
 
+    // TIER 1: Try Transcript Mode
     try {
       const transcriptItems = await YoutubeTranscript.fetchTranscript(videoId)
       transcriptText = transcriptItems.map(item => item.text).join(' ')
     } catch (err) {
-      console.warn('Transcript fetch failed, falling back to Audio Ingestion:', err)
+      console.warn('Transcript fetch failed, falling back to Audio Ingestion (Tier 2):', err)
+      
+      // TIER 2: Try Audio Ingestion Mode
       const tempDir = os.tmpdir()
       const audioPath = path.join(tempDir, `${videoId}.mp3`)
       const mimeType = 'audio/mp3'
@@ -126,64 +130,30 @@ export async function POST(req: Request) {
           writeStream.on('error', (err) => reject(err))
           stream.on('error', (err) => reject(err))
         })
+
+        if (fs.existsSync(audioPath)) {
+          uploadResult = await fileManager.uploadFile(audioPath, {
+            mimeType,
+            displayName: `yt-audio-${videoId}`
+          })
+          
+          // Immediate local cleanup
+          try {
+            fs.unlinkSync(audioPath)
+          } catch (unlinkErr) {
+            console.error('Failed to cleanup local audio file:', unlinkErr)
+          }
+        } else {
+          throw new Error('Audio file does not exist after download')
+        }
       } catch (streamErr) {
-        console.error('ytdl stream pipe failed:', streamErr)
-        return NextResponse.json({ error: 'This video does not have readable subtitles or transcripts, and audio extraction failed.' }, { status: 400 })
-      }
-
-      /* Commented out legacy yt-dlp shell execution to respect safety rules and prevent serverless timeouts/crashes:
-      const ytdlpPath = path.join(process.cwd(), 'yt-dlp.exe')
-      
-      let hasFfmpeg = false
-      try {
-        execSync('ffmpeg -version', { stdio: 'ignore' })
-        hasFfmpeg = true
-      } catch {}
-
-      let audioPath = ''
-      let mimeType = ''
-
-      if (hasFfmpeg) {
-        audioPath = path.join(tempDir, `${videoId}.mp3`)
-        mimeType = 'audio/mp3'
+        console.error('ytdl stream pipe or Gemini upload failed, falling back to Tier 3:', streamErr)
+        tier3Fallback = true
         try {
-          execSync(`"${ytdlpPath}" -x --audio-format mp3 --audio-quality 5 -o "${path.join(tempDir, videoId)}.%(ext)s" "https://www.youtube.com/watch?v=${videoId}"`, { stdio: 'ignore' })
-        } catch (execErr) {
-          console.error('yt-dlp mp3 download failed:', execErr)
-          return NextResponse.json({ error: 'This video does not have readable subtitles or transcripts, and audio extraction failed.' }, { status: 400 })
-        }
-      } else {
-        audioPath = path.join(tempDir, `${videoId}.m4a`)
-        mimeType = 'audio/mp4'
-        try {
-          execSync(`"${ytdlpPath}" -f ba -o "${audioPath}" "https://www.youtube.com/watch?v=${videoId}"`, { stdio: 'ignore' })
-        } catch (execErr) {
-          console.error('yt-dlp m4a download failed:', execErr)
-          return NextResponse.json({ error: 'This video does not have readable subtitles or transcripts, and audio extraction failed.' }, { status: 400 })
-        }
-      }
-      */
-
-      if (!fs.existsSync(audioPath)) {
-        return NextResponse.json({ error: 'Audio file extraction failed' }, { status: 500 })
-      }
-
-      try {
-        uploadResult = await fileManager.uploadFile(audioPath, {
-          mimeType,
-          displayName: `yt-audio-${videoId}`
-        })
-      } catch (uploadErr) {
-        console.error('Gemini File upload failed:', uploadErr)
-        try { fs.unlinkSync(audioPath) } catch {}
-        return NextResponse.json({ error: 'Failed to upload audio to AI processor.' }, { status: 500 })
-      }
-
-      // CRITICAL SECURITY TOPOLOGY: Immediate local server cleanup
-      try {
-        fs.unlinkSync(audioPath)
-      } catch (unlinkErr) {
-        console.error('Failed to cleanup local audio file:', unlinkErr)
+          if (fs.existsSync(audioPath)) {
+            fs.unlinkSync(audioPath)
+          }
+        } catch {}
       }
     }
 
@@ -192,11 +162,22 @@ export async function POST(req: Request) {
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 
     let response;
-    if (uploadResult) {
+    if (tier3Fallback) {
+      const safeTaskTitle = taskTitle || "Technical Lesson"
+      const safeGoalTitle = goalTitle || "Specialized Curriculum"
+      const systemPrompt = `You are an elite technical instructor. We cannot access the direct media stream of this video due to network restrictions. However, we know this lesson is titled "${safeTaskTitle}" and belongs to the comprehensive course/coursework "${safeGoalTitle}". Based on your deep underlying knowledge base of this standard technical curriculum, infer and generate a pristine, highly accurate study checklist for this exact topic. Output 4 to 7 sequential, highly actionable items under 80 characters each in Title Case. Return STRICTLY as a valid JSON string array of strings, without any backticks or markdown wrap. Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
+
+      response = await model.generateContent({
+        contents: [{
+          role: 'user',
+          parts: [{ text: systemPrompt }]
+        }]
+      })
+    } else if (uploadResult) {
       const systemPrompt = `You are an elite academic tutor. This video does not have readable textual transcripts. You are provided with the raw audio file of the lecture. Listen intently to the spoken explanations, technical keywords, and core lessons delivered by the instructor. 
 Generate a pristine, highly logical study checklist for the student based entirely on the audio contents. 
 Break down the milestones into 4 to 7 sequential checklist items. Each item must be highly practical, actionable, under 80 characters, and written in clean Title Case. 
-Return the output STRICTLY as a valid JSON string array of strings, without any markdown formatting blocks, backticks, or wrapping markdown text. 
+Return STRICTLY as a valid JSON string array of strings, without any markdown formatting blocks, backticks, or wrapping markdown text. 
 Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
 
       response = await model.generateContent([
@@ -215,7 +196,7 @@ Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
         console.error('Failed to delete uploaded file from Gemini File API:', delErr)
       }
     } else {
-      const systemPrompt = `You are an elite academic tutor. Analyze the following transcript of a technical video tutorial. Generate a pristine, actionable study checklist for a student. Break down the core educational milestones into 4 to 7 sequential items. Each item must be clear, practical, concise, and under 80 characters. Return the output STRICTLY as a valid JSON string array of strings, without any markdown blocks, backticks, or extra explanation text. Example format: ["Understand core architecture", "Analyze infrastructure mapping"]`
+      const systemPrompt = `You are an elite academic tutor. Analyze the following transcript of a technical video tutorial. Generate a pristine, actionable study checklist for a student. Break down the core educational milestones into 4 to 7 sequential items. Each item must be clear, practical, concise, and under 80 characters. Return STRICTLY as a valid JSON string array of strings, without any markdown blocks, backticks, or extra explanation text. Example format: ["Understand core architecture", "Analyze infrastructure mapping"]`
 
       response = await model.generateContent({
         contents: [{

@@ -69,6 +69,9 @@ interface AiChecklistButtonProps {
   isRTL: boolean
   themeColor: string
   onUpdateTask: (taskId: string, updates: any) => Promise<void> | void
+  resolvedDuration: number
+  taskTitle: string
+  goalTitle: string
 }
 
 function AiChecklistButton({
@@ -77,11 +80,21 @@ function AiChecklistButton({
   canEdit,
   isRTL,
   themeColor,
-  onUpdateTask
+  onUpdateTask,
+  resolvedDuration,
+  taskTitle,
+  goalTitle
 }: AiChecklistButtonProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
-  const [countdown, setCountdown] = useState(30)
+
+  // Calculate dynamic countdown start time based on video duration
+  const videoMinutes = resolvedDuration > 0 ? Math.floor(resolvedDuration / 60) : 0
+  const baseSeconds = 15
+  const variableSeconds = Math.floor(videoMinutes / 2)
+  const countdownStart = Math.min(60, baseSeconds + variableSeconds)
+
+  const [countdown, setCountdown] = useState(countdownStart)
   // Commented out count-up timer state to respect safety rules:
   // const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [aiErrorMessage, setAiErrorMessage] = useState<string | null>(null)
@@ -117,7 +130,7 @@ function AiChecklistButton({
   // Countdown timer loop when generating
   useEffect(() => {
     if (!isGenerating) {
-      setCountdown(30)
+      setCountdown(countdownStart)
       return
     }
     const interval = setInterval(() => {
@@ -130,7 +143,7 @@ function AiChecklistButton({
       })
     }, 1000)
     return () => clearInterval(interval)
-  }, [isGenerating])
+  }, [isGenerating, countdownStart])
 
   // Commented out count-up timer loop to respect safety rules:
   // useEffect(() => {
@@ -174,7 +187,9 @@ function AiChecklistButton({
         },
         body: JSON.stringify({
           taskId: taskId,
-          youtubeUrl: finalVideoUrl
+          youtubeUrl: finalVideoUrl,
+          taskTitle: taskTitle,
+          goalTitle: goalTitle
         })
       })
 
@@ -1388,16 +1403,23 @@ export default function TaskDrawer({
               />
 
               {/* Render isolated AI Checklist button to prevent outer TaskDrawer re-renders on timer tick */}
-              {canEdit && finalVideoUrl && (
-                <AiChecklistButton
-                  taskId={task.id}
-                  finalVideoUrl={finalVideoUrl}
-                  canEdit={canEdit}
-                  isRTL={isRTL}
-                  themeColor={themeColor}
-                  onUpdateTask={onUpdateTask}
-                />
-              )}
+              {canEdit && finalVideoUrl && (() => {
+                const currentGoal = goals.find((g: any) => g.id === goalId || g.id === task.goal_id)
+                const goalTitleText = currentGoal?.title || 'Specialized Curriculum'
+                return (
+                  <AiChecklistButton
+                    taskId={task.id}
+                    finalVideoUrl={finalVideoUrl}
+                    canEdit={canEdit}
+                    isRTL={isRTL}
+                    themeColor={themeColor}
+                    onUpdateTask={onUpdateTask}
+                    resolvedDuration={resolvedDuration}
+                    taskTitle={task.title}
+                    goalTitle={goalTitleText}
+                  />
+                )
+              })()}
               {/* Commented out old button rendering to respect the safety rule of never deleting code:
               {canEdit && finalVideoUrl && (
                 <div className="space-y-1 mt-2">
