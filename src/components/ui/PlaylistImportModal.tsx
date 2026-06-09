@@ -248,7 +248,7 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
       video_id: t.videoId,
       video_progress: 0,
       created_at: new Date(now + index * 10).toISOString(),
-      deadline: calculatedDates[index] || null,
+      // deadline: calculatedDates[index] || null,
       metadata: {
         endDate: calculatedDates[index] || null
       }
@@ -464,7 +464,7 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
                       min={1}
                       value={dailyCapacity}
                       onChange={(e) => setDailyCapacity(Math.max(1, parseInt(e.target.value) || 0))}
-                      className="w-full sm:w-32 bg-white/[0.02] border border-white/5 py-2.5 px-4 rounded-xl font-space text-xs text-white outline-none focus:border-teal-500/50"
+                      className="w-full sm:w-32 text-center bg-white/[0.02] border border-white/5 py-2.5 px-4 rounded-xl font-space text-xs text-white outline-none focus:border-teal-500/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                 </div>
