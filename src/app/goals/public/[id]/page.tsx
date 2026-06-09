@@ -216,6 +216,8 @@ export default function PublicGoalPage() {
       } else {
         // Case 2: Requires Approval
         // Check if request already pending
+        // Commented out per rule "Never delete code, only comment it out":
+        /*
         const { data: existingRequest } = await supabase
           .from('squad_join_requests')
           .select('*')
@@ -237,6 +239,43 @@ export default function PublicGoalPage() {
             user_id: user.id,
             status: 'pending',
             role: 'member'
+          })
+          .select()
+          .single();
+
+        if (requestError) throw requestError;
+        */
+
+        // Check if request already exists
+        const { data: existingRequest } = await supabase
+          .from('squad_join_requests')
+          .select('*')
+          .eq('goal_id', id)
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (existingRequest) {
+          if (existingRequest.status === 'pending') {
+            alert(isRTL ? 'طلبك قيد الانتظار بالفعل.' : 'Your request is already pending.');
+            return;
+          }
+          if (existingRequest.status === 'approved') {
+            alert(isRTL ? 'أنت عضو بالفعل في هذا الفريق.' : 'You are already a member of this squad.');
+            return;
+          }
+        }
+
+        // Upsert pending join request (handles previous rejected status)
+        const { data: insertedData, error: requestError } = await supabase
+          .from('squad_join_requests')
+          .upsert({
+            id: existingRequest?.id, // specifying id updates the row if it exists
+            goal_id: id,
+            user_id: user.id,
+            status: 'pending',
+            role: 'member',
+            requested_at: new Date().toISOString(),
+            reviewed_at: null
           })
           .select()
           .single();
