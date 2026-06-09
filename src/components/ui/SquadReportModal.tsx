@@ -44,8 +44,8 @@ export default function SquadReportModal({
     return task.metadata?.endDate || task.metadata?.dueDate || task.deadline || task.metadata?.deadline
   }
 
-  // Calculate member statistics
-  const memberStats = squadMembers.map(member => {
+  // Pre-calculate stats
+  const baseStats = squadMembers.map(member => {
     const assignedTasks = tasks.filter((t: any) => t.assigned_to === member.id)
     const completedTasks = assignedTasks.filter((t: any) => t.is_completed)
     
@@ -78,6 +78,22 @@ export default function SquadReportModal({
     }
   })
 
+  // Find max completion rate for Top Performer logic
+  const maxRate = baseStats.length > 0 
+    ? Math.max(...baseStats.map(s => s.assignedCount > 0 ? s.progressPercent : 0))
+    : 0
+
+  // Enrich with performance insights
+  const enrichedStats = baseStats.map(stat => {
+    const isTopPerformer = stat.assignedCount > 0 && stat.progressPercent === maxRate && maxRate > 0
+    const isAtRisk = stat.overdueCount > 0
+    return {
+      ...stat,
+      isTopPerformer,
+      isAtRisk
+    }
+  })
+
   // Goal metrics
   const totalTasksCount = tasks.length
   const completedTasksCount = tasks.filter((t: any) => t.is_completed).length
@@ -91,25 +107,37 @@ export default function SquadReportModal({
 
     // Sheet 1: Overview
     const overviewData = [
-      { Metric: isRTL ? 'اسم الهدف' : 'Goal Title', Value: mission.title },
-      { Metric: isRTL ? 'إجمالي التقدم' : 'Overall Progress', Value: `${overallProgress}%` },
-      { Metric: isRTL ? 'إجمالي المهام' : 'Total Tasks', Value: totalTasksCount },
-      { Metric: isRTL ? 'المهام المكتملة' : 'Completed Tasks', Value: completedTasksCount },
-      { Metric: isRTL ? 'عدد الأعضاء' : 'Members Count', Value: squadMembers.length },
-      { Metric: isRTL ? 'تاريخ التقرير' : 'Report Date', Value: new Date().toLocaleDateString() }
+      { [isRTL ? 'المقياس' : 'Metric']: isRTL ? 'اسم الهدف' : 'Goal Title', [isRTL ? 'القيمة' : 'Value']: mission.title },
+      { [isRTL ? 'المقياس' : 'Metric']: isRTL ? 'إجمالي التقدم' : 'Overall Progress', [isRTL ? 'القيمة' : 'Value']: `${overallProgress}%` },
+      { [isRTL ? 'المقياس' : 'Metric']: isRTL ? 'إجمالي المهام' : 'Total Tasks', [isRTL ? 'القيمة' : 'Value']: totalTasksCount },
+      { [isRTL ? 'المقياس' : 'Metric']: isRTL ? 'المهام المكتملة' : 'Completed Tasks', [isRTL ? 'القيمة' : 'Value']: completedTasksCount },
+      { [isRTL ? 'المقياس' : 'Metric']: isRTL ? 'عدد الأعضاء' : 'Members Count', [isRTL ? 'القيمة' : 'Value']: squadMembers.length },
+      { [isRTL ? 'المقياس' : 'Metric']: isRTL ? 'تاريخ التقرير' : 'Report Date', [isRTL ? 'القيمة' : 'Value']: new Date().toLocaleDateString() }
     ]
     const wsOverview = XLSX.utils.json_to_sheet(overviewData)
     XLSX.utils.book_append_sheet(wb, wsOverview, isRTL ? 'نظرة عامة' : 'Overview')
 
     // Sheet 2: Members Stats
-    const membersData = memberStats.map(stat => ({
-      [isRTL ? 'الاسم' : 'Name']: stat.member.full_name,
-      [isRTL ? 'الدور' : 'Role']: stat.member.role,
-      [isRTL ? 'المهام المعينة' : 'Tasks Assigned']: stat.assignedCount,
-      [isRTL ? 'المهام المنجزة' : 'Tasks Completed']: stat.completedCount,
-      [isRTL ? 'المهام المتأخرة' : 'Tasks Overdue']: stat.overdueCount,
-      [isRTL ? 'النسبة المئوية' : 'Completion Rate']: `${stat.progressPercent}%`
-    }))
+    const membersData = enrichedStats.map(stat => {
+      let insight = '-'
+      if (stat.isTopPerformer && stat.isAtRisk) {
+        insight = isRTL ? 'أداء عالٍ ومتأخر' : 'High Performer & Late'
+      } else if (stat.isTopPerformer) {
+        insight = isRTL ? 'الأفضل أداءً 🏆' : 'Top Performer 🏆'
+      } else if (stat.isAtRisk) {
+        insight = isRTL ? 'يحتاج انتباه ⚠️' : 'Needs Attention ⚠️'
+      }
+
+      return {
+        [isRTL ? 'الاسم' : 'Name']: stat.member.full_name,
+        [isRTL ? 'الدور' : 'Role']: stat.member.role,
+        [isRTL ? 'المهام المعينة' : 'Tasks Assigned']: stat.assignedCount,
+        [isRTL ? 'المهام المكتملة' : 'Tasks Completed']: stat.completedCount,
+        [isRTL ? 'المهام المتأخرة' : 'Tasks Overdue']: stat.overdueCount,
+        [isRTL ? 'النسبة المئوية' : 'Completion Rate']: `${stat.progressPercent}%`,
+        [isRTL ? 'ملاحظات الأداء' : 'Performance Insights']: insight
+      }
+    })
     const wsMembers = XLSX.utils.json_to_sheet(membersData)
     XLSX.utils.book_append_sheet(wb, wsMembers, isRTL ? 'إحصائيات الأعضاء' : 'Members Stats')
 
@@ -128,9 +156,14 @@ export default function SquadReportModal({
     const wsTasks = XLSX.utils.json_to_sheet(tasksData)
     XLSX.utils.book_append_sheet(wb, wsTasks, isRTL ? 'سجل المهام' : 'Tasks Log')
 
-    // Auto-adjust column widths for all sheets
+    // Apply RTL view direction to sheets if in Arabic mode
     const sheets: any[] = [wsOverview, wsMembers, wsTasks];
     sheets.forEach((ws) => {
+      if (isRTL) {
+        ws['!dir'] = 'rtl';
+        ws['!views'] = [{ RTL: true }];
+      }
+      
       const refVal = ws['!ref'];
       if (!refVal) return;
       const range = XLSX.utils.decode_range(refVal);
@@ -151,61 +184,73 @@ export default function SquadReportModal({
     XLSX.writeFile(wb, `Squad_Report_${mission.id.slice(0, 8)}.xlsx`)
   }
 
-  // Export to PDF
+  // Export to PDF (Strictly in English fallback to avoid disconnected Arabic fonts bug)
   const handleExportPDF = () => {
     const doc = new jsPDF()
-    const reportTitle = isRTL ? 'تقرير تقدم الفريق - Growth Hub' : 'Squad Progress Report - Growth Hub'
     
     // Add Brand Header
     doc.setFont('helvetica', 'bold')
-    doc.setFontSize(20)
+    doc.setFontSize(22)
     doc.setTextColor(20, 184, 166) // Teal Accent
-    doc.text(reportTitle, 14, 20)
+    doc.text('Squad Progress Report', 14, 20)
 
     doc.setFont('helvetica', 'normal')
-    doc.setFontSize(10)
-    doc.setTextColor(100, 100, 100)
-    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 26)
+    doc.setFontSize(9)
+    doc.setTextColor(120, 120, 120)
+    doc.text(`System Generated • ${new Date().toLocaleString()}`, 14, 26)
 
-    // Divider Line
+    // Divider
     doc.setDrawColor(220, 220, 220)
     doc.line(14, 30, 196, 30)
 
-    // Goal Details Block
+    // Summary Box
+    doc.setFillColor(248, 250, 252) // Very light slate/gray background
+    doc.rect(14, 36, 182, 30, 'F')
+    
     doc.setFont('helvetica', 'bold')
-    doc.setFontSize(14)
-    doc.setTextColor(40, 40, 40)
-    doc.text(mission.title || 'Goal Title', 14, 40)
+    doc.setFontSize(11)
+    doc.setTextColor(50, 50, 50)
+    
+    // Sanitize mission title (fallback empty or safe text)
+    const safeTitle = mission.title ? mission.title.replace(/[^\x00-\x7F]/g, "?") : 'Squad Goal';
+    doc.text(`Goal: ${safeTitle}`, 18, 43)
 
     doc.setFont('helvetica', 'normal')
-    doc.setFontSize(11)
-    doc.text(`Overall Goal Progress: ${overallProgress}%`, 14, 48)
-    doc.text(`Total Squad Tasks: ${totalTasksCount} (${completedTasksCount} completed)`, 14, 54)
+    doc.setFontSize(10)
+    doc.text(`Overall Progress: ${overallProgress}%`, 18, 50)
+    doc.text(`Total Tasks: ${totalTasksCount}  |  Completed: ${completedTasksCount}  |  Squad Members: ${squadMembers.length}`, 18, 57)
 
-    // Table of Members
-    const tableHeaders = [
-      isRTL ? 'الاسم' : 'Name',
-      isRTL ? 'المهام المعينة' : 'Assigned',
-      isRTL ? 'المهام المكتملة' : 'Completed',
-      isRTL ? 'المهام المتأخرة' : 'Overdue',
-      isRTL ? 'النسبة المئوية' : 'Completion Rate'
-    ]
+    // Table headers
+    const tableHeaders = ['Team Member', 'Role', 'Assigned', 'Completed', 'Overdue', 'Completion Rate', 'Insights']
 
-    const tableRows = memberStats.map(stat => [
-      stat.member.full_name,
-      stat.assignedCount.toString(),
-      stat.completedCount.toString(),
-      stat.overdueCount.toString(),
-      `${stat.progressPercent}%`
-    ])
+    const tableRows = enrichedStats.map(stat => {
+      // Clean Arabic names to avoid rendering boxes
+      const safeName = stat.member.full_name ? stat.member.full_name.replace(/[^\x00-\x7F]/g, "?") : 'Operator';
+      const safeRole = stat.member.role ? stat.member.role.replace(/[^\x00-\x7F]/g, "?") : 'Member';
+      
+      let insight = 'Normal'
+      if (stat.isTopPerformer && stat.isAtRisk) insight = 'High & Late'
+      else if (stat.isTopPerformer) insight = 'Top Performer'
+      else if (stat.isAtRisk) insight = 'Needs Attention'
+
+      return [
+        safeName,
+        safeRole,
+        stat.assignedCount.toString(),
+        stat.completedCount.toString(),
+        stat.overdueCount.toString(),
+        `${stat.progressPercent}%`,
+        insight
+      ]
+    })
 
     autoTable(doc, {
-      startY: 62,
+      startY: 74,
       head: [tableHeaders],
       body: tableRows,
       theme: 'striped',
       headStyles: { fillColor: [20, 184, 166], textColor: [255, 255, 255], fontStyle: 'bold' },
-      styles: { fontSize: 10, cellPadding: 3 }
+      styles: { fontSize: 9, cellPadding: 3 }
     })
 
     doc.save(`Squad_Report_${mission.id.slice(0, 8)}.pdf`)
@@ -268,7 +313,7 @@ export default function SquadReportModal({
               <div className="p-4 bg-white/[0.01] border border-white/5 rounded-xl space-y-1">
                 <span className="text-[10px] text-zinc-500 font-mono tracking-wider block">{isRTL ? 'المهام المعينة' : 'Total Tasks'}</span>
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 style={{ color: themeColor }}" />
+                  <Clock className="w-4 h-4" style={{ color: themeColor }} />
                   <span className="text-xl font-bold text-white font-space">{totalTasksCount}</span>
                 </div>
               </div>
@@ -286,14 +331,14 @@ export default function SquadReportModal({
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-rose-500" />
                   <span className="text-xl font-bold text-white font-space">
-                    {memberStats.reduce((acc, curr) => acc + curr.overdueCount, 0)}
+                    {enrichedStats.reduce((acc, curr) => acc + curr.overdueCount, 0)}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Members Progress Table */}
-            <div className="border border-white/5 rounded-xl overflow-hidden bg-white/[0.01]">
+            {/* Desktop Table View (Visible only on desktop screens) */}
+            <div className="hidden md:block border border-white/5 rounded-xl overflow-hidden bg-white/[0.01]">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
@@ -307,17 +352,25 @@ export default function SquadReportModal({
                     </tr>
                   </thead>
                   <tbody>
-                    {memberStats.map(stat => (
+                    {enrichedStats.map(stat => (
                       <tr key={stat.member.id} className="border-b border-white/5 hover:bg-white/[0.02] text-xs font-space text-white/90">
-                        <td className="py-3 px-4 flex items-center gap-2">
-                          {stat.member.avatar_url ? (
-                            <img src={stat.member.avatar_url} alt={stat.member.full_name} className="w-6 h-6 rounded-full object-cover" />
-                          ) : (
-                            <div className="w-6 h-6 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-bold">
-                              {stat.member.full_name?.charAt(0) || '?'}
-                            </div>
-                          )}
-                          <span className="truncate max-w-[120px] font-medium">{stat.member.full_name}</span>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2 min-w-0">
+                            {stat.member.avatar_url ? (
+                              <img src={stat.member.avatar_url} alt={stat.member.full_name} className="w-6 h-6 rounded-full object-cover" />
+                            ) : (
+                              <div className="w-6 h-6 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-bold">
+                                {stat.member.full_name?.charAt(0) || '?'}
+                              </div>
+                            )}
+                            <span className="truncate max-w-[120px] font-medium">{stat.member.full_name}</span>
+                            {stat.isTopPerformer && (
+                              <span className="text-[10px]" title={isRTL ? 'أعلى أداء 🏆' : 'Top Performer 🏆'}>🏆</span>
+                            )}
+                            {stat.isAtRisk && (
+                              <span className="px-1 py-0.5 rounded bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[8px] font-bold" title={isRTL ? 'يحتاج انتباه ⚠️' : 'Needs Attention ⚠️'}>⚠️</span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-3 px-4 text-zinc-400 font-mono text-[10px]">
                           {stat.member.role}
@@ -345,6 +398,61 @@ export default function SquadReportModal({
                 </table>
               </div>
             </div>
+
+            {/* Mobile Stacked Cards (Visible only on mobile screens) */}
+            <div className="block md:hidden space-y-4">
+              {enrichedStats.map(stat => (
+                <div key={stat.member.id} className="p-4 bg-white/[0.02] border border-white/5 rounded-xl space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {stat.member.avatar_url ? (
+                        <img src={stat.member.avatar_url} alt={stat.member.full_name} className="w-8 h-8 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-[11px] font-bold text-white">
+                          {stat.member.full_name?.charAt(0) || '?'}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="font-medium text-white text-xs truncate">{stat.member.full_name}</p>
+                        <p className="text-[10px] text-zinc-500 font-mono">{stat.member.role}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      {stat.isTopPerformer && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[8px] font-bold">
+                          🏆 {isRTL ? 'الأفضل' : 'Top Performer'}
+                        </span>
+                      )}
+                      {stat.isAtRisk && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[8px] font-bold">
+                          ⚠️ {isRTL ? 'يحتاج انتباه' : 'Needs Attention'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-[11px] font-mono border-t border-white/5 pt-2">
+                    <div className="bg-white/[0.01] p-2 rounded-lg border border-white/5">
+                      <span className="text-zinc-500 block text-[9px]">{isRTL ? 'المهام المعينة' : 'Assigned'}</span>
+                      <span className="text-white font-bold">{stat.assignedCount}</span>
+                    </div>
+                    <div className="bg-white/[0.01] p-2 rounded-lg border border-white/5">
+                      <span className="text-zinc-500 block text-[9px]">{isRTL ? 'المهام المكتملة' : 'Completed'}</span>
+                      <span className="text-emerald-400 font-bold">{stat.completedCount}</span>
+                    </div>
+                    <div className="bg-white/[0.01] p-2 rounded-lg border border-white/5">
+                      <span className="text-zinc-500 block text-[9px]">{isRTL ? 'المهام المتأخرة' : 'Overdue'}</span>
+                      <span className="text-rose-500 font-bold">{stat.overdueCount}</span>
+                    </div>
+                    <div className="bg-white/[0.01] p-2 rounded-lg border border-white/5">
+                      <span className="text-zinc-500 block text-[9px]">{isRTL ? 'نسبة الإنجاز' : 'Completion'}</span>
+                      <span className="text-teal-400 font-bold">{stat.progressPercent}%</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
           </div>
 
           {/* Footer Action Buttons */}
