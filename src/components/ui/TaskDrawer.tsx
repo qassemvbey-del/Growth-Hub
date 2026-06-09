@@ -62,6 +62,180 @@ const getYouTubeId = (urlOrId: string) => {
   return urlOrId
 }
 
+interface AiChecklistButtonProps {
+  taskId: string
+  finalVideoUrl: string
+  canEdit: boolean
+  isRTL: boolean
+  themeColor: string
+  onUpdateTask: (taskId: string, updates: any) => Promise<void> | void
+}
+
+function AiChecklistButton({
+  taskId,
+  finalVideoUrl,
+  canEdit,
+  isRTL,
+  themeColor,
+  onUpdateTask
+}: AiChecklistButtonProps) {
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [cooldownRemaining, setCooldownRemaining] = useState(0)
+  const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const [aiErrorMessage, setAiErrorMessage] = useState<string | null>(null)
+
+  // Load active cooldown on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const storedCooldown = localStorage.getItem(`ai_cooldown_${taskId}`)
+    if (storedCooldown) {
+      const remaining = Math.max(0, Math.ceil((parseInt(storedCooldown, 10) - Date.now()) / 1000))
+      if (remaining > 0) {
+        setCooldownRemaining(remaining)
+      }
+    }
+  }, [taskId])
+
+  // Countdown timer loop
+  useEffect(() => {
+    if (cooldownRemaining <= 0) return
+    const interval = setInterval(() => {
+      setCooldownRemaining(prev => {
+        const next = prev - 1
+        if (next <= 0) {
+          clearInterval(interval)
+          return 0
+        }
+        return next
+      })
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [cooldownRemaining])
+
+  // Elapsed seconds timer loop when generating
+  useEffect(() => {
+    if (!isGenerating) {
+      setElapsedSeconds(0)
+      return
+    }
+    const interval = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1)
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [isGenerating])
+
+  const formatCooldownTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+  }
+
+  const formatElapsedTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+  }
+
+  const handleGenerate = async () => {
+    if (isGenerating || cooldownRemaining > 0 || !canEdit || !finalVideoUrl) return
+    setIsGenerating(true)
+    setAiErrorMessage(null)
+
+    try {
+      const res = await fetch('/api/tasks/ai-checklist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          taskId: taskId,
+          youtubeUrl: finalVideoUrl
+        })
+      })
+
+      const data = await res.json()
+      if (res.status === 429) {
+        const seconds = data.remainingSeconds || 15 * 60
+        setCooldownRemaining(seconds)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(`ai_cooldown_${taskId}`, String(Date.now() + seconds * 1000))
+        }
+        setAiErrorMessage(data.message)
+      } else if (!res.ok) {
+        setAiErrorMessage(data.error || 'Failed to generate checklist')
+      } else {
+        const supabase = createClient()
+        const { data: updatedTask } = await supabase
+          .from('tasks')
+          .select('metadata')
+          .eq('id', taskId)
+          .single()
+        
+        if (updatedTask) {
+          await onUpdateTask(taskId, { metadata: updatedTask.metadata })
+          const seconds = 15 * 60
+          setCooldownRemaining(seconds)
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(`ai_cooldown_${taskId}`, String(Date.now() + seconds * 1000))
+          }
+        }
+      }
+    } catch (err) {
+      setAiErrorMessage(isRTL ? 'حدث خطأ في الاتصال بالخادم' : 'Server communication error')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  return (
+    <div className="space-y-1 mt-2">
+      <button
+        type="button"
+        onClick={handleGenerate}
+        disabled={isGenerating || cooldownRemaining > 0}
+        className={cn(
+          "w-full flex items-center justify-center gap-2 py-2 px-3.5 rounded-xl font-medium text-xs transition-all duration-300 backdrop-blur-sm",
+          isGenerating
+            ? "bg-zinc-800/80 text-zinc-500 cursor-not-allowed border border-white/5 animate-pulse"
+            : cooldownRemaining > 0
+              ? "bg-zinc-900/40 text-zinc-500 border border-white/5 cursor-not-allowed opacity-40"
+              : "bg-gradient-to-r from-indigo-950/40 via-slate-900/60 to-teal-950/40 border border-indigo-500/20 hover:border-teal-500/40 text-indigo-200 hover:text-teal-200 shadow-[0_0_15px_rgba(99,102,241,0.05)] hover:shadow-[0_0_20px_rgba(20,184,166,0.15)] group cursor-pointer"
+        )}
+      >
+        {isGenerating ? (
+          <>
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400" />
+            <span className="animate-pulse">
+              {isRTL 
+                ? `جاري معالجة الصوت (وضع NotebookLM)... ${formatElapsedTime(elapsedSeconds)}` 
+                : `Processing Audio (NotebookLM Mode)... ${formatElapsedTime(elapsedSeconds)}`}
+            </span>
+          </>
+        ) : cooldownRemaining > 0 ? (
+          <>
+            <Clock className="w-3.5 h-3.5 text-zinc-500" />
+            <span>
+              {isRTL 
+                ? `فترة الانتظار للذكاء الاصطناعي (${formatCooldownTime(cooldownRemaining)})` 
+                : `AI Cooldown (${formatCooldownTime(cooldownRemaining)})`}
+            </span>
+          </>
+        ) : (
+          <>
+            <Sparkles className="w-3.5 h-3.5 animate-pulse group-hover:scale-110 text-indigo-400 group-hover:text-teal-400 transition-transform duration-300" />
+            <span>{isRTL ? 'إنشاء قائمة المهام بالذكاء الاصطناعي' : 'Generate AI Checklist'}</span>
+          </>
+        )}
+      </button>
+      {aiErrorMessage && (
+        <p className="text-[10px] text-red-500 mt-1 font-mono tracking-wide bg-red-500/5 px-2 py-1 rounded border border-red-500/10">
+          {aiErrorMessage}
+        </p>
+      )}
+    </div>
+  )
+}
+
 export default function TaskDrawer({
   task,
   onClose,
@@ -265,10 +439,10 @@ export default function TaskDrawer({
   const [youtubeUrlInput, setYoutubeUrlInput] = useState('')
   const [showYoutubeInput, setShowYoutubeInput] = useState(false)
   
-  // AI Checklist States
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [cooldownRemaining, setCooldownRemaining] = useState(0)
-  const [aiErrorMessage, setAiErrorMessage] = useState<string | null>(null)
+  // AI Checklist States (Commented out to prevent unnecessary re-renders; logic moved to isolated AiChecklistButton component)
+  // const [isGenerating, setIsGenerating] = useState(false)
+  // const [cooldownRemaining, setCooldownRemaining] = useState(0)
+  // const [aiErrorMessage, setAiErrorMessage] = useState<string | null>(null)
 
   // useEffect(() => {
   //   if (typeof window === 'undefined') return
@@ -652,90 +826,87 @@ export default function TaskDrawer({
     setShowYoutubeInput(false)
   }
 
-  // Load active cooldown on mount
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const storedCooldown = localStorage.getItem(`ai_cooldown_${task.id}`)
-    if (storedCooldown) {
-      const remaining = Math.max(0, Math.ceil((parseInt(storedCooldown, 10) - Date.now()) / 1000))
-      if (remaining > 0) {
-        setCooldownRemaining(remaining)
-      }
-    }
-  }, [task.id])
+  // Load active cooldown on mount (Commented out, logic moved to AiChecklistButton)
+  // useEffect(() => {
+  //   if (typeof window === 'undefined') return
+  //   const storedCooldown = localStorage.getItem(`ai_cooldown_${task.id}`)
+  //   if (storedCooldown) {
+  //     const remaining = Math.max(0, Math.ceil((parseInt(storedCooldown, 10) - Date.now()) / 1000))
+  //     if (remaining > 0) {
+  //       setCooldownRemaining(remaining)
+  //     }
+  //   }
+  // }, [task.id])
 
-  // Countdown timer loop
-  useEffect(() => {
-    if (cooldownRemaining <= 0) return
-    const interval = setInterval(() => {
-      setCooldownRemaining(prev => {
-        const next = prev - 1
-        if (next <= 0) {
-          clearInterval(interval)
-          return 0
-        }
-        return next
-      })
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [cooldownRemaining])
+  // Countdown timer loop (Commented out, logic moved to AiChecklistButton)
+  // useEffect(() => {
+  //   if (cooldownRemaining <= 0) return
+  //   const interval = setInterval(() => {
+  //     setCooldownRemaining(prev => {
+  //       const next = prev - 1
+  //       if (next <= 0) {
+  //         clearInterval(interval)
+  //         return 0
+  //       }
+  //       return next
+  //     })
+  //   }, 1000)
+  //   return () => clearInterval(interval)
+  // }, [cooldownRemaining])
 
-  const formatCooldownTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
-  }
+  // const formatCooldownTime = (seconds: number) => {
+  //   const mins = Math.floor(seconds / 60)
+  //   const secs = seconds % 60
+  //   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+  // }
 
-  const handleGenerateAiChecklist = async () => {
-    if (isGenerating || cooldownRemaining > 0 || !canEdit || !finalVideoUrl) return
-    setIsGenerating(true)
-    setAiErrorMessage(null)
-
-    try {
-      const res = await fetch('/api/tasks/ai-checklist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          taskId: task.id,
-          youtubeUrl: finalVideoUrl
-        })
-      })
-
-      const data = await res.json()
-      if (res.status === 429) {
-        const seconds = data.remainingSeconds || 15 * 60
-        setCooldownRemaining(seconds)
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(`ai_cooldown_${task.id}`, String(Date.now() + seconds * 1000))
-        }
-        setAiErrorMessage(data.message)
-      } else if (!res.ok) {
-        setAiErrorMessage(data.error || 'Failed to generate checklist')
-      } else {
-        const supabase = createClient()
-        const { data: updatedTask } = await supabase
-          .from('tasks')
-          .select('metadata')
-          .eq('id', task.id)
-          .single()
-        
-        if (updatedTask) {
-          await onUpdateTask(task.id, { metadata: updatedTask.metadata })
-          const seconds = 15 * 60
-          setCooldownRemaining(seconds)
-          if (typeof window !== 'undefined') {
-            localStorage.setItem(`ai_cooldown_${task.id}`, String(Date.now() + seconds * 1000))
-          }
-        }
-      }
-    } catch (err) {
-      setAiErrorMessage(isRTL ? 'حدث خطأ في الاتصال بالخادم' : 'Server communication error')
-    } finally {
-      setIsGenerating(false)
-    }
-  }
+  // const handleGenerateAiChecklist = async () => {
+  //   if (isGenerating || cooldownRemaining > 0 || !canEdit || !finalVideoUrl) return
+  //   setIsGenerating(true)
+  //   setAiErrorMessage(null)
+  //   try {
+  //     const res = await fetch('/api/tasks/ai-checklist', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       },
+  //       body: JSON.stringify({
+  //         taskId: task.id,
+  //         youtubeUrl: finalVideoUrl
+  //       })
+  //     })
+  //     const data = await res.json()
+  //     if (res.status === 429) {
+  //       const seconds = data.remainingSeconds || 15 * 60
+  //       setCooldownRemaining(seconds)
+  //       if (typeof window !== 'undefined') {
+  //         localStorage.setItem(`ai_cooldown_${task.id}`, String(Date.now() + seconds * 1000))
+  //       }
+  //       setAiErrorMessage(data.message)
+  //     } else if (!res.ok) {
+  //       setAiErrorMessage(data.error || 'Failed to generate checklist')
+  //     } else {
+  //       const supabase = createClient()
+  //       const { data: updatedTask } = await supabase
+  //         .from('tasks')
+  //         .select('metadata')
+  //         .eq('id', task.id)
+  //         .single()
+  //       if (updatedTask) {
+  //         await onUpdateTask(task.id, { metadata: updatedTask.metadata })
+  //         const seconds = 15 * 60
+  //         setCooldownRemaining(seconds)
+  //         if (typeof window !== 'undefined') {
+  //           localStorage.setItem(`ai_cooldown_${task.id}`, String(Date.now() + seconds * 1000))
+  //         }
+  //       }
+  //     }
+  //   } catch (err) {
+  //     setAiErrorMessage(isRTL ? 'حدث خطأ في الاتصال بالخادم' : 'Server communication error')
+  //   } finally {
+  //     setIsGenerating(false)
+  //   }
+  // }
 
   // --- REAL-TIME WORKSPACE PRESENCE FOR TASK DRAWER ---
   useEffect(() => {
@@ -1185,6 +1356,18 @@ export default function TaskDrawer({
                 canEdit={canEdit}
               />
 
+              {/* Render isolated AI Checklist button to prevent outer TaskDrawer re-renders on timer tick */}
+              {canEdit && finalVideoUrl && (
+                <AiChecklistButton
+                  taskId={task.id}
+                  finalVideoUrl={finalVideoUrl}
+                  canEdit={canEdit}
+                  isRTL={isRTL}
+                  themeColor={themeColor}
+                  onUpdateTask={onUpdateTask}
+                />
+              )}
+              {/* Commented out old button rendering to respect the safety rule of never deleting code:
               {canEdit && finalVideoUrl && (
                 <div className="space-y-1 mt-2">
                   <button
@@ -1226,6 +1409,7 @@ export default function TaskDrawer({
                   )}
                 </div>
               )}
+              */}
 
               <TaskDrawerChecklist
                 task={task}

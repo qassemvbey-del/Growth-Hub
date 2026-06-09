@@ -2,7 +2,12 @@ import { NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase-server'
 import { createClient } from '@supabase/supabase-js'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleAIFileManager } from '@google/generative-ai/server'
 import { YoutubeTranscript } from 'youtube-transcript'
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
+import { execSync } from 'child_process'
 
 function getYouTubeId(urlOrId: string) {
   if (!urlOrId) return ''
@@ -30,6 +35,11 @@ export async function POST(req: Request) {
     const { taskId, youtubeUrl } = await req.json()
     if (!taskId || !youtubeUrl) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 })
+    }
+
+    const videoId = getYouTubeId(youtubeUrl)
+    if (!videoId) {
+      return NextResponse.json({ error: 'Invalid YouTube URL' }, { status: 400 })
     }
 
     // 1. Authentication Check
@@ -84,38 +94,111 @@ export async function POST(req: Request) {
       }, { status: 429 })
     }
 
-    // 3. Transcript Extraction
-    const videoId = getYouTubeId(youtubeUrl)
-    if (!videoId || videoId.length !== 11) {
-      return NextResponse.json({ error: 'Invalid YouTube Video ID' }, { status: 400 })
-    }
-
     let transcriptText = ''
-    try {
-      const transcriptItems = await YoutubeTranscript.fetchTranscript(videoId)
-      transcriptText = transcriptItems.map(item => item.text).join(' ')
-    } catch (err) {
-      console.error('Transcript fetch failed:', err)
-      return NextResponse.json({ error: 'This video does not have readable subtitles or transcripts.' }, { status: 400 })
-    }
-
-    // 4. Gemini AI Invocation
+    let uploadResult: any = null
     const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
     if (!apiKey) {
       return NextResponse.json({ error: 'Gemini API key not configured' }, { status: 500 })
     }
+    const fileManager = new GoogleAIFileManager(apiKey)
 
+    try {
+      const transcriptItems = await YoutubeTranscript.fetchTranscript(videoId)
+      transcriptText = transcriptItems.map(item => item.text).join(' ')
+    } catch (err) {
+      console.warn('Transcript fetch failed, falling back to Audio Ingestion:', err)
+      const tempDir = os.tmpdir()
+      const ytdlpPath = path.join(process.cwd(), 'yt-dlp.exe')
+      
+      let hasFfmpeg = false
+      try {
+        execSync('ffmpeg -version', { stdio: 'ignore' })
+        hasFfmpeg = true
+      } catch {}
+
+      let audioPath = ''
+      let mimeType = ''
+
+      if (hasFfmpeg) {
+        audioPath = path.join(tempDir, `${videoId}.mp3`)
+        mimeType = 'audio/mp3'
+        try {
+          execSync(`"${ytdlpPath}" -x --audio-format mp3 --audio-quality 5 -o "${path.join(tempDir, videoId)}.%(ext)s" "https://www.youtube.com/watch?v=${videoId}"`, { stdio: 'ignore' })
+        } catch (execErr) {
+          console.error('yt-dlp mp3 download failed:', execErr)
+          return NextResponse.json({ error: 'This video does not have readable subtitles or transcripts, and audio extraction failed.' }, { status: 400 })
+        }
+      } else {
+        audioPath = path.join(tempDir, `${videoId}.m4a`)
+        mimeType = 'audio/mp4'
+        try {
+          execSync(`"${ytdlpPath}" -f ba -o "${audioPath}" "https://www.youtube.com/watch?v=${videoId}"`, { stdio: 'ignore' })
+        } catch (execErr) {
+          console.error('yt-dlp m4a download failed:', execErr)
+          return NextResponse.json({ error: 'This video does not have readable subtitles or transcripts, and audio extraction failed.' }, { status: 400 })
+        }
+      }
+
+      if (!fs.existsSync(audioPath)) {
+        return NextResponse.json({ error: 'Audio file extraction failed' }, { status: 500 })
+      }
+
+      try {
+        uploadResult = await fileManager.uploadFile(audioPath, {
+          mimeType,
+          displayName: `yt-audio-${videoId}`
+        })
+      } catch (uploadErr) {
+        console.error('Gemini File upload failed:', uploadErr)
+        try { fs.unlinkSync(audioPath) } catch {}
+        return NextResponse.json({ error: 'Failed to upload audio to AI processor.' }, { status: 500 })
+      }
+
+      // CRITICAL SECURITY TOPOLOGY: Immediate local server cleanup
+      try {
+        fs.unlinkSync(audioPath)
+      } catch (unlinkErr) {
+        console.error('Failed to cleanup local audio file:', unlinkErr)
+      }
+    }
+
+    // 4. Gemini AI Invocation
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 
-    const systemPrompt = `You are an elite academic tutor. Analyze the following transcript of a technical video tutorial. Generate a pristine, actionable study checklist for a student. Break down the core educational milestones into 4 to 7 sequential items. Each item must be clear, practical, concise, and under 80 characters. Return the output STRICTLY as a valid JSON string array of strings, without any markdown blocks, backticks, or extra explanation text. Example format: ["Understand core architecture", "Analyze infrastructure mapping"]`
+    let response;
+    if (uploadResult) {
+      const systemPrompt = `You are an elite academic tutor. This video does not have readable textual transcripts. You are provided with the raw audio file of the lecture. Listen intently to the spoken explanations, technical keywords, and core lessons delivered by the instructor. 
+Generate a pristine, highly logical study checklist for the student based entirely on the audio contents. 
+Break down the milestones into 4 to 7 sequential checklist items. Each item must be highly practical, actionable, under 80 characters, and written in clean Title Case. 
+Return the output STRICTLY as a valid JSON string array of strings, without any markdown formatting blocks, backticks, or wrapping markdown text. 
+Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
 
-    const response = await model.generateContent({
-      contents: [{
-        role: 'user',
-        parts: [{ text: `${systemPrompt}\n\nTranscript:\n${transcriptText}` }]
-      }]
-    })
+      response = await model.generateContent([
+        {
+          fileData: {
+            mimeType: uploadResult.mimeType,
+            fileUri: uploadResult.uri
+          }
+        },
+        { text: systemPrompt }
+      ])
+
+      try {
+        await fileManager.deleteFile(uploadResult.name)
+      } catch (delErr) {
+        console.error('Failed to delete uploaded file from Gemini File API:', delErr)
+      }
+    } else {
+      const systemPrompt = `You are an elite academic tutor. Analyze the following transcript of a technical video tutorial. Generate a pristine, actionable study checklist for a student. Break down the core educational milestones into 4 to 7 sequential items. Each item must be clear, practical, concise, and under 80 characters. Return the output STRICTLY as a valid JSON string array of strings, without any markdown blocks, backticks, or extra explanation text. Example format: ["Understand core architecture", "Analyze infrastructure mapping"]`
+
+      response = await model.generateContent({
+        contents: [{
+          role: 'user',
+          parts: [{ text: `${systemPrompt}\n\nTranscript:\n${transcriptText}` }]
+        }]
+      })
+    }
 
     const rawText = response.response.text().trim()
     let cleanedJson = rawText
