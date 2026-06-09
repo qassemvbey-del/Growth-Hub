@@ -1,11 +1,12 @@
 'use client'
 
-import { ListPlus, X, Loader2 } from 'lucide-react'
+import { ListPlus, X, Loader2, Calendar, Clock } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
 import { cleanPlaylistTitles } from '@/app/actions/ai-magic'
 import { useGrowth } from '@/context/GrowthContext'
+import { cn } from '@/lib/utils'
 
 interface PreviewTask {
   title: string
@@ -27,7 +28,6 @@ interface Props {
 
 const YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || 'AIzaSyAcS6t0jQivhoXePWTajpocP0upKX313hk'
 
-// export default function PlaylistImportModal({ isOpen, onClose, missionId, themeColor, onTasksAdded }: Props) {
 export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColor, onTasksAdded }: Props) {
   const { isRTL, profile } = useGrowth()
   const [playlistUrl, setPlaylistUrl] = useState('')
@@ -35,6 +35,10 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
   const [error, setError] = useState<string | null>(null)
   const [previewTasks, setPreviewTasks] = useState<PreviewTask[]>([])
   const [confirming, setConfirming] = useState(false)
+
+  // Smart Scheduling States
+  const [studyDays, setStudyDays] = useState<number[]>([1, 2, 3, 4, 5]) // Monday to Friday default
+  const [dailyCapacity, setDailyCapacity] = useState<number>(60) // 60 minutes default
 
   const [loadingTextIndex, setLoadingTextIndex] = useState(0)
 
@@ -93,12 +97,6 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
     ].filter(Boolean).join(' ') || '0s'
   }
 
-  const calculateWeight = (seconds: number) => {
-    if (seconds < 600) return 1 // Under 10 min
-    if (seconds <= 1800) return 2 // 10-30 min
-    return 3 // Over 30 min
-  }
-
   const extractPlaylistId = (url: string) => {
     const match = url.match(/[?&]list=([^#\&\?]+)/)
     return match ? match[1] : null
@@ -109,7 +107,6 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
     setPreviewTasks([])
     const playlistId = extractPlaylistId(playlistUrl)
     if (!playlistId) {
-      // setError(isRTL ? 'إشارة غير صالحة // ليس قائمة تشغيل' : 'INVALID_SIGNAL // NOT A PLAYLIST')
       setError(isRTL ? 'إشارة غير صالحة - ليس قائمة تشغيل' : 'Invalid Link - Not a YouTube Playlist')
       return
     }
@@ -122,10 +119,8 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
 
       if (itemsData.error) {
         if (itemsData.error.errors?.[0]?.reason === 'playlistNotFound' || itemsData.error.code === 404) {
-          // setError(isRTL ? 'تم رفض الوصول // قائمة خاصة' : 'ACCESS_DENIED // PRIVATE_FEED')
           setError(isRTL ? 'تم رفض الوصول - قائمة خاصة' : 'Access Denied - Private Playlist')
         } else {
-          // setError(`API_ERROR // ${itemsData.error.message?.toUpperCase() || 'UNKNOWN_REASON'}`)
           setError(`API Error - ${itemsData.error.message || 'Unknown Reason'}`)
         }
         setLoading(false)
@@ -134,7 +129,6 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
 
       const items = itemsData.items || []
       if (items.length === 0) {
-        // setError(isRTL ? 'خلاصة فارغة // لم يتم العثور على فيديوهات' : 'EMPTY_FEED // NO_VIDEOS_FOUND')
         setError(isRTL ? 'خلاصة فارغة - لم يتم العثور على فيديوهات' : 'Empty Playlist - No Videos Found')
         setLoading(false)
         return
@@ -182,38 +176,68 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
 
       setPreviewTasks(relativeMapped)
     } catch (err: any) {
-      // setError(`NETWORK_ERROR // ${err.message?.toUpperCase() || 'RETRY_SEQUENCE'}`)
       setError(`Network Error - Please check connection and try again`)
     } finally {
       setLoading(false)
     }
   }
 
+  // Smart Chunking Algorithm
+  const calculateDeadlines = (
+    tasksList: PreviewTask[],
+    selectedDays: number[],
+    capacityMinutes: number
+  ) => {
+    if (selectedDays.length === 0) return tasksList.map(() => null)
+    
+    const getNextAvailableStudyDate = (startDate: Date) => {
+      const d = new Date(startDate.getTime())
+      for (let i = 0; i < 30; i++) {
+        if (selectedDays.includes(d.getDay())) {
+          return d
+        }
+        d.setDate(d.getDate() + 1)
+      }
+      return d
+    }
+
+    const deadlines: (string | null)[] = []
+    let currentDate = getNextAvailableStudyDate(new Date())
+    let currentDayMinutes = 0
+    
+    tasksList.forEach((task) => {
+      const durationMinutes = Math.ceil(task.seconds / 60)
+      
+      // If adding this duration exceeds capacity, and we have already added tasks today
+      if (currentDayMinutes + durationMinutes > capacityMinutes && currentDayMinutes > 0) {
+        const nextDay = new Date(currentDate.getTime())
+        nextDay.setDate(nextDay.getDate() + 1)
+        currentDate = getNextAvailableStudyDate(nextDay)
+        currentDayMinutes = 0
+      }
+      
+      deadlines.push(currentDate.toISOString().split('T')[0])
+      currentDayMinutes += durationMinutes
+    })
+    
+    return deadlines
+  }
+
   const handleDeploy = async () => {
+    if (validationError) return
     setConfirming(true)
     const { data: { user } } = await supabase.auth.getUser()
-    // const isLocal = typeof missionId === 'string' && missionId.startsWith('local_')
     const isLocal = typeof goalId === 'string' && goalId.startsWith('local_')
 
     if (!user && !isLocal) {
-      // setError('AUTH_REQUIRED // SESSION_TERMINATED')
       setError('Authentication Required')
       setConfirming(false)
       return
     }
 
     const now = Date.now()
-    // const payload = previewTasks.map((t, index) => ({
-    //   cup_id: missionId,
-    //   title: t.title,
-    //   original_title: t.originalTitle,
-    //   weight: t.weight,
-    //   is_completed: false,
-    //   type: 'standard',
-    //   video_id: t.videoId,
-    //   video_progress: 0,
-    //   created_at: new Date(now + index * 10).toISOString()
-    // }))
+    const calculatedDates = calculateDeadlines(previewTasks, studyDays, dailyCapacity)
+
     const payload = previewTasks.map((t, index) => ({
       goal_id: goalId,
       title: t.title,
@@ -223,7 +247,11 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
       type: 'standard',
       video_id: t.videoId,
       video_progress: 0,
-      created_at: new Date(now + index * 10).toISOString()
+      created_at: new Date(now + index * 10).toISOString(),
+      deadline: calculatedDates[index] || null,
+      metadata: {
+        endDate: calculatedDates[index] || null
+      }
     }))
 
     if (isLocal) {
@@ -235,7 +263,6 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
       // Save to localStorage under guest_goals
       const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
       const updatedGoals = guestGoals.map((g: any) => {
-        // if (g.id === missionId) {
         if (g.id === goalId) {
           return {
             ...g,
@@ -258,7 +285,6 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
 
     if (insertError) {
       console.error('PLAYLIST_IMPORT_ERROR:', insertError)
-      // setError(`DATABASE_ERROR // ${insertError.message.toUpperCase()}`)
       setError(`Database Error - ${insertError.message}`)
       setConfirming(false)
     } else {
@@ -273,28 +299,46 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
   if (!isOpen) return null
 
   const totalDuration = previewTasks.reduce((acc, t) => acc + t.seconds, 0)
+  
+  // Strict Validation: Capacity cannot be less than shortest video
+  const shortestVideoSeconds = previewTasks.length > 0 ? Math.min(...previewTasks.map(t => t.seconds)) : 0
+  const shortestVideoMinutes = Math.ceil(shortestVideoSeconds / 60)
+  
+  const validationError = (() => {
+    if (previewTasks.length === 0) return null
+    if (studyDays.length === 0) {
+      return isRTL ? 'يرجى تحديد يوم دراسي واحد على الأقل' : 'Please select at least one study day'
+    }
+    if (dailyCapacity < shortestVideoMinutes) {
+      return isRTL 
+        ? `لا يمكن أن تكون السعة اليومية أقل من أقصر فيديو: ${shortestVideoMinutes} دقيقة` 
+        : `Daily capacity cannot be less than the shortest video: ${shortestVideoMinutes} mins`
+    }
+    return null
+  })()
+
+  const daysLabels = isRTL 
+    ? ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت']
+    : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
   return (
-    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-white/60 dark:bg-black/90 backdrop-blur-md" onClick={onClose} dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md" onClick={onClose} dir={isRTL ? 'rtl' : 'ltr'}>
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-[95vw] md:max-w-2xl bg-white/95 dark:bg-[#080808]/90 backdrop-blur-xl border rounded-2xl overflow-y-auto flex flex-col shadow-2xl max-h-[90vh] my-auto p-4 md:p-6"
+        className="w-full max-w-[95vw] md:max-w-2xl bg-zinc-950/95 border border-white/10 rounded-2xl overflow-y-auto flex flex-col shadow-2xl max-h-[90vh] my-auto p-4 md:p-6"
         style={{ borderColor: `${themeColor}33` }}
       >
         {/* Header */}
-        <div className="pb-4 border-b flex justify-between items-center border-zinc-200 dark:border-white/10" style={{ borderColor: `${themeColor}22` }}>
+        <div className="pb-4 border-b flex justify-between items-center border-white/5 bg-zinc-900/40 px-4 -mx-4 -mt-4 md:px-6 md:-mx-6 md:-mt-6 rounded-t-2xl">
           <div className="flex items-center gap-3">
-            <ListPlus className="text-neon-green" style={{ color: themeColor }} />
-            {/* <h2 className="font-space font-black uppercase tracking-widest text-sm" style={{ color: themeColor }}>
-              {isRTL ? 'استيراد قائمة التشغيل' : 'PLAYLIST_IMPORT'}
-            </h2> */}
-            <h2 className="font-space font-black tracking-widest text-sm" style={{ color: themeColor }}>
+            <ListPlus className="text-teal-400" style={{ color: themeColor }} />
+            <h2 className="font-space font-black tracking-widest text-sm text-white uppercase">
               {isRTL ? 'استيراد قائمة التشغيل' : 'Playlist Import'}
             </h2>
           </div>
-          <button onClick={onClose} className="text-zinc-400 dark:text-white/30 hover:text-zinc-900 dark:hover:text-white cursor-pointer transition-colors">
+          <button onClick={onClose} className="text-zinc-400 hover:text-white cursor-pointer transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -302,32 +346,28 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
         {/* URL Input Area */}
         <div className="py-4 space-y-4">
           <div className="space-y-2">
-            {/* <label className="text-[10px] font-space font-black text-zinc-600 dark:text-white/40 uppercase tracking-widest">
-              {isRTL ? 'رابط قائمة تشغيل يوتيوب' : 'YOUTUBE_PLAYLIST_URL'}
-            </label> */}
-            <label className="text-[10px] font-space font-black text-zinc-600 dark:text-white/40 tracking-widest">
+            <label className="text-[10px] font-space font-black text-zinc-500 tracking-widest">
               {isRTL ? 'رابط قائمة تشغيل يوتيوب' : 'YouTube Playlist URL'}
             </label>
             <div className="flex gap-2">
               <input 
                 value={playlistUrl}
                 onChange={e => setPlaylistUrl(e.target.value)}
-                placeholder="HTTPS://WWW.YOUTUBE.COM/PLAYLIST?LIST=..."
-                className="flex-1 bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 py-2.5 px-4 rounded-xl font-space text-xs text-zinc-900 dark:text-white outline-none focus:border-neon-green/50"
+                placeholder="https://www.youtube.com/playlist?list=..."
+                className="flex-1 bg-white/[0.02] border border-white/5 py-2.5 px-4 rounded-xl font-space text-xs text-white outline-none focus:border-teal-500/50"
                 style={{ borderColor: error ? '#FF0055' : undefined }}
               />
               <button 
                 onClick={handleFetch}
                 disabled={loading || !playlistUrl.trim()}
-                className="py-2.5 px-4 font-space font-black text-[10px] uppercase tracking-widest transition-all bg-neon-green text-black disabled:opacity-30 rounded-xl shadow-lg hover:brightness-110 shrink-0 cursor-pointer min-w-[130px] text-center"
+                className="py-2.5 px-6 font-space font-black text-[10px] uppercase tracking-widest transition-all bg-teal-500 text-black disabled:opacity-30 rounded-xl shadow-lg hover:brightness-110 shrink-0 cursor-pointer min-w-[130px] text-center"
                 style={{ backgroundColor: themeColor }}
               >
-                {/* {loading ? buttonMessages[loadingTextIndex] : (isRTL ? 'فحص' : 'SCAN')} */}
                 {loading ? buttonMessages[loadingTextIndex] : (isRTL ? 'فحص' : 'Scan')}
               </button>
             </div>
             {loading && (
-              <div className="flex flex-col items-center justify-center p-6 bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl space-y-4 mt-4">
+              <div className="flex flex-col items-center justify-center p-6 bg-white/[0.02] border border-white/5 rounded-xl space-y-4 mt-4">
                 <Loader2 className="animate-spin w-10 h-10 mx-auto mb-4" style={{ color: themeColor }} />
                 <span className="text-xs font-black tracking-widest animate-pulse uppercase" style={{ color: themeColor }}>
                   {loadingMessages[loadingTextIndex]}
@@ -345,55 +385,111 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
                 animate={{ opacity: 1, height: 'auto' }}
                 className="space-y-4"
               >
-                <div className="flex justify-between items-end border-b border-zinc-200 dark:border-white/5 pb-2">
-                  {/* <p className="text-[10px] font-space font-black text-zinc-600 dark:text-white/40 uppercase tracking-widest">
-                    {isRTL 
-                      ? `تم العثور على: ${previewTasks.length} فيديو // المجموع: ${formatSeconds(totalDuration)}`
-                      : `FOUND: ${previewTasks.length} VIDEOS // TOTAL: ${formatSeconds(totalDuration)}`
-                    }
-                  </p> */}
-                  <p className="text-[10px] font-space font-black text-zinc-600 dark:text-white/40 tracking-widest">
+                <div className="flex justify-between items-end border-b border-white/5 pb-2">
+                  <p className="text-[10px] font-space font-black text-zinc-500 tracking-widest">
                     {isRTL 
                       ? `تم العثور على: ${previewTasks.length} فيديو - المجموع: ${formatSeconds(totalDuration)}`
                       : `Found: ${previewTasks.length} Videos - Total: ${formatSeconds(totalDuration)}`
                     }
                   </p>
                 </div>
-                <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2 scrollbar-thin">
+                <div className="max-h-[220px] overflow-y-auto space-y-2 pr-2 scrollbar-thin">
                   {previewTasks.map((t, i) => (
-                    <div key={i} className="flex justify-between items-center py-2.5 px-4 border border-zinc-200 dark:border-white/5 bg-black/5 dark:bg-white/5 rounded-xl">
+                    <div key={i} className="flex justify-between items-center py-2.5 px-4 border border-white/5 bg-white/[0.01] rounded-xl">
                       <div className="flex-1 min-w-0 pr-4">
-                        <p className="font-space text-[11px] font-bold text-zinc-900 dark:text-white uppercase truncate">{t.title}</p>
-                        <p className="font-space text-[9px] text-zinc-500 dark:text-white/40 uppercase tracking-tighter">
-                          {/* {isRTL ? `المدة: ${formatSeconds(t.seconds)}` : `DURATION: ${formatSeconds(t.seconds)}`} */}
+                        <p className="font-space text-[11px] font-bold text-white uppercase truncate">{t.title}</p>
+                        <p className="font-space text-[9px] text-zinc-500 uppercase tracking-tighter">
                           {isRTL ? `المدة: ${formatSeconds(t.seconds)}` : `Duration: ${formatSeconds(t.seconds)}`}
                         </p>
                       </div>
                       <div className="flex gap-1 shrink-0">
                         {[1,2,3,4,5].map(w => (
-                          <div key={w} className={`w-1.5 h-4 rounded-[1px] ${w <= t.weight ? 'bg-neon-green shadow-[0_0_8px_rgba(57,255,20,0.5)]' : 'bg-black/10 dark:bg-white/5'}`} style={w <= t.weight ? { backgroundColor: themeColor } : {}} />
+                          <div key={w} className={`w-1.5 h-4 rounded-[1px] ${w <= t.weight ? 'bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.5)]' : 'bg-white/5'}`} style={w <= t.weight ? { backgroundColor: themeColor } : {}} />
                         ))}
                       </div>
                     </div>
                   ))}
                 </div>
 
+                {/* Smart Scheduling Section */}
+                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl space-y-4 mt-2">
+                  <div className="flex items-center gap-2 border-b border-white/5 pb-2">
+                    <Calendar className="w-4 h-4 text-teal-400" />
+                    <h4 className="text-xs font-bold text-white font-space">
+                      {isRTL ? 'الجدولة الذكية' : 'Smart Scheduling'}
+                    </h4>
+                  </div>
+
+                  {/* Study Days Pills */}
+                  <div className="space-y-2">
+                    <span className="text-[10px] text-zinc-500 font-mono block">
+                      {isRTL ? 'أيام الدراسة المتاحة' : 'Study Days'}
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {daysLabels.map((label, index) => {
+                        const isSelected = studyDays.includes(index)
+                        return (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => {
+                              if (isSelected) {
+                                setStudyDays(studyDays.filter(d => d !== index))
+                              } else {
+                                setStudyDays([...studyDays, index])
+                              }
+                            }}
+                            className={cn(
+                              "px-3 py-1.5 rounded-lg text-xs font-space font-medium border transition-all cursor-pointer",
+                              isSelected 
+                                ? "bg-teal-500/10 border-teal-500 text-teal-400" 
+                                : "bg-white/[0.01] border-white/5 text-zinc-500 hover:text-white"
+                            )}
+                          >
+                            {label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Daily Capacity Input */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] text-zinc-500 font-mono flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>{isRTL ? 'سعة الدراسة اليومية (بالدقائق)' : 'Daily Capacity (Minutes)'}</span>
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={dailyCapacity}
+                      onChange={(e) => setDailyCapacity(Math.max(1, parseInt(e.target.value) || 0))}
+                      className="w-full sm:w-32 bg-white/[0.02] border border-white/5 py-2.5 px-4 rounded-xl font-space text-xs text-white outline-none focus:border-teal-500/50"
+                    />
+                  </div>
+                </div>
+
+                {/* Validation Error Message */}
+                {validationError && (
+                  <p className="text-[10px] font-space font-black text-[#FF0055] tracking-widest mt-2">
+                    {validationError}
+                  </p>
+                )}
+
                 {/* Footer Actions */}
-                <div className="flex justify-end gap-4 pt-4 border-t border-zinc-200 dark:border-white/5">
+                <div className="flex justify-end gap-4 pt-4 border-t border-white/5">
                   <button 
                     onClick={onClose}
-                    className="py-2.5 px-4 font-space font-black text-[10px] uppercase tracking-widest text-zinc-500 dark:text-white/40 hover:text-zinc-900 dark:hover:text-white rounded-xl transition-all cursor-pointer"
+                    className="py-2.5 px-4 font-space font-black text-[10px] uppercase tracking-widest text-zinc-500 hover:text-white rounded-xl transition-all cursor-pointer"
                   >
-                    {/* {isRTL ? 'إلغاء' : 'CANCEL'} */}
                     {isRTL ? 'إلغاء' : 'Cancel'}
                   </button>
                   <button 
                     onClick={handleDeploy}
-                    disabled={confirming}
-                    className="py-2.5 px-6 font-space font-black text-[10px] uppercase tracking-widest bg-neon-green text-black shadow-lg rounded-xl transition-all hover:brightness-110 cursor-pointer"
+                    disabled={confirming || !!validationError}
+                    className="py-2.5 px-6 font-space font-black text-[10px] uppercase tracking-widest bg-teal-500 text-black shadow-lg rounded-xl transition-all hover:brightness-110 cursor-pointer disabled:opacity-30"
                     style={{ backgroundColor: themeColor, boxShadow: `0 0 20px ${themeColor}44` }}
                   >
-                    {/* {confirming ? (isRTL ? 'جاري الإنشاء...' : 'CREATING...') : (isRTL ? 'إنشاء' : 'CREATE')} */}
                     {confirming ? (isRTL ? 'جاري الإنشاء...' : 'Creating...') : (isRTL ? 'إنشاء' : 'Create')}
                   </button>
                 </div>
