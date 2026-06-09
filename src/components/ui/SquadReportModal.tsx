@@ -1,8 +1,8 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, FileText, Download, BarChart2, CheckCircle, Clock, AlertTriangle, Users } from 'lucide-react'
+import { X, FileText, Download, BarChart2, CheckCircle, Clock, AlertTriangle, Users, Search, ChevronDown } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -35,6 +35,9 @@ export default function SquadReportModal({
   themeColor,
   isRTL
 }: SquadReportModalProps) {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState<'progress' | 'overdue' | 'name'>('progress')
+
   if (!isOpen || !mission) return null
 
   const tasks = mission.tasks || []
@@ -94,6 +97,22 @@ export default function SquadReportModal({
     }
   })
 
+  // Filter and sort the rendered members list dynamically
+  const filteredAndSortedStats = enrichedStats
+    .filter(stat => stat.member.full_name.toLowerCase().includes(searchQuery.toLowerCase()))
+    .sort((a, b) => {
+      if (sortBy === 'progress') {
+        return b.progressPercent - a.progressPercent
+      }
+      if (sortBy === 'overdue') {
+        return b.overdueCount - a.overdueCount
+      }
+      if (sortBy === 'name') {
+        return a.member.full_name.localeCompare(b.member.full_name)
+      }
+      return 0
+    })
+
   // Goal metrics
   const totalTasksCount = tasks.length
   const completedTasksCount = tasks.filter((t: any) => t.is_completed).length
@@ -141,32 +160,72 @@ export default function SquadReportModal({
     const wsMembers = XLSX.utils.json_to_sheet(membersData)
     XLSX.utils.book_append_sheet(wb, wsMembers, isRTL ? 'إحصائيات الأعضاء' : 'Members Stats')
 
-    // Sheet 3: Tasks Log
-    const tasksData = tasks.map((t: any) => {
-      const deadline = getTaskDeadline(t)
+    // Chronological timeline log
+    const timelineEvents: any[] = []
+    tasks.forEach((t: any) => {
       const assignee = squadMembers.find(m => m.id === t.assigned_to)
-      return {
-        [isRTL ? 'عنوان المهمة' : 'Task Title']: t.title,
-        [isRTL ? 'الحالة' : 'Status']: t.is_completed ? (isRTL ? 'مكتملة' : 'Completed') : (isRTL ? 'قيد التنفيذ' : 'In Progress'),
-        [isRTL ? 'الأهمية' : 'Weight']: t.weight || 1,
-        [isRTL ? 'المسؤول' : 'Assignee']: assignee ? assignee.full_name : (isRTL ? 'غير معين' : 'Unassigned'),
-        [isRTL ? 'تاريخ الاستحقاق' : 'Due Date']: deadline || (isRTL ? 'غير محدد' : 'Not Set')
+      const userName = assignee ? assignee.full_name : (isRTL ? 'غير معين' : 'Unassigned')
+      
+      // Created event
+      if (t.created_at) {
+        timelineEvents.push({
+          date: new Date(t.created_at),
+          user: userName,
+          action: isRTL ? 'إنشاء مهمة' : 'Task Created',
+          taskTitle: t.title
+        })
+      }
+      
+      // Completed event
+      if (t.is_completed) {
+        const completedDate = t.metadata?.completedAt || t.updated_at || t.created_at
+        timelineEvents.push({
+          date: completedDate ? new Date(completedDate) : new Date(),
+          user: userName,
+          action: isRTL ? 'إكمال مهمة' : 'Task Completed',
+          taskTitle: t.title
+        })
       }
     })
-    const wsTasks = XLSX.utils.json_to_sheet(tasksData)
+
+    // Sort timeline events: newest first
+    timelineEvents.sort((a, b) => b.date.getTime() - a.date.getTime())
+
+    // Sheet 3: Tasks Log (Chronological Audit Trail)
+    const tasksLogData = timelineEvents.map(e => ({
+      [isRTL ? 'التاريخ والوقت' : 'Date & Time']: e.date.toLocaleString(),
+      [isRTL ? 'العضو / المسؤول' : 'User / Assignee']: e.user,
+      [isRTL ? 'الإجراء' : 'Action']: e.action,
+      [isRTL ? 'عنوان المهمة' : 'Task Title']: e.taskTitle
+    }))
+    const wsTasks = XLSX.utils.json_to_sheet(tasksLogData)
     XLSX.utils.book_append_sheet(wb, wsTasks, isRTL ? 'سجل المهام' : 'Tasks Log')
 
-    // Apply RTL view direction to sheets if in Arabic mode
+    // Apply RTL view direction, Autofilters and Frozen headers to sheets
     const sheets: any[] = [wsOverview, wsMembers, wsTasks];
     sheets.forEach((ws) => {
       if (isRTL) {
         ws['!dir'] = 'rtl';
-        ws['!views'] = [{ RTL: true }];
       }
       
       const refVal = ws['!ref'];
       if (!refVal) return;
       const range = XLSX.utils.decode_range(refVal);
+      
+      // Add Autofilter on header row (row 1)
+      const lastCol = XLSX.utils.encode_col(range.e.c);
+      ws['!autofilter'] = { ref: `A1:${lastCol}1` };
+      
+      // Freeze header row (freeze top 1 row)
+      ws['!views'] = [{ 
+        state: 'frozen', 
+        ySplit: 1, 
+        activePane: 'bottomLeft', 
+        topLeftCell: 'A2',
+        RTL: isRTL 
+      }];
+      
+      // Generously space columns
       const colWidths = [];
       for (let C = range.s.c; C <= range.e.c; ++C) {
         let maxLen = 10;
@@ -176,12 +235,13 @@ export default function SquadReportModal({
             maxLen = Math.max(maxLen, cell.v.toString().length);
           }
         }
-        colWidths.push({ wch: maxLen + 3 });
+        colWidths.push({ wch: maxLen + 4 }); // Generous spacing +4
       }
       ws['!cols'] = colWidths;
     });
 
-    XLSX.writeFile(wb, `Squad_Report_${mission.id.slice(0, 8)}.xlsx`)
+    const safeName = mission.title.replace(/\s+/g, '_');
+    XLSX.writeFile(wb, `${safeName}_Squad_Report.xlsx`)
   }
 
   // Export to PDF (Strictly in English fallback to avoid disconnected Arabic fonts bug)
@@ -337,6 +397,33 @@ export default function SquadReportModal({
               </div>
             </div>
 
+            {/* Filtering & Sorting Sticky Bar */}
+            <div className="sticky top-0 z-10 bg-[#09090b]/95 backdrop-blur-md p-3 border border-white/5 rounded-xl flex flex-col sm:flex-row items-center gap-3">
+              <div className="relative w-full sm:flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={isRTL ? 'البحث عن عضو الفيلق...' : 'Search squad members...'}
+                  className="w-full bg-zinc-900/60 border border-white/5 rounded-lg py-2 pl-9 pr-4 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-teal-500/50 transition-colors"
+                />
+              </div>
+
+              <div className="relative w-full sm:w-48 shrink-0">
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+                <select
+                  value={sortBy}
+                  onChange={(e: any) => setSortBy(e.target.value)}
+                  className="w-full bg-zinc-900/60 border border-white/5 rounded-lg py-2 pl-3 pr-9 text-xs text-white appearance-none focus:outline-none focus:border-teal-500/50 transition-colors"
+                >
+                  <option value="progress">{isRTL ? 'الأعلى إنجازاً' : 'Highest Progress'}</option>
+                  <option value="overdue">{isRTL ? 'الأكثر تأخراً' : 'Most Overdue'}</option>
+                  <option value="name">{isRTL ? 'الاسم (أ - ي)' : 'Name (A-Z)'}</option>
+                </select>
+              </div>
+            </div>
+
             {/* Desktop Table View (Visible only on desktop screens) */}
             <div className="hidden md:block border border-white/5 rounded-xl overflow-hidden bg-white/[0.01]">
               <div className="overflow-x-auto">
@@ -352,7 +439,7 @@ export default function SquadReportModal({
                     </tr>
                   </thead>
                   <tbody>
-                    {enrichedStats.map(stat => (
+                    {filteredAndSortedStats.map(stat => (
                       <tr key={stat.member.id} className="border-b border-white/5 hover:bg-white/[0.02] text-xs font-space text-white/90">
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2 min-w-0">
@@ -401,7 +488,7 @@ export default function SquadReportModal({
 
             {/* Mobile Stacked Cards (Visible only on mobile screens) */}
             <div className="block md:hidden space-y-4">
-              {enrichedStats.map(stat => (
+              {filteredAndSortedStats.map(stat => (
                 <div key={stat.member.id} className="p-4 bg-white/[0.02] border border-white/5 rounded-xl space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
