@@ -14,6 +14,7 @@ export default function InlineGuideTip({ hasTasks }: InlineGuideTipProps) {
   const { currentTheme, isRTL } = useGrowth()
   const [isDismissed, setIsDismissed] = useState(true) // Default true to prevent flash
 
+  {/*
   useEffect(() => {
     // Check localStorage only on client
     if (typeof window !== 'undefined') {
@@ -21,6 +22,13 @@ export default function InlineGuideTip({ hasTasks }: InlineGuideTipProps) {
       setIsDismissed(dismissed)
     }
   }, [])
+  */}
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const dismissed = localStorage.getItem('dismissed_core_tips') === 'true'
+      setIsDismissed(dismissed || hasTasks)
+    }
+  }, [hasTasks])
 
   if (isDismissed) return null
 

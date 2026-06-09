@@ -217,9 +217,23 @@ export default function TaskDrawerMetadata({
                 
                 {/* Only owner can unassign */}
                 {(currentUserId === missionOwnerId) && (
+                /* Previous onClick handler: onClick={() => updateTask(task.id, { assigned_to: null, assignee: null })} */
                 <button
                   type="button"
-                  onClick={() => updateTask(task.id, { assigned_to: null, assignee: null })}
+                  onClick={async () => {
+                    const prevAssigneeId = task.assigned_to
+                    await updateTask(task.id, { assigned_to: null, assignee: null })
+                    if (prevAssigneeId && prevAssigneeId !== currentUserId) {
+                      const senderName = profile?.full_name || 'Operator'
+                      const notifTitle = isRTL
+                        ? `👤 تم إلغاء تعيين المهمة`
+                        : `👤 Task unassigned`
+                      const notifContent = isRTL
+                        ? `${senderName} ألغى تعيينك من المهمة "${task.title}"`
+                        : `${senderName} unassigned you from the task "${task.title}"`
+                      await sendNotification(prevAssigneeId, 'reaction', notifTitle, notifContent)
+                    }
+                  }}
                   className="px-3 py-1.5 border border-red-500/30 hover:border-red-500 hover:bg-red-500/10 text-red-400 hover:text-red-300 font-black tracking-widest text-[9px] uppercase rounded-md transition-colors cursor-pointer"
                 >
                   {/* {isRTL ? 'إلغاء التعيين' : 'UNASSIGN'} */}
