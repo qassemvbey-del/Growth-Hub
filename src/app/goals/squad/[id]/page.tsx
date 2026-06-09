@@ -2657,7 +2657,19 @@ const { progress, isInRedZone } = useMemo(() => {
                                                 onClick={async () => {
                                                   setIsReviewing(req.id)
                                                   playBlip()
-                                                  const { data, error } = await supabase.rpc('review_squad_join_request', { p_request_id: req.id, p_action: 'reject' })
+                                                  console.log('REJECT RPC call with:', {
+                                                     p_request_id: req.id,
+                                                     p_action: 'reject',
+                                                     req_object: req
+                                                   })
+                                                   // Commented out per rule "Never delete code, only comment it out":
+                                                   // const { data, error } = await supabase.rpc('review_squad_join_request', { p_request_id: req.id, p_action: 'reject' })
+                                                   const { data, error } = await supabase.rpc(
+                                                     'review_squad_join_request', {
+                                                     p_request_id: req.id,
+                                                     p_action: 'reject'
+                                                   })
+                                                   console.log('REJECT result:', { data, error })
                                                   if (error) {
                                                     showToast(isRTL ? 'فشل رفض الطلب' : 'FAILED TO REJECT', 'warning')
                                                     playError()
