@@ -72,6 +72,7 @@ interface AiChecklistButtonProps {
   resolvedDuration: number
   taskTitle: string
   goalTitle: string
+  hasAiChecklist: boolean
 }
 
 function AiChecklistButton({
@@ -83,7 +84,8 @@ function AiChecklistButton({
   onUpdateTask,
   resolvedDuration,
   taskTitle,
-  goalTitle
+  goalTitle,
+  hasAiChecklist
 }: AiChecklistButtonProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
@@ -175,7 +177,7 @@ function AiChecklistButton({
   // }
 
   const handleGenerate = async () => {
-    if (isGenerating || cooldownRemaining > 0 || !canEdit || !finalVideoUrl) return
+    if (isGenerating || cooldownRemaining > 0 || !canEdit || !finalVideoUrl || hasAiChecklist) return
     setIsGenerating(true)
     setAiErrorMessage(null)
 
@@ -233,10 +235,10 @@ function AiChecklistButton({
       <button
         type="button"
         onClick={handleGenerate}
-        disabled={isGenerating || cooldownRemaining > 0}
+        disabled={isGenerating || cooldownRemaining > 0 || hasAiChecklist}
         className={cn(
           "w-full flex items-center justify-center gap-2 py-2 px-3.5 rounded-xl font-medium text-xs transition-all duration-300 backdrop-blur-sm",
-          isGenerating
+          (isGenerating || hasAiChecklist)
             ? "bg-zinc-800/80 text-zinc-500 cursor-not-allowed border border-white/5 animate-pulse"
             : cooldownRemaining > 0
               ? "bg-zinc-900/40 text-zinc-500 border border-white/5 cursor-not-allowed opacity-40"
@@ -247,16 +249,15 @@ function AiChecklistButton({
           <>
             <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400" />
             <span className="animate-pulse">
-              {countdown > 0 ? (
-                isRTL 
-                  ? `جاري تحليل الصوت... ${formatCountdownVal(countdown)}` 
-                  : `Analyzing Audio... ${formatCountdownVal(countdown)}`
-              ) : (
-                isRTL 
-                  ? 'جاري إنهاء العملية...' 
-                  : 'Finishing up...'
-              )}
+              {isRTL 
+                ? `جاري استخراج المنهج الذكي... ${formatCountdownVal(countdown)}` 
+                : `Extracting smart curriculum... ${formatCountdownVal(countdown)}`}
             </span>
+          </>
+        ) : hasAiChecklist ? (
+          <>
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+            <span>{isRTL ? 'تم إنشاء المنهج الذكي بالفعل' : 'Smart Curriculum Active'}</span>
           </>
         ) : cooldownRemaining > 0 ? (
           <>
@@ -1269,14 +1270,14 @@ export default function TaskDrawer({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-stretch justify-end p-0">
+    <div className="fixed inset-0 z-[9999] flex items-stretch justify-end p-0">
       {/* 1. Backdrop Overlay (with backdrop blur as requested) */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 bg-black/60 z-[60] cursor-pointer backdrop-blur-md"
+        className="fixed inset-0 bg-black/60 z-[9999] cursor-pointer backdrop-blur-md"
       />
 
       {/* 2. Sliding Drawer Content Container */}
@@ -1286,7 +1287,7 @@ export default function TaskDrawer({
         exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
         className={cn(
-          "h-[100dvh] bg-zinc-950/95 backdrop-blur-xl border-t md:border-l md:border-t-0 border-white/5 shadow-2xl flex flex-col justify-between rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden z-[60] transition-all duration-300",
+          "h-[100dvh] bg-zinc-950/95 backdrop-blur-xl border-t md:border-l md:border-t-0 border-white/5 shadow-2xl flex flex-col justify-between rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden z-[9999] transition-all duration-300",
           isExpanded ? "w-full md:w-[90vw] max-w-5xl" : "w-full sm:w-[450px] max-w-md"
         )}
       >
@@ -1412,6 +1413,7 @@ export default function TaskDrawer({
               {canEdit && finalVideoUrl && (() => {
                 const currentGoal = goals.find((g: any) => g.id === goalId || g.id === task.goal_id)
                 const goalTitleText = currentGoal?.title || 'Specialized Curriculum'
+                const hasAiChecklist = subtasks.some((s: any) => s.id?.startsWith('sub_ai_') || s.id?.startsWith('ai-'))
                 return (
                   <AiChecklistButton
                     taskId={task.id}
@@ -1423,6 +1425,7 @@ export default function TaskDrawer({
                     resolvedDuration={resolvedDuration}
                     taskTitle={task.title}
                     goalTitle={goalTitleText}
+                    hasAiChecklist={hasAiChecklist}
                   />
                 )
               })()}

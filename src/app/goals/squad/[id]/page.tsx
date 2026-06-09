@@ -3252,6 +3252,33 @@ const { progress, isInRedZone } = useMemo(() => {
                 </div>
               </div>
 
+              {/* Story Export / Share Card */}
+              <div className="space-y-3 pt-3 border-t border-white/5">
+                <span className="text-xs font-semibold text-white/40 block font-space">
+                  {isRTL ? 'كارت الإنجاز' : 'Achievement Card'}
+                </span>
+                
+                <div className="flex gap-2">
+                  <button
+                    onClick={copyCardImageToClipboard}
+                    disabled={isGeneratingCard}
+                    className="flex-1 flex items-center justify-center gap-2 py-2 px-3 border border-white/10 hover:border-cyan-500/50 bg-white/[0.02] hover:bg-white/5 rounded-xl transition-all duration-300 font-semibold text-[10px] text-white disabled:opacity-50 cursor-pointer"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>{isRTL ? 'نسخ كصورة' : 'Copy Card'}</span>
+                  </button>
+                  
+                  <button
+                    onClick={downloadCardImage}
+                    disabled={isGeneratingCard}
+                    className="flex-1 flex items-center justify-center gap-2 py-2 px-3 border border-white/10 hover:border-teal-500/50 bg-white/[0.02] hover:bg-white/5 rounded-xl transition-all duration-300 font-semibold text-[10px] text-white disabled:opacity-50 cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5 text-teal-400" />
+                    <span>{isRTL ? 'تحميل PNG' : 'Download PNG'}</span>
+                  </button>
+                </div>
+              </div>
+
               {/* Status Footer */}
               <div className="p-3 bg-zinc-900/20 rounded-xl border border-white/5 text-center flex items-center justify-center gap-2">
                 <span className="relative flex h-1.5 w-1.5">

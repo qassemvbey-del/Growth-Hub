@@ -122,7 +122,7 @@ export async function POST(req: Request) {
       detectedLang = isArabic ? 'ar' : 'en'
     }
     const languageName = detectedLang === 'ar' ? 'Arabic' : 'English'
-    const criticalLanguageRule = `CRITICAL: The user's interface is in ${languageName}. Respond ENTIRELY in ${languageName}. Keep technical acronyms (MCSA, CCNA, etc.) in English.`
+    const criticalLanguageRule = `CRITICAL LANGUAGE RULE: The user's interface language setting is currently ${languageName} (passed in request payload body). You MUST respond ENTIRELY in ${languageName}. Keep core technical acronyms (MCSA, CCNA, DHCP, etc.) in English text within the translated rows. Return STRICTLY as a valid JSON string array of strings, without backticks or markdown wrapping blocks.`
 
     let checklistItems: string[] = []
     let mediaPipelineSuccess = false

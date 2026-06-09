@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { PlusSquare, Check, Trash2 } from 'lucide-react'
+import { PlusSquare, Check, Trash2, Pencil } from 'lucide-react'
 import { NeonIcon } from '../NeonIcon'
 
 interface TaskDrawerChecklistProps {
@@ -121,14 +121,24 @@ export default function TaskDrawerChecklist({
               )}
             </div>
             {canEdit && (
-              <button
-                type="button"
-                onClick={() => handleDeleteSubtask(sub.id)}
-                className="p-1 text-zinc-500 hover:text-red-500 transition-colors shrink-0 cursor-pointer"
-                title="Remove item"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => handleStartEdit(sub.id, sub.title)}
+                  className="p-1 text-zinc-500 hover:text-teal-400 transition-colors cursor-pointer"
+                  title="Edit item"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteSubtask(sub.id)}
+                  className="p-1 text-zinc-500 hover:text-red-500 transition-colors cursor-pointer"
+                  title="Remove item"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             )}
           </div>
         ))}

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Link as LinkIcon, Play, RefreshCw, Circle, X, CheckCircle2, Edit2, ListTodo, Maximize2, Minimize2 } from 'lucide-react'
+import { Link as LinkIcon, Play, RefreshCw, Circle, X, CheckCircle2, Pencil, ListTodo, Maximize2, Minimize2 } from 'lucide-react'
 import { NeonIcon } from '../NeonIcon'
 import CustomSelect from '../CustomSelect'
 import { cn } from '@/lib/utils'
@@ -91,7 +91,7 @@ export default function TaskDrawerHeader({
                     className="p-1 hover:bg-white/5 rounded transition-all cursor-pointer opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-white shrink-0"
                     title={isRTL ? 'تعديل الهدف' : 'Edit Goal'}
                   >
-                    <Edit2 className="w-3 h-3" />
+                    <Pencil className="w-3 h-3 text-zinc-500 hover:text-white" />
                   </button>
                 )}
               </div>
@@ -135,7 +135,7 @@ export default function TaskDrawerHeader({
       </div>
 
       {/* Task Title input/textarea */}
-      <div className="w-full">
+      <div className="w-full flex items-start gap-2 group">
         <textarea
           rows={1}
           value={taskTitle}
@@ -159,11 +159,14 @@ export default function TaskDrawerHeader({
             }
           }}
           className={cn(
-            "text-lg/snug font-medium font-space text-[#FFFFFF] tracking-tight bg-transparent w-full border-none focus:outline-none focus:ring-0 p-0 resize-none overflow-hidden break-words whitespace-normal",
+            "text-lg/snug font-medium font-space text-[#FFFFFF] tracking-tight bg-transparent w-full border-none focus:outline-none focus:ring-0 p-0 resize-none overflow-hidden break-words whitespace-normal flex-1",
             !canEdit && "cursor-default select-text"
           )}
           placeholder={isRTL ? "اسم المهمة..." : "Task Name..."}
         />
+        {canEdit && (
+          <Pencil className="w-4 h-4 text-zinc-500 hover:text-white transition-colors cursor-pointer shrink-0 mt-1 opacity-0 group-hover:opacity-100" />
+        )}
       </div>
     </div>
   )
