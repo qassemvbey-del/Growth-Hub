@@ -605,6 +605,9 @@ export default function SquadGoalsPage() {
           .eq('metadata->>invite_code', code)
           .single()
         
+        // Commented out since the database trigger tr_notify_squad_admins_on_join_request
+        // automatically handles squad join request notifications server-side.
+        /*
         if (cupData) {
           const userName = profile?.full_name || 'Someone'
           const targetUserId = cupData.user_id
@@ -627,6 +630,7 @@ export default function SquadGoalsPage() {
             }
           })
         }
+        */
         
         if (cupData && joinRoleInput && ['admin', 'member', 'viewer', 'guest'].includes(joinRoleInput)) {
           const { data: { user } } = await supabase.auth.getUser()

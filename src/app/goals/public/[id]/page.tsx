@@ -131,12 +131,6 @@ export default function PublicGoalPage() {
         }
         */
 
-        const { data: goalData } = await supabase
-          .from('goals')
-          .select('user_id')
-          .eq('id', id)
-          .single()
-
         const { data: admins } = await supabase
           .from('goal_members')
           .select('user_id')
@@ -145,7 +139,7 @@ export default function PublicGoalPage() {
 
         // Combine owner + admins, remove duplicates
         const adminIds = [
-          ...(goalData ? [{ user_id: goalData.user_id }] : []),
+          ...(goal ? [{ user_id: goal.user_id }] : []),
           ...(admins || [])
         ].filter((v, i, arr) => 
           arr.findIndex(x => x.user_id === v.user_id) === i
@@ -317,6 +311,9 @@ export default function PublicGoalPage() {
         }
         */
 
+        // Commented out since the database trigger tr_notify_squad_admins_on_join_request
+        // automatically handles squad join request notifications server-side.
+        /*
         const { data: goalData } = await supabase
           .from('goals')
           .select('user_id')
@@ -361,6 +358,7 @@ export default function PublicGoalPage() {
             }))
           )
         }
+        */
 
 
 
