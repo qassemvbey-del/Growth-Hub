@@ -97,6 +97,8 @@ export default function PublicGoalPage() {
 
         if (joinError) throw joinError;
 
+        // Commented out per rule "Never delete code, only comment it out":
+        /*
         // Notify all admins of the goal
         const { data: admins } = await supabase
           .from('goal_members')
@@ -127,6 +129,52 @@ export default function PublicGoalPage() {
             .from('inbox_reports')
             .insert(notifications)
         }
+        */
+
+        const { data: goalData } = await supabase
+          .from('goals')
+          .select('user_id')
+          .eq('id', id)
+          .single()
+
+        const { data: admins } = await supabase
+          .from('goal_members')
+          .select('user_id')
+          .eq('goal_id', id)
+          .in('role', ['owner', 'admin'])
+
+        // Combine owner + admins, remove duplicates
+        const adminIds = [
+          ...(goalData ? [{ user_id: goalData.user_id }] : []),
+          ...(admins || [])
+        ].filter((v, i, arr) => 
+          arr.findIndex(x => x.user_id === v.user_id) === i
+        )
+
+        if (adminIds && adminIds.length > 0) {
+          const userName = user.user_metadata?.full_name || (isRTL ? 'مستخدم' : 'User')
+          const goalName = goal?.title || 'Goal'
+          const notifications = adminIds.map((admin: any) => ({
+            user_id: admin.user_id,
+            type: 'member_joined',
+            title: isRTL ? 'عضو جديد انضم' : 'New member joined',
+            content: {
+              goal_id: id,
+              goal_title: goalName,
+              user_id: user.id,
+              user_name: userName,
+              message: isRTL
+                ? `${userName} انضم لـ ${goalName}`
+                : `${userName} joined ${goalName}`
+            },
+            is_read: false
+          }))
+          
+          await supabase
+            .from('inbox_reports')
+            .insert(notifications)
+        }
+
 
 
         /*
@@ -195,6 +243,8 @@ export default function PublicGoalPage() {
 
         if (requestError) throw requestError;
 
+        // Commented out per rule "Never delete code, only comment it out":
+        /*
         // Fetch squad owner and admins to notify
         const { data: admins } = await supabase
           .from('goal_members')
@@ -226,6 +276,53 @@ export default function PublicGoalPage() {
             }))
           )
         }
+        */
+
+        const { data: goalData } = await supabase
+          .from('goals')
+          .select('user_id')
+          .eq('id', id)
+          .single()
+
+        const { data: admins } = await supabase
+          .from('goal_members')
+          .select('user_id')
+          .eq('goal_id', id)
+          .in('role', ['owner', 'admin'])
+
+        // Combine owner + admins, remove duplicates
+        const adminIds = [
+          ...(goalData ? [{ user_id: goalData.user_id }] : []),
+          ...(admins || [])
+        ].filter((v, i, arr) => 
+          arr.findIndex(x => x.user_id === v.user_id) === i
+        )
+
+        if (adminIds && adminIds.length > 0) {
+          const userName = user.user_metadata?.full_name || (isRTL ? 'مستخدم' : 'User')
+          const goalName = goal.title
+          await supabase.from('inbox_reports').insert(
+            adminIds.map((admin: any) => ({
+              user_id: admin.user_id,
+              type: 'join_request',
+              title: isRTL
+                ? `${userName} يريد الانضمام`
+                : `${userName} wants to join`,
+              content: {
+                goal_id: id,
+                goal_title: goalName,
+                requester_id: user.id,
+                requester_name: userName,
+                request_id: insertedData.id,
+                message: isRTL
+                  ? `${userName} يريد الانضمام لـ ${goalName}`
+                  : `${userName} wants to join ${goalName}`
+              },
+              is_read: false
+            }))
+          )
+        }
+
 
 
         setJoinState('pending')

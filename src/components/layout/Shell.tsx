@@ -205,6 +205,7 @@ export default function Shell({ children }: ShellProps) {
   const { isRTL, profile, calculateAccountability, lastAiMessage, t, currentTheme, isRankUpModalOpen, setIsRankUpModalOpen, isLoading, showAuthModal, setShowAuthModal, openCreateGoalModal, isTaskDrawerOpen } = useGrowth()
   const pathname = usePathname()
   const router = useRouter()
+  const showSidebar = profile && pathname !== '/auth/login' && !(pathname === '/' && profile.id === 'guest')
   const { playNeuralLink, playBlip } = useSound()
   const { showToast } = useToast()
 
@@ -1243,13 +1244,15 @@ export default function Shell({ children }: ShellProps) {
       <div className="fixed inset-0 pointer-events-none z-[100] scanlines opacity-[0.02]" />
       <div className="fixed inset-0 pointer-events-none z-0 cyber-grid opacity-[0.05]" />
 
-      <Sidebar isRTL={isRTL} onOpenCoach={() => { setCoachPanelOpen(true); playNeuralLink(); window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ai-coach' })); }} />
+      {showSidebar && (
+        <Sidebar isRTL={isRTL} onOpenCoach={() => { setCoachPanelOpen(true); playNeuralLink(); window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ai-coach' })); }} />
+      )}
 
       <main
         className={cn(
         'flex-1 min-h-[100dvh] relative z-10 w-full max-w-full overflow-x-hidden',
         'pb-24 lg:pb-8',
-        'lg:ps-72 lg:max-w-none'
+        showSidebar ? 'lg:ps-72 lg:max-w-none' : 'lg:max-w-none'
       )}>
         {/* ── DESKTOP TOP BAR ── */}
         <header className="hidden lg:flex w-full px-8 h-16 justify-end items-center bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-black/5 dark:border-white/[0.03] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] z-[150] sticky top-0 transition-colors duration-500 relative header-target">
@@ -1349,14 +1352,19 @@ export default function Shell({ children }: ShellProps) {
         <header className="flex lg:hidden w-full h-14 px-4 items-center justify-between bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-black/5 dark:border-white/[0.03] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] z-[150] sticky top-0 transition-colors duration-500 relative">
           {/* LEFT: Hamburger Menu Icon */}
           <div className="flex items-center order-first rtl:order-last">
-            <button
-              onClick={() => { setIsMobileNavOpen(true); playBlip(); }}
-              className="w-11 h-11 flex items-center justify-center bg-[var(--input-bg)] border border-[var(--card-border)] rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-white/20 transition-all cursor-pointer active:scale-95 shrink-0"
-              title={isRTL ? 'القائمة' : 'Menu'}
-            >
-              <Menu className="w-5 h-5" />
-            </button>
+            {showSidebar ? (
+              <button
+                onClick={() => { setIsMobileNavOpen(true); playBlip(); }}
+                className="w-11 h-11 flex items-center justify-center bg-[var(--input-bg)] border border-[var(--card-border)] rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-white/20 transition-all cursor-pointer active:scale-95 shrink-0"
+                title={isRTL ? 'القائمة' : 'Menu'}
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+            ) : (
+              <div className="w-11 h-11 shrink-0" />
+            )}
           </div>
+
 
           {/* CENTER: Core Brand Text */}
           <div className="absolute left-1/2 -translate-x-1/2 flex items-center" dir="ltr">
@@ -1413,25 +1421,28 @@ export default function Shell({ children }: ShellProps) {
       />
       */}
       {/* Backdrop - click or swipe to close */}
-      <motion.div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] lg:hidden"
-        style={{ opacity: computedBackdropOpacity, pointerEvents: isDrawerVisible ? 'auto' : 'none' }}
-        onClick={() => setIsMobileNavOpen(false)}
-        drag="x"
-        dragConstraints={isRTL ? { left: 0, right: 0 } : { left: 0, right: 0 }}
-        dragElastic={0}
-        onDrag={(_e, info) => {
-          const closedPos = isRTL ? SIDEBAR_WIDTH : -SIDEBAR_WIDTH
-          const currentX = sidebarX.get()
-          const delta = info.delta.x
-          const newX = Math.max(
-            isRTL ? 0 : -SIDEBAR_WIDTH,
-            Math.min(isRTL ? SIDEBAR_WIDTH : 0, currentX + delta)
-          )
-          sidebarX.set(newX)
-        }}
-        onDragEnd={handleSidebarDragEnd}
-      />
+      {showSidebar && (
+        <motion.div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] lg:hidden"
+          style={{ opacity: computedBackdropOpacity, pointerEvents: isDrawerVisible ? 'auto' : 'none' }}
+          onClick={() => setIsMobileNavOpen(false)}
+          drag="x"
+          dragConstraints={isRTL ? { left: 0, right: 0 } : { left: 0, right: 0 }}
+          dragElastic={0}
+          onDrag={(_e, info) => {
+            const closedPos = isRTL ? SIDEBAR_WIDTH : -SIDEBAR_WIDTH
+            const currentX = sidebarX.get()
+            const delta = info.delta.x
+            const newX = Math.max(
+              isRTL ? 0 : -SIDEBAR_WIDTH,
+              Math.min(isRTL ? SIDEBAR_WIDTH : 0, currentX + delta)
+            )
+            sidebarX.set(newX)
+          }}
+          onDragEnd={handleSidebarDragEnd}
+        />
+      )}
+
 
       {/*
       {/* Edge swipe zone - 20px from left/right edge to open sidebar *\/
@@ -1462,32 +1473,34 @@ export default function Shell({ children }: ShellProps) {
       )}
       */}
 
-      <motion.div
-        drag="x"
-        dragConstraints={isRTL
-          ? { left: 0, right: SIDEBAR_WIDTH }
-          : { left: -SIDEBAR_WIDTH, right: 0 }
-        }
-        dragElastic={0.05}
-        dragMomentum={false}
-        onDragEnd={handleSidebarDragEnd}
-        onDrag={(_e, info) => {
-          const currentX = sidebarX.get()
-          const delta = info.delta.x
-          const newX = Math.max(
-            isRTL ? 0 : -SIDEBAR_WIDTH,
-            Math.min(isRTL ? SIDEBAR_WIDTH : 0, currentX + delta)
-          )
-          sidebarX.set(newX)
-        }}
-        style={{ 
-          x: sidebarX
-        }}
-        className={cn(
-          "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col !bg-black/50 !backdrop-blur-xl p-6 transform-gpu will-change-transform touch-pan-y",
-          isRTL ? "right-0 border-s border-white/10" : "left-0 border-e border-white/10"
-        )}
-      >
+      {showSidebar && (
+        <motion.div
+          drag="x"
+          dragConstraints={isRTL
+            ? { left: 0, right: SIDEBAR_WIDTH }
+            : { left: -SIDEBAR_WIDTH, right: 0 }
+          }
+          dragElastic={0.05}
+          dragMomentum={false}
+          onDragEnd={handleSidebarDragEnd}
+          onDrag={(_e, info) => {
+            const currentX = sidebarX.get()
+            const delta = info.delta.x
+            const newX = Math.max(
+              isRTL ? 0 : -SIDEBAR_WIDTH,
+              Math.min(isRTL ? SIDEBAR_WIDTH : 0, currentX + delta)
+            )
+            sidebarX.set(newX)
+          }}
+          style={{ 
+            x: sidebarX
+          }}
+          className={cn(
+            "fixed top-0 bottom-0 w-[280px] z-[201] lg:hidden flex flex-col !bg-black/50 !backdrop-blur-xl p-6 transform-gpu will-change-transform touch-pan-y",
+            isRTL ? "right-0 border-s border-white/10" : "left-0 border-e border-white/10"
+          )}
+        >
+
         {/* Header of Drawer */}
         <div className="flex justify-between items-center mb-8">
           <AnimatedLogo className="text-lg tracking-[0.2em]" />
@@ -1581,6 +1594,7 @@ export default function Shell({ children }: ShellProps) {
         </div>
         */}
       </motion.div>
+      )}
 
       {/* ORIGINAL_MOBILE_DRAWER_CODE_FOR_REFERENCE:
       <motion.div
