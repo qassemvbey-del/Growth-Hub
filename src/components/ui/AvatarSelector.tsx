@@ -48,7 +48,9 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
 
       if (authError) {
         console.error('Auth updateUser error:', authError)
-        showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'UPDATE_FAILED', 'warning')
+        // Commented out per safety rules:
+        // showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'UPDATE_FAILED', 'warning')
+        showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'Update failed', 'warning')
         setIsSaving(false)
         return
       }
@@ -86,7 +88,9 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
       onClose()
     } catch (err) {
       console.error('Save avatar error:', err)
-      showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'UPDATE_FAILED', 'warning')
+      // Commented out per safety rules:
+      // showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'UPDATE_FAILED', 'warning')
+      showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'Update failed', 'warning')
     } finally {
       setIsSaving(false)
     }
@@ -282,7 +286,9 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
 
       if (authError) {
         console.error('Auth updateUser error:', authError)
-        showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'UPDATE_FAILED', 'warning')
+        // Commented out per safety rules:
+        // showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'UPDATE_FAILED', 'warning')
+        showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'Update failed', 'warning')
         setIsSaving(false)
         return
       }
@@ -322,7 +328,9 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
       onClose()
     } catch (err) {
       console.error('Save avatar error:', err)
-      showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'UPDATE_FAILED', 'warning')
+      // Commented out per safety rules:
+      // showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'UPDATE_FAILED', 'warning')
+      showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'Update failed', 'warning')
     } finally {
       setIsSaving(false)
     }

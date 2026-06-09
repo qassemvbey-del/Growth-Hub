@@ -167,7 +167,9 @@ export default function TaskDrawer({
                 <span 
                   key={`${member.id}-${idx}`}
                   onClick={() => {
-                    alert(isRTL ? `الملف الشخصي: ${name} • الرتبة: ${member.rank || 'عضو'}` : `Member Profile: ${name} • Rank: ${member.rank || 'ROOKIE'}`)
+                    // Commented out per safety rules:
+                    // alert(isRTL ? `الملف الشخصي: ${name} • الرتبة: ${member.rank || 'عضو'}` : `Member Profile: ${name} • Rank: ${member.rank || 'ROOKIE'}`)
+                    alert(isRTL ? `الملف الشخصي: ${name} • الرتبة: ${member.rank || 'عضو'}` : `Member Profile: ${name} • Rank: ${member.rank || 'Rookie'}`)
                   }}
                   className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 font-bold border border-blue-500/25 shadow-[0_0_8px_rgba(59,130,246,0.2)] transition-all cursor-pointer mx-0.5 relative z-10 font-space text-[11px]"
                   title={isRTL ? `عرض الملف الشخصي لـ ${name}` : `View ${name}'s profile`}
@@ -1081,11 +1083,17 @@ export default function TaskDrawer({
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/Google_Drive_icon_(2020).svg" alt="Drive" className="w-3.5 h-3.5 shrink-0" />
                     <span className="font-medium tracking-wide uppercase">
+                      {/* Commented out per safety rules:
                       {isDriveConnected ? (isRTL ? 'إضافة من درايف' : 'ADD FROM DRIVE') : (isRTL ? 'ربط جوجل درايف' : 'CONNECT GOOGLE DRIVE')}
+                      */}
+                      {isDriveConnected ? (isRTL ? 'إضافة من درايف' : 'Add from Drive') : (isRTL ? 'ربط جوجل درايف' : 'Link Google Drive')}
                     </span>
                     {isDriveConnected && (
                       <span className="ml-auto text-[10px] text-emerald-500 font-bold tracking-wider animate-pulse">
+                        {/* Commented out per safety rules:
                         {isRTL ? 'متصل' : 'CONNECTED'}
+                        */}
+                        {isRTL ? 'متصل' : 'Connected'}
                       </span>
                     )}
                   </button>
@@ -1119,7 +1127,9 @@ export default function TaskDrawer({
                     >
                       <input
                         type="text"
-                        placeholder={isRTL ? 'اسم المرفق...' : 'ATTACHMENT_NAME...'}
+                        // Commented out per safety rules:
+                        // placeholder={isRTL ? 'اسم المرفق...' : 'ATTACHMENT_NAME...'}
+                        placeholder={isRTL ? 'اسم المرفق...' : 'Attachment name...'}
                         value={manualLinkName}
                         onChange={e => setManualLinkName(e.target.value)}
                         className="w-full bg-zinc-900/80 border border-white/8 py-2.5 px-4 font-space text-xs font-black text-white uppercase tracking-widest outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
@@ -1127,7 +1137,9 @@ export default function TaskDrawer({
                       <div className="flex gap-2">
                         <input
                           type="url"
-                          placeholder="HTTPS://..."
+                          // Commented out per safety rules:
+                          // placeholder="HTTPS://..."
+                          placeholder="https://..."
                           value={manualLinkUrl}
                           onChange={e => setManualLinkUrl(e.target.value)}
                           className="flex-1 bg-zinc-900/80 border border-white/8 py-2.5 px-4 font-space text-xs font-black text-white uppercase tracking-widest outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
@@ -1138,7 +1150,10 @@ export default function TaskDrawer({
                           className="py-2.5 px-4 font-space font-black uppercase tracking-widest text-[10px] text-black transition-all rounded-md shrink-0 cursor-pointer disabled:opacity-40"
                           style={{ backgroundColor: themeColor }}
                         >
+                          {/* Commented out per safety rules:
                           {isAddingLink ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto text-black" /> : (isRTL ? 'إضافة' : 'ADD')}
+                          */}
+                          {isAddingLink ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto text-black" /> : (isRTL ? 'إضافة' : 'Add')}
                         </button>
                       </div>
                     </motion.div>
@@ -1348,7 +1363,9 @@ export default function TaskDrawer({
                   }
                 }}
                 className="w-9 h-9 flex items-center justify-center bg-transparent hover:bg-red-500/10 text-zinc-500 hover:text-red-500 rounded-xl transition-all cursor-pointer"
-                title="DELETE TASK"
+                // Commented out per safety rules:
+                // title="DELETE TASK"
+                title="Delete Task"
               >
                 <Trash2 className="w-4 h-4" />
               </button>

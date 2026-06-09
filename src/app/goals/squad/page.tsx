@@ -34,9 +34,12 @@ import {
 
 
 const SIZES = [
-  { key: 'lg', label: 'LARGE GOAL',  desc: 'Macro Objective', icon: Flame },
-  { key: 'md', label: 'MEDIUM GOAL', desc: 'Standard Focus',  icon: SignalMedium },
-  { key: 'sm', label: 'SMALL GOAL',  desc: 'Micro Focus',     icon: SignalLow },
+  // { key: 'lg', label: 'LARGE GOAL',  desc: 'Macro Objective', icon: Flame },
+  // { key: 'md', label: 'MEDIUM GOAL', desc: 'Standard Focus',  icon: SignalMedium },
+  // { key: 'sm', label: 'SMALL GOAL',  desc: 'Micro Focus',     icon: SignalLow },
+  { key: 'lg', label: 'Large Goal',  desc: 'Macro Objective', icon: Flame },
+  { key: 'md', label: 'Medium Goal', desc: 'Standard Focus',  icon: SignalMedium },
+  { key: 'sm', label: 'Small Goal',  desc: 'Micro Focus',     icon: SignalLow },
 ]
 
 const renderSizeIcon = (key: string, className?: string, style?: any) => {
@@ -547,7 +550,8 @@ export default function SquadGoalsPage() {
       
       if (error) {
         setJoinStatus('invalid')
-        setJoinErrorText('INVALID_CODE // TRY AGAIN')
+        // setJoinErrorText('INVALID_CODE // TRY AGAIN')
+        setJoinErrorText('Invalid code - Try again')
         playError()
         return
       }
@@ -558,7 +562,8 @@ export default function SquadGoalsPage() {
         setScannedGoalName(result.goal_title)
         playDeploy()
       } else {
-        const err = result?.error || 'INVALID_CODE // TRY AGAIN'
+        // const err = result?.error || 'INVALID_CODE // TRY AGAIN'
+        const err = result?.error || 'Invalid code - Try again'
         if (err.includes('ALREADY IN THIS SQUAD')) {
           setJoinStatus('already_member')
         } else {
@@ -585,7 +590,8 @@ export default function SquadGoalsPage() {
       
       if (error) {
         setJoinStatus('invalid')
-        setJoinErrorText('INVALID_CODE // TRY AGAIN')
+        // setJoinErrorText('INVALID_CODE // TRY AGAIN')
+        setJoinErrorText('Invalid code - Try again')
         playError()
         return
       }
@@ -650,18 +656,21 @@ export default function SquadGoalsPage() {
           fetchMissions()
         }, 2000)
       } else {
-        const err = result?.error || 'INVALID_CODE // TRY AGAIN'
+        // const err = result?.error || 'INVALID_CODE // TRY AGAIN'
+        const err = result?.error || 'Invalid code - Try again'
         if (err.includes('ALREADY IN THIS SQUAD')) {
           setJoinStatus('already_member')
         } else if (err.includes('REQUEST_PENDING')) {
           setJoinStatus('invalid')
           /* setJoinErrorText(isRTL ? 'الطلب قيد الانتظار بالفعل // يرجى الانتظار' : 'REQUEST_PENDING // ALREADY SENT') */
-          setJoinErrorText(isRTL ? 'الطلب متعلق فعلاً // من فضلك استنى' : 'REQUEST_PENDING // ALREADY SENT')
+          // setJoinErrorText(isRTL ? 'الطلب متعلق فعلاً // من فضلك استنى' : 'REQUEST_PENDING // ALREADY SENT')
+          setJoinErrorText(isRTL ? 'الطلب متعلق فعلاً - من فضلك استنى' : 'Request pending - Already sent')
           playError()
         } else if (err.includes('REQUEST_REJECTED')) {
           setJoinStatus('invalid')
           /* setJoinErrorText(isRTL ? 'تم رفض طلبك السابق // الوصول مصنف' : 'REQUEST_REJECTED // ACCESS CLASSIFIED') */
-          setJoinErrorText(isRTL ? 'طلبك القديم اترفض // الوصول ممنوع' : 'REQUEST_REJECTED // ACCESS CLASSIFIED')
+          // setJoinErrorText(isRTL ? 'طلبك القديم اترفض // الوصول ممنوع' : 'REQUEST_REJECTED // ACCESS CLASSIFIED')
+          setJoinErrorText(isRTL ? 'طلبك القديم اترفض - الوصول ممنوع' : 'Request rejected - Access classified')
           playError()
         } else {
           setJoinStatus('invalid')
@@ -671,7 +680,8 @@ export default function SquadGoalsPage() {
       }
     } catch (err) {
       setJoinStatus('invalid')
-      setJoinErrorText('INVALID_CODE // TRY AGAIN')
+      // setJoinErrorText('INVALID_CODE // TRY AGAIN')
+      setJoinErrorText('Invalid code - Try again')
       playError()
     }
   }
@@ -681,7 +691,8 @@ export default function SquadGoalsPage() {
     const link = `${window.location.origin}/goals/squad?join=${code}`
     navigator.clipboard.writeText(link)
     /* showToast(isRTL ? 'تم نسخ الرابط' : 'INVITE LINK COPIED', 'success') */
-    showToast(isRTL ? 'الرابط اتنسخ' : 'INVITE LINK COPIED', 'success')
+    // showToast(isRTL ? 'الرابط اتنسخ' : 'INVITE LINK COPIED', 'success')
+    showToast(isRTL ? 'الرابط اتنسخ' : 'Invite link copied', 'success')
     playBlip()
   }
 
@@ -693,11 +704,13 @@ export default function SquadGoalsPage() {
     if (!error) {
       setMissions(prev => prev.map(m => m.id === mission.id ? { ...m, metadata: newMetadata } : m))
       /* showToast(isRTL ? 'تم تحديث القاعدة!' : 'RULE UPDATED', 'success') */
-      showToast(isRTL ? 'القاعدة اتحدثت!' : 'RULE UPDATED', 'success')
+      // showToast(isRTL ? 'القاعدة اتحدثت!' : 'RULE UPDATED', 'success')
+      showToast(isRTL ? 'القاعدة اتحدثت!' : 'Rule updated', 'success')
       playDeploy()
     } else {
       /* showToast(isRTL ? 'فشل التحديث!' : 'UPDATE FAILED', 'warning') */
-      showToast(isRTL ? 'التحديث مش اشتغل!' : 'UPDATE FAILED', 'warning')
+      // showToast(isRTL ? 'التحديث مش اشتغل!' : 'UPDATE FAILED', 'warning')
+      showToast(isRTL ? 'التحديث مش اشتغل!' : 'Update failed', 'warning')
       playError()
     }
   }
@@ -1169,7 +1182,8 @@ export default function SquadGoalsPage() {
             <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-color)] animate-ping" />
             <span className="font-space text-[9px] tracking-[0.25em] font-black uppercase text-[var(--theme-color)]">
               {/* {isRTL ? 'مزامنة أهداف مساحة العمل السحابية...' : 'SYNCING_CLOUD_WORKSPACE_OBJECTIVES...'} */}
-              {isRTL ? 'مزامنة الـ Goals السحابية...' : 'SYNCING_CLOUD_WORKSPACE_OBJECTIVES...'}
+              // {isRTL ? 'مزامنة الـ Goals السحابية...' : 'SYNCING_CLOUD_WORKSPACE_OBJECTIVES...'}
+              {isRTL ? 'مزامنة الـ Goals السحابية...' : 'Syncing cloud workspace goals...'}
             </span>
           </div>
         </div>
@@ -1298,7 +1312,8 @@ export default function SquadGoalsPage() {
                 className="flex flex-row items-center justify-center gap-1 sm:gap-2 w-full md:w-auto h-11 px-2 sm:px-6 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-[9px] min-[375px]:text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-all duration-300 active:scale-[0.97] shadow-lg cursor-pointer animate-pulse"
               >
                 <LinkIcon className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" />
-                {isRTL ? 'انضم لهدف' : 'JOIN GOAL'}
+                {/* {isRTL ? 'انضم لهدف' : 'JOIN GOAL'} */}
+                {isRTL ? 'انضم لهدف' : 'Join Goal'}
               </button>
               <button
                 onClick={() => { playBlip(); setShowCreate(true); }}
@@ -1306,7 +1321,8 @@ export default function SquadGoalsPage() {
                 style={{ backgroundColor: currentTheme.color, boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
                 <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                {isRTL ? 'أنشئ هدفاً جماعياً' : 'CREATE SQUAD GOAL'}
+                {/* {isRTL ? 'أنشئ هدفاً جماعياً' : 'CREATE SQUAD GOAL'} */}
+                {isRTL ? 'أنشئ هدفاً جماعياً' : 'Create Squad Goal'}
               </button>
             </div>
           ) : (
@@ -1317,7 +1333,8 @@ export default function SquadGoalsPage() {
             >
               <Plus className="w-4 h-4" />
               {/* {typeFilter === 'solo' ? (isRTL ? 'إنشاء هدف فردي' : 'CREATE GOAL') : (isRTL ? 'إنشاء هدف' : 'Create Goal')} */}
-              {typeFilter === 'solo' ? (isRTL ? 'اعمل Goal شخصي' : 'CREATE GOAL') : (isRTL ? 'اعمل Goal' : 'Create Goal')}
+              {/* {typeFilter === 'solo' ? (isRTL ? 'اعمل Goal شخصي' : 'CREATE GOAL') : (isRTL ? 'اعمل Goal' : 'Create Goal')} */}
+              {typeFilter === 'solo' ? (isRTL ? 'اعمل Goal شخصي' : 'Create Goal') : (isRTL ? 'اعمل Goal' : 'Create Goal')}
             </button>
           )}
         </motion.header>
@@ -1353,7 +1370,8 @@ export default function SquadGoalsPage() {
               className="flex items-center gap-1.5 px-3 h-8 border border-teal-500/40 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 rounded-md font-space text-[10px] font-black uppercase tracking-widest transition-all duration-300 active:scale-95 cursor-pointer"
             >
               <LinkIcon className="w-3.5 h-3.5" />
-              {isRTL ? 'الانضمام للفريق' : 'JOIN A TEAM GOAL'}
+              {/* {isRTL ? 'الانضمام للفريق' : 'JOIN A TEAM GOAL'} */}
+              {isRTL ? 'الانضمام للفريق' : 'Join a Team Goal'}
             </button>
           </div>
         )}
@@ -1511,7 +1529,8 @@ export default function SquadGoalsPage() {
                   >
                     {isSubmitting && <Loader2 className="w-3 h-3 animate-spin text-black" />}
                     {/* {isRTL ? 'إنشاء هدف' : 'CREATE GOAL'} */}
-                    {isRTL ? 'عمل Goal' : 'CREATE GOAL'}
+                    // {isRTL ? 'عمل Goal' : 'CREATE GOAL'}
+                    {isRTL ? 'عمل Goal' : 'Create Goal'}
                   </button>
                 </div>
               </motion.div>
@@ -1720,7 +1739,8 @@ export default function SquadGoalsPage() {
                     <div className="flex items-center gap-3 text-[#FF0055]">
                       <AlertTriangle className="w-7 h-7 animate-pulse text-[#FF0055]" />
                       <h3 className="text-lg font-black tracking-widest uppercase font-space">
-                        {isRTL ? 'تحذير: تشتيت التركيز' : 'WARNING: CONTEXT SWITCHING'}
+                        {/* {isRTL ? 'تحذير: تشتيت التركيز' : 'WARNING: CONTEXT SWITCHING'} */}
+                        {isRTL ? 'تحذير: تشتيت التركيز' : 'Warning: Context Switching'}
                       </h3>
                     </div>
 
@@ -1728,7 +1748,8 @@ export default function SquadGoalsPage() {
                       <p className="font-bold border-l-2 border-[#FF0055] pl-3 py-1 bg-[#FF0055]/5">
                         {isRTL 
                           ? '🚧 تشتيت التركيز يقلل الأداء الذهني بنسبة تصل إلى 40%.' 
-                          : '🚧 WARNING: Context Switching degrades cognitive performance by up to 40%.'}
+                          : // '🚧 WARNING: Context Switching degrades cognitive performance by up to 40%.'
+                            '🚧 Warning: Context Switching degrades cognitive performance by up to 40%.'}
                       </p>
                       <p className="text-[var(--text-secondary)]">
                         {isRTL
@@ -1760,7 +1781,8 @@ export default function SquadGoalsPage() {
                         }}
                         className="flex-1 py-2.5 bg-[#FF0055]/10 text-[#FF0055] border border-[#FF0055]/30 hover:bg-[#FF0055]/20 font-space font-black text-xs uppercase tracking-widest transition-all rounded-xl"
                       >
-                        {isRTL ? 'استبدال المهمة' : 'FORCE SWAP'}
+                        {/* {isRTL ? 'استبدال المهمة' : 'FORCE SWAP'} */}
+                        {isRTL ? 'استبدال المهمة' : 'Force Swap'}
                       </button>
                       <button
                         onClick={() => {
@@ -1912,9 +1934,9 @@ export default function SquadGoalsPage() {
                       <p className="text-xs text-red-500 text-center animate-bounce">
                         {joinErrorText.includes('INVALID_CODE') || joinErrorText.includes('Invalid') 
                           ? (isRTL ? "رابط غير صحيح، جرب مرة أخرى" : "Invalid link, please try again")
-                          : (joinErrorText.includes('REQUEST_PENDING') 
+                          : (joinErrorText.includes('REQUEST_PENDING') || joinErrorText.includes('Request pending') 
                               ? (isRTL ? "الطلب قيد الانتظار بالفعل" : "Your request is already pending")
-                              : (joinErrorText.includes('REQUEST_REJECTED')
+                              : (joinErrorText.includes('REQUEST_REJECTED') || joinErrorText.includes('Request rejected')
                                   ? (isRTL ? "تم رفض طلبك السابق" : "Your previous request was rejected")
                                   : joinErrorText))}
                       </p>

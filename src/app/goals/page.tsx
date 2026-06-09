@@ -18,10 +18,16 @@ import MissionAttachmentsModal from '@/components/ui/MissionAttachmentsModal'
 import { validateContent } from '@/lib/profanityFilter'
 import { aiProfanityCheck } from '@/app/actions/profanityCheck'
 
+// Commented out per safety rules:
+// const SIZES = [
+//   { key: 'lg', label: 'LARGE GOAL', desc: 'Macro Objective', icon: Flame },
+//   { key: 'md', label: 'MEDIUM GOAL', desc: 'Standard Focus', icon: SignalMedium },
+//   { key: 'sm', label: 'SMALL GOAL', desc: 'Micro Focus', icon: SignalLow },
+// ]
 const SIZES = [
-  { key: 'lg', label: 'LARGE GOAL', desc: 'Macro Objective', icon: Flame },
-  { key: 'md', label: 'MEDIUM GOAL', desc: 'Standard Focus', icon: SignalMedium },
-  { key: 'sm', label: 'SMALL GOAL', desc: 'Micro Focus', icon: SignalLow },
+  { key: 'lg', label: 'Large Goal', desc: 'Macro Objective', icon: Flame },
+  { key: 'md', label: 'Medium Goal', desc: 'Standard Focus', icon: SignalMedium },
+  { key: 'sm', label: 'Small Goal', desc: 'Micro Focus', icon: SignalLow },
 ]
 
 const getRankBorderClass = (rank: string) => {
@@ -430,7 +436,9 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
     const code = extractCode(joinCodeInput)
     if (!code) {
       setJoinStatus('invalid')
-      setJoinErrorText('INVALID_CODE // TRY AGAIN')
+      // Commented out per safety rules:
+      // setJoinErrorText('INVALID_CODE // TRY AGAIN')
+      setJoinErrorText('Invalid code - Try again')
       return
     }
 
@@ -442,7 +450,9 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
 
       if (error) {
         setJoinStatus('invalid')
-        setJoinErrorText('INVALID_CODE // TRY AGAIN')
+        // Commented out per safety rules:
+        // setJoinErrorText('INVALID_CODE // TRY AGAIN')
+        setJoinErrorText('Invalid code - Try again')
         playError()
         return
       }
@@ -453,7 +463,9 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
         setScannedGoalName(result.goal_title)
         playDeploy()
       } else {
-        const err = result?.error || 'INVALID_CODE // TRY AGAIN'
+        // Commented out per safety rules:
+        // const err = result?.error || 'INVALID_CODE // TRY AGAIN'
+        const err = result?.error || 'Invalid code - Try again'
         if (err.includes('ALREADY IN THIS SQUAD')) {
           setJoinStatus('already_member')
         } else {
@@ -464,7 +476,9 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
       }
     } catch (err) {
       setJoinStatus('invalid')
-      setJoinErrorText('INVALID_CODE // TRY AGAIN')
+      // Commented out per safety rules:
+      // setJoinErrorText('INVALID_CODE // TRY AGAIN')
+      setJoinErrorText('Invalid code - Try again')
       playError()
     }
   }
@@ -479,7 +493,9 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
 
       if (error) {
         setJoinStatus('invalid')
-        setJoinErrorText('INVALID_CODE // TRY AGAIN')
+        // Commented out per safety rules:
+        // setJoinErrorText('INVALID_CODE // TRY AGAIN')
+        setJoinErrorText('Invalid code - Try again')
         playError()
         return
       }
@@ -501,16 +517,22 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
           fetchMissions()
         }, 2000)
       } else {
-        const err = result?.error || 'INVALID_CODE // TRY AGAIN'
+        // Commented out per safety rules:
+        // const err = result?.error || 'INVALID_CODE // TRY AGAIN'
+        const err = result?.error || 'Invalid code - Try again'
         if (err.includes('ALREADY IN THIS SQUAD')) {
           setJoinStatus('already_member')
         } else if (err.includes('REQUEST_PENDING')) {
           setJoinStatus('invalid')
-          setJoinErrorText(isRTL ? 'الطلب قيد الانتظار بالفعل // يرجى الانتظار' : 'REQUEST_PENDING // ALREADY SENT')
+          // Commented out per safety rules:
+          // setJoinErrorText(isRTL ? 'الطلب قيد الانتظار بالفعل // يرجى الانتظار' : 'REQUEST_PENDING // ALREADY SENT')
+          setJoinErrorText(isRTL ? 'الطلب قيد الانتظار بالفعل - يرجى الانتظار' : 'Request pending - Already sent')
           playError()
         } else if (err.includes('REQUEST_REJECTED')) {
           setJoinStatus('invalid')
-          setJoinErrorText(isRTL ? 'تم رفض طلبك السابق // الوصول مصنف' : 'REQUEST_REJECTED // ACCESS CLASSIFIED')
+          // Commented out per safety rules:
+          // setJoinErrorText(isRTL ? 'تم رفض طلبك السابق // الوصول مصنف' : 'REQUEST_REJECTED // ACCESS CLASSIFIED')
+          setJoinErrorText(isRTL ? 'تم رفض طلبك السابق - الوصول ممنوع' : 'Request rejected - Access Denied')
           playError()
         } else {
           setJoinStatus('invalid')
@@ -520,7 +542,9 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
       }
     } catch (err) {
       setJoinStatus('invalid')
-      setJoinErrorText('INVALID_CODE // TRY AGAIN')
+      // Commented out per safety rules:
+      // setJoinErrorText('INVALID_CODE // TRY AGAIN')
+      setJoinErrorText('Invalid code - Try again')
       playError()
     }
   }
@@ -529,7 +553,9 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
     e.stopPropagation()
     const link = `${window.location.origin}/goals/squad?join=${code}`
     navigator.clipboard.writeText(link)
-    showToast(isRTL ? 'تم نسخ الرابط' : 'INVITE LINK COPIED', 'success')
+    // Commented out per safety rules:
+    // showToast(isRTL ? 'تم نسخ الرابط' : 'INVITE LINK COPIED', 'success')
+    showToast(isRTL ? 'تم نسخ الرابط' : 'Invite link copied', 'success')
     playBlip()
   }
 
@@ -540,10 +566,14 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
     const { error } = await supabase.from('goals').update({ metadata: newMetadata }).eq('id', mission.id)
     if (!error) {
       setMissions(prev => prev.map(m => m.id === mission.id ? { ...m, metadata: newMetadata } : m))
-      showToast(isRTL ? 'تم تحديث القاعدة!' : 'RULE UPDATED', 'success')
+      // Commented out per safety rules:
+      // showToast(isRTL ? 'تم تحديث القاعدة!' : 'RULE UPDATED', 'success')
+      showToast(isRTL ? 'تم تحديث القاعدة!' : 'Rule updated', 'success')
       playDeploy()
     } else {
-      showToast(isRTL ? 'فشل التحديث!' : 'UPDATE FAILED', 'warning')
+      // Commented out per safety rules:
+      // showToast(isRTL ? 'فشل التحديث!' : 'UPDATE FAILED', 'warning')
+      showToast(isRTL ? 'فشل التحديث!' : 'Update failed', 'warning')
       playError()
     }
   }
@@ -1087,7 +1117,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-12 md:h-11 min-h-[48px] md:min-h-0 px-6 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-[0.97] shadow-lg cursor-pointer animate-pulse"
               >
                 <Link className="text-[16px] leading-none" />
-                {isRTL ? 'انضم لهدف' : 'JOIN GOAL'}
+                {isRTL ? 'انضم لهدف' : 'Join goal'}
               </button>
               <button
                 onClick={() => { playBlip(); setShowCreate(true); }}
@@ -1095,7 +1125,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 style={{ backgroundColor: currentTheme.color, boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
                 <Plus className="text-[16px] leading-none" />
-                {isRTL ? 'أنشئ هدف جماعي' : 'CREATE SQUAD GOAL'}
+                {isRTL ? 'أنشئ هدف جماعي' : 'Create squad goal'}
               </button>
             </div>
           ) : (
@@ -1106,7 +1136,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
               style={{ backgroundColor: currentTheme.color, boxShadow: `0 4px 20px ${currentTheme.color}33` }}
             >
               <Plus className="w-4 h-4" />
-              {typeFilter === 'solo' ? (isRTL ? 'أنشئ هدفاً شخصياً' : 'CREATE GOAL') : (isRTL ? 'أنشئ هدفاً' : 'Create Goal')}
+              {typeFilter === 'solo' ? (isRTL ? 'أنشئ هدفاً شخصياً' : 'Create goal') : (isRTL ? 'أنشئ هدفاً' : 'Create goal')}
             </button>
           )}
         </motion.header>
@@ -1118,7 +1148,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
             <div className="flex items-center gap-2 border border-amber-500/20 bg-amber-500/5 px-3 py-1 rounded-md">
               <Zap className="text-xs text-amber-500 animate-pulse w-3 h-3" />
               <span className="text-[10px] font-space font-black text-amber-500 uppercase tracking-widest select-none">
-                {profile?.rank || 'SILVER'} • {profile?.xp || 0} XP
+                {profile?.rank ? (profile.rank.charAt(0).toUpperCase() + profile.rank.slice(1).toLowerCase()) : 'Silver'} • {profile?.xp || 0} XP
               </span>
             </div>
           </div>
@@ -1203,15 +1233,15 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 <div className="flex flex-col gap-1">
                   <h2 className="text-lg font-black uppercase text-white tracking-wider">
                     {typeFilter === 'squad'
-                      ? (isRTL ? 'إنشاء هدف فريق' : 'Create Squad Goal')
-                      : (isRTL ? 'إنشاء هدف جديد' : 'Create New Goal')}
+                      ? (isRTL ? 'إنشاء هدف فريق' : 'Create squad goal')
+                      : (isRTL ? 'إنشاء هدف جديد' : 'Create new goal')}
                   </h2>
                 </div>
 
                 {/* Title */}
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black tracking-widest uppercase text-zinc-400">
-                    {isRTL ? 'العنوان' : 'Goal Title'}
+                    {isRTL ? 'العنوان' : 'Goal title'}
                   </label>
                   <input
                     autoFocus
@@ -1226,7 +1256,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 {/* Deadline */}
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black tracking-widest uppercase text-zinc-400">
-                    {isRTL ? 'تاريخ الاستحقاق (اختياري)' : 'Deadline (Optional)'}
+                    {isRTL ? 'تاريخ الاستحقاق (اختياري)' : 'Deadline (optional)'}
                   </label>
                   <input
                     type="date"
@@ -1240,7 +1270,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 {/* Show on Dashboard Checkbox */}
                 <div className="flex items-center justify-between py-2 border-t border-b border-white/[0.05]">
                   <span className="text-[10px] font-black tracking-widest uppercase text-zinc-400">
-                    {isRTL ? 'تثبيت في اللوحة الرئيسة' : 'Pin to Dashboard'}
+                    {isRTL ? 'تثبيت في اللوحة الرئيسة' : 'Pin to dashboard'}
                   </span>
                   <label className="relative inline-flex items-center cursor-pointer select-none">
                     <input
@@ -1269,119 +1299,13 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     style={{ backgroundColor: currentTheme.color }}
                   >
                     {isSubmitting && <RefreshCw className="animate-spin text-[10px] w-3 h-3" />}
-                    {isRTL ? 'إنشاء هدف' : 'CREATE GOAL'}
+                    {isRTL ? 'إنشاء هدف' : 'Create goal'}
                   </button>
                 </div>
               </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Commented out My Tasks section block to permanently remove it from the site
-        {!typeFilter && (
-          <div className="w-full bg-zinc-50/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/80 rounded-md p-6 md:p-8 space-y-6 shadow-md transition-all duration-300 hover:shadow-[0_0_0_1px_rgba(161,161,170,0.3)] backdrop-blur-md">
-            <div className="flex flex-row justify-between items-center border-b border-zinc-200 dark:border-zinc-800 pb-4">
-              <div className="flex items-center gap-3">
-                <HelpCircle />
-                <h2 className="text-xl font-space font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-wide">
-                  {isRTL ? 'مهامي' : 'My Tasks'}
-                </h2>
-              </div>
-              <span className="px-3 py-1 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-xs font-space font-black">
-                {allTasks.length} {isRTL ? 'مهام' : 'tasks'}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-              <button
-                onClick={() => setActiveTab('ALL')}
-                className={cn(
-                  "px-4 py-2 rounded-md border font-space font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap shrink-0 cursor-pointer",
-                  activeTab === 'ALL'
-                    ? "bg-zinc-200/60 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-300 dark:border-zinc-700 shadow-sm"
-                    : "border-transparent text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800/50"
-                )}
-                style={activeTab === 'ALL' ? { borderColor: currentTheme.color } : undefined}
-              >
-                {isRTL ? 'جميع المهام' : 'ALL TASKS'} ({allTasks.length})
-              </button>
-              {missions.map(m => (
-                <button
-                  key={m.id}
-                  onClick={() => setActiveTab(m.id)}
-                  className={cn(
-                    "px-4 py-2 rounded-md border font-space font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap shrink-0 cursor-pointer max-w-[200px] truncate",
-                    activeTab === m.id
-                      ? "bg-zinc-200/60 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-300 dark:border-zinc-700 shadow-sm"
-                      : "border-transparent text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800/50"
-                  )}
-                  style={activeTab === m.id ? { borderColor: (m.color || currentTheme.color) } : undefined}
-                >
-                  {m.title}
-                </button>
-              ))}
-            </div>
-
-            <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-2">
-              {filteredTasks.map((task) => (
-                <motion.div
-                  key={task.id}
-                  layout
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className={cn(
-                    "flex items-center justify-between p-4 rounded-md border transition-all duration-300 group",
-                    "bg-white/50 dark:bg-zinc-950/20 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700/80",
-                    task.is_completed ? "opacity-60" : ""
-                  )}
-                >
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <button
-                      onClick={() => toggleTask(task)}
-                      className="shrink-0 cursor-pointer flex items-center justify-center"
-                    >
-                      {task.is_completed ? (
-                        <NeonIcon icon={CheckCircle2} interactive size={18} style={{ color: task.missionColor }} />
-                      ) : (
-                        <NeonIcon icon={Circle} interactive size={18} className="opacity-40 hover:opacity-80 text-zinc-400 hover:text-white transition-opacity" />
-                      )}
-                    </button>
-
-                    <div className="space-y-1 truncate flex-1">
-                      <p className={cn(
-                        "text-sm font-space font-bold text-zinc-900 dark:text-zinc-100 truncate transition-all duration-300",
-                        task.is_completed ? "line-through text-zinc-400 dark:text-zinc-500" : ""
-                      )}>
-                        {task.title}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: task.missionColor }} />
-                        <span className="text-[10px] font-space text-zinc-500 dark:text-zinc-400 uppercase tracking-wider truncate">
-                          {task.missionTitle}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <span className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-[10px] font-space font-black tracking-widest uppercase text-zinc-500 dark:text-zinc-400 shrink-0 ml-4">
-                    {task.weight || 3} {isRTL ? 'نقطة' : 'XP'}
-                  </span>
-                </motion.div>
-              ))}
-
-              {filteredTasks.length === 0 && (
-                <div className="py-16 text-center space-y-3">
-                  <HelpCircle />
-                  <p className="text-sm font-space text-zinc-500 dark:text-white/40">
-                    {isRTL ? 'لا توجد مهام في هذه القائمة.' : 'No tasks in this view.'}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-        */}
 
         <div className="w-full">
           {typeFilter === 'squad' ? (
@@ -1472,7 +1396,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     <div className="flex items-center gap-3 text-[#FF0055]">
                       <AlertTriangle className="text-3xl animate-pulse w-8 h-8" />
                       <h3 className="text-lg font-black tracking-widest uppercase font-space">
-                        {isRTL ? 'تحذير: تشتيت التركيز' : 'WARNING: CONTEXT SWITCHING'}
+                        {isRTL ? 'تحذير: تشتيت التركيز' : 'Warning: Context switching'}
                       </h3>
                     </div>
 
@@ -1480,7 +1404,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       <p className="font-bold border-l-2 border-[#FF0055] pl-3 py-1 bg-[#FF0055]/5">
                         {isRTL
                           ? '🚧 تشتيت التركيز يقلل الأداء الذهني بنسبة تصل إلى 40%.'
-                          : '🚧 WARNING: Context Switching degrades cognitive performance by up to 40%.'}
+                          : '🚧 Warning: Context switching degrades cognitive performance by up to 40%.'}
                       </p>
                       <p className="text-[var(--text-secondary)]">
                         {isRTL
@@ -1491,8 +1415,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       <div className="p-3 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-md space-y-2">
                         {warningSlots >= 7 && (
                           <div className="flex justify-between items-center text-[10px] uppercase font-bold text-[var(--text-secondary)] font-space">
-                            <span>{isRTL ? 'سعة التركيز النشطة:' : 'Active Focus Capacity:'}</span>
-                            <span className="text-[#FF0055] font-black">{warningSlots.toFixed(1).replace('.0', '')}/9 Slots ({(warningSlots / 9 * 100).toFixed(0)}%)</span>
+                            <span>{isRTL ? 'سعة التركيز النشطة:' : 'Active focus capacity:'}</span>
+                            <span className="text-[#FF0055] font-black">{warningSlots.toFixed(1).replace('.0', '')}/9 slots ({(warningSlots / 9 * 100).toFixed(0)}%)</span>
                           </div>
                         )}
                         {warningCriticalCount > 0 && (
@@ -1512,7 +1436,10 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                         }}
                         className="flex-1 py-2.5 bg-[#FF0055]/10 text-[#FF0055] border border-[#FF0055]/30 hover:bg-[#FF0055]/20 font-space font-black text-xs uppercase tracking-widest transition-all rounded-md"
                       >
-                        {isRTL ? 'استبدال المهمة' : 'FORCE SWAP'}
+                        {/* Commented out per safety rules:
+                        isRTL ? 'استبدال المهمة' : 'FORCE SWAP'
+                        */}
+                        {isRTL ? 'استبدال المهمة' : 'Swap task'}
                       </button>
                       <button
                         onClick={() => {
@@ -1794,11 +1721,22 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     {/* Status Message */}
                     {joinStatus === 'invalid' && (
                       <p className="text-xs text-red-500 text-center font-medium">
-                        {joinErrorText === 'INVALID_CODE // TRY AGAIN' 
+                        {/* Commented out per safety rules:
+                        joinErrorText === 'INVALID_CODE // TRY AGAIN'
                           ? (isRTL ? "رابط غير صحيح، جرب مرة أخرى" : "Invalid link, please try again")
-                          : (joinErrorText.includes('REQUEST_PENDING') 
+                          : (joinErrorText.includes('REQUEST_PENDING')
                               ? (isRTL ? "تم إرسال الطلب بالفعل وهو قيد الانتظار" : "A join request is already pending for this goal")
                               : (joinErrorText.includes('REQUEST_REJECTED')
+                                  ? (isRTL ? "تم رفض طلبك السابق" : "Your previous join request was rejected")
+                                  : (isRTL ? "رابط غير صحيح، جرب مرة أخرى" : "Invalid link, please try again")
+                                )
+                            )
+                        */}
+                        {joinErrorText === 'Invalid code - Try again' 
+                          ? (isRTL ? "رابط غير صحيح، جرب مرة أخرى" : "Invalid link, please try again")
+                          : (joinErrorText.includes('Request pending') 
+                              ? (isRTL ? "تم إرسال الطلب بالفعل وهو قيد الانتظار" : "A join request is already pending for this goal")
+                              : (joinErrorText.includes('Request rejected')
                                   ? (isRTL ? "تم رفض طلبك السابق" : "Your previous join request was rejected")
                                   : (isRTL ? "رابط غير صحيح، جرب مرة أخرى" : "Invalid link, please try again")
                                 )

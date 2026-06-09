@@ -308,7 +308,8 @@ export default function MissionDetailPage() {
             ...prev,
             tasks: prev.tasks.map((t: any) => t.id === task.id ? { ...t, assigned_to: profile?.id, assignee: userProfile } : t)
           }))
-          showToast(isRTL ? "تم تعيين المهمة لك" : "TASK ASSIGNED TO YOU", "success")
+          // showToast(isRTL ? "تم تعيين المهمة لك" : "TASK ASSIGNED TO YOU", "success")
+          showToast(isRTL ? "تم تعيين المهمة لك" : "Task assigned to you", "success")
           playSuccess()
         }
       } else if (task.assigned_to === profile?.id) {
@@ -321,11 +322,13 @@ export default function MissionDetailPage() {
             ...prev,
             tasks: prev.tasks.map((t: any) => t.id === task.id ? { ...t, assigned_to: null, assignee: null } : t)
           }))
-          showToast(isRTL ? "تم إلغاء التعيين" : "TASK UNASSIGNED", "success")
+          // showToast(isRTL ? "تم إلغاء التعيين" : "TASK UNASSIGNED", "success")
+          showToast(isRTL ? "تم إلغاء التعيين" : "Task unassigned", "success")
           playSuccess()
         }
       } else {
-        showToast(isRTL ? "هذه المهمة معينة بالفعل لشخص آخر" : "TASK ALREADY ASSIGNED TO ANOTHER MEMBER", "warning")
+        // showToast(isRTL ? "هذه المهمة معينة بالفعل لشخص آخر" : "TASK ALREADY ASSIGNED TO ANOTHER MEMBER", "warning")
+        showToast(isRTL ? "هذه المهمة معينة بالفعل لشخص آخر" : "Task already assigned to another member", "warning")
         playError()
       }
     }
@@ -363,12 +366,14 @@ export default function MissionDetailPage() {
       if (!blob) throw new Error('Blob generation failed')
       const item = new ClipboardItem({ 'image/png': blob })
       await navigator.clipboard.write([item])
-      showToast(isRTL ? 'تم نسخ صورة البطاقة بنجاح!' : 'CARD IMAGE COPIED TO CLIPBOARD', 'success')
+      // showToast(isRTL ? 'تم نسخ صورة البطاقة بنجاح!' : 'CARD IMAGE COPIED TO CLIPBOARD', 'success')
+      showToast(isRTL ? 'تم نسخ صورة البطاقة بنجاح!' : 'Card image copied to clipboard', 'success')
       playSuccess()
       setShowShareModal(false)
     } catch (err) {
       console.error('Failed to copy image blob:', err)
-      showToast(isRTL ? 'الكارت غير متوفر حالياً // يعمل في البيئة الإنتاجية' : 'CARD_UNAVAILABLE // Works on production', 'warning')
+      // showToast(isRTL ? 'الكارت غير متوفر حالياً // يعمل في البيئة الإنتاجية' : 'CARD_UNAVAILABLE // Works on production', 'warning')
+      showToast(isRTL ? 'الكارت غير متوفر حالياً - يعمل في البيئة الإنتاجية' : 'Card unavailable - Works on production', 'warning')
       playError()
       setShowShareModal(false)
     } finally {
@@ -390,7 +395,8 @@ export default function MissionDetailPage() {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      showToast(isRTL ? 'تم تحميل الكارت بنجاح!' : 'GOAL CARD DOWNLOADED SUCCESSFULLY', 'success')
+      // showToast(isRTL ? 'تم تحميل الكارت بنجاح!' : 'GOAL CARD DOWNLOADED SUCCESSFULLY', 'success')
+      showToast(isRTL ? 'تم تحميل الكارت بنجاح!' : 'Goal card downloaded successfully', 'success')
       playSuccess()
       setShowShareModal(false)
     } catch (err) {
@@ -873,7 +879,8 @@ export default function MissionDetailPage() {
         
         if (!error) {
           setMission((prev: any) => ({ ...prev, is_archived: true, status: 'completed' }))
-          showToast(isRTL ? 'تم اكتمال المهمة! نقلت إلى الخزنة' : 'GOAL ACHIEVED! MOVED TO WINS', 'success')
+          // showToast(isRTL ? 'تم اكتمال المهمة! نقلت إلى الخزنة' : 'GOAL ACHIEVED! MOVED TO WINS', 'success')
+          showToast(isRTL ? 'تم اكتمال المهمة! نقلت إلى الخزنة' : 'Goal achieved! Moved to wins', 'success')
           playSuccess()
         }
       } else if (roundedProgress < 100 && mission.is_archived) {
@@ -1401,14 +1408,16 @@ export default function MissionDetailPage() {
       playError()
       return
     }
-    if (!confirm(isRTL ? 'هل أنت متأكد من حذف هذه المهمة؟' : 'CONFIRM GOAL TERMINATION?')) return
+    // if (!confirm(isRTL ? 'هل أنت متأكد من حذف هذه المهمة؟' : 'CONFIRM GOAL TERMINATION?')) return
+    if (!confirm(isRTL ? 'هل أنت متأكد من حذف هذه المهمة؟' : 'Are you sure you want to delete this goal?')) return
     const isLocal = typeof id === 'string' && id.startsWith('local_')
 
     if (isLocal) {
       const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
       const updatedGoals = guestGoals.filter((g: any) => g.id !== id)
       localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
-      showToast(isRTL ? 'تم حذف المهمة' : 'GOAL DELETED', 'success')
+      // showToast(isRTL ? 'تم حذف المهمة' : 'GOAL DELETED', 'success')
+      showToast(isRTL ? 'تم حذف المهمة' : 'Goal deleted', 'success')
       router.push('/goals/squad')
       return
     }
@@ -1416,7 +1425,8 @@ export default function MissionDetailPage() {
     const { error } = await supabase.from('goals').delete().eq('id', id)
     if (error) {
       console.error('Delete cup error:', error)
-      showToast(isRTL ? `فشل الحذف: ${error.message}` : `DELETE FAILED: ${error.message}`, 'warning')
+      // showToast(isRTL ? `فشل الحذف: ${error.message}` : `DELETE FAILED: ${error.message}`, 'warning')
+      showToast(isRTL ? `فشل الحذف: ${error.message}` : `Delete failed: ${error.message}`, 'warning')
     } else {
       showToast(isRTL ? 'تم حذف المهمة' : 'GOAL DELETED', 'success')
       router.push('/goals/squad')
@@ -1450,10 +1460,12 @@ export default function MissionDetailPage() {
       .eq('id', id)
     
     if (error) {
-      showToast(isRTL ? "فشل تحديث القواعد" : "FAILED TO UPDATE TEAM RULES", "warning")
+      // showToast(isRTL ? "فشل تحديث القواعد" : "FAILED TO UPDATE TEAM RULES", "warning")
+      showToast(isRTL ? "فشل تحديث القواعد" : "Failed to update team rules", "warning")
       playError()
     } else {
-      showToast(isRTL ? "تم تحديث قواعد الفريق!" : "TEAM RULES UPDATED", "success")
+      // showToast(isRTL ? "تم تحديث قواعد الفريق!" : "TEAM RULES UPDATED", "success")
+      showToast(isRTL ? "تم تحديث قواعد الفريق!" : "Team rules updated", "success")
       playSuccess()
     }
   }
@@ -1468,10 +1480,12 @@ export default function MissionDetailPage() {
         .eq('user_id', profile?.id)
       
       if (error) {
-        showToast(isRTL ? 'فشل مغادرة الفريق' : 'FAILED TO LEAVE TEAM', 'warning')
+        // showToast(isRTL ? 'فشل مغادرة الفريق' : 'FAILED TO LEAVE TEAM', 'warning')
+        showToast(isRTL ? 'فشل مغادرة الفريق' : 'Failed to leave team', 'warning')
         playError()
       } else {
-        showToast(isRTL ? 'لقد غادرت الفريق بنجاح' : 'YOU HAVE LEFT THE TEAM', 'success')
+        // showToast(isRTL ? 'لقد غادرت الفريق بنجاح' : 'YOU HAVE LEFT THE TEAM', 'success')
+        showToast(isRTL ? 'لقد غادرت الفريق بنجاح' : 'You have left the team', 'success')
         playSuccess()
         setShowSquadPanel(false)
         router.push('/goals/squad')
@@ -1497,7 +1511,8 @@ const { progress, isInRedZone } = useMemo(() => {
   if (loading || !mounted) return (
     <>
       <div className="p-16 font-space animate-pulse tracking-widest text-sm uppercase" style={{ color: currentTheme.color }}>
-        {isRTL ? 'جاري التحميل...' : 'LOADING WORKSPACE...'}
+        {/* {isRTL ? 'جاري التحميل...' : 'LOADING WORKSPACE...'} */}
+        {isRTL ? 'جاري التحميل...' : 'Loading workspace...'}
       </div>
     </>
   )
@@ -1518,7 +1533,8 @@ const { progress, isInRedZone } = useMemo(() => {
               <Lock className="w-12 h-12 text-[#FF0055] animate-pulse" />
               <div className="space-y-2">
                 <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-[#FF0055]">
-                  CLASSIFIED_GOAL // ACCESS DENIED
+                  {/* CLASSIFIED_GOAL // ACCESS DENIED */}
+                  Access Denied
                 </h2>
                 <p className="text-xs md:text-sm font-bold text-zinc-400 max-w-sm leading-relaxed">
                   This is a Team goal. Join with an invite code to access.
@@ -1534,7 +1550,8 @@ const { progress, isInRedZone } = useMemo(() => {
                 className="flex items-center justify-center gap-2 px-6 py-3 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-95 cursor-pointer"
               >
                 <LinkIcon className="w-4 h-4 text-teal-400" />
-                JOIN WITH CODE
+                {/* JOIN WITH CODE */}
+                Join with Code
               </button>
             </div>
           </motion.div>
@@ -1568,7 +1585,8 @@ const { progress, isInRedZone } = useMemo(() => {
                       <button 
                          onClick={deleteMission}
                          className="p-2 text-black/20 dark:text-white/10 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-full"
-                         title={isRTL ? 'حذف المهمة' : 'DELETE_GOAL'}
+                         // title={isRTL ? 'حذف المهمة' : 'DELETE_GOAL'}
+                         title={isRTL ? 'حذف المهمة' : 'Delete Goal'}
                       >
                          <Trash2 className="w-5 h-5 text-zinc-400 hover:text-red-500" />
                       </button>
@@ -1686,11 +1704,13 @@ const { progress, isInRedZone } = useMemo(() => {
                  }}
                  className="flex flex-col items-center justify-center p-2 transition-colors cursor-pointer text-zinc-400 hover:text-white"
                  style={mission.sync_to_dashboard ? { color: missionColor } : {}}
-                 title={mission.sync_to_dashboard ? (isRTL ? 'إلغاء التثبيت من الواجهة' : 'UNPIN FROM DASHBOARD') : (isRTL ? 'تثبيت في الواجهة' : 'PIN TO DASHBOARD')}
+                 // title={mission.sync_to_dashboard ? (isRTL ? 'إلغاء التثبيت من الواجهة' : 'UNPIN FROM DASHBOARD') : (isRTL ? 'تثبيت في الواجهة' : 'PIN TO DASHBOARD')}
+                  title={mission.sync_to_dashboard ? (isRTL ? 'إلغاء التثبيت من الواجهة' : 'Unpin from Dashboard') : (isRTL ? 'تثبيت في الواجهة' : 'Pin to Dashboard')}
               >
                  <Pin className={cn("w-5 h-5 mb-1", mission.sync_to_dashboard ? "rotate-45 fill-current" : "")} />
                  <span className="text-[10px] tracking-wider uppercase font-space font-black">
-                   {mission.sync_to_dashboard ? (isRTL ? 'إلغاء التثبيت' : 'UNPIN') : (isRTL ? 'تثبيت' : 'PIN')}
+                   {/* {mission.sync_to_dashboard ? (isRTL ? 'إلغاء التثبيت' : 'UNPIN') : (isRTL ? 'تثبيت' : 'PIN')} */}
+                    {mission.sync_to_dashboard ? (isRTL ? 'إلغاء التثبيت' : 'Unpin') : (isRTL ? 'تثبيت' : 'Pin')}
                  </span>
               </button>
 
@@ -1702,7 +1722,8 @@ const { progress, isInRedZone } = useMemo(() => {
                 >
                    <ListPlus className="w-5 h-5 mb-1" />
                    <span className="text-[10px] tracking-wider uppercase font-space font-black flex items-center gap-0.5">
-                      {isRTL ? 'استيراد' : 'IMPORT'}
+                      {/* {isRTL ? 'استيراد' : 'IMPORT'} */}
+                       {isRTL ? 'استيراد' : 'Import'}
                       <ChevronDown className={cn("w-3 h-3 transition-transform duration-200", showImportDropdown && "rotate-180")} />
                    </span>
                 </button>
@@ -1748,7 +1769,8 @@ const { progress, isInRedZone } = useMemo(() => {
               >
                 <FileText className="w-5 h-5 mb-1" />
                 <span className="text-[10px] tracking-wider uppercase font-space font-black">
-                  {isRTL ? 'الملاحظات' : 'NOTES'}
+                  {/* {isRTL ? 'الملاحظات' : 'NOTES'} */}
+                  {isRTL ? 'الملاحظات' : 'Notes'}
                 </span>
                 {linkedNotes.length > 0 && (
                   <span className="absolute top-1 right-2 w-3.5 h-3.5 rounded-full text-[8px] font-black flex items-center justify-center text-black" style={{ backgroundColor: missionColor }}>
@@ -1764,7 +1786,8 @@ const { progress, isInRedZone } = useMemo(() => {
               >
                  <Share2 className="w-5 h-5 mb-1" />
                  <span className="text-[10px] tracking-wider uppercase font-space font-black">
-                   {isRTL ? 'مشاركة' : 'SHARE'}
+                   {/* {isRTL ? 'مشاركة' : 'SHARE'} */}
+                   {isRTL ? 'مشاركة' : 'Share'}
                  </span>
               </button>
             </div>
@@ -1799,7 +1822,8 @@ const { progress, isInRedZone } = useMemo(() => {
                   e.currentTarget.style.color = `${currentTheme.color}99`;
                   e.currentTarget.style.borderColor = '';
                 }}
-                title="ADD_TO_GOOGLE_CALENDAR"
+                // title="ADD_TO_GOOGLE_CALENDAR"
+                title="Add to Google Calendar"
              >
                 <Calendar className="text-xl w-5 h-5" />
              </button>
@@ -1808,7 +1832,8 @@ const { progress, isInRedZone } = useMemo(() => {
                 onClick={openAttachments}
                 /* rounded-md */
                 className="w-10 h-10 border border-[var(--card-border)] text-[var(--text-secondary)] hover:opacity-85 flex items-center justify-center rounded-md relative transition-all"
-                title="GOAL_ATTACHMENTS"
+                // title="GOAL_ATTACHMENTS"
+                title="Attachments"
              >
                 <Paperclip className="text-xl w-5 h-5" />
                 {attachmentCount > 0 && (
@@ -1824,7 +1849,8 @@ const { progress, isInRedZone } = useMemo(() => {
         <div className="w-full space-y-8">
             <section className="space-y-8">
            <div className="flex justify-between items-center border-b border-zinc-800/80 pb-3">
-             <h2 className="text-[10px] font-black font-space text-[var(--text-secondary)] tracking-[0.5em] uppercase">{isRTL ? 'قائمة المهام' : 'TASKS'}</h2>
+             <h2 className="text-[10px] font-black font-space text-[var(--text-secondary)] tracking-[0.5em] uppercase">{/* {isRTL ? 'قائمة المهام' : 'TASKS'} */}
+             {isRTL ? 'قائمة المهام' : 'Tasks'}</h2>
              
              {/* View Toggles (Icon Only) on the Far Right */}
              <div className="flex items-center gap-1 p-0.5 bg-black/40 border border-white/5 backdrop-blur-md rounded-md">
@@ -1969,7 +1995,8 @@ const { progress, isInRedZone } = useMemo(() => {
                                    onClick={(e) => { 
                                      e.stopPropagation(); 
                                      if (!canToggleTask(task)) {
-                                       showToast(isRTL ? 'غير مسموح // ليست مهمتك' : 'RESTRICTED // NOT YOUR TASK', 'warning');
+                                       // showToast(isRTL ? 'غير مسموح // ليست مهمتك' : 'RESTRICTED // NOT YOUR TASK', 'warning')
+                                       showToast(isRTL ? 'غير مسموح - ليست مهمتك' : 'Restricted - Not your task', 'warning');
                                        playError();
                                        return;
                                      }
@@ -2072,7 +2099,8 @@ const { progress, isInRedZone } = useMemo(() => {
                                       onClick={(e) => handleAssignClick(e, task)}
                                       className="px-2 py-1 border border-dashed border-white/25 hover:border-teal-500 hover:text-teal-400 text-white/40 text-[9px] font-mono tracking-wider rounded transition-colors"
                                     >
-                                      [ + ASSIGN ]
+                                      {/* [ + ASSIGN ] */}
+                                       [ + Assign ]
                                     </button>
                                   )}
 
@@ -2083,7 +2111,8 @@ const { progress, isInRedZone } = useMemo(() => {
                                       onClick={e => e.stopPropagation()}
                                     >
                                       <div className="text-[9px] font-black text-zinc-500 tracking-widest uppercase p-1.5 border-b border-white/5">
-                                        {isRTL ? 'ASSIGN' : 'ASSIGN OPERATOR'}
+                                        {/* {isRTL ? 'ASSIGN' : 'ASSIGN OPERATOR'} */}
+                                        {isRTL ? 'تعيين' : 'Assign Operator'}
                                       </div>
                                       <div className="max-h-40 overflow-y-auto py-1">
                                         {squadMembers.map((member) => (
@@ -2107,7 +2136,8 @@ const { progress, isInRedZone } = useMemo(() => {
                                                   ...prev,
                                                   tasks: prev.tasks.map((t: any) => t.id === task.id ? { ...t, assigned_to: member.id, assignee: memberProfile } : t)
                                                 }))
-                                                showToast(isRTL ? `ASSIGNED` : `ASSIGNED TO ${member.full_name.toUpperCase()}`, 'success')
+                                                // showToast(isRTL ? `ASSIGNED` : `ASSIGNED TO ${member.full_name.toUpperCase()}`, 'success')
+                                                 showToast(isRTL ? `تم التعيين` : `Assigned to ${member.full_name}`, 'success')
                                                 playSuccess()
                                               }
                                             }}
@@ -2155,7 +2185,8 @@ const { progress, isInRedZone } = useMemo(() => {
                                   deleteTask(task.id); 
                                 }}
                                 className="p-2.5 md:p-1.5 text-[var(--text-secondary)] hover:text-red-500 transition-all cursor-pointer"
-                                title="DELETE_TASK"
+                                // title="DELETE_TASK"
+                                title="Delete Task"
                               >
                                 <Trash2 className="w-5 h-5 md:w-4 md:h-4" />
                               </button>
@@ -2201,7 +2232,8 @@ const { progress, isInRedZone } = useMemo(() => {
                    <input
                       value={newTaskTitle}
                       onChange={e => setNewTaskTitle(e.target.value)}
-                      placeholder={isRTL ? 'إضافة مهمة... (ENTER)' : 'ADD_TASK... (PRESS ENTER)'}
+                      // placeholder={isRTL ? 'إضافة مهمة... (ENTER)' : 'ADD_TASK... (PRESS ENTER)'}
+                      placeholder={isRTL ? 'إضافة مهمة... (Enter)' : 'Add task... (Press Enter)'}
                       className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] p-4 md:p-6 font-space text-sm font-black text-[var(--text-primary)] outline-none transition-all"
                       style={{ borderColor: `${currentTheme.color}20` }}
                    />
@@ -2210,13 +2242,15 @@ const { progress, isInRedZone } = useMemo(() => {
                       className="absolute end-4 top-1/2 -translate-y-1/2 px-4 md:px-6 py-2 font-space text-[10px] font-black uppercase tracking-widest transition-all"
                       style={{ backgroundColor: `${currentTheme.color}11`, color: currentTheme.color, borderColor: `${currentTheme.color}33` }}
                    >
-                      + {isRTL ? 'إضافة' : 'ADD'}
+                      {/* + {isRTL ? 'إضافة' : 'ADD'} */}
+                      + {isRTL ? 'إضافة' : 'Add'}
                    </button>
                 </div>
 
                 <div className="flex flex-col gap-2 justify-center px-4 md:px-6 py-3 md:py-0 border border-[var(--card-border)] bg-[var(--input-bg)]">
                    <div className="flex items-center gap-2">
-                     <span className="text-[8px] font-space text-[var(--text-secondary)] uppercase tracking-widest font-black">SET_POWER</span>
+                     <span className="text-[8px] font-space text-[var(--text-secondary)] uppercase tracking-widest font-black">{/* SET_POWER */}
+                      Set Power</span>
                      <div className="group relative flex items-center cursor-help">
                        <HelpCircle className="text-[12px] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
                        <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 rounded bg-[var(--card-bg)] border border-[var(--card-border)] p-2 text-[10px] md:text-xs text-[var(--text-primary)] shadow-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-[300] text-center">
@@ -2263,10 +2297,12 @@ const { progress, isInRedZone } = useMemo(() => {
                 <div className="flex justify-between items-center">
                   <div>
                     <h2 className="text-xl md:text-2xl font-black font-space uppercase" style={{ color: missionColor }}>
-                      {isRTL ? 'الملاحظات' : 'NOTES'}
+                      {/* {isRTL ? 'الملاحظات' : 'NOTES'} */}
+                      {isRTL ? 'الملاحظات' : 'Notes'}
                     </h2>
                     <p className="text-[12px] font-space text-[var(--text-secondary)] tracking-widest uppercase font-black mt-1">
-                      {linkedNotes.length} {isRTL ? 'سجل مرتبط' : 'RECORDS LINKED TO THIS GOAL'}
+                      {/* {linkedNotes.length} {isRTL ? 'سجل مرتبط' : 'RECORDS LINKED TO THIS GOAL'} */}
+                      {linkedNotes.length} {isRTL ? 'سجل مرتبط' : 'records linked to this goal'}
                     </p>
                   </div>
                   <button
@@ -2281,10 +2317,12 @@ const { progress, isInRedZone } = useMemo(() => {
                   <div className="py-16 text-center space-y-4">
                     <HelpCircle />
                     <p className="text-[11px] font-space text-[var(--text-secondary)] tracking-[0.4em] uppercase font-black">
-                      {isRTL ? 'لا توجد سجلات مرتبطة' : 'NO_INTEL_LINKED'}
+                      {/* {isRTL ? 'لا توجد سجلات مرتبطة' : 'NO_INTEL_LINKED'} */}
+                      {isRTL ? 'لا توجد سجلات مرتبطة' : 'No notes linked'}
                     </p>
                     <p className="text-[14px] font-space text-[var(--text-primary)] tracking-wider">
-                      {isRTL ? 'اذهب إلى العقل وأنشئ ملاحظة مرتبطة بهذه المهمة' : 'Go to NOTES → NEW_LOG and link it to this goal'}
+                      {/* {isRTL ? 'اذهب إلى العقل وأنشئ ملاحظة مرتبطة بهذه المهمة' : 'Go to NOTES → NEW_LOG and link it to this goal'} */}
+                      {isRTL ? 'اذهب إلى الملاحظات وأنشئ ملاحظة مرتبطة بهذه المهمة' : 'Go to Notes → New Log and link it to this goal'}
                     </p>
                   </div>
                 ) : (
@@ -2533,7 +2571,8 @@ const { progress, isInRedZone } = useMemo(() => {
                                                   .update({ role: newRole })
                                                   .eq('id', member.member_row_id)
                                                 if (error) {
-                                                  showToast(isRTL ? 'فشل تحديث الدور' : 'FAILED TO UPDATE ROLE', 'warning')
+                                                  // showToast(isRTL ? 'فشل تحديث الدور' : 'FAILED TO UPDATE ROLE', 'warning')
+                                                  showToast(isRTL ? 'فشل تحديث الدور' : 'Failed to update role', 'warning')
                                                   playError()
                                                 } else {
                                                   showToast(isRTL ? 'تم تحديث الدور بنجاح!' : `Role updated to ${newRole}`, 'success')
@@ -2543,10 +2582,14 @@ const { progress, isInRedZone } = useMemo(() => {
                                               }}
                                               className="bg-zinc-900 border border-white/10 text-zinc-300 py-1 px-2 rounded-md text-[10px] outline-none focus:border-teal-500/50 cursor-pointer font-space transition-all h-8"
                                             >
-                                              <option value="admin">ADMIN</option>
-                                              <option value="member">MEMBER</option>
-                                              <option value="viewer">VIEWER</option>
-                                              <option value="guest">GUEST</option>
+                                              {/* <option value="admin">ADMIN</option> */}
+                                              {/* <option value="member">MEMBER</option> */}
+                                              {/* <option value="viewer">VIEWER</option> */}
+                                              {/* <option value="guest">GUEST</option> */}
+                                              <option value="admin">Admin</option>
+                                              <option value="member">Member</option>
+                                              <option value="viewer">Viewer</option>
+                                              <option value="guest">Guest</option>
                                             </select>
                                           )}
 
@@ -2565,7 +2608,8 @@ const { progress, isInRedZone } = useMemo(() => {
                                                       .eq('id', member.member_row_id)
                                                     
                                                     if (error) {
-                                                      showToast(isRTL ? 'فشل إزالة العضو' : 'FAILED TO REMOVE MEMBER', 'warning')
+                                                      // showToast(isRTL ? 'فشل إزالة العضو' : 'FAILED TO REMOVE MEMBER', 'warning')
+                                                      showToast(isRTL ? 'فشل إزالة العضو' : 'Failed to remove member', 'warning')
                                                       playError()
                                                     } else {
                                                       showToast(isRTL ? 'تم إزالة العضو من الفريق' : 'Member removed from squad', 'success')
@@ -2631,7 +2675,8 @@ const { progress, isInRedZone } = useMemo(() => {
                                                   playBlip()
                                                   const { data, error } = await supabase.rpc('review_squad_join_request', { p_request_id: req.id, p_action: 'approve' })
                                                   if (error) {
-                                                    showToast(isRTL ? 'فشل قبول الطلب' : 'FAILED TO APPROVE', 'warning')
+                                                    // showToast(isRTL ? 'فشل قبول الطلب' : 'FAILED TO APPROVE', 'warning')
+                                                    showToast(isRTL ? 'فشل قبول الطلب' : 'Failed to approve', 'warning')
                                                     playError()
                                                   } else {
                                                     if (req.role && ['admin', 'member', 'viewer', 'guest'].includes(req.role)) {
@@ -2641,7 +2686,8 @@ const { progress, isInRedZone } = useMemo(() => {
                                                         .eq('goal_id', id)
                                                         .eq('user_id', req.user_id)
                                                     }
-                                                    showToast(isRTL ? 'تم قبول العضو الجديد في الفريق!' : 'MEMBER APPROVED // JOINED SQUAD', 'success')
+                                                    // showToast(isRTL ? 'تم قبول العضو الجديد في الفريق!' : 'MEMBER APPROVED // JOINED SQUAD', 'success')
+                                                    showToast(isRTL ? 'تم قبول العضو الجديد في الفريق!' : 'Member approved - Joined squad', 'success')
                                                     playSuccess()
                                                     await fetchPendingRequests()
                                                     await fetchMission() // reload members list
@@ -2650,7 +2696,8 @@ const { progress, isInRedZone } = useMemo(() => {
                                                 }}
                                                 className="flex-1 py-1.5 border border-teal-500/40 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 rounded font-black tracking-widest text-[9px] uppercase transition-all duration-300 disabled:opacity-50 cursor-pointer text-center"
                                               >
-                                                {isReviewing === req.id ? 'PROCESSING...' : (isRTL ? '✓ قبول' : '✓ APPROVE')}
+                                                {/* {isReviewing === req.id ? 'PROCESSING...' : (isRTL ? '✓ قبول' : '✓ APPROVE')} */}
+                                                {isReviewing === req.id ? 'Processing...' : (isRTL ? '✓ قبول' : '✓ Approve')}
                                               </button>
                                               <button
                                                 disabled={isReviewing !== null}
@@ -2671,10 +2718,12 @@ const { progress, isInRedZone } = useMemo(() => {
                                                    })
                                                    console.log('REJECT result:', { data, error })
                                                   if (error) {
-                                                    showToast(isRTL ? 'فشل رفض الطلب' : 'FAILED TO REJECT', 'warning')
+                                                    // showToast(isRTL ? 'فشل رفض الطلب' : 'FAILED TO REJECT', 'warning')
+                                                    showToast(isRTL ? 'فشل رفض الطلب' : 'Failed to reject', 'warning')
                                                     playError()
                                                   } else {
-                                                    showToast(isRTL ? 'تم رفض طلب الانضمام' : 'MEMBER REJECTED // SQUAD SECURE', 'success')
+                                                    // showToast(isRTL ? 'تم رفض طلب الانضمام' : 'MEMBER REJECTED // SQUAD SECURE', 'success')
+                                                    showToast(isRTL ? 'تم رفض طلب الانضمام' : 'Member rejected - Squad secure', 'success')
                                                     playSuccess()
                                                     await fetchPendingRequests()
                                                   }
@@ -2682,7 +2731,8 @@ const { progress, isInRedZone } = useMemo(() => {
                                                 }}
                                                 className="flex-1 py-1.5 border border-red-500/40 hover:border-red-400 text-red-400 hover:text-red-300 bg-red-500/5 hover:bg-red-500/10 rounded font-black tracking-widest text-[9px] uppercase transition-all duration-300 disabled:opacity-50 cursor-pointer text-center"
                                               >
-                                                {isReviewing === req.id ? 'PROCESSING...' : (isRTL ? '✗ رفض' : '✗ REJECT')}
+                                                {/* {isReviewing === req.id ? 'PROCESSING...' : (isRTL ? '✗ رفض' : '✗ REJECT')} */}
+                                                {isReviewing === req.id ? 'Processing...' : (isRTL ? '✗ رفض' : '✗ Reject')}
                                               </button>
                                             </div>
                                           </div>
@@ -2820,7 +2870,8 @@ const { progress, isInRedZone } = useMemo(() => {
                               {isAdmin && (
                                 <div className="space-y-4">
                                   <h4 className="text-[10px] font-black tracking-[0.3em] uppercase text-zinc-500 border-b border-white/5 pb-1">
-                                    {isRTL ? 'قواعد الفريق // RULES' : 'SQUAD RULES'}
+                                    {/* {isRTL ? 'قواعد الفريق // RULES' : 'SQUAD RULES'} */}
+                                    {isRTL ? 'قواعد الفريق - القوانين' : 'Squad Rules'}
                                   </h4>
                                   <div className="space-y-3 p-4 border border-white/5 bg-black/40 rounded-md">
                                     <label className="flex items-center justify-between text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer select-none">
@@ -2853,7 +2904,8 @@ const { progress, isInRedZone } = useMemo(() => {
                                       />
                                     </label>
                                     <div className="mt-3 pt-3 border-t border-white/5 space-y-1 text-[9px] font-mono text-zinc-500 uppercase tracking-wider">
-                                      <div className="text-zinc-400 font-bold">SYSTEM ROLE POLICIES // ضوابط الأدوار:</div>
+                                      {/* <div className="text-zinc-400 font-bold">SYSTEM ROLE POLICIES // ضوابط الأدوار:</div> */}
+                                      <div className="text-zinc-400 font-bold">Role Details</div>
                                       <div>• {isRTL ? 'الضيف (Guest) تنتهي صلاحيته بعد 7 أيام' : 'Guest access expires automatically after 7 days'}</div>
                                       <div>• {isRTL ? 'المشاهد والضيف لا يمكنهم تعديل أو نقل المهام' : 'Viewer & Guest cannot add, complete, or move tasks'}</div>
                                       <div>• {isRTL ? 'المشرفون (Admin) لا يمكنهم حذف الفريق' : 'Admins cannot terminate the squad'}</div>
@@ -2869,7 +2921,8 @@ const { progress, isInRedZone } = useMemo(() => {
                                     onClick={leaveSquad}
                                     className="w-full py-3 border border-red-500/40 hover:border-red-400 bg-red-500/5 hover:bg-red-500/10 text-red-400 hover:text-red-300 rounded-md font-space font-black text-xs uppercase tracking-widest cursor-pointer transition-all hover:scale-[1.02]"
                                   >
-                                    {isRTL ? '✗ مغادرة الفريق' : '✗ LEAVE SQUAD'}
+                                    {/* {isRTL ? '✗ مغادرة الفريق' : '✗ LEAVE SQUAD'} */}
+                                    {isRTL ? '✗ مغادرة الفريق' : '✗ Leave Squad'}
                                   </button>
                                 </div>
                               )}
@@ -3119,7 +3172,8 @@ const { progress, isInRedZone } = useMemo(() => {
                       navigator.clipboard.writeText(inviteUrl)
                       setCopiedRow('invite')
                       setTimeout(() => setCopiedRow(null), 2000)
-                      showToast(isRTL ? 'تم نسخ الرابط!' : 'INVITE LINK COPIED', 'success')
+                      // showToast(isRTL ? 'تم نسخ الرابط!' : 'INVITE LINK COPIED', 'success')
+                      showToast(isRTL ? 'تم نسخ الرابط!' : 'Invite link copied', 'success')
                       playSuccess()
                     }}
                     className="shrink-0 h-9 px-4 bg-teal-500 text-black text-xs font-semibold rounded-xl transition-all duration-150 active:scale-[0.97]"

@@ -39,18 +39,28 @@ export default function BlockedPage() {
           </div>
 
           <h1 className="text-3xl font-black text-red-500 tracking-tighter uppercase">
+            {/* Commented out per safety rules:
             ACCESS_DENIED
+            */}
+            Access Denied
           </h1>
           
           <div className="space-y-4">
             <p className="text-white/60 text-sm leading-relaxed">
+              {/* Commented out per safety rules:
               <span className="text-red-500 font-bold tracking-widest block mb-2">ACCOUNT_SUSPENDED</span>
               Your access to the Growth Hub has been terminated by system administration. 
               Violation of core terms detected.
+              */}
+              <span className="text-red-500 font-bold tracking-widest block mb-2">Account Suspended</span>
+              Your access to the Growth Hub has been disabled by system administration.
             </p>
             
             <div className="p-4 bg-red-500/5 border border-red-500/10 rounded-sm text-left">
+              {/* Commented out per safety rules:
               <p className="text-[10px] font-black text-red-400/50 tracking-widest uppercase mb-1">CONTACT SUPPORT:</p>
+              */}
+              <p className="text-[10px] font-black text-red-400/50 tracking-widest uppercase mb-1">Contact Support:</p>
               <p className="text-xs text-white/40 font-mono">admin@growthhub.sys</p>
             </div>
           </div>
@@ -59,17 +69,22 @@ export default function BlockedPage() {
             onClick={handleLogout}
             className="w-full py-4 bg-red-600 hover:bg-red-500 text-white font-black tracking-[0.3em] uppercase text-xs transition-all shadow-[0_0_20px_rgba(220,20,60,0.3)] hover:shadow-[0_0_30px_rgba(220,20,60,0.5)] active:scale-95"
           >
+            {/* Commented out per safety rules:
             LOGOUT
+            */}
+            Logout
           </button>
         </div>
       </motion.div>
 
-      {/* Decorative Glitch Elements */}
+      {/* Decorative Glitch Elements - Commented out per safety rules */}
+      {/* 
       <div className="fixed top-10 left-10 text-[10px] text-red-500/20 font-mono hidden lg:block">
         ERROR_CODE: 0x8004100E<br />
         SEC_LEVEL: BLACK<br />
         STATUS: RESTRICTED
       </div>
+      */}
     </div>
   )
 }

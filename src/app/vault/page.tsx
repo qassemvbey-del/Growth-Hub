@@ -159,12 +159,19 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
                 transition={{ duration: 0.3 }}
                 className="space-y-0.5"
               >
+                {/* Commented out per safety rules:
                 <p className="font-space text-[9px] text-zinc-500 dark:text-white/40 uppercase tracking-[0.25em] font-black">
                   {isRTL ? 'الخبرة المطلوبة' : 'XP REQUIRED'}
                 </p>
+                */}
+                <p className="font-space text-[9px] text-zinc-500 dark:text-white/40 uppercase tracking-[0.25em] font-black">
+                  {isRTL ? 'الخبرة المطلوبة' : 'XP Required'}
+                </p>
                 <p className="text-xl font-black font-space tracking-tight text-zinc-900 dark:text-white">
                   {rank.id === 'CONQUEROR' ? (
-                    isRTL ? 'المتصدر #1' : 'TOP #1 LEAD'
+                    // Commented out per safety rules:
+                    // isRTL ? 'المتصدر #1' : 'TOP #1 LEAD'
+                    isRTL ? 'المتصدر #1' : 'Top #1 Leader'
                   ) : (
                     `${rank.threshold.toLocaleString()} XP`
                   )}
@@ -177,8 +184,13 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
                 transition={{ duration: 0.3 }}
                 className="space-y-0.5"
               >
+                {/* Commented out per safety rules:
                 <p className="font-space text-[9px] uppercase tracking-[0.25em] font-black" style={{ color: rank.color }}>
                   {isRTL ? 'الميزة النشطة' : 'ACTIVE PERK'}
+                </p>
+                */}
+                <p className="font-space text-[9px] uppercase tracking-[0.25em] font-black" style={{ color: rank.color }}>
+                  {isRTL ? 'الميزة النشطة' : 'Active Perk'}
                 </p>
                 <p className="text-[11px] font-bold font-space uppercase tracking-widest text-zinc-800 dark:text-white/80">
                   {isRTL ? (
@@ -198,8 +210,13 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
                 transition={{ duration: 0.3 }}
                 className="space-y-0.5"
               >
+                {/* Commented out per safety rules:
                 <p className="font-space text-[9px] text-zinc-500 dark:text-white/40 uppercase tracking-[0.25em] font-black">
                   {isRTL ? 'ميزات الرتبة' : 'RANK UNLOCKS'}
+                </p>
+                */}
+                <p className="font-space text-[9px] text-zinc-500 dark:text-white/40 uppercase tracking-[0.25em] font-black">
+                  {isRTL ? 'ميزات الرتبة' : 'Rank Unlocks'}
                 </p>
                 <p className="text-[10px] font-space text-zinc-600 dark:text-white/60 tracking-wider">
                   {isRTL ? (
@@ -237,7 +254,10 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
                     el.style.boxShadow = 'none';
                   }}
                 >
+                  {/* Commented out per safety rules:
                   {isRTL ? 'تفعيل المظهر' : 'EQUIP THEME'}
+                  */}
+                  {isRTL ? 'تفعيل المظهر' : 'Equip Theme'}
                 </motion.button>
               )}
             </div>
@@ -248,7 +268,10 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
         {isLocked && (
           <div className="absolute inset-0 z-50 bg-white/90 dark:bg-black/85 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-6 text-center border border-zinc-200 dark:border-white/5 transition-opacity duration-300 group-hover:opacity-95">
             <Lock className="text-zinc-400 dark:text-white/30 text-5xl mb-3 group-hover:scale-110 group-hover:text-zinc-600 dark:group-hover:text-white/55 transition-all duration-300 w-12 h-12" />
+            {/* Commented out per safety rules:
             <p className="text-zinc-500 dark:text-white/40 font-black font-space text-2xl tracking-widest uppercase">{isRTL ? 'غير متاح' : 'LOCKED'}</p>
+            */}
+            <p className="text-zinc-500 dark:text-white/40 font-black font-space text-2xl tracking-widest uppercase">{isRTL ? 'غير متاح' : 'Locked'}</p>
             
             <motion.div
               animate={{ opacity: isHovered ? 1.0 : 0.3 }}
@@ -257,13 +280,20 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
             >
               <p className="font-space text-[11px] tracking-[0.2em] font-black uppercase text-center" style={{ color: rank.color }}>
                 {rank.id === 'CONQUEROR' ? (
-                  isRTL ? 'يتطلب الصدارة #1 في المنصة' : 'REQUIRES TOP #1 IN THE PLATFORM'
+                  // Commented out per safety rules:
+                  // isRTL ? 'يتطلب الصدارة #1 في المنصة' : 'REQUIRES TOP #1 IN THE PLATFORM'
+                  isRTL ? 'يتطلب الصدارة #1 في المنصة' : 'Requires Top #1 in the Platform'
                 ) : (
-                  `${rank.threshold - xp} ${isRTL ? 'نقطة خبرة مطلوبة للتفعيل' : 'XP REQUIRED TO UNLOCK'}`
+                  // Commented out per safety rules:
+                  // `${rank.threshold - xp} ${isRTL ? 'نقطة خبرة مطلوبة للتفعيل' : 'XP REQUIRED TO UNLOCK'}`
+                  `${rank.threshold - xp} ${isRTL ? 'نقطة خبرة مطلوبة للتفعيل' : 'XP required to unlock'}`
                 )}
               </p>
               <p className="text-[9px] font-space text-zinc-500 dark:text-white/40 tracking-wider uppercase text-center">
+                {/* Commented out per safety rules:
                 {isRTL ? 'استمر في إنجاز أهدافك' : 'CONTINUE ACHIEVING GOALS'}
+                */}
+                {isRTL ? 'استمر في إنجاز أهدافك' : 'Continue achieving goals'}
               </p>
             </motion.div>
           </div>
@@ -312,7 +342,9 @@ export function VaultContent() {
   const RANKS_DATA: RankData[] = [
     {
       id: 'SILVER',
-      name: 'SILVER',
+      // Commented out per safety rules:
+      // name: 'SILVER',
+      name: 'Silver',
       threshold: 0,
       themeId: 'SILVER',
       color: '#94a3b8',
@@ -323,7 +355,9 @@ export function VaultContent() {
     },
     {
       id: 'GOLD',
-      name: 'GOLD',
+      // Commented out per safety rules:
+      // name: 'GOLD',
+      name: 'Gold',
       threshold: 400,
       themeId: 'GOLD',
       color: '#FACC15',
@@ -334,7 +368,9 @@ export function VaultContent() {
     },
     {
       id: 'PLATINUM',
-      name: 'PLATINUM',
+      // Commented out per safety rules:
+      // name: 'PLATINUM',
+      name: 'Platinum',
       threshold: 1000,
       themeId: 'PLATINUM',
       color: '#38bdf8',
@@ -345,7 +381,9 @@ export function VaultContent() {
     },
     {
       id: 'DIAMOND',
-      name: 'DIAMOND',
+      // Commented out per safety rules:
+      // name: 'DIAMOND',
+      name: 'Diamond',
       threshold: 2000,
       themeId: 'DIAMOND',
       color: '#d500f9',
@@ -356,7 +394,9 @@ export function VaultContent() {
     },
     {
       id: 'CROWN',
-      name: 'CROWN',
+      // Commented out per safety rules:
+      // name: 'CROWN',
+      name: 'Crown',
       threshold: 4000,
       themeId: 'CROWN',
       color: '#F97316',
@@ -367,7 +407,9 @@ export function VaultContent() {
     },
     {
       id: 'ACE',
-      name: 'ACE',
+      // Commented out per safety rules:
+      // name: 'ACE',
+      name: 'Ace',
       threshold: 7000,
       themeId: 'ACE',
       color: '#EF4444',
@@ -378,7 +420,9 @@ export function VaultContent() {
     },
     {
       id: 'CONQUEROR',
-      name: 'CONQUEROR',
+      // Commented out per safety rules:
+      // name: 'CONQUEROR',
+      name: 'Conqueror',
       threshold: 12000,
       themeId: 'CONQUEROR',
       color: '#FACC15',
@@ -406,7 +450,10 @@ export function VaultContent() {
       {/* Header */}
       <header className="border-b border-black/10 dark:border-white/10 pb-4 md:pb-6 w-full max-w-full">
         <h1 className="text-2xl md:text-6xl font-black font-space tracking-wider text-black dark:text-white uppercase leading-none">
+          {/* Commented out per safety rules:
           {isRTL ? 'الرتب والترقيات' : 'RANKS & SYSTEMS'}
+          */}
+          {isRTL ? 'الرتب والترقيات' : 'Ranks & Systems'}
         </h1>
         <p className="text-[10px] md:text-xs font-space text-black/40 dark:text-white/30 tracking-[0.4em] md:tracking-[0.6em] uppercase font-black mt-2">
           {isRTL ? 'مستوى تقدمك الحالي' : 'Your Progress Status'} &nbsp;·&nbsp; {xp.toLocaleString()} XP

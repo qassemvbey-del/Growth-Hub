@@ -55,16 +55,22 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               // Dynamic themes based on type
               let color = currentTheme.color
               let IconComponent = Brain
-              let label = isRTL ? 'إشعار النظام' : 'AI_FEEDBACK'
+              // Commented out per safety rules:
+              // let label = isRTL ? 'إشعار النظام' : 'AI_FEEDBACK'
+              let label = isRTL ? 'إشعار النظام' : 'AI Feedback'
               
               if (toast.type === 'success') {
                 color = currentTheme.color
                 IconComponent = CheckCircle
-                label = isRTL ? 'اكتملت العملية' : 'SYSTEM_SUCCESS'
+                // Commented out per safety rules:
+                // label = isRTL ? 'اكتملت العملية' : 'SYSTEM_SUCCESS'
+                label = isRTL ? 'اكتملت العملية' : 'Success'
               } else if (toast.type === 'warning') {
                 color = '#ef4444' // alert red-orange
                 IconComponent = AlertTriangle
-                label = isRTL ? 'تنبيه النظام' : 'SYSTEM_WARNING'
+                // Commented out per safety rules:
+                // label = isRTL ? 'تنبيه النظام' : 'SYSTEM_WARNING'
+                label = isRTL ? 'تنبيه النظام' : 'Warning'
               }
 
               return (

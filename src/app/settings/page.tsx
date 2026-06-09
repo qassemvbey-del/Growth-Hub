@@ -29,7 +29,9 @@ interface RankData {
 const RANKS_DATA: RankData[] = [
   {
     id: 'SILVER',
-    name: 'SILVER',
+    // Commented out per safety rules:
+    // name: 'SILVER',
+    name: 'Silver',
     threshold: 0,
     themeId: 'SILVER',
     color: '#94a3b8',
@@ -40,7 +42,9 @@ const RANKS_DATA: RankData[] = [
   },
   {
     id: 'GOLD',
-    name: 'GOLD',
+    // Commented out per safety rules:
+    // name: 'GOLD',
+    name: 'Gold',
     threshold: 400,
     themeId: 'GOLD',
     color: '#FACC15',
@@ -51,7 +55,9 @@ const RANKS_DATA: RankData[] = [
   },
   {
     id: 'PLATINUM',
-    name: 'PLATINUM',
+    // Commented out per safety rules:
+    // name: 'PLATINUM',
+    name: 'Platinum',
     threshold: 1000,
     themeId: 'PLATINUM',
     color: '#38bdf8',
@@ -62,7 +68,9 @@ const RANKS_DATA: RankData[] = [
   },
   {
     id: 'DIAMOND',
-    name: 'DIAMOND',
+    // Commented out per safety rules:
+    // name: 'DIAMOND',
+    name: 'Diamond',
     threshold: 2000,
     themeId: 'DIAMOND',
     color: '#d500f9',
@@ -73,7 +81,9 @@ const RANKS_DATA: RankData[] = [
   },
   {
     id: 'CROWN',
-    name: 'CROWN',
+    // Commented out per safety rules:
+    // name: 'CROWN',
+    name: 'Crown',
     threshold: 4000,
     themeId: 'CROWN',
     color: '#F97316',
@@ -84,7 +94,9 @@ const RANKS_DATA: RankData[] = [
   },
   {
     id: 'ACE',
-    name: 'ACE',
+    // Commented out per safety rules:
+    // name: 'ACE',
+    name: 'Ace',
     threshold: 7000,
     themeId: 'ACE',
     color: '#EF4444',
@@ -95,7 +107,9 @@ const RANKS_DATA: RankData[] = [
   },
   {
     id: 'CONQUEROR',
-    name: 'CONQUEROR',
+    // Commented out per safety rules:
+    // name: 'CONQUEROR',
+    name: 'Conqueror',
     threshold: 12000,
     themeId: 'CONQUEROR',
     color: '#FACC15',
@@ -296,14 +310,18 @@ export default function SettingsPage() {
       if (res?.success) {
         await supabase.auth.signOut()
         localStorage.clear()
-        showToast(isRTL ? 'تم حذف حسابك نهائياً بنجاح' : 'ACCOUNT_WIPED_SUCCESSFULLY', 'success')
+        // Commented out per safety rules:
+        // showToast(isRTL ? 'تم حذف حسابك نهائياً بنجاح' : 'ACCOUNT_WIPED_SUCCESSFULLY', 'success')
+        showToast(isRTL ? 'تم حذف حسابك نهائياً بنجاح' : 'Account successfully deleted', 'success')
         router.push('/auth/login')
       } else {
         throw new Error('Deletion was not successful')
       }
     } catch (err: any) {
       console.error('Delete own account error:', err)
-      showToast('DELETE_FAILED', 'warning')
+      // Commented out per safety rules:
+      // showToast('DELETE_FAILED', 'warning')
+      showToast('Delete failed', 'warning')
       alert('Account deletion failed: ' + (err.message || 'Unknown error'))
     }
     setIsDeleteModalOpen(false)
@@ -311,7 +329,10 @@ export default function SettingsPage() {
 
   if (isLoading || !mounted) return (
     <div className="p-16 font-space animate-pulse tracking-widest text-sm md:text-base text-center" style={{ color: currentTheme.color }}>
+      {/* Commented out per safety rules:
       {isRTL ? 'جاري التحميل...' : 'LOADING USER DATA...'}
+      */}
+      {isRTL ? 'جاري التحميل...' : 'Loading user data...'}
     </div>
   )
 
@@ -432,7 +453,10 @@ export default function SettingsPage() {
                       <path fill="#FBBC05" d="M3.94 10.67A5.4 5.4 0 0 1 3.6 9c0-.58.1-1.14.28-1.67V5.03H.95A8.99 8.99 0 0 0 0 9c0 1.45.35 2.82.95 4.03l2.99-2.36z"/>
                       <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2A8.99 8.99 0 0 0 0 9l2.99 2.36C3.7 5.17 5.7 3.58 9 3.58z"/>
                     </svg>
+                    {/* Commented out per safety rules:
                     <span>{isRTL ? 'ربط الحساب بمزود جوجل' : 'LINK ACCOUNT WITH GOOGLE'}</span>
+                    */}
+                    <span>{isRTL ? 'ربط الحساب بمزود جوجل' : 'Link account with Google'}</span>
                   </button>
                 </div>
               </div>
@@ -744,7 +768,10 @@ export default function SettingsPage() {
             }}
             className="text-[10px] font-space font-black uppercase tracking-widest text-red-500/60 hover:text-red-500 transition-all cursor-pointer"
           >
+            {/* Commented out per safety rules:
             {isRTL ? 'حذف الحساب نهائياً' : 'DELETE ACCOUNT'}
+            */}
+            {isRTL ? 'حذف الحساب نهائياً' : 'Delete Account'}
           </button>
         </div>
 
@@ -790,7 +817,10 @@ export default function SettingsPage() {
                   className="w-full text-black py-3.5 font-space font-black text-xs uppercase tracking-widest rounded-xl transition-all duration-300 shadow-lg cursor-pointer active:scale-98 font-bold"
                   style={{ backgroundColor: currentTheme.color, boxShadow: `0 4px 15px ${currentTheme.color}20` }}
                 >
+                  {/* Commented out per safety rules:
                   {isRTL ? 'نعم، تسجيل الخروج' : 'YES, LOGOUT'}
+                  */}
+                  {isRTL ? 'نعم، تسجيل الخروج' : 'Yes, Logout'}
                 </button>
 
                 <button
