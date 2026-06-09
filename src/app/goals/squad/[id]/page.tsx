@@ -21,11 +21,13 @@ import { aiProfanityCheck } from '@/app/actions/profanityCheck'
 import TaskDrawer from '@/components/ui/TaskDrawer'
 import InlineGuideTip from '@/components/ui/InlineGuideTip'
 import KanbanBoard from '@/components/ui/KanbanBoard'
+import SquadReportModal from '@/components/ui/SquadReportModal'
 import { 
   Lock, Link as LinkIcon, Trash2, Clock, Radio, CheckSquare, 
   Plus, List, Kanban, Check, Timer, HelpCircle, X, Pin, 
   Shield, CheckCircle2, Award, Download, Clipboard as ClipboardIcon, FileText, 
-  Share2, Calendar, Paperclip, Users2, Medal, EyeOff, ListPlus, LayoutGrid, Eye, ChevronDown, Play, Tv, Circle, Trophy
+  Share2, Calendar, Paperclip, Users2, Medal, EyeOff, ListPlus, LayoutGrid, Eye, ChevronDown, Play, Tv, Circle, Trophy,
+  BarChart2
 } from 'lucide-react'
 
 
@@ -162,6 +164,7 @@ export default function MissionDetailPage() {
   const [activeViewInitialized, setActiveViewInitialized] = useState(false)
   const [timeFilter, setTimeFilter] = useState<'ALL' | 'WEEK' | 'OVERDUE'>('ALL')
   const [selectedTaskState, setSelectedTaskState] = useState<any | null>(null)
+  const [showReportModal, setShowReportModal] = useState(false)
   const searchParams = useSearchParams()
 
   useEffect(() => {
@@ -1582,14 +1585,26 @@ const { progress, isInRedZone } = useMemo(() => {
                </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
                    <div className="flex items-center gap-2 md:gap-4">
-                      <button 
-                         onClick={deleteMission}
-                         className="p-2 text-black/20 dark:text-white/10 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-full"
-                         // title={isRTL ? 'حذف المهمة' : 'DELETE_GOAL'}
-                         title={isRTL ? 'حذف المهمة' : 'Delete Goal'}
-                      >
-                         <Trash2 className="w-5 h-5 text-zinc-400 hover:text-red-500" />
-                      </button>
+                      {(isCurrentUserOwner || normalizedRole === 'admin') && (
+                        <button
+                          onClick={() => { playBlip(); setShowReportModal(true); }}
+                          className="px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 bg-white/[0.02] hover:bg-white/[0.05] text-[var(--text-secondary)] hover:text-white transition-all font-space text-xs font-medium flex items-center gap-1.5 cursor-pointer"
+                          title={isRTL ? 'تقرير تقدم الفريق' : 'Squad Report'}
+                        >
+                          <BarChart2 className="w-4 h-4 text-teal-400" />
+                          <span className="hidden sm:inline">{isRTL ? 'التقرير' : 'Report'}</span>
+                        </button>
+                      )}
+                      {isCurrentUserOwner && (
+                        <button 
+                           onClick={deleteMission}
+                           className="p-2 text-black/20 dark:text-white/10 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-full"
+                           // title={isRTL ? 'حذف المهمة' : 'DELETE_GOAL'}
+                           title={isRTL ? 'حذف المهمة' : 'Delete Goal'}
+                        >
+                           <Trash2 className="w-5 h-5 text-zinc-400 hover:text-red-500" />
+                        </button>
+                      )}
                       <span className="text-3xl md:text-6xl font-black font-space" style={{ color: missionColor }}>{roundedProgress}%</span>
                    </div>
                    <p className="text-[9px] font-space text-[var(--text-secondary)] font-medium">{isRTL ? 'مكتمل' : 'Complete'}</p>
@@ -3266,6 +3281,16 @@ const { progress, isInRedZone } = useMemo(() => {
           squadMembers={squadMembers}
           isSquad={mission?.metadata?.type === 'squad'}
           missionOwnerId={mission?.user_id}
+        />
+      )}
+      {showReportModal && (
+        <SquadReportModal
+          isOpen={showReportModal}
+          onClose={() => setShowReportModal(false)}
+          mission={mission}
+          squadMembers={squadMembers}
+          themeColor={missionColor}
+          isRTL={isRTL}
         />
       )}
       </div>

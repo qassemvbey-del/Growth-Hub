@@ -30,6 +30,7 @@ interface TaskDrawerMetadataProps {
   profile: any
   updateTask: (taskId: string, updates: any) => Promise<void> | void
   sendNotification: (targetUserId: string, type: 'mention' | 'reaction', title: string, contentText: string) => Promise<void> | void
+  canEdit?: boolean
 }
 
 export default function TaskDrawerMetadata({
@@ -44,7 +45,8 @@ export default function TaskDrawerMetadata({
   missionOwnerId,
   profile,
   updateTask,
-  sendNotification
+  sendNotification,
+  canEdit = true
 }: TaskDrawerMetadataProps) {
   const [showAssignDropdown, setShowAssignDropdown] = useState(false)
   return (
@@ -134,32 +136,36 @@ export default function TaskDrawerMetadata({
             <div className="flex items-center gap-2 relative z-[9999]">
               <label 
                 className={cn(
-                  "relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono font-bold border cursor-pointer transition-all shrink-0 select-none",
+                  "relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono font-bold border transition-all shrink-0 select-none",
                   isOverdue
                     ? "bg-red-500/10 border-red-500 text-red-500 font-bold"
-                    : "border-white/5 bg-white/[0.02] text-white/70 hover:bg-white/[0.05] hover:text-white"
+                    : "border-white/5 bg-white/[0.02] text-white/70",
+                  canEdit && "hover:bg-white/[0.05] hover:text-white cursor-pointer"
                 )}
               >
                 <Calendar className="w-3.5 h-3.5" />
                 <span>{displayVal}</span>
-                <input
-                  type="date"
-                  value={taskDeadline ? String(taskDeadline).substring(0, 10) : ''}
-                  onChange={async (e) => {
-                    const selectedDate = e.target.value
-                    const updatedMetadata = { ...task.metadata, endDate: selectedDate }
-                    await updateTask(task.id, { metadata: updatedMetadata })
-                  }}
-                  className="absolute inset-0 z-10 w-full h-full opacity-0 cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    if (typeof e.currentTarget.showPicker === 'function') {
-                      try {
-                        e.currentTarget.showPicker()
-                      } catch (err) {}
-                    }
-                  }}
-                />
+                {canEdit && (
+                  <input
+                    type="date"
+                    disabled={!canEdit}
+                    value={taskDeadline ? String(taskDeadline).substring(0, 10) : ''}
+                    onChange={async (e) => {
+                      const selectedDate = e.target.value
+                      const updatedMetadata = { ...task.metadata, endDate: selectedDate }
+                      await updateTask(task.id, { metadata: updatedMetadata })
+                    }}
+                    className="absolute inset-0 z-10 w-full h-full opacity-0 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (typeof e.currentTarget.showPicker === 'function') {
+                        try {
+                          e.currentTarget.showPicker()
+                        } catch (err) {}
+                      }
+                    }}
+                  />
+                )}
               </label>
 
               {hasDate && (

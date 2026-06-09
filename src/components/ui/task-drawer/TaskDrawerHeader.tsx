@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Link as LinkIcon, Play, RefreshCw, Circle, X, CheckCircle2, Edit2, ListTodo } from 'lucide-react'
+import { Link as LinkIcon, Play, RefreshCw, Circle, X, CheckCircle2, Edit2, ListTodo, Maximize2, Minimize2 } from 'lucide-react'
 import { NeonIcon } from '../NeonIcon'
 import CustomSelect from '../CustomSelect'
 import { cn } from '@/lib/utils'
@@ -26,6 +26,9 @@ interface TaskDrawerHeaderProps {
   updateTask: (taskId: string, updates: any) => Promise<void> | void
   handleCopyLink: () => void
   goals: any[]
+  canEdit?: boolean
+  isExpanded?: boolean
+  onToggleExpand?: () => void
 }
 
 export default function TaskDrawerHeader({
@@ -45,7 +48,10 @@ export default function TaskDrawerHeader({
   sendNotification,
   updateTask,
   handleCopyLink,
-  goals
+  goals,
+  canEdit = true,
+  isExpanded = false,
+  onToggleExpand
 }: TaskDrawerHeaderProps) {
   const [isEditingGoal, setIsEditingGoal] = useState(false)
   const currentGoal = goals.find(g => g.id === (task.goal_id || goalId))
@@ -57,7 +63,7 @@ export default function TaskDrawerHeader({
         {/* Goal Selector */}
         <div className="flex items-center gap-1.5 max-w-xs sm:max-w-md w-full sm:w-auto">
           {goals && goals.length > 0 && (
-            isEditingGoal ? (
+            isEditingGoal && canEdit ? (
               <CustomSelect
                 minimal
                 value={task.goal_id || goalId || ''}
@@ -78,29 +84,45 @@ export default function TaskDrawerHeader({
                 <span className="text-[12px] font-semibold text-orange-500 select-none">
                   {goalLabel}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setIsEditingGoal(true)}
-                  className="p-1 hover:bg-white/5 rounded transition-all cursor-pointer opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-white shrink-0"
-                  title={isRTL ? 'تعديل الهدف' : 'Edit Goal'}
-                >
-                  <Edit2 className="w-3 h-3" />
-                </button>
+                {canEdit && (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingGoal(true)}
+                    className="p-1 hover:bg-white/5 rounded transition-all cursor-pointer opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-white shrink-0"
+                    title={isRTL ? 'تعديل الهدف' : 'Edit Goal'}
+                  >
+                    <Edit2 className="w-3 h-3" />
+                  </button>
+                )}
               </div>
             )
           )}
         </div>
 
-        {/* Status Toggle Pill and Close Button */}
+        {/* Status Toggle Pill, Expand Button and Close Button */}
         <div className="flex items-center gap-2">
           {/* Status Toggle Pill */}
-          <button
-            onClick={onComplete}
-            className="status-pill border border-orange-500/50 text-orange-500 rounded-full px-2 py-0.5 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
-          >
-            {task.is_completed ? <ListTodo className="w-3.5 h-3.5" /> : <Circle className="w-3.5 h-3.5" />}
-            <span>{task.is_completed ? t('completed') : t('inProgress')}</span>
-          </button>
+          {canEdit && (
+            <button
+              onClick={onComplete}
+              className="status-pill border border-orange-500/50 text-orange-500 rounded-full px-2 py-0.5 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+            >
+              {task.is_completed ? <ListTodo className="w-3.5 h-3.5" /> : <Circle className="w-3.5 h-3.5" />}
+              <span>{task.is_completed ? t('completed') : t('inProgress')}</span>
+            </button>
+          )}
+
+          {/* Expand/Collapse Button */}
+          {onToggleExpand && (
+            <button
+              type="button"
+              onClick={onToggleExpand}
+              className="w-8 h-8 rounded-full flex items-center justify-center border border-white/10 hover:border-white/20 bg-white/[0.02] text-[var(--text-secondary)] hover:text-white transition-all cursor-pointer"
+              title={isExpanded ? (isRTL ? 'تصغير' : 'Collapse') : (isRTL ? 'توسيع' : 'Expand')}
+            >
+              {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
+          )}
 
           {/* Close button */}
           <button
@@ -117,12 +139,15 @@ export default function TaskDrawerHeader({
         <textarea
           rows={1}
           value={taskTitle}
+          readOnly={!canEdit}
           onChange={(e) => {
+            if (!canEdit) return
             setTaskTitle(e.target.value)
             e.target.style.height = 'auto'
             e.target.style.height = `${e.target.scrollHeight}px`
           }}
           onBlur={() => {
+            if (!canEdit) return
             if (taskTitle.trim() && taskTitle !== task.title) {
               updateTask(task.id, { title: taskTitle.trim() })
             }
@@ -133,7 +158,10 @@ export default function TaskDrawerHeader({
               e.currentTarget.blur()
             }
           }}
-          className="text-lg/snug font-medium font-space text-[#FFFFFF] tracking-tight bg-transparent w-full border-none focus:outline-none focus:ring-0 p-0 resize-none overflow-hidden break-words whitespace-normal"
+          className={cn(
+            "text-lg/snug font-medium font-space text-[#FFFFFF] tracking-tight bg-transparent w-full border-none focus:outline-none focus:ring-0 p-0 resize-none overflow-hidden break-words whitespace-normal",
+            !canEdit && "cursor-default select-text"
+          )}
           placeholder={isRTL ? "اسم المهمة..." : "Task Name..."}
         />
       </div>
