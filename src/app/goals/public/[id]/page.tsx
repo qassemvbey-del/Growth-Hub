@@ -240,6 +240,9 @@ export default function PublicGoalPage() {
         if (requestError) throw requestError;
         */
 
+        // Commented out client-side check and upsert due to RLS write policies.
+        // We now call the secure database function request_squad_join instead.
+        /*
         // Check if request already exists
         const { data: existingRequest } = await supabase
           .from('squad_join_requests')
@@ -275,6 +278,26 @@ export default function PublicGoalPage() {
           .single();
 
         if (requestError) throw requestError;
+        */
+
+        // Call RPC function to securely submit or reapply squad join request
+        const { data, error: rpcError } = await supabase
+          .rpc('request_squad_join', { p_goal_id: id });
+
+        if (rpcError) throw rpcError;
+
+        const result = typeof data === 'string' ? JSON.parse(data) : data;
+        if (!result.success) {
+          if (result.error === 'REQUEST_PENDING') {
+            alert(isRTL ? 'طلبك قيد الانتظار بالفعل.' : 'Your request is already pending.');
+            return;
+          }
+          if (result.error === 'ALREADY IN THIS SQUAD') {
+            alert(isRTL ? 'أنت عضو بالفعل في هذا الفريق.' : 'You are already a member of this squad.');
+            return;
+          }
+          throw new Error(result.error);
+        }
 
         // Commented out per rule "Never delete code, only comment it out":
         /*
