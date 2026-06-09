@@ -49,7 +49,7 @@ export default function TaskDrawerHeader({
 }: TaskDrawerHeaderProps) {
   const [isEditingGoal, setIsEditingGoal] = useState(false)
   const currentGoal = goals.find(g => g.id === (task.goal_id || goalId))
-  const goalLabel = currentGoal ? currentGoal.title : (isRTL ? '— بدون ربط —' : '— NO LINK —')
+  const goalLabel = currentGoal ? currentGoal.title : (isRTL ? '— بدون ربط —' : '— No Link —')
 
   return (
     <div className="sticky top-0 bg-[#09090b]/90 backdrop-blur-md border-b border-white/5 z-[60] p-4 md:p-6 flex flex-col gap-3 shrink-0">
@@ -66,8 +66,8 @@ export default function TaskDrawerHeader({
                   setIsEditingGoal(false)
                 }}
                 options={[
-                  { value: '', label: isRTL ? '— بدون ربط —' : '— NO LINK —' },
-                  ...goals.map(g => ({ value: g.id, label: g.title.toUpperCase() }))
+                  { value: '', label: isRTL ? '— بدون ربط —' : '— No Link —' },
+                  ...goals.map(g => ({ value: g.id, label: g.title }))
                 ]}
                 className="w-full sm:w-auto min-w-[200px]"
               />
@@ -75,7 +75,7 @@ export default function TaskDrawerHeader({
               <div 
                 className="group flex items-center gap-1.5"
               >
-                <span className="text-[12px] font-semibold text-orange-500 uppercase select-none">
+                <span className="text-[12px] font-semibold text-orange-500 select-none">
                   {goalLabel}
                 </span>
                 <button
@@ -99,7 +99,7 @@ export default function TaskDrawerHeader({
             className="status-pill border border-orange-500/50 text-orange-500 rounded-full px-2 py-0.5 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
           >
             {task.is_completed ? <ListTodo className="w-3.5 h-3.5" /> : <Circle className="w-3.5 h-3.5" />}
-            <span className="uppercase">{task.is_completed ? t('completed') : t('inProgress')}</span>
+            <span>{task.is_completed ? t('completed') : t('inProgress')}</span>
           </button>
 
           {/* Close button */}
@@ -133,7 +133,7 @@ export default function TaskDrawerHeader({
               e.currentTarget.blur()
             }
           }}
-          className="text-lg/snug font-medium font-space text-[#FFFFFF] tracking-tight uppercase bg-transparent w-full border-none focus:outline-none focus:ring-0 p-0 resize-none overflow-hidden break-words whitespace-normal"
+          className="text-lg/snug font-medium font-space text-[#FFFFFF] tracking-tight bg-transparent w-full border-none focus:outline-none focus:ring-0 p-0 resize-none overflow-hidden break-words whitespace-normal"
           placeholder={isRTL ? "اسم المهمة..." : "Task Name..."}
         />
       </div>

@@ -19,7 +19,7 @@ export default function TaskDrawerDescription({
 }: TaskDrawerDescriptionProps) {
   return (
     <div className="space-y-2">
-      <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3 opacity-60">
+      <h3 className="text-[10px] font-medium text-zinc-500 mb-3 opacity-60">
         {isRTL ? 'وصف المهمة' : 'Task Description'}
       </h3>
       <textarea

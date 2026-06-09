@@ -1510,7 +1510,7 @@ const { progress, isInRedZone } = useMemo(() => {
 
   if (loading || !mounted) return (
     <>
-      <div className="p-16 font-space animate-pulse tracking-widest text-sm uppercase" style={{ color: currentTheme.color }}>
+      <div className="p-16 font-space animate-pulse text-sm" style={{ color: currentTheme.color }}>
         {/* {isRTL ? 'جاري التحميل...' : 'LOADING WORKSPACE...'} */}
         {isRTL ? 'جاري التحميل...' : 'Loading workspace...'}
       </div>
@@ -1532,7 +1532,7 @@ const { progress, isInRedZone } = useMemo(() => {
             <div className="flex flex-col items-center gap-6">
               <Lock className="w-12 h-12 text-[#FF0055] animate-pulse" />
               <div className="space-y-2">
-                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-[#FF0055]">
+                <h2 className="text-xl md:text-2xl font-black text-[#FF0055]">
                   {/* CLASSIFIED_GOAL // ACCESS DENIED */}
                   Access Denied
                 </h2>
@@ -1576,7 +1576,7 @@ const { progress, isInRedZone } = useMemo(() => {
             
             <div className="flex justify-between items-start gap-4">
                <div className="space-y-1 flex-1 min-w-0">
-                  <h1 className="text-2xl md:text-5xl font-black font-space tracking-tighter uppercase text-[var(--text-primary)] leading-none break-words">
+                  <h1 className="text-2xl md:text-5xl font-black font-space text-[var(--text-primary)] leading-none break-words">
                      {mission.title}
                   </h1>
                </div>
@@ -1592,7 +1592,7 @@ const { progress, isInRedZone } = useMemo(() => {
                       </button>
                       <span className="text-3xl md:text-6xl font-black font-space" style={{ color: missionColor }}>{roundedProgress}%</span>
                    </div>
-                   <p className="text-[9px] font-space text-[var(--text-secondary)] tracking-[0.4em] uppercase font-black">{isRTL ? 'مكتمل' : 'Complete'}</p>
+                   <p className="text-[9px] font-space text-[var(--text-secondary)] font-medium">{isRTL ? 'مكتمل' : 'Complete'}</p>
                 </div>
             </div>
 
@@ -1615,8 +1615,8 @@ const { progress, isInRedZone } = useMemo(() => {
             {/* Squad Facepile — Clickable, capped to 3 + overflow bubble */}
             {mission?.metadata?.type === 'squad' && squadMembers.length > 0 && (
               <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-white/5">
-                <span className="text-[10px] font-mono text-white/40 tracking-widest uppercase font-black">
-                  {isRTL ? '\u0627\u0644\u0641\u0631\u064a\u0642:' : 'TEAM:'}
+                <span className="text-[10px] font-mono text-white/40 font-medium">
+                  {isRTL ? '\u0627\u0644\u0641\u0631\u064a\u0642:' : 'Team:'}
                 </span>
 
                 {/* Clickable Facepile */}
@@ -1708,7 +1708,7 @@ const { progress, isInRedZone } = useMemo(() => {
                   title={mission.sync_to_dashboard ? (isRTL ? 'إلغاء التثبيت من الواجهة' : 'Unpin from Dashboard') : (isRTL ? 'تثبيت في الواجهة' : 'Pin to Dashboard')}
               >
                  <Pin className={cn("w-5 h-5 mb-1", mission.sync_to_dashboard ? "rotate-45 fill-current" : "")} />
-                 <span className="text-[10px] tracking-wider uppercase font-space font-black">
+                 <span className="text-[10px] font-space font-medium">
                    {/* {mission.sync_to_dashboard ? (isRTL ? 'إلغاء التثبيت' : 'UNPIN') : (isRTL ? 'تثبيت' : 'PIN')} */}
                     {mission.sync_to_dashboard ? (isRTL ? 'إلغاء التثبيت' : 'Unpin') : (isRTL ? 'تثبيت' : 'Pin')}
                  </span>
@@ -1721,7 +1721,7 @@ const { progress, isInRedZone } = useMemo(() => {
                    className="flex flex-col items-center justify-center p-2 text-zinc-400 hover:text-white transition-colors cursor-pointer"
                 >
                    <ListPlus className="w-5 h-5 mb-1" />
-                   <span className="text-[10px] tracking-wider uppercase font-space font-black flex items-center gap-0.5">
+                   <span className="text-[10px] font-space font-medium flex items-center gap-0.5">
                       {/* {isRTL ? 'استيراد' : 'IMPORT'} */}
                        {isRTL ? 'استيراد' : 'Import'}
                       <ChevronDown className={cn("w-3 h-3 transition-transform duration-200", showImportDropdown && "rotate-180")} />
@@ -1744,14 +1744,14 @@ const { progress, isInRedZone } = useMemo(() => {
                             setShowImportDropdown(false); 
                             window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'import-playlist' }));
                           }}
-                          className="w-full text-left px-3 py-2 text-[9px] font-black tracking-wider uppercase text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-md transition-colors flex items-center gap-2 cursor-pointer"
+                          className="w-full text-left px-3 py-2 text-[9px] font-medium text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-md transition-colors flex items-center gap-2 cursor-pointer"
                         >
                           <ListPlus className="w-3.5 h-3.5" />
                           {isRTL ? 'استيراد قائمة تشغيل' : 'Import Playlist'}
                         </button>
                         <button
                           onClick={() => { playBlip(); setShowSmartImportModal(true); setShowImportDropdown(false); }}
-                          className="w-full text-left px-3 py-2 text-[9px] font-black tracking-wider uppercase text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-md transition-colors flex items-center gap-2 cursor-pointer"
+                          className="w-full text-left px-3 py-2 text-[9px] font-medium text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-md transition-colors flex items-center gap-2 cursor-pointer"
                         >
                           <ClipboardIcon className="w-3.5 h-3.5" />
                           {isRTL ? 'استيراد ذكي' : 'Smart Import'}
@@ -1785,7 +1785,7 @@ const { progress, isInRedZone } = useMemo(() => {
                  className="flex flex-col items-center justify-center p-2 text-zinc-400 hover:text-white transition-colors cursor-pointer"
               >
                  <Share2 className="w-5 h-5 mb-1" />
-                 <span className="text-[10px] tracking-wider uppercase font-space font-black">
+                 <span className="text-[10px] font-space font-medium">
                    {/* {isRTL ? 'مشاركة' : 'SHARE'} */}
                    {isRTL ? 'مشاركة' : 'Share'}
                  </span>
@@ -1849,8 +1849,9 @@ const { progress, isInRedZone } = useMemo(() => {
         <div className="w-full space-y-8">
             <section className="space-y-8">
            <div className="flex justify-between items-center border-b border-zinc-800/80 pb-3">
-             <h2 className="text-[10px] font-black font-space text-[var(--text-secondary)] tracking-[0.5em] uppercase">{/* {isRTL ? 'قائمة المهام' : 'TASKS'} */}
-             {isRTL ? 'قائمة المهام' : 'Tasks'}</h2>
+             <h2 className="text-[10px] font-medium font-space text-[var(--text-secondary)]">
+               {isRTL ? 'قائمة المهام' : 'Tasks'}
+             </h2>
              
              {/* View Toggles (Icon Only) on the Far Right */}
              <div className="flex items-center gap-1 p-0.5 bg-black/40 border border-white/5 backdrop-blur-md rounded-md">
@@ -2232,25 +2233,22 @@ const { progress, isInRedZone } = useMemo(() => {
                    <input
                       value={newTaskTitle}
                       onChange={e => setNewTaskTitle(e.target.value)}
-                      // placeholder={isRTL ? 'إضافة مهمة... (ENTER)' : 'ADD_TASK... (PRESS ENTER)'}
                       placeholder={isRTL ? 'إضافة مهمة... (Enter)' : 'Add task... (Press Enter)'}
                       className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] p-4 md:p-6 font-space text-sm font-black text-[var(--text-primary)] outline-none transition-all"
                       style={{ borderColor: `${currentTheme.color}20` }}
                    />
                    <button 
                       type="submit"
-                      className="absolute end-4 top-1/2 -translate-y-1/2 px-4 md:px-6 py-2 font-space text-[10px] font-black uppercase tracking-widest transition-all"
+                      className="absolute end-4 top-1/2 -translate-y-1/2 px-4 md:px-6 py-2 font-space text-[10px] font-medium transition-all"
                       style={{ backgroundColor: `${currentTheme.color}11`, color: currentTheme.color, borderColor: `${currentTheme.color}33` }}
                    >
-                      {/* + {isRTL ? 'إضافة' : 'ADD'} */}
                       + {isRTL ? 'إضافة' : 'Add'}
                    </button>
                 </div>
 
                 <div className="flex flex-col gap-2 justify-center px-4 md:px-6 py-3 md:py-0 border border-[var(--card-border)] bg-[var(--input-bg)]">
                    <div className="flex items-center gap-2">
-                     <span className="text-[8px] font-space text-[var(--text-secondary)] uppercase tracking-widest font-black">{/* SET_POWER */}
-                      Set Power</span>
+                     <span className="text-[8px] font-space text-[var(--text-secondary)] font-medium">Set Power</span>
                      <div className="group relative flex items-center cursor-help">
                        <HelpCircle className="text-[12px] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
                        <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 rounded bg-[var(--card-bg)] border border-[var(--card-border)] p-2 text-[10px] md:text-xs text-[var(--text-primary)] shadow-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-[300] text-center">
@@ -2296,12 +2294,10 @@ const { progress, isInRedZone } = useMemo(() => {
               <div className="p-6 md:p-10 space-y-6">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h2 className="text-xl md:text-2xl font-black font-space uppercase" style={{ color: missionColor }}>
-                      {/* {isRTL ? 'الملاحظات' : 'NOTES'} */}
+                    <h2 className="text-xl md:text-2xl font-black font-space" style={{ color: missionColor }}>
                       {isRTL ? 'الملاحظات' : 'Notes'}
                     </h2>
-                    <p className="text-[12px] font-space text-[var(--text-secondary)] tracking-widest uppercase font-black mt-1">
-                      {/* {linkedNotes.length} {isRTL ? 'سجل مرتبط' : 'RECORDS LINKED TO THIS GOAL'} */}
+                    <p className="text-[12px] font-space text-[var(--text-secondary)] font-medium mt-1">
                       {linkedNotes.length} {isRTL ? 'سجل مرتبط' : 'records linked to this goal'}
                     </p>
                   </div>
@@ -2316,12 +2312,10 @@ const { progress, isInRedZone } = useMemo(() => {
                 {linkedNotes.length === 0 ? (
                   <div className="py-16 text-center space-y-4">
                     <HelpCircle />
-                    <p className="text-[11px] font-space text-[var(--text-secondary)] tracking-[0.4em] uppercase font-black">
-                      {/* {isRTL ? 'لا توجد سجلات مرتبطة' : 'NO_INTEL_LINKED'} */}
+                    <p className="text-[11px] font-space text-[var(--text-secondary)] font-medium">
                       {isRTL ? 'لا توجد سجلات مرتبطة' : 'No notes linked'}
                     </p>
                     <p className="text-[14px] font-space text-[var(--text-primary)] tracking-wider">
-                      {/* {isRTL ? 'اذهب إلى العقل وأنشئ ملاحظة مرتبطة بهذه المهمة' : 'Go to NOTES → NEW_LOG and link it to this goal'} */}
                       {isRTL ? 'اذهب إلى الملاحظات وأنشئ ملاحظة مرتبطة بهذه المهمة' : 'Go to Notes → New Log and link it to this goal'}
                     </p>
                   </div>
@@ -2376,7 +2370,7 @@ const { progress, isInRedZone } = useMemo(() => {
               tasks: nextTasks
             }
           })
-          showToast(isRTL ? 'تم استيراد قائمة التشغيل بنجاح' : 'PLAYLIST_IMPORTED // TASKS_DEPLOYED', 'success')
+          showToast(isRTL ? 'تم استيراد قائمة التشغيل بنجاح' : 'Playlist imported successfully', 'success')
           playSuccess()
           
           // Automatically complete "Import Tutorial Task" if it exists (Point 3)
@@ -2406,7 +2400,7 @@ const { progress, isInRedZone } = useMemo(() => {
           showToast(
             isRTL
               ? `تم إضافة ${newTasks.length} مهمة بنجاح`
-              : `SMART_IMPORT // ${newTasks.length} TASKS_DEPLOYED`,
+              : `Smart import complete — ${newTasks.length} tasks added`,
             'success'
           )
           playSuccess()
@@ -2953,6 +2947,7 @@ const { progress, isInRedZone } = useMemo(() => {
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.95, y: 15, opacity: 0 }}
               className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 border rounded-md p-6 max-w-md w-full relative overflow-hidden shadow-[0_0_40px_rgba(6,182,212,0.15)] space-y-6"
+              onClick={e => e.stopPropagation()}
             >
               <div className="absolute top-0 inset-x-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, #22d3ee, transparent)` }} />
 
@@ -2960,7 +2955,7 @@ const { progress, isInRedZone } = useMemo(() => {
                 <div>
                   <h3 className="font-space text-base font-black tracking-widest uppercase text-white flex items-center gap-2">
                     <Share2 className="w-[16px] h-[16px] text-cyan-400" />
-                    {isRTL ? 'ACCESS_KEY_GENERATOR // مشاركة الهدف' : 'ACCESS_KEY_GENERATOR'}
+                    {isRTL ? 'مشاركة الهدف' : 'Share Goal'}
                   </h3>
                   <p className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase mt-1">
                     {isRTL ? 'اختر طريقة مشاركة هذه المهمة' : 'Choose secure channel to export access'}
@@ -2982,7 +2977,7 @@ const { progress, isInRedZone } = useMemo(() => {
                       <div className="absolute inset-2 rounded-full border-b-2 border-r-2 border-transparent animate-spin" style={{ borderBottomColor: missionColor, borderRightColor: missionColor, opacity: 0.5, animationDirection: 'reverse' }} />
                     </div>
                     <span className="font-space text-[9px] tracking-[0.3em] uppercase animate-pulse" style={{ color: missionColor }}>
-                      {isRTL ? 'جارٍ توليد الكارت...' : 'GENERATING CARD...'}
+                      {isRTL ? 'جارٍ توليد الكارت...' : 'Generating card...'}
                     </span>
                   </div>
                 )}
@@ -2990,22 +2985,22 @@ const { progress, isInRedZone } = useMemo(() => {
                 {mission?.metadata?.type === 'squad' && (
                   <div className="border border-white/5 bg-zinc-900/20 p-4 rounded-md space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-[9px] text-zinc-500 tracking-widest uppercase">INVITATION_KEY // SECURE_CHANNEL</span>
-                      <span className="font-mono text-[8px] bg-red-950/20 border border-red-500/20 text-red-400 px-1.5 py-0.5 rounded-md tracking-wider">PRIVATE</span>
+                      <span className="font-mono text-[9px] text-zinc-500 font-medium">Invitation Link</span>
+                      <span className="font-mono text-[8px] bg-red-950/20 border border-red-500/20 text-red-400 px-1.5 py-0.5 rounded-md">Private</span>
                     </div>
                     <div className="flex items-center justify-between text-xs border-b border-white/5 pb-2">
-                      <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">
-                        {isRTL ? 'دعوة كـ:' : 'INVITE AS:'}
+                      <span className="text-[10px] font-black text-zinc-400">
+                        {isRTL ? 'دعوة كـ:' : 'Invite as:'}
                       </span>
                       <select
                         value={inviteRole}
                         onChange={(e) => setInviteRole(e.target.value as any)}
                         className="bg-zinc-900 border border-white/10 text-zinc-300 py-1 px-2.5 rounded text-[10px] outline-none focus:border-cyan-500/50 cursor-pointer font-space"
                       >
-                        <option value="admin">ADMIN</option>
-                        <option value="member">MEMBER</option>
-                        <option value="viewer">VIEWER</option>
-                        <option value="guest">GUEST</option>
+                        <option value="admin">Admin</option>
+                        <option value="member">Member</option>
+                        <option value="viewer">Viewer</option>
+                        <option value="guest">Guest</option>
                       </select>
                     </div>
                     <div className="flex gap-2">
@@ -3022,12 +3017,12 @@ const { progress, isInRedZone } = useMemo(() => {
                           navigator.clipboard.writeText(inviteUrl)
                           setCopiedRow('invite')
                           setTimeout(() => setCopiedRow(null), 2000)
-                          showToast(isRTL ? 'تم نسخ رابط الدعوة!' : 'SQUAD INVITE URL COPIED', 'success')
+                          showToast(isRTL ? 'تم نسخ رابط الدعوة!' : 'Squad invite URL copied', 'success')
                           playSuccess()
                         }}
                         className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-zinc-950 text-[10px] font-mono font-black rounded-md transition-all shrink-0 cursor-pointer shadow-[0_0_10px_rgba(6,182,212,0.2)] hover:scale-105"
                       >
-                        {copiedRow === 'invite' ? 'COPIED' : 'COPY'}
+                        {copiedRow === 'invite' ? 'Copied' : 'Copy'}
                       </button>
                     </div>
                   </div>
@@ -3035,8 +3030,8 @@ const { progress, isInRedZone } = useMemo(() => {
 
                 <div className="border border-white/5 bg-zinc-900/20 p-4 rounded-md space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-[9px] text-zinc-500 tracking-widest uppercase">PUBLIC_VIEW_LINK // INTEL_ACCESS</span>
-                    <span className="font-mono text-[8px] bg-cyan-950/20 border border-cyan-500/20 text-cyan-400 px-1.5 py-0.5 rounded-md tracking-wider">PUBLIC</span>
+                    <span className="font-mono text-[9px] text-zinc-500 font-medium">Public View Link</span>
+                    <span className="font-mono text-[8px] bg-cyan-950/20 border border-cyan-500/20 text-cyan-400 px-1.5 py-0.5 rounded-md">Public</span>
                   </div>
                   <div className="flex gap-2">
                     <input
@@ -3052,7 +3047,7 @@ const { progress, isInRedZone } = useMemo(() => {
                         navigator.clipboard.writeText(publicUrl)
                         setCopiedRow('public')
                         setTimeout(() => setCopiedRow(null), 2000)
-                        showToast(isRTL ? 'تم نسخ الرابط العام!' : 'PUBLIC VIEW LINK COPIED', 'success')
+                        showToast(isRTL ? 'تم نسخ الرابط العام!' : 'Public view link copied', 'success')
                         playSuccess()
 
                         const currentMetadata = mission?.metadata || {}

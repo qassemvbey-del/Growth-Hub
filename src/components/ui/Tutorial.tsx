@@ -149,12 +149,12 @@ export default function Tutorial() {
             <header className="flex justify-between items-center mb-4">
                <div className="flex items-center gap-2">
                  <AlertCircle className="w-5 h-5" style={{ color: currentTheme.color }} />
-                 <h3 className="text-sm font-black font-space tracking-wider uppercase text-zinc-100">
+                 <h3 className="text-sm font-bold font-space text-zinc-100">
                    {steps[currentStep].title}
                  </h3>
                </div>
-               <span className="text-[10px] font-mono text-zinc-500 font-bold">
-                 {isRTL ? `الخطوة ${currentStep + 1}/${steps.length}` : `STEP ${currentStep + 1}/${steps.length}`}
+               <span className="text-[10px] font-mono text-zinc-500 font-medium">
+                 {isRTL ? `الخطوة ${currentStep + 1}/${steps.length}` : `Step ${currentStep + 1} of ${steps.length}`}
                </span>
             </header>
 
@@ -165,20 +165,20 @@ export default function Tutorial() {
             <div className="flex justify-between items-center pt-4 border-t border-white/5">
                <button 
                  onClick={finish}
-                 className="text-[10px] font-space tracking-widest uppercase font-black text-zinc-500 hover:text-red-400 transition-colors cursor-pointer"
+                 className="text-[10px] font-space font-medium text-zinc-500 hover:text-red-400 transition-colors cursor-pointer"
                >
-                 {isRTL ? 'تخطي' : 'SKIP'}
+                 {isRTL ? 'تخطي' : 'Skip'}
                </button>
                
                <button 
                  onClick={next}
-                 className="flex items-center gap-1.5 px-4 py-2 rounded-md text-black font-space text-[10px] tracking-widest uppercase font-black hover:opacity-95 transition-all cursor-pointer"
+                 className="flex items-center gap-1.5 px-4 py-2 rounded-md text-black font-space text-[10px] font-medium hover:opacity-95 transition-all cursor-pointer"
                  style={{ backgroundColor: currentTheme.color }}
                >
                  <span>
                    {currentStep === steps.length - 1 
-                     ? (isRTL ? 'فهمت!' : 'GOT IT!') 
-                     : (isRTL ? 'التالي' : 'NEXT')
+                     ? (isRTL ? 'فهمت!' : 'Got it') 
+                     : (isRTL ? 'التالي' : 'Next')
                    }
                  </span>
                  {isRTL ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}

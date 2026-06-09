@@ -52,8 +52,7 @@ export default function TaskDrawerMetadata({
       {/* A. STATUS, WEIGHT, XP & TIMELINE PANEL (LEGACY GRID COMMENTED OUT TO RECLAIM VERTICAL SPACE) */}
       {/*
       <div className="p-5 border border-white/5 bg-zinc-900/40 rounded-xl space-y-4">
-        // isRTL ? 'بيانات المهمة // METADATA' : 'TASK METADATA // PROFILE'
-        <h3 className="text-[10px] font-black tracking-widest text-zinc-500 font-mono">
+        <h3 className="text-[10px] font-medium text-zinc-500 font-mono">
           {isRTL ? 'بيانات المهمة - Metadata' : 'Task Metadata'}
         </h3>
         
@@ -193,7 +192,7 @@ export default function TaskDrawerMetadata({
           {/* <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
             {isRTL ? 'المسؤول' : 'ASSIGNED TO'}
           </h3> */}
-          <h3 className="text-[10px] font-black tracking-widest text-zinc-500 font-mono">
+          <h3 className="text-[10px] font-medium text-zinc-500 font-mono">
             {isRTL ? 'المسؤول' : 'Assigned To'}
           </h3>
           
@@ -211,7 +210,7 @@ export default function TaskDrawerMetadata({
                   )}
                   <div className="flex flex-col min-w-0">
                     <span className="text-xs font-bold text-white truncate">{task.assignee.full_name}</span>
-                    <span className="text-[9px] font-black text-white/40 uppercase tracking-wider">{task.assignee.rank || 'ROOKIE'}</span>
+                    <span className="text-[9px] font-medium text-white/40">{task.assignee.rank || 'Rookie'}</span>
                   </div>
                 </div>
                 
@@ -234,7 +233,7 @@ export default function TaskDrawerMetadata({
                       await sendNotification(prevAssigneeId, 'reaction', notifTitle, notifContent)
                     }
                   }}
-                  className="px-3 py-1.5 border border-red-500/30 hover:border-red-500 hover:bg-red-500/10 text-red-400 hover:text-red-300 font-black tracking-widest text-[9px] uppercase rounded-md transition-colors cursor-pointer"
+                  className="px-3 py-1.5 border border-red-500/30 hover:border-red-500 hover:bg-red-500/10 text-red-400 hover:text-red-300 font-medium text-[9px] rounded-md transition-colors cursor-pointer"
                 >
                   {/* {isRTL ? 'إلغاء التعيين' : 'UNASSIGN'} */}
                   {isRTL ? 'إلغاء التعيين' : 'Unassign'}

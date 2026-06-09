@@ -469,12 +469,16 @@ main > div {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 16px;
-  transition: all 150ms ease;
+  transition: all 150ms ease-in-out;
 }
 
 .card-base:hover {
-  border-color: rgba(249, 115, 22, 0.3);
+  border-color: var(--color-primary);
   transform: translateY(-1px);
+}
+
+.card-base:active {
+  transform: scale(0.97);
 }
 
 /* Goal cards specifically */
@@ -483,12 +487,43 @@ main > div {
   border: 1px solid var(--card-border);
   background: var(--card-bg);
   padding: 16px;
-  transition: all 150ms ease;
+  transition: all 150ms ease-in-out;
 }
 
 .goal-card:hover {
-  border-color: rgba(249, 115, 22, 0.25);
+  border-color: var(--color-primary);
   transform: translateY(-1px);
+}
+
+.goal-card:active {
+  transform: scale(0.97);
+}
+
+/* Premium micro-interactions for buttons */
+button {
+  transition: all 150ms ease-in-out;
+}
+button:active {
+  transform: scale(0.97);
+}
+
+/* Soft Pill Badges */
+.badge-pill {
+  border-radius: 9999px;
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Slim rounded progress bar */
+.progress-bar-slim {
+  height: 4px;
+  border-radius: 9999px;
+  overflow: hidden;
+  background-color: var(--input-bg);
 }
 
 /* RTL progress bar fill */

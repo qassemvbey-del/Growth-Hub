@@ -29,7 +29,7 @@ export default function TaskDrawerChecklist({
 }: TaskDrawerChecklistProps) {
   return (
     <div className="space-y-2">
-      <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3 opacity-60">
+      <h3 className="text-[10px] font-medium text-zinc-500 mb-3 opacity-60">
         {/* {isRTL ? 'المهام الفرعية // SUBTASKS' : 'CHECKLIST // SUBTASKS'} */}
         {isRTL ? 'المهام الفرعية - Checklist' : 'Checklist'}
       </h3>
@@ -80,7 +80,7 @@ export default function TaskDrawerChecklist({
               type="button"
               onClick={() => handleDeleteSubtask(sub.id)}
               className="p-1 text-zinc-500 hover:text-red-500 transition-colors shrink-0 cursor-pointer"
-              title="DELETE ITEM"
+              title="Remove item"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>

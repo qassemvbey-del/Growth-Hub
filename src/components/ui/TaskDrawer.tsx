@@ -1069,7 +1069,7 @@ export default function TaskDrawer({
 
           {/* Google Drive Attachments */}
           <div className="space-y-3">
-             <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3 opacity-60">
+             <h3 className="text-[10px] font-medium text-zinc-500 mb-3 opacity-60">
               {isRTL ? 'المرفقات - Attachments' : 'Drive Attachments'}
              </h3>
             
@@ -1082,10 +1082,7 @@ export default function TaskDrawer({
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/Google_Drive_icon_(2020).svg" alt="Drive" className="w-3.5 h-3.5 shrink-0" />
-                    <span className="font-medium tracking-wide uppercase">
-                      {/* Commented out per safety rules:
-                      {isDriveConnected ? (isRTL ? 'إضافة من درايف' : 'ADD FROM DRIVE') : (isRTL ? 'ربط جوجل درايف' : 'CONNECT GOOGLE DRIVE')}
-                      */}
+                    <span className="font-medium">
                       {isDriveConnected ? (isRTL ? 'إضافة من درايف' : 'Add from Drive') : (isRTL ? 'ربط جوجل درايف' : 'Link Google Drive')}
                     </span>
                     {isDriveConnected && (
@@ -1113,7 +1110,7 @@ export default function TaskDrawer({
                   className="w-full flex items-center gap-2 py-1.5 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/40 hover:text-white/70"
                 >
                   <LinkIcon className="w-3.5 h-3.5 shrink-0" />
-                  <span className="font-medium tracking-wide uppercase">{isRTL ? 'إضافة رابط يدوياً' : 'Add Manual Link'}</span>
+                  <span className="font-medium">{isRTL ? 'إضافة رابط يدوياً' : 'Add Manual Link'}</span>
                   <span className="ml-auto text-[10px] font-mono">{showManualLink ? '▲' : '▼'}</span>
                 </button>
 
@@ -1132,7 +1129,7 @@ export default function TaskDrawer({
                         placeholder={isRTL ? 'اسم المرفق...' : 'Attachment name...'}
                         value={manualLinkName}
                         onChange={e => setManualLinkName(e.target.value)}
-                        className="w-full bg-zinc-900/80 border border-white/8 py-2.5 px-4 font-space text-xs font-black text-white uppercase tracking-widest outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
+                        className="w-full bg-zinc-900/80 border border-white/8 py-2.5 px-4 font-space text-xs font-medium text-white outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
                       />
                       <div className="flex gap-2">
                         <input
@@ -1142,12 +1139,12 @@ export default function TaskDrawer({
                           placeholder="https://..."
                           value={manualLinkUrl}
                           onChange={e => setManualLinkUrl(e.target.value)}
-                          className="flex-1 bg-zinc-900/80 border border-white/8 py-2.5 px-4 font-space text-xs font-black text-white uppercase tracking-widest outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
+                          className="flex-1 bg-zinc-900/80 border border-white/8 py-2.5 px-4 font-space text-xs font-medium text-white outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
                         />
                         <button
                           onClick={handleAddManualLink}
                           disabled={isAddingLink || !manualLinkName.trim() || !manualLinkUrl.trim()}
-                          className="py-2.5 px-4 font-space font-black uppercase tracking-widest text-[10px] text-black transition-all rounded-md shrink-0 cursor-pointer disabled:opacity-40"
+                          className="py-2.5 px-4 font-space font-medium text-[10px] text-black transition-all rounded-md shrink-0 cursor-pointer disabled:opacity-40"
                           style={{ backgroundColor: themeColor }}
                         >
                           {/* Commented out per safety rules:
@@ -1182,9 +1179,9 @@ export default function TaskDrawer({
                         <div className="flex items-center gap-3 min-w-0 pl-1">
                           <Paperclip className="w-4 h-4 shrink-0" style={{ color: themeColor }} />
                           <div className="min-w-0">
-                            <p className="font-space font-black text-xs text-white/90 uppercase truncate tracking-wide">{att.name}</p>
+                            <p className="font-space font-medium text-xs text-white/90 truncate">{att.name}</p>
                             <div className="flex items-center gap-2 mt-0.5">
-                              <span className="font-space text-[9px] uppercase tracking-widest text-white/30">{typeKey.toUpperCase()}</span>
+                              <span className="font-space text-[9px] text-white/30">{typeKey}</span>
                               {att.uploaded_by && (
                                 <div className="flex items-center gap-1.5">
                                   <span className="text-[9px] text-white/20">•</span>
@@ -1194,7 +1191,7 @@ export default function TaskDrawer({
                                     alt={att.uploaded_by.name || 'User'}
                                     className="w-3.5 h-3.5 rounded-full border border-white/10"
                                   />
-                                  <span className="text-[8px] text-zinc-400 font-space uppercase">
+                                  <span className="text-[8px] text-zinc-400 font-space">
                                     {att.uploaded_by.name || 'Operator'}
                                   </span>
                                 </div>
@@ -1242,7 +1239,7 @@ export default function TaskDrawer({
 
           {/* Subtle Auto-saved text */}
           <div className="flex justify-end pr-1 pt-4 select-none">
-            <span className="text-[9px] font-space tracking-widest uppercase text-zinc-600">
+            <span className="text-[9px] font-space text-zinc-600">
               {isRTL ? 'تم الحفظ تلقائياً' : 'Auto-saved'}
             </span>
           </div>
@@ -1289,7 +1286,7 @@ export default function TaskDrawer({
                 <Play className="w-4 h-4 fill-current" style={{ color: isCurrentTaskFocus ? '#F97316' : 'var(--text-secondary)' }} />
               )}
               <span className={cn(
-                "text-[10px] font-bold tracking-wider uppercase",
+                "text-[10px] font-medium",
                 isCurrentFocusActive ? "text-orange-500" : isCurrentTaskFocus ? "text-orange-400" : "text-zinc-400"
               )}>
                 {isCurrentFocusActive 
@@ -1340,7 +1337,7 @@ export default function TaskDrawer({
                 <Circle className="w-4 h-4 text-zinc-500" />
               )}
               <span className={cn(
-                "text-[10px] font-bold tracking-wider uppercase",
+                "text-[10px] font-medium",
                 task.is_completed ? "text-emerald-500" : "text-zinc-400"
               )}>
               {task.is_completed 

@@ -250,7 +250,7 @@ export default function TaskDrawerComments({
           {/* <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
             {isRTL ? 'التعليقات' : 'COMMENTS'}
           </h3> */}
-          <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3 opacity-60">
+          <h3 className="text-[10px] font-medium text-zinc-500 mb-3 opacity-60">
             {isRTL ? 'التعليقات' : 'Comments'}
           </h3>
         </div>
@@ -372,7 +372,7 @@ export default function TaskDrawerComments({
           </AnimatePresence>
 
           {notes.length === 0 && (
-            <div className="text-center py-6 text-white/25 text-[10px] font-space tracking-widest uppercase">
+            <div className="text-center py-6 text-white/25 text-[10px] font-space font-medium">
               {isRTL ? 'لا توجد تعليقات بعد' : 'No comments yet'}
             </div>
           )}
@@ -551,12 +551,12 @@ export default function TaskDrawerComments({
                         <img src={member.avatar_url} className="w-6 h-6 rounded-full object-cover border border-white/10" />
                       ) : (
                         /* bg-zinc-800 */
-                        <div className="w-6 h-6 rounded-full bg-transparent dark:bg-white/10 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white uppercase">
+                        <div className="w-6 h-6 rounded-full bg-transparent dark:bg-white/10 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white">
                           {member.full_name?.charAt(0) || member.user_name?.charAt(0) || 'OP'}
                         </div>
                       )}
                       <span className={cn(
-                        "text-xs font-space font-semibold uppercase truncate",
+                        "text-xs font-space font-semibold truncate",
                         isSelected ? 'text-white' : 'text-white/60 group-hover:text-white/80'
                       )}>
                         {member.full_name || member.user_name}
@@ -573,7 +573,7 @@ export default function TaskDrawerComments({
                   <button
                     type="button"
                     onClick={() => setMentionPickerMode(false)}
-                    className="w-full py-2 rounded-md text-[10px] font-black font-space uppercase tracking-widest transition-all cursor-pointer text-black"
+                    className="w-full py-2 rounded-md text-[10px] font-medium font-space transition-all cursor-pointer text-black"
                     style={{ backgroundColor: themeColor }}
                   >
                     {/* {isRTL ? `تم (${selectedMentions.size})` : `DONE (${selectedMentions.size} SELECTED)`} */}
@@ -605,11 +605,11 @@ export default function TaskDrawerComments({
                     <img src={member.avatar_url} className="w-6 h-6 rounded-full object-cover border border-white/10" />
                   ) : (
                     /* bg-zinc-800 */
-                    <div className="w-6 h-6 rounded-full bg-transparent dark:bg-white/10 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white uppercase">
+                    <div className="w-6 h-6 rounded-full bg-transparent dark:bg-white/10 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white">
                       {member.full_name?.charAt(0) || member.user_name?.charAt(0) || 'OP'}
                     </div>
                   )}
-                  <span className="text-xs text-white/80 group-hover:text-white font-space font-semibold uppercase">{member.full_name || member.user_name}</span>
+                  <span className="text-xs text-white/80 group-hover:text-white font-space font-semibold">{member.full_name || member.user_name}</span>
                 </button>
               ))}
             </div>
