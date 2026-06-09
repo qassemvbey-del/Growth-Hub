@@ -1184,9 +1184,10 @@ export default function SquadGoalsPage() {
         <div className="text-center md:text-left">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--theme-color)]/5 border border-[var(--theme-color)]/10 backdrop-blur-md">
             <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-color)] animate-ping" />
-            <span className="font-space text-[9px] tracking-[0.25em] font-black uppercase text-[var(--theme-color)]">
+            {/* <span className="font-space text-[9px] tracking-[0.25em] font-black uppercase text-[var(--theme-color)]"> */}
+            <span className="font-space text-[9px] tracking-[0.25em] font-black text-[var(--theme-color)]">
               {/* {isRTL ? 'مزامنة أهداف مساحة العمل السحابية...' : 'SYNCING_CLOUD_WORKSPACE_OBJECTIVES...'} */}
-              // {isRTL ? 'مزامنة الـ Goals السحابية...' : 'SYNCING_CLOUD_WORKSPACE_OBJECTIVES...'}
+              {/* // {isRTL ? 'مزامنة الـ Goals السحابية...' : 'SYNCING_CLOUD_WORKSPACE_OBJECTIVES...'} */}
               {isRTL ? 'مزامنة الـ Goals السحابية...' : 'Syncing cloud workspace goals...'}
             </span>
           </div>
