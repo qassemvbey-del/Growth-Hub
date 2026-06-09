@@ -189,7 +189,8 @@ function AiChecklistButton({
           taskId: taskId,
           youtubeUrl: finalVideoUrl,
           taskTitle: taskTitle,
-          goalTitle: goalTitle
+          goalTitle: goalTitle,
+          language: isRTL ? 'ar' : 'en'
         })
       })
 
@@ -1285,7 +1286,7 @@ export default function TaskDrawer({
         exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
         className={cn(
-          "h-full bg-zinc-950/95 backdrop-blur-xl border-t md:border-l md:border-t-0 border-white/5 shadow-2xl flex flex-col justify-between rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden z-[60] transition-all duration-300",
+          "h-[100dvh] bg-zinc-950/95 backdrop-blur-xl border-t md:border-l md:border-t-0 border-white/5 shadow-2xl flex flex-col justify-between rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden z-[60] transition-all duration-300",
           isExpanded ? "w-full md:w-[90vw] max-w-5xl" : "w-full sm:w-[450px] max-w-md"
         )}
       >

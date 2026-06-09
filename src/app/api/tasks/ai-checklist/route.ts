@@ -41,7 +41,7 @@ export async function POST(req: Request) {
   let fileManagerToDelete: string | null = null
 
   try {
-    const { taskId, youtubeUrl, taskTitle, goalTitle } = await req.json()
+    const { taskId, youtubeUrl, taskTitle, goalTitle, language } = await req.json()
     if (!taskId || !youtubeUrl) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 })
     }
@@ -115,6 +115,15 @@ export async function POST(req: Request) {
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' })
 
+    // Language Detection / Assignment
+    let detectedLang = language || ""
+    if (!detectedLang) {
+      const isArabic = /[\u0600-\u06FF]/.test((taskTitle || '') + (goalTitle || ''))
+      detectedLang = isArabic ? 'ar' : 'en'
+    }
+    const languageName = detectedLang === 'ar' ? 'Arabic' : 'English'
+    const criticalLanguageRule = `CRITICAL: The user's interface is in ${languageName}. Respond ENTIRELY in ${languageName}. Keep technical acronyms (MCSA, CCNA, etc.) in English.`
+
     let checklistItems: string[] = []
     let mediaPipelineSuccess = false
 
@@ -129,9 +138,7 @@ export async function POST(req: Request) {
         const transcriptItems = await YoutubeTranscript.fetchTranscript(videoId)
         const transcriptText = transcriptItems.map(item => item.text).join(' ')
         if (transcriptText.trim()) {
-          const isArabic = /[\u0600-\u06FF]/.test(transcriptText + (taskTitle || '') + (goalTitle || ''))
-          
-          const systemPrompt = `You are an elite academic tutor. Analyze the following transcript of a technical video tutorial. Generate a pristine, actionable study checklist for a student. Break down the core educational milestones into 4 to 7 sequential items. Each item must be clear, practical, concise, and under 80 characters. CRITICAL LANGUAGE RULE: If the video title, content, or transcript is in Arabic, respond in Arabic (preserving standard technical terms in English where appropriate). Otherwise respond in English. Return STRICTLY as a valid JSON string array of strings, without any markdown blocks, backticks, or extra explanation text. Example format: ["Understand core architecture", "Analyze infrastructure mapping"]`
+          const systemPrompt = `You are an elite academic tutor. Analyze the following transcript of a technical video tutorial. Generate a pristine, actionable study checklist for a student. Break down the core educational milestones into 4 to 7 sequential items. Each item must be clear, practical, concise, and under 80 characters. ${criticalLanguageRule} Return STRICTLY as a valid JSON string array of strings, without any markdown blocks, backticks, or extra explanation text. Example format: ["Understand core architecture", "Analyze infrastructure mapping"]`
 
           const response = await model.generateContent({
             contents: [{
@@ -172,9 +179,7 @@ export async function POST(req: Request) {
               const title = snippet.title || ""
               const description = snippet.description || ""
               
-              const isArabic = /[\u0600-\u06FF]/.test(title + description + (taskTitle || '') + (goalTitle || ''))
-              
-              const systemPrompt = `You are an elite academic tutor. Analyze the provided YouTube metadata, description, and chapters of this lecture video. Synthesize a highly actionable, structured study checklist for the student matching these milestone timelines. Output 4 to 7 sequential items, under 80 characters each, written in clean Title Case formatting. CRITICAL LANGUAGE RULE: If the video title or content is in Arabic, respond in Arabic (preserving standard technical terms in English where appropriate). Otherwise respond in English. Return STRICTLY as a valid JSON string array of strings, without any backticks or markdown wrapping blocks.`
+              const systemPrompt = `You are an elite academic tutor. Analyze the provided YouTube metadata, description, and chapters of this lecture video. Synthesize a highly actionable, structured study checklist for the student matching these milestone timelines. Output 4 to 7 sequential items, under 80 characters each, written in clean Title Case formatting. ${criticalLanguageRule} Return STRICTLY as a valid JSON string array of strings, without any backticks or markdown wrapping blocks.`
               
               const contentPrompt = `Metadata:\nTitle: ${title}\nDescription: ${description}`
               
@@ -239,12 +244,10 @@ export async function POST(req: Request) {
           }
 
           if (uploadResult) {
-            const isArabic = /[\u0600-\u06FF]/.test((taskTitle || '') + (goalTitle || ''))
-            
             const systemPrompt = `You are an elite academic tutor. This video does not have readable textual transcripts. You are provided with the raw audio file of the lecture. Listen intently to the spoken explanations, technical keywords, and core lessons delivered by the instructor. 
 Generate a pristine, highly logical study checklist for the student based entirely on the audio contents. 
 Break down the milestones into 4 to 7 sequential checklist items. Each item must be highly practical, actionable, under 80 characters, and written in clean Title Case. 
-CRITICAL LANGUAGE RULE: If the video title, content, or course context is in Arabic, respond in Arabic (preserving standard technical terms in English where appropriate). Otherwise respond in English.
+${criticalLanguageRule}
 Return STRICTLY as a valid JSON string array of strings, without any markdown formatting blocks, backticks, or wrapping markdown text. 
 Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
 
@@ -321,7 +324,8 @@ Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
       const safeGoalTitle = goalTitle || "Specialized Curriculum"
       
       const systemPrompt = `You are an elite technical instructor. We cannot access the direct media stream of this video due to network restrictions. However, we know this lesson is titled "${safeTaskTitle}" and belongs to the comprehensive course/coursework "${safeGoalTitle}". Based on your deep underlying knowledge base of this standard technical curriculum, infer and generate a pristine, highly accurate study checklist for this exact topic. Output 4 to 7 sequential, highly actionable items under 80 characters each in Title Case.
-CRITICAL LANGUAGE RULE: If the video title or course context is in Arabic, respond in Arabic (keeping core technical acronyms in English). Otherwise respond in English. Output 4 to 7 sequential items under 80 characters each in Title Case. Return STRICTLY as a valid JSON string array of strings, without any backticks or markdown wrapping blocks.
+${criticalLanguageRule}
+Return STRICTLY as a valid JSON string array of strings, without any backticks or markdown wrapping blocks.
 Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
 
       const response = await model.generateContent({
