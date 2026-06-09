@@ -81,7 +81,9 @@ function AiChecklistButton({
 }: AiChecklistButtonProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
-  const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const [countdown, setCountdown] = useState(30)
+  // Commented out count-up timer state to respect safety rules:
+  // const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [aiErrorMessage, setAiErrorMessage] = useState<string | null>(null)
 
   // Load active cooldown on mount
@@ -112,17 +114,35 @@ function AiChecklistButton({
     return () => clearInterval(interval)
   }, [cooldownRemaining])
 
-  // Elapsed seconds timer loop when generating
+  // Countdown timer loop when generating
   useEffect(() => {
     if (!isGenerating) {
-      setElapsedSeconds(0)
+      setCountdown(30)
       return
     }
     const interval = setInterval(() => {
-      setElapsedSeconds(prev => prev + 1)
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(interval)
+          return 0
+        }
+        return prev - 1
+      })
     }, 1000)
     return () => clearInterval(interval)
   }, [isGenerating])
+
+  // Commented out count-up timer loop to respect safety rules:
+  // useEffect(() => {
+  //   if (!isGenerating) {
+  //     setElapsedSeconds(0)
+  //     return
+  //   }
+  //   const interval = setInterval(() => {
+  //     setElapsedSeconds(prev => prev + 1)
+  //   }, 1000)
+  //   return () => clearInterval(interval)
+  // }, [isGenerating])
 
   const formatCooldownTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -130,11 +150,16 @@ function AiChecklistButton({
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
   }
 
-  const formatElapsedTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+  const formatCountdownVal = (seconds: number) => {
+    return `00:${String(seconds).padStart(2, '0')}`
   }
+
+  // Commented out old elapsed time formatter to respect safety rules:
+  // const formatElapsedTime = (seconds: number) => {
+  //   const mins = Math.floor(seconds / 60)
+  //   const secs = seconds % 60
+  //   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+  // }
 
   const handleGenerate = async () => {
     if (isGenerating || cooldownRemaining > 0 || !canEdit || !finalVideoUrl) return
@@ -206,9 +231,15 @@ function AiChecklistButton({
           <>
             <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400" />
             <span className="animate-pulse">
-              {isRTL 
-                ? `جاري معالجة الصوت (وضع NotebookLM)... ${formatElapsedTime(elapsedSeconds)}` 
-                : `Processing Audio (NotebookLM Mode)... ${formatElapsedTime(elapsedSeconds)}`}
+              {countdown > 0 ? (
+                isRTL 
+                  ? `جاري تحليل الصوت... ${formatCountdownVal(countdown)}` 
+                  : `Analyzing Audio... ${formatCountdownVal(countdown)}`
+              ) : (
+                isRTL 
+                  ? 'جاري إنهاء العملية...' 
+                  : 'Finishing up...'
+              )}
             </span>
           </>
         ) : cooldownRemaining > 0 ? (

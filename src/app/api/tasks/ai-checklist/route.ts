@@ -7,7 +7,9 @@ import { YoutubeTranscript } from 'youtube-transcript'
 import fs from 'fs'
 import os from 'os'
 import path from 'path'
-import { execSync } from 'child_process'
+import ytdl from '@distube/ytdl-core'
+
+export const maxDuration = 60;
 
 function getYouTubeId(urlOrId: string) {
   if (!urlOrId) return ''
@@ -108,6 +110,28 @@ export async function POST(req: Request) {
     } catch (err) {
       console.warn('Transcript fetch failed, falling back to Audio Ingestion:', err)
       const tempDir = os.tmpdir()
+      const audioPath = path.join(tempDir, `${videoId}.mp3`)
+      const mimeType = 'audio/mp3'
+
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const stream = ytdl(`https://www.youtube.com/watch?v=${videoId}`, {
+            filter: 'audioonly',
+            quality: 'highestaudio'
+          })
+          const writeStream = fs.createWriteStream(audioPath)
+          stream.pipe(writeStream)
+
+          writeStream.on('finish', () => resolve())
+          writeStream.on('error', (err) => reject(err))
+          stream.on('error', (err) => reject(err))
+        })
+      } catch (streamErr) {
+        console.error('ytdl stream pipe failed:', streamErr)
+        return NextResponse.json({ error: 'This video does not have readable subtitles or transcripts, and audio extraction failed.' }, { status: 400 })
+      }
+
+      /* Commented out legacy yt-dlp shell execution to respect safety rules and prevent serverless timeouts/crashes:
       const ytdlpPath = path.join(process.cwd(), 'yt-dlp.exe')
       
       let hasFfmpeg = false
@@ -138,6 +162,7 @@ export async function POST(req: Request) {
           return NextResponse.json({ error: 'This video does not have readable subtitles or transcripts, and audio extraction failed.' }, { status: 400 })
         }
       }
+      */
 
       if (!fs.existsSync(audioPath)) {
         return NextResponse.json({ error: 'Audio file extraction failed' }, { status: 500 })
