@@ -115,22 +115,99 @@ export async function POST(req: Request) {
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' })
 
-    let transcriptText = ''
-    let tier3Fallback = false
+    let checklistItems: string[] = []
+    let mediaPipelineSuccess = false
 
+    // 4. Timeout Circuit Breaker Setup (6 Seconds max for Tiers 1, 2, and 3)
     const timeout = (ms: number) => new Promise((_, reject) => 
       setTimeout(() => reject(new Error("CEILING_TIMEOUT")), ms)
     );
 
     const theMediaPipeline = async () => {
-      // TIER 1: Try Transcript Mode
+      // TIER 1: Try Text Transcript Mode
       try {
         const transcriptItems = await YoutubeTranscript.fetchTranscript(videoId)
-        transcriptText = transcriptItems.map(item => item.text).join(' ')
+        const transcriptText = transcriptItems.map(item => item.text).join(' ')
+        if (transcriptText.trim()) {
+          const isArabic = /[\u0600-\u06FF]/.test(transcriptText + (taskTitle || '') + (goalTitle || ''))
+          
+          const systemPrompt = `You are an elite academic tutor. Analyze the following transcript of a technical video tutorial. Generate a pristine, actionable study checklist for a student. Break down the core educational milestones into 4 to 7 sequential items. Each item must be clear, practical, concise, and under 80 characters. CRITICAL LANGUAGE RULE: If the video title, content, or transcript is in Arabic, respond in Arabic (preserving standard technical terms in English where appropriate). Otherwise respond in English. Return STRICTLY as a valid JSON string array of strings, without any markdown blocks, backticks, or extra explanation text. Example format: ["Understand core architecture", "Analyze infrastructure mapping"]`
+
+          const response = await model.generateContent({
+            contents: [{
+              role: 'user',
+              parts: [{ text: `${systemPrompt}\n\nTranscript:\n${transcriptText}` }]
+            }]
+          })
+
+          const rawText = response.response.text().trim()
+          let cleanedJson = rawText
+          if (cleanedJson.startsWith('```json')) {
+            cleanedJson = cleanedJson.replace(/^```json\s*/, '').replace(/\s*```$/, '')
+          } else if (cleanedJson.startsWith('```')) {
+            cleanedJson = cleanedJson.replace(/^```\s*/, '').replace(/\s*```$/, '')
+          }
+
+          const parsed = JSON.parse(cleanedJson)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            checklistItems = parsed
+            mediaPipelineSuccess = true
+            return
+          }
+        }
       } catch (err) {
-        console.warn('Transcript fetch failed, falling back to Audio Ingestion (Tier 2):', err)
-        
-        // TIER 2: Try Audio Ingestion Mode
+        console.warn('Tier 1 Transcript fetch failed, falling back to Tier 2:', err)
+      }
+
+      // TIER 2: YouTube Metadata & Chapters Mode via Data API v3
+      const youtubeKey = process.env.YOUTUBE_DATA_API_KEY || process.env.YOUTUBE_API_KEY
+      if (youtubeKey) {
+        try {
+          const metadataUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${youtubeKey}`
+          const metaRes = await fetch(metadataUrl)
+          if (metaRes.ok) {
+            const metaData = await metaRes.json()
+            const snippet = metaData.items?.[0]?.snippet
+            if (snippet) {
+              const title = snippet.title || ""
+              const description = snippet.description || ""
+              
+              const isArabic = /[\u0600-\u06FF]/.test(title + description + (taskTitle || '') + (goalTitle || ''))
+              
+              const systemPrompt = `You are an elite academic tutor. Analyze the provided YouTube metadata, description, and chapters of this lecture video. Synthesize a highly actionable, structured study checklist for the student matching these milestone timelines. Output 4 to 7 sequential items, under 80 characters each, written in clean Title Case formatting. CRITICAL LANGUAGE RULE: If the video title or content is in Arabic, respond in Arabic (preserving standard technical terms in English where appropriate). Otherwise respond in English. Return STRICTLY as a valid JSON string array of strings, without any backticks or markdown wrapping blocks.`
+              
+              const contentPrompt = `Metadata:\nTitle: ${title}\nDescription: ${description}`
+              
+              const response = await model.generateContent({
+                contents: [{
+                  role: 'user',
+                  parts: [{ text: `${systemPrompt}\n\n${contentPrompt}` }]
+                }]
+              })
+              
+              const rawText = response.response.text().trim()
+              let cleanedJson = rawText
+              if (cleanedJson.startsWith('```json')) {
+                cleanedJson = cleanedJson.replace(/^```json\s*/, '').replace(/\s*```$/, '')
+              } else if (cleanedJson.startsWith('```')) {
+                cleanedJson = cleanedJson.replace(/^```\s*/, '').replace(/\s*```$/, '')
+              }
+              
+              const parsed = JSON.parse(cleanedJson)
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                checklistItems = parsed
+                mediaPipelineSuccess = true
+                return
+              }
+            }
+          }
+        } catch (tier2Err) {
+          console.warn('Tier 2 YouTube Metadata fallback failed, falling back to Tier 3:', tier2Err)
+        }
+      }
+
+      // TIER 3: Capped Multimodal Audio Streaming Mode
+      try {
         await new Promise<void>((resolve, reject) => {
           activeYtdlStream = ytdl(`https://www.youtube.com/watch?v=${videoId}`, {
             filter: 'audioonly',
@@ -160,9 +237,56 @@ export async function POST(req: Request) {
           } catch (unlinkErr) {
             console.error('Failed to cleanup local audio file:', unlinkErr)
           }
+
+          if (uploadResult) {
+            const isArabic = /[\u0600-\u06FF]/.test((taskTitle || '') + (goalTitle || ''))
+            
+            const systemPrompt = `You are an elite academic tutor. This video does not have readable textual transcripts. You are provided with the raw audio file of the lecture. Listen intently to the spoken explanations, technical keywords, and core lessons delivered by the instructor. 
+Generate a pristine, highly logical study checklist for the student based entirely on the audio contents. 
+Break down the milestones into 4 to 7 sequential checklist items. Each item must be highly practical, actionable, under 80 characters, and written in clean Title Case. 
+CRITICAL LANGUAGE RULE: If the video title, content, or course context is in Arabic, respond in Arabic (preserving standard technical terms in English where appropriate). Otherwise respond in English.
+Return STRICTLY as a valid JSON string array of strings, without any markdown formatting blocks, backticks, or wrapping markdown text. 
+Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
+
+            const response = await model.generateContent([
+              {
+                fileData: {
+                  mimeType: uploadResult.mimeType,
+                  fileUri: uploadResult.uri
+                }
+              },
+              { text: systemPrompt }
+            ])
+
+            if (fileManagerToDelete) {
+              try {
+                await fileManager.deleteFile(fileManagerToDelete)
+                fileManagerToDelete = null
+              } catch (delErr) {
+                console.error('Failed to delete uploaded file from Gemini File API:', delErr)
+              }
+            }
+
+            const rawText = response.response.text().trim()
+            let cleanedJson = rawText
+            if (cleanedJson.startsWith('```json')) {
+              cleanedJson = cleanedJson.replace(/^```json\s*/, '').replace(/\s*```$/, '')
+            } else if (cleanedJson.startsWith('```')) {
+              cleanedJson = cleanedJson.replace(/^```\s*/, '').replace(/\s*```$/, '')
+            }
+
+            const parsed = JSON.parse(cleanedJson)
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              checklistItems = parsed
+              mediaPipelineSuccess = true
+              return
+            }
+          }
         } else {
           throw new Error('Audio file does not exist after download')
         }
+      } catch (err) {
+        console.warn('Tier 3 Audio Ingestion failed:', err)
       }
     }
 
@@ -170,9 +294,9 @@ export async function POST(req: Request) {
       await Promise.race([theMediaPipeline(), timeout(6000)])
     } catch (error: any) {
       if (error.message === "CEILING_TIMEOUT") {
-        console.warn("Media pipeline timed out at 6s. Force-dropping to Tier 3 Knowledge Base Inference.")
+        console.warn("Media pipeline timed out at 6s. Force-dropping to Tier 4.")
       } else {
-        console.error("Media pipeline failed, falling back to Tier 3:", error)
+        console.error("Media pipeline failed, falling back to Tier 4:", error)
       }
 
       // CRITICAL STREAM ABORTION & CLEANUP
@@ -188,75 +312,33 @@ export async function POST(req: Request) {
         }
       } catch (e) { console.error('Failed to unlink partial file:', e) }
 
-      tier3Fallback = true
+      mediaPipelineSuccess = false
     }
 
-    // 4. Gemini AI Invocation
-    let response;
-    if (tier3Fallback) {
+    // TIER 4: Zero-Crash Knowledge Base Inference Mode (Fallback)
+    if (!mediaPipelineSuccess || checklistItems.length === 0) {
       const safeTaskTitle = taskTitle || "Technical Lesson"
       const safeGoalTitle = goalTitle || "Specialized Curriculum"
-      const systemPrompt = `You are an elite technical instructor. We cannot access the direct media stream of this video due to network restrictions. However, we know this lesson is titled "${safeTaskTitle}" and belongs to the comprehensive course/coursework "${safeGoalTitle}". Based on your deep underlying knowledge base of this standard technical curriculum, infer and generate a pristine, highly accurate study checklist for this exact topic. Output 4 to 7 sequential, highly actionable items under 80 characters each in Title Case. Return STRICTLY as a valid JSON string array of strings, without any backticks or markdown wrap. Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
+      
+      const systemPrompt = `You are an elite technical instructor. We cannot access the direct media stream of this video due to network restrictions. However, we know this lesson is titled "${safeTaskTitle}" and belongs to the comprehensive course/coursework "${safeGoalTitle}". Based on your deep underlying knowledge base of this standard technical curriculum, infer and generate a pristine, highly accurate study checklist for this exact topic. Output 4 to 7 sequential, highly actionable items under 80 characters each in Title Case.
+CRITICAL LANGUAGE RULE: If the video title or course context is in Arabic, respond in Arabic (keeping core technical acronyms in English). Otherwise respond in English. Output 4 to 7 sequential items under 80 characters each in Title Case. Return STRICTLY as a valid JSON string array of strings, without any backticks or markdown wrapping blocks.
+Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
 
-      response = await model.generateContent({
+      const response = await model.generateContent({
         contents: [{
           role: 'user',
           parts: [{ text: systemPrompt }]
         }]
       })
-    } else if (uploadResult) {
-      const systemPrompt = `You are an elite academic tutor. This video does not have readable textual transcripts. You are provided with the raw audio file of the lecture. Listen intently to the spoken explanations, technical keywords, and core lessons delivered by the instructor. 
-Generate a pristine, highly logical study checklist for the student based entirely on the audio contents. 
-Break down the milestones into 4 to 7 sequential checklist items. Each item must be highly practical, actionable, under 80 characters, and written in clean Title Case. 
-Return STRICTLY as a valid JSON string array of strings, without any markdown formatting blocks, backticks, or wrapping markdown text. 
-Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
 
-      response = await model.generateContent([
-        {
-          fileData: {
-            mimeType: uploadResult.mimeType,
-            fileUri: uploadResult.uri
-          }
-        },
-        { text: systemPrompt }
-      ])
-
-      if (fileManagerToDelete) {
-        try {
-          await fileManager.deleteFile(fileManagerToDelete)
-          fileManagerToDelete = null
-        } catch (delErr) {
-          console.error('Failed to delete uploaded file from Gemini File API:', delErr)
-        }
+      const rawText = response.response.text().trim()
+      let cleanedJson = rawText
+      if (cleanedJson.startsWith('```json')) {
+        cleanedJson = cleanedJson.replace(/^```json\s*/, '').replace(/\s*```$/, '')
+      } else if (cleanedJson.startsWith('```')) {
+        cleanedJson = cleanedJson.replace(/^```\s*/, '').replace(/\s*```$/, '')
       }
-    } else {
-      const systemPrompt = `You are an elite academic tutor. Analyze the following transcript of a technical video tutorial. Generate a pristine, actionable study checklist for a student. Break down the core educational milestones into 4 to 7 sequential items. Each item must be clear, practical, concise, and under 80 characters. Return STRICTLY as a valid JSON string array of strings, without any markdown blocks, backticks, or extra explanation text. Example format: ["Understand core architecture", "Analyze infrastructure mapping"]`
-
-      response = await model.generateContent({
-        contents: [{
-          role: 'user',
-          parts: [{ text: `${systemPrompt}\n\nTranscript:\n${transcriptText}` }]
-        }]
-      })
-    }
-
-    const rawText = response.response.text().trim()
-    let cleanedJson = rawText
-    if (cleanedJson.startsWith('```json')) {
-      cleanedJson = cleanedJson.replace(/^```json\s*/, '').replace(/\s*```$/, '')
-    } else if (cleanedJson.startsWith('```')) {
-      cleanedJson = cleanedJson.replace(/^```\s*/, '').replace(/\s*```$/, '')
-    }
-
-    let checklistItems: string[] = []
-    try {
       checklistItems = JSON.parse(cleanedJson)
-      if (!Array.isArray(checklistItems)) {
-        throw new Error('Not an array')
-      }
-    } catch (jsonErr) {
-      console.error('Failed to parse Gemini output:', rawText)
-      return NextResponse.json({ error: 'Failed to generate a valid checklist structure.' }, { status: 500 })
     }
 
     // 5. Database Checklist Insertion
@@ -366,6 +448,13 @@ Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
 // }
 // 
 // export async function POST(req: Request) {
+//   // Outer scoped stream references for strict timeout cleanup
+//   let activeYtdlStream: any = null
+//   let activeWriteStream: any = null
+//   let audioPath = ""
+//   let uploadResult: any = null
+//   let fileManagerToDelete: string | null = null
+// 
 //   try {
 //     const { taskId, youtubeUrl, taskTitle, goalTitle } = await req.json()
 //     if (!taskId || !youtubeUrl) {
@@ -376,6 +465,9 @@ Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
 //     if (!videoId) {
 //       return NextResponse.json({ error: 'Invalid YouTube URL' }, { status: 400 })
 //     }
+// 
+//     const tempDir = os.tmpdir()
+//     audioPath = path.join(tempDir, `${videoId}.mp3`)
 // 
 //     // 1. Authentication Check
 //     const supabase = await createServerClient()
@@ -429,24 +521,21 @@ Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
 //       }, { status: 429 })
 //     }
 // 
-//     let transcriptText = ''
-//     let uploadResult: any = null
-//     let tier3Fallback = false
 //     const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
 //     if (!apiKey) {
 //       return NextResponse.json({ error: 'Gemini API key not configured' }, { status: 500 })
 //     }
+// 
 //     const fileManager = new GoogleAIFileManager(apiKey)
+//     const genAI = new GoogleGenerativeAI(apiKey)
+//     const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' })
+// 
+//     let transcriptText = ''
+//     let tier3Fallback = false
 // 
 //     const timeout = (ms: number) => new Promise((_, reject) => 
 //       setTimeout(() => reject(new Error("CEILING_TIMEOUT")), ms)
 //     );
-// 
-//     let activeYtdlStream: any = null
-//     let activeWriteStream: fs.WriteStream | null = null
-//     const tempDir = os.tmpdir()
-//     const audioPath = path.join(tempDir, `${videoId}.mp3`)
-//     const mimeType = 'audio/mp3'
 // 
 //     const theMediaPipeline = async () => {
 //       // TIER 1: Try Transcript Mode
@@ -460,7 +549,7 @@ Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
 //         await new Promise<void>((resolve, reject) => {
 //           activeYtdlStream = ytdl(`https://www.youtube.com/watch?v=${videoId}`, {
 //             filter: 'audioonly',
-//             quality: 'highestaudio'
+//             quality: 'lowestaudio'
 //           })
 //           activeWriteStream = fs.createWriteStream(audioPath)
 //           activeYtdlStream.pipe(activeWriteStream)
@@ -472,9 +561,13 @@ Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
 // 
 //         if (fs.existsSync(audioPath)) {
 //           uploadResult = await fileManager.uploadFile(audioPath, {
-//             mimeType,
+//             mimeType: 'audio/mp3',
 //             displayName: `yt-audio-${videoId}`
 //           })
+//           
+//           if (uploadResult) {
+//             fileManagerToDelete = uploadResult.name
+//           }
 //           
 //           // Immediate local cleanup
 //           try {
@@ -505,7 +598,7 @@ Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
 //         try { activeWriteStream.destroy() } catch (e) { console.error('Failed to destroy write stream:', e) }
 //       }
 //       try {
-//         if (fs.existsSync(audioPath)) {
+//         if (audioPath && fs.existsSync(audioPath)) {
 //           fs.unlinkSync(audioPath)
 //         }
 //       } catch (e) { console.error('Failed to unlink partial file:', e) }
@@ -514,9 +607,6 @@ Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
 //     }
 // 
 //     // 4. Gemini AI Invocation
-//     const genAI = new GoogleGenerativeAI(apiKey)
-//     const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' })
-// 
 //     let response;
 //     if (tier3Fallback) {
 //       const safeTaskTitle = taskTitle || "Technical Lesson"
@@ -546,10 +636,13 @@ Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
 //         { text: systemPrompt }
 //       ])
 // 
-//       try {
-//         await fileManager.deleteFile(uploadResult.name)
-//       } catch (delErr) {
-//         console.error('Failed to delete uploaded file from Gemini File API:', delErr)
+//       if (fileManagerToDelete) {
+//         try {
+//           await fileManager.deleteFile(fileManagerToDelete)
+//           fileManagerToDelete = null
+//         } catch (delErr) {
+//           console.error('Failed to delete uploaded file from Gemini File API:', delErr)
+//         }
 //       }
 //     } else {
 //       const systemPrompt = `You are an elite academic tutor. Analyze the following transcript of a technical video tutorial. Generate a pristine, actionable study checklist for a student. Break down the core educational milestones into 4 to 7 sequential items. Each item must be clear, practical, concise, and under 80 characters. Return STRICTLY as a valid JSON string array of strings, without any markdown blocks, backticks, or extra explanation text. Example format: ["Understand core architecture", "Analyze infrastructure mapping"]`
@@ -582,7 +675,6 @@ Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
 //     }
 // 
 //     // 5. Database Checklist Insertion
-//     // A. Robust update to tasks table metadata (which holds subtasks in our system)
 //     const { data: taskData } = await supabaseAdmin
 //       .from('tasks')
 //       .select('metadata')
@@ -635,6 +727,20 @@ Example: ["Understand core architecture", "Analyze infrastructure mapping"]`
 //     return NextResponse.json({ success: true, checklist: checklistItems })
 //   } catch (error: any) {
 //     console.error('AI Checklist API Error:', error)
+//     
+//     // Cleanup any lingering uploads if we crashed after uploading
+//     if (fileManagerToDelete) {
+//       try {
+//         const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
+//         if (apiKey) {
+//           const fileManager = new GoogleAIFileManager(apiKey)
+//           await fileManager.deleteFile(fileManagerToDelete)
+//         }
+//       } catch (delErr) {
+//         console.error('Failed to delete uploaded file in catch block:', delErr)
+//       }
+//     }
+// 
 //     return NextResponse.json({ error: error?.message || 'Server error' }, { status: 500 })
 //   }
 // }

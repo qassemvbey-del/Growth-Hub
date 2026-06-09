@@ -1045,6 +1045,11 @@ export default function TaskDrawer({
     await updateTask(task.id, { metadata: { ...task.metadata, subtasks: updatedSubtasks } })
   }
 
+  const handleUpdateSubtask = async (subId: string, newTitle: string) => {
+    const updatedSubtasks = subtasks.map((s: any) => s.id === subId ? { ...s, title: newTitle } : s)
+    await updateTask(task.id, { metadata: { ...task.metadata, subtasks: updatedSubtasks } })
+  }
+
 
 
   const handleDeleteNote = async (noteId: string, index: number) => {
@@ -1280,7 +1285,7 @@ export default function TaskDrawer({
         exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
         className={cn(
-          "h-full bg-zinc-950/95 backdrop-blur-xl border-t md:border-l md:border-t-0 border-white/5 shadow-2xl flex flex-col rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden z-[60] transition-all duration-300",
+          "h-full bg-zinc-950/95 backdrop-blur-xl border-t md:border-l md:border-t-0 border-white/5 shadow-2xl flex flex-col justify-between rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden z-[60] transition-all duration-300",
           isExpanded ? "w-full md:w-[90vw] max-w-5xl" : "w-full sm:w-[450px] max-w-md"
         )}
       >
@@ -1317,7 +1322,7 @@ export default function TaskDrawer({
         />
 
         {/* Single Scrollable view content wrapper */}
-        <div className="flex-1 overflow-y-auto p-6 pb-12 select-none">
+        <div className="flex-1 overflow-y-auto px-4 custom-scrollbar select-none">
           <div className={cn("flex", isExpanded ? "flex-col md:flex-row gap-6 items-stretch" : "flex-col space-y-6")}>
             
             {/* Left/Start Column (60% width when expanded) */}
@@ -1472,6 +1477,7 @@ export default function TaskDrawer({
                 handleAddSubtask={handleAddSubtask}
                 handleToggleSubtask={handleToggleSubtask}
                 handleDeleteSubtask={handleDeleteSubtask}
+                handleUpdateSubtask={handleUpdateSubtask}
                 isRTL={isRTL}
                 themeColor={themeColor}
                 canEdit={canEdit}

@@ -12,6 +12,7 @@ interface TaskDrawerChecklistProps {
   handleAddSubtask: (e?: React.FormEvent) => Promise<void> | void
   handleToggleSubtask: (subId: string, currentStatus: boolean) => Promise<void> | void
   handleDeleteSubtask: (subId: string) => Promise<void> | void
+  handleUpdateSubtask: (subId: string, newTitle: string) => Promise<void> | void
   isRTL: boolean
   themeColor: string
   canEdit?: boolean
@@ -25,10 +26,26 @@ export default function TaskDrawerChecklist({
   handleAddSubtask,
   handleToggleSubtask,
   handleDeleteSubtask,
+  handleUpdateSubtask,
   isRTL,
   themeColor,
   canEdit = true
 }: TaskDrawerChecklistProps) {
+  const [editingSubtaskId, setEditingSubtaskId] = React.useState<string | null>(null)
+  const [editingText, setEditingText] = React.useState<string>('')
+
+  const handleStartEdit = (subId: string, currentTitle: string) => {
+    setEditingSubtaskId(subId)
+    setEditingText(currentTitle)
+  }
+
+  const handleSaveEdit = async (subId: string) => {
+    if (editingText.trim() && editingText.trim() !== subtasks.find(s => s.id === subId)?.title) {
+      await handleUpdateSubtask(subId, editingText.trim())
+    }
+    setEditingSubtaskId(null)
+  }
+
   return (
     <div className="space-y-2">
       <h3 className="text-[10px] font-medium text-zinc-500 mb-3 opacity-60">
@@ -60,7 +77,7 @@ export default function TaskDrawerChecklist({
             key={sub.id}
             className="flex items-center justify-between gap-1 py-0.5 transition-colors"
           >
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
               <button
                 type="button"
                 disabled={!canEdit}
@@ -75,13 +92,33 @@ export default function TaskDrawerChecklist({
               >
                 {sub.is_completed && <NeonIcon icon={Check} className="w-2.5 h-2.5 text-black" />}
               </button>
-              <span
-                className={`text-xs font-space truncate ${
-                  sub.is_completed ? 'line-through text-white/30' : 'text-white/80'
-                }`}
-              >
-                {sub.title}
-              </span>
+              {editingSubtaskId === sub.id ? (
+                <input
+                  type="text"
+                  value={editingText}
+                  onChange={e => setEditingText(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleSaveEdit(sub.id)
+                    } else if (e.key === 'Escape') {
+                      setEditingSubtaskId(null)
+                    }
+                  }}
+                  onBlur={() => handleSaveEdit(sub.id)}
+                  autoFocus
+                  className="bg-transparent border-b border-teal-500 focus:outline-none text-xs text-white w-full py-0.5 px-0 font-space"
+                />
+              ) : (
+                <span
+                  onDoubleClick={() => canEdit && handleStartEdit(sub.id, sub.title)}
+                  className={`text-xs font-space flex-1 min-w-0 break-words whitespace-pre-wrap cursor-text select-text ${
+                    sub.is_completed ? 'line-through text-white/30' : 'text-white/80'
+                  }`}
+                >
+                  {sub.title}
+                </span>
+              )}
             </div>
             {canEdit && (
               <button
