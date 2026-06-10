@@ -1537,7 +1537,7 @@ export default function SquadGoalsPage() {
                   >
                     {isSubmitting && <Loader2 className="w-3 h-3 animate-spin text-black" />}
                     {/* {isRTL ? 'إنشاء هدف' : 'CREATE GOAL'} */}
-                    // {isRTL ? 'عمل Goal' : 'CREATE GOAL'}
+                    {/* // {isRTL ? 'عمل Goal' : 'CREATE GOAL'} */}
                     {isRTL ? 'عمل Goal' : 'Create Goal'}
                   </button>
                 </div>

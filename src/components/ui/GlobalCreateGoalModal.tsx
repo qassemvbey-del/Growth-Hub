@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, RefreshCw, Calendar } from 'lucide-react'
+import { X, RefreshCw, Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useGrowth } from '@/context/GrowthContext'
 import { useToast } from '@/components/ui/Toast'
 import { useSound } from '@/context/SoundContext'
@@ -11,6 +11,7 @@ import { validateContent } from '@/lib/profanityFilter'
 import { aiProfanityCheck } from '@/app/actions/profanityCheck'
 import { useRouter } from 'next/navigation'
 import { useTrack } from '@/hooks/useTrack'
+import { cn } from '@/lib/utils'
 
 /**
  * GlobalCreateGoalModal
@@ -44,6 +45,25 @@ export default function GlobalCreateGoalModal() {
   const [newSize, setNewSize] = useState('md')
   const [syncOnCreate, setSyncOnCreate] = useState(true)
   const [endDate, setEndDate] = useState('')
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [viewDate, setViewDate] = useState(new Date())
+
+  // Helper for generating days of a month
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const firstDay = new Date(year, month, 1).getDay()
+    const totalDays = new Date(year, month + 1, 0).getDate()
+    
+    const days = []
+    for (let i = 0; i < firstDay; i++) {
+      days.push(null)
+    }
+    for (let i = 1; i <= totalDays; i++) {
+      days.push(new Date(year, month, i))
+    }
+    return days
+  }
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Sync prefill whenever modal is opened with opts
@@ -54,6 +74,8 @@ export default function GlobalCreateGoalModal() {
       setSyncOnCreate(true)
       setEndDate('')
       setIsSubmitting(false)
+      setShowDatePicker(false)
+      setViewDate(new Date())
     }
   }, [isCreateGoalModalOpen, createGoalModalOpts.prefillTitle])
 
@@ -255,7 +277,7 @@ export default function GlobalCreateGoalModal() {
 
             {/* Header */}
             <div className="flex flex-col gap-1">
-              <h2 className="text-lg font-black uppercase text-white tracking-wider">
+              <h2 className="text-lg font-black text-white tracking-wider">
                 {goalType === 'squad'
                   ? (isRTL ? 'عمل Goal فريق' : 'Create Squad Goal')
                   : (isRTL ? 'عمل Goal جديد' : 'Create New Goal')}
@@ -266,7 +288,7 @@ export default function GlobalCreateGoalModal() {
 
             {/* Title Input */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black tracking-widest uppercase text-zinc-400">
+              <label className="text-[10px] font-black tracking-widest text-zinc-400">
                 {isRTL ? 'العنوان' : 'Goal Title'}
               </label>
               <input
@@ -281,33 +303,128 @@ export default function GlobalCreateGoalModal() {
             </div>
 
             {/* Deadline */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-black tracking-widest uppercase text-zinc-400">
+            <div className="space-y-1.5 relative">
+              <label className="text-[10px] font-black tracking-widest text-zinc-400">
                 {isRTL ? 'الموعد النهائي (اختياري)' : 'Deadline (Optional)'}
               </label>
-              <div className="relative w-full" onClick={(e) => e.stopPropagation()}>
-                {/* Styled Wrapper Button */}
-                <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--text-primary)] hover:bg-[var(--card-hover)] transition-colors cursor-pointer w-full">
+              <div className="relative w-full">
+                {/* Styled Trigger Box */}
+                <button
+                  type="button"
+                  onClick={() => { playBlip(); setShowDatePicker(!showDatePicker); }}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 bg-white/[0.03] text-sm text-white hover:bg-white/[0.05] transition-colors cursor-pointer w-full text-left"
+                >
                   <Calendar className="w-4 h-4 shrink-0" style={{ color: currentTheme.color }} />
                   <span className="truncate">
                     {endDate ? endDate : (isRTL ? 'اختر تاريخ الانتهاء' : 'Select deadline')}
                   </span>
-                </div>
-
-                {/* Hidden native input date overlay */}
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={e => setEndDate(e.target.value)}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  style={{ colorScheme: 'dark' }}
-                />
+                </button>
               </div>
+
+              {/* Custom Interactive Calendar Popover */}
+              <AnimatePresence>
+                {showDatePicker && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute z-[9999] top-full mt-2 left-0 right-0 p-4 bg-zinc-950/95 border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl space-y-3"
+                  >
+                    {/* Calendar Header */}
+                    <div className="flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          playBlip()
+                          setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))
+                        }}
+                        className="p-1 hover:bg-white/5 rounded text-zinc-400 hover:text-white transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <span className="text-xs font-bold text-white uppercase tracking-wider font-space">
+                        {viewDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          playBlip()
+                          setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))
+                        }}
+                        className="p-1 hover:bg-white/5 rounded text-zinc-400 hover:text-white transition-colors"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Weekdays */}
+                    <div className="grid grid-cols-7 gap-1 text-center">
+                      {(isRTL ? ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'] : ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']).map((day) => (
+                        <span key={day} className="text-[9px] font-bold text-zinc-600 uppercase font-space">
+                          {day}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Days */}
+                    <div className="grid grid-cols-7 gap-1">
+                      {(() => {
+                        const days = getDaysInMonth(viewDate)
+                        return days.map((day, idx) => {
+                          if (!day) return <div key={`empty-${idx}`} />
+                          const dateString = day.toISOString().split('T')[0]
+                          const isSelected = endDate === dateString
+                          const isToday = new Date().toISOString().split('T')[0] === dateString
+                          return (
+                            <button
+                              key={dateString}
+                              type="button"
+                              onClick={() => {
+                                playClick()
+                                setEndDate(dateString)
+                                setShowDatePicker(false)
+                              }}
+                              className={cn(
+                                "h-7 w-full rounded text-[10px] font-bold font-mono transition-all flex items-center justify-center cursor-pointer",
+                                isSelected
+                                  ? "text-black"
+                                  : isToday
+                                    ? "bg-white/5 border border-white/20 text-white"
+                                    : "text-zinc-400 hover:bg-white/5 hover:text-white"
+                              )}
+                              style={isSelected ? { backgroundColor: currentTheme.color } : {}}
+                            >
+                              {day.getDate()}
+                            </button>
+                          )
+                        })
+                      })()}
+                    </div>
+
+                    {/* Clear Button */}
+                    {endDate && (
+                      <div className="pt-2 border-t border-white/5 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            playBlip()
+                            setEndDate('')
+                            setShowDatePicker(false)
+                          }}
+                          className="text-[9px] font-bold uppercase tracking-wider text-red-500 hover:text-red-400 transition-colors"
+                        >
+                          {isRTL ? 'إلغاء الموعد' : 'Clear Deadline'}
+                        </button>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Pin to Dashboard */}
             <div className="flex items-center justify-between py-2 border-t border-b border-white/[0.05]">
-              <span className="text-[10px] font-black tracking-widest uppercase text-zinc-400">
+              <span className="text-[10px] font-black tracking-widest text-zinc-400">
                 {isRTL ? 'ثبّته في الـ Dashboard' : 'Pin to Dashboard'}
               </span>
               <label className="relative inline-flex items-center cursor-pointer select-none">
@@ -328,18 +445,18 @@ export default function GlobalCreateGoalModal() {
             <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => { playClick(); closeCreateGoalModal() }}
-                className="px-4 py-2.5 rounded-md text-xs uppercase tracking-widest text-zinc-400 hover:text-white transition-all font-black cursor-pointer"
+                className="px-4 py-2.5 rounded-md text-xs tracking-widest text-zinc-400 hover:text-white transition-all font-black cursor-pointer"
               >
                 {isRTL ? 'اتركها' : 'Cancel'}
               </button>
               <button
                 onClick={handleCreate}
                 disabled={isSubmitting}
-                className="px-6 py-2.5 font-space font-black text-xs uppercase tracking-widest rounded-md flex items-center justify-center gap-2 cursor-pointer text-black hover:brightness-110 transition-all shadow-md disabled:opacity-60"
+                className="px-6 py-2.5 font-space font-black text-xs tracking-widest rounded-md flex items-center justify-center gap-2 cursor-pointer text-black hover:brightness-110 transition-all shadow-md disabled:opacity-60"
                 style={{ backgroundColor: currentTheme.color }}
               >
                 {isSubmitting && <RefreshCw className="animate-spin w-3 h-3" />}
-                {isRTL ? 'عمل Goal' : 'CREATE GOAL'}
+                {isRTL ? 'عمل Goal' : 'Create Goal'}
               </button>
             </div>
           </motion.div>

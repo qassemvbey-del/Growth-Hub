@@ -139,7 +139,7 @@ export default function KanbanBoard({
   }
 
   return (
-    <div className="flex md:grid md:grid-cols-3 overflow-x-auto snap-x snap-mandatory gap-4 w-full pb-4 custom-scrollbar">
+    <div className="flex md:grid md:grid-cols-3 overflow-x-auto snap-x snap-mandatory gap-4 w-full pb-4 custom-scrollbar items-start">
       {columns.map((col) => {
         const colTasks = tasks.filter(t => getTaskColumn(t) === col.id)
         const isOver = dragOverColumnId === col.id
@@ -151,7 +151,7 @@ export default function KanbanBoard({
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, col.id)}
             className={cn(
-              "w-[85vw] md:w-full max-w-[310px] md:max-w-none shrink-0 snap-center flex flex-col h-auto min-h-[52px] max-h-[72vh] rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-[var(--border)] p-2 transition-all overflow-hidden relative",
+              "w-[85vw] md:w-full max-w-[310px] md:max-w-none shrink-0 snap-center flex flex-col h-auto min-h-[52px] max-h-[75vh] rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-[var(--border)] p-2 transition-all overflow-hidden relative",
               isOver ? "border-dashed" : ""
             )}
             style={isOver ? { borderColor: col.color, boxShadow: `0 0 20px ${col.color}22` } : {}}
@@ -261,10 +261,10 @@ export default function KanbanBoard({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="py-12 flex flex-col items-center justify-center text-center border border-dashed border-[var(--border)] dark:border-white/5 rounded-xl bg-zinc-50/50 dark:bg-white/[0.01] text-[var(--text-muted)] dark:text-white/20 select-none"
+                    className="py-2 flex flex-col items-center justify-center text-center border border-dashed border-[var(--border)] dark:border-white/5 rounded-xl bg-zinc-50/50 dark:bg-white/[0.01] text-[var(--text-muted)] dark:text-white/20 select-none"
                   >
-                    <FolderOpen className="w-5 h-5 mb-1 opacity-45" />
-                    <span className="text-[10px] font-space tracking-widest uppercase text-[var(--text-muted)] dark:text-white/20">EMPTY</span>
+                    <FolderOpen className="w-4 h-4 mb-0.5 opacity-45" />
+                    <span className="text-[9px] font-space tracking-widest uppercase text-[var(--text-muted)] dark:text-white/20">Empty</span>
                   </motion.div>
                 )}
               </AnimatePresence>
