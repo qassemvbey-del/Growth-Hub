@@ -1612,18 +1612,18 @@ const { progress, isInRedZone } = useMemo(() => {
             </div>
 
             {/* Horizontal Stats Row */}
-            <div className="flex flex-wrap items-center pt-4 border-t border-white/5 gap-y-2">
-               <div className="inline-flex items-center text-xs font-mono text-white/50 border-r border-white/10 pr-3 mr-3 last:border-0">
+            <div className="flex flex-wrap items-center pt-4 border-t border-[var(--border)] dark:border-white/5 gap-y-2">
+               <div className="inline-flex items-center text-xs font-mono text-[var(--text-secondary)] dark:text-white/50 border-r border-[var(--border)] dark:border-white/10 pr-3 mr-3 last:border-0">
                   <Clock className="w-4 h-4 mr-1.5" style={{ color: missionColor }} />
-                  <span>{isRTL ? 'إجمالي التركيز:' : 'Total Focus:'} <strong className="text-white font-black ml-1">{Math.floor(totalTimeInvested / 60)}h {totalTimeInvested % 60}m</strong></span>
+                  <span>{isRTL ? 'إجمالي التركيز:' : 'Total Focus:'} <strong className="text-[var(--text-primary)] dark:text-white font-black ml-1">{Math.floor(totalTimeInvested / 60)}h {totalTimeInvested % 60}m</strong></span>
                </div>
-               <div className="inline-flex items-center text-xs font-mono text-white/50 border-r border-white/10 pr-3 mr-3 last:border-0">
+               <div className="inline-flex items-center text-xs font-mono text-[var(--text-secondary)] dark:text-white/50 border-r border-[var(--border)] dark:border-white/10 pr-3 mr-3 last:border-0">
                   <Radio className="w-4 h-4 mr-1.5" style={{ color: missionColor }} />
-                  <span>{isRTL ? 'مكتمل:' : 'Done:'} <strong className="text-white font-black ml-1">{completedCount}</strong></span>
+                  <span>{isRTL ? 'مكتمل:' : 'Done:'} <strong className="text-[var(--text-primary)] dark:text-white font-black ml-1">{completedCount}</strong></span>
                </div>
-               <div className="inline-flex items-center text-xs font-mono text-white/50 border-r border-white/10 pr-3 mr-3 last:border-0">
+               <div className="inline-flex items-center text-xs font-mono text-[var(--text-secondary)] dark:text-white/50 border-r border-[var(--border)] dark:border-white/10 pr-3 mr-3 last:border-0">
                   <CheckSquare className="w-4 h-4 mr-1.5" style={{ color: missionColor }} />
-                  <span>{isRTL ? 'المهام الإجمالية:' : 'Total Tasks:'} <strong className="text-white font-black ml-1">{totalCount}</strong></span>
+                  <span>{isRTL ? 'المهام الإجمالية:' : 'Total Tasks:'} <strong className="text-[var(--text-primary)] dark:text-white font-black ml-1">{totalCount}</strong></span>
                </div>
             </div>
 
@@ -2085,14 +2085,14 @@ const { progress, isInRedZone } = useMemo(() => {
                                   isRTL ? "justify-end" : "justify-start"
                                 )}>
                                   {hasVideo ? (
-                                    <div className="flex items-center gap-1.5 shrink-0 bg-white/[0.03] border border-zinc-800 px-2 py-0.5 rounded text-[11px] font-mono text-white/60">
+                                    <div className="flex items-center gap-1.5 shrink-0 bg-[var(--background-secondary)] dark:bg-white/[0.03] border border-[var(--border)] dark:border-zinc-800 px-2 py-0.5 rounded text-[11px] font-mono text-[var(--text-secondary)] dark:text-white/60">
                                       <Play className="w-3.5 h-3.5 fill-current" style={{ color: currentTheme.color }} />
-                                      <span className="font-mono text-[11px] text-[#FFFFFF] tracking-wider">
+                                      <span className="font-mono text-[11px] text-[var(--text-primary)] dark:text-[#FFFFFF] tracking-wider">
                                         {formatVideoTime(videoProgress)} / {formatVideoTime(videoDuration)}
                                       </span>
                                     </div>
                                   ) : timeFormatted ? (
-                                    <span className="font-mono text-[11px] text-white/50 bg-white/[0.03] border border-zinc-800 px-2 py-0.5 rounded tracking-wider inline-flex items-center gap-1.5">
+                                    <span className="font-mono text-[11px] text-[var(--text-secondary)] dark:text-white/50 bg-[var(--background-secondary)] dark:bg-white/[0.03] border border-[var(--border)] dark:border-zinc-800 px-2 py-0.5 rounded tracking-wider inline-flex items-center gap-1.5">
                                       <Timer className="w-3.5 h-3.5" style={{ color: currentTheme.color }} />
                                       {timeFormatted}
                                     </span>
@@ -2108,15 +2108,15 @@ const { progress, isInRedZone } = useMemo(() => {
                                         "font-mono text-[10px] px-2 py-0.5 rounded tracking-wider inline-flex items-center gap-1.5 border shrink-0",
                                         isOverdue 
                                           ? "bg-red-500/10 border-red-500 text-red-500 font-bold" 
-                                          : "text-white/40 border-zinc-800 bg-white/[0.02]"
+                                          : "text-[var(--text-secondary)] dark:text-white/40 border-[var(--border)] dark:border-zinc-800 bg-[var(--background-secondary)] dark:bg-white/[0.02]"
                                       )}>
-                                        <Calendar className={cn("w-3.5 h-3.5", isOverdue ? "text-red-500" : "text-cyan-500/80")} />
+                                        <Calendar className={cn("w-3.5 h-3.5", isOverdue ? "text-red-500" : "text-cyan-600 dark:text-cyan-500/80")} />
                                         {formatDeadline(task.metadata.endDate)}
                                       </span>
                                     )
                                   })()}
-                                  <div className="flex items-center gap-2 bg-white/[0.01] border border-zinc-900/50 px-2 py-0.5 rounded shrink-0">
-                                    <span className="text-[9px] uppercase font-mono text-white/30 tracking-widest">{isRTL ? 'الوزن:' : 'Weight:'}</span>
+                                  <div className="flex items-center gap-2 bg-[var(--background-secondary)] dark:bg-white/[0.01] border border-[var(--border)] dark:border-zinc-900/50 px-2 py-0.5 rounded shrink-0">
+                                    <span className="text-[9px] uppercase font-mono text-[var(--text-muted)] dark:text-white/30 tracking-widest">{isRTL ? 'الوزن:' : 'Weight:'}</span>
                                     <ComplexityDashes weight={task.weight} color={currentTheme.color} />
                                   </div>
                                 </div>
@@ -2143,7 +2143,7 @@ const { progress, isInRedZone } = useMemo(() => {
                                       {task.assignee.avatar_url ? (
                                         <img src={task.assignee.avatar_url} className="w-full h-full object-cover" />
                                       ) : (
-                                        <span className="text-[10px] font-bold text-white">
+                                        <span className="text-[10px] font-bold text-[var(--text-primary)] dark:text-white">
                                           {task.assignee.full_name?.charAt(0) || '?'}
                                         </span>
                                       )}
@@ -2151,9 +2151,8 @@ const { progress, isInRedZone } = useMemo(() => {
                                   ) : (
                                     <button
                                       onClick={(e) => handleAssignClick(e, task)}
-                                      className="px-2 py-1 border border-dashed border-white/25 hover:border-teal-500 hover:text-teal-400 text-white/40 text-[9px] font-mono tracking-wider rounded transition-colors"
+                                      className="px-2 py-1 border border-dashed border-[var(--border)] dark:border-white/25 hover:border-teal-500 hover:text-teal-400 text-[var(--text-secondary)] dark:text-white/40 text-[9px] font-mono tracking-wider rounded transition-colors bg-[var(--background-secondary)] dark:bg-transparent"
                                     >
-                                      {/* [ + ASSIGN ] */}
                                        [ + Assign ]
                                     </button>
                                   )}

@@ -847,7 +847,7 @@ export default function PublicGoalPage() {
                 cx="60"
                 cy="60"
                 r={radius}
-                className="stroke-white/5"
+                className="dark:stroke-white/10 stroke-slate-900/10"
                 strokeWidth={strokeWidth}
                 fill="transparent"
               />

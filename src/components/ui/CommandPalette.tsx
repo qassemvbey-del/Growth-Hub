@@ -167,8 +167,8 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
       <style jsx global>{`
         [data-selected="true"] {
           border-left: 2px solid var(--selected-border-color) !important;
-          background-color: rgba(255, 255, 255, 0.05) !important;
-          color: #ffffff !important;
+          background-color: var(--background-secondary) !important;
+          color: var(--text-primary) !important;
         }
       `}</style>
       <AnimatePresence>
@@ -190,8 +190,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.95, y: -20, opacity: 0 }}
               className={cn(
-                // "w-full max-w-2xl bg-[#09090b]/95 border-2 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden relative z-50",
-                "w-full max-w-2xl bg-[#09090b]/95 border-2 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden relative z-[101]",
+                "w-full max-w-2xl bg-white dark:bg-[#09090b]/95 border-2 rounded-2xl shadow-2xl overflow-hidden relative z-[101]",
                 isRTL ? "text-right" : "text-left"
               )}
               style={{ 
@@ -207,19 +206,19 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
 
               <Command 
                 label="Cyberpunk Command Palette" 
-                className="flex flex-col h-full text-white font-space"
+                className="flex flex-col h-full text-[var(--text-primary)] dark:text-white font-space"
                 onKeyDown={(e) => {
                   if (e.key === 'Escape') onClose()
                 }}
               >
                 {/* Input wrapper */}
-                <div className="flex items-center gap-3 px-4 py-4 border-b border-white/[0.08]">
+                <div className="flex items-center gap-3 px-4 py-4 border-b border-[var(--border)] dark:border-white/[0.08]">
                   <NeonIcon icon={Sparkles} className="w-5 h-5 shrink-0 animate-pulse" style={{ color: currentTheme.color }} />
                   <Command.Input
                     value={search}
                     onValueChange={setSearch}
                     placeholder={isRTL ? "ابحث عن أمر، هدف، أو مهمة..." : "Type a command, goal, or task..."}
-                    className="flex-1 bg-transparent border-none text-[#FFFFFF] placeholder-[#FFFFFF]/30 outline-none font-space font-medium text-lg"
+                    className="flex-1 bg-transparent border-none text-[var(--text-primary)] dark:text-[#FFFFFF] placeholder-[var(--text-secondary)]/40 dark:placeholder-[#FFFFFF]/30 outline-none font-space font-medium text-lg"
                     autoFocus
                   />
                   <div className="flex items-center gap-1 text-[10px] text-zinc-500 font-mono tracking-widest border border-zinc-800 rounded px-1.5 py-0.5 bg-black/40 uppercase">
@@ -237,14 +236,14 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                       <Command.Item
                         value={`create task ${search}`}
                         onSelect={() => runCommand(() => { openCreateGoalModal({ goalType: 'solo', prefillTitle: search }); onClose(); })}
-                        className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-zinc-300 hover:text-white cursor-pointer transition-all gap-3"
+                        className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-[var(--text-secondary)] dark:text-zinc-300 hover:text-[var(--text-primary)] dark:hover:text-white cursor-pointer transition-all gap-3"
                         style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
                       >
                         <div className="flex items-center gap-3">
                           <div className="p-1.5 bg-cyan-500/10 border border-cyan-500/30 rounded">
                             <NeonIcon icon={PlusSquare} intent="primary" className="w-4 h-4" />
                           </div>
-                          <span className="font-semibold tracking-wide text-cyan-400">{isRTL ? `إنشاء هدف فرعي: "${search}"` : `Create Goal: "${search}"`}</span>
+                          <span className="font-semibold tracking-wide text-cyan-500 dark:text-cyan-400">{isRTL ? `إنشاء هدف فرعي: "${search}"` : `Create Goal: "${search}"`}</span>
                         </div>
                         <div className="flex items-center gap-1.5 text-[10px] text-cyan-500/60 font-mono">
                           <span>QUICK</span>
@@ -268,7 +267,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                           key={res.id}
                           value={res.title}
                           onSelect={() => runCommand(() => { router.push(res.url); onClose(); }, res.rawItem)}
-                          className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-zinc-300 hover:text-white cursor-pointer transition-all gap-3 mt-1"
+                          className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-[var(--text-secondary)] dark:text-zinc-300 hover:text-[var(--text-primary)] dark:hover:text-white cursor-pointer transition-all gap-3 mt-1"
                           style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
                         >
                           <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -276,7 +275,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                               <NeonIcon icon={Search} className="w-4 h-4" style={{ color: currentTheme.color }} />
                             </div>
                             <div className="flex flex-col min-w-0 flex-1">
-                              <span className="font-semibold tracking-wide text-[#FFFFFF] truncate uppercase">{res.title}</span>
+                              <span className="font-semibold tracking-wide text-[var(--text-primary)] dark:text-[#FFFFFF] truncate uppercase">{res.title}</span>
                               <span className="text-[9px] text-zinc-500 tracking-wider uppercase font-medium">{res.subtitle}</span>
                             </div>
                           </div>
@@ -298,7 +297,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                           key={item.id}
                           value={item.title}
                           onSelect={() => runCommand(() => { router.push(item.url); onClose(); })}
-                          className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-zinc-300 hover:text-white cursor-pointer transition-all gap-3 mt-1"
+                          className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-[var(--text-secondary)] dark:text-zinc-300 hover:text-[var(--text-primary)] dark:hover:text-white cursor-pointer transition-all gap-3 mt-1"
                           style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
                         >
                           <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -306,7 +305,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                               <NeonIcon icon={History} className="w-4 h-4 text-zinc-400" />
                             </div>
                           <div className="flex flex-col min-w-0 flex-1">
-                               <span className="font-semibold tracking-wide text-[#FFFFFF] truncate uppercase">{item.title}</span>
+                               <span className="font-semibold tracking-wide text-[var(--text-primary)] dark:text-[#FFFFFF] truncate uppercase">{item.title}</span>
                                <span className="text-[9px] text-zinc-500 tracking-wider uppercase font-medium">
                                  {item.type === 'goal' ? (isRTL ? 'هدف' : 'Goal') : item.type === 'task' ? (isRTL ? 'مهمة فرعية' : 'Task') : (isRTL ? 'رابط' : 'Navigation')}
                                </span>
@@ -331,7 +330,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                     <Command.Item
                       value="create new goal"
                       onSelect={() => runCommand(() => { openCreateGoalModal({ goalType: 'solo' }); onClose(); })}
-                      className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-zinc-300 hover:text-white cursor-pointer transition-all gap-3"
+                      className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-[var(--text-secondary)] dark:text-zinc-300 hover:text-[var(--text-primary)] dark:hover:text-white cursor-pointer transition-all gap-3"
                       style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
                     >
                       <div className="flex items-center gap-3">
@@ -349,7 +348,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                     <Command.Item
                       value="create team workspace"
                       onSelect={() => runCommand(() => { openCreateGoalModal({ goalType: 'squad' }); onClose(); })}
-                      className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-zinc-300 hover:text-white cursor-pointer transition-all gap-3 mt-1"
+                      className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-[var(--text-secondary)] dark:text-zinc-300 hover:text-[var(--text-primary)] dark:hover:text-white cursor-pointer transition-all gap-3 mt-1"
                       style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
                     >
                       <div className="flex items-center gap-3">
@@ -376,7 +375,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                     <Command.Item
                       value="go to dashboard"
                       onSelect={() => runCommand(() => { router.push('/'); onClose(); }, { id: 'nav-dashboard', type: 'nav', title: 'Dashboard', url: '/' })}
-                      className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-zinc-300 hover:text-white cursor-pointer transition-all gap-3 mt-1"
+                      className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-[var(--text-secondary)] dark:text-zinc-300 hover:text-[var(--text-primary)] dark:hover:text-white cursor-pointer transition-all gap-3 mt-1"
                       style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
                     >
                       <div className="flex items-center gap-3">
@@ -394,7 +393,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                     <Command.Item
                       value="go to vault ranks"
                       onSelect={() => runCommand(() => { router.push('/vault'); onClose(); }, { id: 'nav-vault', type: 'nav', title: 'Vault', url: '/vault' })}
-                      className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-zinc-300 hover:text-white cursor-pointer transition-all gap-3 mt-1"
+                      className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-[var(--text-secondary)] dark:text-zinc-300 hover:text-[var(--text-primary)] dark:hover:text-white cursor-pointer transition-all gap-3 mt-1"
                       style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
                     >
                       <div className="flex items-center gap-3">
@@ -412,7 +411,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                     <Command.Item
                       value="go to coach"
                       onSelect={() => runCommand(() => { if (onOpenCoach) onOpenCoach(); onClose(); })}
-                      className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-zinc-300 hover:text-white cursor-pointer transition-all gap-3 mt-1"
+                      className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-[var(--text-secondary)] dark:text-zinc-300 hover:text-[var(--text-primary)] dark:hover:text-white cursor-pointer transition-all gap-3 mt-1"
                       style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
                     >
                       <div className="flex items-center gap-3">
@@ -439,7 +438,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                     <Command.Item
                       value="toggle dark light mode"
                       onSelect={() => runCommand(toggleTheme)}
-                      className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-zinc-300 hover:text-white cursor-pointer transition-all gap-3 mt-1"
+                      className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-[var(--text-secondary)] dark:text-zinc-300 hover:text-[var(--text-primary)] dark:hover:text-white cursor-pointer transition-all gap-3 mt-1"
                       style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
                     >
                       <div className="flex items-center gap-3">
@@ -458,7 +457,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                     <Command.Item
                       value="toggle zen mode deep work"
                       onSelect={() => runCommand(toggleZenMode)}
-                      className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-zinc-300 hover:text-white cursor-pointer transition-all gap-3 mt-1"
+                      className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-[var(--text-secondary)] dark:text-zinc-300 hover:text-[var(--text-primary)] dark:hover:text-white cursor-pointer transition-all gap-3 mt-1"
                       style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
                     >
                       <div className="flex items-center gap-3">
@@ -476,7 +475,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                 </Command.List>
 
                 {/* Footer details */}
-                <div className="px-4 py-3 border-t border-white/[0.08] bg-black/60 flex items-center justify-between text-[10px] font-space text-zinc-500 select-none">
+                <div className="px-4 py-3 border-t border-white/[0.08] bg-black/5 dark:bg-black/60 flex items-center justify-between text-[10px] font-space text-zinc-500 select-none">
                   <div className="flex items-center gap-2">
                     <span className="text-zinc-600 font-black">◆</span>
                     {/* <span>{isRTL ? "لوحة التوجيه السيبرانية" : "CYBERPUNK NAVIGATION CORE v3"}</span> */}

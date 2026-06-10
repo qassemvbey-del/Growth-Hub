@@ -243,11 +243,11 @@ export default function InboxDropdown({ isOpen, reports, onClose, onRead, onMark
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
             className={cn(
-              "hidden md:flex md:flex-col md:absolute md:top-full md:mt-4 md:w-[90vw] md:max-w-[360px] md:h-auto md:rounded-2xl border border-black/10 dark:border-white/10 shadow-[0_15px_50px_rgba(0,0,0,0.5)] z-[250]",
+              "hidden md:flex md:flex-col md:absolute md:top-full md:mt-4 md:w-[90vw] md:max-w-[360px] md:h-auto md:rounded-2xl border border-[var(--border)] dark:border-white/10 bg-white dark:bg-zinc-950 shadow-xl z-[250]",
               isRTL ? "md:left-0 md:right-auto" : "md:right-0 md:left-auto"
             )}
             style={{ 
-              boxShadow: `0 0 30px ${themeColor}15, 0 15px 50px rgba(0,0,0,0.5)`
+              boxShadow: `0 0 30px ${themeColor}15, 0 15px 50px rgba(0,0,0,0.08)`
             }}
           >
             {renderContent()}

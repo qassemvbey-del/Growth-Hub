@@ -1260,7 +1260,7 @@ export default function NotesPage() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.93, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-[calc(100%-2rem)] mx-auto md:max-w-3xl p-5 md:p-12 pb-28 relative border border-white/5 bg-zinc-900/20 backdrop-blur-xl shadow-[0_0_80px_rgba(0,0,0,0.8)] flex flex-col h-auto min-h-[300px] max-h-[90vh] overflow-hidden rounded-3xl my-auto"
+              className="w-[calc(100%-2rem)] mx-auto md:max-w-3xl p-5 md:p-12 pb-28 relative border border-[var(--border)] dark:border-white/5 bg-white dark:bg-[#0a0a0f]/90 dark:bg-zinc-900/20 backdrop-blur-xl shadow-2xl flex flex-col h-auto min-h-[300px] max-h-[90vh] overflow-hidden rounded-3xl my-auto"
             >
               {/* Neon top bar */}
               <div
@@ -1331,17 +1331,17 @@ export default function NotesPage() {
                   </button>
                 </div>
 
-                {/* Tags Harmonization: Single flex-wrap row with compact bg-zinc-800/30 pills */}
-                <div className="flex gap-1.5 flex-wrap mb-4 border-b border-zinc-800/30 pb-3">
+                {/* Tags Harmonization: Single flex-wrap row with dynamic clean pills */}
+                <div className="flex gap-1.5 flex-wrap mb-4 border-b border-[var(--border)] dark:border-zinc-800/30 pb-3">
                   {TAGS.map(t => (
                     <button
                       key={t.value}
                       onClick={() => updateNote(editingNote.id, { tag: editingNote.tag === t.value ? null : t.value })}
                       className={cn(
-                        "px-2 py-0.5 rounded-full font-space text-[10px] font-bold tracking-wider transition-all border-0 cursor-pointer",
+                        "px-2 py-0.5 rounded-full font-space text-[10px] font-bold tracking-wider transition-all border border-[var(--border)] dark:border-transparent cursor-pointer",
                         editingNote.tag === t.value 
-                          ? "text-black font-black" 
-                          : "bg-zinc-800/30 text-zinc-400 hover:text-zinc-200"
+                          ? "text-white dark:text-black font-black" 
+                          : "bg-[var(--background-secondary)] text-[var(--text-secondary)] dark:bg-zinc-800/30 dark:text-zinc-400 dark:hover:text-zinc-200"
                       )}
                       style={editingNote.tag === t.value ? { backgroundColor: currentTheme.color } : {}}
                     >
