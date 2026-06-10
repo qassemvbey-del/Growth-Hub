@@ -247,6 +247,7 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
       type: 'standard',
       video_id: t.videoId,
       video_progress: 0,
+      video_duration: t.seconds > 0 ? t.seconds : null,
       created_at: new Date(now + index * 10).toISOString(),
       // deadline: calculatedDates[index] || null,
       metadata: {
