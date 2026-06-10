@@ -29,6 +29,7 @@ import {
   Share2, Calendar, Paperclip, Users2, Medal, EyeOff, ListPlus, LayoutGrid, Eye, ChevronDown, Play, Tv, Circle, Trophy,
   BarChart2
 } from 'lucide-react'
+import html2canvas from 'html2canvas'
 
 
 const formatDeadline = (dateStr: string) => {
@@ -156,7 +157,8 @@ export default function MissionDetailPage() {
   const [squadMembers, setSquadMembers] = useState<SquadMember[]>([])
   const [showSquadPanel, setShowSquadPanel] = useState(false)
   const [pendingRequests, setPendingRequests] = useState<any[]>([])
-  const [inviteRole, setInviteRole] = useState<'admin' | 'member' | 'viewer' | 'guest'>('member')
+  const [inviteRole, setInviteRole] = useState<'admin' | 'editor' | 'member' | 'viewer' | 'guest'>('member')
+  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false)
   const [isReviewing, setIsReviewing] = useState<string | null>(null)
   const [activeAssignPopover, setActiveAssignPopover] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -196,6 +198,8 @@ export default function MissionDetailPage() {
     canCompleteTask,
     canComment
   } = useSquadPermissions({ mission, profile, squadMembers })
+
+  const isReadOnly = !profile || normalizedRole === 'viewer' || normalizedRole === 'guest';
 
   const setSelectedTask = (task: any | null) => {
     setSelectedTaskState(task)
@@ -242,6 +246,7 @@ export default function MissionDetailPage() {
   const [showSmartImportModal, setShowSmartImportModal] = useState(false)
   const [timeStatsMap, setTimeStatsMap] = useState<Record<string, number>>({})
   const [totalTimeInvested, setTotalTimeInvested] = useState<number>(0)
+  const exportRef = useRef<HTMLDivElement>(null)
   
   // --- ATTACHMENTS STATE ---
   // const [attachmentMissionId, setAttachmentMissionId] = useState<string | null>(null)
@@ -352,11 +357,17 @@ export default function MissionDetailPage() {
 
   const generateLocalCardBlob = async (): Promise<Blob | null> => {
     try {
-      const response = await fetch(`${window.location.origin}/api/missions/${id}/og?t=${Date.now()}`)
-      if (!response.ok) throw new Error('Failed to fetch OG image')
-      return await response.blob()
+      if (!exportRef.current) throw new Error('Card ref not found')
+      const canvas = await html2canvas(exportRef.current, {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+      })
+      return new Promise((resolve) => {
+        canvas.toBlob((blob) => resolve(blob), 'image/png', 1.0)
+      })
     } catch (err) {
-      console.error('OG fetch failed:', err)
+      console.error('Canvas generation failed:', err)
       return null
     }
   }
@@ -369,14 +380,12 @@ export default function MissionDetailPage() {
       if (!blob) throw new Error('Blob generation failed')
       const item = new ClipboardItem({ 'image/png': blob })
       await navigator.clipboard.write([item])
-      // showToast(isRTL ? 'تم نسخ صورة البطاقة بنجاح!' : 'CARD IMAGE COPIED TO CLIPBOARD', 'success')
       showToast(isRTL ? 'تم نسخ صورة البطاقة بنجاح!' : 'Card image copied to clipboard', 'success')
       playSuccess()
       setShowShareModal(false)
     } catch (err) {
       console.error('Failed to copy image blob:', err)
-      // showToast(isRTL ? 'الكارت غير متوفر حالياً // يعمل في البيئة الإنتاجية' : 'CARD_UNAVAILABLE // Works on production', 'warning')
-      showToast(isRTL ? 'الكارت غير متوفر حالياً - يعمل في البيئة الإنتاجية' : 'Card unavailable - Works on production', 'warning')
+      showToast(isRTL ? 'تعذر تصدير كارت الإنجاز في الوقت الحالي.' : 'Unable to export achievement card at this moment.', 'warning')
       playError()
       setShowShareModal(false)
     } finally {
@@ -398,13 +407,12 @@ export default function MissionDetailPage() {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      // showToast(isRTL ? 'تم تحميل الكارت بنجاح!' : 'GOAL CARD DOWNLOADED SUCCESSFULLY', 'success')
       showToast(isRTL ? 'تم تحميل الكارت بنجاح!' : 'Goal card downloaded successfully', 'success')
       playSuccess()
       setShowShareModal(false)
     } catch (err) {
       console.error('Failed to download image blob:', err)
-      showToast(isRTL ? 'الكارت غير متوفر حالياً // يعمل في البيئة الإنتاجية' : 'CARD_UNAVAILABLE // Works on production', 'warning')
+      showToast(isRTL ? 'تعذر تصدير كارت الإنجاز في الوقت الحالي.' : 'Unable to export achievement card at this moment.', 'warning')
       playError()
       setShowShareModal(false)
     } finally {
@@ -1570,7 +1578,18 @@ const { progress, isInRedZone } = useMemo(() => {
 
   return (
     <>
-      <div className="w-full max-w-7xl mx-auto px-4 md:px-8 p-4 md:p-12 space-y-8 md:space-y-12">
+      {isReadOnly && (
+        <div className="fixed top-0 left-0 right-0 z-[100] bg-slate-900/90 border-b border-slate-800 backdrop-blur-md px-4 py-3 flex items-center justify-center shadow-lg">
+          <span className="text-xs md:text-sm font-semibold text-slate-200 flex items-center gap-2">
+            <Lock className="w-4 h-4 text-slate-400" />
+            {isRTL ? 'أنت تشاهد مساحة العمل هذه في وضع القراءة فقط.' : 'You are currently viewing this workspace in Read-Only Mode.'}
+            <button onClick={() => router.push('/auth/login')} className="text-teal-400 hover:text-teal-300 underline ml-2 transition-colors cursor-pointer">
+              {isRTL ? '[ طلب صلاحية التعديل ]' : '[ Request Edit Access ]'}
+            </button>
+          </span>
+        </div>
+      )}
+      <div ref={exportRef} className={cn("w-full max-w-7xl mx-auto px-4 md:px-8 p-4 md:p-12 space-y-8 md:space-y-12", isReadOnly && "mt-12 pointer-events-none")}>
         
         {/* Mission Header Overview */}
         {/* rounded-md */}
@@ -3289,6 +3308,79 @@ const { progress, isInRedZone } = useMemo(() => {
                 </div>
               </div>
 
+              {/* Custom Role Selector Dropdown */}
+              <div className="space-y-3 pt-3 border-t border-white/5 relative">
+                <span className="text-xs font-semibold text-white/40 block">
+                  {isRTL ? 'دور الوصول الافتراضي عند الانضمام' : 'Default Access Role Upon Join'}
+                </span>
+                
+                <div className="relative">
+                  <button
+                    onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+                    className="w-full flex items-center justify-between p-3.5 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-150 cursor-pointer"
+                  >
+                    <div className="flex flex-col text-left">
+                      <span className="text-sm font-semibold text-white">
+                        {inviteRole === 'viewer' ? (isRTL ? 'مشاهد' : 'Viewer') :
+                         inviteRole === 'editor' || inviteRole === 'admin' ? (isRTL ? 'محرر' : 'Editor') :
+                         (isRTL ? 'عضو' : 'Member')}
+                      </span>
+                      <span className="text-xs text-white/50 mt-0.5">
+                        {inviteRole === 'viewer' ? (isRTL ? 'الاطلاع فقط، لا يمكن التعديل' : 'Read-only access, cannot edit') :
+                         inviteRole === 'editor' || inviteRole === 'admin' ? (isRTL ? 'تعديل كامل' : 'Full interactive read/write access') :
+                         (isRTL ? 'وصول أساسي لمساحة العمل' : 'Standard workspace member credentials')}
+                      </span>
+                    </div>
+                    <ChevronDown className={cn("w-5 h-5 text-zinc-400 transition-transform duration-300", isRoleDropdownOpen && "rotate-180")} />
+                  </button>
+
+                  <AnimatePresence>
+                    {isRoleDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                        transition={{ duration: 0.2, type: "spring", stiffness: 300, damping: 20 }}
+                        className="absolute top-full left-0 right-0 mt-2 bg-[#09090b]/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50"
+                      >
+                        {['viewer', 'member', 'editor'].map((role) => (
+                          <button
+                            key={role}
+                            onClick={() => {
+                              setInviteRole(role as any);
+                              setIsRoleDropdownOpen(false);
+                            }}
+                            className={cn(
+                              "w-full text-left p-3.5 flex items-start gap-3 transition-colors duration-150 hover:bg-white/5 border-b border-white/5 last:border-0 cursor-pointer",
+                              inviteRole === role || (inviteRole === 'admin' && role === 'editor') ? "bg-teal-500/10" : ""
+                            )}
+                          >
+                            <div className="flex-1">
+                              <span className={cn(
+                                "text-sm font-semibold block",
+                                inviteRole === role || (inviteRole === 'admin' && role === 'editor') ? "text-teal-400" : "text-white"
+                              )}>
+                                {role === 'viewer' ? (isRTL ? 'مشاهد' : 'Viewer') :
+                                 role === 'editor' ? (isRTL ? 'محرر' : 'Editor') :
+                                 (isRTL ? 'عضو' : 'Member')}
+                              </span>
+                              <span className="text-xs text-white/50 block mt-0.5">
+                                {role === 'viewer' ? (isRTL ? 'الاطلاع فقط، لا يمكن التعديل' : 'Read-only access, cannot edit') :
+                                 role === 'editor' ? (isRTL ? 'تعديل كامل' : 'Full interactive read/write access') :
+                                 (isRTL ? 'وصول أساسي لمساحة العمل' : 'Standard workspace member credentials')}
+                              </span>
+                            </div>
+                            {(inviteRole === role || (inviteRole === 'admin' && role === 'editor')) && (
+                              <Check className="w-5 h-5 text-teal-400 shrink-0 mt-1" />
+                            )}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+
               {/* Story Export / Share Card */}
               <div className="space-y-3 pt-3 border-t border-white/5">
                 <span className="text-xs font-semibold text-white/40 block font-space">
@@ -3297,21 +3389,12 @@ const { progress, isInRedZone } = useMemo(() => {
                 
                 <div className="flex gap-2">
                   <button
-                    onClick={copyCardImageToClipboard}
-                    disabled={isGeneratingCard}
-                    className="flex-1 flex items-center justify-center gap-2 py-2 px-3 border border-white/10 hover:border-cyan-500/50 bg-white/[0.02] hover:bg-white/5 rounded-xl transition-all duration-300 font-semibold text-[10px] text-white disabled:opacity-50 cursor-pointer"
-                  >
-                    <Share2 className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>{isRTL ? 'نسخ كصورة' : 'Copy Card'}</span>
-                  </button>
-                  
-                  <button
                     onClick={downloadCardImage}
                     disabled={isGeneratingCard}
-                    className="flex-1 flex items-center justify-center gap-2 py-2 px-3 border border-white/10 hover:border-teal-500/50 bg-white/[0.02] hover:bg-white/5 rounded-xl transition-all duration-300 font-semibold text-[10px] text-white disabled:opacity-50 cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-white/10 hover:border-teal-500/50 bg-white/[0.02] hover:bg-white/5 rounded-xl transition-all duration-300 font-semibold text-xs text-white disabled:opacity-50 cursor-pointer"
                   >
-                    <Download className="w-3.5 h-3.5 text-teal-400" />
-                    <span>{isRTL ? 'تحميل PNG' : 'Download PNG'}</span>
+                    <Download className="w-4 h-4 text-teal-400" />
+                    <span>{isRTL ? 'تحميل كارت الإنجاز PNG' : 'Download PNG Achievement Card'}</span>
                   </button>
                 </div>
               </div>
