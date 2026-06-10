@@ -116,8 +116,48 @@ function WorkspaceLoader({ isRTL, rank: propRank }: { isRTL: boolean; rank?: str
 
   const ActiveIcon = icons[iconIndex]
 
+  // Commented out per rule "Never delete code, only comment it out"
+  // return (
+  //   <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#050505] z-[9999] overflow-hidden select-none font-space p-6">
+  //     <div className="absolute inset-0 pointer-events-none cyber-grid opacity-[0.03] z-0" />
+  //     <div className="absolute inset-0 pointer-events-none scanlines opacity-[0.01] z-0" />
+  //     
+  //     <div 
+  //       className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none z-0 opacity-20"
+  //       style={{
+  //         background: `radial-gradient(circle, ${rankColor}33 0%, transparent 70%)`,
+  //         filter: 'blur(80px)',
+  //       }}
+  //     />
+  // 
+  //     <div className="relative z-10 flex flex-col items-center gap-6">
+  //       <div className="relative w-24 h-24 flex items-center justify-center">
+  //         <div 
+  //           className="absolute w-20 h-20 rounded-full opacity-40 blur-xl transition-all duration-300"
+  //           style={{
+  //             background: `radial-gradient(circle, ${rankColor} 33%, transparent 70%)`,
+  //           }}
+  //         />
+  //         <div className="relative">
+  //           <ActiveIcon 
+  //             className="w-16 h-16 transition-all duration-150 fill-none" 
+  //             style={{ 
+  //               color: rankColor, 
+  //               filter: `drop-shadow(0 0 15px ${rankColor}a8)` 
+  //             }} 
+  //           />
+  //         </div>
+  //       </div>
+  //       
+  //       <p className="text-sm tracking-widest font-medium animate-pulse" style={{ color: rankColor }}>
+  //         {isRTL ? 'مساحة العمل بتتحمل...' : 'Loading workspace...'}
+  //       </p>
+  //     </div>
+  //   </div>
+  // )
+
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#050505] z-[9999] overflow-hidden select-none font-space p-6">
+    <div className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-[var(--background)] transition-colors duration-150 overflow-hidden select-none font-space p-6">
       <div className="absolute inset-0 pointer-events-none cyber-grid opacity-[0.03] z-0" />
       <div className="absolute inset-0 pointer-events-none scanlines opacity-[0.01] z-0" />
       
@@ -148,7 +188,7 @@ function WorkspaceLoader({ isRTL, rank: propRank }: { isRTL: boolean; rank?: str
           </div>
         </div>
         
-        <p className="text-sm tracking-widest font-medium animate-pulse" style={{ color: rankColor }}>
+        <p className="text-xs sm:text-sm font-medium tracking-wide text-[var(--text-secondary)] mt-4 animate-pulse">
           {isRTL ? 'مساحة العمل بتتحمل...' : 'Loading workspace...'}
         </p>
       </div>
