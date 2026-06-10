@@ -362,6 +362,54 @@ export default function MissionDetailPage() {
         backgroundColor: null,
         scale: 2,
         useCORS: true,
+        onclone: (clonedDoc) => {
+          const elements = clonedDoc.getElementsByTagName('*');
+          for (let i = 0; i < elements.length; i++) {
+            const el = elements[i] as HTMLElement;
+            // Scan inline styles and computed styles for color properties
+            const colorProps = ['color'];
+            const bgProps = ['backgroundColor', 'backgroundImage'];
+            const borderProps = ['borderColor', 'borderTopColor', 'borderBottomColor', 'borderLeftColor', 'borderRightColor'];
+            const shadowProps = ['boxShadow', 'textShadow'];
+            const allProps = [...colorProps, ...bgProps, ...borderProps, ...shadowProps];
+
+            try {
+              // Check inline style.cssText
+              if (el.style && el.style.cssText && (el.style.cssText.includes('oklab') || el.style.cssText.includes('oklch'))) {
+                // Remove or clean oklab/oklch occurrences
+                el.style.cssText = el.style.cssText
+                  .replace(/okla?b\([^)]+\)/g, '#14b8a6')
+                  .replace(/oklch\([^)]+\)/g, '#14b8a6');
+              }
+
+              const computed = window.getComputedStyle(el);
+              allProps.forEach(prop => {
+                const val = computed.getPropertyValue(prop);
+                if (val && (val.includes('oklab') || val.includes('oklch'))) {
+                  let fallback = '';
+                  if (colorProps.includes(prop)) {
+                    fallback = '#ffffff';
+                  } else if (bgProps.includes(prop)) {
+                    if (prop === 'backgroundImage') {
+                      fallback = 'none';
+                    } else {
+                      fallback = '#09090b';
+                    }
+                  } else if (borderProps.includes(prop)) {
+                    fallback = '#27272a';
+                  } else if (shadowProps.includes(prop)) {
+                    fallback = 'none';
+                  } else {
+                    fallback = 'transparent';
+                  }
+                  el.style.setProperty(prop, fallback, 'important');
+                }
+              });
+            } catch (styleErr) {
+              // Ignore styles accessing errors in sandbox/cloned env
+            }
+          }
+        }
       })
       return new Promise((resolve) => {
         canvas.toBlob((blob) => resolve(blob), 'image/png', 1.0)
@@ -3197,7 +3245,7 @@ const { progress, isInRedZone } = useMemo(() => {
               initial={{ scale: 0.95, y: 15, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.95, y: 15, opacity: 0 }}
-              className="bg-white/60 dark:bg-[#09090b]/80 backdrop-blur-3xl border border-white/10 rounded-2xl p-6 max-w-md w-full relative overflow-hidden shadow-2xl space-y-6"
+              className="bg-white/60 dark:bg-[#09090b]/80 backdrop-blur-3xl border border-white/10 rounded-2xl p-6 max-w-md w-full relative overflow-visible shadow-2xl space-y-6"
               onClick={e => e.stopPropagation()}
             >
               {/* Header */}
@@ -3238,7 +3286,6 @@ const { progress, isInRedZone } = useMemo(() => {
                       navigator.clipboard.writeText(inviteUrl)
                       setCopiedRow('invite')
                       setTimeout(() => setCopiedRow(null), 2000)
-                      // showToast(isRTL ? 'تم نسخ الرابط!' : 'INVITE LINK COPIED', 'success')
                       showToast(isRTL ? 'تم نسخ الرابط!' : 'Invite link copied', 'success')
                       playSuccess()
                     }}
@@ -3267,7 +3314,6 @@ const { progress, isInRedZone } = useMemo(() => {
                           .from('goals')
                           .update({ is_public: true, requires_approval: false })
                           .eq('id', id);
-                        showToast(isRTL ? 'تم التحديث: انضمام مباشر' : 'Updated: Anyone can join', 'success');
                       }}
                       className="mt-1 accent-orange-500 w-4 h-4 shrink-0"
                     />
@@ -3292,7 +3338,6 @@ const { progress, isInRedZone } = useMemo(() => {
                           .from('goals')
                           .update({ is_public: true, requires_approval: true })
                           .eq('id', id);
-                        showToast(isRTL ? 'تم التحديث: يتطلب الموافقة' : 'Updated: Requires approval', 'success');
                       }}
                       className="mt-1 accent-orange-500 w-4 h-4 shrink-0"
                     />
@@ -3341,7 +3386,7 @@ const { progress, isInRedZone } = useMemo(() => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -10, scale: 0.95 }}
                         transition={{ duration: 0.2, type: "spring", stiffness: 300, damping: 20 }}
-                        className="absolute top-full left-0 right-0 mt-2 bg-[#09090b]/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50"
+                        className="max-h-40 overflow-y-auto scrollbar-thin rounded-xl border border-[var(--border)] bg-white dark:bg-zinc-900 p-1 shadow-2xl absolute top-full left-0 w-full mt-1 z-[9999]"
                       >
                         {['viewer', 'member', 'editor'].map((role) => (
                           <button
@@ -3351,27 +3396,27 @@ const { progress, isInRedZone } = useMemo(() => {
                               setIsRoleDropdownOpen(false);
                             }}
                             className={cn(
-                              "w-full text-left p-3.5 flex items-start gap-3 transition-colors duration-150 hover:bg-white/5 border-b border-white/5 last:border-0 cursor-pointer",
+                              "w-full text-left py-1.5 px-3 flex items-start gap-3 transition-colors duration-150 hover:bg-white/5 border-b border-white/5 last:border-0 cursor-pointer",
                               inviteRole === role || (inviteRole === 'admin' && role === 'editor') ? "bg-teal-500/10" : ""
                             )}
                           >
                             <div className="flex-1">
                               <span className={cn(
-                                "text-sm font-semibold block",
+                                "text-[11px] font-semibold block",
                                 inviteRole === role || (inviteRole === 'admin' && role === 'editor') ? "text-teal-400" : "text-white"
                               )}>
                                 {role === 'viewer' ? (isRTL ? 'مشاهد' : 'Viewer') :
                                  role === 'editor' ? (isRTL ? 'محرر' : 'Editor') :
                                  (isRTL ? 'عضو' : 'Member')}
                               </span>
-                              <span className="text-xs text-white/50 block mt-0.5">
+                              <span className="text-[10px] text-white/50 block mt-0.5">
                                 {role === 'viewer' ? (isRTL ? 'الاطلاع فقط، لا يمكن التعديل' : 'Read-only access, cannot edit') :
                                  role === 'editor' ? (isRTL ? 'تعديل كامل' : 'Full interactive read/write access') :
                                  (isRTL ? 'وصول أساسي لمساحة العمل' : 'Standard workspace member credentials')}
                               </span>
                             </div>
                             {(inviteRole === role || (inviteRole === 'admin' && role === 'editor')) && (
-                              <Check className="w-5 h-5 text-teal-400 shrink-0 mt-1" />
+                              <Check className="w-4 h-4 text-teal-400 shrink-0 mt-1" />
                             )}
                           </button>
                         ))}
