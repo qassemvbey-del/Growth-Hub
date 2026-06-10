@@ -391,6 +391,7 @@ export default function Dashboard() {
             <div className="h-[1px] w-12 sm:w-20 md:w-32" style={{ background: `linear-gradient(to left, transparent, ${currentTheme.color}40)` }} />
           </div>
 
+          {/* Commented out per rule "Never delete code, only comment it out"
           <motion.h1
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -400,13 +401,32 @@ export default function Dashboard() {
               isRTL ? "text-xl md:text-4xl" : "text-2xl md:text-5xl"
             )}
           >
-            {/* {isRTL ? 'منصة' : 'Focus'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'Hub'}</span> */}
             {isRTL ? 'لوحة' : 'Focus'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'Hub'}</span>
           </motion.h1>
 
           <p className={cn(
             "font-medium truncate max-w-[90vw]",
             isRTL ? "text-[11px] text-zinc-500 dark:text-zinc-400" : "text-[13px] text-zinc-500 dark:text-zinc-400"
+          )}>
+            {isRTL ? 'لوحة المتابعة والتحكم بالأداء' : 'Your performance metrics and focus pipeline'}
+          </p>
+          */}
+
+          <motion.h1
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className={cn(
+              "font-black tracking-tight leading-none text-[var(--text-primary)] dark:text-white",
+              isRTL ? "text-xl md:text-4xl" : "text-2xl md:text-5xl"
+            )}
+          >
+            {isRTL ? 'لوحة' : 'Focus'} <span style={{ color: currentTheme.color }}>{isRTL ? 'التركيز' : 'Hub'}</span>
+          </motion.h1>
+
+          <p className={cn(
+            "font-medium truncate max-w-[90vw]",
+            isRTL ? "text-[11px] text-[var(--text-secondary)] dark:text-zinc-400" : "text-[13px] text-[var(--text-secondary)] dark:text-zinc-400"
           )}>
             {isRTL ? 'لوحة المتابعة والتحكم بالأداء' : 'Your performance metrics and focus pipeline'}
           </p>
@@ -585,10 +605,15 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 mt-1.5">
+              {/* Commented out per rule "Never delete code, only comment it out"
               <p className={cn(
                 "font-medium text-zinc-100 leading-tight flex-1 line-clamp-2 break-words whitespace-normal",
                 isRTL ? "text-[8px] sm:text-[10px]" : "text-[9px] sm:text-xs"
               )}>
+                {computedRivalryText}
+              </p>
+              */}
+              <p className="text-xs font-mono text-[var(--text-secondary)] dark:text-zinc-500 mt-1 leading-tight flex-1 line-clamp-2 break-words whitespace-normal">
                 {computedRivalryText}
               </p>
             </div>
@@ -873,7 +898,21 @@ export default function Dashboard() {
                   </div>
 
                   {/* Sleek horizontal Progress Bar */}
+                  {/* Commented out per rule "Never delete code, only comment it out"
                   <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${roundedProgress}%` }}
+                      transition={{ duration: 1.2 }}
+                      className="h-full rounded-full"
+                      style={{ 
+                        backgroundColor: isInRedZone ? '#ef4444' : customColor,
+                        boxShadow: `0 0 8px ${isInRedZone ? '#ef4444' : customColor}`
+                      }}
+                    />
+                  </div>
+                  */}
+                  <div className="w-full h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800/80 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${roundedProgress}%` }}

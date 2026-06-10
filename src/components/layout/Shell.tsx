@@ -245,7 +245,9 @@ export default function Shell({ children }: ShellProps) {
   const { isRTL, profile, calculateAccountability, lastAiMessage, t, currentTheme, isRankUpModalOpen, setIsRankUpModalOpen, isLoading, showAuthModal, setShowAuthModal, openCreateGoalModal, isTaskDrawerOpen } = useGrowth()
   const pathname = usePathname()
   const router = useRouter()
-  const showSidebar = profile && pathname !== '/auth/login' && !(pathname === '/' && profile.id === 'guest')
+  // Commented out per rule "Never delete code, only comment it out"
+  // const showSidebar = profile && pathname !== '/auth/login' && !(pathname === '/' && profile.id === 'guest')
+  const showSidebar = profile && pathname !== '/auth/login'
   const { playNeuralLink, playBlip } = useSound()
   const { showToast } = useToast()
 
