@@ -176,10 +176,58 @@ export default function SmartTaskPlayer({
             video_duration: duration,
             updated_at: new Date().toISOString()
           })
+
+          const { data: taskData } = await supabase
+            .from('tasks')
+            .select('metadata')
+            .eq('id', taskId)
+            .maybeSingle()
+
+          const currentMeta = taskData?.metadata || {}
+          const updatedMeta = {
+            ...currentMeta,
+            videoDuration: duration > 0 ? duration : (currentMeta.videoDuration || null),
+            videoProgress: time
+          }
+
+          await supabase
+            .from('tasks')
+            .update({ metadata: updatedMeta })
+            .eq('id', taskId)
         }
       }
     } catch (err) {
       console.error('Failed to save progress:', err)
+    }
+  }, [taskId, isGuest, supabase])
+
+  const hasHydratedDurationRef = useRef(false)
+
+  const lazyHydrateDuration = useCallback(async (duration: number) => {
+    if (isGuest || duration <= 0) return
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      
+      const { data: taskData } = await supabase
+        .from('tasks')
+        .select('metadata')
+        .eq('id', taskId)
+        .maybeSingle()
+        
+      const metadata = taskData?.metadata || {}
+      if (metadata.videoDuration === undefined || metadata.videoDuration === null) {
+        const updatedMeta = {
+          ...metadata,
+          videoDuration: duration
+        }
+        await supabase
+          .from('tasks')
+          .update({ metadata: updatedMeta })
+          .eq('id', taskId)
+      }
+    } catch (err) {
+      console.error('Failed to lazy hydrate duration:', err)
     }
   }, [taskId, isGuest, supabase])
 
@@ -239,6 +287,10 @@ export default function SmartTaskPlayer({
 
           if (duration !== undefined && duration > 0) {
             durationRef.current = Math.floor(duration)
+            if (!hasHydratedDurationRef.current) {
+              hasHydratedDurationRef.current = true
+              lazyHydrateDuration(Math.floor(duration))
+            }
           }
         }
 
@@ -283,7 +335,7 @@ export default function SmartTaskPlayer({
     return () => {
       window.removeEventListener('message', handleMessage)
     }
-  }, [taskId, isGuest, supabase, onComplete, onProgressUpdate, showToast, saveProgress])
+  }, [taskId, isGuest, supabase, onComplete, onProgressUpdate, showToast, saveProgress, lazyHydrateDuration])
 
   // 6. DB Sync Interval (saves progress to DB every 5s while playing)
   useEffect(() => {

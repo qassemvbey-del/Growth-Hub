@@ -250,7 +250,9 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
       created_at: new Date(now + index * 10).toISOString(),
       // deadline: calculatedDates[index] || null,
       metadata: {
-        endDate: calculatedDates[index] || null
+        endDate: calculatedDates[index] || null,
+        videoDuration: t.seconds > 0 ? t.seconds : null,
+        videoProgress: 0
       }
     }))
 

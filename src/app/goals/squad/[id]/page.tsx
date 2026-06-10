@@ -164,7 +164,7 @@ export default function MissionDetailPage() {
   const [loading, setLoading] = useState(true)
   const [activeView, setActiveView] = useState<'list' | 'board'>('list')
   const [activeViewInitialized, setActiveViewInitialized] = useState(false)
-  const [timeFilter, setTimeFilter] = useState<'ALL' | 'WEEK' | 'OVERDUE'>('ALL')
+  const [timeFilter, setTimeFilter] = useState<'ALL' | 'WEEK' | 'OVERDUE' | 'today'>('ALL')
   const [selectedTaskState, setSelectedTaskState] = useState<any | null>(null)
   const [showReportModal, setShowReportModal] = useState(false)
   const searchParams = useSearchParams()
@@ -207,6 +207,16 @@ export default function MissionDetailPage() {
 
   const filteredTasks = useMemo(() => {
     if (!mission?.tasks) return []
+
+    // Formatting helper for local calendar date: YYYY-MM-DD
+    const toLocalDateString = (d: Date) => {
+      const yyyy = d.getFullYear()
+      const mm = String(d.getMonth() + 1).padStart(2, '0')
+      const dd = String(d.getDate()).padStart(2, '0')
+      return `${yyyy}-${mm}-${dd}`
+    }
+
+    const todayStr = toLocalDateString(new Date())
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     
@@ -216,13 +226,19 @@ export default function MissionDetailPage() {
 
     return mission.tasks.filter((task: any) => {
       const isCompleted = task.is_completed || task.metadata?.status === 'done'
-      const dateStr = task.metadata?.endDate || task.metadata?.dueDate
+      const dateStr = task.due_date || task.metadata?.endDate || task.metadata?.dueDate
       
       if (timeFilter === 'ALL') return true
 
       if (!dateStr) return false
 
       const taskDate = new Date(dateStr)
+
+      if (timeFilter === 'today') {
+        const taskDateStr = toLocalDateString(taskDate)
+        return taskDateStr === todayStr
+      }
+
       taskDate.setHours(0, 0, 0, 0)
 
       if (timeFilter === 'WEEK') {
@@ -1995,6 +2011,7 @@ const { progress, isInRedZone } = useMemo(() => {
            <div className="flex flex-wrap gap-2 py-2 p-3 bg-[var(--background-secondary)] dark:bg-zinc-900/30 border border-[var(--border)] dark:border-white/5 rounded-lg">
              {[
                { key: 'ALL', label: isRTL ? 'الكل' : 'All Active' },
+               { key: 'today', label: isRTL ? 'اليوم' : 'Today' },
                { key: 'WEEK', label: isRTL ? 'هذا الأسبوع' : 'Upcoming This Week' },
                { key: 'OVERDUE', label: isRTL ? 'المتأخرة' : 'Overdue' }
              ].map(f => (
@@ -2038,8 +2055,8 @@ const { progress, isInRedZone } = useMemo(() => {
                       }
                       const storedProgress = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`growth_hub_video_progress_${task.id}`) || '0') : 0
                      const storedDuration = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`growth_hub_video_duration_${task.id}`) || '0') : 0
-                     const videoProgress = task.video_progress ?? storedProgress
-                     const videoDuration = task.video_duration ?? storedDuration
+                     const videoProgress = task.metadata?.videoProgress ?? task.video_progress ?? storedProgress
+                     const videoDuration = task.metadata?.videoDuration ?? task.video_duration ?? storedDuration
                      const hasVideo = !!(task.video_id || task.video_url)
 
                      const formatVideoTime = (secs: number) => {
