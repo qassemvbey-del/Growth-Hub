@@ -11,6 +11,27 @@ import { cn } from '@/lib/utils'
 
 const stripEmojis = (str?: string | null) => str ? str.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim() : '';
 
+const formatNotificationTitle = (title?: string | null, type?: string | null): string => {
+  // Map raw DB type values to human-readable labels
+  const typeLabels: Record<string, string> = {
+    deadline_alert: 'Deadline Alert',
+    overdue_task: 'Overdue Task',
+    squad_join_request: 'Squad Join Request',
+    squad_member_completed_task: 'Squad Achievement',
+    rank_up: 'Rank Up',
+  }
+  if (type && typeLabels[type]) return typeLabels[type]
+  if (!title) return 'Notification'
+  // Convert snake_case and ALL_CAPS to Title Case
+  return title
+    .replace(/[_\.]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, c => c.toUpperCase())
+    .toLowerCase()
+    .replace(/\b\w/g, c => c.toUpperCase())
+}
+
 export default function NotificationsPage() {
   const { reports, loading, markAsRead, fetchReports } = useInbox()
   const { isRTL } = useGrowth()
@@ -192,8 +213,8 @@ export default function NotificationsPage() {
                               className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0 shadow-[0_0_8px_#f97316]" 
                             />
                           )}
-                          <h3 className="text-sm font-bold text-zinc-100 uppercase truncate">
-                            {stripEmojis(report.title)}
+                          <h3 className="text-sm font-bold text-[var(--text-primary)] dark:text-zinc-100 truncate">
+                            {formatNotificationTitle(report.title, report.type)}
                           </h3>
                           <span className="text-[10px] text-zinc-500 uppercase font-mono ml-auto">
                             {new Date(report.created_at).toLocaleDateString()} {new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -201,8 +222,8 @@ export default function NotificationsPage() {
                         </div>
                         
                         <p className={cn(
-                          "text-sm text-zinc-300 leading-relaxed",
-                          isExpanded ? "whitespace-pre-wrap" : "line-clamp-3 text-zinc-400"
+                          "text-sm text-[var(--text-secondary)] dark:text-zinc-300 leading-relaxed",
+                          isExpanded ? "whitespace-pre-wrap" : "line-clamp-3 text-[var(--text-muted)] dark:text-zinc-400"
                         )}>
                           {stripEmojis(formattedBody)}
                         </p>

@@ -1890,19 +1890,19 @@ const { progress, isInRedZone } = useMemo(() => {
         {/* Full-width Kanban board / Tasks layout */}
         <div className="w-full space-y-8">
             <section className="space-y-8">
-           <div className="flex justify-between items-center border-b border-zinc-800/80 pb-3">
+           <div className="flex justify-between items-center border-b border-[var(--border)] dark:border-zinc-800/80 pb-3">
              <h2 className="text-[10px] font-medium font-space text-[var(--text-secondary)]">
                {isRTL ? 'قائمة المهام' : 'Tasks'}
              </h2>
              
              {/* View Toggles (Icon Only) on the Far Right */}
-             <div className="flex items-center gap-1 p-0.5 bg-black/40 border border-white/5 backdrop-blur-md rounded-md">
+             <div className="flex items-center gap-1 p-0.5 bg-[var(--card)] dark:bg-black/40 border border-[var(--border)] dark:border-white/5 backdrop-blur-md rounded-md">
                <button
                  type="button"
                  onClick={() => { playBlip(); setActiveView('list'); }}
                  className={cn(
                    "p-1.5 rounded transition-colors cursor-pointer",
-                   activeView === 'list' ? "text-white" : "text-white/40 hover:text-white/70"
+                    activeView === 'list' ? "text-white" : "text-[var(--text-muted)] dark:text-white/40 hover:text-[var(--text-primary)] dark:hover:text-white/70"
                  )}
                  style={activeView === 'list' ? { color: missionColor, backgroundColor: `${missionColor}15` } : {}}
                  title={isRTL ? 'عرض القائمة' : 'List View'}
@@ -1914,7 +1914,7 @@ const { progress, isInRedZone } = useMemo(() => {
                  onClick={() => { playBlip(); setActiveView('board'); }}
                  className={cn(
                    "p-1.5 rounded transition-colors cursor-pointer",
-                   activeView === 'board' ? "text-white" : "text-white/40 hover:text-white/70"
+                    activeView === 'board' ? "text-white" : "text-[var(--text-muted)] dark:text-white/40 hover:text-[var(--text-primary)] dark:hover:text-white/70"
                  )}
                  style={activeView === 'board' ? { color: missionColor, backgroundColor: `${missionColor}15` } : {}}
                  title={isRTL ? 'عرض كانبان' : 'Board View'}
@@ -1925,7 +1925,7 @@ const { progress, isInRedZone } = useMemo(() => {
            </div>
 
            {/* Smart Time Filters wrapped underneath the header row */}
-           <div className="flex flex-wrap gap-2 py-2 p-3 bg-zinc-900/30 border border-white/5 rounded-lg">
+           <div className="flex flex-wrap gap-2 py-2 p-3 bg-[var(--background-secondary)] dark:bg-zinc-900/30 border border-[var(--border)] dark:border-white/5 rounded-lg">
              {[
                { key: 'ALL', label: isRTL ? 'الكل' : 'All Active' },
                { key: 'WEEK', label: isRTL ? 'هذا الأسبوع' : 'Upcoming This Week' },
@@ -1938,10 +1938,10 @@ const { progress, isInRedZone } = useMemo(() => {
                  className={cn(
                    "h-8 px-4 rounded-full text-[10px] font-space font-black uppercase tracking-wider transition-all duration-200 cursor-pointer whitespace-nowrap flex items-center justify-center border",
                    timeFilter === f.key
-                     ? "text-black border-transparent shadow-md font-black"
-                     : "border-zinc-800 text-zinc-400 hover:text-white bg-black/20"
+                     ? "text-white border-transparent shadow-md font-black"
+                     : "border-[var(--border)] dark:border-zinc-700 text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white bg-[var(--card)] dark:bg-black/20"
                  )}
-                 style={timeFilter === f.key ? { color: '#000', backgroundColor: missionColor } : {}}
+                 style={timeFilter === f.key ? { backgroundColor: missionColor } : {}}
                >
                  {f.label}
                </button>

@@ -150,12 +150,6 @@ export default function KanbanBoard({
             onDragOver={(e) => handleDragOver(e, col.id)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, col.id)}
-            /* Commented out per rule "Never delete code, only comment it out"
-            className={cn(
-              "flex flex-col gap-4 p-4 rounded-2xl min-h-[500px] lg:min-h-[550px] transition-all duration-300 bg-zinc-950/40 border border-white/5 backdrop-blur-md relative overflow-hidden w-[80vw] lg:w-auto shrink-0 snap-center lg:shrink",
-              isOver ? "border-dashed" : ""
-            )}
-            */
             className={cn(
               "flex flex-col gap-4 p-4 rounded-2xl min-h-[500px] lg:min-h-[550px] transition-all duration-300 bg-[var(--background-secondary)] dark:bg-zinc-950/40 border border-[var(--border)] dark:border-white/5 backdrop-blur-md relative overflow-hidden w-[80vw] lg:w-auto shrink-0 snap-center lg:shrink",
               isOver ? "border-dashed" : ""
@@ -171,22 +165,6 @@ export default function KanbanBoard({
             )}
 
             {/* Column Header Banner (Sticky with Dot Indicator) */}
-            {/* Commented out per rule "Never delete code, only comment it out"
-            <div className="sticky top-0 bg-[#09090f]/95 backdrop-blur-md flex items-center justify-between pb-3 border-b border-white/5 shrink-0 z-10 pt-1">
-            */}
-            /* Commented out per rule "Never delete code, only comment it out"
-            <div className="sticky top-0 bg-[var(--background-secondary)]/95 dark:bg-[#09090f]/95 backdrop-blur-md flex items-center justify-between pb-3 border-b border-[var(--border)] dark:border-white/5 shrink-0 z-10 pt-1">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full shadow-[0_0_8px_currentcolor]" style={{ backgroundColor: col.color, color: col.color }} />
-                <span className="text-[10px] font-space font-bold tracking-widest uppercase text-zinc-300">
-                  {col.name}
-                </span>
-              </div>
-              <span className="font-mono text-xs text-white/30 px-2 py-0.5 rounded-full bg-white/[0.02]">
-                {colTasks.length}
-              </span>
-            </div>
-            */
             <div className="sticky top-0 bg-[var(--background-secondary)]/95 dark:bg-[#09090f]/95 backdrop-blur-md flex items-center justify-between pb-3 border-b border-[var(--border)] dark:border-white/5 shrink-0 z-10 pt-1">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full shadow-[0_0_8px_currentcolor]" style={{ backgroundColor: col.color, color: col.color }} />
@@ -220,20 +198,6 @@ export default function KanbanBoard({
                         onDragStart={(e) => handleDragStart(e, task.id)}
                         onDragEnd={handleDragEnd}
                         onClick={() => setSelectedTask(task)}
-                        /* Commented out per rule "Never delete code, only comment it out"
-                        className={cn(
-                          "p-3 rounded-lg border cursor-grab active:cursor-grabbing hover:bg-white/5 transition-all shadow-sm flex items-center justify-between gap-2.5 relative overflow-hidden select-none bg-zinc-900/40 border-white/5",
-                          isDragging ? "opacity-20 scale-95 border-dashed border-white/20" : "opacity-100",
-                          task.is_completed ? "opacity-50" : ""
-                        )}
-                        */
-                        /* Commented out per rule "Never delete code, only comment it out"
-                        className={cn(
-                          "p-3 rounded-lg border cursor-grab active:cursor-grabbing hover:bg-white/5 transition-all shadow-sm flex items-center justify-between gap-2.5 relative overflow-hidden select-none bg-[var(--card)] border-[var(--border)] text-[var(--text-primary)] dark:bg-zinc-900/40 dark:border-white/5 dark:text-zinc-200",
-                          isDragging ? "opacity-20 scale-95 border-dashed border-white/20" : "opacity-100",
-                          task.is_completed ? "opacity-50" : ""
-                        )}
-                        */
                         className={cn(
                           "p-3 rounded-lg border cursor-grab active:cursor-grabbing hover:bg-zinc-50 dark:hover:bg-white/5 transition-all shadow-sm flex items-center justify-between gap-2.5 relative overflow-hidden select-none bg-white dark:bg-zinc-900/40 border-[var(--border)] text-[var(--text-primary)] dark:border-white/5 dark:text-zinc-200",
                           isDragging ? "opacity-20 scale-95 border-dashed border-white/20" : "opacity-100",
@@ -249,30 +213,6 @@ export default function KanbanBoard({
 
                         {/* Checkbox + Title */}
                         <div className="flex items-center gap-2.5 min-w-0 flex-1 pl-1">
-                          {/* 
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              toggleTask(task.id, task.is_completed)
-                            }}
-                            className="shrink-0 cursor-pointer flex items-center justify-center"
-                          >
-                            {task.is_completed ? (
-                              <CheckCircle2 className="w-4 h-4 text-emerald-500" style={{ color: themeColor }} />
-                            ) : (
-                              <Circle className="w-4 h-4 opacity-40 hover:opacity-80 text-zinc-500 hover:text-white transition-opacity" />
-                            )}
-                          </button>
-                          */}
-                          
-                          {/* Commented out per rule "Never delete code, only comment it out"
-                          <span 
-                            className={cn(
-                              "text-sm font-medium text-zinc-200 truncate",
-                              task.is_completed && "text-zinc-500 line-through"
-                            )}
-                          >
-                          */}
                           <span 
                             className={cn(
                               "text-sm font-medium text-[var(--text-primary)] dark:text-zinc-200 truncate",
@@ -318,17 +258,6 @@ export default function KanbanBoard({
                 })}
 
                 {colTasks.length === 0 && (
-                  /* Commented out per rule "Never delete code, only comment it out"
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="py-12 flex flex-col items-center justify-center text-center border border-dashed border-white/5 rounded-xl bg-white/[0.01] text-white/20 select-none"
-                  >
-                    <FolderOpen className="w-5 h-5 mb-1 opacity-45" />
-                    <span className="text-[10px] font-space tracking-widest uppercase">EMPTY</span>
-                  </motion.div>
-                  */
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
