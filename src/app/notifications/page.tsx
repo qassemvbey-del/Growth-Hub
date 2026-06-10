@@ -69,10 +69,22 @@ export default function NotificationsPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Commented out per rule "Never delete code, only comment it out" */}
+            {/*
             {reports.some(r => !r.is_read) && (
               <button
                 onClick={(e) => handleMarkAllRead(e)}
                 className="flex items-center gap-1.5 px-4 py-2 bg-white/[0.02] hover:bg-white/5 border border-white/10 text-white/70 font-space font-black uppercase tracking-widest hover:text-white transition-all text-[10px] rounded-xl shrink-0 cursor-pointer"
+              >
+                <Check className="w-3.5 h-3.5" />
+                {isRTL ? 'تحديد الكل كمقروء' : 'Mark all as read'}
+              </button>
+            )}
+            */}
+            {reports.some(r => !r.is_read) && (
+              <button
+                onClick={(e) => handleMarkAllRead(e)}
+                className="flex items-center gap-1.5 px-4 py-2 bg-[var(--card)] hover:bg-[var(--card-hover)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:bg-white/[0.02] dark:hover:bg-white/5 dark:border-white/10 dark:text-white/70 dark:hover:text-white font-space font-black uppercase tracking-widest transition-all text-[10px] rounded-xl shrink-0 cursor-pointer"
               >
                 <Check className="w-3.5 h-3.5" />
                 {isRTL ? 'تحديد الكل كمقروء' : 'Mark all as read'}
@@ -99,9 +111,15 @@ export default function NotificationsPage() {
               onClick={() => setFilter(tab.id as any)}
               className={cn(
                 "px-4 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer whitespace-nowrap",
+                /* Commented out per rule "Never delete code, only comment it out" */
+                /*
                 filter === tab.id 
                   ? "bg-orange-500 text-white" 
                   : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:text-white"
+                */
+                filter === tab.id 
+                  ? "bg-orange-500 text-white" 
+                  : "bg-[var(--background-secondary)] text-[var(--text-secondary)] dark:bg-zinc-900 dark:text-zinc-400 border border-[var(--border)] dark:border-zinc-800 hover:text-[var(--text-primary)] dark:hover:text-white"
               )}
             >
               {tab.label}
@@ -148,6 +166,12 @@ export default function NotificationsPage() {
                     }
                   }
 
+                  // Commented out per rule "Never delete code, only comment it out"
+                  // const oldClassName = cn(
+                  //   "bg-zinc-900/40 border border-zinc-800 rounded-xl p-4 flex gap-4 relative",
+                  //   !report.is_read && "border-orange-500/30 bg-orange-500/[0.02]"
+                  // )
+
                   return (
                     <motion.div
                       key={report.id}
@@ -155,8 +179,8 @@ export default function NotificationsPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       className={cn(
-                        "bg-zinc-900/40 border border-zinc-800 rounded-xl p-4 flex gap-4 relative",
-                        !report.is_read && "border-orange-500/30 bg-orange-500/[0.02]"
+                        "bg-white dark:bg-zinc-900/40 border border-[var(--border)] dark:border-zinc-800 rounded-xl p-4 flex gap-4 relative shadow-sm",
+                        !report.is_read && "border-orange-500/30 bg-orange-500/[0.01] dark:bg-orange-500/[0.02]"
                       )}
                     >
                       {getIcon()}

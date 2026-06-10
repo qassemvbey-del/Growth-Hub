@@ -602,6 +602,8 @@ export default function Dashboard() {
         <div className="w-full font-space">
           
           {/* Action Inbox */}
+          {/* Commented out per rule "Never delete code, only comment it out" */}
+          {/*
           <div 
             className="w-full bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 shadow-xl relative overflow-hidden"
           >
@@ -655,7 +657,6 @@ export default function Dashboard() {
                     </div>
 
                     <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-                      {/* Overdue/Today Date indicator */}
                       <span className={cn(
                         "font-mono text-[8px] sm:text-[9px] px-1.5 sm:px-2 py-0.5 rounded border tracking-wider",
                         isOverdue 
@@ -665,7 +666,6 @@ export default function Dashboard() {
                         📅 {task.metadata.endDate || task.metadata.dueDate}
                       </span>
 
-                      {/* XP badge */}
                       <span className="text-[8px] sm:text-[10px] font-mono text-zinc-500 tracking-wider">
                         +{task.weight * 10}XP
                       </span>
@@ -676,10 +676,88 @@ export default function Dashboard() {
 
               {actionInboxTasks.length === 0 && (
                 <div className="py-12 sm:py-16 text-center space-y-2 border border-dashed border-white/5 rounded-xl">
-                  {/* <span className="text-zinc-600 font-black text-xl sm:text-2xl">⚡</span> */}
                   <p className="text-[9px] sm:text-xs text-zinc-500 dark:text-white/30 uppercase tracking-widest">
-                    {/* {isRTL ? 'الوارد فارغ! جميع الالتزامات منجزة.' : 'INBOX CLEAR // NO OVERDUE TASKS'} */}
-                    {/* {isRTL ? 'عاش! مفيش أي مهام متأخرة عليك حالياً.' : "You're all caught up! Overdue tasks will appear here."} */}
+                    {isRTL ? 'عاش! مفيش أي مهام متأخرة عليك دلوقتي.' : "You're all caught up! Overdue tasks will appear here."}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+          */}
+
+          <div 
+            className="w-full bg-white dark:bg-black/40 border border-[var(--border)] dark:border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 shadow-xl relative overflow-hidden"
+          >
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r to-transparent" style={{ backgroundImage: `linear-gradient(to right, ${currentTheme.color}, transparent)` }} />
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <h2 className={cn(
+                  "font-semibold text-[var(--text-secondary)]",
+                  isRTL ? "text-[9px] sm:text-[11px]" : "text-[10px] sm:text-xs"
+                )}>
+                  {isRTL ? 'المهام العاجلة' : 'Action Inbox'}
+                </h2>
+              </div>
+              <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[10px] font-medium border shrink-0 transition-colors duration-200" style={{ color: currentTheme.color, borderColor: `${currentTheme.color}30`, backgroundColor: `${currentTheme.color}15` }}>
+                {actionInboxTasks.length} {isRTL ? 'مهمة' : 'tasks'}
+              </span>
+            </div>
+
+            <div className="space-y-2.5 sm:space-y-3 max-h-[300px] sm:max-h-[380px] overflow-y-auto pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {actionInboxTasks.map((task) => {
+                const tDate = new Date(task.metadata.endDate || task.metadata.dueDate)
+                tDate.setHours(0,0,0,0)
+                const today = new Date()
+                today.setHours(0,0,0,0)
+                const isOverdue = tDate < today
+
+                return (
+                  <motion.div
+                    key={task.id}
+                    layout
+                    className="flex items-center justify-between p-2.5 sm:p-4 rounded-xl border border-[var(--border)] dark:border-white/5 bg-white dark:bg-zinc-950/20 hover:bg-[var(--card-hover)] dark:hover:bg-white/5 transition-all gap-2.5 sm:gap-4 font-space"
+                  >
+                    <div className="flex items-center gap-2 sm:gap-3.5 min-w-0 flex-1">
+                      <button
+                        onClick={() => toggleTask(task)}
+                        className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-full border flex items-center justify-center bg-transparent hover:bg-white/5 transition-all shrink-0 cursor-pointer animate-none group/btn"
+                        style={{ borderColor: task.missionColor || currentTheme.color }}
+                      >
+                        <NeonIcon 
+                          icon={Crosshair} 
+                          interactive 
+                          className="w-3 sm:w-3.5 sm:h-3.5 opacity-0 group-hover/btn:opacity-100 transition-opacity" 
+                          style={{ color: task.missionColor || currentTheme.color }} 
+                        />
+                      </button>
+
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <span className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] dark:text-white/95 truncate leading-tight">{task.title}</span>
+                        <span className="text-[8px] sm:text-[9px] text-[var(--text-secondary)] dark:text-zinc-500 font-medium tracking-wide mt-0.5 truncate">{task.missionTitle}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+                      <span className={cn(
+                        "font-mono text-[8px] sm:text-[9px] px-1.5 sm:px-2 py-0.5 rounded border tracking-wider",
+                        isOverdue 
+                          ? "text-red-500 border-red-500/30 bg-red-950/15 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse font-black" 
+                          : "text-[var(--text-secondary)] dark:text-zinc-400 border border-[var(--border)] dark:border-white/5 bg-[var(--background-secondary)] dark:bg-white/[0.02]"
+                      )}>
+                        📅 {task.metadata.endDate || task.metadata.dueDate}
+                      </span>
+
+                      <span className="text-[8px] sm:text-[10px] font-mono text-[var(--text-muted)] dark:text-zinc-500 tracking-wider">
+                        +{task.weight * 10}XP
+                      </span>
+                    </div>
+                  </motion.div>
+                )
+              })}
+
+              {actionInboxTasks.length === 0 && (
+                <div className="py-12 sm:py-16 text-center space-y-2 border border-dashed border-[var(--border)] dark:border-white/5 rounded-xl">
+                  <p className="text-[9px] sm:text-xs text-[var(--text-muted)] dark:text-white/30 uppercase tracking-widest">
                     {isRTL ? 'عاش! مفيش أي مهام متأخرة عليك دلوقتي.' : "You're all caught up! Overdue tasks will appear here."}
                   </p>
                 </div>
@@ -781,7 +859,9 @@ export default function Dashboard() {
                         {/* <h3 className="tracking-wide truncate min-w-0 flex-1 text-xs sm:text-sm font-semibold text-zinc-100 font-space">
                          {mission.title}
                         </h3> */}
-                        <h3 className="tracking-wide truncate min-w-0 flex-1 font-semibold text-zinc-100 font-space" style={{ fontSize: '0.75rem', lineHeight: '1.25rem' }}>
+                        {/* Commented out per rule "Never delete code, only comment it out" */}
+                        {/* <h3 className="tracking-wide truncate min-w-0 flex-1 font-semibold text-zinc-100 font-space" style={{ fontSize: '0.75rem', lineHeight: '1.25rem' }}> */}
+                        <h3 className="tracking-wide truncate min-w-0 flex-1 font-semibold text-[var(--text-primary)] dark:text-zinc-100 font-space" style={{ fontSize: '0.75rem', lineHeight: '1.25rem' }}>
                          {mission.title}
                         </h3>
                     <span 

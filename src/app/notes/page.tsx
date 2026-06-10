@@ -577,9 +577,17 @@ export default function NotesPage() {
             </div>
 
             {/* Mobile Add Note Button (placed in row with title on mobile) */}
-            <button
+            {/* Commented out per rule "Never delete code, only comment it out" */}
+            {/* <button
               onClick={() => setIsCreating(true)}
               className="flex md:hidden flex-row items-center justify-center gap-2 h-11 px-4 bg-white/5 border border-white/10 text-white/70 font-medium transition-all duration-150 text-sm rounded-xl shrink-0 active:scale-[0.97] hover:bg-white/10 hover:text-white"
+            >
+              <Plus className="w-4 h-4" />
+              {isRTL ? 'إضافة' : 'Add'}
+            </button> */}
+            <button
+              onClick={() => setIsCreating(true)}
+              className="flex md:hidden flex-row items-center justify-center gap-2 h-11 px-4 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white/5 dark:border border-white/10 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white font-medium transition-all duration-150 text-sm rounded-xl shrink-0 active:scale-[0.97]"
             >
               <Plus className="w-4 h-4" />
               {isRTL ? 'إضافة' : 'Add'}
@@ -603,9 +611,17 @@ export default function NotesPage() {
             </div>
 
             {/* Desktop Add Note Button */}
-            <button
+            {/* Commented out per rule "Never delete code, only comment it out" */}
+            {/* <button
               onClick={() => setIsCreating(true)}
               className="hidden md:flex flex-row items-center justify-center gap-2 h-11 px-5 bg-white/5 border border-white/10 text-white/70 font-medium transition-all duration-150 text-sm rounded-xl shrink-0 active:scale-[0.97] hover:bg-white/10 hover:text-white"
+            >
+              <Plus className="w-4 h-4" />
+              {isRTL ? 'إضافة ملاحظة' : 'New Note'}
+            </button> */}
+            <button
+              onClick={() => setIsCreating(true)}
+              className="hidden md:flex flex-row items-center justify-center gap-2 h-11 px-5 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white/5 dark:border border-white/10 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white font-medium transition-all duration-150 text-sm rounded-xl shrink-0 active:scale-[0.97]"
             >
               <Plus className="w-4 h-4" />
               {isRTL ? 'إضافة ملاحظة' : 'New Note'}
