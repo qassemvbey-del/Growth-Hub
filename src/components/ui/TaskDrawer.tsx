@@ -1286,8 +1286,14 @@ export default function TaskDrawer({
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        /* Commented out original theme-unaware drawer background for safety rules
         className={cn(
           "h-[100dvh] bg-zinc-950/95 backdrop-blur-xl border-t md:border-l md:border-t-0 border-white/5 shadow-2xl flex flex-col justify-between rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden z-[9999] transition-all duration-300",
+          isExpanded ? "w-full md:w-[90vw] max-w-5xl" : "w-full sm:w-[450px] max-w-md"
+        )}
+        */
+        className={cn(
+          "h-[100dvh] bg-[var(--background)] dark:bg-[#080810] text-[var(--text-primary)] transition-colors duration-200 border-t md:border-l md:border-t-0 border-[var(--border)] dark:border-white/5 shadow-2xl flex flex-col justify-between rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden z-[9999]",
           isExpanded ? "w-full md:w-[90vw] max-w-5xl" : "w-full sm:w-[450px] max-w-md"
         )}
       >
@@ -1694,7 +1700,7 @@ export default function TaskDrawer({
             </div>
 
             {/* Right Column container: Execution & Collaboration */}
-            <div className="h-full overflow-y-auto overscroll-y-contain pr-2 custom-scrollbar space-y-6 border-l border-white/5 pl-6">
+            <div className="h-full overflow-y-auto overscroll-y-contain pr-2 custom-scrollbar space-y-6 border-l border-[var(--border)] dark:border-white/5 pl-6">
               {/* Generate AI Checklist */}
               {canEdit && finalVideoUrl && (() => {
                 const currentGoal = goals.find((g: any) => g.id === goalId || g.id === task.goal_id)
@@ -1886,7 +1892,10 @@ export default function TaskDrawer({
 
         {/* Fixed Thumb-Zone Footer */}
         {canEdit && (
+          /* Commented out original dark theme footer for safety rules
           <div className="w-full z-[60] bg-[#09090b]/98 border-t border-white/5 px-4 py-3 flex items-center justify-center shrink-0 relative">
+          */
+          <div className="w-full z-[60] bg-[var(--background)]/98 dark:bg-[#09090b]/98 border-t border-[var(--border)] dark:border-white/5 px-4 py-3 flex items-center justify-center shrink-0 relative">
             <div className="flex items-center justify-center gap-6">
               {/* Pomodoro / Focus Button */}
               <button
@@ -1917,7 +1926,7 @@ export default function TaskDrawer({
                     ? "bg-orange-500/10 border border-orange-500/30 shadow-[0_0_12px_rgba(249,115,22,0.15)]"
                     : isCurrentTaskFocus && !isCurrentFocusActive
                       ? "bg-orange-500/5 border border-orange-500/20"
-                      : "bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/10"
+                      : "bg-zinc-200/40 dark:bg-white/[0.03] border border-[var(--border)] dark:border-white/[0.06] hover:bg-zinc-200/60 dark:hover:bg-white/[0.06] hover:border-[var(--border)] dark:hover:border-white/10"
                 )}
               >
                 {isCurrentFocusActive ? (
@@ -1968,7 +1977,7 @@ export default function TaskDrawer({
                   "flex items-center gap-2.5 px-4 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer min-w-[120px] justify-center",
                   task.is_completed
                     ? "bg-emerald-500/10 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.15)]"
-                    : "bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/10"
+                    : "bg-zinc-200/40 dark:bg-white/[0.03] border border-[var(--border)] dark:border-white/[0.06] hover:bg-zinc-200/60 dark:hover:bg-white/[0.06] hover:border-[var(--border)] dark:hover:border-white/10"
                 )}
               >
                 {task.is_completed ? (

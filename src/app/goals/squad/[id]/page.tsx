@@ -1708,6 +1708,7 @@ const { progress, isInRedZone } = useMemo(() => {
             {/* Redesigned Native Action Bar */}
             <div className="flex flex-row justify-around items-center py-2 border-y border-zinc-800/50 w-full">
               {/* PIN ACTION */}
+              {/* Commented out per safety rules:
               <button 
                  onClick={() => { 
                     playBlip(); 
@@ -1718,6 +1719,17 @@ const { progress, isInRedZone } = useMemo(() => {
                     }
                  }}
                  className="flex flex-col items-center justify-center p-2 transition-colors cursor-pointer text-zinc-400 hover:text-white"
+              */}
+              <button 
+                 onClick={() => { 
+                    playBlip(); 
+                    const nextVal = !mission.sync_to_dashboard;
+                    updateMission({ sync_to_dashboard: nextVal }); 
+                    if (nextVal) {
+                      window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'pin' }));
+                    }
+                 }}
+                 className="flex flex-col items-center justify-center p-2 transition-colors cursor-pointer text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white font-medium"
                  style={mission.sync_to_dashboard ? { color: missionColor } : {}}
                  // title={mission.sync_to_dashboard ? (isRTL ? 'إلغاء التثبيت من الواجهة' : 'UNPIN FROM DASHBOARD') : (isRTL ? 'تثبيت في الواجهة' : 'PIN TO DASHBOARD')}
                   title={mission.sync_to_dashboard ? (isRTL ? 'إلغاء التثبيت من الواجهة' : 'Unpin from Dashboard') : (isRTL ? 'تثبيت في الواجهة' : 'Pin to Dashboard')}
@@ -1731,9 +1743,14 @@ const { progress, isInRedZone } = useMemo(() => {
 
               {/* IMPORT ACTION */}
               <div className="relative">
+                {/* Commented out per safety rules:
                 <button
                    onClick={() => { playBlip(); setShowImportDropdown(!showImportDropdown); }}
                    className="flex flex-col items-center justify-center p-2 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                */}
+                <button
+                   onClick={() => { playBlip(); setShowImportDropdown(!showImportDropdown); }}
+                   className="flex flex-col items-center justify-center p-2 text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white transition-colors cursor-pointer font-medium"
                 >
                    <ListPlus className="w-5 h-5 mb-1" />
                    <span className="text-[10px] font-space font-medium flex items-center gap-0.5">
@@ -1778,9 +1795,14 @@ const { progress, isInRedZone } = useMemo(() => {
               </div>
 
               {/* NOTES ACTION */}
+              {/* Commented out per safety rules:
               <button
                 onClick={() => { playBlip(); setShowIntelModal(true); }}
                 className="flex flex-col items-center justify-center p-2 text-zinc-400 hover:text-white transition-colors cursor-pointer relative"
+              */}
+              <button
+                onClick={() => { playBlip(); setShowIntelModal(true); }}
+                className="flex flex-col items-center justify-center p-2 text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white transition-colors cursor-pointer relative font-medium"
               >
                 <FileText className="w-5 h-5 mb-1" />
                 <span className="text-[10px] tracking-wider uppercase font-space font-black">
@@ -1795,9 +1817,14 @@ const { progress, isInRedZone } = useMemo(() => {
               </button>
 
               {/* SHARE ACTION */}
+              {/* Commented out per safety rules:
               <button
                  onClick={handleShare}
                  className="flex flex-col items-center justify-center p-2 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              */}
+              <button
+                 onClick={handleShare}
+                 className="flex flex-col items-center justify-center p-2 text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white transition-colors cursor-pointer font-medium"
               >
                  <Share2 className="w-5 h-5 mb-1" />
                  <span className="text-[10px] font-space font-medium">
@@ -1970,7 +1997,10 @@ const { progress, isInRedZone } = useMemo(() => {
                          className={cn(
                            // Commented out per rule "Never delete code, only comment it out"
                             // "group flex flex-col p-4 md:p-5 border border-[var(--card-border)] rounded-md cursor-pointer hover:border-cyan-500/50 hover:bg-white/5 hover:scale-[1.01] transition-all duration-300 shadow-sm space-y-3 relative",
-                            "group flex flex-col p-4 md:p-5 bg-[var(--card)] border border-[var(--border)] dark:border-[var(--card-border)] dark:bg-transparent rounded-md cursor-pointer hover:border-cyan-500/50 hover:bg-white/5 hover:scale-[1.01] transition-all duration-300 shadow-sm space-y-3 relative",
+                            /* Commented out per safety rules:
+                             "group flex flex-col p-4 md:p-5 bg-[var(--card)] border border-[var(--border)] dark:border-[var(--card-border)] dark:bg-transparent rounded-md cursor-pointer hover:border-cyan-500/50 hover:bg-white/5 hover:scale-[1.01] transition-all duration-300 shadow-sm space-y-3 relative",
+                             */
+                             "group flex flex-col p-4 md:p-5 bg-[var(--card)] border border-[var(--border)] dark:border-white/10 rounded-xl cursor-pointer hover:border-cyan-500/50 hover:bg-white/5 hover:scale-[1.01] transition-all duration-300 shadow-sm space-y-3 relative",
                            task.is_completed ? "opacity-40" : "opacity-100"
                          )}
                        >

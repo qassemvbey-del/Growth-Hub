@@ -38,12 +38,17 @@ export default function AnimatedLogo({ className = "" }: { className?: string })
   };
 
   const getLetterColor = (char: string, index: number) => {
+    /* Commented out per safety rules:
     if (index === 7) return 'text-[#FFCC00]'; // H
     if (index === 8) return 'text-[#F97316]'; // U
     if (index === 9) return 'text-[#EF4444]'; // B
     
     // G R O W T H _
     return 'text-[#3F3F46] dark:text-[#E4E4E7]';
+    */
+    if (index >= 7 && index <= 9) return 'text-[#ff6a00]'; // H U B
+    if (index >= 0 && index <= 5) return 'text-[var(--text-primary)] dark:text-[#E4E4E7]'; // G r o w t h
+    return '';
   }
 
   return (

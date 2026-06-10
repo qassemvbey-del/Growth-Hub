@@ -191,9 +191,14 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                   onMouseLeave={() => setHoveredIndex(null)}
                   className={cn(
                     "flex items-center p-3 px-6 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[44px] w-full text-left rtl:text-right cursor-pointer rtl:flex-row-reverse",
+                     /* Commented out per safety rules:
                      isGoalsActive && !pathname.startsWith('/goals/')
                        ? "bg-[var(--active-nav-bg)] text-[var(--active-nav-text)] border border-[var(--border)] dark:border-white/10 shadow-sm" 
                        : "text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:text-[var(--active-nav-text)] border border-transparent hover:border-[var(--border)] dark:hover:border-white/10 hover:bg-[var(--active-nav-bg)]"
+                     */
+                     isGoalsActive && !pathname.startsWith('/goals/')
+                       ? "bg-orange-500/10 text-orange-600 font-bold border-s-4 border-orange-500 ps-3" 
+                       : "text-[var(--text-secondary)] hover:text-orange-600 hover:bg-orange-500/10 font-medium border-s-4 border-transparent ps-3"
                   )}
                 >
                   <NeonIcon
@@ -256,9 +261,14 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                             onMouseLeave={() => setHoveredIndex(null)}
                             className={cn(
                               "flex items-center p-2 px-3 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[34px] border border-transparent rtl:flex-row-reverse rtl:text-right",
+                              /* Commented out per safety rules:
                               isSubActive 
                                 ? "bg-[var(--active-nav-bg)] text-[var(--active-nav-text)] border border-[var(--border)] dark:border-white/10 shadow-sm" 
                                 : "text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:text-[var(--active-nav-text)] hover:bg-[var(--active-nav-bg)]"
+                              */
+                              isSubActive 
+                                ? "bg-orange-500/10 text-orange-600 font-bold border-s-4 border-orange-500 ps-3" 
+                                : "text-[var(--text-secondary)] hover:text-orange-600 hover:bg-orange-500/10 font-medium border-s-4 border-transparent ps-3"
                             )}
                           >
                             <NeonIcon 
@@ -302,9 +312,14 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               onMouseLeave={() => setHoveredIndex(null)}
               className={cn(
                 "flex items-center p-3 px-6 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[44px] rtl:flex-row-reverse rtl:text-right",
+                 /* Commented out per safety rules:
                  isActive 
                    ? "bg-[var(--active-nav-bg)] text-[var(--active-nav-text)] border border-[var(--border)] dark:border-white/10 shadow-sm" 
                    : "text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:text-[var(--active-nav-text)] border border-transparent hover:border-[var(--border)] dark:hover:border-white/10 hover:bg-[var(--active-nav-bg)]"
+                 */
+                 isActive 
+                   ? "bg-orange-500/10 text-orange-600 font-bold border-s-4 border-orange-500 ps-3" 
+                   : "text-[var(--text-secondary)] hover:text-orange-600 hover:bg-orange-500/10 font-medium border-s-4 border-transparent ps-3"
               )}
             >
               <NeonIcon
@@ -379,9 +394,14 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
           onMouseLeave={() => setIsSettingsHovered(false)}
           className={cn(
             "flex items-center gap-4 p-3 px-6 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[44px]",
+            /* Commented out per safety rules:
             pathname === '/settings'
               ? "bg-[var(--active-nav-bg)] text-[var(--active-nav-text)] border border-[var(--border)] dark:border-white/10 shadow-sm"
               : "text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:text-[var(--active-nav-text)] hover:bg-[var(--active-nav-bg)]"
+            */
+            pathname === '/settings'
+              ? "bg-orange-500/10 text-orange-600 font-bold border-s-4 border-orange-500 ps-3"
+              : "text-[var(--text-secondary)] hover:text-orange-600 hover:bg-orange-500/10 font-medium border-s-4 border-transparent ps-3"
           )}
         >
           <NeonIcon icon={Sliders} interactive className="w-4 h-4 transition-colors duration-300" style={{ color: (pathname === '/settings' || isSettingsHovered) ? 'var(--active-nav-text)' : undefined }} />

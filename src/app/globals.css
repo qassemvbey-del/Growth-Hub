@@ -64,6 +64,7 @@
   --sidebar-bg: #e8e8e8;
   */
 
+  /* Commented out per safety rules:
   --background: #F2F6F8;
   --background-secondary: #E8EFF2;
   --card: #E8EFF2;
@@ -73,6 +74,16 @@
   --text-secondary: #5A7280;
   --text-muted: #8A9FA8;
   --sidebar-bg: #EAF0F3;
+  */
+  --background: #F8FAFC;            /* Ice White Page Root Background */
+  --background-secondary: #F1F5F9;  /* Porcelain Matte Surface */
+  --card: #F1F5F9;                  /* Core Container Element Body */
+  --card-hover: #E2E8F0;            /* Distinct Interactive Card Hover */
+  --border: rgba(15, 23, 42, 0.09); /* Sharp Crisp Slate Ink Border */
+  --text-primary: #0F172A;          /* Deep Charcoal Ink (Absolute Sharpness for Main Text) */
+  --text-secondary: #334155;        /* Dark Slate for Subtitles and Meta-labels */
+  --text-muted: #64748B;            /* Muted Solid Gray for Non-critical Metadata */
+  --sidebar-bg: #F8FAFC;            /* Clean Sidebar Isolation Layer */
   --active-nav-text: #f97316;
   --active-nav-bg: rgba(249, 115, 22, 0.1);
 
@@ -90,6 +101,7 @@
 
 .light,
 [data-theme="light"] {
+  /* Commented out per safety rules:
   --background: #F2F6F8;
   --background-secondary: #E8EFF2;
   --card: #E8EFF2;
@@ -99,6 +111,16 @@
   --text-secondary: #5A7280;
   --text-muted: #8A9FA8;
   --sidebar-bg: #EAF0F3;
+  */
+  --background: #F8FAFC;            /* Ice White Page Root Background */
+  --background-secondary: #F1F5F9;  /* Porcelain Matte Surface */
+  --card: #F1F5F9;                  /* Core Container Element Body */
+  --card-hover: #E2E8F0;            /* Distinct Interactive Card Hover */
+  --border: rgba(15, 23, 42, 0.09); /* Sharp Crisp Slate Ink Border */
+  --text-primary: #0F172A;          /* Deep Charcoal Ink (Absolute Sharpness for Main Text) */
+  --text-secondary: #334155;        /* Dark Slate for Subtitles and Meta-labels */
+  --text-muted: #64748B;            /* Muted Solid Gray for Non-critical Metadata */
+  --sidebar-bg: #F8FAFC;            /* Clean Sidebar Isolation Layer */
   --active-nav-text: #f97316;
   --active-nav-bg: rgba(249, 115, 22, 0.1);
 }

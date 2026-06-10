@@ -595,7 +595,7 @@ export default function NotesPage() {
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder={isRTL ? 'البحث في الملاحظات...' : 'Search notes...'}
                 className={cn(
-                  "h-11 w-full md:w-64 bg-white/5 border border-white/5 rounded-2xl font-space text-[11px] text-[var(--text-primary)] tracking-wide outline-none focus:outline-none focus:ring-2 focus:border-transparent transition-all",
+                  "h-11 w-full md:w-64 bg-white/5 dark:bg-white/5 border border-[var(--border)] dark:border-white/5 rounded-2xl font-space text-[11px] text-[var(--text-primary)] tracking-wide outline-none focus:outline-none focus:ring-2 focus:border-transparent transition-all",
                   isRTL ? "pr-10 pl-4" : "pl-10 pr-4"
                 )}
                 style={{ ['--tw-ring-color' as any]: `${currentTheme.color}55` }}
@@ -655,6 +655,7 @@ export default function NotesPage() {
             </button>
           </div>
           */}
+          /* Commented out original source filter pills for safety rules
           <div className="flex bg-[var(--input-bg)] border border-[var(--card-border)] rounded-full p-0.5 w-full sm:w-auto relative shadow-sm overflow-x-auto flex-nowrap scrollbar-hide -webkit-overflow-scrolling-touch scroll-snap-x gap-1 px-2 pb-0.5 max-w-full">
             <button 
               onClick={() => setNoteSourceFilter('personal')}
@@ -689,6 +690,42 @@ export default function NotesPage() {
                   : "border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-bold"
               )}
               style={noteSourceFilter === 'all' ? { backgroundColor: currentTheme.color } : {}}
+            >
+              {isRTL ? 'عرض الكل' : 'SHOW ALL'}
+            </button>
+          </div>
+          */
+          <div className="flex bg-[var(--background-secondary)] border border-[var(--border)] rounded-full p-0.5 w-full sm:w-auto relative shadow-sm overflow-x-auto flex-nowrap scrollbar-hide -webkit-overflow-scrolling-touch scroll-snap-x gap-1 px-2 pb-0.5 max-w-full">
+            <button 
+              onClick={() => setNoteSourceFilter('personal')}
+              className={cn(
+                "flex-1 sm:flex-none h-7 px-3 py-1 rounded-full text-[10px] font-space font-black tracking-wider uppercase transition-all duration-200 cursor-pointer text-center whitespace-nowrap scroll-snap-align-start flex-shrink-0 min-w-fit flex items-center justify-center border",
+                noteSourceFilter === 'personal' 
+                  ? "bg-[#ff6a00] text-white border-transparent shadow-md font-black" 
+                  : "bg-transparent border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-bold"
+              )}
+            >
+              {isRTL ? 'ملاحظاتي الحرة' : 'PERSONAL NOTES'}
+            </button>
+            <button 
+              onClick={() => setNoteSourceFilter('task')}
+              className={cn(
+                "flex-1 sm:flex-none h-7 px-3 py-1 rounded-full text-[10px] font-space font-black tracking-wider uppercase transition-all duration-200 cursor-pointer text-center whitespace-nowrap scroll-snap-align-start flex-shrink-0 min-w-fit flex items-center justify-center border",
+                noteSourceFilter === 'task' 
+                  ? "bg-[#ff6a00] text-white border-transparent shadow-md font-black" 
+                  : "bg-transparent border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-bold"
+              )}
+            >
+              {isRTL ? 'تعليقات المهام' : 'TASK COMMENTS'}
+            </button>
+            <button 
+              onClick={() => setNoteSourceFilter('all')}
+              className={cn(
+                "flex-1 sm:flex-none h-7 px-3 py-1 rounded-full text-[10px] font-space font-black tracking-wider uppercase transition-all duration-200 cursor-pointer text-center whitespace-nowrap scroll-snap-align-start flex-shrink-0 min-w-fit flex items-center justify-center border",
+                noteSourceFilter === 'all' 
+                  ? "bg-[#ff6a00] text-white border-transparent shadow-md font-black" 
+                  : "bg-transparent border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-bold"
+              )}
             >
               {isRTL ? 'عرض الكل' : 'SHOW ALL'}
             </button>
@@ -847,6 +884,7 @@ export default function NotesPage() {
             </div>
           </div>
           */
+          /* Commented out original goal filters for safety rules
           <div className="w-full">
             <div className="flex overflow-x-auto flex-nowrap scrollbar-hide -webkit-overflow-scrolling-touch scroll-snap-x gap-1.5 px-1 pb-1.5 max-w-full">
               <button
@@ -857,7 +895,7 @@ export default function NotesPage() {
                     ? "text-black border-transparent shadow-md"
                     : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)]/50 hover:text-[var(--text-primary)]"
                 )}
-                style={selectedGoalId === null ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
+                style={selectedGoalId === null ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: \`0 0 15px \${currentTheme.color}33\` } : {}}
               >
                 {isRTL ? 'جميع الأهداف' : 'ALL GOALS'}
               </button>
@@ -871,7 +909,37 @@ export default function NotesPage() {
                       ? "text-black border-transparent shadow-md"
                       : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)]/50 hover:text-[var(--text-primary)]"
                   )}
-                  style={selectedGoalId === m.id ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}33` } : {}}
+                  style={selectedGoalId === m.id ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: \`0 0 15px \${currentTheme.color}33\` } : {}}
+                >
+                  {m.title.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+          */
+          <div className="w-full">
+            <div className="flex overflow-x-auto flex-nowrap scrollbar-hide -webkit-overflow-scrolling-touch scroll-snap-x gap-1.5 px-1 pb-1.5 max-w-full">
+              <button
+                onClick={() => setSelectedGoalId(null)}
+                className={cn(
+                  "h-7 px-3 py-1 rounded-full text-[10px] border font-space font-black tracking-widest uppercase transition-all duration-200 whitespace-nowrap scroll-snap-align-start flex-shrink-0 min-w-fit flex items-center justify-center cursor-pointer",
+                  selectedGoalId === null
+                    ? "bg-[#ff6a00] text-white border-transparent shadow-md"
+                    : "bg-[var(--background-secondary)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border)] hover:text-[var(--text-primary)]"
+                )}
+              >
+                {isRTL ? 'جميع الأهداف' : 'ALL GOALS'}
+              </button>
+              {uniqueGoals.map(m => (
+                <button
+                  key={m.id}
+                  onClick={() => setSelectedGoalId(selectedGoalId === m.id ? null : m.id)}
+                  className={cn(
+                    "h-7 px-3 py-1 rounded-full text-[10px] border font-space font-black tracking-widest uppercase transition-all duration-200 whitespace-nowrap scroll-snap-align-start flex-shrink-0 min-w-fit flex items-center justify-center cursor-pointer",
+                    selectedGoalId === m.id
+                      ? "bg-[#ff6a00] text-white border-transparent shadow-md"
+                      : "bg-[var(--background-secondary)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border)] hover:text-[var(--text-primary)]"
+                  )}
                 >
                   {m.title.toUpperCase()}
                 </button>
@@ -913,16 +981,46 @@ export default function NotesPage() {
         */}
 
         {/* Tag Filter Bar */}
+        {/* Commented out original tag filter for safety rules
+                <div className="flex overflow-x-auto flex-nowrap scrollbar-hide -webkit-overflow-scrolling-touch scroll-snap-x gap-1.5 px-1 pb-1.5 max-w-full">
+                  <button
+                    onClick={() => setFilterTag('all')}
+                    className={cn(
+                      "h-7 px-3 py-1 rounded-full text-[10px] border font-space font-black tracking-widest uppercase transition-all duration-200 whitespace-nowrap scroll-snap-align-start flex-shrink-0 min-w-fit flex items-center justify-center cursor-pointer",
+                      filterTag === 'all' 
+                        ? "text-black border-transparent shadow-lg" 
+                        : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)]/50"
+                    )}
+                    style={filterTag === 'all' ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 20px ${currentTheme.color}33` } : {}}
+                  >
+                    {isRTL ? 'الكل' : 'ALL'}
+                  </button>
+                  {TAGS.map(t => (
+                    <button
+                      key={t.value}
+                      onClick={() => setFilterTag(t.value)}
+                      className={cn(
+                        "h-7 px-3 py-1 rounded-full text-[10px] border font-space font-black tracking-widest uppercase transition-all duration-200 whitespace-nowrap scroll-snap-align-start flex-shrink-0 min-w-fit flex items-center justify-center cursor-pointer",
+                        filterTag === t.value 
+                          ? "text-black border-transparent shadow-lg" 
+                          : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)]/50"
+                      )}
+                      style={filterTag === t.value ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 20px ${currentTheme.color}33` } : {}}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+        */}
         <div className="flex overflow-x-auto flex-nowrap scrollbar-hide -webkit-overflow-scrolling-touch scroll-snap-x gap-1.5 px-1 pb-1.5 max-w-full">
           <button
             onClick={() => setFilterTag('all')}
             className={cn(
               "h-7 px-3 py-1 rounded-full text-[10px] border font-space font-black tracking-widest uppercase transition-all duration-200 whitespace-nowrap scroll-snap-align-start flex-shrink-0 min-w-fit flex items-center justify-center cursor-pointer",
               filterTag === 'all' 
-                ? "text-black border-transparent shadow-lg" 
-                : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)]/50"
+                ? "bg-[#ff6a00] text-white border-transparent shadow-lg font-black" 
+                : "bg-[var(--background-secondary)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border)]"
             )}
-            style={filterTag === 'all' ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 20px ${currentTheme.color}33` } : {}}
           >
             {isRTL ? 'الكل' : 'ALL'}
           </button>
@@ -933,10 +1031,9 @@ export default function NotesPage() {
               className={cn(
                 "h-7 px-3 py-1 rounded-full text-[10px] border font-space font-black tracking-widest uppercase transition-all duration-200 whitespace-nowrap scroll-snap-align-start flex-shrink-0 min-w-fit flex items-center justify-center cursor-pointer",
                 filterTag === t.value 
-                  ? "text-black border-transparent shadow-lg" 
-                  : "border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)]/50"
+                  ? "bg-[#ff6a00] text-white border-transparent shadow-lg font-black" 
+                  : "bg-[var(--background-secondary)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border)]"
               )}
-              style={filterTag === t.value ? { backgroundColor: currentTheme.color, borderColor: currentTheme.color, boxShadow: `0 0 20px ${currentTheme.color}33` } : {}}
             >
               {t.label}
             </button>
@@ -1026,7 +1123,10 @@ export default function NotesPage() {
                       /* Commented out original border settings for safety rules
                       "bg-zinc-900/10 dark:bg-zinc-900/30 border-zinc-200/50 dark:border-zinc-800/60 hover:bg-zinc-100/50 dark:hover:bg-zinc-900/50 hover:border-zinc-300 dark:hover:border-zinc-700",
                       */
+                      /* Commented out original theme-unaware note backgrounds for safety rules
                       "bg-zinc-900/20 backdrop-blur-xl border-white/5 hover:bg-zinc-900/30 hover:border-white/10",
+                      */
+                      "bg-white dark:bg-zinc-900/20 border border-[var(--border)] dark:border-white/5 shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-900/30 hover:border-[var(--border)] dark:hover:border-white/10 rounded-xl",
                       isRTL ? "text-right" : "text-left",
                       note._isTaskNote && (isRTL 
                         ? "border-r-2 border-indigo-500/50 shadow-[inset_-3px_0_10px_rgba(99,102,241,0.05)]" 
@@ -1055,7 +1155,10 @@ export default function NotesPage() {
                       </h3>
 
                       {/* Preview */}
+                      {/* Commented out original preview color for safety rules
                       <p className="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400 font-space line-clamp-3">
+                      */}
+                      <p className="text-xs leading-relaxed text-[var(--text-secondary)] dark:text-zinc-400 font-space line-clamp-3">
                         "{plainText}"
                       </p>
                     </div>
