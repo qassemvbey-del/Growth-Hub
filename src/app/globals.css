@@ -75,15 +75,15 @@
   --text-muted: #8A9FA8;
   --sidebar-bg: #EAF0F3;
   */
-  --background: #F8FAFC;            /* Ice White Page Root Background */
-  --background-secondary: #F1F5F9;  /* Porcelain Matte Surface */
-  --card: #F1F5F9;                  /* Core Container Element Body */
-  --card-hover: #E2E8F0;            /* Distinct Interactive Card Hover */
-  --border: rgba(15, 23, 42, 0.09); /* Sharp Crisp Slate Ink Border */
-  --text-primary: #0F172A;          /* Deep Charcoal Ink (Absolute Sharpness for Main Text) */
-  --text-secondary: #334155;        /* Dark Slate for Subtitles and Meta-labels */
-  --text-muted: #64748B;            /* Muted Solid Gray for Non-critical Metadata */
-  --sidebar-bg: #F8FAFC;            /* Clean Sidebar Isolation Layer */
+  --background: #FFFFFF;            /* Pure White Canvas */
+  --background-secondary: #F3F4F6;  /* Clean Neutral Grey Column Lane */
+  --card: #FFFFFF;                  /* Pure White Card */
+  --card-hover: #E2E8F0;            /* Interactive Card Hover */
+  --border: rgba(15, 23, 42, 0.08); /* Crisp ink line border */
+  --text-primary: #0F172A;          /* Deep Charcoal Ink */
+  --text-secondary: #475569;        /* Dark Slate subtitle ink */
+  --text-muted: #64748B;            /* Muted solid gray metadata */
+  --sidebar-bg: #F8FAFC;            /* Sleek Off-White Sidebarbg */
   --active-nav-text: #f97316;
   --active-nav-bg: rgba(249, 115, 22, 0.1);
 
@@ -112,15 +112,15 @@
   --text-muted: #8A9FA8;
   --sidebar-bg: #EAF0F3;
   */
-  --background: #F8FAFC;            /* Ice White Page Root Background */
-  --background-secondary: #F1F5F9;  /* Porcelain Matte Surface */
-  --card: #F1F5F9;                  /* Core Container Element Body */
-  --card-hover: #E2E8F0;            /* Distinct Interactive Card Hover */
-  --border: rgba(15, 23, 42, 0.09); /* Sharp Crisp Slate Ink Border */
-  --text-primary: #0F172A;          /* Deep Charcoal Ink (Absolute Sharpness for Main Text) */
-  --text-secondary: #334155;        /* Dark Slate for Subtitles and Meta-labels */
-  --text-muted: #64748B;            /* Muted Solid Gray for Non-critical Metadata */
-  --sidebar-bg: #F8FAFC;            /* Clean Sidebar Isolation Layer */
+  --background: #FFFFFF;            /* Pure White Canvas */
+  --background-secondary: #F3F4F6;  /* Clean Neutral Grey Column Lane */
+  --card: #FFFFFF;                  /* Pure White Card */
+  --card-hover: #E2E8F0;            /* Interactive Card Hover */
+  --border: rgba(15, 23, 42, 0.08); /* Crisp ink line border */
+  --text-primary: #0F172A;          /* Deep Charcoal Ink */
+  --text-secondary: #475569;        /* Dark Slate subtitle ink */
+  --text-muted: #64748B;            /* Muted solid gray metadata */
+  --sidebar-bg: #F8FAFC;            /* Sleek Off-White Sidebarbg */
   --active-nav-text: #f97316;
   --active-nav-bg: rgba(249, 115, 22, 0.1);
 }

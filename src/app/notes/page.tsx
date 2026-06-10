@@ -655,7 +655,7 @@ export default function NotesPage() {
             </button>
           </div>
           */}
-          /* Commented out original source filter pills for safety rules
+          {/* Commented out original source filter pills for safety rules
           <div className="flex bg-[var(--input-bg)] border border-[var(--card-border)] rounded-full p-0.5 w-full sm:w-auto relative shadow-sm overflow-x-auto flex-nowrap scrollbar-hide -webkit-overflow-scrolling-touch scroll-snap-x gap-1 px-2 pb-0.5 max-w-full">
             <button 
               onClick={() => setNoteSourceFilter('personal')}
@@ -694,7 +694,7 @@ export default function NotesPage() {
               {isRTL ? 'عرض الكل' : 'SHOW ALL'}
             </button>
           </div>
-          */
+          */}
           <div className="flex bg-[var(--background-secondary)] border border-[var(--border)] rounded-full p-0.5 w-full sm:w-auto relative shadow-sm overflow-x-auto flex-nowrap scrollbar-hide -webkit-overflow-scrolling-touch scroll-snap-x gap-1 px-2 pb-0.5 max-w-full">
             <button 
               onClick={() => setNoteSourceFilter('personal')}
@@ -1046,7 +1046,7 @@ export default function NotesPage() {
         {filteredNotes.length === 0 ? (
           <div className="flex items-center justify-center py-12 sm:py-20">
             <div 
-              className="w-full max-w-md mx-auto p-6 sm:p-8 border border-white/10 bg-black/40 backdrop-blur-xl rounded-2xl flex flex-col items-center justify-center text-center relative overflow-hidden"
+              className="w-full max-w-md mx-auto p-6 sm:p-8 border border-[var(--border)] dark:border-white/10 bg-[var(--card)] dark:bg-black/40 backdrop-blur-xl rounded-2xl flex flex-col items-center justify-center text-center relative overflow-hidden shadow-sm"
               style={{ boxShadow: `0 0 25px ${currentTheme.color}10, inset 0 0 15px ${currentTheme.color}05` }}
             >
               {/* Decorative corner accents */}
@@ -1070,13 +1070,13 @@ export default function NotesPage() {
               </span>
 
               {/* <h3 className="text-sm font-bold font-space text-zinc-200 tracking-wide uppercase mb-1"> */}
-              <h3 className="text-sm font-bold font-space text-zinc-200 tracking-wide mb-1">
+              <h3 className="text-sm font-bold font-space text-[var(--text-primary)] dark:text-zinc-200 tracking-wide mb-1">
                 {searchQuery
                   ? (isRTL ? 'لا توجد ملاحظات مطابقة' : 'No Matching Notes Found')
                   : (isRTL ? 'لا توجد ملاحظات مضافة بعد' : 'No notes added yet')}
               </h3>
 
-              <p className="text-xs font-space text-zinc-500 leading-relaxed max-w-[280px]">
+              <p className="text-xs font-space text-[var(--text-secondary)] dark:text-zinc-500 leading-relaxed max-w-[280px]">
                 {searchQuery
                   ? (isRTL ? 'جرب كلمات بحث مختلفة للعثور على ما تبحث عنه.' : 'Try different search terms to find what you\'re looking for.')
                   : (isRTL ? 
@@ -1175,7 +1175,7 @@ export default function NotesPage() {
                              {tagObj.label}
                            </span>
                            */
-                           <span className="px-1.5 py-0.5 border border-zinc-200/10 dark:border-zinc-800/30 text-[10px] font-bold font-space tracking-wider uppercase rounded text-zinc-600 dark:text-zinc-500 bg-zinc-800/5">
+                           <span className="px-1.5 py-0.5 border border-[var(--border)] dark:border-zinc-800/30 text-[10px] font-bold font-space tracking-wider uppercase rounded text-[var(--text-secondary)] dark:text-zinc-500 bg-[var(--background-secondary)] dark:bg-zinc-800/5">
                              {tagObj.label}
                            </span>
                          )}
@@ -1192,7 +1192,7 @@ export default function NotesPage() {
                            {date}
                          </span>
                          */}
-                         <span className="text-[10px] font-space text-zinc-600 dark:text-zinc-500 font-bold tracking-wider shrink-0 select-none">
+                         <span className="text-[10px] font-space text-[var(--text-secondary)] dark:text-zinc-500 font-bold tracking-wider shrink-0 select-none">
                            {date}
                          </span>
                          {linkedMission && (

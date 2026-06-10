@@ -239,15 +239,15 @@ function AiChecklistButton({
         className={cn(
           "w-full flex items-center justify-center gap-2 py-2 px-3.5 rounded-xl font-medium text-xs transition-all duration-300 backdrop-blur-sm",
           (isGenerating || hasAiChecklist)
-            ? "bg-zinc-800/80 text-zinc-500 cursor-not-allowed border border-white/5 animate-pulse"
+            ? "bg-zinc-800/80 text-[var(--text-muted)] dark:text-zinc-500 cursor-not-allowed border border-[var(--border)] dark:border-white/5 animate-pulse"
             : cooldownRemaining > 0
-              ? "bg-zinc-900/40 text-zinc-500 border border-white/5 cursor-not-allowed opacity-40"
+              ? "bg-zinc-900/40 text-[var(--text-muted)] dark:text-zinc-500 border border-[var(--border)] dark:border-white/5 cursor-not-allowed opacity-40"
               : "bg-gradient-to-r from-indigo-950/40 via-slate-900/60 to-teal-950/40 border border-indigo-500/20 hover:border-teal-500/40 text-indigo-200 hover:text-teal-200 shadow-[0_0_15px_rgba(99,102,241,0.05)] hover:shadow-[0_0_20px_rgba(20,184,166,0.15)] group cursor-pointer"
         )}
       >
         {isGenerating ? (
           <>
-            <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400" />
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--text-secondary)] dark:text-zinc-400" />
             <span className="animate-pulse">
               {isRTL 
                 ? `جاري استخراج المنهج الذكي... ${formatCountdownVal(countdown)}` 
@@ -261,7 +261,7 @@ function AiChecklistButton({
           </>
         ) : cooldownRemaining > 0 ? (
           <>
-            <Clock className="w-3.5 h-3.5 text-zinc-500" />
+            <Clock className="w-3.5 h-3.5 text-[var(--text-muted)] dark:text-zinc-500" />
             <span>
               {isRTL 
                 ? `فترة الانتظار للذكاء الاصطناعي (${formatCooldownTime(cooldownRemaining)})` 
@@ -1288,12 +1288,12 @@ export default function TaskDrawer({
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
         /* Commented out original theme-unaware drawer background for safety rules
         className={cn(
-          "h-[100dvh] bg-zinc-950/95 backdrop-blur-xl border-t md:border-l md:border-t-0 border-white/5 shadow-2xl flex flex-col justify-between rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden z-[9999] transition-all duration-300",
+          "h-[100dvh] bg-zinc-950/95 backdrop-blur-xl border-t md:border-l md:border-t-0 border-[var(--border)] dark:border-white/5 shadow-2xl flex flex-col justify-between rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden z-[9999] transition-all duration-300",
           isExpanded ? "w-full md:w-[90vw] max-w-5xl" : "w-full sm:w-[450px] max-w-md"
         )}
         */
         className={cn(
-          "h-[100dvh] bg-[var(--background)] dark:bg-[#080810] text-[var(--text-primary)] transition-colors duration-200 border-t md:border-l md:border-t-0 border-[var(--border)] dark:border-white/5 shadow-2xl flex flex-col justify-between rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden z-[9999]",
+          "h-[100dvh] bg-[var(--background)] dark:bg-[#080810] text-[var(--text-primary)] transition-colors duration-200 border-t md:border-l md:border-t-0 border-[var(--border)] dark:border-[var(--border)] dark:border-white/5 shadow-2xl flex flex-col justify-between rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden z-[9999]",
           isExpanded ? "w-full md:w-[90vw] max-w-5xl" : "w-full sm:w-[450px] max-w-md"
         )}
       >
@@ -1348,7 +1348,7 @@ export default function TaskDrawer({
                   />
                 </div>
                 {/* Mini video meta bar */}
-                <div className="flex justify-between items-center text-[11px] font-mono text-white/55 px-1 bg-white/[0.02] py-2 rounded-lg border border-white/5">
+                <div className="flex justify-between items-center text-[11px] font-mono text-[var(--text-muted)] dark:text-white/55 px-1 bg-[var(--background-secondary)]/50 dark:bg-white/[0.02] py-2 rounded-lg border border-[var(--border)] dark:border-white/5">
                   <span className="flex items-center gap-1.5 px-2">
                     <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: themeColor }} />
                     {t('savedProgress')}
@@ -1422,7 +1422,7 @@ export default function TaskDrawer({
 
             {/* Google Drive Attachments */}
             <div className="space-y-3">
-              <h3 className="text-[10px] font-medium text-zinc-500 mb-3 opacity-60">
+              <h3 className="text-[10px] font-medium text-[var(--text-muted)] dark:text-zinc-500 mb-3 opacity-60">
                 {isRTL ? 'المرفقات - Attachments' : 'Drive Attachments'}
               </h3>
               
@@ -1432,7 +1432,7 @@ export default function TaskDrawer({
                   <button
                     type="button"
                     onClick={() => setIsAttachOpen(!isAttachOpen)}
-                    className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 font-space text-xs text-white/90 border border-white/10 cursor-pointer"
+                    className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-[var(--background-secondary)] dark:bg-white/5 hover:bg-white/10 transition-all duration-300 font-space text-xs text-[var(--text-primary)] dark:text-white/90 border border-[var(--border)] dark:border-white/10 cursor-pointer"
                   >
                     <Paperclip className="w-3.5 h-3.5 shrink-0" />
                     <span className="font-bold">{isRTL ? 'إضافة ملحقات' : 'Attach Resource'}</span>
@@ -1446,12 +1446,12 @@ export default function TaskDrawer({
                       isAttachOpen ? "max-h-[500px] opacity-100 mt-2" : "max-h-0 opacity-0 pointer-events-none"
                     )}
                   >
-                    <div className="p-3 bg-white/[0.02] border border-white/5 rounded-md space-y-2">
+                    <div className="p-3 bg-[var(--background-secondary)]/50 dark:bg-white/[0.02] border border-[var(--border)] dark:border-white/5 rounded-md space-y-2">
                       {/* Option 1: Google Drive Link */}
                       <button
                         type="button"
                         onClick={handleGoogleDrivePicker}
-                        className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 font-space text-xs text-left cursor-pointer text-white/90"
+                        className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-[var(--background-secondary)] dark:bg-white/5 hover:bg-white/10 transition-all duration-300 font-space text-xs text-left cursor-pointer text-[var(--text-primary)] dark:text-white/90"
                       >
                         <img src="/Google_Drive_icon_(2020).svg" alt="Drive" className="w-3.5 h-3.5 shrink-0" />
                         <span className="font-medium">
@@ -1471,7 +1471,7 @@ export default function TaskDrawer({
                           setShowManualLink(!showManualLink);
                           setShowYoutubeInput(false);
                         }}
-                        className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/80 hover:text-white"
+                        className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-[var(--background-secondary)] dark:bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-[var(--text-secondary)] dark:text-white/80 hover:text-white"
                       >
                         <LinkIcon className="w-3.5 h-3.5 shrink-0" />
                         <span className="font-medium">{isRTL ? 'إضافة رابط يدوياً' : 'Add Manual Link'}</span>
@@ -1485,7 +1485,7 @@ export default function TaskDrawer({
                             setShowYoutubeInput(!showYoutubeInput);
                             setShowManualLink(false);
                           }}
-                          className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/80 hover:text-white"
+                          className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-[var(--background-secondary)] dark:bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-[var(--text-secondary)] dark:text-white/80 hover:text-white"
                         >
                           <Video className="w-3.5 h-3.5 shrink-0 text-red-500" />
                           <span className="font-medium">{isRTL ? 'ربط فيديو يوتيوب' : 'Attach YouTube Video'}</span>
@@ -1499,14 +1499,14 @@ export default function TaskDrawer({
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="flex flex-col gap-2 overflow-hidden pt-2 border-t border-white/5"
+                            className="flex flex-col gap-2 overflow-hidden pt-2 border-t border-[var(--border)] dark:border-white/5"
                           >
                             <input
                               type="text"
                               placeholder={isRTL ? 'اسم المرفق...' : 'Attachment name...'}
                               value={manualLinkName}
                               onChange={e => setManualLinkName(e.target.value)}
-                              className="w-full bg-zinc-900/80 border border-white/8 py-2 px-3 font-space text-xs font-medium text-white outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
+                              className="w-full bg-zinc-900/80 border border-white/8 py-2 px-3 font-space text-xs font-medium text-white outline-none placeholder:text-[var(--text-muted)]/30 dark:text-white/20 transition-all rounded-md focus:border-white/20"
                             />
                             <div className="flex gap-2">
                               <input
@@ -1514,7 +1514,7 @@ export default function TaskDrawer({
                                 placeholder="https://..."
                                 value={manualLinkUrl}
                                 onChange={e => setManualLinkUrl(e.target.value)}
-                                className="flex-1 bg-zinc-900/80 border border-white/8 py-2 px-3 font-space text-xs font-medium text-white outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
+                                className="flex-1 bg-zinc-900/80 border border-white/8 py-2 px-3 font-space text-xs font-medium text-white outline-none placeholder:text-[var(--text-muted)]/30 dark:text-white/20 transition-all rounded-md focus:border-white/20"
                               />
                               <button
                                 type="button"
@@ -1537,7 +1537,7 @@ export default function TaskDrawer({
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="flex flex-col gap-2 overflow-hidden pt-2 border-t border-white/5"
+                            className="flex flex-col gap-2 overflow-hidden pt-2 border-t border-[var(--border)] dark:border-white/5"
                           >
                             <div className="flex gap-2">
                               <input
@@ -1545,7 +1545,7 @@ export default function TaskDrawer({
                                 placeholder={isRTL ? 'رابط فيديو يوتيوب...' : 'YouTube URL...'}
                                 value={youtubeUrlInput}
                                 onChange={e => setYoutubeUrlInput(e.target.value)}
-                                className="flex-1 bg-zinc-900/80 border border-white/8 py-2 px-3 font-space text-xs font-medium text-white outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
+                                className="flex-1 bg-zinc-900/80 border border-white/8 py-2 px-3 font-space text-xs font-medium text-white outline-none placeholder:text-[var(--text-muted)]/30 dark:text-white/20 transition-all rounded-md focus:border-white/20"
                               />
                               <button
                                 type="button"
@@ -1577,25 +1577,25 @@ export default function TaskDrawer({
                       return (
                         <div
                           key={att.id || idx}
-                          className="group flex items-center justify-between gap-3 p-3.5 rounded-md border bg-transparent dark:bg-white/5 border-white/5 hover:border-white/10 hover:bg-white/10 transition-all relative overflow-hidden cursor-pointer"
+                          className="group flex items-center justify-between gap-3 p-3.5 rounded-md border bg-transparent dark:bg-[var(--background-secondary)] dark:bg-white/5 border-[var(--border)] dark:border-white/5 hover:border-[var(--border)] dark:border-white/10 hover:bg-white/10 transition-all relative overflow-hidden cursor-pointer"
                           onClick={() => window.open(att.url, '_blank')}
                         >
                           <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ backgroundColor: themeColor }} />
                           <div className="flex items-center gap-3 min-w-0 pl-1">
                             <Paperclip className="w-4 h-4 shrink-0" style={{ color: themeColor }} />
                             <div className="min-w-0">
-                              <p className="font-space font-medium text-xs text-white/90 truncate">{att.name}</p>
+                              <p className="font-space font-medium text-xs text-[var(--text-primary)] dark:text-white/90 truncate">{att.name}</p>
                               <div className="flex items-center gap-2 mt-0.5">
-                                <span className="font-space text-[9px] text-white/30">{typeKey}</span>
+                                <span className="font-space text-[9px] text-[var(--text-muted)]/50 dark:text-white/30">{typeKey}</span>
                                 {att.uploaded_by && (
                                   <div className="flex items-center gap-1.5">
-                                    <span className="text-[9px] text-white/20">•</span>
+                                    <span className="text-[9px] text-[var(--text-muted)]/30 dark:text-white/20">•</span>
                                     <img
                                       src={att.uploaded_by.avatar_url || '/avatars/omar.svg'}
                                       alt={att.uploaded_by.name || 'User'}
-                                      className="w-3.5 h-3.5 rounded-full border border-white/10"
+                                      className="w-3.5 h-3.5 rounded-full border border-[var(--border)] dark:border-white/10"
                                     />
-                                    <span className="text-[8px] text-zinc-400 font-space">
+                                    <span className="text-[8px] text-[var(--text-secondary)] dark:text-zinc-400 font-space">
                                       {att.uploaded_by.name || 'Operator'}
                                     </span>
                                   </div>
@@ -1610,7 +1610,7 @@ export default function TaskDrawer({
                                 const updated = attachments.filter((_: any, i: number) => i !== idx)
                                 await updateTask(task.id, { metadata: { ...task.metadata, attachments: updated } })
                               }}
-                              className="w-7 h-7 flex items-center justify-center border border-white/5 text-white/25 hover:border-red-500/50 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-md shrink-0 cursor-pointer"
+                              className="w-7 h-7 flex items-center justify-center border border-[var(--border)] dark:border-white/5 text-[var(--text-muted)]/40 dark:text-white/25 hover:border-red-500/50 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-md shrink-0 cursor-pointer"
                             >
                               <X className="w-3 h-3" />
                             </button>
@@ -1623,7 +1623,7 @@ export default function TaskDrawer({
               })()}
             </div>
 
-            <div className="pt-6 border-t border-white/5">
+            <div className="pt-6 border-t border-[var(--border)] dark:border-white/5">
               <TaskDrawerComments
                 task={task}
                 notes={notes}
@@ -1661,7 +1661,7 @@ export default function TaskDrawer({
                     />
                   </div>
                   {/* Mini video meta bar */}
-                  <div className="flex justify-between items-center text-[11px] font-mono text-white/55 px-1 bg-white/[0.02] py-2 rounded-lg border border-white/5">
+                  <div className="flex justify-between items-center text-[11px] font-mono text-[var(--text-muted)] dark:text-white/55 px-1 bg-[var(--background-secondary)]/50 dark:bg-white/[0.02] py-2 rounded-lg border border-[var(--border)] dark:border-white/5">
                     <span className="flex items-center gap-1.5 px-2">
                       <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: themeColor }} />
                       {t('savedProgress')}
@@ -1700,7 +1700,7 @@ export default function TaskDrawer({
             </div>
 
             {/* Right Column container: Execution & Collaboration */}
-            <div className="h-full overflow-y-auto overscroll-y-contain pr-2 custom-scrollbar space-y-6 border-l border-[var(--border)] dark:border-white/5 pl-6">
+            <div className="h-full overflow-y-auto overscroll-y-contain pr-2 custom-scrollbar space-y-6 border-l border-[var(--border)] dark:border-[var(--border)] dark:border-white/5 pl-6">
               {/* Generate AI Checklist */}
               {canEdit && finalVideoUrl && (() => {
                 const currentGoal = goals.find((g: any) => g.id === goalId || g.id === task.goal_id)
@@ -1738,7 +1738,7 @@ export default function TaskDrawer({
 
               {/* Google Drive Attachments */}
               <div className="space-y-3">
-                <h3 className="text-[10px] font-medium text-zinc-500 mb-3 opacity-60">
+                <h3 className="text-[10px] font-medium text-[var(--text-muted)] dark:text-zinc-500 mb-3 opacity-60">
                   {isRTL ? 'المرفقات - Attachments' : 'Drive Attachments'}
                 </h3>
                 
@@ -1748,7 +1748,7 @@ export default function TaskDrawer({
                     <button
                       type="button"
                       onClick={() => setIsAttachOpen(!isAttachOpen)}
-                      className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 font-space text-xs text-white/90 border border-white/10 cursor-pointer"
+                      className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-[var(--background-secondary)] dark:bg-white/5 hover:bg-white/10 transition-all duration-300 font-space text-xs text-[var(--text-primary)] dark:text-white/90 border border-[var(--border)] dark:border-white/10 cursor-pointer"
                     >
                       <Paperclip className="w-3.5 h-3.5 shrink-0" />
                       <span className="font-bold">{isRTL ? 'إضافة ملحقات' : 'Attach Resource'}</span>
@@ -1762,12 +1762,12 @@ export default function TaskDrawer({
                         isAttachOpen ? "max-h-[500px] opacity-100 mt-2" : "max-h-0 opacity-0 pointer-events-none"
                       )}
                     >
-                      <div className="p-3 bg-white/[0.02] border border-white/5 rounded-md space-y-2">
+                      <div className="p-3 bg-[var(--background-secondary)]/50 dark:bg-white/[0.02] border border-[var(--border)] dark:border-white/5 rounded-md space-y-2">
                         {/* Option 1: Google Drive Link */}
                         <button
                           type="button"
                           onClick={handleGoogleDrivePicker}
-                          className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 font-space text-xs text-left cursor-pointer text-white/90"
+                          className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-[var(--background-secondary)] dark:bg-white/5 hover:bg-white/10 transition-all duration-300 font-space text-xs text-left cursor-pointer text-[var(--text-primary)] dark:text-white/90"
                         >
                           <img src="/Google_Drive_icon_(2020).svg" alt="Drive" className="w-3.5 h-3.5 shrink-0" />
                           <span className="font-medium">
@@ -1787,7 +1787,7 @@ export default function TaskDrawer({
                             setShowManualLink(!showManualLink);
                             setShowYoutubeInput(false);
                           }}
-                          className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/80 hover:text-white"
+                          className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-[var(--background-secondary)] dark:bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-[var(--text-secondary)] dark:text-white/80 hover:text-white"
                         >
                           <LinkIcon className="w-3.5 h-3.5 shrink-0" />
                           <span className="font-medium">{isRTL ? 'إضافة رابط يدوياً' : 'Add Manual Link'}</span>
@@ -1801,7 +1801,7 @@ export default function TaskDrawer({
                               setShowYoutubeInput(!showYoutubeInput);
                               setShowManualLink(false);
                             }}
-                            className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/80 hover:text-white"
+                            className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-[var(--background-secondary)] dark:bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-[var(--text-secondary)] dark:text-white/80 hover:text-white"
                           >
                             <Video className="w-3.5 h-3.5 shrink-0 text-red-500" />
                             <span className="font-medium">{isRTL ? 'ربط فيديو يوتيوب' : 'Attach YouTube Video'}</span>
@@ -1825,25 +1825,25 @@ export default function TaskDrawer({
                       return (
                         <div
                           key={att.id || idx}
-                          className="group flex items-center justify-between gap-3 p-3.5 rounded-md border bg-transparent dark:bg-white/5 border-white/5 hover:border-white/10 hover:bg-white/10 transition-all relative overflow-hidden cursor-pointer"
+                          className="group flex items-center justify-between gap-3 p-3.5 rounded-md border bg-transparent dark:bg-[var(--background-secondary)] dark:bg-white/5 border-[var(--border)] dark:border-white/5 hover:border-[var(--border)] dark:border-white/10 hover:bg-white/10 transition-all relative overflow-hidden cursor-pointer"
                           onClick={() => window.open(att.url, '_blank')}
                         >
                           <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ backgroundColor: themeColor }} />
                           <div className="flex items-center gap-3 min-w-0 pl-1">
                             <Paperclip className="w-4 h-4 shrink-0" style={{ color: themeColor }} />
                             <div className="min-w-0">
-                              <p className="font-space font-medium text-xs text-white/90 truncate">{att.name}</p>
+                              <p className="font-space font-medium text-xs text-[var(--text-primary)] dark:text-white/90 truncate">{att.name}</p>
                               <div className="flex items-center gap-2 mt-0.5">
-                                <span className="font-space text-[9px] text-white/30">{typeKey}</span>
+                                <span className="font-space text-[9px] text-[var(--text-muted)]/50 dark:text-white/30">{typeKey}</span>
                                 {att.uploaded_by && (
                                   <div className="flex items-center gap-1.5">
-                                    <span className="text-[9px] text-white/20">•</span>
+                                    <span className="text-[9px] text-[var(--text-muted)]/30 dark:text-white/20">•</span>
                                     <img
                                       src={att.uploaded_by.avatar_url || '/avatars/omar.svg'}
                                       alt={att.uploaded_by.name || 'User'}
-                                      className="w-3.5 h-3.5 rounded-full border border-white/10"
+                                      className="w-3.5 h-3.5 rounded-full border border-[var(--border)] dark:border-white/10"
                                     />
-                                    <span className="text-[8px] text-zinc-400 font-space">
+                                    <span className="text-[8px] text-[var(--text-secondary)] dark:text-zinc-400 font-space">
                                       {att.uploaded_by.name || 'Operator'}
                                     </span>
                                   </div>
@@ -1858,7 +1858,7 @@ export default function TaskDrawer({
                                 const updated = attachments.filter((_: any, i: number) => i !== idx)
                                 await updateTask(task.id, { metadata: { ...task.metadata, attachments: updated } })
                               }}
-                              className="w-7 h-7 flex items-center justify-center border border-white/5 text-white/25 hover:border-red-500/50 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-md shrink-0 cursor-pointer"
+                              className="w-7 h-7 flex items-center justify-center border border-[var(--border)] dark:border-white/5 text-[var(--text-muted)]/40 dark:text-white/25 hover:border-red-500/50 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-md shrink-0 cursor-pointer"
                             >
                               <X className="w-3 h-3" />
                             </button>
@@ -1893,9 +1893,9 @@ export default function TaskDrawer({
         {/* Fixed Thumb-Zone Footer */}
         {canEdit && (
           /* Commented out original dark theme footer for safety rules
-          <div className="w-full z-[60] bg-[#09090b]/98 border-t border-white/5 px-4 py-3 flex items-center justify-center shrink-0 relative">
+          <div className="w-full z-[60] bg-[#09090b]/98 border-t border-[var(--border)] dark:border-white/5 px-4 py-3 flex items-center justify-center shrink-0 relative">
           */
-          <div className="w-full z-[60] bg-[var(--background)]/98 dark:bg-[#09090b]/98 border-t border-[var(--border)] dark:border-white/5 px-4 py-3 flex items-center justify-center shrink-0 relative">
+          <div className="w-full z-[60] bg-[var(--background)]/98 dark:bg-[#09090b]/98 border-t border-[var(--border)] dark:border-[var(--border)] dark:border-white/5 px-4 py-3 flex items-center justify-center shrink-0 relative">
             <div className="flex items-center justify-center gap-6">
               {/* Pomodoro / Focus Button */}
               <button
@@ -1926,7 +1926,7 @@ export default function TaskDrawer({
                     ? "bg-orange-500/10 border border-orange-500/30 shadow-[0_0_12px_rgba(249,115,22,0.15)]"
                     : isCurrentTaskFocus && !isCurrentFocusActive
                       ? "bg-orange-500/5 border border-orange-500/20"
-                      : "bg-zinc-200/40 dark:bg-white/[0.03] border border-[var(--border)] dark:border-white/[0.06] hover:bg-zinc-200/60 dark:hover:bg-white/[0.06] hover:border-[var(--border)] dark:hover:border-white/10"
+                      : "bg-zinc-200/40 dark:bg-white/[0.03] border border-[var(--border)] dark:border-white/[0.06] hover:bg-zinc-200/60 dark:hover:bg-white/[0.06] hover:border-[var(--border)] dark:hover:border-[var(--border)] dark:border-white/10"
                 )}
               >
                 {isCurrentFocusActive ? (
@@ -1936,7 +1936,7 @@ export default function TaskDrawer({
                 )}
                 <span className={cn(
                   "text-[10px] font-medium",
-                  isCurrentFocusActive ? "text-orange-500" : isCurrentTaskFocus ? "text-orange-400" : "text-zinc-400"
+                  isCurrentFocusActive ? "text-orange-500" : isCurrentTaskFocus ? "text-orange-400" : "text-[var(--text-secondary)] dark:text-zinc-400"
                 )}>
                   {isCurrentFocusActive 
                     ? (isRTL ? "إيقاف" : "Pause")
@@ -1977,17 +1977,17 @@ export default function TaskDrawer({
                   "flex items-center gap-2.5 px-4 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer min-w-[120px] justify-center",
                   task.is_completed
                     ? "bg-emerald-500/10 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.15)]"
-                    : "bg-zinc-200/40 dark:bg-white/[0.03] border border-[var(--border)] dark:border-white/[0.06] hover:bg-zinc-200/60 dark:hover:bg-white/[0.06] hover:border-[var(--border)] dark:hover:border-white/10"
+                    : "bg-zinc-200/40 dark:bg-white/[0.03] border border-[var(--border)] dark:border-white/[0.06] hover:bg-zinc-200/60 dark:hover:bg-white/[0.06] hover:border-[var(--border)] dark:hover:border-[var(--border)] dark:border-white/10"
                 )}
               >
                 {task.is_completed ? (
                   <ListTodo className="w-4 h-4 text-emerald-500" />
                 ) : (
-                  <Circle className="w-4 h-4 text-zinc-500" />
+                  <Circle className="w-4 h-4 text-[var(--text-muted)] dark:text-zinc-500" />
                 )}
                 <span className={cn(
                   "text-[10px] font-medium",
-                  task.is_completed ? "text-emerald-500" : "text-zinc-400"
+                  task.is_completed ? "text-emerald-500" : "text-[var(--text-secondary)] dark:text-zinc-400"
                 )}>
                 {task.is_completed 
                   ? (isRTL ? "تم" : "Done") 
@@ -2008,7 +2008,7 @@ export default function TaskDrawer({
                       onClose()
                     }
                   }}
-                  className="w-9 h-9 flex items-center justify-center bg-transparent hover:bg-red-500/10 text-zinc-500 hover:text-red-500 rounded-xl transition-all cursor-pointer"
+                  className="w-9 h-9 flex items-center justify-center bg-transparent hover:bg-red-500/10 text-[var(--text-muted)] dark:text-zinc-500 hover:text-red-500 rounded-xl transition-all cursor-pointer"
                   // Commented out per safety rules:
                   // title="DELETE TASK"
                   title="Delete Task"
