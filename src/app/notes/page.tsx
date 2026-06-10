@@ -31,23 +31,48 @@ function WikiSearch({ onInsert, color, isRTL }: WikiSearchProps) {
     
     // Arabic char detection logic
     const hasArabic = /[\u0600-\u06FF]/.test(query)
-    const domain = hasArabic ? 'ar' : 'en'
-    const url = `https://${domain}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query.trim())}`
+    let domain = hasArabic ? 'ar' : 'en'
 
     try {
-      const res = await fetch(url)
-      if (!res.ok) {
-        throw new Error('Not found')
+      // Step 1: Query Elasticsearch API for matches
+      let searchUrl = `https://${domain}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query.trim())}&format=json&origin=*`
+      let res = await fetch(searchUrl)
+      let searchData = await res.json()
+
+      // Fallback to English Wikipedia if Arabic search yields no results and query has English characters
+      if (domain === 'ar' && (!searchData.query?.search || searchData.query.search.length === 0) && /[a-zA-Z]/.test(query)) {
+        domain = 'en'
+        searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query.trim())}&format=json&origin=*`
+        res = await fetch(searchUrl)
+        searchData = await res.json()
       }
-      const data = await res.ok ? await res.json() : null
-      if (data && data.extract) {
-        onInsert(data.extract)
+
+      const results = searchData.query?.search || []
+      if (results.length === 0) {
+        setError(isRTL ? 'لم نجد مقالات مطابقة. حاول إعادة الصياغة.' : 'No matching articles found. Try rephrasing.')
+        setLoading(false)
+        return
+      }
+
+      const topResultTitle = results[0].title
+
+      // Step 2: Fetch details extract for the top title match
+      const extractUrl = `https://${domain}.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&titles=${encodeURIComponent(topResultTitle)}&format=json&origin=*`
+      const extractRes = await fetch(extractUrl)
+      const extractData = await extractRes.json()
+
+      const pages = extractData.query?.pages || {}
+      const pageObj = Object.values(pages)[0] as any
+      const extractText = pageObj?.extract
+
+      if (extractText) {
+        onInsert(extractText)
         setQuery('')
       } else {
-        throw new Error('No extract')
+        throw new Error('No extract found')
       }
     } catch (e) {
-      setError(isRTL ? 'لم نجد نتائج لهذا الموضوع' : 'No results found for this topic')
+      setError(isRTL ? 'لم نجد مقالات مطابقة. حاول إعادة الصياغة.' : 'No matching articles found. Try rephrasing.')
     } finally {
       setLoading(false)
     }
