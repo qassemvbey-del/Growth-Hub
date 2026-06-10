@@ -1072,22 +1072,22 @@ export default function SquadGoalsPage() {
     }, 0)
 
     // Capacity guard: only check if syncing to dashboard
-    if (syncOnCreate) {
-      const newSlots = SIZE_SLOTS[newSize] ?? 1
-      if (usedSlots + newSlots > 9) {
-        showToast(
-          /* isRTL
-            ? `سعة المحطة ممتلئة (${usedSlots.toFixed(1).replace('.0','')}/9 فتحات) - أتمم أو أزل مهمات موجودة.`
-            : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0','')}/9 SLOTS) — Complete or un-equip existing goals.`, */
-          isRTL
-            ? `سعة المحطة مليانة (${usedSlots.toFixed(1).replace('.0','')}/9 فتحات) - خلص أو شيل Goals موجودة.`
-            : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0','')}/9 SLOTS) — Complete or un-equip existing goals.`,
-          'warning'
-        )
-        playError()
-        return
-      }
-    }
+    // if (syncOnCreate) {
+    //   const newSlots = SIZE_SLOTS[newSize] ?? 1
+    //   if (usedSlots + newSlots > 9) {
+    //     showToast(
+    //       /* isRTL
+    //         ? `سعة المحطة ممتلئة (${usedSlots.toFixed(1).replace('.0','')}/9 فتحات) - أتمم أو أزل مهمات موجودة.`
+    //         : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0','')}/9 SLOTS) — Complete or un-equip existing goals.`, */
+    //       isRTL
+    //         ? `سعة المحطة مليانة (${usedSlots.toFixed(1).replace('.0','')}/9 فتحات) - خلص أو شيل Goals موجودة.`
+    //         : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0','')}/9 SLOTS) — Complete or un-equip existing goals.`,
+    //       'warning'
+    //     )
+    //     playError()
+    //     return
+    //   }
+    // }
 
     // 2. Perform Feature 3 checks (Context Switching Warning):
     if (!bypassWarning) {

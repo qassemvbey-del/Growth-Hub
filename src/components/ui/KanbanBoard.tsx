@@ -139,7 +139,7 @@ export default function KanbanBoard({
   }
 
   return (
-    <div className="flex lg:grid lg:grid-cols-3 overflow-x-auto lg:overflow-x-visible gap-4 lg:gap-6 w-full pt-4 select-none snap-x scrollbar-none pb-4">
+    <div className="flex md:grid md:grid-cols-3 overflow-x-auto snap-x snap-mandatory gap-4 w-full pb-4 custom-scrollbar">
       {columns.map((col) => {
         const colTasks = tasks.filter(t => getTaskColumn(t) === col.id)
         const isOver = dragOverColumnId === col.id
@@ -151,7 +151,7 @@ export default function KanbanBoard({
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, col.id)}
             className={cn(
-              "flex flex-col gap-4 p-4 rounded-2xl min-h-[500px] lg:min-h-[550px] transition-all duration-300 bg-[var(--background-secondary)] dark:bg-zinc-950/40 border border-[var(--border)] dark:border-white/5 backdrop-blur-md relative overflow-hidden w-[80vw] lg:w-auto shrink-0 snap-center lg:shrink",
+              "w-[85vw] md:w-full max-w-[310px] md:max-w-none shrink-0 snap-center flex flex-col h-auto min-h-[52px] max-h-[72vh] rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-[var(--border)] p-2 transition-all overflow-hidden relative",
               isOver ? "border-dashed" : ""
             )}
             style={isOver ? { borderColor: col.color, boxShadow: `0 0 20px ${col.color}22` } : {}}
@@ -179,8 +179,7 @@ export default function KanbanBoard({
 
             {/* Tasks Container */}
             <div 
-              className="flex-1 flex flex-col gap-3 overflow-y-auto pr-1 max-h-[600px] scrollbar-none"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              className="flex-1 flex flex-col gap-3 overflow-y-auto scrollbar-thin pr-1"
             >
               <AnimatePresence mode='popLayout'>
                 {colTasks.map((task) => {

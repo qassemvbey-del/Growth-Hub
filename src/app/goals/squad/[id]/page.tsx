@@ -164,6 +164,7 @@ export default function MissionDetailPage() {
   const [loading, setLoading] = useState(true)
   const [activeView, setActiveView] = useState<'list' | 'board'>('list')
   const [activeViewInitialized, setActiveViewInitialized] = useState(false)
+  const [pinnedView, setPinnedView] = useState<'list' | 'board' | null>(null)
   const [timeFilter, setTimeFilter] = useState<'ALL' | 'WEEK' | 'OVERDUE' | 'today'>('ALL')
   const [selectedTaskState, setSelectedTaskState] = useState<any | null>(null)
   const [showReportModal, setShowReportModal] = useState(false)
@@ -366,6 +367,17 @@ export default function MissionDetailPage() {
     return () => window.removeEventListener('click', handleGlobalClick)
   }, [])
 
+  const handleTogglePin = () => {
+    playBlip()
+    if (pinnedView === activeView) {
+      localStorage.removeItem(`default_view_${id}`)
+      setPinnedView(null)
+    } else {
+      localStorage.setItem(`default_view_${id}`, activeView)
+      setPinnedView(activeView)
+    }
+  }
+
   const handleShare = () => {
     playBlip()
     setShowShareModal(true)
@@ -555,15 +567,19 @@ export default function MissionDetailPage() {
 
   useEffect(() => {
     setActiveViewInitialized(false)
+    if (typeof window !== 'undefined') {
+      setPinnedView(localStorage.getItem(`default_view_${id}`) as 'list' | 'board' | null)
+    }
   }, [id])
 
   useEffect(() => {
     if (mission && !activeViewInitialized) {
-      const defaultView = mission.metadata?.defaultView || 'list'
+      const savedView = typeof window !== 'undefined' ? localStorage.getItem(`default_view_${id}`) as 'list' | 'board' | null : null
+      const defaultView = savedView || mission.metadata?.defaultView || 'list'
       setActiveView(defaultView)
       setActiveViewInitialized(true)
     }
-  }, [mission, activeViewInitialized])
+  }, [mission, activeViewInitialized, id])
 
   // Close all modals event listener from global Shell ESC matrix
   useEffect(() => {
@@ -1456,17 +1472,17 @@ export default function MissionDetailPage() {
         const thisMissionSlots = SIZE_SLOTS[mission.size?.toLowerCase()] ?? 1
         const totalAfter = usedSlots + thisMissionSlots
 
-        if (totalAfter > 9) {
-          const remaining = Math.max(0, 9 - usedSlots).toFixed(1).replace('.0', '')
-          showToast(
-            isRTL
-              ? `سعة المحطة ممتلئة (${usedSlots.toFixed(1).replace('.0','')}/9 فتحات) - أتمم أو أزل مهمات موجودة.`
-              : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0','')}/9 SLOTS) — Complete or un-equip existing goals.`,
-            'warning'
-          )
-          playError()
-          return
-        }
+        // if (totalAfter > 9) {
+        //   const remaining = Math.max(0, 9 - usedSlots).toFixed(1).replace('.0', '')
+        //   showToast(
+        //     isRTL
+        //       ? `سعة المحطة ممتلئة (${usedSlots.toFixed(1).replace('.0','')}/9 فتحات) - أتمم أو أزل مهمات موجودة.`
+        //       : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0','')}/9 SLOTS) — Complete or un-equip existing goals.`,
+        //     'warning'
+        //   )
+        //   playError()
+        //   return
+        // }
       }
     }
 
@@ -1973,39 +1989,56 @@ const { progress, isInRedZone } = useMemo(() => {
         {/* Full-width Kanban board / Tasks layout */}
         <div className="w-full space-y-8">
             <section className="space-y-8">
-           <div className="flex justify-between items-center border-b border-[var(--border)] dark:border-zinc-800/80 pb-3">
-             <h2 className="text-[10px] font-medium font-space text-[var(--text-secondary)]">
-               {isRTL ? 'قائمة المهام' : 'Tasks'}
-             </h2>
-             
-             {/* View Toggles (Icon Only) on the Far Right */}
-             <div className="flex items-center gap-1 p-0.5 bg-[var(--card)] dark:bg-black/40 border border-[var(--border)] dark:border-white/5 backdrop-blur-md rounded-md">
-               <button
-                 type="button"
-                 onClick={() => { playBlip(); setActiveView('list'); }}
-                 className={cn(
-                   "p-1.5 rounded transition-colors cursor-pointer",
-                    activeView === 'list' ? "text-white" : "text-[var(--text-muted)] dark:text-white/40 hover:text-[var(--text-primary)] dark:hover:text-white/70"
-                 )}
-                 style={activeView === 'list' ? { color: missionColor, backgroundColor: `${missionColor}15` } : {}}
-                 title={isRTL ? 'عرض القائمة' : 'List View'}
-               >
-                 <List className="w-4 h-4" />
-               </button>
-               <button
-                 type="button"
-                 onClick={() => { playBlip(); setActiveView('board'); }}
-                 className={cn(
-                   "p-1.5 rounded transition-colors cursor-pointer",
-                    activeView === 'board' ? "text-white" : "text-[var(--text-muted)] dark:text-white/40 hover:text-[var(--text-primary)] dark:hover:text-white/70"
-                 )}
-                 style={activeView === 'board' ? { color: missionColor, backgroundColor: `${missionColor}15` } : {}}
-                 title={isRTL ? 'عرض كانبان' : 'Board View'}
-               >
-                 <Kanban className="w-4 h-4" />
-               </button>
-             </div>
-           </div>
+            <div className="flex justify-between items-center border-b border-[var(--border)] dark:border-zinc-800/80 pb-3">
+              <h2 className="text-[10px] font-medium font-space text-[var(--text-secondary)]">
+                {isRTL ? 'قائمة المهام' : 'Tasks'}
+              </h2>
+              
+              {/* View Toggles (Icon Only) on the Far Right */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={handleTogglePin}
+                  className={cn(
+                    "p-1.5 rounded transition-all cursor-pointer flex items-center justify-center border",
+                    pinnedView === activeView 
+                      ? "border-[var(--border)] bg-[var(--theme-color)]/10 text-[var(--theme-color)] shadow-[0_0_10px_rgba(20,184,166,0.2)]" 
+                      : "border-transparent text-[var(--text-muted)] dark:text-white/40 hover:text-[var(--text-primary)] dark:hover:text-white/70"
+                  )}
+                  style={pinnedView === activeView ? { color: missionColor, borderColor: `${missionColor}44`, backgroundColor: `${missionColor}10` } : {}}
+                  title={pinnedView === activeView ? (isRTL ? 'إلغاء تثبيت العرض المفضل' : 'Unpin Favorite View') : (isRTL ? 'تثبيت كعرض مفضل' : 'Pin Favorite View')}
+                >
+                  <Pin className={cn("w-3.5 h-3.5", pinnedView === activeView ? "fill-current" : "")} />
+                </button>
+
+                <div className="flex items-center gap-1 p-0.5 bg-[var(--card)] dark:bg-black/40 border border-[var(--border)] dark:border-white/5 backdrop-blur-md rounded-md">
+                  <button
+                    type="button"
+                    onClick={() => { playBlip(); setActiveView('list'); }}
+                    className={cn(
+                      "p-1.5 rounded transition-colors cursor-pointer",
+                       activeView === 'list' ? "text-white" : "text-[var(--text-muted)] dark:text-white/40 hover:text-[var(--text-primary)] dark:hover:text-white/70"
+                    )}
+                    style={activeView === 'list' ? { color: missionColor, backgroundColor: `${missionColor}15` } : {}}
+                    title={isRTL ? 'عرض القائمة' : 'List View'}
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { playBlip(); setActiveView('board'); }}
+                    className={cn(
+                      "p-1.5 rounded transition-colors cursor-pointer",
+                       activeView === 'board' ? "text-white" : "text-[var(--text-muted)] dark:text-white/40 hover:text-[var(--text-primary)] dark:hover:text-white/70"
+                    )}
+                    style={activeView === 'board' ? { color: missionColor, backgroundColor: `${missionColor}15` } : {}}
+                    title={isRTL ? 'عرض كانبان' : 'Board View'}
+                  >
+                    <Kanban className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
 
            {/* Smart Time Filters wrapped underneath the header row */}
            <div className="flex flex-wrap gap-2 py-2 p-3 bg-[var(--background-secondary)] dark:bg-zinc-900/30 border border-[var(--border)] dark:border-white/5 rounded-lg">

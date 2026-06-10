@@ -160,16 +160,16 @@ export default function GlobalCreateGoalModal() {
         }, 0)
 
         const newSlots = SIZE_SLOTS[newSize] ?? 1
-        if (usedSlots + newSlots > 9) {
-          showToast(
-            isRTL
-              ? `سعة الـ Dashboard ممتلية (${usedSlots.toFixed(1).replace('.0', '')}/9) — خلص أو شيل Goals موجودة.`
-              : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0', '')}/9 SLOTS) — Complete or un-equip existing goals.`,
-            'warning'
-          )
-          playError()
-          return
-        }
+        // if (usedSlots + newSlots > 9) {
+        //   showToast(
+        //     isRTL
+        //       ? `سعة الـ Dashboard ممتلية (${usedSlots.toFixed(1).replace('.0', '')}/9) — خلص أو شيل Goals موجودة.`
+        //       : `FOCUS CAPACITY FULL (${usedSlots.toFixed(1).replace('.0', '')}/9 SLOTS) — Complete or un-equip existing goals.`,
+        //     'warning'
+        //   )
+        //   playError()
+        //   return
+        // }
       }
 
       const metadataPayload: any = { type: goalType }

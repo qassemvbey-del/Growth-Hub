@@ -113,37 +113,48 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
 
     setLoading(true)
     try {
-      // 1. Fetch playlist items
-      const itemsRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&maxResults=50&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}`)
-      const itemsData = await itemsRes.json()
+      // 1. Fetch playlist items recursively
+      let items: any[] = []
+      let nextPageToken = ''
+      
+      do {
+        const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&maxResults=50&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`
+        const itemsRes = await fetch(url)
+        const itemsData = await itemsRes.json()
 
-      if (itemsData.error) {
-        if (itemsData.error.errors?.[0]?.reason === 'playlistNotFound' || itemsData.error.code === 404) {
-          setError(isRTL ? 'تم رفض الوصول - قائمة خاصة' : 'Access Denied - Private Playlist')
-        } else {
-          setError(`API Error - ${itemsData.error.message || 'Unknown Reason'}`)
+        if (itemsData.error) {
+          if (itemsData.error.errors?.[0]?.reason === 'playlistNotFound' || itemsData.error.code === 404) {
+            setError(isRTL ? 'تم رفض الوصول - قائمة خاصة' : 'Access Denied - Private Playlist')
+          } else {
+            setError(`API Error - ${itemsData.error.message || 'Unknown Reason'}`)
+          }
+          setLoading(false)
+          return
         }
-        setLoading(false)
-        return
-      }
 
-      const items = itemsData.items || []
+        items = [...items, ...(itemsData.items || [])]
+        nextPageToken = itemsData.nextPageToken || ''
+      } while (nextPageToken)
+
       if (items.length === 0) {
         setError(isRTL ? 'خلاصة فارغة - لم يتم العثور على فيديوهات' : 'Empty Playlist - No Videos Found')
         setLoading(false)
         return
       }
 
-      const videoIds = items.map((it: any) => it.contentDetails.videoId).join(',')
-
-      // 2. Fetch video details for durations
-      const videosRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoIds}&key=${YOUTUBE_API_KEY}`)
-      const videosData = await videosRes.json()
-      
+      // 2. Fetch video details for durations in chunks of up to 50
       const durationMap: Record<string, string> = {}
-      videosData.items.forEach((v: any) => {
-        durationMap[v.id] = v.contentDetails.duration
-      })
+      const allVideoIds = items.map((it: any) => it.contentDetails.videoId)
+      for (let i = 0; i < allVideoIds.length; i += 50) {
+        const chunk = allVideoIds.slice(i, i + 50).join(',')
+        const videosRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${chunk}&key=${YOUTUBE_API_KEY}`)
+        const videosData = await videosRes.json()
+        if (videosData.items) {
+          videosData.items.forEach((v: any) => {
+            durationMap[v.id] = v.contentDetails.duration
+          })
+        }
+      }
 
       const rawTitles = items.map((it: any) => it.snippet.title)
       const cleanTitles = await cleanPlaylistTitles(rawTitles)
