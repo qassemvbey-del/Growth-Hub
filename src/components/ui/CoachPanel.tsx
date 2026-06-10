@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { chatWithCoach } from '@/app/actions/ai-magic'
 import { useGrowth } from '@/context/GrowthContext'
 import { useSound } from '@/context/SoundContext'
+import { useTrack } from '@/hooks/useTrack'
 
 interface CoachPanelProps {
   isOpen: boolean
@@ -26,6 +27,7 @@ const IconMap: Record<string, React.ComponentType<any>> = {
 export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProps) {
   const { profile, setLastAiMessage, currentTheme, tasksCompletedToday, isRTL } = useGrowth()
   const { playNeuralLink, playBlip } = useSound()
+  const { track } = useTrack()
   const [response, setResponse] = useState(profile?.language === 'ar' ? 'جاهز، إيه اللي تحب تعمله؟' : 'What do you need help with?')
   const [isLoading, setIsLoading] = useState(false)
   const [energy, setEnergy] = useState<number>(3)
@@ -57,6 +59,12 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
     if (isOpen) checkEnergy()
   }, [isOpen])
 
+  React.useEffect(() => {
+    if (isOpen) {
+      track('coach_opened')
+    }
+  }, [isOpen, track])
+
   const isArabic = /[\u0600-\u06FF]/.test(response)
 
   const personality = React.useMemo(() => {
@@ -74,6 +82,7 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
     if (isLoading || energy <= 0) return
     setIsLoading(true)
     playNeuralLink()
+    track('coach_action', { action: actionType })
 
     // Visual loading prompt (Point 4)
     setResponse(profile?.language === 'ar' ? 'جاري فحص وتحليل خلايا البيانات الحية...' : 'ANALYZING_USER_DATA...')

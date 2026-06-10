@@ -51,35 +51,92 @@
 }
 
 :root {
+  /* Commented out per rule "Never delete code, only comment it out"
   --bg-base: #f8fafc;
   --text-base: #0f172a;
   --bg-surface: #ffffff;
   
-  /* Light mode styles */
   --card-bg: #E8EFF2;
   --card-border: #C8D8DF;
   --text-primary: #0a0a0a;
   --text-secondary: rgba(0,0,0,0.6);
   --input-bg: rgba(0,0,0,0.05);
   --sidebar-bg: #e8e8e8;
+  */
+
+  --background: #F2F6F8;
+  --background-secondary: #E8EFF2;
+  --card: #E8EFF2;
+  --card-hover: #DDE6EA;
+  --border: rgba(0,0,0,0.08);
+  --text-primary: #1A2428;
+  --text-secondary: #5A7280;
+  --text-muted: #8A9FA8;
+  --sidebar-bg: #EAF0F3;
+  --active-nav-text: #f97316;
+  --active-nav-bg: rgba(249, 115, 22, 0.1);
+
+  --bg-base: var(--background);
+  --text-base: var(--text-primary);
+  --bg-surface: var(--card);
+  --card-bg: var(--card);
+  --card-border: var(--border);
+  --input-bg: rgba(0,0,0,0.05);
 
   --font-heading: var(--font-heading);
   --font-body: var(--font-body);
   --font-arabic: var(--font-arabic);
 }
 
-:root.dark {
+.light,
+[data-theme="light"] {
+  --background: #F2F6F8;
+  --background-secondary: #E8EFF2;
+  --card: #E8EFF2;
+  --card-hover: #DDE6EA;
+  --border: rgba(0,0,0,0.08);
+  --text-primary: #1A2428;
+  --text-secondary: #5A7280;
+  --text-muted: #8A9FA8;
+  --sidebar-bg: #EAF0F3;
+  --active-nav-text: #f97316;
+  --active-nav-bg: rgba(249, 115, 22, 0.1);
+}
+
+:root.dark,
+.dark,
+[data-theme="dark"] {
+  /* Commented out per rule "Never delete code, only comment it out"
   --bg-base: #000000;
   --text-base: #ffffff;
   --bg-surface: #0a0a0a;
   
-  /* Dark mode styles */
   --card-bg: #1a1a1a;
   --card-border: rgba(255,255,255,0.1);
   --text-primary: #ffffff;
   --text-secondary: #ffffff;
   --input-bg: rgba(255,255,255,0.05);
   --sidebar-bg: #0a0a0a;
+  */
+
+  --background: #000000;
+  --background-secondary: #0a0a0a;
+  --card: #1a1a1a;
+  --card-hover: #262626;
+  --border: rgba(255,255,255,0.1);
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --text-muted: rgba(255,255,255,0.5);
+  --sidebar-bg: #0a0a0a;
+  --active-nav-text: var(--theme-color);
+  --active-nav-bg: color-mix(in srgb, var(--theme-color) 15%, transparent);
+
+  --bg-base: var(--background);
+  --text-base: var(--text-primary);
+  --bg-surface: var(--card);
+  --card-bg: var(--card);
+  --card-border: var(--border);
+  --input-bg: rgba(255,255,255,0.05);
 }
 
 @layer base {

@@ -564,7 +564,10 @@ export default function SettingsPage() {
                   {isRTL ? 'لغة الواجهة' : 'Language'}
                 </span>
               </div>
-              <div className="flex bg-zinc-900/50 p-1 rounded-lg border border-white/5 shrink-0">
+              {/* Commented out per safety rules:
+            <div className="flex bg-zinc-900/50 p-1 rounded-lg border border-white/5 shrink-0">
+            */}
+            <div className="flex bg-[var(--background-secondary)] dark:bg-zinc-900/50 p-1 rounded-lg border border-[var(--border)] dark:border-white/5 shrink-0">
                 {[
                   { key: 'en', label: 'EN' },
                   { key: 'ar', label: 'AR' }
@@ -600,7 +603,10 @@ export default function SettingsPage() {
                   {isRTL ? 'المظهر' : 'Appearance'}
                 </span>
               </div>
-              <div className="flex bg-zinc-900/50 p-1 rounded-lg border border-white/5 shrink-0">
+              {/* Commented out per safety rules:
+            <div className="flex bg-zinc-900/50 p-1 rounded-lg border border-white/5 shrink-0">
+            */}
+            <div className="flex bg-[var(--background-secondary)] dark:bg-zinc-900/50 p-1 rounded-lg border border-[var(--border)] dark:border-white/5 shrink-0">
                 {[
                   { key: 'dark', label: isRTL ? 'ليلي' : 'Dark' },
                   { key: 'light', label: isRTL ? 'نهاري' : 'Light' }
@@ -786,7 +792,10 @@ export default function SettingsPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ duration: 0.2 }}
+              /* Commented out per safety rules:
               className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl relative space-y-6 text-center"
+              */
+              className="bg-[var(--card)] dark:bg-[#0c0c0c] border border-[var(--border)] dark:border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl relative space-y-6 text-center"
               style={{ boxShadow: `0 0 40px ${currentTheme.color}15` }}
             >
               <div className="flex justify-center">
@@ -796,7 +805,10 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
+                {/* Commented out per safety rules:
                 <h3 className="font-semibold text-xl text-white leading-none">
+                */}
+                <h3 className="font-semibold text-xl text-[var(--text-primary)] dark:text-white leading-none">
                   {isRTL ? 'تسجيل الخروج' : 'Log out?'}
                 </h3>
                 <p className="text-[9px] font-medium" style={{ color: currentTheme.color }}>
@@ -804,7 +816,10 @@ export default function SettingsPage() {
                 </p>
               </div>
 
+              {/* Commented out per safety rules:
               <p className="text-sm font-space text-white/60 leading-relaxed">
+              */}
+              <p className="text-sm font-space text-[var(--text-secondary)] dark:text-white/60 leading-relaxed">
                 {isRTL 
                   ? 'هل أنت متأكد من رغبتك في تسجيل الخروج؟ نتمنى رؤيتك مجدداً في أقرب وقت.'
                   : 'Are you sure you want to log out? We hope to see you back soon, Member!'}
@@ -829,7 +844,10 @@ export default function SettingsPage() {
                     setIsLogoutModalOpen(false)
                     playBlip()
                   }}
+                  /* Commented out per safety rules:
                   className="w-full bg-transparent border border-white/10 hover:bg-white/5 text-white/60 hover:text-white py-3 font-medium text-sm rounded-xl transition-all duration-150 cursor-pointer active:scale-[0.97]"
+                  */
+                  className="w-full bg-transparent border border-[var(--border)] dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] dark:text-white/60 hover:text-[var(--text-primary)] dark:hover:text-white py-3 font-medium text-sm rounded-xl transition-all duration-150 cursor-pointer active:scale-[0.97]"
                 >
                   {isRTL ? 'إلغاء' : 'Cancel'}
                 </button>
@@ -850,7 +868,10 @@ export default function SettingsPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
+              /* Commented out per safety rules:
               className="bg-[#0c0c0c] border border-red-500/20 rounded-2xl p-6 md:p-8 max-w-lg w-full shadow-2xl relative space-y-6 flex flex-col max-h-[90vh] overflow-hidden"
+              */
+              className="bg-[var(--card)] dark:bg-[#0c0c0c] border border-red-500/20 rounded-2xl p-6 md:p-8 max-w-lg w-full shadow-2xl relative space-y-6 flex flex-col max-h-[90vh] overflow-hidden"
               style={{ boxShadow: '0 0 50px rgba(239, 68, 68, 0.15)' }}
             >
               
@@ -999,7 +1020,10 @@ export default function SettingsPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ duration: 0.2 }}
+              /* Commented out per safety rules:
               className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-6 max-w-lg w-full shadow-2xl relative flex flex-col max-h-[85vh] overflow-hidden"
+              */
+              className="bg-[var(--card)] dark:bg-[#0c0c0c] border border-[var(--border)] dark:border-white/10 rounded-2xl p-6 max-w-lg w-full shadow-2xl relative flex flex-col max-h-[85vh] overflow-hidden"
               style={{ boxShadow: `0 0 40px ${currentTheme.color}15` }}
             >
               {/* Header */}
@@ -1032,7 +1056,10 @@ export default function SettingsPage() {
                     <div
                       key={rank.id}
                       className={cn(
+                        /* Commented out per safety rules:
                         "p-4 rounded-2xl border flex items-center justify-between transition-all relative overflow-hidden backdrop-blur-md bg-black/40",
+                        */
+                        "p-4 rounded-2xl border flex items-center justify-between transition-all relative overflow-hidden backdrop-blur-md bg-[var(--background-secondary)] dark:bg-black/40 border-[var(--border)] dark:border-white/5",
                         isCurrent 
                           ? "border-[var(--card-border)] ring-1 ring-white/15 scale-[1.02]"
                           : isUnlocked

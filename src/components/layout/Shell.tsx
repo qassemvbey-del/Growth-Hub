@@ -1254,8 +1254,10 @@ export default function Shell({ children }: ShellProps) {
         'pb-24 lg:pb-8',
         showSidebar ? 'lg:ps-72 lg:max-w-none' : 'lg:max-w-none'
       )}>
-        {/* ── DESKTOP TOP BAR ── */}
+        {/* Commented out per rule "Never delete code, only comment it out"
         <header className="hidden lg:flex w-full px-8 h-16 justify-end items-center bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-black/5 dark:border-white/[0.03] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] z-[150] sticky top-0 transition-colors duration-500 relative header-target">
+        */}
+        <header className="hidden lg:flex w-full px-8 h-16 justify-end items-center bg-[var(--sidebar-bg)] dark:bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-[var(--border)] dark:border-white/[0.03] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] z-[150] sticky top-0 transition-colors duration-500 relative header-target">
           <div className="absolute -bottom-[1px] inset-inline-start-12 w-48 h-[1px] shadow-[0_0_15px_currentcolor]" style={{ backgroundColor: currentTheme.color, color: currentTheme.color }} />
 
           {/* CENTER: Core Brand Text */}
@@ -1348,8 +1350,10 @@ export default function Shell({ children }: ShellProps) {
           </div>
         </header>
 
-        {/* ── MOBILE TOP BAR ── */}
+        {/* Commented out per rule "Never delete code, only comment it out"
         <header className="flex lg:hidden w-full h-14 px-4 items-center justify-between bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-black/5 dark:border-white/[0.03] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] z-[150] sticky top-0 transition-colors duration-500 relative">
+        */}
+        <header className="flex lg:hidden w-full h-14 px-4 items-center justify-between bg-[var(--sidebar-bg)] dark:bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-[var(--border)] dark:border-white/[0.03] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] z-[150] sticky top-0 transition-colors duration-500 relative">
           {/* LEFT: Hamburger Menu Icon */}
           <div className="flex items-center order-first rtl:order-last">
             {showSidebar ? (

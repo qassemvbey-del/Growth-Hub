@@ -34,6 +34,18 @@ export default function Dashboard() {
   const [squadsList, setSquadsList] = useState<any[]>([])
   const [selectedSquadId, setSelectedSquadId] = useState<string>('')
   const [squadMembersMap, setSquadMembersMap] = useState<Record<string, any[]>>({})
+  const [isDark, setIsDark] = useState(true)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsDark(document.documentElement.classList.contains('dark'))
+      const observer = new MutationObserver(() => {
+        setIsDark(document.documentElement.classList.contains('dark'))
+      })
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+      return () => observer.disconnect()
+    }
+  }, [])
 
   const supabase = createClient()
 
@@ -360,9 +372,15 @@ export default function Dashboard() {
       {/* Shell is now in layout.tsx */}
       {/* <Shell> */}
       {/* <Shell syncedMissions={missions} onMissionsRefresh={fetchDashboardMissions}> */}
+      {/* Commented out per rule "Never delete code, only comment it out"
       <div 
         className="w-full min-h-[calc(100dvh-64px)] font-space relative animate-page-fade-in"
         style={{ background: `radial-gradient(ellipse at 50% 0%, ${currentTheme.color}45 0%, transparent 55%), radial-gradient(ellipse at 80% 20%, ${currentTheme.color}30 0%, transparent 45%)` }}
+      >
+      */}
+      <div 
+        className="w-full min-h-[calc(100dvh-64px)] font-space relative animate-page-fade-in bg-gradient-to-b from-[#E8EFF2] to-[#F2F6F8] dark:bg-transparent"
+        style={isDark ? { background: `radial-gradient(ellipse at 50% 0%, ${currentTheme.color}45 0%, transparent 55%), radial-gradient(ellipse at 80% 20%, ${currentTheme.color}30 0%, transparent 45%)` } : {}}
       >
         <div className="w-full flex flex-col py-4 sm:py-8 md:py-12 px-2 sm:px-6 md:px-12 space-y-4 sm:space-y-6 md:space-y-8 max-w-7xl mx-auto bg-transparent border-l-0 border-r-0">
         
@@ -537,6 +555,7 @@ export default function Dashboard() {
                     </option>
                   ))}
                 </select> */
+                /* Commented out per rule "Never delete code, only comment it out"
                 <select
                   value={selectedSquadId}
                   onChange={(e) => { playBlip(); setSelectedSquadId(e.target.value); }}
@@ -545,6 +564,19 @@ export default function Dashboard() {
                 >
                   {squadsList.map((sq) => (
                     <option key={sq.id} value={sq.id} className="bg-zinc-900 text-zinc-200">
+                      {sq.title}
+                    </option>
+                  ))}
+                </select>
+                */
+                <select
+                  value={selectedSquadId}
+                  onChange={(e) => { playBlip(); setSelectedSquadId(e.target.value); }}
+                  className="bg-[var(--card)] border border-[var(--border)] text-[var(--text-primary)] dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-200 rounded-lg py-1 px-2 text-[10px] sm:text-[11px] outline-none cursor-pointer truncate max-w-[90px] sm:max-w-[130px] shrink-0 font-space font-bold"
+                  style={{ colorScheme: isDark ? 'dark' : 'light', borderColor: isDark ? `${currentTheme.color}40` : 'var(--border)', color: isDark ? currentTheme.color : 'var(--text-primary)' }}
+                >
+                  {squadsList.map((sq) => (
+                    <option key={sq.id} value={sq.id} className="bg-[var(--card)] text-[var(--text-primary)] dark:bg-zinc-900 dark:text-zinc-200">
                       {sq.title}
                     </option>
                   ))}

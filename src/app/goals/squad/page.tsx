@@ -15,6 +15,7 @@ import { useSound } from '@/context/SoundContext'
 import MissionAttachmentsModal from '@/components/ui/MissionAttachmentsModal'
 import { validateContent } from '@/lib/profanityFilter'
 import { aiProfanityCheck } from '@/app/actions/profanityCheck'
+import { useTrack } from '@/hooks/useTrack'
 /*
 import { 
   Trophy, Medal, Award, Layers, Settings, Link as LinkIcon, Calendar, Paperclip, 
@@ -60,6 +61,7 @@ export default function SquadGoalsPage() {
   const { profile, t, calculateAccountability, isRTL, mounted, currentTheme, setShowAuthModal, addXp } = useGrowth()
   const { showToast } = useToast()
   const router = useRouter()
+  const { track } = useTrack()
   const { playDeploy, playBlip, playError, playClick } = useSound()
   const [missions, setMissions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -1142,6 +1144,7 @@ export default function SquadGoalsPage() {
       const { data, error } = await supabase.from('goals').insert(insertData).select().single()
       
       if (data) {
+        track('goal_created', { goal_id: data.id, title: data.title, type: data.metadata?.type || 'squad' })
         if (typeFilter === 'squad') {
           await supabase.from('goal_members').insert({
             goal_id: data.id,

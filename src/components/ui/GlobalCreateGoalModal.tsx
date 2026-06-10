@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase'
 import { validateContent } from '@/lib/profanityFilter'
 import { aiProfanityCheck } from '@/app/actions/profanityCheck'
 import { useRouter } from 'next/navigation'
+import { useTrack } from '@/hooks/useTrack'
 
 /**
  * GlobalCreateGoalModal
@@ -36,6 +37,7 @@ export default function GlobalCreateGoalModal() {
   const { playDeploy, playBlip, playError, playClick } = useSound()
   const router = useRouter()
   const supabase = createClient()
+  const { track } = useTrack()
 
   // ── Local form state ──────────────────────────────────────────────────────
   const [newTitle, setNewTitle] = useState('')
@@ -195,6 +197,7 @@ export default function GlobalCreateGoalModal() {
       const { data, error } = await supabase.from('goals').insert(insertData).select().single()
 
       if (data) {
+        track('goal_created', { goal_id: data.id, title: data.title, type: data.metadata?.type || 'solo' })
         if (goalType === 'squad') {
           await supabase.from('goal_members').insert({
             goal_id: data.id,

@@ -150,8 +150,14 @@ export default function KanbanBoard({
             onDragOver={(e) => handleDragOver(e, col.id)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, col.id)}
+            /* Commented out per rule "Never delete code, only comment it out"
             className={cn(
               "flex flex-col gap-4 p-4 rounded-2xl min-h-[500px] lg:min-h-[550px] transition-all duration-300 bg-zinc-950/40 border border-white/5 backdrop-blur-md relative overflow-hidden w-[80vw] lg:w-auto shrink-0 snap-center lg:shrink",
+              isOver ? "border-dashed" : ""
+            )}
+            */
+            className={cn(
+              "flex flex-col gap-4 p-4 rounded-2xl min-h-[500px] lg:min-h-[550px] transition-all duration-300 bg-[var(--background-secondary)] dark:bg-zinc-950/40 border border-[var(--border)] dark:border-white/5 backdrop-blur-md relative overflow-hidden w-[80vw] lg:w-auto shrink-0 snap-center lg:shrink",
               isOver ? "border-dashed" : ""
             )}
             style={isOver ? { borderColor: col.color, boxShadow: `0 0 20px ${col.color}22` } : {}}
@@ -165,7 +171,10 @@ export default function KanbanBoard({
             )}
 
             {/* Column Header Banner (Sticky with Dot Indicator) */}
+            {/* Commented out per rule "Never delete code, only comment it out"
             <div className="sticky top-0 bg-[#09090f]/95 backdrop-blur-md flex items-center justify-between pb-3 border-b border-white/5 shrink-0 z-10 pt-1">
+            */}
+            <div className="sticky top-0 bg-[var(--background-secondary)]/95 dark:bg-[#09090f]/95 backdrop-blur-md flex items-center justify-between pb-3 border-b border-[var(--border)] dark:border-white/5 shrink-0 z-10 pt-1">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full shadow-[0_0_8px_currentcolor]" style={{ backgroundColor: col.color, color: col.color }} />
                 <span className="text-[10px] font-space font-bold tracking-widest uppercase text-zinc-300">
@@ -198,8 +207,15 @@ export default function KanbanBoard({
                         onDragStart={(e) => handleDragStart(e, task.id)}
                         onDragEnd={handleDragEnd}
                         onClick={() => setSelectedTask(task)}
+                        /* Commented out per rule "Never delete code, only comment it out"
                         className={cn(
                           "p-3 rounded-lg border cursor-grab active:cursor-grabbing hover:bg-white/5 transition-all shadow-sm flex items-center justify-between gap-2.5 relative overflow-hidden select-none bg-zinc-900/40 border-white/5",
+                          isDragging ? "opacity-20 scale-95 border-dashed border-white/20" : "opacity-100",
+                          task.is_completed ? "opacity-50" : ""
+                        )}
+                        */
+                        className={cn(
+                          "p-3 rounded-lg border cursor-grab active:cursor-grabbing hover:bg-white/5 transition-all shadow-sm flex items-center justify-between gap-2.5 relative overflow-hidden select-none bg-[var(--card)] border-[var(--border)] text-[var(--text-primary)] dark:bg-zinc-900/40 dark:border-white/5 dark:text-zinc-200",
                           isDragging ? "opacity-20 scale-95 border-dashed border-white/20" : "opacity-100",
                           task.is_completed ? "opacity-50" : ""
                         )}
@@ -229,10 +245,18 @@ export default function KanbanBoard({
                           </button>
                           */}
                           
+                          {/* Commented out per rule "Never delete code, only comment it out"
                           <span 
                             className={cn(
                               "text-sm font-medium text-zinc-200 truncate",
                               task.is_completed && "text-zinc-500 line-through"
+                            )}
+                          >
+                          */}
+                          <span 
+                            className={cn(
+                              "text-sm font-medium text-[var(--text-primary)] dark:text-zinc-200 truncate",
+                              task.is_completed && "text-zinc-500 line-through opacity-55"
                             )}
                           >
                             {task.title}

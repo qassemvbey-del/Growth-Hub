@@ -1323,17 +1323,327 @@ export default function TaskDrawer({
           onToggleExpand={() => setIsExpanded(!isExpanded)}
         />
 
-        {/* Single Scrollable view content wrapper */}
-        <div className="flex-1 overflow-y-auto px-4 custom-scrollbar select-none">
-          <div className={cn("flex", isExpanded ? "flex-col md:flex-row gap-6 items-stretch" : "flex-col space-y-6")}>
-            
-            {/* Left/Start Column (60% width when expanded) */}
-            <div className={cn("space-y-6", isExpanded ? "w-full md:w-[60%] flex flex-col" : "w-full")}>
-              {/* SmartTaskPlayer Section (Strict aspect-video container with dynamic rendering) */}
+        {/* Content Area */}
+        {!isExpanded ? (
+          /* Mobile / Non-expanded layout: single scrollable column */
+          <div className="flex-1 overflow-y-auto px-4 custom-scrollbar select-none space-y-6 pb-6">
+            {/* YouTube Embed Player */}
+            {hasVideo && (
+              <div className="space-y-3 shrink-0">
+                <div className="w-full aspect-video min-h-[200px] relative rounded-xl overflow-hidden shadow-lg border bg-black/40" style={{ borderColor: `${themeColor}20` }}>
+                  <SmartTaskPlayer
+                    taskId={task.id}
+                    url={finalVideoUrl}
+                    initialProgress={videoProgress}
+                    isGuest={isGuest}
+                    themeColor={themeColor}
+                    onComplete={onComplete}
+                    onProgressUpdate={onProgressUpdate}
+                  />
+                </div>
+                {/* Mini video meta bar */}
+                <div className="flex justify-between items-center text-[11px] font-mono text-white/55 px-1 bg-white/[0.02] py-2 rounded-lg border border-white/5">
+                  <span className="flex items-center gap-1.5 px-2">
+                    <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: themeColor }} />
+                    {t('savedProgress')}
+                  </span>
+                  <span className="px-2 tracking-widest">
+                    {formatVideoTime(videoProgress)} / {formatVideoTime(resolvedDuration)}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <TaskDrawerMetadata
+              task={task}
+              themeColor={themeColor}
+              isRTL={isRTL}
+              t={t}
+              endDate={endDate}
+              isSquad={isSquad}
+              squadMembers={squadMembers}
+              currentUserId={currentUserId}
+              missionOwnerId={missionOwnerId}
+              profile={profile}
+              updateTask={onUpdateTask}
+              sendNotification={sendNotification}
+              canEdit={canEdit}
+            />
+
+            <TaskDrawerDescription
+              task={task}
+              description={description}
+              setDescription={setDescription}
+              isRTL={isRTL}
+              updateTask={onUpdateTask}
+              canEdit={canEdit}
+            />
+
+            {/* Render isolated AI Checklist button to prevent outer TaskDrawer re-renders on timer tick */}
+            {canEdit && finalVideoUrl && (() => {
+              const currentGoal = goals.find((g: any) => g.id === goalId || g.id === task.goal_id)
+              const goalTitleText = currentGoal?.title || 'Specialized Curriculum'
+              const hasAiChecklist = subtasks.some((s: any) => s.id?.startsWith('sub_ai_') || s.id?.startsWith('ai-'))
+              return (
+                <AiChecklistButton
+                  taskId={task.id}
+                  finalVideoUrl={finalVideoUrl}
+                  canEdit={canEdit}
+                  isRTL={isRTL}
+                  themeColor={themeColor}
+                  onUpdateTask={onUpdateTask}
+                  resolvedDuration={resolvedDuration}
+                  taskTitle={task.title}
+                  goalTitle={goalTitleText}
+                  hasAiChecklist={hasAiChecklist}
+                />
+              )
+            })()}
+
+            <TaskDrawerChecklist
+              task={task}
+              subtasks={subtasks}
+              newSubtaskText={newSubtaskText}
+              setNewSubtaskText={setNewSubtaskText}
+              handleAddSubtask={handleAddSubtask}
+              handleToggleSubtask={handleToggleSubtask}
+              handleDeleteSubtask={handleDeleteSubtask}
+              handleUpdateSubtask={handleUpdateSubtask}
+              isRTL={isRTL}
+              themeColor={themeColor}
+              canEdit={canEdit}
+            />
+
+            {/* Google Drive Attachments */}
+            <div className="space-y-3">
+              <h3 className="text-[10px] font-medium text-zinc-500 mb-3 opacity-60">
+                {isRTL ? 'المرفقات - Attachments' : 'Drive Attachments'}
+              </h3>
+              
+              {canAddAttachment && (
+                <div className="space-y-2">
+                  {/* Accordion Attach Resource Button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsAttachOpen(!isAttachOpen)}
+                    className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 font-space text-xs text-white/90 border border-white/10 cursor-pointer"
+                  >
+                    <Paperclip className="w-3.5 h-3.5 shrink-0" />
+                    <span className="font-bold">{isRTL ? 'إضافة ملحقات' : 'Attach Resource'}</span>
+                    <span className="ml-auto text-[10px] font-mono">{isAttachOpen ? '▲' : '▼'}</span>
+                  </button>
+
+                  {/* Accordion Expanded Submenu with smooth Tailwind transitions */}
+                  <div 
+                    className={cn(
+                      "transition-all duration-200 ease-in-out overflow-hidden space-y-2", 
+                      isAttachOpen ? "max-h-[500px] opacity-100 mt-2" : "max-h-0 opacity-0 pointer-events-none"
+                    )}
+                  >
+                    <div className="p-3 bg-white/[0.02] border border-white/5 rounded-md space-y-2">
+                      {/* Option 1: Google Drive Link */}
+                      <button
+                        type="button"
+                        onClick={handleGoogleDrivePicker}
+                        className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 font-space text-xs text-left cursor-pointer text-white/90"
+                      >
+                        <img src="/Google_Drive_icon_(2020).svg" alt="Drive" className="w-3.5 h-3.5 shrink-0" />
+                        <span className="font-medium">
+                          {isDriveConnected ? (isRTL ? 'إضافة من درايف' : 'Add from Drive') : (isRTL ? 'ربط جوجل درايف' : 'Link Google Drive')}
+                        </span>
+                        {isDriveConnected && (
+                          <span className="ml-auto text-[10px] text-emerald-500 font-bold tracking-wider animate-pulse">
+                            {isRTL ? 'متصل' : 'Connected'}
+                          </span>
+                        )}
+                      </button>
+
+                      {/* Option 2: Add Custom Link */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowManualLink(!showManualLink);
+                          setShowYoutubeInput(false);
+                        }}
+                        className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/80 hover:text-white"
+                      >
+                        <LinkIcon className="w-3.5 h-3.5 shrink-0" />
+                        <span className="font-medium">{isRTL ? 'إضافة رابط يدوياً' : 'Add Manual Link'}</span>
+                      </button>
+
+                      {/* Option 3: Attach YouTube Video (only if task doesn't have a video yet) */}
+                      {!hasVideo && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowYoutubeInput(!showYoutubeInput);
+                            setShowManualLink(false);
+                          }}
+                          className="w-full flex items-center gap-2 py-2 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/80 hover:text-white"
+                        >
+                          <Video className="w-3.5 h-3.5 shrink-0 text-red-500" />
+                          <span className="font-medium">{isRTL ? 'ربط فيديو يوتيوب' : 'Attach YouTube Video'}</span>
+                        </button>
+                      )}
+
+                      {/* Manual Link Input Form */}
+                      <AnimatePresence>
+                        {showManualLink && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="flex flex-col gap-2 overflow-hidden pt-2 border-t border-white/5"
+                          >
+                            <input
+                              type="text"
+                              placeholder={isRTL ? 'اسم المرفق...' : 'Attachment name...'}
+                              value={manualLinkName}
+                              onChange={e => setManualLinkName(e.target.value)}
+                              className="w-full bg-zinc-900/80 border border-white/8 py-2 px-3 font-space text-xs font-medium text-white outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
+                            />
+                            <div className="flex gap-2">
+                              <input
+                                type="url"
+                                placeholder="https://..."
+                                value={manualLinkUrl}
+                                onChange={e => setManualLinkUrl(e.target.value)}
+                                className="flex-1 bg-zinc-900/80 border border-white/8 py-2 px-3 font-space text-xs font-medium text-white outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
+                              />
+                              <button
+                                type="button"
+                                onClick={handleAddManualLink}
+                                disabled={isAddingLink || !manualLinkName.trim() || !manualLinkUrl.trim()}
+                                className="py-2 px-3 font-space font-medium text-[10px] text-black transition-all rounded-md shrink-0 cursor-pointer disabled:opacity-40"
+                                style={{ backgroundColor: themeColor }}
+                              >
+                                {isAddingLink ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto text-black" /> : (isRTL ? 'إضافة' : 'Add')}
+                              </button>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* YouTube Video Link Input Form */}
+                      <AnimatePresence>
+                        {showYoutubeInput && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="flex flex-col gap-2 overflow-hidden pt-2 border-t border-white/5"
+                          >
+                            <div className="flex gap-2">
+                              <input
+                                type="url"
+                                placeholder={isRTL ? 'رابط فيديو يوتيوب...' : 'YouTube URL...'}
+                                value={youtubeUrlInput}
+                                onChange={e => setYoutubeUrlInput(e.target.value)}
+                                className="flex-1 bg-zinc-900/80 border border-white/8 py-2 px-3 font-space text-xs font-medium text-white outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
+                              />
+                              <button
+                                type="button"
+                                onClick={handleAttachYoutubeVideo}
+                                disabled={!youtubeUrlInput.trim()}
+                                className="py-2 px-3 font-space font-medium text-[10px] text-black transition-all rounded-md shrink-0 cursor-pointer disabled:opacity-40"
+                                style={{ backgroundColor: themeColor }}
+                              >
+                                {isRTL ? 'ربط' : 'Attach'}
+                              </button>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Render List of Drive Files */}
+              {(() => {
+                const attachments: any[] = task.metadata?.attachments || []
+                if (attachments.length === 0) return null
+
+                return (
+                  <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
+                    {attachments.map((att: any, idx: number) => {
+                      const typeKey = att.type || 'link'
+                      return (
+                        <div
+                          key={att.id || idx}
+                          className="group flex items-center justify-between gap-3 p-3.5 rounded-md border bg-transparent dark:bg-white/5 border-white/5 hover:border-white/10 hover:bg-white/10 transition-all relative overflow-hidden cursor-pointer"
+                          onClick={() => window.open(att.url, '_blank')}
+                        >
+                          <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ backgroundColor: themeColor }} />
+                          <div className="flex items-center gap-3 min-w-0 pl-1">
+                            <Paperclip className="w-4 h-4 shrink-0" style={{ color: themeColor }} />
+                            <div className="min-w-0">
+                              <p className="font-space font-medium text-xs text-white/90 truncate">{att.name}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="font-space text-[9px] text-white/30">{typeKey}</span>
+                                {att.uploaded_by && (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[9px] text-white/20">•</span>
+                                    <img
+                                      src={att.uploaded_by.avatar_url || '/avatars/omar.svg'}
+                                      alt={att.uploaded_by.name || 'User'}
+                                      className="w-3.5 h-3.5 rounded-full border border-white/10"
+                                    />
+                                    <span className="text-[8px] text-zinc-400 font-space">
+                                      {att.uploaded_by.name || 'Operator'}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          {canAddAttachment && (
+                            <button
+                              onClick={async (e) => {
+                                e.stopPropagation()
+                                const updated = attachments.filter((_: any, i: number) => i !== idx)
+                                await updateTask(task.id, { metadata: { ...task.metadata, attachments: updated } })
+                              }}
+                              className="w-7 h-7 flex items-center justify-center border border-white/5 text-white/25 hover:border-red-500/50 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-md shrink-0 cursor-pointer"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              })()}
+            </div>
+
+            <div className="pt-6 border-t border-white/5">
+              <TaskDrawerComments
+                task={task}
+                notes={notes}
+                isRTL={isRTL}
+                themeColor={themeColor}
+                isSquad={isSquad}
+                squadMembers={squadMembers}
+                currentUserId={currentUserId}
+                profile={profile}
+                updateTask={updateTask}
+                sendNotification={sendNotification}
+                handleDeleteNote={handleDeleteNote}
+                handleToggleReaction={handleToggleReaction}
+                formatNoteContent={formatNoteContent}
+              />
+            </div>
+          </div>
+        ) : (
+          /* Desktop / Expanded split view layout: 50/50 height-contained workspace split */
+          <div className="flex-1 min-h-0 overflow-hidden grid grid-cols-2 gap-6 px-6 pb-6 select-none">
+            {/* Left Column container: Context & Media (Consumption) */}
+            <div className="h-full overflow-y-auto overscroll-y-contain pr-2 custom-scrollbar space-y-6">
+              {/* YouTube Embed Player */}
               {hasVideo && (
                 <div className="space-y-3 shrink-0">
                   <div className="w-full aspect-video min-h-[200px] relative rounded-xl overflow-hidden shadow-lg border bg-black/40" style={{ borderColor: `${themeColor}20` }}>
-                    {/* {isAnimationComplete ? ( */}
                     <SmartTaskPlayer
                       taskId={task.id}
                       url={finalVideoUrl}
@@ -1343,9 +1653,6 @@ export default function TaskDrawer({
                       onComplete={onComplete}
                       onProgressUpdate={onProgressUpdate}
                     />
-                    {/* ) : (
-                      <div className="w-full h-full bg-zinc-900 animate-pulse rounded-md" />
-                    )} */}
                   </div>
                   {/* Mini video meta bar */}
                   <div className="flex justify-between items-center text-[11px] font-mono text-white/55 px-1 bg-white/[0.02] py-2 rounded-lg border border-white/5">
@@ -1376,30 +1683,6 @@ export default function TaskDrawer({
                 canEdit={canEdit}
               />
 
-              {/* Commented out temporary video player block at the bottom */}
-              {/*
-              {videoUrl && (
-                <div className="space-y-3">
-                  <h3 className="text-[10px] font-black tracking-widest text-zinc-500 font-mono">
-                    // isRTL ? 'مشغل الفيديو // EMBEDDED PLAYER' : 'EMBEDDED VIDEO PLAYER // MEDIA'
-                    {isRTL ? 'مشغل الفيديو - Embedded Player' : 'Embedded Video Player'}
-                  </h3>
-                  <div className="relative aspect-video w-full rounded-md overflow-hidden bg-black/40 border border-white/5 shadow-2xl">
-                    <ReactPlayer
-                      ref={playerRef}
-                      url={videoUrl}
-                      controls
-                      width="100%"
-                      height="100%"
-                      onReady={handlePlayerReady}
-                      onProgress={handlePlayerProgress}
-                      progressInterval={2000}
-                    />
-                  </div>
-                </div>
-              )}
-              */}
-
               <TaskDrawerDescription
                 task={task}
                 description={description}
@@ -1408,8 +1691,11 @@ export default function TaskDrawer({
                 updateTask={onUpdateTask}
                 canEdit={canEdit}
               />
+            </div>
 
-              {/* Render isolated AI Checklist button to prevent outer TaskDrawer re-renders on timer tick */}
+            {/* Right Column container: Execution & Collaboration */}
+            <div className="h-full overflow-y-auto overscroll-y-contain pr-2 custom-scrollbar space-y-6 border-l border-white/5 pl-6">
+              {/* Generate AI Checklist */}
               {canEdit && finalVideoUrl && (() => {
                 const currentGoal = goals.find((g: any) => g.id === goalId || g.id === task.goal_id)
                 const goalTitleText = currentGoal?.title || 'Specialized Curriculum'
@@ -1429,49 +1715,6 @@ export default function TaskDrawer({
                   />
                 )
               })()}
-              {/* Commented out old button rendering to respect the safety rule of never deleting code:
-              {canEdit && finalVideoUrl && (
-                <div className="space-y-1 mt-2">
-                  <button
-                    type="button"
-                    onClick={handleGenerateAiChecklist}
-                    disabled={isGenerating || cooldownRemaining > 0}
-                    className={cn(
-                      "w-full flex items-center justify-center gap-2 py-2 px-3.5 rounded-xl font-medium text-xs transition-all duration-300 backdrop-blur-sm",
-                      isGenerating
-                        ? "bg-zinc-800/80 text-zinc-500 cursor-not-allowed border border-white/5"
-                        : cooldownRemaining > 0
-                          ? "bg-zinc-900/40 text-zinc-500 border border-white/5 cursor-not-allowed opacity-40"
-                          : "bg-gradient-to-r from-indigo-950/40 via-slate-900/60 to-teal-950/40 border border-indigo-500/20 hover:border-teal-500/40 text-indigo-200 hover:text-teal-200 shadow-[0_0_15px_rgba(99,102,241,0.05)] hover:shadow-[0_0_20px_rgba(20,184,166,0.15)] group cursor-pointer"
-                    )}
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400" />
-                        <span>{isRTL ? 'جاري تحليل النص...' : 'Analyzing Transcript...'}</span>
-                      </>
-                    ) : cooldownRemaining > 0 ? (
-                      <>
-                        <Clock className="w-3.5 h-3.5 text-zinc-500" />
-                        <span>
-                          {isRTL ? `فترة الانتظار للذكاء الاصطناعي (${formatCooldownTime(cooldownRemaining)})` : `AI Cooldown (${formatCooldownTime(cooldownRemaining)})`}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-3.5 h-3.5 animate-pulse group-hover:scale-110 text-indigo-400 group-hover:text-teal-400 transition-transform duration-300" />
-                        <span>{isRTL ? 'إنشاء قائمة المهام بالذكاء الاصطناعي' : 'Generate AI Checklist'}</span>
-                      </>
-                    )}
-                  </button>
-                  {aiErrorMessage && (
-                    <p className="text-[10px] text-red-500 mt-1 font-mono tracking-wide bg-red-500/5 px-2 py-1 rounded border border-red-500/10">
-                      {aiErrorMessage}
-                    </p>
-                  )}
-                </div>
-              )}
-              */}
 
               <TaskDrawerChecklist
                 task={task}
@@ -1489,9 +1732,9 @@ export default function TaskDrawer({
 
               {/* Google Drive Attachments */}
               <div className="space-y-3">
-                 <h3 className="text-[10px] font-medium text-zinc-500 mb-3 opacity-60">
+                <h3 className="text-[10px] font-medium text-zinc-500 mb-3 opacity-60">
                   {isRTL ? 'المرفقات - Attachments' : 'Drive Attachments'}
-                 </h3>
+                </h3>
                 
                 {canAddAttachment && (
                   <div className="space-y-2">
@@ -1544,7 +1787,7 @@ export default function TaskDrawer({
                           <span className="font-medium">{isRTL ? 'إضافة رابط يدوياً' : 'Add Manual Link'}</span>
                         </button>
 
-                        {/* Option 3: Attach YouTube Video (only if task doesn't have a video yet) */}
+                        {/* Option 3: Attach YouTube Video */}
                         {!hasVideo && (
                           <button
                             type="button"
@@ -1558,180 +1801,69 @@ export default function TaskDrawer({
                             <span className="font-medium">{isRTL ? 'ربط فيديو يوتيوب' : 'Attach YouTube Video'}</span>
                           </button>
                         )}
-
-                        {/* Manual Link Input Form */}
-                        <AnimatePresence>
-                          {showManualLink && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              className="flex flex-col gap-2 overflow-hidden pt-2 border-t border-white/5"
-                            >
-                              <input
-                                type="text"
-                                placeholder={isRTL ? 'اسم المرفق...' : 'Attachment name...'}
-                                value={manualLinkName}
-                                onChange={e => setManualLinkName(e.target.value)}
-                                className="w-full bg-zinc-900/80 border border-white/8 py-2 px-3 font-space text-xs font-medium text-white outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
-                              />
-                              <div className="flex gap-2">
-                                <input
-                                  type="url"
-                                  placeholder="https://..."
-                                  value={manualLinkUrl}
-                                  onChange={e => setManualLinkUrl(e.target.value)}
-                                  className="flex-1 bg-zinc-900/80 border border-white/8 py-2 px-3 font-space text-xs font-medium text-white outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={handleAddManualLink}
-                                  disabled={isAddingLink || !manualLinkName.trim() || !manualLinkUrl.trim()}
-                                  className="py-2 px-3 font-space font-medium text-[10px] text-black transition-all rounded-md shrink-0 cursor-pointer disabled:opacity-40"
-                                  style={{ backgroundColor: themeColor }}
-                                >
-                                  {isAddingLink ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto text-black" /> : (isRTL ? 'إضافة' : 'Add')}
-                                </button>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-
-                        {/* YouTube Video Link Input Form */}
-                        <AnimatePresence>
-                          {showYoutubeInput && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              className="flex flex-col gap-2 overflow-hidden pt-2 border-t border-white/5"
-                            >
-                              <div className="flex gap-2">
-                                <input
-                                  type="url"
-                                  placeholder={isRTL ? 'رابط فيديو يوتيوب...' : 'YouTube URL...'}
-                                  value={youtubeUrlInput}
-                                  onChange={e => setYoutubeUrlInput(e.target.value)}
-                                  className="flex-1 bg-zinc-900/80 border border-white/8 py-2 px-3 font-space text-xs font-medium text-white outline-none placeholder:text-white/20 transition-all rounded-md focus:border-white/20"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={handleAttachYoutubeVideo}
-                                  disabled={!youtubeUrlInput.trim()}
-                                  className="py-2 px-3 font-space font-medium text-[10px] text-black transition-all rounded-md shrink-0 cursor-pointer disabled:opacity-40"
-                                  style={{ backgroundColor: themeColor }}
-                                >
-                                  {isRTL ? 'ربط' : 'Attach'}
-                                </button>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
                       </div>
                     </div>
-
-                    {/* Commented out original static buttons per safety rules:
-                    <div className="w-full flex items-center justify-between gap-2 py-1.5 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 font-space text-xs">
-                      <button
-                        onClick={handleGoogleDrivePicker}
-                        className="flex items-center gap-2 flex-1 text-left cursor-pointer text-white/90"
-                      >
-                        <img src="/Google_Drive_icon_(2020).svg" alt="Drive" className="w-3.5 h-3.5 shrink-0" />
-                        <span className="font-medium">
-                          {isDriveConnected ? (isRTL ? 'إضافة من درايف' : 'Add from Drive') : (isRTL ? 'ربط جوجل درايف' : 'Link Google Drive')}
-                        </span>
-                        {isDriveConnected && (
-                          <span className="ml-auto text-[10px] text-emerald-500 font-bold tracking-wider animate-pulse">
-                            {isRTL ? 'متصل' : 'Connected'}
-                          </span>
-                        )}
-                      </button>
-                      {isDriveConnected && (
-                        <button
-                          onClick={handleDisconnectDrive}
-                          className="p-1 hover:bg-white/10 rounded text-white/40 hover:text-red-400 transition-colors cursor-pointer"
-                          title={isRTL ? 'إلغاء ربط جوجل درايف' : 'Unlink Google Drive'}
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-
-                    <button
-                      onClick={() => setShowManualLink(!showManualLink)}
-                      className="w-full flex items-center gap-2 py-1.5 px-3 rounded-md bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer font-space text-xs text-white/40 hover:text-white/70"
-                    >
-                      <LinkIcon className="w-3.5 h-3.5 shrink-0" />
-                      <span className="font-medium">{isRTL ? 'إضافة رابط يدوياً' : 'Add Manual Link'}</span>
-                      <span className="ml-auto text-[10px] font-mono">{showManualLink ? '▲' : '▼'}</span>
-                    </button>
-                    */}
                   </div>
                 )}
+              </div>
 
-                {/* Render List of Drive Files */}
-                {(() => {
-                  const attachments: any[] = task.metadata?.attachments || []
-                  if (attachments.length === 0) return null
+              {/* Render List of Drive Files */}
+              {(() => {
+                const attachments: any[] = task.metadata?.attachments || []
+                if (attachments.length === 0) return null
 
-                  return (
-                    <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
-                      {attachments.map((att: any, idx: number) => {
-                        const typeKey = att.type || 'link'
-                        return (
-                          <div
-                            key={att.id || idx}
-                            /* bg-zinc-900/30 hover:bg-zinc-900/50 */
-                            className="group flex items-center justify-between gap-3 p-3.5 rounded-md border bg-transparent dark:bg-white/5 border-white/5 hover:border-white/10 hover:bg-white/10 transition-all relative overflow-hidden cursor-pointer"
-                            onClick={() => window.open(att.url, '_blank')}
-                          >
-                            <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ backgroundColor: themeColor }} />
-                            <div className="flex items-center gap-3 min-w-0 pl-1">
-                              <Paperclip className="w-4 h-4 shrink-0" style={{ color: themeColor }} />
-                              <div className="min-w-0">
-                                <p className="font-space font-medium text-xs text-white/90 truncate">{att.name}</p>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                  <span className="font-space text-[9px] text-white/30">{typeKey}</span>
-                                  {att.uploaded_by && (
-                                    <div className="flex items-center gap-1.5">
-                                      <span className="text-[9px] text-white/20">•</span>
-                                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                                      <img
-                                        src={att.uploaded_by.avatar_url || '/avatars/omar.svg'}
-                                        alt={att.uploaded_by.name || 'User'}
-                                        className="w-3.5 h-3.5 rounded-full border border-white/10"
-                                      />
-                                      <span className="text-[8px] text-zinc-400 font-space">
-                                        {att.uploaded_by.name || 'Operator'}
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
+                return (
+                  <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
+                    {attachments.map((att: any, idx: number) => {
+                      const typeKey = att.type || 'link'
+                      return (
+                        <div
+                          key={att.id || idx}
+                          className="group flex items-center justify-between gap-3 p-3.5 rounded-md border bg-transparent dark:bg-white/5 border-white/5 hover:border-white/10 hover:bg-white/10 transition-all relative overflow-hidden cursor-pointer"
+                          onClick={() => window.open(att.url, '_blank')}
+                        >
+                          <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ backgroundColor: themeColor }} />
+                          <div className="flex items-center gap-3 min-w-0 pl-1">
+                            <Paperclip className="w-4 h-4 shrink-0" style={{ color: themeColor }} />
+                            <div className="min-w-0">
+                              <p className="font-space font-medium text-xs text-white/90 truncate">{att.name}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="font-space text-[9px] text-white/30">{typeKey}</span>
+                                {att.uploaded_by && (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[9px] text-white/20">•</span>
+                                    <img
+                                      src={att.uploaded_by.avatar_url || '/avatars/omar.svg'}
+                                      alt={att.uploaded_by.name || 'User'}
+                                      className="w-3.5 h-3.5 rounded-full border border-white/10"
+                                    />
+                                    <span className="text-[8px] text-zinc-400 font-space">
+                                      {att.uploaded_by.name || 'Operator'}
+                                    </span>
+                                  </div>
+                                )}
                               </div>
                             </div>
-                            {canAddAttachment && (
-                              <button
-                                onClick={async (e) => {
-                                  e.stopPropagation()
-                                  const updated = attachments.filter((_: any, i: number) => i !== idx)
-                                  await updateTask(task.id, { metadata: { ...task.metadata, attachments: updated } })
-                                }}
-                                className="w-7 h-7 flex items-center justify-center border border-white/5 text-white/25 hover:border-red-500/50 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-md shrink-0 cursor-pointer"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            )}
                           </div>
-                        )
-                      })}
-                    </div>
-                  )
-                })()}
-              </div>
-            </div>
+                          {canAddAttachment && (
+                            <button
+                              onClick={async (e) => {
+                                e.stopPropagation()
+                                const updated = attachments.filter((_: any, i: number) => i !== idx)
+                                await updateTask(task.id, { metadata: { ...task.metadata, attachments: updated } })
+                              }}
+                              className="w-7 h-7 flex items-center justify-center border border-white/5 text-white/25 hover:border-red-500/50 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-md shrink-0 cursor-pointer"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              })()}
 
-            {/* Right/End Column (40% width when expanded) */}
-            <div className={cn("space-y-6", isExpanded ? "w-full md:w-[40%] flex flex-col border-s border-white/5 ps-6" : "w-full pt-6 border-t border-white/5 md:border-t-0 md:pt-0")}>
               {/* Collaborative Activity Comments */}
               <TaskDrawerComments
                 task={task}
@@ -1750,7 +1882,7 @@ export default function TaskDrawer({
               />
             </div>
           </div>
-        </div>
+        )}
 
         {/* Fixed Thumb-Zone Footer */}
         {canEdit && (

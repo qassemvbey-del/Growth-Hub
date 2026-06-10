@@ -1968,7 +1968,9 @@ const { progress, isInRedZone } = useMemo(() => {
                          exit={{ opacity: 0, scale: 0.95 }}
                          onClick={() => setSelectedTask(task)}
                          className={cn(
-                           "group flex flex-col p-4 md:p-5 border border-[var(--card-border)] rounded-md cursor-pointer hover:border-cyan-500/50 hover:bg-white/5 hover:scale-[1.01] transition-all duration-300 shadow-sm space-y-3 relative",
+                           // Commented out per rule "Never delete code, only comment it out"
+                            // "group flex flex-col p-4 md:p-5 border border-[var(--card-border)] rounded-md cursor-pointer hover:border-cyan-500/50 hover:bg-white/5 hover:scale-[1.01] transition-all duration-300 shadow-sm space-y-3 relative",
+                            "group flex flex-col p-4 md:p-5 bg-[var(--card)] border border-[var(--border)] dark:border-[var(--card-border)] dark:bg-transparent rounded-md cursor-pointer hover:border-cyan-500/50 hover:bg-white/5 hover:scale-[1.01] transition-all duration-300 shadow-sm space-y-3 relative",
                            task.is_completed ? "opacity-40" : "opacity-100"
                          )}
                        >
@@ -2034,9 +2036,15 @@ const { progress, isInRedZone } = useMemo(() => {
                                 "flex-1 min-w-0 flex flex-col justify-center",
                                 isRTL ? "items-end text-right" : "items-start text-left"
                               )}>
+                                {/* Commented out per rule "Never delete code, only comment it out"
                                 <span className={cn(
                                   "text-base md:text-[17px] font-space font-bold tracking-tight transition-all duration-300 ease-in-out uppercase truncate max-w-full block",
                                   task.is_completed ? "text-gray-500 line-through opacity-55" : "text-white"
+                                )}
+                                */}
+                                <span className={cn(
+                                  "text-base md:text-[17px] font-space font-bold tracking-tight transition-all duration-300 ease-in-out uppercase truncate max-w-full block",
+                                  task.is_completed ? "text-gray-500 line-through opacity-55" : "text-[var(--text-primary)] dark:text-white"
                                 )}>
                                   {task.title}
                                 </span>

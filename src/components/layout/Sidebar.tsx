@@ -82,8 +82,14 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
   ]
 
   return (
+    /* Commented out per rule "Never delete code, only comment it out"
     <aside className={cn(
       "hidden lg:flex w-[220px] bg-black/50 backdrop-blur-xl border-e border-white/10 h-screen fixed top-0 flex-col z-[110] sidebar-target",
+      "inset-inline-start-0"
+    )}>
+    */
+    <aside className={cn(
+      "hidden lg:flex w-[220px] bg-[var(--sidebar-bg)] dark:bg-black/50 backdrop-blur-xl border-e border-[var(--border)] dark:border-white/10 h-screen fixed top-0 flex-col z-[110] sidebar-target",
       "inset-inline-start-0"
     )}>
       {/* ── PROFILE IDENTITY LAYER ── */}
@@ -186,8 +192,8 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                   className={cn(
                     "flex items-center p-3 px-6 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[44px] w-full text-left rtl:text-right cursor-pointer rtl:flex-row-reverse",
                      isGoalsActive && !pathname.startsWith('/goals/')
-                       ? "bg-white/5 text-[var(--text-primary)] border border-white/10 shadow-sm" 
-                       : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-white/10 hover:bg-white/5"
+                       ? "bg-[var(--active-nav-bg)] text-[var(--active-nav-text)] border border-[var(--border)] dark:border-white/10 shadow-sm" 
+                       : "text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:text-[var(--active-nav-text)] border border-transparent hover:border-[var(--border)] dark:hover:border-white/10 hover:bg-[var(--active-nav-bg)]"
                   )}
                 >
                   <NeonIcon
@@ -196,16 +202,16 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                     className="w-4 h-4 transition-all duration-300 me-3 rtl:ms-3 rtl:me-0 shrink-0"
                     style={{ 
                       color: (isGoalsActive && !pathname.startsWith('/goals/'))
-                        ? currentTheme.color 
-                        : (isHovered ? `${currentTheme.color}cc` : undefined)
+                        ? 'var(--active-nav-text)' 
+                        : (isHovered ? 'var(--active-nav-text)' : undefined)
                     }}
                   />
                   
                   <span className="font-body font-medium flex-grow overflow-hidden truncate max-w-full transition-colors duration-300 text-sm"
                   style={{ 
                     color: (isGoalsActive && !pathname.startsWith('/goals/'))
-                      ? currentTheme.color 
-                      : (isHovered ? currentTheme.color : undefined)
+                      ? 'var(--active-nav-text)' 
+                      : (isHovered ? 'var(--active-nav-text)' : undefined)
                   }}
                   >
                     {item.label}
@@ -216,11 +222,11 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                       "w-3.5 h-3.5 shrink-0 transition-transform duration-200 me-1.5 rtl:me-auto rtl:ms-2 rtl:order-first",
                       isGoalsExpanded ? "rotate-180" : ""
                     )}
-                    style={{ color: isHovered ? currentTheme.color : undefined }}
+                    style={{ color: isHovered ? 'var(--active-nav-text)' : undefined }}
                   />
                   <span
                     className="text-[9px] font-body text-[var(--text-secondary)]/30 font-medium transition-colors duration-300 shrink-0 rtl:hidden"
-                    style={{ color: isHovered ? `${currentTheme.color}66` : undefined }}
+                    style={{ color: isHovered ? 'var(--active-nav-text)' : undefined }}
                   >
                     {item.shortcut}
                   </span>
@@ -251,8 +257,8 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                             className={cn(
                               "flex items-center p-2 px-3 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[34px] border border-transparent rtl:flex-row-reverse rtl:text-right",
                               isSubActive 
-                                ? "bg-white/5 text-[var(--text-primary)] border border-white/10 shadow-sm" 
-                                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5"
+                                ? "bg-[var(--active-nav-bg)] text-[var(--active-nav-text)] border border-[var(--border)] dark:border-white/10 shadow-sm" 
+                                : "text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:text-[var(--active-nav-text)] hover:bg-[var(--active-nav-bg)]"
                             )}
                           >
                             <NeonIcon 
@@ -261,16 +267,16 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                               className="w-3.5 h-3.5 transition-all duration-300 me-3 rtl:ms-2 rtl:me-0 shrink-0 rtl:order-last"
                               style={{ 
                                 color: isSubActive 
-                                  ? currentTheme.color 
-                                  : (isSubHovered ? `${currentTheme.color}cc` : undefined)
+                                  ? 'var(--active-nav-text)' 
+                                  : (isSubHovered ? 'var(--active-nav-text)' : undefined)
                               }}
                             />
 
                             <span className="font-body font-medium flex-grow overflow-hidden truncate transition-colors duration-300 text-xs rtl:order-first rtl:text-right"
                             style={{ 
                               color: isSubActive 
-                                ? currentTheme.color 
-                                : (isSubHovered ? currentTheme.color : undefined)
+                                ? 'var(--active-nav-text)' 
+                                : (isSubHovered ? 'var(--active-nav-text)' : undefined)
                             }}
                             >
                               {subItem.label}
@@ -297,8 +303,8 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               className={cn(
                 "flex items-center p-3 px-6 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[44px] rtl:flex-row-reverse rtl:text-right",
                  isActive 
-                   ? "bg-white/5 text-[var(--text-primary)] border border-white/10 shadow-sm" 
-                   : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-white/10 hover:bg-white/5"
+                   ? "bg-[var(--active-nav-bg)] text-[var(--active-nav-text)] border border-[var(--border)] dark:border-white/10 shadow-sm" 
+                   : "text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:text-[var(--active-nav-text)] border border-transparent hover:border-[var(--border)] dark:hover:border-white/10 hover:bg-[var(--active-nav-bg)]"
               )}
             >
               <NeonIcon
@@ -307,8 +313,8 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                 className="w-4 h-4 transition-all duration-300 me-3 rtl:ms-3 rtl:me-0 shrink-0"
                 style={{ 
                   color: isActive 
-                    ? currentTheme.color 
-                    : (isHovered ? `${currentTheme.color}cc` : undefined)
+                    ? 'var(--active-nav-text)' 
+                    : (isHovered ? 'var(--active-nav-text)' : undefined)
                 }}
               />
               
@@ -317,8 +323,8 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               )}
               style={{ 
                 color: isActive 
-                  ? currentTheme.color 
-                  : (isHovered ? currentTheme.color : undefined)
+                  ? 'var(--active-nav-text)' 
+                  : (isHovered ? 'var(--active-nav-text)' : undefined)
               }}
               >
                 {item.label}
@@ -327,7 +333,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               <span 
                 className="text-[9px] font-body text-[var(--text-secondary)]/30 font-medium transition-colors duration-300 shrink-0 rtl:hidden"
                 style={{ 
-                  color: isHovered ? `${currentTheme.color}66` : undefined 
+                  color: isHovered ? 'var(--active-nav-text)' : undefined 
                 }}
               >
                 {item.shortcut}
@@ -374,11 +380,11 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
           className={cn(
             "flex items-center gap-4 p-3 px-6 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[44px]",
             pathname === '/settings'
-              ? "bg-white/5 text-[var(--text-primary)] shadow-sm"
-              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5"
+              ? "bg-[var(--active-nav-bg)] text-[var(--active-nav-text)] border border-[var(--border)] dark:border-white/10 shadow-sm"
+              : "text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:text-[var(--active-nav-text)] hover:bg-[var(--active-nav-bg)]"
           )}
         >
-          <NeonIcon icon={Sliders} interactive className="w-4 h-4 transition-colors duration-300" style={{ color: (pathname === '/settings' || isSettingsHovered) ? currentTheme.color : undefined }} />
+          <NeonIcon icon={Sliders} interactive className="w-4 h-4 transition-colors duration-300" style={{ color: (pathname === '/settings' || isSettingsHovered) ? 'var(--active-nav-text)' : undefined }} />
           <span className="font-body font-medium text-sm transition-colors duration-300 text-zinc-900 dark:text-zinc-100">
             {mounted ? (isRTL ? 'الإعدادات' : 'Settings') : 'Settings'}
           </span>
