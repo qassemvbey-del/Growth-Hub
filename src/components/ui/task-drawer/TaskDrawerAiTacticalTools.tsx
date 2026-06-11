@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Sparkles, Loader2, ChevronDown, ChevronUp, BookOpen, ListTodo } from 'lucide-react'
+import { Sparkles, Loader2, ChevronDown, ChevronUp } from 'lucide-react'
+// import { BookOpen, ListTodo } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getFeatureUsage, incrementFeatureUsage } from '@/lib/quota'
 import { createClient } from '@/lib/supabase'
@@ -45,11 +46,11 @@ export default function TaskDrawerAiTacticalTools({
   const fixErrorsUsage = getFeatureUsage('fix_errors')
   const fixErrorsLocked = fixErrorsUsage.used >= fixErrorsUsage.limit
 
-  const explainTopicUsage = getFeatureUsage('explain_topic')
-  const explainTopicLocked = explainTopicUsage.used >= explainTopicUsage.limit
-
-  const generateChecklistUsage = getFeatureUsage('generate_checklist')
-  const generateChecklistLocked = generateChecklistUsage.used >= generateChecklistUsage.limit
+  // Commented out unused quota checks
+  // const explainTopicUsage = getFeatureUsage('explain_topic')
+  // const explainTopicLocked = explainTopicUsage.used >= explainTopicUsage.limit
+  // const generateChecklistUsage = getFeatureUsage('generate_checklist')
+  // const generateChecklistLocked = generateChecklistUsage.used >= generateChecklistUsage.limit
 
   // Placeholders for Fix Errors dynamic field
   let fixErrorsPlaceholder = isRTL ? 'اسأل المساعد الذكي عن أي شيء هنا...' : 'Ask the smart assistant anything here...'
@@ -123,6 +124,8 @@ export default function TaskDrawerAiTacticalTools({
     }
   }
 
+  // Commented out unused handlers:
+  /*
   const handleExplainTopic = async () => {
     const usage = getFeatureUsage('explain_topic')
     if (usage.used >= usage.limit) {
@@ -238,6 +241,7 @@ export default function TaskDrawerAiTacticalTools({
       setLoading(false)
     }
   }
+  */
 
   return (
     <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4 transition-colors relative overflow-hidden space-y-4">
@@ -248,7 +252,7 @@ export default function TaskDrawerAiTacticalTools({
       <div className="flex items-center justify-between pl-1">
         <h4 className="text-[10px] font-space font-black uppercase tracking-wider text-zinc-900 dark:text-white flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-          {isRTL ? 'مساعد الذكاء الاصطناعي' : 'AI Assistants'}
+          {isRTL ? 'مساعد الأخطاء الذكي' : 'Fix Errors Debugger'}
         </h4>
         {response && (
           <button
@@ -316,7 +320,7 @@ export default function TaskDrawerAiTacticalTools({
         </div>
       </div>
 
-      {/* 2. Bottom Element: Row of side-by-side buttons */}
+      {/* Commented out bottom button row:
       {canEdit && (
         <div className="grid grid-cols-2 gap-2 pt-2 border-t border-zinc-200/50 dark:border-white/5">
           <button
@@ -358,6 +362,7 @@ export default function TaskDrawerAiTacticalTools({
           </button>
         </div>
       )}
+      */}
 
       {error && (
         <span className="text-[9px] font-space font-bold text-red-500/80 block mt-1">

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Sparkles, Loader2 } from 'lucide-react'
+import { Sparkles, Loader2, BookOpen } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { getFeatureUsage, incrementFeatureUsage } from '@/lib/quota'
 
 interface TaskDrawerDescriptionProps {
   task: any
@@ -18,10 +20,15 @@ export default function TaskDrawerDescription({
   updateTask,
   canEdit = true
 }: TaskDrawerDescriptionProps) {
+  const router = useRouter()
   const [aiQuery, setAiQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [aiError, setAiError] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Quota check
+  const explainTopicUsage = getFeatureUsage('explain_topic')
+  const explainTopicLocked = explainTopicUsage.used >= explainTopicUsage.limit
 
   // Auto-resize the description textarea dynamically
   useEffect(() => {
@@ -33,6 +40,17 @@ export default function TaskDrawerDescription({
 
   const askAi = async (promptText: string) => {
     if (!promptText.trim()) return
+    const usage = getFeatureUsage('explain_topic')
+    if (usage.used >= usage.limit) {
+      const remainingMs = Math.max(0, usage.nextResetMs - Date.now())
+      const hrs = Math.floor(remainingMs / (3600 * 1000))
+      const mins = Math.floor((remainingMs % (3600 * 1000)) / (60 * 1000))
+      setAiError(isRTL 
+        ? `تجاوزت الحد المسموح. يفتح مجدداً خلال ${hrs}س ${mins}د.` 
+        : `Explain Topic limit exceeded. Resets in ${hrs}h ${mins}m.`)
+      return
+    }
+
     setLoading(true)
     setAiError('')
     try {
@@ -49,6 +67,7 @@ export default function TaskDrawerDescription({
       if (!res.ok) throw new Error('API Error')
       const data = await res.json()
       if (data.text) {
+        incrementFeatureUsage('explain_topic')
         const appended = description ? `${description}\n\n${data.text}` : data.text
         setDescription(appended)
         await updateTask(task.id, { description: appended })
@@ -71,17 +90,40 @@ export default function TaskDrawerDescription({
           {canEdit && (
             <button
               type="button"
-              onClick={() => askAi(isRTL ? `اشرح موضوع المهمة بالتفصيل: ${task.title}` : `Explain task topic in detail: ${task.title}`)}
+              onClick={() => {
+                if (explainTopicLocked) {
+                  router.push('/settings?focus=usage-limits')
+                } else {
+                  askAi(isRTL ? `اشرح موضوع المهمة بالتفصيل: ${task.title}` : `Explain task topic in detail: ${task.title}`)
+                }
+              }}
               disabled={loading}
-              className="inline-flex items-center gap-1 p-1 rounded hover:bg-zinc-200 dark:hover:bg-white/5 text-[9px] font-bold text-cyan-400 hover:text-cyan-300 transition-colors disabled:opacity-50 cursor-pointer"
-              title={isRTL ? 'اشرح موضوع المهمة بالذكاء الاصطناعي' : 'Explain task topic with AI'}
+              className={`inline-flex items-center gap-1.5 p-1 rounded hover:bg-zinc-200 dark:hover:bg-white/5 text-[9px] font-bold text-cyan-400 hover:text-cyan-300 transition-colors disabled:opacity-50 cursor-pointer ${explainTopicLocked ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+              title={explainTopicLocked 
+                ? (isRTL ? '🔒 تم استهلاك حد شرح الموضوع. اضغط للاشتراك أو مراجعة الحدود.' : '🔒 Explain Topic quota consumed. Click to view limits.')
+                : (isRTL ? 'اشرح موضوع المهمة بالذكاء الاصطناعي' : 'Explain task topic with AI')}
             >
-              {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-              <span>{isRTL ? 'شرح ذكي' : 'AI Explain'}</span>
+              {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <BookOpen className="w-3 h-3" />}
+              <span>{explainTopicLocked ? '🔒 ' : ''}{isRTL ? 'شرح الموضوع' : 'Explain Topic'}</span>
             </button>
           )}
         </h3>
       </div>
+
+      {/* Commented out temporary button:
+      {canEdit && (
+        <button
+          type="button"
+          onClick={() => askAi(isRTL ? `اشرح موضوع المهمة بالتفصيل: ${task.title}` : `Explain task topic in detail: ${task.title}`)}
+          disabled={loading}
+          className="inline-flex items-center gap-1 p-1 rounded hover:bg-zinc-200 dark:hover:bg-white/5 text-[9px] font-bold text-cyan-400 hover:text-cyan-300 transition-colors disabled:opacity-50 cursor-pointer"
+          title={isRTL ? 'اشرح موضوع المهمة بالذكاء الاصطناعي' : 'Explain task topic with AI'}
+        >
+          {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+          <span>{isRTL ? 'شرح ذكي' : 'AI Explain'}</span>
+        </button>
+      )}
+      */}
 
       {!canEdit ? (
         <div className="text-sm text-zinc-300 whitespace-pre-wrap leading-relaxed font-space min-h-[40px] select-text">
@@ -101,6 +143,44 @@ export default function TaskDrawerDescription({
             className="w-full h-auto min-h-[100px] bg-transparent border-none p-0 font-space text-sm text-zinc-300 dark:text-zinc-300 outline-none focus:outline-none focus:ring-0 placeholder:text-white/20 resize-none overflow-hidden"
             placeholder={isRTL ? "أضف وصفاً..." : "Add a description..."}
           />
+
+          <div className="pt-2 border-t border-zinc-200/50 dark:border-white/5">
+            <div className="flex items-center gap-2 relative">
+              <input
+                type="text"
+                value={aiQuery}
+                onChange={(e) => setAiQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    if (explainTopicLocked) {
+                      router.push('/settings?focus=usage-limits')
+                    } else {
+                      askAi(aiQuery)
+                    }
+                  }
+                }}
+                onClick={() => {
+                  if (explainTopicLocked) {
+                    router.push('/settings?focus=usage-limits')
+                  }
+                }}
+                disabled={loading}
+                readOnly={explainTopicLocked}
+                placeholder={loading ? (isRTL ? 'جاري الاستعلام...' : 'Inquiring AI...') : explainTopicLocked ? (isRTL ? '🔒 تم استهلاك حد الاستفسار. اضغط لمراجعة الحدود.' : '🔒 AI query quota consumed. Click to view limits.') : 'Ask AI about this step...'}
+                className={`w-full bg-zinc-100/50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 rounded-md px-3 py-1.5 text-xs text-zinc-800 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-white/20 focus:outline-none focus:border-zinc-300 dark:focus:border-white/10 transition-all font-space ${explainTopicLocked ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+              />
+              {loading && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400" />
+                </div>
+              )}
+            </div>
+            {aiError && (
+              <span className="text-[9px] font-space font-bold text-red-500/80 mt-1 block">
+                {aiError}
+              </span>
+            )}
+          </div>
 
           {/* Commented out per layout refactor rules
           <div className="pt-2 border-t border-zinc-200/50 dark:border-white/5">

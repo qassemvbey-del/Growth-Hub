@@ -1414,6 +1414,21 @@ export default function TaskDrawer({
           )}>
             {/* Commented out legacy checklists button per layout rules */}
 
+            {canEdit && (
+              <AiChecklistButton
+                taskId={task.id}
+                finalVideoUrl={finalVideoUrl}
+                canEdit={canEdit}
+                isRTL={isRTL}
+                themeColor={themeColor}
+                onUpdateTask={onUpdateTask}
+                resolvedDuration={resolvedDuration}
+                taskTitle={task.title}
+                goalTitle={goals.find((g: any) => g.id === goalId || g.id === task.goal_id)?.title || 'Specialized Curriculum'}
+                hasAiChecklist={subtasks.some((s: any) => s.id?.startsWith('sub_ai_') || s.id?.startsWith('ai-'))}
+              />
+            )}
+
             <TaskDrawerChecklist
               task={task}
               subtasks={subtasks}
