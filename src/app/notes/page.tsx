@@ -37,7 +37,10 @@ function AskAiWorkspace({ onInsert, color, isRTL }: AskAiWorkspaceProps) {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ query: query.trim() })
+        body: JSON.stringify({ 
+          query: query.trim(),
+          type: 'general_ask'
+        })
       })
 
       if (!res.ok) {

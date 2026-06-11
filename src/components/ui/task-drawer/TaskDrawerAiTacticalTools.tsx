@@ -60,7 +60,8 @@ export default function TaskDrawerAiTacticalTools({
         },
         body: JSON.stringify({
           query: query.trim(),
-          role: role || 'general_learner'
+          role: role || 'general_learner',
+          type: 'tactical_tool'
         })
       })
 

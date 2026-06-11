@@ -41,7 +41,10 @@ export default function TaskDrawerDescription({
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ query: promptText.trim() })
+        body: JSON.stringify({ 
+          query: promptText.trim(),
+          type: 'general_ask'
+        })
       })
       if (!res.ok) throw new Error('API Error')
       const data = await res.json()
