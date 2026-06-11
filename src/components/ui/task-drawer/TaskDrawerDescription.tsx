@@ -64,29 +64,23 @@ export default function TaskDrawerDescription({
   }
 
   return (
-    <div className="space-y-4 border-t border-zinc-850 pt-4 dark:border-white/5">
+    <div className="space-y-4 border-t border-zinc-850 pt-4 dark:border-white/5 pb-2">
       <div className="flex justify-between items-center">
-        <h3 className="text-[10px] font-medium text-zinc-500 opacity-60">
-          {isRTL ? 'وصف المهمة' : 'Task Description'}
+        <h3 className="text-[10px] font-medium text-zinc-500 opacity-60 flex items-center gap-2">
+          <span>{isRTL ? 'وصف المهمة' : 'Task Description'}</span>
+          {canEdit && (
+            <button
+              type="button"
+              onClick={() => askAi(isRTL ? `اشرح موضوع المهمة بالتفصيل: ${task.title}` : `Explain task topic in detail: ${task.title}`)}
+              disabled={loading}
+              className="inline-flex items-center gap-1 p-1 rounded hover:bg-zinc-200 dark:hover:bg-white/5 text-[9px] font-bold text-cyan-400 hover:text-cyan-300 transition-colors disabled:opacity-50 cursor-pointer"
+              title={isRTL ? 'اشرح موضوع المهمة بالذكاء الاصطناعي' : 'Explain task topic with AI'}
+            >
+              {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+              <span>{isRTL ? 'شرح ذكي' : 'AI Explain'}</span>
+            </button>
+          )}
         </h3>
-        
-        {/* Commented out per layout refactor rules
-        {canEdit && (
-          <button
-            type="button"
-            onClick={() => askAi(isRTL ? `اشرح موضوع المهمة بالتفصيل: ${task.title}` : `Explain task topic in detail: ${task.title}`)}
-            disabled={loading}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 text-[10px] font-bold text-zinc-800 dark:text-zinc-300 transition-colors disabled:opacity-50 cursor-pointer border border-zinc-200/50 dark:border-white/5"
-          >
-            {loading ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
-            ) : (
-              <Sparkles className="w-3 h-3 text-cyan-400" />
-            )}
-            {isRTL ? 'اشرح موضوع المهمة' : 'Explain Task Topic'}
-          </button>
-        )}
-        */}
       </div>
 
       {!canEdit ? (

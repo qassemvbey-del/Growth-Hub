@@ -302,11 +302,13 @@ export default function TaskDrawerAiTacticalTools({
             }}
             disabled={loading || (!query.trim() && !fixErrorsLocked) || !canEdit}
             className={cn(
-              "px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-zinc-850 dark:hover:bg-zinc-200 rounded-xl text-[10px] font-space font-black tracking-wider uppercase transition-colors shrink-0 flex items-center justify-center min-w-[70px] cursor-pointer",
-              fixErrorsLocked && "opacity-50 cursor-not-allowed grayscale"
+              "px-4 py-2 bg-transparent rounded-xl text-[10px] font-space font-black tracking-wider uppercase transition-all shrink-0 flex items-center justify-center min-w-[70px] cursor-pointer border hover:shadow-[0_0_12px_rgba(20,184,166,0.2)]",
+              fixErrorsLocked ? "opacity-50 cursor-not-allowed grayscale border-zinc-700 text-zinc-500" : "hover:brightness-110"
             )}
-            style={{
-              boxShadow: query.trim() && !loading && !fixErrorsLocked ? `0 4px 15px ${themeColor}22` : 'none'
+            style={fixErrorsLocked ? {} : {
+              color: themeColor,
+              borderColor: `${themeColor}60`,
+              boxShadow: query.trim() && !loading ? `0 0 10px ${themeColor}20` : 'none'
             }}
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : fixErrorsLocked ? '🔒 LIMIT' : (isRTL ? 'تشغيل' : 'RUN')}

@@ -193,79 +193,69 @@ export default function TaskDrawerMetadata({
 
       {/* B. ASSIGNEE SECTION (Squad Goals Only) */}
       {isSquad && squadMembers && squadMembers.length > 0 && (
-        /* bg-zinc-900/40 */
+        /*
+        OLD BULKY LAYOUT (PRESERVED):
         <div className="p-5 border border-white/5 bg-transparent dark:bg-white/5 rounded-md space-y-4">
-          {/* <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 font-mono">
-            {isRTL ? 'المسؤول' : 'ASSIGNED TO'}
-          </h3> */}
           <h3 className="text-[10px] font-medium text-zinc-500 font-mono">
             {isRTL ? 'المسؤول' : 'Assigned To'}
           </h3>
-          
-          <div className="space-y-4">
+          ...
+        </div>
+        */
+        <div className="p-3 border border-white/5 bg-transparent dark:bg-white/5 rounded-md flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-medium text-zinc-500 font-mono">
+              {isRTL ? 'المسؤول:' : 'Assigned To:'}
+            </span>
             {task.assignee ? (
-              <div className="flex items-center gap-3 bg-white/[0.02] border border-white/10 p-3 rounded-md w-full justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                  {task.assignee.avatar_url ? (
-                    <img src={task.assignee.avatar_url} className="w-8 h-8 rounded-full object-cover border border-white/10" />
-                  ) : (
-                    /* bg-zinc-800 */
-                    <div className="w-8 h-8 rounded-full bg-transparent dark:bg-white/10 border border-white/10 flex items-center justify-center text-xs font-bold text-white">
-                      {task.assignee.full_name?.charAt(0) || '?'}
-                    </div>
-                  )}
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-xs font-bold text-white truncate">{task.assignee.full_name}</span>
-                    <span className="text-[9px] font-medium text-white/40">{task.assignee.rank || 'Rookie'}</span>
+              <div className="flex items-center gap-2">
+                {task.assignee.avatar_url ? (
+                  <img src={task.assignee.avatar_url} className="w-5 h-5 rounded-full object-cover border border-white/10" />
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-[9px] font-bold text-white">
+                    {task.assignee.full_name?.charAt(0) || '?'}
                   </div>
-                </div>
-                
-                {/* Only owner can unassign */}
+                )}
+                <span className="text-xs font-bold text-white truncate max-w-[120px]">{task.assignee.full_name}</span>
                 {(currentUserId === missionOwnerId) && (
-                /* Previous onClick handler: onClick={() => updateTask(task.id, { assigned_to: null, assignee: null })} */
-                <button
-                  type="button"
-                  onClick={async () => {
-                    const prevAssigneeId = task.assigned_to
-                    await updateTask(task.id, { assigned_to: null, assignee: null })
-                    if (prevAssigneeId && prevAssigneeId !== currentUserId) {
-                      const senderName = profile?.full_name || 'Operator'
-                      const notifTitle = isRTL
-                        ? `👤 تم إلغاء تعيين المهمة`
-                        : `👤 Task unassigned`
-                      const notifContent = isRTL
-                        ? `${senderName} ألغى تعيينك من المهمة "${task.title}"`
-                        : `${senderName} unassigned you from the task "${task.title}"`
-                      await sendNotification(prevAssigneeId, 'reaction', notifTitle, notifContent)
-                    }
-                  }}
-                  className="px-3 py-1.5 border border-red-500/30 hover:border-red-500 hover:bg-red-500/10 text-red-400 hover:text-red-300 font-medium text-[9px] rounded-md transition-colors cursor-pointer"
-                >
-                  {/* {isRTL ? 'إلغاء التعيين' : 'UNASSIGN'} */}
-                  {isRTL ? 'إلغاء التعيين' : 'Unassign'}
-                </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const prevAssigneeId = task.assigned_to
+                      await updateTask(task.id, { assigned_to: null, assignee: null })
+                      if (prevAssigneeId && prevAssigneeId !== currentUserId) {
+                        const senderName = profile?.full_name || 'Operator'
+                        const notifTitle = isRTL ? `👤 تم إلغاء تعيين المهمة` : `👤 Task unassigned`
+                        const notifContent = isRTL
+                          ? `${senderName} ألغى تعيينك من المهمة "${task.title}"`
+                          : `${senderName} unassigned you from the task "${task.title}"`
+                        await sendNotification(prevAssigneeId, 'reaction', notifTitle, notifContent)
+                      }
+                    }}
+                    className="text-[9px] text-red-400 hover:text-red-300 font-bold ml-1 cursor-pointer"
+                  >
+                    {isRTL ? 'إلغاء' : 'Remove'}
+                  </button>
                 )}
               </div>
             ) : (
-              <div className="flex items-center justify-between bg-white/[0.01] border border-dashed border-white/10 p-4 rounded-md w-full text-center text-white/40 text-xs font-space">
-                <span>{isRTL ? 'المهمة غير معينة لأي عضو' : 'No one assigned yet'}</span>
-              </div>
+              <span className="text-xs text-white/40">{isRTL ? 'غير معينة' : 'Unassigned'}</span>
             )}
-            
-            {/* Only owner can assign */}
-            {(currentUserId === missionOwnerId) && (
-            <div className="space-y-2">
+          </div>
+          
+          {(currentUserId === missionOwnerId) && (
+            <div className="space-y-1">
               <button
                 type="button"
                 onClick={() => setShowAssignDropdown(!showAssignDropdown)}
-                className="w-full flex items-center justify-between px-3 py-2 border border-white/10 hover:border-white/20 bg-white/[0.02] text-xs font-bold text-zinc-400 hover:text-white rounded-md cursor-pointer transition-all"
+                className="w-full flex items-center justify-between px-2 py-1 border border-white/10 hover:border-white/20 bg-white/[0.02] text-[10px] font-bold text-zinc-400 hover:text-white rounded-md cursor-pointer transition-all"
               >
-                <span>{isRTL ? '⚙️ تعيين / تغيير المسؤول' : '⚙️ Assign / Change Operator'}</span>
-                <span className="text-[10px] opacity-60">{showAssignDropdown ? '▲' : '▼'}</span>
+                <span>{isRTL ? '⚙️ تعيين مسؤول' : '⚙️ Assign Operator'}</span>
+                <span className="text-[8px] opacity-60">{showAssignDropdown ? '▲' : '▼'}</span>
               </button>
               
               {showAssignDropdown && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1 pt-2">
+                <div className="flex flex-wrap gap-1 pt-1 max-h-24 overflow-y-auto">
                   {squadMembers.map((member: any) => {
                     const isAssigned = task.assigned_to === member.id
                     return (
@@ -283,45 +273,37 @@ export default function TaskDrawerMetadata({
                               rank: member.rank
                             }
                           })
-                          
-                          // Send custom assignee notification
                           if (member.id !== currentUserId) {
                             const senderName = profile?.full_name || 'Operator'
-                            const notifTitle = isRTL
-                              ? `👤 تم تعيين مهمة جديدة لك`
-                              : `👤 New task assigned to you`
+                            const notifTitle = isRTL ? `👤 تم تعيين مهمة جديدة لك` : `👤 New task assigned to you`
                             const notifContent = isRTL
                               ? `${senderName} قام بتعيين مهمة "${task.title}" لك`
                               : `${senderName} assigned you to the task "${task.title}"`
                             sendNotification(member.id, 'reaction', notifTitle, notifContent)
                           }
                         }}
-                        className={`flex items-center gap-3 p-2.5 border rounded-md text-left transition-all duration-300 cursor-pointer min-w-0 w-full ${
+                        className={cn(
+                          "flex items-center gap-1.5 px-2 py-1 border rounded text-[10px] transition-all cursor-pointer min-w-0",
                           isAssigned
                             ? "bg-teal-500/10 border-teal-500/50 text-[#14b8a6]"
                             : "bg-white/[0.01] border-white/5 hover:border-white/15 text-zinc-400 hover:text-white"
-                        }`}
+                        )}
                       >
                         {member.avatar_url ? (
-                          <img src={member.avatar_url} className="w-6 h-6 rounded-full object-cover shrink-0" />
+                          <img src={member.avatar_url} className="w-3.5 h-3.5 rounded-full object-cover shrink-0" />
                         ) : (
-                          /* bg-zinc-800 */
-                          <div className="w-6 h-6 rounded-full bg-transparent dark:bg-white/10 flex items-center justify-center text-[9px] font-bold shrink-0 text-white">
+                          <div className="w-3.5 h-3.5 rounded-full bg-white/10 flex items-center justify-center text-[7px] font-bold text-white shrink-0">
                             {member.full_name?.charAt(0) || '?'}
                           </div>
                         )}
-                        <span className="text-xs font-bold truncate flex-1">{member.full_name}</span>
-                        {isAssigned && (
-                          <NeonIcon icon={Circle} className="shrink-0 w-3.5 h-3.5" style={{ color: '#14b8a6', opacity: 0.7 }} />
-                        )}
+                        <span className="truncate max-w-[80px]">{member.full_name}</span>
                       </button>
                     )
                   })}
                 </div>
               )}
             </div>
-            )}
-          </div>
+          )}
         </div>
       )}
     </>

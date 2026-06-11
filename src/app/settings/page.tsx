@@ -594,7 +594,7 @@ export default function SettingsPage() {
                     {quotaData.fix.used + quotaData.explain.used + quotaData.checklist.used} / {quotaData.fix.limit + quotaData.explain.limit + quotaData.checklist.limit} {isRTL ? 'مستخدم' : 'used'}
                   </span>
                 </div>
-                <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
                   <div 
                     className="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-teal-500 to-cyan-500"
                     style={{ 
@@ -639,7 +639,7 @@ export default function SettingsPage() {
                         )}
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
                           <div 
                             className="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-amber-500 to-orange-500"
                             style={{ 
