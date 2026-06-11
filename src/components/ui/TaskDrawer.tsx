@@ -18,6 +18,7 @@ import TaskDrawerMetadata from './task-drawer/TaskDrawerMetadata'
 import TaskDrawerDescription from './task-drawer/TaskDrawerDescription'
 import TaskDrawerChecklist from './task-drawer/TaskDrawerChecklist'
 import TaskDrawerComments from './task-drawer/TaskDrawerComments'
+import TaskDrawerAiTacticalTools from './task-drawer/TaskDrawerAiTacticalTools'
 
 
 interface TaskDrawerProps {
@@ -1642,6 +1643,12 @@ export default function TaskDrawer({
               handleDeleteNote={handleDeleteNote}
               handleToggleReaction={handleToggleReaction}
               formatNoteContent={formatNoteContent}
+            />
+
+            <TaskDrawerAiTacticalTools
+              role={profile?.role}
+              isRTL={isRTL}
+              themeColor={themeColor}
             />
           </div>
         </div>
