@@ -1390,6 +1390,20 @@ export default function TaskDrawer({
               updateTask={onUpdateTask}
               canEdit={canEdit}
             />
+
+            <TaskDrawerAiTacticalTools
+              task={task}
+              role={profile?.role}
+              isRTL={isRTL}
+              themeColor={themeColor}
+              updateTask={onUpdateTask}
+              canEdit={canEdit}
+              goals={goals}
+              goalId={goalId}
+              resolvedDuration={resolvedDuration}
+              finalVideoUrl={finalVideoUrl}
+              isGuest={isGuest}
+            />
           </div>
 
           {/* Column 2: checklists, attachments, comments */}
@@ -1398,26 +1412,7 @@ export default function TaskDrawer({
               ? "h-full overflow-y-auto overscroll-y-contain pr-2 custom-scrollbar space-y-6 border-l border-[var(--border)] dark:border-[var(--border)] dark:border-white/5 pl-6" 
               : "space-y-6 pt-6 border-t border-[var(--border)] dark:border-white/5"
           )}>
-            {/* Generate AI Checklist */}
-            {canEdit && finalVideoUrl && (() => {
-              const currentGoal = goals.find((g: any) => g.id === goalId || g.id === task.goal_id)
-              const goalTitleText = currentGoal?.title || 'Specialized Curriculum'
-              const hasAiChecklist = subtasks.some((s: any) => s.id?.startsWith('sub_ai_') || s.id?.startsWith('ai-'))
-              return (
-                <AiChecklistButton
-                  taskId={task.id}
-                  finalVideoUrl={finalVideoUrl}
-                  canEdit={canEdit}
-                  isRTL={isRTL}
-                  themeColor={themeColor}
-                  onUpdateTask={onUpdateTask}
-                  resolvedDuration={resolvedDuration}
-                  taskTitle={task.title}
-                  goalTitle={goalTitleText}
-                  hasAiChecklist={hasAiChecklist}
-                />
-              )
-            })()}
+            {/* Commented out legacy checklists button per layout rules */}
 
             <TaskDrawerChecklist
               task={task}
@@ -1645,11 +1640,7 @@ export default function TaskDrawer({
               formatNoteContent={formatNoteContent}
             />
 
-            <TaskDrawerAiTacticalTools
-              role={profile?.role}
-              isRTL={isRTL}
-              themeColor={themeColor}
-            />
+            {/* Commented out legacy AI tactical tools placement per layout rules */}
           </div>
         </div>
 

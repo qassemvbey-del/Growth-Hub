@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/components/ui/Toast'
+import { getFeatureUsage } from '@/lib/quota'
 import { useSound } from '@/context/SoundContext'
 import CustomSelect from '@/components/ui/CustomSelect'
 import { deleteOwnAccount } from '@/app/actions/adminActions'
@@ -147,6 +148,19 @@ export default function SettingsPage() {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true)
   const [isPwaInstalled, setIsPwaInstalled] = useState<boolean>(false)
   const [pwaPromptAvailable, setPwaPromptAvailable] = useState<boolean>(false)
+  const [quotaData, setQuotaData] = useState<any>(null)
+
+  useEffect(() => {
+    const fetchQuotas = () => {
+      const fix = getFeatureUsage('fix_errors')
+      const explain = getFeatureUsage('explain_topic')
+      const checklist = getFeatureUsage('generate_checklist')
+      setQuotaData({ fix, explain, checklist })
+    }
+    fetchQuotas()
+    const interval = setInterval(fetchQuotas, 15000)
+    return () => clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     setIsDarkMode(document.documentElement.classList.contains('dark'))
@@ -548,6 +562,83 @@ export default function SettingsPage() {
 
           </div>
         </div>
+
+        {/* AI USAGE LIMITS BLOCK */}
+        {quotaData && (
+          <div>
+            <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
+              {isRTL ? 'حدود استخدام الذكاء الاصطناعي' : 'AI USAGE LIMITS'}
+            </span>
+            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-4 shadow-xl space-y-4">
+              {/* Master Aggregated Progress Bar */}
+              <div className="space-y-2 text-start">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-space font-black uppercase tracking-wider text-white">
+                    {isRTL ? 'الاستهلاك الإجمالي' : 'Total Consumption'}
+                  </span>
+                  <span className="text-xs font-mono font-bold text-zinc-400">
+                    {quotaData.fix.used + quotaData.explain.used + quotaData.checklist.used} / {quotaData.fix.limit + quotaData.explain.limit + quotaData.checklist.limit} {isRTL ? 'مستخدم' : 'used'}
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full rounded-full transition-all duration-300"
+                    style={{ 
+                      width: `${((quotaData.fix.used + quotaData.explain.used + quotaData.checklist.used) / (quotaData.fix.limit + quotaData.explain.limit + quotaData.checklist.limit)) * 100}%`,
+                      backgroundColor: currentTheme.color,
+                      boxShadow: `0 0 10px ${currentTheme.color}`
+                    }} 
+                  />
+                </div>
+              </div>
+
+              {/* Individual Sub-list */}
+              <div className="space-y-4 pt-2 border-t border-white/5">
+                {[
+                  { key: 'fix_errors', name: isRTL ? 'مصحح الأخطاء (Fix Errors)' : 'Fix Errors', data: quotaData.fix },
+                  { key: 'explain_topic', name: isRTL ? 'شرح الموضوع (Explain Topic)' : 'Explain Topic', data: quotaData.explain },
+                  { key: 'generate_checklist', name: isRTL ? 'إنشاء المهام (Generate Checklist)' : 'Generate Checklist', data: quotaData.checklist }
+                ].map(feat => {
+                  const now = Date.now()
+                  const remainingMs = Math.max(0, feat.data.nextResetMs - now)
+                  const hrs = Math.floor(remainingMs / (3600 * 1000))
+                  const mins = Math.floor((remainingMs % (3600 * 1000)) / (60 * 1000))
+                  const countdownText = feat.data.used > 0 && remainingMs > 0
+                    ? (isRTL ? `يعاد التعيين خلال ${hrs}س ${mins}د` : `Resets in ${hrs}h ${mins}m`)
+                    : (isRTL ? 'جاهز' : 'Ready')
+
+                  return (
+                    <div key={feat.key} className="space-y-1.5 text-start">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-space font-medium text-zinc-300">
+                          {feat.name}
+                        </span>
+                        <span className="font-mono text-[10px] text-zinc-500">
+                          {countdownText}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full rounded-full transition-all duration-300"
+                            style={{ 
+                              width: `${(feat.data.used / feat.data.limit) * 100}%`,
+                              backgroundColor: currentTheme.color,
+                              boxShadow: `0 0 6px ${currentTheme.color}80`
+                            }} 
+                          />
+                        </div>
+                        <span className="text-[10px] font-mono text-zinc-400 min-w-[55px] text-right shrink-0">
+                          {feat.data.used} / {feat.data.limit} {isRTL ? 'مستخدم' : 'used'}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 4. SYSTEM PREFERENCES BLOCK */}
         <div>

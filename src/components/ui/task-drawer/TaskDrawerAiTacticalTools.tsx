@@ -1,19 +1,37 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Sparkles, Loader2, ChevronDown, ChevronUp } from 'lucide-react'
+import { Sparkles, Loader2, ChevronDown, ChevronUp, BookOpen, ListTodo } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getFeatureUsage, incrementFeatureUsage } from '@/lib/quota'
+import { createClient } from '@/lib/supabase'
 
 interface TaskDrawerAiTacticalToolsProps {
+  task: any
   role?: string | null
   isRTL: boolean
   themeColor: string
+  updateTask: (taskId: string, updates: any) => Promise<void> | void
+  canEdit: boolean
+  goals: any[]
+  goalId?: string
+  resolvedDuration: number
+  finalVideoUrl: string
+  isGuest: boolean
 }
 
 export default function TaskDrawerAiTacticalTools({
+  task,
   role,
   isRTL,
-  themeColor
+  themeColor,
+  updateTask,
+  canEdit,
+  goals,
+  goalId,
+  resolvedDuration,
+  finalVideoUrl,
+  isGuest
 }: TaskDrawerAiTacticalToolsProps) {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
@@ -21,34 +39,39 @@ export default function TaskDrawerAiTacticalTools({
   const [response, setResponse] = useState('')
   const [collapsed, setCollapsed] = useState(false)
 
-  // Configuration mapping based on user role
-  let title = isRTL ? '🧠 أدوات الذكاء الاصطناعي التكتيكية' : '🧠 AI Tactical Tools'
-  let placeholder = isRTL ? 'اسأل المساعد الذكي عن أي شيء هنا...' : 'Ask the smart assistant anything here...'
-
+  // Placeholders for Fix Errors dynamic field
+  let fixErrorsPlaceholder = isRTL ? 'اسأل المساعد الذكي عن أي شيء هنا...' : 'Ask the smart assistant anything here...'
   if (role === 'programmer') {
-    title = isRTL ? '⚡ مصحح الأكواد بالذكاء الاصطناعي' : '⚡ AI Code Debugger'
-    placeholder = isRTL
+    fixErrorsPlaceholder = isRTL
       ? 'ارمي الكود البايظ أو الـ Error اللي طلعلك في الـ Console هنا...'
       : 'Paste your broken code or console error here...'
   } else if (role === 'network_engineer') {
-    title = isRTL ? '🌐 مصلح الشبكات بالذكاء الاصطناعي' : '🌐 AI CLI Fixer'
-    placeholder = isRTL
-      ? 'ارمي الـ Cisco CLI commands أو الـ Router error logs هنا...'
+    fixErrorsPlaceholder = isRTL
+      ? 'ارمي الـ CLI logs أو أوامر سيسكو هنا...'
       : 'Paste your Cisco CLI commands or router logs here...'
   } else if (role === 'accountant') {
-    title = isRTL ? '📊 مراجع القيود الحسابية' : '📊 AI Balance Sheet Auditor'
-    placeholder = isRTL
+    fixErrorsPlaceholder = isRTL
       ? 'ارمي القيد المحاسبي المكسور أو معادلة إكسيل البايظة هنا...'
       : 'Paste your broken journal entry or Excel formula here...'
   } else if (role === 'general_learner') {
-    title = isRTL ? '🧠 تبسيط المفاهيم الصعبة' : '🧠 AI Concept Breaker'
-    placeholder = isRTL
+    fixErrorsPlaceholder = isRTL
       ? 'ارمي المفهوم الصعب أو العقبة التقنية اللي واقفة معاك هنا...'
       : 'Paste the complex concept or technical block here...'
   }
 
-  const handleExecute = async () => {
+  const handleFixErrors = async () => {
     if (!query.trim()) return
+    const usage = getFeatureUsage('fix_errors')
+    if (usage.used >= usage.limit) {
+      const remainingMs = Math.max(0, usage.nextResetMs - Date.now())
+      const hrs = Math.floor(remainingMs / (3600 * 1000))
+      const mins = Math.floor((remainingMs % (3600 * 1000)) / (60 * 1000))
+      setError(isRTL 
+        ? `تجاوزت الحد المسموح اليومي. يفتح مجدداً خلال ${hrs}س ${mins}د.` 
+        : `Fix Errors limit exceeded. Resets in ${hrs}h ${mins}m.`)
+      return
+    }
+
     setLoading(true)
     setError('')
     setResponse('')
@@ -65,16 +88,15 @@ export default function TaskDrawerAiTacticalTools({
         })
       })
 
-      if (!res.ok) {
-        throw new Error('AI execution failed')
-      }
+      if (!res.ok) throw new Error('AI request failed')
 
       const data = await res.json()
       if (data.text) {
+        incrementFeatureUsage('fix_errors')
         setResponse(data.text)
         setCollapsed(false)
       } else {
-        throw new Error('No diagnostic returned')
+        throw new Error('No diagnosis returned')
       }
     } catch (err) {
       setError(isRTL ? 'فشلت معالجة الاستعلام الذكي.' : 'Failed to process AI request.')
@@ -83,15 +105,132 @@ export default function TaskDrawerAiTacticalTools({
     }
   }
 
+  const handleExplainTopic = async () => {
+    const usage = getFeatureUsage('explain_topic')
+    if (usage.used >= usage.limit) {
+      const remainingMs = Math.max(0, usage.nextResetMs - Date.now())
+      const hrs = Math.floor(remainingMs / (3600 * 1000))
+      const mins = Math.floor((remainingMs % (3600 * 1000)) / (60 * 1000))
+      setError(isRTL 
+        ? `تجاوزت الحد المسموح. يفتح مجدداً خلال ${hrs}س ${mins}د.` 
+        : `Explain Topic limit exceeded. Resets in ${hrs}h ${mins}m.`)
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    setResponse('')
+    try {
+      const res = await fetch('/api/ai/ask', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          query: isRTL ? `اشرح موضوع المهمة بالتفصيل: ${task.title}` : `Explain task topic in detail: ${task.title}`,
+          type: 'general_ask'
+        })
+      })
+      if (!res.ok) throw new Error('API Error')
+      const data = await res.json()
+      if (data.text) {
+        incrementFeatureUsage('explain_topic')
+        const appended = task.description ? `${task.description}\n\n${data.text}` : data.text
+        await updateTask(task.id, { description: appended })
+        setResponse(data.text)
+        setCollapsed(false)
+      } else {
+        throw new Error('No description returned')
+      }
+    } catch (err) {
+      setError(isRTL ? 'خطأ أثناء توليد الشرح.' : 'Error generating explanation.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGenerateChecklist = async () => {
+    const subtasks = task.metadata?.subtasks || []
+    const hasAiChecklist = subtasks.some((s: any) => s.id?.startsWith('sub_ai_') || s.id?.startsWith('ai-'))
+    if (hasAiChecklist) {
+      setError(isRTL ? 'تم إنشاء المنهج الذكي بالفعل' : 'Smart Checklist already generated')
+      return
+    }
+    if (!finalVideoUrl) {
+      setError(isRTL ? 'يجب ربط فيديو أولاً لإنشاء المهام الذكية.' : 'Attach a video first to generate tasks.')
+      return
+    }
+
+    const usage = getFeatureUsage('generate_checklist')
+    if (usage.used >= usage.limit) {
+      const remainingMs = Math.max(0, usage.nextResetMs - Date.now())
+      const hrs = Math.floor(remainingMs / (3600 * 1000))
+      const mins = Math.floor((remainingMs % (3600 * 1000)) / (60 * 1000))
+      setError(isRTL 
+        ? `تجاوزت الحد المسموح. يفتح مجدداً خلال ${hrs}س ${mins}د.` 
+        : `Generate Checklist limit exceeded. Resets in ${hrs}h ${mins}m.`)
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    setResponse('')
+
+    const currentGoal = goals.find((g: any) => g.id === goalId || g.id === task.goal_id)
+    const goalTitleText = currentGoal?.title || 'Specialized Curriculum'
+
+    try {
+      const res = await fetch('/api/tasks/ai-checklist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          taskId: task.id,
+          youtubeUrl: finalVideoUrl,
+          taskTitle: task.title,
+          goalTitle: goalTitleText,
+          language: isRTL ? 'ar' : 'en'
+        })
+      })
+
+      const data = await res.json()
+      if (res.status === 429) {
+        setError(data.message || 'Rate limited')
+      } else if (!res.ok) {
+        setError(data.error || 'Failed to generate checklist')
+      } else {
+        incrementFeatureUsage('generate_checklist')
+        const supabase = createClient()
+        const { data: updatedTask } = await supabase
+          .from('tasks')
+          .select('metadata')
+          .eq('id', task.id)
+          .single()
+        
+        if (updatedTask) {
+          await updateTask(task.id, { metadata: updatedTask.metadata })
+          setResponse(isRTL ? 'تم إنشاء قائمة المهام الذكية بنجاح!' : 'Smart Checklist generated successfully!')
+          setCollapsed(false)
+        }
+      }
+    } catch (err) {
+      setError(isRTL ? 'حدث خطأ في الاتصال بالخادم' : 'Server communication error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <div className="mt-6 border border-zinc-200/50 dark:border-white/5 bg-zinc-100/30 dark:bg-[#0c0c14]/30 backdrop-blur-md rounded-2xl p-4 hover:border-zinc-300 dark:hover:border-white/10 transition-colors relative overflow-hidden">
-      {/* Decorative vertical border highlight */}
+    <div className="border border-zinc-200/50 dark:border-white/5 bg-zinc-100/30 dark:bg-[#0c0c14]/30 backdrop-blur-md rounded-2xl p-4 hover:border-zinc-300 dark:hover:border-white/10 transition-colors relative overflow-hidden space-y-4">
+      {/* Side Color bar indicator */}
       <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl" style={{ backgroundColor: themeColor }} />
 
-      <div className="flex items-center justify-between mb-3 pl-1">
-        <h4 className="text-xs font-space font-black uppercase tracking-wider text-zinc-900 dark:text-white flex items-center gap-1.5">
+      {/* Header */}
+      <div className="flex items-center justify-between pl-1">
+        <h4 className="text-[10px] font-space font-black uppercase tracking-wider text-zinc-900 dark:text-white flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-          {title}
+          {isRTL ? 'مساعد الذكاء الاصطناعي' : 'AI Assistants'}
         </h4>
         {response && (
           <button
@@ -103,52 +242,77 @@ export default function TaskDrawerAiTacticalTools({
         )}
       </div>
 
-      <div className="space-y-3">
-        <div className="flex gap-2 relative">
+      {/* 1. Top Element: Fix Errors */}
+      <div className="space-y-2">
+        <label className="text-[9px] font-space font-black uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block pl-1">
+          {isRTL ? 'مصحح الأخطاء' : 'Fix Errors'}
+        </label>
+        <div className="flex gap-2">
           <textarea
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             disabled={loading}
-            placeholder={placeholder}
-            className="w-full bg-zinc-100/50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-800 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-white/20 focus:outline-none focus:border-zinc-300 dark:focus:border-white/10 transition-all font-space min-h-[64px] resize-none"
+            placeholder={fixErrorsPlaceholder}
+            className="w-full bg-zinc-100/50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-800 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-white/20 focus:outline-none focus:border-zinc-300 dark:focus:border-white/10 transition-all font-space min-h-[60px] resize-none"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
-                handleExecute()
+                handleFixErrors()
               }
             }}
           />
           <button
-            onClick={handleExecute}
-            disabled={loading || !query.trim()}
-            className="px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-zinc-850 dark:hover:bg-zinc-200 rounded-xl text-[10px] font-space font-black tracking-wider uppercase transition-colors shrink-0 flex items-center justify-center min-w-[70px] disabled:opacity-40 cursor-pointer h-auto"
+            onClick={handleFixErrors}
+            disabled={loading || !query.trim() || !canEdit}
+            className="px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-zinc-850 dark:hover:bg-zinc-200 rounded-xl text-[10px] font-space font-black tracking-wider uppercase transition-colors shrink-0 flex items-center justify-center min-w-[70px] disabled:opacity-40 cursor-pointer"
             style={{
               boxShadow: query.trim() && !loading ? `0 4px 15px ${themeColor}22` : 'none'
             }}
           >
-            {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              isRTL ? 'تشغيل' : 'RUN'
-            )}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (isRTL ? 'تشغيل' : 'RUN')}
           </button>
         </div>
-
-        {error && (
-          <span className="text-[9px] font-space font-bold text-red-500/80 block mt-1">
-            {error}
-          </span>
-        )}
-
-        {response && !collapsed && (
-          <div className="mt-3 bg-zinc-200/50 dark:bg-black/40 border border-zinc-300/50 dark:border-white/5 rounded-xl p-3 text-xs text-zinc-800 dark:text-zinc-300 font-space whitespace-pre-wrap leading-relaxed select-text transition-all max-h-[300px] overflow-y-auto scrollbar-thin">
-            <div className="text-[8px] uppercase tracking-widest text-zinc-500/60 dark:text-white/20 font-bold mb-2 pb-1 border-b border-zinc-300 dark:border-white/5">
-              {isRTL ? 'التحليل والحلول المقترحة' : 'AI Diagnostic Resolution'}
-            </div>
-            {response}
-          </div>
-        )}
       </div>
+
+      {/* 2. Bottom Element: Row of side-by-side buttons */}
+      {canEdit && (
+        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-zinc-200/50 dark:border-white/5">
+          <button
+            type="button"
+            onClick={handleExplainTopic}
+            disabled={loading}
+            className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-zinc-200/50 dark:bg-white/5 hover:bg-zinc-300/60 dark:hover:bg-white/10 text-[10px] font-bold text-zinc-800 dark:text-zinc-300 transition-colors disabled:opacity-50 cursor-pointer border border-zinc-200/50 dark:border-white/5"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
+            <span>{isRTL ? 'شرح الموضوع' : 'Explain Topic'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleGenerateChecklist}
+            disabled={loading}
+            className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-zinc-200/50 dark:bg-white/5 hover:bg-zinc-300/60 dark:hover:bg-white/10 text-[10px] font-bold text-zinc-800 dark:text-zinc-300 transition-colors disabled:opacity-50 cursor-pointer border border-zinc-200/50 dark:border-white/5"
+          >
+            <ListTodo className="w-3.5 h-3.5 text-cyan-400" />
+            <span>{isRTL ? 'إنشاء المهام' : 'Generate Checklist'}</span>
+          </button>
+        </div>
+      )}
+
+      {error && (
+        <span className="text-[9px] font-space font-bold text-red-500/80 block mt-1">
+          {error}
+        </span>
+      )}
+
+      {response && !collapsed && (
+        <div className="mt-3 bg-zinc-200/50 dark:bg-black/40 border border-zinc-300/50 dark:border-white/5 rounded-xl p-3 text-xs text-zinc-800 dark:text-zinc-300 font-space whitespace-pre-wrap leading-relaxed select-text transition-all max-h-[200px] overflow-y-auto scrollbar-thin">
+          <div className="text-[8px] uppercase tracking-widest text-zinc-500/60 dark:text-white/20 font-bold mb-2 pb-1 border-b border-zinc-300 dark:border-white/5">
+            {isRTL ? 'التحليل والحلول المقترحة' : 'AI Diagnostic Resolution'}
+          </div>
+          {response}
+        </div>
+      )}
     </div>
   )
 }

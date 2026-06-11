@@ -70,6 +70,7 @@ export default function TaskDrawerDescription({
           {isRTL ? 'وصف المهمة' : 'Task Description'}
         </h3>
         
+        {/* Commented out per layout refactor rules
         {canEdit && (
           <button
             type="button"
@@ -85,6 +86,7 @@ export default function TaskDrawerDescription({
             {isRTL ? 'اشرح موضوع المهمة' : 'Explain Task Topic'}
           </button>
         )}
+        */}
       </div>
 
       {!canEdit ? (
@@ -106,7 +108,7 @@ export default function TaskDrawerDescription({
             placeholder={isRTL ? "أضف وصفاً..." : "Add a description..."}
           />
 
-          {/* Colloquial Query Follow-up Field */}
+          {/* Commented out per layout refactor rules
           <div className="pt-2 border-t border-zinc-200/50 dark:border-white/5">
             <div className="flex items-center gap-2 relative">
               <input
@@ -134,6 +136,7 @@ export default function TaskDrawerDescription({
               </span>
             )}
           </div>
+          */}
         </div>
       )}
     </div>
