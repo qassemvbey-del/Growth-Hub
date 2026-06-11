@@ -32,6 +32,7 @@ export interface Profile {
   email: string | null
   drive_connected?: boolean
   drive_refresh_token?: string | null
+  role?: string | null
 }
 
 export const THEME_PACKAGES = {

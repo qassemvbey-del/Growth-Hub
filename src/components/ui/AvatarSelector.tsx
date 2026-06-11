@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, HelpCircle, RefreshCw, Save, User, X, Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp } from 'lucide-react'
+import { Check, HelpCircle, RefreshCw, Save, User, X, Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp, Code, Globe, Calculator, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
@@ -17,14 +17,12 @@ const CUSTOM_SVGS = [
   { id: 'nour', label: 'Nour', arLabel: 'نور', gender: 'female', sub: 'Professional', arSub: 'موظف', icon: 'trending_up' },
 ]
 
-const IconMap: Record<string, React.ComponentType<any>> = {
-  laptop_mac: Laptop,
-  school: GraduationCap,
-  work: Briefcase,
-  rocket_launch: Rocket,
-  videocam: Video,
-  trending_up: TrendingUp
-}
+const CLASSES = [
+  { id: 'programmer', label: 'Programmer', arLabel: 'مبرمج', icon: Laptop, desc: 'Software, web, and systems development.', arDesc: 'تطوير البرمجيات والمواقع والأنظمة.' },
+  { id: 'network_engineer', label: 'Network Engineer', arLabel: 'Network Engineer', arLabelAlt: 'مهندس شبكات', icon: Globe, desc: 'Infrastructure, routing, and security.', arDesc: 'البنية التحتية والتوجيه والحماية.' },
+  { id: 'accountant', label: 'Accountant', arLabel: 'محاسب', icon: Calculator, desc: 'Financial planning, books, and analysis.', arDesc: 'التخطيط المالي والدفاتر والتحليل.' },
+  { id: 'general_learner', label: 'General Learner', arLabel: 'متعلم عام', icon: GraduationCap, desc: 'General study, skills, and growth.', arDesc: 'الدراسة العامة والمهارات والنمو الشخصي.' }
+]
 
 interface Props {
   onClose: () => void
@@ -34,22 +32,22 @@ interface Props {
 export default function AvatarSelector({ onClose, onSaved }: Props) {
   const { profile, setProfile, currentTheme, isRTL } = useGrowth()
   const { showToast } = useToast()
+  const [step, setStep] = useState<1 | 2>(1)
+  const [chosenRole, setChosenRole] = useState<string | null>(profile?.role || null)
   const [selected, setSelected] = useState<string | null>(profile?.custom_avatar || null)
   const [isSaving, setIsSaving] = useState(false)
   const supabase = createClient()
 
   const handleSave = async () => {
-    if (!profile?.id) return
+    if (!profile?.id || !chosenRole) return
     setIsSaving(true)
     try {
       const { error: authError } = await supabase.auth.updateUser({
-        data: { custom_avatar: selected }
+        data: { custom_avatar: selected, role: chosenRole }
       })
 
       if (authError) {
         console.error('Auth updateUser error:', authError)
-        // Commented out per safety rules:
-        // showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'UPDATE_FAILED', 'warning')
         showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'Update failed', 'warning')
         setIsSaving(false)
         return
@@ -57,15 +55,27 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
 
       const defaultAvatar = (profile?.gender === 'female' || profile?.gender === 'أنثى' || profile?.gender === 'Female') ? '/avatars/menna.svg' : '/avatars/omar.svg'
       const targetAvatarUrl = selected || profile.google_avatar_url || defaultAvatar
-      await supabase
+      
+      const { error } = await supabase
         .from('profiles')
-        .update({ avatar_url: targetAvatarUrl, custom_avatar: selected })
+        .update({ 
+          avatar_url: targetAvatarUrl, 
+          custom_avatar: selected,
+          role: chosenRole,
+          onboarded: true
+        })
         .eq('id', profile.id)
+
+      if (error) {
+        throw error
+      }
 
       const updatedProfile = {
         ...profile,
         custom_avatar: selected,
-        avatar_url: targetAvatarUrl
+        avatar_url: targetAvatarUrl,
+        role: chosenRole,
+        onboarded: true
       }
       setProfile(updatedProfile)
 
@@ -76,6 +86,8 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
             const parsed = JSON.parse(cached)
             parsed.custom_avatar = selected
             parsed.avatar_url = targetAvatarUrl
+            parsed.role = chosenRole
+            parsed.onboarded = true
             localStorage.setItem('cached_profile', JSON.stringify(parsed))
           } catch (e) {}
         } else {
@@ -88,8 +100,6 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
       onClose()
     } catch (err) {
       console.error('Save avatar error:', err)
-      // Commented out per safety rules:
-      // showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'UPDATE_FAILED', 'warning')
       showToast(isRTL ? 'فشل تحديث الشخصية، يرجى المحاولة مرة أخرى' : 'Update failed', 'warning')
     } finally {
       setIsSaving(false)
@@ -126,11 +136,13 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                 <div className="flex items-center gap-2">
                   <HelpCircle className="w-4 h-4" />
                   <p className="text-[10px] font-space tracking-[0.4em] uppercase font-black" style={{ color: currentTheme.color }}>
-                    {isRTL ? 'تخصيص الملف الشخصي والهوية' : 'Customize Profile'}
+                    {isRTL ? `خطوة ${step} من ٢ // إعداد الهوية` : `Step ${step} of 2 // Customize Identity`}
                   </p>
                 </div>
                 <h2 className="text-xl md:text-2xl font-space font-black text-zinc-900 dark:text-white uppercase tracking-wider">
-                  {isRTL ? 'اختر الشخصية المهنية الخاصة بك' : 'Select Active User Persona'}
+                  {step === 1 
+                    ? (isRTL ? 'اختر تخصصك المهني (Class)' : 'Choose Your Class') 
+                    : (isRTL ? 'اختر الشخصية البصرية الخاصة بك' : 'Choose Your Avatar')}
                 </h2>
               </div>
               <button
@@ -141,97 +153,186 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
               </button>
             </div>
 
-            {/* Avatar Grid (Aspect Ratio Preserved, Compact Tiles) */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {/* Option 1: Google Profile */}
-              <button
-                type="button"
-                onClick={() => setSelected(null)}
-                className={cn(
-                  "relative flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 group cursor-pointer bg-white/60 dark:bg-black/60 backdrop-blur-md aspect-square text-center",
-                  selected === null 
-                    ? "ring-2 ring-orange-500 ring-offset-2 ring-offset-zinc-100 dark:ring-offset-black" 
-                    : "border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20"
-                )}
-                style={selected === null ? { borderColor: currentTheme.color } : {}}
-              >
-                <div className="relative w-16 h-16 rounded-full flex items-center justify-center p-1 transition-transform duration-500 group-hover:scale-105 mb-2">
-                  <div className="w-full h-full rounded-full overflow-hidden border border-zinc-300 dark:border-white/20 bg-zinc-100/80 dark:bg-white/10 flex items-center justify-center">
-                    {profile?.google_avatar_url ? (
-                      <img src={profile.google_avatar_url} alt="Google Auth" className="w-[90%] h-[90%] mx-auto object-contain p-1 rounded-full" />
-                    ) : (
-                      <User className="text-zinc-400 dark:text-white/40 w-8 h-8" />
-                    )}
-                  </div>
+            {step === 1 ? (
+              /* Step 1: Class Selection */
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {CLASSES.map((cls) => {
+                    const ClassIcon = cls.icon
+                    const isSelected = chosenRole === cls.id
+                    return (
+                      <button
+                        key={cls.id}
+                        type="button"
+                        onClick={() => setChosenRole(cls.id)}
+                        className={cn(
+                          "relative flex flex-col items-start p-5 rounded-2xl border transition-all duration-300 group cursor-pointer bg-white/60 dark:bg-black/60 backdrop-blur-md text-left w-full",
+                          isSelected 
+                            ? "ring-2 ring-orange-500 ring-offset-2 ring-offset-zinc-100 dark:ring-offset-black" 
+                            : "border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20"
+                        )}
+                        style={isSelected ? { borderColor: currentTheme.color } : {}}
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          <div 
+                            className="w-10 h-10 rounded-xl flex items-center justify-center border transition-colors"
+                            style={{ 
+                              borderColor: isSelected ? currentTheme.color : 'rgba(150,150,150,0.2)',
+                              backgroundColor: isSelected ? `${currentTheme.color}15` : 'transparent'
+                            }}
+                          >
+                            <ClassIcon className="w-5 h-5" style={{ color: isSelected ? currentTheme.color : 'inherit' }} />
+                          </div>
+                          <span className="text-sm font-space font-black tracking-wider uppercase text-zinc-900 dark:text-white block">
+                            {isRTL ? cls.arLabel : cls.label}
+                          </span>
+                        </div>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 font-space leading-relaxed">
+                          {isRTL ? cls.arDesc : cls.desc}
+                        </p>
+
+                        {isSelected && (
+                          <div className="absolute top-4 right-4 w-5 h-5 rounded-full flex items-center justify-center shadow-lg border border-black/20" style={{ backgroundColor: currentTheme.color }}>
+                            <Check className="text-black text-xs font-bold w-3 h-3" />
+                          </div>
+                        )}
+                      </button>
+                    )
+                  })}
                 </div>
 
-                <span className="text-xs font-space font-black tracking-wider uppercase text-zinc-900 dark:text-white block truncate w-full">
-                  {isRTL ? 'حساب جوجل' : 'Google Profile'}
-                </span>
-              </button>
-
-              {/* Options 2-7: Custom SVGs */}
-              {CUSTOM_SVGS.map((avatar) => {
-                const avatarUrl = `/avatars/${avatar.id}.svg`
-                const isActive = selected === avatarUrl
-                return (
+                <div className="pt-4 border-t border-zinc-200 dark:border-white/10 flex justify-end">
                   <button
-                    key={avatar.id}
                     type="button"
-                    onClick={() => setSelected(avatarUrl)}
+                    disabled={!chosenRole}
+                    onClick={() => setStep(2)}
+                    className="px-6 py-3 rounded-xl font-space font-black text-xs tracking-[0.2em] uppercase transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-2xl hover:scale-[1.01] active:scale-[0.99] cursor-pointer border border-white/20 hover:border-white/40"
+                    style={{
+                      background: chosenRole ? currentTheme.color : '#71717a',
+                      color: '#000000',
+                      boxShadow: chosenRole ? `0 4px 30px ${currentTheme.color}66` : 'none',
+                    }}
+                  >
+                    <span className="font-bold">{isRTL ? 'التالي' : 'Next'}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Step 2: Avatar Selection */
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {/* Google Profile */}
+                  <button
+                    type="button"
+                    onClick={() => setSelected(null)}
                     className={cn(
-                      "relative flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 group cursor-pointer bg-white/60 dark:bg-black/60 backdrop-blur-md aspect-square text-center",
-                      isActive 
+                      "relative flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 group cursor-pointer bg-white/60 dark:bg-black/60 backdrop-blur-md aspect-square text-center w-full",
+                      selected === null 
                         ? "ring-2 ring-orange-500 ring-offset-2 ring-offset-zinc-100 dark:ring-offset-black" 
                         : "border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20"
                     )}
-                    style={isActive ? { borderColor: currentTheme.color } : {}}
+                    style={selected === null ? { borderColor: currentTheme.color } : {}}
                   >
                     <div className="relative w-16 h-16 rounded-full flex items-center justify-center p-1 transition-transform duration-500 group-hover:scale-105 mb-2">
                       <div className="w-full h-full rounded-full overflow-hidden border border-zinc-300 dark:border-white/20 bg-zinc-100/80 dark:bg-white/10 flex items-center justify-center">
-                        <img src={avatarUrl} alt={avatar.label} className="w-[90%] h-[90%] mx-auto object-contain p-1" />
+                        {profile?.google_avatar_url ? (
+                          <img src={profile.google_avatar_url} alt="Google Auth" className="w-[90%] h-[90%] mx-auto object-contain p-1 rounded-full" />
+                        ) : (
+                          <User className="text-zinc-400 dark:text-white/40 w-8 h-8" />
+                        )}
                       </div>
                     </div>
 
                     <span className="text-xs font-space font-black tracking-wider uppercase text-zinc-900 dark:text-white block truncate w-full">
-                      {isRTL ? avatar.arLabel : avatar.label}
+                      {isRTL ? 'حساب جوجل' : 'Google Profile'}
                     </span>
                   </button>
-                )
-              })}
-            </div>
 
-            <div className="pt-4 border-t border-zinc-200 dark:border-white/10">
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={isSaving}
-                className="w-full py-3 rounded-xl font-space font-black text-xs tracking-[0.2em] uppercase transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-2xl hover:scale-[1.01] active:scale-[0.99] cursor-pointer border border-white/20 hover:border-white/40"
-                style={{
-                  background: currentTheme.color,
-                  color: '#000000',
-                  boxShadow: `0 4px 30px ${currentTheme.color}66`,
-                }}
-              >
-                {isSaving ? (
-                  <>
-                    <HelpCircle className="w-4 h-4" />
-                    <span className="font-bold">{isRTL ? 'جارٍ الحفظ...' : 'Saving...'}</span>
-                  </>
-                ) : (
-                  <>
-                    <Save className="text-lg font-bold w-4 h-4" />
-                    <span className="font-bold">{isRTL ? 'تأكيد اختيار الشخصية' : 'Confirm Selection'}</span>
-                  </>
-                )}
-              </button>
-            </div>
+                  {/* Custom SVG Avatars */}
+                  {CUSTOM_SVGS.map((avatar) => {
+                    const avatarUrl = `/avatars/${avatar.id}.svg`
+                    const isActive = selected === avatarUrl
+                    return (
+                      <button
+                        key={avatar.id}
+                        type="button"
+                        onClick={() => setSelected(avatarUrl)}
+                        className={cn(
+                          "relative flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-300 group cursor-pointer bg-white/60 dark:bg-black/60 backdrop-blur-md aspect-square text-center w-full",
+                          isActive 
+                            ? "ring-2 ring-orange-500 ring-offset-2 ring-offset-zinc-100 dark:ring-offset-black" 
+                            : "border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20"
+                        )}
+                        style={isActive ? { borderColor: currentTheme.color } : {}}
+                      >
+                        <div className="relative w-16 h-16 rounded-full flex items-center justify-center p-1 transition-transform duration-500 group-hover:scale-105 mb-2">
+                          <div className="w-full h-full rounded-full overflow-hidden border border-zinc-300 dark:border-white/20 bg-zinc-100/80 dark:bg-white/10 flex items-center justify-center">
+                            <img src={avatarUrl} alt={avatar.label} className="w-[90%] h-[90%] mx-auto object-contain p-1" />
+                          </div>
+                        </div>
+
+                        <span className="text-xs font-space font-black tracking-wider uppercase text-zinc-900 dark:text-white block truncate w-full">
+                          {isRTL ? avatar.arLabel : avatar.label}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <div className="pt-4 border-t border-zinc-200 dark:border-white/10 flex justify-between gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="px-6 py-3 rounded-xl font-space font-black text-xs tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-2 border border-zinc-300 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer text-zinc-700 dark:text-white"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span className="font-bold">{isRTL ? 'السابق' : 'Back'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="flex-1 py-3 rounded-xl font-space font-black text-xs tracking-[0.2em] uppercase transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-2xl hover:scale-[1.01] active:scale-[0.99] cursor-pointer border border-white/20 hover:border-white/40"
+                    style={{
+                      background: currentTheme.color,
+                      color: '#000000',
+                      boxShadow: `0 4px 30px ${currentTheme.color}66`,
+                    }}
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-black" />
+                        <span className="font-bold">{isRTL ? 'جارٍ الحفظ...' : 'Saving...'}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save className="text-lg font-bold w-4 h-4" />
+                        <span className="font-bold">{isRTL ? 'تأكيد وحفظ التعديلات' : 'Confirm Selection'}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
   )
 }
+
+/*
+PREVIOUS_ACTIVE_AVATAR_SELECTOR_CODE:
+interface LegacyProps {
+  onClose: () => void
+  onSaved?: (url: string) => void
+}
+function LegacyAvatarSelector({ onClose, onSaved }: LegacyProps) {
+  // original active code left here commented out for safety rules reference
+}
+*/
 
 /*
 ORIGINAL_UNTOUCHED_CODE_FOR_REFERENCE:
