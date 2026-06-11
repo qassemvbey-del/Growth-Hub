@@ -13,109 +13,100 @@ import { useGrowth } from '@/context/GrowthContext'
 import CustomSelect from '@/components/ui/CustomSelect'
 import { useRouter } from 'next/navigation'
 
-interface WikiSearchProps {
+interface AskAiWorkspaceProps {
   onInsert: (text: string) => void
   color: string
   isRTL: boolean
 }
 
-function WikiSearch({ onInsert, color, isRTL }: WikiSearchProps) {
+function AskAiWorkspace({ onInsert, color, isRTL }: AskAiWorkspaceProps) {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [aiResponse, setAiResponse] = useState('')
 
-  const handleSearch = async () => {
+  const handleAsk = async () => {
     if (!query.trim()) return
     setLoading(true)
     setError('')
+    setAiResponse('')
     
-    // Sanitize raw search string by stripping question marks
-    const cleanQuery = query.replace(/[?؟]/g, '')
-
-    // Arabic char detection logic
-    const hasArabic = /[\u0600-\u06FF]/.test(cleanQuery)
-    let domain = hasArabic ? 'ar' : 'en'
-
     try {
-      // Step 1: Query Elasticsearch API for matches
-      let searchUrl = `https://${domain}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(cleanQuery.trim())}&format=json&origin=*`
-      let res = await fetch(searchUrl)
-      let searchData = await res.json()
+      const res = await fetch('/api/ai/ask', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query: query.trim() })
+      })
 
-      // Fallback to English Wikipedia if Arabic search yields no results and query has English characters
-      if (domain === 'ar' && (!searchData.query?.search || searchData.query.search.length === 0) && /[a-zA-Z]/.test(cleanQuery)) {
-        domain = 'en'
-        searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(cleanQuery.trim())}&format=json&origin=*`
-        res = await fetch(searchUrl)
-        searchData = await res.json()
+      if (!res.ok) {
+        throw new Error('Failed to get answer')
       }
 
-      const results = searchData.query?.search || []
-      if (results.length === 0) {
-        setError(isRTL ? 'لم نجد مقالات مطابقة. حاول إعادة الصياغة.' : 'No matching articles found. Try rephrasing.')
-        setLoading(false)
-        return
-      }
-
-      // const topResultTitle = results[0].title
-      const topResultPageId = results[0].pageid
-
-      // Step 2: Fetch details extract for the top page ID match (using pageids instead of titles to prevent encoding bugs)
-      // const extractUrl = `https://${domain}.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&titles=${encodeURIComponent(topResultTitle)}&format=json&origin=*`
-      const extractUrl = `https://${domain}.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&pageids=${topResultPageId}&format=json&origin=*`
-      const extractRes = await fetch(extractUrl)
-      const extractData = await extractRes.json()
-
-      const pages = extractData.query?.pages || {}
-      // const pageObj = Object.values(pages)[0] as any
-      const pageObj = pages[topResultPageId] as any
-      const extractText = pageObj?.extract
-
-      if (extractText) {
-        onInsert(extractText)
-        setQuery('')
+      const data = await res.json()
+      if (data.text) {
+        setAiResponse(data.text)
       } else {
-        throw new Error('No extract found')
+        throw new Error('No answer returned')
       }
     } catch (e) {
-      setError(isRTL ? 'لم نجد مقالات مطابقة. حاول إعادة الصياغة.' : 'No matching articles found. Try rephrasing.')
+      setError(isRTL ? 'حدث خطأ أثناء الاتصال بالذكاء الاصطناعي.' : 'Failed to communicate with AI.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="w-full max-w-[280px] md:max-w-[320px] shrink-0 text-left">
+    <div className="w-full max-w-[320px] md:max-w-[400px] shrink-0 text-left space-y-3">
       <span className="text-[10px] font-mono tracking-widest text-black/30 dark:text-white/30 uppercase block mb-1">
-        {isRTL ? 'و // ويكيبيديا' : 'W // WIKIPEDIA'}
+        {isRTL ? 'مساحة العمل للذكاء الاصطناعي' : 'Ask AI Workspace'}
       </span>
       <div className="flex relative">
         <input
           value={query}
           onChange={e => setQuery(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') handleSearch() }}
-          placeholder={loading ? (isRTL ? 'جاري البحث...' : 'Searching...') : (isRTL ? 'بحث سريع...' : 'Quick search...')}
+          onKeyDown={e => { if (e.key === 'Enter') handleAsk() }}
+          placeholder={loading ? (isRTL ? 'جاري التفكير...' : 'Thinking...') : (isRTL ? 'اسأل أي شيء بالعامية أو الفصحى...' : 'Ask anything in colloquial or formal strings... (e.g., يعني ايه CCNA)')}
           disabled={loading}
-          className="w-full bg-black/[0.01] dark:bg-white/[0.01] border border-black/5 dark:border-white/5 rounded-l-md px-2 py-1 text-xs text-black dark:text-white placeholder:text-black/30 dark:placeholder:text-white/20 focus:outline-none focus:border-black/20 dark:focus:border-white/10 transition-all font-space"
+          className="w-full bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 hover:border-black/10 dark:hover:border-white/10 rounded-l-md px-3 py-1.5 text-xs text-black dark:text-white placeholder:text-black/30 dark:placeholder:text-white/20 focus:outline-none focus:border-black/20 dark:focus:border-white/10 transition-all font-space"
         />
         <button
-          onClick={handleSearch}
+          onClick={handleAsk}
           disabled={loading}
-          className="border-y border-r border-black/5 dark:border-white/5 bg-black/[0.03] dark:bg-white/[0.03] px-2.5 py-1 text-xs text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white rounded-r-md transition-colors font-mono shrink-0 active:scale-95 flex items-center justify-center min-w-[50px]"
+          className="border-y border-r border-black/5 dark:border-white/5 bg-black/[0.03] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.05] px-3.5 py-1.5 text-xs text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white rounded-r-md transition-colors font-mono shrink-0 active:scale-95 flex items-center justify-center min-w-[50px] cursor-pointer"
         >
-          {loading ? '...' : (isRTL ? 'بحث' : 'GO')}
+          {loading ? '...' : (isRTL ? 'إرسال' : 'ASK')}
         </button>
-        
-        {loading && (
-          <div className="absolute right-[60px] top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none">
-            <span className="w-1 h-1 rounded-full animate-ping" style={{ backgroundColor: color }} />
-          </div>
-        )}
       </div>
+
       {error && (
         <span className="text-[9px] font-space font-bold tracking-wide text-red-500/80 mt-1 block">
           {error}
         </span>
+      )}
+
+      {aiResponse && (
+        <div className="mt-2 bg-zinc-100/80 dark:bg-zinc-900/50 backdrop-blur-md border border-zinc-200/50 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 rounded-xl p-3 text-xs text-zinc-800 dark:text-zinc-300 font-space transition-all">
+          <div className="flex justify-between items-center mb-2 pb-1.5 border-b border-zinc-200 dark:border-white/5">
+            <span className="text-[9px] uppercase tracking-wider text-zinc-500/80 dark:text-white/30 font-bold">
+              {isRTL ? 'استجابة الذكاء الاصطناعي' : 'AI Explanation'}
+            </span>
+            <button
+              onClick={() => {
+                onInsert(aiResponse)
+                setAiResponse('')
+                setQuery('')
+              }}
+              className="text-[9px] font-bold px-2 py-0.5 rounded bg-zinc-200 dark:bg-white/5 hover:bg-zinc-300 dark:hover:bg-white/10 text-zinc-700 dark:text-white transition-colors cursor-pointer"
+            >
+              {isRTL ? '+ إلحاق باللوحة' : '+ Append to Canvas'}
+            </button>
+          </div>
+          <div className="whitespace-pre-wrap select-text leading-relaxed">
+            {aiResponse}
+          </div>
+        </div>
       )}
     </div>
   )
@@ -813,10 +804,10 @@ export default function NotesPage() {
                   <span className="text-[10px] font-space tracking-widest text-black/30 dark:text-white/20 uppercase font-black mb-1">
                     {isRTL ? 'لوحة الملاحظة' : 'Note Canvas'}
                   </span>
-                  <WikiSearch
+                  <AskAiWorkspace
                     isRTL={isRTL}
                     color={currentTheme.color}
-                    onInsert={(text) => setNewContent(prev => prev ? `${prev}\n\n${text}` : text)}
+                    onInsert={(text: string) => setNewContent(prev => prev ? `${prev}\n\n${text}` : text)}
                   />
                 </div>
                 
@@ -1401,7 +1392,7 @@ export default function NotesPage() {
                   <span className="text-[10px] font-space tracking-widest text-[var(--text-secondary)]/30 uppercase font-black">
                     {isRTL ? 'محرر اللوحة' : 'Canvas Editor'}
                   </span>
-                  <WikiSearch
+                  <AskAiWorkspace
                     isRTL={isRTL}
                     color={currentTheme.color}
                     onInsert={(text) => updateNote(editingNote.id, { content: editingNote.content ? `${editingNote.content}\n\n${text}` : text })}
