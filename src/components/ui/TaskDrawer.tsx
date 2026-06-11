@@ -325,6 +325,28 @@ export default function TaskDrawer({
     }
   }, [setIsTaskDrawerOpen])
 
+  useEffect(() => {
+    if (!task?.id) return
+    try {
+      const currentGoalId = goalId || task.goal_id
+      const taskUrl = isSquad 
+        ? `/goals/squad/${currentGoalId}?task=${task.id}` 
+        : `/goals/${currentGoalId}?task=${task.id}`
+
+      const raw = localStorage.getItem('growth_hub_recent_tasks')
+      let list = raw ? JSON.parse(raw) : []
+      // Filter out duplicate
+      list = list.filter((i: any) => i.id !== task.id)
+      // Add to front
+      list.unshift({ id: task.id, title: task.title, url: taskUrl })
+      // Max 3 items
+      list = list.slice(0, 3)
+      localStorage.setItem('growth_hub_recent_tasks', JSON.stringify(list))
+    } catch (e) {
+      console.error('Error tracking recent task:', e)
+    }
+  }, [task?.id, task?.title, goalId, task?.goal_id, isSquad])
+
   const updateTask = async (taskId: string, updates: any) => {
     await onUpdateTask(taskId, updates)
     

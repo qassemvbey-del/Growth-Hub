@@ -1,5 +1,10 @@
 'use client'
 
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
+// STANDALONE RANKS VIEW RETIRED & COMMENTED OUT PER SAFETY RULES:
+/*
 import { Lock } from 'lucide-react'
 import React from 'react'
 import { motion, useMotionValue, useSpring, useMotionTemplate } from 'framer-motion'
@@ -89,7 +94,7 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
             : '0 8px 32px rgba(0,0,0,0.3)'
         }}
       >
-        {/* Tier Inner Border Accent */}
+        {/* Tier Inner Border Accent * /}
         <div className={cn(
           "absolute inset-1 rounded-[14px] border pointer-events-none",
           rank.id === 'SILVER' ? 'border-slate-500/10' :
@@ -100,13 +105,13 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
           rank.id === 'ACE' ? 'border-red-500/10' : 'border-yellow-500/20'
         )} />
 
-        {/* 1. Radial Spot Light Tracking Pointer */}
+        {/* 1. Radial Spot Light Tracking Pointer * /}
         <motion.div
           className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{ background: radialBg }}
         />
 
-        {/* Rank Title */}
+        {/* Rank Title * /}
         <h2 className={cn(
           "text-4xl md:text-5xl font-black font-space mb-2 uppercase tracking-wider transition-transform duration-300 group-hover:scale-105",
           getRankNeonClass(rank.id)
@@ -121,7 +126,7 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
           ) : rank.name}
         </h2>
         
-        {/* Status Badge */}
+        {/* Status Badge * /}
         <div
           className="px-5 py-1.5 rounded-full font-space text-[10px] font-black tracking-widest mb-6 border transition-all duration-300"
           style={status === 'EQUIPPED'
@@ -135,7 +140,7 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
           ) : status}
         </div>
 
-        {/* EnergyCell Visualization */}
+        {/* EnergyCell Visualization * /}
         <div className="w-32 h-32 md:w-36 md:h-36 mb-4 relative flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.05]">
           <EnergyCell 
             percentage={75}
@@ -144,7 +149,7 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
           />
         </div>
 
-        {/* 3. HOVER REVEAL DETAILS AND ACTIONS (Smooth Opacity Sync) */}
+        {/* 3. HOVER REVEAL DETAILS AND ACTIONS (Smooth Opacity Sync) * /}
         <div className="w-full flex-grow flex flex-col justify-end">
           <motion.div
             animate={{ opacity: isHovered ? 1.0 : 0.0, height: isHovered ? 'auto' : 0 }}
@@ -153,24 +158,17 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
           >
             <div className="w-full space-y-4 text-center border-t border-zinc-200 dark:border-white/10 pt-4 mt-2">
               
-              {/* XP Stagger */}
+              {/* XP Stagger * /}
               <motion.div 
                 animate={{ y: isHovered ? 0 : 3 }}
                 transition={{ duration: 0.3 }}
                 className="space-y-0.5"
               >
-                {/* Commented out per safety rules:
-                <p className="font-space text-[9px] text-zinc-500 dark:text-white/40 uppercase tracking-[0.25em] font-black">
-                  {isRTL ? 'الخبرة المطلوبة' : 'XP REQUIRED'}
-                </p>
-                */}
                 <p className="font-space text-[9px] text-zinc-500 dark:text-white/40 uppercase tracking-[0.25em] font-black">
                   {isRTL ? 'الخبرة المطلوبة' : 'XP Required'}
                 </p>
                 <p className="text-xl font-black font-space tracking-tight text-zinc-900 dark:text-white">
                   {rank.id === 'CONQUEROR' ? (
-                    // Commented out per safety rules:
-                    // isRTL ? 'المتصدر #1' : 'TOP #1 LEAD'
                     isRTL ? 'المتصدر #1' : 'Top #1 Leader'
                   ) : (
                     `${rank.threshold.toLocaleString()} XP`
@@ -178,17 +176,12 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
                 </p>
               </motion.div>
 
-              {/* Perk Stagger */}
+              {/* Perk Stagger * /}
               <motion.div 
                 animate={{ y: isHovered ? 0 : 3 }}
                 transition={{ duration: 0.3 }}
                 className="space-y-0.5"
               >
-                {/* Commented out per safety rules:
-                <p className="font-space text-[9px] uppercase tracking-[0.25em] font-black" style={{ color: rank.color }}>
-                  {isRTL ? 'الميزة النشطة' : 'ACTIVE PERK'}
-                </p>
-                */}
                 <p className="font-space text-[9px] uppercase tracking-[0.25em] font-black" style={{ color: rank.color }}>
                   {isRTL ? 'الميزة النشطة' : 'Active Perk'}
                 </p>
@@ -204,17 +197,12 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
                 </p>
               </motion.div>
 
-              {/* Unlocks Stagger */}
+              {/* Unlocks Stagger * /}
               <motion.div 
                 animate={{ y: isHovered ? 0 : 3 }}
                 transition={{ duration: 0.3 }}
                 className="space-y-0.5"
               >
-                {/* Commented out per safety rules:
-                <p className="font-space text-[9px] text-zinc-500 dark:text-white/40 uppercase tracking-[0.25em] font-black">
-                  {isRTL ? 'ميزات الرتبة' : 'RANK UNLOCKS'}
-                </p>
-                */}
                 <p className="font-space text-[9px] text-zinc-500 dark:text-white/40 uppercase tracking-[0.25em] font-black">
                   {isRTL ? 'ميزات الرتبة' : 'Rank Unlocks'}
                 </p>
@@ -230,7 +218,7 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
                 </p>
               </motion.div>
 
-              {/* Equip Button Stagger */}
+              {/* Equip Button Stagger * /}
               {status === 'AVAILABLE' && (
                 <motion.button
                   animate={{ scale: isHovered ? 1.0 : 0.96, opacity: isHovered ? 1.0 : 0.7 }}
@@ -254,9 +242,6 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
                     el.style.boxShadow = 'none';
                   }}
                 >
-                  {/* Commented out per safety rules:
-                  {isRTL ? 'تفعيل المظهر' : 'EQUIP THEME'}
-                  */}
                   {isRTL ? 'تفعيل المظهر' : 'Equip Theme'}
                 </motion.button>
               )}
@@ -264,13 +249,10 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
           </motion.div>
         </div>
 
-        {/* Locked Overlay with Premium Hover Specs - No dynamic expansion */}
+        {/* Locked Overlay with Premium Hover Specs - No dynamic expansion * /}
         {isLocked && (
           <div className="absolute inset-0 z-50 bg-white/90 dark:bg-black/85 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-6 text-center border border-zinc-200 dark:border-white/5 transition-opacity duration-300 group-hover:opacity-95">
             <Lock className="text-zinc-400 dark:text-white/30 text-5xl mb-3 group-hover:scale-110 group-hover:text-zinc-600 dark:group-hover:text-white/55 transition-all duration-300 w-12 h-12" />
-            {/* Commented out per safety rules:
-            <p className="text-zinc-500 dark:text-white/40 font-black font-space text-2xl tracking-widest uppercase">{isRTL ? 'غير متاح' : 'LOCKED'}</p>
-            */}
             <p className="text-zinc-500 dark:text-white/40 font-black font-space text-2xl tracking-widest uppercase">{isRTL ? 'غير متاح' : 'Locked'}</p>
             
             <motion.div
@@ -280,19 +262,12 @@ function RankCard({ rank, status, xp, isRTL, currentTheme, changeTheme }: RankCa
             >
               <p className="font-space text-[11px] tracking-[0.2em] font-black uppercase text-center" style={{ color: rank.color }}>
                 {rank.id === 'CONQUEROR' ? (
-                  // Commented out per safety rules:
-                  // isRTL ? 'يتطلب الصدارة #1 في المنصة' : 'REQUIRES TOP #1 IN THE PLATFORM'
                   isRTL ? 'يتطلب الصدارة #1 في المنصة' : 'Requires Top #1 in the Platform'
                 ) : (
-                  // Commented out per safety rules:
-                  // `${rank.threshold - xp} ${isRTL ? 'نقطة خبرة مطلوبة للتفعيل' : 'XP REQUIRED TO UNLOCK'}`
                   `${rank.threshold - xp} ${isRTL ? 'نقطة خبرة مطلوبة للتفعيل' : 'XP required to unlock'}`
                 )}
               </p>
               <p className="text-[9px] font-space text-zinc-500 dark:text-white/40 tracking-wider uppercase text-center">
-                {/* Commented out per safety rules:
-                {isRTL ? 'استمر في إنجاز أهدافك' : 'CONTINUE ACHIEVING GOALS'}
-                */}
                 {isRTL ? 'استمر في إنجاز أهدافك' : 'Continue achieving goals'}
               </p>
             </motion.div>
@@ -342,8 +317,6 @@ export function VaultContent() {
   const RANKS_DATA: RankData[] = [
     {
       id: 'SILVER',
-      // Commented out per safety rules:
-      // name: 'SILVER',
       name: 'Silver',
       threshold: 0,
       themeId: 'SILVER',
@@ -355,8 +328,6 @@ export function VaultContent() {
     },
     {
       id: 'GOLD',
-      // Commented out per safety rules:
-      // name: 'GOLD',
       name: 'Gold',
       threshold: 400,
       themeId: 'GOLD',
@@ -368,8 +339,6 @@ export function VaultContent() {
     },
     {
       id: 'PLATINUM',
-      // Commented out per safety rules:
-      // name: 'PLATINUM',
       name: 'Platinum',
       threshold: 1000,
       themeId: 'PLATINUM',
@@ -381,8 +350,6 @@ export function VaultContent() {
     },
     {
       id: 'DIAMOND',
-      // Commented out per safety rules:
-      // name: 'DIAMOND',
       name: 'Diamond',
       threshold: 2000,
       themeId: 'DIAMOND',
@@ -394,8 +361,6 @@ export function VaultContent() {
     },
     {
       id: 'CROWN',
-      // Commented out per safety rules:
-      // name: 'CROWN',
       name: 'Crown',
       threshold: 4000,
       themeId: 'CROWN',
@@ -407,8 +372,6 @@ export function VaultContent() {
     },
     {
       id: 'ACE',
-      // Commented out per safety rules:
-      // name: 'ACE',
       name: 'Ace',
       threshold: 7000,
       themeId: 'ACE',
@@ -420,8 +383,6 @@ export function VaultContent() {
     },
     {
       id: 'CONQUEROR',
-      // Commented out per safety rules:
-      // name: 'CONQUEROR',
       name: 'Conqueror',
       threshold: 12000,
       themeId: 'CONQUEROR',
@@ -436,7 +397,6 @@ export function VaultContent() {
   return (
     <div className="max-w-[1600px] mx-auto space-y-12">
       
-      {/* Scrollbar hide utility styling */}
       <style>{`
         .scrollbar-none::-webkit-scrollbar {
           display: none !important;
@@ -447,12 +407,8 @@ export function VaultContent() {
         }
       `}</style>
 
-      {/* Header */}
       <header className="border-b border-black/10 dark:border-white/10 pb-4 md:pb-6 w-full max-w-full">
         <h1 className="text-2xl md:text-6xl font-black font-space tracking-wider text-black dark:text-white uppercase leading-none">
-          {/* Commented out per safety rules:
-          {isRTL ? 'الرتب والترقيات' : 'RANKS & SYSTEMS'}
-          */}
           {isRTL ? 'الرتب والترقيات' : 'Ranks & Systems'}
         </h1>
         <p className="text-[10px] md:text-xs font-space text-black/40 dark:text-white/30 tracking-[0.4em] md:tracking-[0.6em] uppercase font-black mt-2">
@@ -460,7 +416,6 @@ export function VaultContent() {
         </p>
       </header>
 
-      {/* Premium Gaming Echelon Slider Container */}
       <div 
         ref={containerRef} 
         className="flex flex-row overflow-x-auto snap-x snap-mandatory scrollbar-none pb-8 gap-6 w-full px-6"
@@ -494,4 +449,17 @@ export default function VaultPage() {
       </main>
     </>
   )
+}
+*/
+
+export default function VaultPage() {
+  const router = useRouter()
+  useEffect(() => {
+    router.replace('/')
+  }, [router])
+  return null
+}
+
+export function VaultContent() {
+  return null
 }

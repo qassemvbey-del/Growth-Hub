@@ -12,9 +12,11 @@ import { useSound } from '@/context/SoundContext'
 import { 
   LayoutGrid, Trophy, Target, FileText, User, Users, Settings, Zap, Bell, Flame, Bot, X, Home,
   Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp, CloudLightning,
-  Crosshair, Shield, CheckCircle, Menu, Search, Plus, StickyNote, Loader2, UserPlus
+  Crosshair, Shield, CheckCircle, Menu, Search, Plus, StickyNote, Loader2, UserPlus,
+  Lock, CheckCircle2
 } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
+import EnergyCell from '@/components/ui/EnergyCell'
 
 import { useInbox } from '@/hooks/useInbox'
 import InboxDropdown from '@/components/ui/InboxDropdown'
@@ -241,6 +243,87 @@ interface ShellProps {
 }
 
 // export default function Shell({ children, syncedMissions = [], onMissionsRefresh }: ShellProps) {
+// RANKS_DATA definition for global roadmap modal
+const RANKS_DATA = [
+  {
+    id: 'SILVER',
+    name: 'Silver',
+    threshold: 0,
+    themeId: 'SILVER',
+    color: '#94a3b8',
+    neonClass: 'neon-silver',
+    perk: 'Standard Features Unlocked',
+    unlocks: 'Access to Notes and Settings pages',
+    vessel: 'Cylinder'
+  },
+  {
+    id: 'GOLD',
+    name: 'Gold',
+    threshold: 400,
+    themeId: 'GOLD',
+    color: '#FACC15',
+    neonClass: 'neon-gold',
+    perk: 'Exclusive Title Badge',
+    unlocks: 'Special title showing below username',
+    vessel: 'Cylinder'
+  },
+  {
+    id: 'PLATINUM',
+    name: 'Platinum',
+    threshold: 1000,
+    themeId: 'PLATINUM',
+    color: '#38bdf8',
+    neonClass: 'neon-platinum',
+    perk: 'Premium Avatar Border',
+    unlocks: 'Glow border framing profile picture',
+    vessel: 'Hex'
+  },
+  {
+    id: 'DIAMOND',
+    name: 'Diamond',
+    threshold: 2000,
+    themeId: 'DIAMOND',
+    color: '#d500f9',
+    neonClass: 'neon-diamond',
+    perk: 'Exclusive Chat Emojis',
+    unlocks: 'Special reactive emojis in squad threads',
+    vessel: 'Crystal'
+  },
+  {
+    id: 'CROWN',
+    name: 'Crown',
+    threshold: 4000,
+    themeId: 'CROWN',
+    color: '#F97316',
+    neonClass: 'neon-crown',
+    perk: 'Name Neon Glow effect',
+    unlocks: 'Vibrant custom neon glow around username',
+    vessel: 'Crystal'
+  },
+  {
+    id: 'ACE',
+    name: 'Ace',
+    threshold: 7000,
+    themeId: 'ACE',
+    color: '#EF4444',
+    neonClass: 'neon-ace',
+    perk: 'Player Calling Card',
+    unlocks: 'Interactive profile card on user hover',
+    vessel: 'Shard'
+  },
+  {
+    id: 'CONQUEROR',
+    name: 'Conqueror',
+    threshold: 12000,
+    themeId: 'CONQUEROR',
+    color: '#FACC15',
+    neonClass: 'neon-conqueror',
+    perk: 'Top #1 Champion Dominance',
+    unlocks: 'Exclusive animated dynamic gradient badge (Top XP Leader)',
+    vessel: 'Sphere'
+  }
+]
+
 export default function Shell({ children }: ShellProps) {
   const { isRTL, profile, calculateAccountability, lastAiMessage, t, currentTheme, isRankUpModalOpen, setIsRankUpModalOpen, isLoading, showAuthModal, setShowAuthModal, openCreateGoalModal, isTaskDrawerOpen } = useGrowth()
   const pathname = usePathname()
@@ -263,6 +346,32 @@ export default function Shell({ children }: ShellProps) {
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false)
   
   const [syncedMissions, setSyncedMissions] = useState<any[]>([])
+  const [isRanksRoadmapOpen, setIsRanksRoadmapOpen] = useState(false)
+
+  // Ranks roadmap event listener
+  useEffect(() => {
+    const handleOpenRoadmap = () => {
+      setIsRanksRoadmapOpen(true)
+    }
+    window.addEventListener('open-ranks-roadmap', handleOpenRoadmap)
+    return () => window.removeEventListener('open-ranks-roadmap', handleOpenRoadmap)
+  }, [])
+
+  const currentXp = profile?.xp || 0
+  const activeRank = useMemo(() => {
+    return [...RANKS_DATA].reverse().find(r => currentXp >= r.threshold) || RANKS_DATA[0]
+  }, [currentXp])
+
+  const progressPercent = useMemo(() => {
+    const nextRank = RANKS_DATA.find((r) => r.threshold > currentXp)
+    if (nextRank) {
+      const prevThreshold = activeRank.threshold
+      const range = nextRank.threshold - prevThreshold
+      const currentOffset = currentXp - prevThreshold
+      return range > 0 ? (currentOffset / range) * 100 : 100
+    }
+    return 100
+  }, [currentXp, activeRank])
 
   useEffect(() => {
     const fetchMissions = async () => {
@@ -2248,6 +2357,138 @@ export default function Shell({ children }: ShellProps) {
             </div>
           </div>
         </motion.div>
+      )}
+    </AnimatePresence>
+
+    {/* RANKS ROADMAP MODAL OVERLAY */}
+    <AnimatePresence>
+      {isRanksRoadmapOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            transition={{ duration: 0.2 }}
+            className="bg-[var(--card)] dark:bg-[#0c0c0c] border border-[var(--border)] dark:border-white/10 rounded-2xl p-6 max-w-lg w-full shadow-2xl relative flex flex-col max-h-[85vh] overflow-hidden"
+            style={{ boxShadow: `0 0 40px ${currentTheme?.color || '#14b8a6'}15` }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4">
+              <div className="text-start">
+                <h3 className="font-space font-black text-lg text-white uppercase tracking-widest leading-none">
+                  {isRTL ? 'خريطة الرتب' : 'RANKS ROADMAP'}
+                </h3>
+                <p className="text-[8px] font-space tracking-[0.2em] uppercase font-black mt-1" style={{ color: currentTheme?.color || '#14b8a6' }}>
+                  {isRTL ? 'مسار التقدم ورتب النظام' : 'SYSTEM_PROGRESSION_TIERS'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setIsRanksRoadmapOpen(false); playBlip(); }}
+                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Scrollable list of ranks */}
+            <div className="flex-1 overflow-y-auto pe-1 space-y-4 scrollbar-thin text-start">
+              {RANKS_DATA.map((rank) => {
+                const isCurrent = activeRank.id === rank.id
+                const isUnlocked = currentXp >= rank.threshold && !isCurrent
+                const isLocked = currentXp < rank.threshold
+
+                return (
+                  <div
+                    key={rank.id}
+                    className={cn(
+                      "p-4 rounded-2xl border flex items-center justify-between transition-all relative overflow-hidden backdrop-blur-md bg-[var(--background-secondary)] dark:bg-black/40 border-[var(--border)] dark:border-white/5",
+                      isCurrent 
+                        ? "border-[var(--card-border)] ring-1 ring-white/15 scale-[1.02]"
+                        : isUnlocked
+                          ? "border-white/5 opacity-80" 
+                          : "border-white/5 opacity-50"
+                    )}
+                    style={isCurrent ? { 
+                      borderColor: rank.color,
+                      boxShadow: `0 0 25px ${rank.color}25, inset 0 0 12px ${rank.color}10`
+                    } : {}}
+                  >
+                    {/* Left Side: Crystal & Info */}
+                    <div className="flex items-center gap-4">
+                      {/* Crystal Container */}
+                      <div className="relative shrink-0 w-16 h-20 flex items-center justify-center">
+                        {isLocked ? (
+                          <div className="grayscale opacity-40 relative flex items-center justify-center w-full h-full">
+                            <EnergyCell percentage={0} color={rank.color} size="sm" />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <Lock className="w-4 h-4 text-white drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]" />
+                            </div>
+                          </div>
+                        ) : isCurrent ? (
+                          <EnergyCell percentage={Math.round(progressPercent)} color={rank.color} size="sm" />
+                        ) : (
+                          <EnergyCell percentage={100} color={rank.color} size="sm" />
+                        )}
+                      </div>
+
+                      {/* Title and XP */}
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 
+                            className="font-space font-black text-sm uppercase tracking-wider"
+                            style={{ color: rank.color }}
+                          >
+                            {isRTL ? (
+                              rank.id === 'SILVER' ? 'سيلفر' :
+                              rank.id === 'GOLD' ? 'جولد' :
+                              rank.id === 'PLATINUM' ? 'بلاتينوم' :
+                              rank.id === 'DIAMOND' ? 'دايموند' :
+                              rank.id === 'CROWN' ? 'كراون' :
+                              rank.id === 'ACE' ? 'ايس' : 'كونكر'
+                            ) : rank.name}
+                          </h4>
+                          {isCurrent && (
+                            <span 
+                              className="text-[9px] font-space font-black px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse"
+                              style={{ 
+                                backgroundColor: `${rank.color}20`,
+                                color: rank.color,
+                                border: `1px solid ${rank.color}40`
+                              }}
+                            >
+                              {isRTL ? 'الرتبة الحالية' : 'Current Rank'}
+                            </span>
+                          )}
+                          {isUnlocked && (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-zinc-500" />
+                          )}
+                        </div>
+                        <p className="text-[10px] text-zinc-500 font-mono mt-0.5">
+                          {rank.id === 'CONQUEROR' ? (
+                            isRTL ? 'المتصدر #1' : 'TOP #1 LEAD'
+                          ) : (
+                            `${rank.threshold.toLocaleString()} XP`
+                          )}
+                        </p>
+                        <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1 max-w-[240px]">
+                          {isRTL ? (
+                            rank.id === 'SILVER' ? 'الميزات القياسية مفتوحة' :
+                            rank.id === 'GOLD' ? 'لقب تحت الاسم (hasTitle)' :
+                            rank.id === 'PLATINUM' ? 'إطار حول الصورة (hasAvatarBorder)' :
+                            rank.id === 'DIAMOND' ? 'تفاعلات شات حصرية (hasExclusiveEmojis)' :
+                            rank.id === 'CROWN' ? 'توهج الاسم بالكامل (hasNameGlow)' :
+                            rank.id === 'ACE' ? 'بطاقة هوية بالهوفر (hasCallingCard)' : 'اللقب المتصدر الأول + كافة الميزات الحصرية'
+                          ) : rank.perk}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </motion.div>
+        </div>
       )}
     </AnimatePresence>
     </>
