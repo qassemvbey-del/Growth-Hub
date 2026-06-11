@@ -29,20 +29,23 @@ function WikiSearch({ onInsert, color, isRTL }: WikiSearchProps) {
     setLoading(true)
     setError('')
     
+    // Sanitize raw search string by stripping question marks
+    const cleanQuery = query.replace(/[?؟]/g, '')
+
     // Arabic char detection logic
-    const hasArabic = /[\u0600-\u06FF]/.test(query)
+    const hasArabic = /[\u0600-\u06FF]/.test(cleanQuery)
     let domain = hasArabic ? 'ar' : 'en'
 
     try {
       // Step 1: Query Elasticsearch API for matches
-      let searchUrl = `https://${domain}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query.trim())}&format=json&origin=*`
+      let searchUrl = `https://${domain}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(cleanQuery.trim())}&format=json&origin=*`
       let res = await fetch(searchUrl)
       let searchData = await res.json()
 
       // Fallback to English Wikipedia if Arabic search yields no results and query has English characters
-      if (domain === 'ar' && (!searchData.query?.search || searchData.query.search.length === 0) && /[a-zA-Z]/.test(query)) {
+      if (domain === 'ar' && (!searchData.query?.search || searchData.query.search.length === 0) && /[a-zA-Z]/.test(cleanQuery)) {
         domain = 'en'
-        searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query.trim())}&format=json&origin=*`
+        searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(cleanQuery.trim())}&format=json&origin=*`
         res = await fetch(searchUrl)
         searchData = await res.json()
       }
@@ -54,15 +57,18 @@ function WikiSearch({ onInsert, color, isRTL }: WikiSearchProps) {
         return
       }
 
-      const topResultTitle = results[0].title
+      // const topResultTitle = results[0].title
+      const topResultPageId = results[0].pageid
 
-      // Step 2: Fetch details extract for the top title match
-      const extractUrl = `https://${domain}.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&titles=${encodeURIComponent(topResultTitle)}&format=json&origin=*`
+      // Step 2: Fetch details extract for the top page ID match (using pageids instead of titles to prevent encoding bugs)
+      // const extractUrl = `https://${domain}.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&titles=${encodeURIComponent(topResultTitle)}&format=json&origin=*`
+      const extractUrl = `https://${domain}.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&pageids=${topResultPageId}&format=json&origin=*`
       const extractRes = await fetch(extractUrl)
       const extractData = await extractRes.json()
 
       const pages = extractData.query?.pages || {}
-      const pageObj = Object.values(pages)[0] as any
+      // const pageObj = Object.values(pages)[0] as any
+      const pageObj = pages[topResultPageId] as any
       const extractText = pageObj?.extract
 
       if (extractText) {
