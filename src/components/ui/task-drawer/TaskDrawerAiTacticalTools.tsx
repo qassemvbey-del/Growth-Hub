@@ -5,6 +5,7 @@ import { Sparkles, Loader2, ChevronDown, ChevronUp, BookOpen, ListTodo } from 'l
 import { cn } from '@/lib/utils'
 import { getFeatureUsage, incrementFeatureUsage } from '@/lib/quota'
 import { createClient } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
 
 interface TaskDrawerAiTacticalToolsProps {
   task: any
@@ -33,11 +34,22 @@ export default function TaskDrawerAiTacticalTools({
   finalVideoUrl,
   isGuest
 }: TaskDrawerAiTacticalToolsProps) {
+  const router = useRouter()
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [response, setResponse] = useState('')
   const [collapsed, setCollapsed] = useState(false)
+
+  // Quota locks evaluation
+  const fixErrorsUsage = getFeatureUsage('fix_errors')
+  const fixErrorsLocked = fixErrorsUsage.used >= fixErrorsUsage.limit
+
+  const explainTopicUsage = getFeatureUsage('explain_topic')
+  const explainTopicLocked = explainTopicUsage.used >= explainTopicUsage.limit
+
+  const generateChecklistUsage = getFeatureUsage('generate_checklist')
+  const generateChecklistLocked = generateChecklistUsage.used >= generateChecklistUsage.limit
 
   // Placeholders for Fix Errors dynamic field
   let fixErrorsPlaceholder = isRTL ? 'اسأل المساعد الذكي عن أي شيء هنا...' : 'Ask the smart assistant anything here...'
@@ -57,6 +69,12 @@ export default function TaskDrawerAiTacticalTools({
     fixErrorsPlaceholder = isRTL
       ? 'ارمي المفهوم الصعب أو العقبة التقنية اللي واقفة معاك هنا...'
       : 'Paste the complex concept or technical block here...'
+  }
+
+  if (fixErrorsLocked) {
+    fixErrorsPlaceholder = isRTL 
+      ? '🔒 تم استهلاك حد مصحح الأخطاء. اضغط للاشتراك أو مراجعة الحدود.' 
+      : '🔒 Fix Errors quota consumed. Click to view limits.'
   }
 
   const handleFixErrors = async () => {
@@ -222,9 +240,9 @@ export default function TaskDrawerAiTacticalTools({
   }
 
   return (
-    <div className="border border-zinc-200/50 dark:border-white/5 bg-zinc-100/30 dark:bg-[#0c0c14]/30 backdrop-blur-md rounded-2xl p-4 hover:border-zinc-300 dark:hover:border-white/10 transition-colors relative overflow-hidden space-y-4">
+    <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4 transition-colors relative overflow-hidden space-y-4">
       {/* Side Color bar indicator */}
-      <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl" style={{ backgroundColor: themeColor }} />
+      <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ backgroundColor: themeColor }} />
 
       {/* Header */}
       <div className="flex items-center justify-between pl-1">
@@ -252,24 +270,46 @@ export default function TaskDrawerAiTacticalTools({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             disabled={loading}
+            readOnly={fixErrorsLocked}
+            onClick={() => {
+              if (fixErrorsLocked) {
+                router.push('/settings?focus=usage-limits')
+              }
+            }}
             placeholder={fixErrorsPlaceholder}
-            className="w-full bg-zinc-100/50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-800 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-white/20 focus:outline-none focus:border-zinc-300 dark:focus:border-white/10 transition-all font-space min-h-[60px] resize-none"
+            className={cn(
+              "w-full bg-zinc-100/50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-800 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-white/20 focus:outline-none focus:border-zinc-300 dark:focus:border-white/10 transition-all font-space min-h-[60px] resize-none",
+              fixErrorsLocked && "opacity-50 cursor-not-allowed grayscale"
+            )}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
-                handleFixErrors()
+                if (fixErrorsLocked) {
+                  router.push('/settings?focus=usage-limits')
+                } else {
+                  handleFixErrors()
+                }
               }
             }}
           />
           <button
-            onClick={handleFixErrors}
-            disabled={loading || !query.trim() || !canEdit}
-            className="px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-zinc-850 dark:hover:bg-zinc-200 rounded-xl text-[10px] font-space font-black tracking-wider uppercase transition-colors shrink-0 flex items-center justify-center min-w-[70px] disabled:opacity-40 cursor-pointer"
+            onClick={() => {
+              if (fixErrorsLocked) {
+                router.push('/settings?focus=usage-limits')
+              } else {
+                handleFixErrors()
+              }
+            }}
+            disabled={loading || (!query.trim() && !fixErrorsLocked) || !canEdit}
+            className={cn(
+              "px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-zinc-850 dark:hover:bg-zinc-200 rounded-xl text-[10px] font-space font-black tracking-wider uppercase transition-colors shrink-0 flex items-center justify-center min-w-[70px] cursor-pointer",
+              fixErrorsLocked && "opacity-50 cursor-not-allowed grayscale"
+            )}
             style={{
-              boxShadow: query.trim() && !loading ? `0 4px 15px ${themeColor}22` : 'none'
+              boxShadow: query.trim() && !loading && !fixErrorsLocked ? `0 4px 15px ${themeColor}22` : 'none'
             }}
           >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (isRTL ? 'تشغيل' : 'RUN')}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : fixErrorsLocked ? '🔒 LIMIT' : (isRTL ? 'تشغيل' : 'RUN')}
           </button>
         </div>
       </div>
@@ -279,22 +319,40 @@ export default function TaskDrawerAiTacticalTools({
         <div className="grid grid-cols-2 gap-2 pt-2 border-t border-zinc-200/50 dark:border-white/5">
           <button
             type="button"
-            onClick={handleExplainTopic}
+            onClick={() => {
+              if (explainTopicLocked) {
+                router.push('/settings?focus=usage-limits')
+              } else {
+                handleExplainTopic()
+              }
+            }}
             disabled={loading}
-            className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-zinc-200/50 dark:bg-white/5 hover:bg-zinc-300/60 dark:hover:bg-white/10 text-[10px] font-bold text-zinc-800 dark:text-zinc-300 transition-colors disabled:opacity-50 cursor-pointer border border-zinc-200/50 dark:border-white/5"
+            className={cn(
+              "flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-zinc-200/50 dark:bg-white/5 hover:bg-zinc-300/60 dark:hover:bg-white/10 text-[10px] font-bold text-zinc-800 dark:text-zinc-300 transition-colors cursor-pointer border border-zinc-200/50 dark:border-white/5",
+              explainTopicLocked && "opacity-50 cursor-not-allowed grayscale"
+            )}
           >
             <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
-            <span>{isRTL ? 'شرح الموضوع' : 'Explain Topic'}</span>
+            <span>{explainTopicLocked ? '🔒 ' : ''}{isRTL ? 'شرح الموضوع' : 'Explain Topic'}</span>
           </button>
 
           <button
             type="button"
-            onClick={handleGenerateChecklist}
+            onClick={() => {
+              if (generateChecklistLocked) {
+                router.push('/settings?focus=usage-limits')
+              } else {
+                handleGenerateChecklist()
+              }
+            }}
             disabled={loading}
-            className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-zinc-200/50 dark:bg-white/5 hover:bg-zinc-300/60 dark:hover:bg-white/10 text-[10px] font-bold text-zinc-800 dark:text-zinc-300 transition-colors disabled:opacity-50 cursor-pointer border border-zinc-200/50 dark:border-white/5"
+            className={cn(
+              "flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-zinc-200/50 dark:bg-white/5 hover:bg-zinc-300/60 dark:hover:bg-white/10 text-[10px] font-bold text-zinc-800 dark:text-zinc-300 transition-colors cursor-pointer border border-zinc-200/50 dark:border-white/5",
+              generateChecklistLocked && "opacity-50 cursor-not-allowed grayscale"
+            )}
           >
             <ListTodo className="w-3.5 h-3.5 text-cyan-400" />
-            <span>{isRTL ? 'إنشاء المهام' : 'Generate Checklist'}</span>
+            <span>{generateChecklistLocked ? '🔒 ' : ''}{isRTL ? 'إنشاء المهام' : 'Generate Checklist'}</span>
           </button>
         </div>
       )}

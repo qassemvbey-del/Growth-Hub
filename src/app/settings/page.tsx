@@ -1,7 +1,7 @@
 'use client'
 
 import { AlertTriangle, CheckCircle2, FileText, HelpCircle, Lock, LogOut, Star, User, Brain, Settings as SettingsIcon, Moon, Sun, Trophy, Volume2, ChevronRight, X } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useGrowth } from '@/context/GrowthContext'
 import { createClient } from '@/lib/supabase'
@@ -149,6 +149,7 @@ export default function SettingsPage() {
   const [isPwaInstalled, setIsPwaInstalled] = useState<boolean>(false)
   const [pwaPromptAvailable, setPwaPromptAvailable] = useState<boolean>(false)
   const [quotaData, setQuotaData] = useState<any>(null)
+  const usageLimitsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const fetchQuotas = () => {
@@ -161,6 +162,19 @@ export default function SettingsPage() {
     const interval = setInterval(fetchQuotas, 15000)
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('focus') === 'usage-limits' && usageLimitsRef.current) {
+        usageLimitsRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        usageLimitsRef.current.classList.add('ring-2', 'ring-amber-500/50', 'animate-pulse')
+        setTimeout(() => {
+          usageLimitsRef.current?.classList.remove('ring-2', 'ring-amber-500/50', 'animate-pulse')
+        }, 3000)
+      }
+    }
+  }, [quotaData])
 
   useEffect(() => {
     setIsDarkMode(document.documentElement.classList.contains('dark'))
@@ -377,7 +391,7 @@ export default function SettingsPage() {
           <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
             {isRTL ? 'الحساب الشخصي' : 'Account'}
           </span>
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-4 shadow-xl space-y-4">
+          <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4 space-y-4">
             
             {/* Avatar Row */}
             <div className="flex items-center gap-4 pb-4 border-b border-white/5">
@@ -495,7 +509,7 @@ export default function SettingsPage() {
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-4 shadow-xl">
+          <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4">
             <div className="flex flex-col gap-3 text-start">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full border flex items-center justify-center bg-zinc-100/80 dark:bg-white/10 shrink-0" style={{ borderColor: `${activeRank.color}40` }}>
@@ -522,7 +536,7 @@ export default function SettingsPage() {
           <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
             {isRTL ? 'المساعد الذكي' : 'AI Assistant'}
           </span>
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-4 shadow-xl space-y-3">
+          <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4 space-y-3">
             
             {/* Custom AI Name */}
             <div className="flex items-center justify-between py-2 border-b border-white/5">
@@ -569,7 +583,7 @@ export default function SettingsPage() {
             <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
               {isRTL ? 'حدود استخدام الذكاء الاصطناعي' : 'AI USAGE LIMITS'}
             </span>
-            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-4 shadow-xl space-y-4">
+            <div ref={usageLimitsRef} className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4 space-y-4">
               {/* Master Aggregated Progress Bar */}
               <div className="space-y-2 text-start">
                 <div className="flex justify-between items-center">
@@ -582,10 +596,9 @@ export default function SettingsPage() {
                 </div>
                 <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
                   <div 
-                    className="h-full rounded-full transition-all duration-300"
+                    className="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-teal-500 to-cyan-500"
                     style={{ 
                       width: `${((quotaData.fix.used + quotaData.explain.used + quotaData.checklist.used) / (quotaData.fix.limit + quotaData.explain.limit + quotaData.checklist.limit)) * 100}%`,
-                      backgroundColor: currentTheme.color,
                       boxShadow: `0 0 10px ${currentTheme.color}`
                     }} 
                   />
@@ -603,9 +616,11 @@ export default function SettingsPage() {
                   const remainingMs = Math.max(0, feat.data.nextResetMs - now)
                   const hrs = Math.floor(remainingMs / (3600 * 1000))
                   const mins = Math.floor((remainingMs % (3600 * 1000)) / (60 * 1000))
+                  const hrsText = String(hrs).padStart(2, '0')
+                  const minsText = String(mins).padStart(2, '0')
                   const countdownText = feat.data.used > 0 && remainingMs > 0
-                    ? (isRTL ? `يعاد التعيين خلال ${hrs}س ${mins}د` : `Resets in ${hrs}h ${mins}m`)
-                    : (isRTL ? 'جاهز' : 'Ready')
+                    ? (isRTL ? `يعاد التعيين خلال ${hrsText}س ${minsText}د` : `Resets in ${hrsText}h ${minsText}m`)
+                    : null
 
                   return (
                     <div key={feat.key} className="space-y-1.5 text-start">
@@ -613,17 +628,22 @@ export default function SettingsPage() {
                         <span className="font-space font-medium text-zinc-300">
                           {feat.name}
                         </span>
-                        <span className="font-mono text-[10px] text-zinc-500">
-                          {countdownText}
-                        </span>
+                        {countdownText ? (
+                          <span className="font-mono text-[10px] text-zinc-500">
+                            {countdownText}
+                          </span>
+                        ) : (
+                          <span className="font-space text-[10px] text-emerald-400 font-bold uppercase tracking-wide">
+                            {isRTL ? 'متاح' : 'Available'}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
                           <div 
-                            className="h-full rounded-full transition-all duration-300"
+                            className="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-amber-500 to-orange-500"
                             style={{ 
                               width: `${(feat.data.used / feat.data.limit) * 100}%`,
-                              backgroundColor: currentTheme.color,
                               boxShadow: `0 0 6px ${currentTheme.color}80`
                             }} 
                           />
@@ -645,7 +665,7 @@ export default function SettingsPage() {
           <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
             {isRTL ? 'تفضيلات النظام' : 'System Preferences'}
           </span>
-          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-4 shadow-xl space-y-3">
+          <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4 space-y-3">
             
             {/* Language */}
             <div className="flex items-center justify-between py-2 border-b border-white/5">
