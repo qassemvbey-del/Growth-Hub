@@ -83,8 +83,8 @@ export async function POST(req: Request) {
 
     if (!intentionRes.ok) {
       const errorText = await intentionRes.text()
-      console.error('Paymob V2 Intention API Failed:', errorText)
-      return NextResponse.json({ error: 'Payment intention creation failed' }, { status: 500 })
+      console.error('Paymob Error:', errorText)
+      return NextResponse.json({ error: 'Paymob rejected the request', details: errorText }, { status: 500 })
     }
 
     const intentionData = await intentionRes.json()
