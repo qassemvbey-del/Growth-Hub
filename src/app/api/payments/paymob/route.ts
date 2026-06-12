@@ -50,7 +50,14 @@ export async function POST(req: Request) {
         delivery_needed: "false",
         amount_cents: amountCents.toString(),
         currency: "EGP",
-        items: [] 
+        items: [
+          {
+            name: `Growth Hub ${planId.toUpperCase()} Plan`,
+            amount_cents: amountCents.toString(),
+            description: "Subscription upgrade",
+            quantity: "1"
+          }
+        ]
       })
     })
     if (!orderRes.ok) throw new Error(`V1 Order Failed: ${await orderRes.text()}`)
