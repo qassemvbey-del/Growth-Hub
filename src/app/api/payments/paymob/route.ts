@@ -34,10 +34,16 @@ export async function POST(req: Request) {
     }
 
     const secretKey = process.env.PAYMOB_SECRET_KEY
-    const integrationId = process.env.PAYMOB_INTEGRATION_ID
+    // Commented out per rule "Never delete code, only comment it out"
+    // const integrationId = process.env.PAYMOB_INTEGRATION_ID
 
-    if (!secretKey || !integrationId) {
-      console.error('Paymob V2: Missing required environment variables PAYMOB_SECRET_KEY or PAYMOB_INTEGRATION_ID')
+    // Commented out per rule "Never delete code, only comment it out"
+    // if (!secretKey || !integrationId) {
+    //   console.error('Paymob V2: Missing required environment variables PAYMOB_SECRET_KEY or PAYMOB_INTEGRATION_ID')
+    //   return NextResponse.json({ error: 'Payment gateway is not fully configured' }, { status: 500 })
+    // }
+    if (!secretKey) {
+      console.error('Paymob V2: Missing required environment variable PAYMOB_SECRET_KEY')
       return NextResponse.json({ error: 'Payment gateway is not fully configured' }, { status: 500 })
     }
 
@@ -51,7 +57,9 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         amount: amountCents,
         currency: 'EGP',
-        payment_methods: [Number(integrationId)],
+        // Commented out per rule "Never delete code, only comment it out"
+        // payment_methods: [Number(integrationId)],
+        payment_methods: [5723234],
         items: [
           {
             name: 'Growth Hub Plan',
