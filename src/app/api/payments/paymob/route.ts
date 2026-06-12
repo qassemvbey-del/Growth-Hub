@@ -1,14 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
 
-// Commented out per rule "Never delete code, only comment it out"
-// export async function POST() {
-//   return NextResponse.json(
-//     { message: 'Payment gateway is being reconfigured. Please check back soon.' },
-//     { status: 200 }
-//   )
-// }
-
 export async function POST(req: Request) {
   try {
     const supabase = await createClient()
@@ -23,18 +15,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Plan ID is required' }, { status: 400 })
     }
 
-    // Commented out per rule "Never delete code, only comment it out"
-    // const secretKey = process.env.PAYMOB_SECRET_KEY
-    const apiKey = process.env.PAYMOB_API_KEY
-    const integrationId = process.env.PAYMOB_INTEGRATION_ID
+    // STRICT SANITIZATION: Remove any invisible trailing spaces from Vercel
+    const secretKey = process.env.PAYMOB_SECRET_KEY?.trim()
+    const integrationId = process.env.PAYMOB_INTEGRATION_ID?.trim()
 
-    // Commented out per rule "Never delete code, only comment it out"
-    // if (!secretKey || !integrationId) {
-    //   console.error('Paymob V2: Missing required environment variables PAYMOB_SECRET_KEY or PAYMOB_INTEGRATION_ID')
-    //   return NextResponse.json({ error: 'Payment gateway is not fully configured' }, { status: 500 })
-    // }
-    if (!apiKey || !integrationId) {
-      console.error('Paymob V2: Missing required environment variables PAYMOB_API_KEY or PAYMOB_INTEGRATION_ID')
+    if (!secretKey || !integrationId) {
+      console.error('Paymob V2: Missing environment variables')
       return NextResponse.json({ error: 'Payment gateway is not fully configured' }, { status: 500 })
     }
 
@@ -50,12 +36,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid plan selected' }, { status: 400 })
     }
 
-    console.log("Targeting Integration ID:", process.env.PAYMOB_INTEGRATION_ID)
-
     const paymobRes = await fetch('https://accept.paymob.com/v1/intention/', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': `Token ${secretKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -94,7 +78,7 @@ export async function POST(req: Request) {
 
     if (!paymobRes.ok) {
       const errorText = await paymobRes.text()
-      console.error('Paymob Error:', errorText)
+      console.error('Paymob Error Raw:', errorText)
       return NextResponse.json({ error: 'Paymob rejected the request', details: errorText }, { status: 500 })
     }
 
@@ -103,7 +87,7 @@ export async function POST(req: Request) {
       url: 'https://accept.paymob.com/unifiedcheckout/?client_secret=' + data.client_secret
     })
   } catch (err: any) {
-    console.error('Paymob V2 Payment Handler Exception:', err)
-    return NextResponse.json({ error: err.message || 'Internal payment gateway error' }, { status: 500 })
+    console.error('Paymob Exception:', err)
+    return NextResponse.json({ error: err.message || 'Internal payment error' }, { status: 500 })
   }
 }
