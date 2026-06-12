@@ -4,9 +4,14 @@ import React from 'react'
 import { Check, Clock, Sparkles } from 'lucide-react'
 import { useGrowth, Profile } from '@/context/GrowthContext'
 
+// Uncommented per plan
+import { CreditCard, RefreshCw } from 'lucide-react'
+import { usePricing } from '@/hooks/usePricing'
+
 // Commented out per rule "Never delete code, only comment it out"
-// import { CreditCard, RefreshCw } from 'lucide-react'
-// import { usePricing } from '@/hooks/usePricing'
+// // Commented out per rule "Never delete code, only comment it out"
+// // import { CreditCard, RefreshCw } from 'lucide-react'
+// // import { usePricing } from '@/hooks/usePricing'
 
 interface ExtendedProfile extends Profile {
   user_tier?: 'free' | 'pro' | 'elite'
@@ -38,6 +43,7 @@ const pricingContent = {
       period: "Month",
       desc: "Uncapped productivity and specialized AI for professionals.",
       btnAction: "Upgrade to Pro",
+      btnCurrent: "Current Plan",
       features: [
         "Unlimited goals & tasks",
         "1 GB Storage capacity",
@@ -53,6 +59,7 @@ const pricingContent = {
       period: "Month",
       desc: "The ultimate powerhouse for teams and intensive users.",
       btnAction: "Upgrade to Elite",
+      btnCurrent: "Current Plan",
       features: [
         "Includes all Pro features",
         "5 GB Enterprise Storage",
@@ -94,6 +101,7 @@ const pricingContent = {
       period: "شهرياً",
       desc: "إنتاجية بلا حدود وذكاء اصطناعي للمحترفين.",
       btnAction: "الترقية إلى خطة المحترفين",
+      btnCurrent: "الخطة الحالية",
       features: [
         "أهداف ومهام غير محدودة",
         "سعة تخزين 1 جيجابايت",
@@ -109,6 +117,7 @@ const pricingContent = {
       period: "شهرياً",
       desc: "القوة الضاربة لفرق العمل والاستخدام المكثف.",
       btnAction: "الترقية إلى خطة الأساطير",
+      btnCurrent: "الخطة الحالية",
       features: [
         "شامل ميزات البرو",
         "سعة تخزين 5 جيجابايت",
@@ -129,8 +138,11 @@ const pricingContent = {
 
 export default function PricingPage() {
   const { profile } = useGrowth()
+  const { loadingTier, handleCheckout } = usePricing()
+
   // Commented out per rule "Never delete code, only comment it out"
-  // const { loadingTier, handleCheckout } = usePricing()
+  // // Commented out per rule "Never delete code, only comment it out"
+  // // const { loadingTier, handleCheckout } = usePricing()
 
   const extProfile = profile as ExtendedProfile
   const currentTier = extProfile?.user_tier || 'free'
@@ -149,14 +161,15 @@ export default function PricingPage() {
         </p>
       </div>
 
+      {/* Commented out per rule "Never delete code, only comment it out" */}
       {/* Coming Soon Notice */}
-      <div className="flex items-center justify-center gap-3 bg-zinc-900/60 border border-zinc-700/50 rounded-lg px-6 py-4 max-w-lg mx-auto">
+      {/* <div className="flex items-center justify-center gap-3 bg-zinc-900/60 border border-zinc-700/50 rounded-lg px-6 py-4 max-w-lg mx-auto">
         <Clock className="w-5 h-5 text-teal-400 shrink-0" />
         <div>
           <p className="text-zinc-200 font-semibold text-sm">{t.comingSoon}</p>
           <p className="text-zinc-500 text-xs">{t.comingSoonDesc}</p>
         </div>
-      </div>
+      </div> */}
 
       {/* Pricing Matrix */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
@@ -199,7 +212,7 @@ export default function PricingPage() {
         </div>
 
         {/* Pro Plan Card */}
-        <div className="bg-zinc-900/60 border border-zinc-800 rounded-lg p-6 md:p-8 flex flex-col justify-between shadow-lg relative">
+        <div className="bg-zinc-900/60 border border-zinc-800 hover:border-teal-500/30 transition-colors rounded-lg p-6 md:p-8 flex flex-col justify-between shadow-lg relative">
           <div className="space-y-6">
             <div className="space-y-2">
               <h2 className="text-xl md:text-2xl font-bold text-zinc-100 flex items-center gap-2">
@@ -228,18 +241,41 @@ export default function PricingPage() {
             </ul>
           </div>
           <div className="pt-8">
-            <button
+            {/* Commented out per rule "Never delete code, only comment it out" */}
+            {/* <button
               disabled
               className="w-full h-11 flex items-center justify-center gap-2 rounded bg-zinc-800 text-zinc-500 font-semibold text-xs md:text-sm cursor-not-allowed border border-zinc-700/50"
             >
               <Clock className="w-4 h-4" />
               {t.comingSoon}
-            </button>
+            </button> */}
+
+            {currentTier === 'pro' ? (
+              <button
+                disabled
+                className="w-full h-11 flex items-center justify-center rounded bg-zinc-800 text-zinc-500 font-semibold text-xs md:text-sm cursor-not-allowed border border-zinc-700/50"
+              >
+                {t.pro.btnCurrent}
+              </button>
+            ) : (
+              <button
+                onClick={() => handleCheckout('pro')}
+                disabled={loadingTier !== null}
+                className="w-full h-11 flex items-center justify-center gap-2 rounded bg-teal-500 text-zinc-950 font-semibold text-xs md:text-sm hover:bg-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-zinc-950 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {loadingTier === 'pro' ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <CreditCard className="w-4 h-4" />
+                )}
+                {t.pro.btnAction}
+              </button>
+            )}
           </div>
         </div>
 
         {/* Elite Plan Card */}
-        <div className="bg-zinc-900/60 border border-zinc-800 rounded-lg p-6 md:p-8 flex flex-col justify-between shadow-lg relative">
+        <div className="bg-zinc-900/60 border border-zinc-800 hover:border-teal-500/30 transition-colors rounded-lg p-6 md:p-8 flex flex-col justify-between shadow-lg relative">
           <div className="space-y-6">
             <div className="space-y-2">
               <h2 className="text-xl md:text-2xl font-bold text-zinc-100 flex items-center gap-2">
@@ -268,13 +304,36 @@ export default function PricingPage() {
             </ul>
           </div>
           <div className="pt-8">
-            <button
+            {/* Commented out per rule "Never delete code, only comment it out" */}
+            {/* <button
               disabled
               className="w-full h-11 flex items-center justify-center gap-2 rounded bg-zinc-800 text-zinc-500 font-semibold text-xs md:text-sm cursor-not-allowed border border-zinc-700/50"
             >
               <Clock className="w-4 h-4" />
               {t.comingSoon}
-            </button>
+            </button> */}
+
+            {currentTier === 'elite' ? (
+              <button
+                disabled
+                className="w-full h-11 flex items-center justify-center rounded bg-zinc-800 text-zinc-500 font-semibold text-xs md:text-sm cursor-not-allowed border border-zinc-700/50"
+              >
+                {t.elite.btnCurrent}
+              </button>
+            ) : (
+              <button
+                onClick={() => handleCheckout('elite')}
+                disabled={loadingTier !== null}
+                className="w-full h-11 flex items-center justify-center gap-2 rounded bg-teal-500 text-zinc-950 font-semibold text-xs md:text-sm hover:bg-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-zinc-950 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {loadingTier === 'elite' ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <CreditCard className="w-4 h-4" />
+                )}
+                {t.elite.btnAction}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -301,12 +360,26 @@ export default function PricingPage() {
                 {t.refill.price}
               </span>
             </div>
-            <button
+            {/* Commented out per rule "Never delete code, only comment it out" */}
+            {/* <button
               disabled
               className="h-11 px-6 flex items-center justify-center gap-2 rounded bg-zinc-800 text-zinc-500 font-semibold text-xs md:text-sm cursor-not-allowed border border-zinc-700/50 min-w-[160px]"
             >
               <Clock className="w-4 h-4" />
               {t.comingSoon}
+            </button> */}
+
+            <button
+              onClick={() => handleCheckout('refill')}
+              disabled={loadingTier !== null}
+              className="h-11 px-6 flex items-center justify-center gap-2 rounded bg-teal-500 text-zinc-950 font-semibold text-xs md:text-sm hover:bg-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-zinc-950 disabled:opacity-50 disabled:cursor-not-allowed transition-all min-w-[160px]"
+            >
+              {loadingTier === 'refill' ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <CreditCard className="w-4 h-4" />
+              )}
+              {t.refill.btnAction}
             </button>
           </div>
         </div>
