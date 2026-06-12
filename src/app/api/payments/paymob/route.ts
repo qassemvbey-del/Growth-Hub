@@ -23,11 +23,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Plan ID is required' }, { status: 400 })
     }
 
-    const secretKey = process.env.PAYMOB_SECRET_KEY
+    // Commented out per rule "Never delete code, only comment it out"
+    // const secretKey = process.env.PAYMOB_SECRET_KEY
+    const apiKey = process.env.PAYMOB_API_KEY
     const integrationId = process.env.PAYMOB_INTEGRATION_ID
 
-    if (!secretKey || !integrationId) {
-      console.error('Paymob V2: Missing required environment variables PAYMOB_SECRET_KEY or PAYMOB_INTEGRATION_ID')
+    // Commented out per rule "Never delete code, only comment it out"
+    // if (!secretKey || !integrationId) {
+    //   console.error('Paymob V2: Missing required environment variables PAYMOB_SECRET_KEY or PAYMOB_INTEGRATION_ID')
+    //   return NextResponse.json({ error: 'Payment gateway is not fully configured' }, { status: 500 })
+    // }
+    if (!apiKey || !integrationId) {
+      console.error('Paymob V2: Missing required environment variables PAYMOB_API_KEY or PAYMOB_INTEGRATION_ID')
       return NextResponse.json({ error: 'Payment gateway is not fully configured' }, { status: 500 })
     }
 
@@ -43,10 +50,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid plan selected' }, { status: 400 })
     }
 
+    console.log("Targeting Integration ID:", process.env.PAYMOB_INTEGRATION_ID)
+
     const paymobRes = await fetch('https://accept.paymob.com/v1/intention/', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${secretKey}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
