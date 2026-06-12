@@ -84,13 +84,24 @@ export async function POST(req: Request) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         auth_token: authToken,
-        delivery_needed: false,
+        // Commented out per rule "Never delete code, only comment it out"
+        // delivery_needed: false,
+        delivery_needed: 'false',
         // Commented out per rule "Never delete code, only comment it out"
         // amount_cents: amountCents,
         amount_cents: String(amountCents),
         currency: 'EGP',
         merchant_order_id: uniqueOrderId,
-        items: []
+        // Commented out per rule "Never delete code, only comment it out"
+        // items: []
+        items: [
+          {
+            name: 'Growth Hub Subscription',
+            amount_cents: String(amountCents),
+            description: 'Plan Upgrade',
+            quantity: '1'
+          }
+        ]
       })
     })
 
