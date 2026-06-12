@@ -28,7 +28,10 @@ export async function POST(req: Request) {
     }
 
     const paymobApiKey = process.env.PAYMOB_API_KEY
-    const integrationId = process.env.PAYMOB_CARD_INTEGRATION_ID
+    const hmacSecret = process.env.PAYMOB_HMAC_SECRET
+    const integrationId = process.env.PAYMOB_INTEGRATION_ID
+    // Commented out per rule "Never delete code, only comment it out"
+    // const integrationId = process.env.PAYMOB_CARD_INTEGRATION_ID
     // Commented out per rule "Never delete code, only comment it out"
     // const iframeId = process.env.PAYMOB_IFRAME_ID
 
@@ -36,7 +39,11 @@ export async function POST(req: Request) {
     // if (!paymobApiKey || !integrationId || !iframeId) {
     //   return NextResponse.json({ error: 'Paymob parameters are not fully configured' }, { status: 500 })
     // }
-    if (!paymobApiKey || !integrationId) {
+    // Commented out per rule "Never delete code, only comment it out"
+    // if (!paymobApiKey || !integrationId) {
+    //   return NextResponse.json({ error: 'Paymob parameters are not fully configured' }, { status: 500 })
+    // }
+    if (!paymobApiKey || !hmacSecret || !integrationId) {
       return NextResponse.json({ error: 'Paymob parameters are not fully configured' }, { status: 500 })
     }
 
