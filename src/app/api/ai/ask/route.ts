@@ -1,7 +1,24 @@
 import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase-server'
+import { checkAndUpdateAiQuota } from '@/lib/quota-guard'
 
 export async function POST(req: Request) {
   try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const quota = await checkAndUpdateAiQuota(user.id)
+    if (!quota.allowed) {
+      return NextResponse.json({
+        error: 'quota_exceeded',
+        message_en: quota.message_en,
+        message_ar: quota.message_ar
+      }, { status: 403 })
+    }
+
     const { query, role, type } = await req.json()
     if (!query) {
       return NextResponse.json({ error: 'Query is required' }, { status: 400 })

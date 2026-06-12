@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase-server'
+import { checkAndUpdateAiQuota } from '@/lib/quota-guard'
 import { createClient } from '@supabase/supabase-js'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { GoogleAIFileManager } from '@google/generative-ai/server'
@@ -59,6 +60,15 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const quotaStatus = await checkAndUpdateAiQuota(user.id)
+    if (!quotaStatus.allowed) {
+      return NextResponse.json({
+        error: 'Quota Exceeded',
+        message_en: quotaStatus.message_en,
+        message_ar: quotaStatus.message_ar
+      }, { status: 403 })
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
