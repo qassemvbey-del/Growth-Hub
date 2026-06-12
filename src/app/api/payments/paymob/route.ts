@@ -121,8 +121,8 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         auth_token: authToken,
         // Commented out per rule "Never delete code, only comment it out"
-        // amount_cents: amountCents,
-        amount_cents: String(amountCents),
+        // amount_cents: String(amountCents),
+        amount_cents: amountCents,
         expiration: 3600,
         order_id: paymobOrderId,
         // Commented out per rule "Never delete code, only comment it out"
