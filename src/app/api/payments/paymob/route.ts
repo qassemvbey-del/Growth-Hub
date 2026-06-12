@@ -146,7 +146,9 @@ export async function POST(req: Request) {
           state: 'NA'
         },
         currency: 'EGP',
-        integration_id: Number(integrationId),
+        // Commented out per rule "Never delete code, only comment it out"
+        // integration_id: Number(integrationId),
+        integration_id: Number(process.env.PAYMOB_INTEGRATION_ID),
         lock_order_when_paid: true,
         extra_data: {
           profile_id: user.id
