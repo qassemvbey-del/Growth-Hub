@@ -15,13 +15,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Plan ID is required' }, { status: 400 })
     }
 
-    // Map plans to EGP cents
+    // Commented out per rule "Never delete code, only comment it out"
+    // // Map plans to EGP cents
+    // let amountCents = 0
+    // if (planId === 'pro') {
+    //   amountCents = 6000 // 60 EGP
+    // } else if (planId === 'elite') {
+    //   amountCents = 11500 // 115 EGP
+    // } else if (planId === 'refill') {
+    //   amountCents = 1500 // 15 EGP
+    // } else {
+    //   return NextResponse.json({ error: 'Invalid plan selected' }, { status: 400 })
+    // }
+
+    // Case-Insensitive Mapping
+    const normalizedPlanId = String(planId).toLowerCase()
     let amountCents = 0
-    if (planId === 'pro') {
+    if (normalizedPlanId === 'pro') {
       amountCents = 6000 // 60 EGP
-    } else if (planId === 'elite') {
+    } else if (normalizedPlanId === 'elite') {
       amountCents = 11500 // 115 EGP
-    } else if (planId === 'refill') {
+    } else if (normalizedPlanId === 'refill') {
       amountCents = 1500 // 15 EGP
     } else {
       return NextResponse.json({ error: 'Invalid plan selected' }, { status: 400 })
@@ -71,7 +85,9 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         auth_token: authToken,
         delivery_needed: false,
-        amount_cents: amountCents,
+        // Commented out per rule "Never delete code, only comment it out"
+        // amount_cents: amountCents,
+        amount_cents: String(amountCents),
         currency: 'EGP',
         merchant_order_id: uniqueOrderId,
         items: []
@@ -93,23 +109,41 @@ export async function POST(req: Request) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         auth_token: authToken,
-        amount_cents: amountCents,
+        // Commented out per rule "Never delete code, only comment it out"
+        // amount_cents: amountCents,
+        amount_cents: String(amountCents),
         expiration: 3600,
         order_id: paymobOrderId,
+        // Commented out per rule "Never delete code, only comment it out"
+        // billing_data: {
+        //   apartment: 'NA',
+        //   email: user.email || 'operator@playgrowthhub.com',
+        //   floor: 'NA',
+        //   first_name: user.user_metadata?.first_name || 'Operator',
+        //   street: 'NA',
+        //   building: 'NA',
+        //   phone_number: user.phone || '+201000000000',
+        //   shipping_method: 'NA',
+        //   postal_code: 'NA',
+        //   city: 'Cairo',
+        //   country: 'EG',
+        //   last_name: user.user_metadata?.last_name || 'Member',
+        //   state: 'Cairo'
+        // },
         billing_data: {
           apartment: 'NA',
-          email: user.email || 'operator@playgrowthhub.com',
+          email: user.email || 'user@growthhub.com',
           floor: 'NA',
-          first_name: user.user_metadata?.first_name || 'Operator',
+          first_name: 'Growth',
           street: 'NA',
           building: 'NA',
-          phone_number: user.phone || '+201000000000',
+          phone_number: '+201000000000',
           shipping_method: 'NA',
           postal_code: 'NA',
-          city: 'Cairo',
+          city: 'NA',
           country: 'EG',
-          last_name: user.user_metadata?.last_name || 'Member',
-          state: 'Cairo'
+          last_name: 'User',
+          state: 'NA'
         },
         currency: 'EGP',
         integration_id: Number(integrationId),
