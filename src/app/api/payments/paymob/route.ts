@@ -43,7 +43,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid plan selected' }, { status: 400 })
     }
 
-    const paymobRes = await fetch('https://api.paymob.com/v1/intention/', {
+    const paymobRes = await fetch('https://accept.paymob.com/api/v1/intention/', {
       method: 'POST',
       headers: {
         'Authorization': `Token ${secretKey}`,
