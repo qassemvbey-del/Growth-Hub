@@ -23,8 +23,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Payment gateway configuration missing' }, { status: 500 })
     }
 
-    // STRICT FAIL-SAFE: Fallback to the exact Integration ID if the Vercel env variable fails
-    const rawIntegrationId = process.env.PAYMOB_INTEGRATION_ID?.trim() || "5723234"
+    // STRICT FAIL-SAFE: Fallback to the exact Online Card Integration ID if the Vercel env variable fails
+    // const rawIntegrationId = process.env.PAYMOB_INTEGRATION_ID?.trim() || "5723234"
+    const rawIntegrationId = process.env.PAYMOB_INTEGRATION_ID?.trim() || "5723859"
     const integrationId = parseInt(rawIntegrationId, 10)
 
     if (isNaN(integrationId)) {
