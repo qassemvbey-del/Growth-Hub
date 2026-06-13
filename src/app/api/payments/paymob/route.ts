@@ -47,7 +47,8 @@ export async function POST(req: Request) {
     const paymobRes = await fetch('https://accept.paymob.com/v1/intention/', {
       method: 'POST',
       headers: {
-        'Authorization': `Token ${secretKey}`,
+        // 'Authorization': `Token ${secretKey}`,
+        'Authorization': `Bearer ${secretKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
