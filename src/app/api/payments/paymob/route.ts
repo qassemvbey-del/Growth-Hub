@@ -23,15 +23,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Payment gateway configuration missing' }, { status: 500 })
     }
 
-    // STRICT FAIL-SAFE: Fallback to the exact Online Card Integration ID if the Vercel env variable fails
-    // const rawIntegrationId = process.env.PAYMOB_INTEGRATION_ID?.trim() || "5723234"
-    const rawIntegrationId = process.env.PAYMOB_INTEGRATION_ID?.trim() || "5723859"
-    const integrationId = parseInt(rawIntegrationId, 10)
-
-    if (isNaN(integrationId)) {
-      console.error('Paymob V2: Integration ID is NaN')
-      return NextResponse.json({ error: 'Invalid Integration ID format' }, { status: 500 })
-    }
+    // Commented out per rule: Never delete code, only comment it out
+    // // STRICT FAIL-SAFE: Fallback to the exact Online Card Integration ID if the Vercel env variable fails
+    // // const rawIntegrationId = process.env.PAYMOB_INTEGRATION_ID?.trim() || "5723234"
+    // const rawIntegrationId = process.env.PAYMOB_INTEGRATION_ID?.trim() || "5723859"
+    // const integrationId = parseInt(rawIntegrationId, 10)
+    // 
+    // if (isNaN(integrationId)) {
+    //   console.error('Paymob V2: Integration ID is NaN')
+    //   return NextResponse.json({ error: 'Invalid Integration ID format' }, { status: 500 })
+    // }
 
     const normalizedPlanId = String(planId).toLowerCase()
     let amountCents = 0
@@ -55,7 +56,8 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         amount: amountCents,
         currency: 'EGP',
-        payment_methods: [integrationId],
+        // payment_methods: [integrationId],
+        payment_methods: [5723859], // STRICTLY HARDCODED: Bypassing Vercel env cache completely
         items: [
           {
             name: `Growth Hub ${planId.toUpperCase()} Plan`,
