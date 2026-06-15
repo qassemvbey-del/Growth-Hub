@@ -24,7 +24,10 @@ export async function checkAndUpdateAiQuota(userId: string): Promise<QuotaCheckR
       }
     }
 
-    const result = data as { allowed: boolean; lang: string } | null
+    // const result = data as { allowed: boolean; lang: string } | null
+    const result = typeof data === 'string'
+      ? JSON.parse(data) as { allowed: boolean; lang: string }
+      : data as { allowed: boolean; lang: string } | null
 
     if (!result || !result.allowed) {
       return {

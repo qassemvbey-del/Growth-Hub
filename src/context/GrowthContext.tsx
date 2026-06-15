@@ -9,6 +9,7 @@ export type Language = 'en' | 'ar'
 export type Theme = 'Neon Cyberpunk' | 'Clean Stealth'
 export type AiPersonality = 'SAVAGE' | 'GENTLE'
 
+/* Commented out per rule "Never delete code, only comment it out"
 export interface Profile {
   id: string
   full_name: string | null
@@ -33,6 +34,36 @@ export interface Profile {
   drive_connected?: boolean
   drive_refresh_token?: string | null
   role?: string | null
+}
+*/
+export interface Profile {
+  id: string
+  full_name: string | null
+  avatar_url: string | null
+  custom_avatar?: string | null
+  google_avatar_url?: string | null
+  age: number | null
+  mission_goal: string | null
+  weekly_project: string | null
+  daily_focus: string | null
+  language: Language
+  onboarded: boolean
+  ai_name: string | null
+  ai_personality: AiPersonality
+  gender: string | null
+  xp: number
+  rank: string
+  active_theme: string
+  blocked: boolean
+  last_seen: string | null
+  email: string | null
+  drive_connected?: boolean
+  drive_refresh_token?: string | null
+  role?: string | null
+  user_tier?: 'free' | 'pro' | 'elite'
+  ai_request_count?: number
+  last_ai_reset?: string | null
+  max_squads_allowed?: number
 }
 
 export const THEME_PACKAGES = {
@@ -517,6 +548,7 @@ export const TRANSLATIONS = {
   }
 }
 
+/* Commented out per rule "Never delete code, only comment it out"
 interface GrowthContextType {
   profile: Profile | null
   setProfile: (profile: Profile | null) => void
@@ -564,6 +596,57 @@ interface GrowthContextType {
   createGoalModalOpts: { prefillTitle?: string; goalType?: 'solo' | 'squad' }
   isTaskDrawerOpen: boolean
   setIsTaskDrawerOpen: (open: boolean) => void
+}
+*/
+interface GrowthContextType {
+  profile: Profile | null
+  setProfile: (profile: Profile | null) => void
+  isLoading: boolean
+  isRTL: boolean
+  tutorialActive: boolean
+  setTutorialActive: (active: boolean) => void
+  isTourActive: boolean
+  setIsTourActive: (active: boolean) => void
+  restartTour: () => void
+  fetchGoals: () => Promise<void>
+  refreshProfile: () => Promise<void>
+  t: (key: keyof typeof TRANSLATIONS['en']) => string
+  mounted: boolean
+  currentTheme: typeof THEME_PACKAGES['SILVER']
+  addXp: (amount: number, taskTitle?: string, taskId?: string) => Promise<void>
+  lastAiMessage: string
+  setLastAiMessage: (msg: string) => void
+  changeTheme: (themeId: string) => Promise<void>
+  isRankUpModalOpen: boolean
+  setIsRankUpModalOpen: (open: boolean) => void
+  oldRank: string
+  newRank: string
+  triggerRankUp: (oldVal: string, newVal: string) => void
+  calculateAccountability: (mission: Mission) => {
+    progress: number
+    isInRedZone: boolean
+    isAheadOfSchedule: boolean
+    status: 'LATE' | 'ON_TRACK'
+  }
+  showAuthModal: boolean
+  setShowAuthModal: (open: boolean) => void
+  perks: {
+    hasTitle: boolean
+    hasAvatarBorder: boolean
+    hasExclusiveEmojis: boolean
+    hasNameGlow: boolean
+    hasCallingCard: boolean
+  }
+  getRankNeonClass: (rank: string) => string
+  tasksCompletedToday: number
+  isCreateGoalModalOpen: boolean
+  openCreateGoalModal: (opts?: { prefillTitle?: string; goalType?: 'solo' | 'squad' }) => void
+  closeCreateGoalModal: () => void
+  createGoalModalOpts: { prefillTitle?: string; goalType?: 'solo' | 'squad' }
+  isTaskDrawerOpen: boolean
+  setIsTaskDrawerOpen: (open: boolean) => void
+  activeGoalsCount: number
+  isGoalLimitReached: boolean
 }
 
 const GrowthContext = createContext<GrowthContextType | undefined>(undefined)
@@ -628,6 +711,34 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
     }
     return true
   })
+  const [activeGoalsCount, setActiveGoalsCount] = useState<number>(0)
+  
+  const refreshActiveGoalsCount = async (userId: string) => {
+    if (userId === 'guest') {
+      const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+      setActiveGoalsCount(guestGoals.length)
+      return
+    }
+    try {
+      const { count, error } = await supabase
+        .from('goals')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('is_archived', false)
+      if (!error && count !== null) {
+        setActiveGoalsCount(count)
+      }
+    } catch (e) {
+      console.error('Failed to refresh active goals count:', e)
+    }
+  }
+
+  const isGoalLimitReached = useMemo(() => {
+    if (!profile) return false
+    const tier = profile.user_tier || 'free'
+    return tier === 'free' && activeGoalsCount >= 5
+  }, [profile, activeGoalsCount])
+
   const [tutorialActive, setTutorialActive] = useState(false)
   const [isTourActive, setIsTourActive] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -787,6 +898,31 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
       }
     }
   }, [])
+
+  useEffect(() => {
+    const handleGoalChange = () => {
+      if (profile?.id) {
+        refreshActiveGoalsCount(profile.id)
+      } else {
+        refreshActiveGoalsCount('guest')
+      }
+    }
+
+    window.addEventListener('goal-created', handleGoalChange)
+    window.addEventListener('refresh-goals', handleGoalChange)
+    
+    // Initial fetch of active goals count
+    if (profile?.id) {
+      refreshActiveGoalsCount(profile.id)
+    } else {
+      refreshActiveGoalsCount('guest')
+    }
+
+    return () => {
+      window.removeEventListener('goal-created', handleGoalChange)
+      window.removeEventListener('refresh-goals', handleGoalChange)
+    }
+  }, [profile?.id])
 
   const incrementTasksCompletedToday = () => {
     const todayStr = new Date().toISOString().split('T')[0]
@@ -1176,6 +1312,9 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
           .eq('id', user.id)
           .maybeSingle()
         
+        // Sync active goals count for the authenticated user
+        refreshActiveGoalsCount(user.id)
+        
         const storedLang = typeof window !== 'undefined' ? localStorage.getItem('language') as Language : null
         let profileData: Profile | null = null
         let isNewUser = false
@@ -1320,6 +1459,8 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       } else {
+        // Sync active goals count for guests
+        refreshActiveGoalsCount('guest')
         const hasLocalAuth = typeof window !== 'undefined' && !!localStorage.getItem('growth-hub-auth-token')
         const hasCachedProfile = typeof window !== 'undefined' && !!localStorage.getItem('cached_profile')
         /*
@@ -1518,7 +1659,9 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
       closeCreateGoalModal,
       createGoalModalOpts,
       isTaskDrawerOpen,
-      setIsTaskDrawerOpen
+      setIsTaskDrawerOpen,
+      activeGoalsCount,
+      isGoalLimitReached
     }}>
       {children}
     </GrowthContext.Provider>

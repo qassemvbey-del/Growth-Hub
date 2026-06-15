@@ -21,7 +21,8 @@ interface CommandPaletteProps {
 }
 
 export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions = [] }: CommandPaletteProps) {
-  const { currentTheme, isRTL, openCreateGoalModal, profile, setProfile } = useGrowth()
+  // const { currentTheme, isRTL, openCreateGoalModal, profile, setProfile } = useGrowth()
+  const { currentTheme, isRTL, openCreateGoalModal, profile, setProfile, isGoalLimitReached } = useGrowth()
   const { showToast } = useToast()
   const { playBlip, playSuccess, playClick, playError, playDeploy } = useSound()
   const router = useRouter()
@@ -282,8 +283,20 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
     }
   }
 
-  // Submit goal creation
+  // const submitCreateGoal = async (type: 'solo' | 'squad') => {
   const submitCreateGoal = async (type: 'solo' | 'squad') => {
+    if (isGoalLimitReached && profile?.id && profile.id !== 'guest') {
+      showToast(
+        isRTL 
+          ? 'اكتمل الحد الأقصى للأهداف (5 أهداف). يرجى الترقية إلى باقة المحترفين لإنشاء المزيد.'
+          : 'Goal limit reached (5 active goals). Please upgrade to Pro to create more.',
+        'warning'
+      )
+      playError()
+      onClose()
+      router.push('/pricing')
+      return
+    }
     if (isSubmittingGoal) return
     const titleToCheck = goalTitle.trim()
     if (!titleToCheck) {
@@ -770,7 +783,24 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
 
                       <Command.Item
                         value="create new goal"
+                        /* Commented out per rule "Never delete code, only comment it out"
                         onSelect={() => runCommand(() => { setSubView('create-solo-goal') })}
+                        */
+                        onSelect={() => {
+                          if (isGoalLimitReached && profile?.id && profile.id !== 'guest') {
+                            showToast(
+                              isRTL 
+                                ? 'اكتمل الحد الأقصى للأهداف (5 أهداف). يرجى الترقية إلى باقة المحترفين لإنشاء المزيد.'
+                                : 'Goal limit reached (5 active goals). Please upgrade to Pro to create more.',
+                              'warning'
+                            )
+                            playError()
+                            onClose()
+                            router.push('/pricing')
+                            return
+                          }
+                          runCommand(() => { setSubView('create-solo-goal') })
+                        }}
                         className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-[var(--text-secondary)] dark:text-zinc-300 hover:text-[var(--text-primary)] dark:hover:text-white cursor-pointer transition-all gap-3 mt-1"
                         style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
                       >
@@ -788,7 +818,24 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
 
                       <Command.Item
                         value="create team workspace"
+                        /* Commented out per rule "Never delete code, only comment it out"
                         onSelect={() => runCommand(() => { setSubView('create-team-goal') })}
+                        */
+                        onSelect={() => {
+                          if (isGoalLimitReached && profile?.id && profile.id !== 'guest') {
+                            showToast(
+                              isRTL 
+                                ? 'اكتمل الحد الأقصى للأهداف (5 أهداف). يرجى الترقية إلى باقة المحترفين لإنشاء المزيد.'
+                                : 'Goal limit reached (5 active goals). Please upgrade to Pro to create more.',
+                              'warning'
+                            )
+                            playError()
+                            onClose()
+                            router.push('/pricing')
+                            return
+                          }
+                          runCommand(() => { setSubView('create-team-goal') })
+                        }}
                         className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-[var(--text-secondary)] dark:text-zinc-300 hover:text-[var(--text-primary)] dark:hover:text-white cursor-pointer transition-all gap-3 mt-1"
                         style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
                       >
