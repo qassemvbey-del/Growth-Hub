@@ -229,33 +229,59 @@ export default function GlobalCreateGoalModal() {
       }
       if (endDate) insertData.end_date = endDate
 
-      // const { data, error } = await supabase.from('cups').insert(insertData).select().single()
-      const { data, error } = await supabase.from('goals').insert(insertData).select().single()
+      try {
+        const { data, error } = await supabase.from('goals').insert(insertData).select().single()
 
-      if (data) {
-        track('goal_created', { goal_id: data.id, title: data.title, type: data.metadata?.type || 'solo' })
-        if (goalType === 'squad') {
-          await supabase.from('goal_members').insert({
-            goal_id: data.id,
-            user_id: user.id,
-            role: 'owner',
-          })
+        if (error) {
+          console.error('Goal creation failed error payload:', error)
+          const isLimitError = error.message?.includes('PLAN_LIMIT_EXCEEDED') || JSON.stringify(error).includes('PLAN_LIMIT_EXCEEDED')
+          if (isLimitError) {
+            showToast(
+              isRTL 
+                ? 'اكتمل الحد الأقصى للأهداف (5 أهداف). يرجى الترقية إلى باقة المحترفين لإنشاء المزيد.'
+                : 'Goal limit reached (5 active goals). Please upgrade to Pro to create more.',
+              'warning'
+            )
+          } else {
+            showToast(
+              isRTL ? 'مش اشتغل — جرب تاني' : 'Creation failed — try again',
+              'warning'
+            )
+          }
+          playError()
+          return
         }
 
-        closeCreateGoalModal()
-        showToast(isRTL ? 'تم إنشاء الـ Goal!' : 'Goal activated!', 'success')
-        playDeploy()
+        if (data) {
+          track('goal_created', { goal_id: data.id, title: data.title, type: data.metadata?.type || 'solo' })
+          if (goalType === 'squad') {
+            await supabase.from('goal_members').insert({
+              goal_id: data.id,
+              user_id: user.id,
+              role: 'owner',
+            })
+          }
 
-        // Notify any page that listens for new goals
-        window.dispatchEvent(new CustomEvent('goal-created', { detail: data }))
+          closeCreateGoalModal()
+          showToast(isRTL ? 'تم إنشاء الـ Goal!' : 'Goal activated!', 'success')
+          playDeploy()
 
-        // Navigate into the new goal
-        // router.push(`/missions/${data.id}`)
-        // const targetPath = goalType === 'squad' ? `/goals/squad/${data.id}` : `/goals/${data.id}`
-        const targetPath = goalType === 'squad' ? `/goals/squad/${data.id}` : `/goals/solo`
-        router.push(targetPath)
-      } else {
-        showToast(isRTL ? 'مش اشتغل — جرب تاني' : 'Creation failed — try again', 'warning')
+          // Notify any page that listens for new goals
+          window.dispatchEvent(new CustomEvent('goal-created', { detail: data }))
+
+          // Navigate into the new goal
+          const targetPath = goalType === 'squad' ? `/goals/squad/${data.id}` : `/goals/solo`
+          router.push(targetPath)
+        } else {
+          showToast(isRTL ? 'مش اشتغل — جرب تاني' : 'Creation failed — try again', 'warning')
+          playError()
+        }
+      } catch (err) {
+        console.error('Goal creation exception:', err)
+        showToast(
+          isRTL ? 'حدث خطأ غير متوقع - حاول مرة أخرى' : 'An unexpected error occurred - please try again',
+          'warning'
+        )
         playError()
       }
     } finally {
@@ -488,11 +514,19 @@ export default function GlobalCreateGoalModal() {
                   <span className="text-[10px] font-black tracking-widest text-zinc-400">
                     {isRTL ? 'ثبّته في الـ Dashboard' : 'Pin to Dashboard'}
                   </span>
-                  <label className="relative inline-flex items-center cursor-pointer select-none">
+                  <label 
+                    className="relative inline-flex items-center cursor-pointer select-none"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <input
                       type="checkbox"
                       checked={syncOnCreate}
-                      onChange={() => { playBlip(); setSyncOnCreate(!syncOnCreate) }}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        playBlip();
+                        setSyncOnCreate(!syncOnCreate);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
                       className="sr-only peer"
                     />
                     <div

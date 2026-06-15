@@ -39,7 +39,10 @@ const getRankBorderClass = (rank: string) => {
 }
 
 export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'squad' } = {}) {
+  /* Commented out per rule "Never delete code, only comment it out"
   const { profile, t, calculateAccountability, isRTL, mounted, currentTheme, setShowAuthModal, addXp } = useGrowth()
+  */
+  const { profile, t, calculateAccountability, isRTL, mounted, currentTheme, setShowAuthModal, addXp, isGoalLimitReached, openCreateGoalModal } = useGrowth()
   const { showToast } = useToast()
   const router = useRouter()
   const { track } = useTrack()
@@ -77,6 +80,14 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
   const [activeAttachments, setActiveAttachments] = useState<any[]>([])
   const [modalLoading, setModalLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleCreateGoalClick = () => {
+    if (isGoalLimitReached && profile?.id && profile.id !== 'guest') {
+      openCreateGoalModal({ goalType: typeFilter || 'solo' })
+    } else {
+      setShowCreate(true)
+    }
+  }
 
   const getUserRole = (mission: any) => {
     if (mission.user_id === profile?.id) return 'OWNER'
@@ -909,6 +920,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
       }
 
       // 2. Perform Feature 3 checks (Context Switching Warning):
+      /* Commented out per rule "Never delete code, only comment it out" to permanently nuke Context Switching Warning modal
       if (!bypassWarning) {
         const cooldown = localStorage.getItem('context_warning_cooldown')
         const isCooldownActive = cooldown && (Date.now() - Number(cooldown) < 24 * 60 * 60 * 1000)
@@ -935,6 +947,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
           }
         }
       }
+      */
 
       const metadataPayload: any = {
         defaultView,
@@ -960,29 +973,58 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
       if (startDate) insertData.start_date = startDate
       if (endDate) insertData.end_date = endDate
 
-      const { data, error } = await supabase.from('goals').insert(insertData).select().single()
+      try {
+        const { data, error } = await supabase.from('goals').insert(insertData).select().single()
 
-      if (data) {
-        track('goal_created', { goal_id: data.id, title: data.title, type: data.metadata?.type || 'solo' })
-        if (typeFilter === 'squad') {
-          await supabase.from('goal_members').insert({
-            goal_id: data.id,
-            user_id: user.id,
-            role: 'owner'
-          })
+        if (error) {
+          console.error('Goal creation failed error payload:', error)
+          const isLimitError = error.message?.includes('PLAN_LIMIT_EXCEEDED') || JSON.stringify(error).includes('PLAN_LIMIT_EXCEEDED')
+          if (isLimitError) {
+            showToast(
+              isRTL 
+                ? 'اكتمل الحد الأقصى للأهداف (5 أهداف). يرجى الترقية إلى باقة المحترفين لإنشاء المزيد.'
+                : 'Goal limit reached (5 active goals). Please upgrade to Pro to create more.',
+              'warning'
+            )
+          } else {
+            showToast(
+              isRTL ? 'فشل إنشاء الهدف - حاول مرة أخرى' : 'Creation failed - please try again',
+              'warning'
+            )
+          }
+          playError()
+          return
         }
-        setMissions([data, ...missions])
-        setShowCreate(false)
-        setShowWarningModal(false)
-        setNewTitle('')
-        setNewSize('md')
-        setStartDate('')
-        setEndDate('')
-        setDefaultView('list')
-        // showToast(isRTL ? 'تم إنشاء الهدف' : 'Goal activated!', 'success')
-        playDeploy()
-        // router.push(`/missions/${data.id}`)
-        router.push(data.metadata?.type === 'public' ? `/goals/public/${data.id}` : `/goals/squad/${data.id}`)
+
+        if (data) {
+          track('goal_created', { goal_id: data.id, title: data.title, type: data.metadata?.type || 'solo' })
+          if (typeFilter === 'squad') {
+            await supabase.from('goal_members').insert({
+              goal_id: data.id,
+              user_id: user.id,
+              role: 'owner'
+            })
+          }
+          setMissions([data, ...missions])
+          setShowCreate(false)
+          setShowWarningModal(false)
+          setNewTitle('')
+          setNewSize('md')
+          setStartDate('')
+          setEndDate('')
+          setDefaultView('list')
+          // showToast(isRTL ? 'تم إنشاء الهدف' : 'Goal activated!', 'success')
+          playDeploy()
+          // router.push(`/missions/${data.id}`)
+          router.push(data.metadata?.type === 'public' ? `/goals/public/${data.id}` : `/goals/squad/${data.id}`)
+        }
+      } catch (err) {
+        console.error('Goal creation exception:', err)
+        showToast(
+          isRTL ? 'حدث خطأ غير متوقع - حاول مرة أخرى' : 'An unexpected error occurred - please try again',
+          'warning'
+        )
+        playError()
       }
     } finally {
       setIsSubmitting(false)
@@ -1103,7 +1145,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
             {/* Mobile-only Quick CTA trigger next to title */}
             {typeFilter !== 'squad' && (
               <button
-                onClick={() => { playBlip(); setShowCreate(true); }}
+                onClick={() => { playBlip(); handleCreateGoalClick(); }}
                 className="flex md:hidden flex-row items-center justify-center gap-1.5 h-11 px-4 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-[0.97] shadow-lg shrink-0 text-white"
                 style={{ backgroundColor: currentTheme.color, boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
@@ -1123,7 +1165,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 {isRTL ? 'انضم لهدف' : 'Join goal'}
               </button>
               <button
-                onClick={() => { playBlip(); setShowCreate(true); }}
+                onClick={() => { playBlip(); handleCreateGoalClick(); }}
                 className="flex flex-row items-center justify-center gap-2 w-full md:w-auto h-12 md:h-11 min-h-[48px] md:min-h-0 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-[0.97] shadow-lg text-white"
                 style={{ backgroundColor: currentTheme.color, boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
@@ -1134,7 +1176,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
           ) : (
             /* Desktop-only CTA — hidden on mobile since a mobile btn is already in header */
             <button
-              onClick={() => { playBlip(); setShowCreate(true); }}
+              onClick={() => { playBlip(); handleCreateGoalClick(); }}
               className="hidden md:flex flex-row items-center justify-center gap-2 w-full md:w-auto h-11 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg cursor-pointer text-white"
               style={{ backgroundColor: currentTheme.color, boxShadow: `0 4px 20px ${currentTheme.color}33` }}
             >
@@ -1223,6 +1265,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                 initial={{ scale: 0.9, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9 }}
+                onClick={(e) => e.stopPropagation()}
                 /* bg-zinc-950/95 border border-white/10 */
                 className="w-full max-w-[380px] bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 p-6 space-y-5 rounded-md shadow-2xl my-auto relative"
               >
@@ -1275,11 +1318,19 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                   <span className="text-[10px] font-black tracking-widest uppercase text-zinc-400">
                     {isRTL ? 'تثبيت في اللوحة الرئيسة' : 'Pin to dashboard'}
                   </span>
-                  <label className="relative inline-flex items-center cursor-pointer select-none">
+                  <label 
+                    className="relative inline-flex items-center cursor-pointer select-none"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <input
                       type="checkbox"
                       checked={syncOnCreate}
-                      onChange={() => { playBlip(); setSyncOnCreate(!syncOnCreate); }}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        playBlip();
+                        setSyncOnCreate(!syncOnCreate);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
                       className="sr-only peer"
                     />
                     <div className="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-zinc-400 peer-checked:after:bg-black after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--theme-color)]"
@@ -1377,6 +1428,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
           )}
 
           {/* FEATURE 3: CONTEXT SWITCHING WARNING OVERLAY */}
+          {/* Commented out per safety rules to permanently nuke context switching warning modal
           <AnimatePresence>
             {showWarningModal && (
               <motion.div
@@ -1392,7 +1444,6 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                   className="w-full max-w-md border bg-[var(--card-bg)] p-6 rounded-md shadow-[0_0_50px_rgba(255,0,85,0.3)] relative overflow-hidden"
                   style={{ borderColor: '#FF0055' }}
                 >
-                  {/* Neon alert top line */}
                   <div className="absolute top-0 inset-x-0 h-[2.5px] bg-[#FF0055]" />
 
                   <div className="space-y-6">
@@ -1439,9 +1490,6 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                         }}
                         className="flex-1 py-2.5 bg-[#FF0055]/10 text-[#FF0055] border border-[#FF0055]/30 hover:bg-[#FF0055]/20 font-space font-black text-xs uppercase tracking-widest transition-all rounded-md"
                       >
-                        {/* Commented out per safety rules:
-                        isRTL ? 'استبدال المهمة' : 'FORCE SWAP'
-                        */}
                         {isRTL ? 'استبدال المهمة' : 'Swap task'}
                       </button>
                       <button
@@ -1460,6 +1508,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
               </motion.div>
             )}
           </AnimatePresence>
+          */}
 
           {missions.length === 0 && !loading && (
             <div className="col-span-full py-24 flex flex-col items-center justify-center text-center space-y-6">
@@ -1474,7 +1523,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                     </p>
                   </div>
                   <button
-                    onClick={() => { playBlip(); setShowCreate(true); }}
+                    onClick={() => { playBlip(); handleCreateGoalClick(); }}
                     className="flex flex-row items-center justify-center gap-2 h-11 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg cursor-pointer"
                     style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
                   >
@@ -1502,7 +1551,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
                       {isRTL ? 'انضم برمز' : 'Join with Code'}
                     </button>
                     <button
-                      onClick={() => { playBlip(); setShowCreate(true); }}
+                      onClick={() => { playBlip(); handleCreateGoalClick(); }}
                       className="flex flex-row items-center justify-center gap-2 h-11 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg cursor-pointer"
                       style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
                     >

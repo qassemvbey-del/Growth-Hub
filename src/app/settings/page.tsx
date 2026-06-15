@@ -148,20 +148,57 @@ export default function SettingsPage() {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true)
   const [isPwaInstalled, setIsPwaInstalled] = useState<boolean>(false)
   const [pwaPromptAvailable, setPwaPromptAvailable] = useState<boolean>(false)
-  const [quotaData, setQuotaData] = useState<any>(null)
+  // Commented out per safety rules:
+  // const [quotaData, setQuotaData] = useState<any>(null)
   const usageLimitsRef = useRef<HTMLDivElement>(null)
 
+  // Commented out per safety rules:
+  // useEffect(() => {
+  //   const fetchQuotas = () => {
+  //     const fix = getFeatureUsage('fix_errors')
+  //     const explain = getFeatureUsage('explain_topic')
+  //     const checklist = getFeatureUsage('generate_checklist')
+  //     setQuotaData({ fix, explain, checklist })
+  //   }
+  //   fetchQuotas()
+  //   const interval = setInterval(fetchQuotas, 15000)
+  //   return () => clearInterval(interval)
+  // }, [])
+
+  const [resetCountdown, setResetCountdown] = useState<string>('')
+
   useEffect(() => {
-    const fetchQuotas = () => {
-      const fix = getFeatureUsage('fix_errors')
-      const explain = getFeatureUsage('explain_topic')
-      const checklist = getFeatureUsage('generate_checklist')
-      setQuotaData({ fix, explain, checklist })
+    if (!profile?.last_ai_reset) {
+      setResetCountdown('')
+      return
     }
-    fetchQuotas()
-    const interval = setInterval(fetchQuotas, 15000)
+
+    const updateCountdown = () => {
+      const lastReset = new Date(profile.last_ai_reset!).getTime()
+      const nextReset = lastReset + 12 * 60 * 60 * 1000
+      const remaining = nextReset - Date.now()
+
+      if (remaining <= 0) {
+        setResetCountdown('')
+      } else {
+        const hrs = Math.floor(remaining / (3600 * 1000))
+        const mins = Math.floor((remaining % (3600 * 1000)) / (60 * 1000))
+        const secs = Math.floor((remaining % (60 * 1000)) / 1000)
+        const hrsText = String(hrs).padStart(2, '0')
+        const minsText = String(mins).padStart(2, '0')
+        const secsText = String(secs).padStart(2, '0')
+        setResetCountdown(
+          isRTL
+            ? `يعاد التعيين خلال ${hrsText}س ${minsText}د ${secsText}ث`
+            : `Resets in ${hrsText}h ${minsText}m ${secsText}s`
+        )
+      }
+    }
+
+    updateCountdown()
+    const interval = setInterval(updateCountdown, 1000)
     return () => clearInterval(interval)
-  }, [])
+  }, [profile?.last_ai_reset, isRTL])
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -174,7 +211,7 @@ export default function SettingsPage() {
         }, 3000)
       }
     }
-  }, [quotaData])
+  }, [profile])
 
   useEffect(() => {
     setIsDarkMode(document.documentElement.classList.contains('dark'))
@@ -577,14 +614,13 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* AI USAGE LIMITS BLOCK */}
+        {/* Commented out per safety rules:
         {quotaData && (
           <div>
             <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
               {isRTL ? 'حدود استخدام الذكاء الاصطناعي' : 'AI USAGE LIMITS'}
             </span>
             <div ref={usageLimitsRef} className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4 space-y-4">
-              {/* Master Aggregated Progress Bar */}
               <div className="space-y-2 text-start">
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-space font-black uppercase tracking-wider text-white">
@@ -605,7 +641,6 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Individual Sub-list */}
               <div className="space-y-4 pt-2 border-t border-white/5">
                 {[
                   { key: 'fix_errors', name: isRTL ? 'مصحح الأخطاء (Fix Errors)' : 'Fix Errors', data: quotaData.fix },
@@ -655,6 +690,62 @@ export default function SettingsPage() {
                     </div>
                   )
                 })}
+              </div>
+            </div>
+          </div>
+        )}
+        */}
+
+        {/* Global AI Quota Block */}
+        {profile && (
+          <div>
+            <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
+              {isRTL ? 'حدود استخدام الذكاء الاصطناعي' : 'AI Quota'}
+            </span>
+            <div ref={usageLimitsRef} className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4 space-y-4 text-start">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h4 className="font-medium text-sm text-white">
+                    {isRTL ? 'الاستهلاك الإجمالي للذكاء الاصطناعي' : 'Global AI Quota'}
+                  </h4>
+                  <p className="text-[10px] text-zinc-500 mt-0.5 font-medium">
+                    {isRTL
+                      ? `الباقة الحالية: ${profile.user_tier === 'pro' ? 'المحترفين (Pro)' : profile.user_tier === 'elite' ? 'النخبة (Elite)' : 'المجانية (Free)'}`
+                      : `Current tier: ${profile.user_tier === 'pro' ? 'Pro' : profile.user_tier === 'elite' ? 'Elite' : 'Free'}`}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-mono font-bold text-zinc-400">
+                    {profile.ai_request_count || 0} / {
+                      profile.user_tier === 'pro' ? 50 : profile.user_tier === 'elite' ? 150 : 3
+                    } {isRTL ? 'مستخدم' : 'used'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                <div 
+                  className="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-teal-500 to-cyan-500"
+                  style={{ 
+                    width: `${Math.min(100, (((profile.ai_request_count || 0) / (profile.user_tier === 'pro' ? 50 : profile.user_tier === 'elite' ? 150 : 3)) * 100))}%`,
+                    boxShadow: `0 0 10px ${currentTheme.color}`
+                  }} 
+                />
+              </div>
+
+              <div className="flex justify-between items-center text-xs pt-1">
+                <span className="font-space text-[10px] text-zinc-500 font-bold uppercase tracking-wide">
+                  {isRTL ? 'حالة التعيين' : 'Reset status'}
+                </span>
+                {(profile.ai_request_count || 0) > 0 && resetCountdown ? (
+                  <span className="font-mono text-[10px] text-zinc-400">
+                    {resetCountdown}
+                  </span>
+                ) : (
+                  <span className="font-space text-[10px] text-emerald-400 font-bold uppercase tracking-wide">
+                    {isRTL ? 'متاح بالكامل' : 'Fully Available'}
+                  </span>
+                )}
               </div>
             </div>
           </div>
