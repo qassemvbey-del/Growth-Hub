@@ -38,6 +38,7 @@ function getYouTubeId(urlOrId: string) {
 
 export async function POST(req: Request) {
   try {
+    // 1. Auth & Setup
     const { taskId, youtubeUrl, taskTitle, goalTitle } = await req.json()
     if (!taskId || !youtubeUrl) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 })
@@ -48,7 +49,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid YouTube URL' }, { status: 400 })
     }
 
-    // 1. Fetch video metadata
+    const supabase = await createServerClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error("CHECKLIST_ROUTE_CRASH: Supabase env variables are missing.")
+      return NextResponse.json({ error: "Supabase environment configuration is missing" }, { status: 500 })
+    }
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
+
+    // 2. Extract Video Info & Transcript
     let videoTitle = taskTitle || 'YouTube Video'
     let videoDescription = ''
     const youtubeKey = process.env.YOUTUBE_DATA_API_KEY || process.env.YOUTUBE_API_KEY
@@ -80,34 +95,15 @@ export async function POST(req: Request) {
       }
     }
 
-    // 2. Fetch video transcript (catch error silently)
     let transcriptText = ''
     try {
       const transcriptItems = await YoutubeTranscript.fetchTranscript(videoId)
       transcriptText = transcriptItems.map(item => item.text).join(' ')
     } catch (_err) {
-      // Catch silently so transcriptText remains an empty string
+      // Silently catch — transcriptText stays empty
     }
 
-    // 3. Authentication Check (needed for DB saves)
-    const supabase = await createServerClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error("CHECKLIST_ROUTE_CRASH: Supabase env variables are missing.")
-      return NextResponse.json({
-        error: "Supabase environment configuration is missing",
-        message: `NEXT_PUBLIC_SUPABASE_URL: ${supabaseUrl ? 'present' : 'missing'}, SUPABASE_SERVICE_ROLE_KEY: ${supabaseServiceKey ? 'present' : 'missing'}`
-      }, { status: 500 })
-    }
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
-
-    // 4. Evaluate 3-Stage Validation
+    // 3. Evaluate 3-Stage Validation
     const transcriptLen = transcriptText.trim().length
     const metadataCombined = (videoTitle + ' ' + videoDescription).trim()
     const metadataLen = metadataCombined.length
@@ -117,11 +113,9 @@ export async function POST(req: Request) {
       runStage = 1
     } else if (metadataLen > 50) {
       runStage = 2
-    } else {
-      runStage = 3
     }
 
-    // Stage 3 (Hard Reject) - Return fallback immediately without checking or deducting quota
+    // Stage 3 (Hard Reject) — NO quota check, NO Gemini call
     if (runStage === 3) {
       const fallbackAnalysis = {
         isIntroOnly: true,
@@ -131,7 +125,6 @@ export async function POST(req: Request) {
         additionalNotes: ""
       }
 
-      // Save fallback to database metadata so frontend can load it
       const { data: taskData } = await supabaseAdmin
         .from('tasks')
         .select('metadata')
@@ -139,101 +132,37 @@ export async function POST(req: Request) {
         .single()
 
       const currentMetadata = (taskData?.metadata as any) || {}
-      const updatedMetadata = {
-        ...currentMetadata,
-        videoAnalysis: fallbackAnalysis
-      }
-
       await supabaseAdmin
         .from('tasks')
-        .update({ metadata: updatedMetadata })
+        .update({ metadata: { ...currentMetadata, videoAnalysis: fallbackAnalysis } })
         .eq('id', taskId)
 
       return NextResponse.json({ success: true, analysis: fallbackAnalysis })
     }
 
-    // 5. Quota Check (Only for Stage 1 & 2)
-    const { data: profileData, error: profileErr } = await supabaseAdmin
-      .from('profiles')
-      .select('user_tier, ai_request_count, last_ai_reset')
-      .eq('id', user.id)
-      .single()
+    // 4. Centralized Quota Check (Atomic RPC — BEFORE Gemini)
+    const { data: quotaData, error: quotaError } = await supabaseAdmin.rpc('check_and_increment_quota', {
+      p_user_id: user.id
+    })
 
-    if (profileErr || !profileData) {
-      return NextResponse.json({ 
-        error: 'Failed to retrieve profile quota status',
-        message: profileErr?.message || 'Profile data is empty'
-      }, { status: 500 })
+    if (quotaError) {
+      console.error('Quota RPC error:', quotaError)
+      return NextResponse.json({ error: 'Quota validation failed', message: quotaError.message }, { status: 500 })
     }
 
-    const lastReset = new Date(profileData.last_ai_reset || Date.now()).getTime()
-    const nowTime = Date.now()
-    const cooldownPeriod = 12 * 60 * 60 * 1000 // 12 hours
-    let currentCount = profileData.ai_request_count || 0
-    if (nowTime - lastReset >= cooldownPeriod) {
-      currentCount = 0
-    }
-
-    const tier = profileData.user_tier || 'free'
-    let limit = 3
-    if (tier === 'pro') limit = 50
-    else if (tier === 'elite') limit = 150
-
-    if (currentCount >= limit) {
+    const quotaResult = typeof quotaData === 'string' ? JSON.parse(quotaData) : quotaData
+    if (!quotaResult || !quotaResult.allowed) {
       return NextResponse.json({
         error: 'Quota Exceeded',
-        message_en: 'Your 12-hour AI request limit has been reached. Please wait for the automatic cooldown or unlock instantly with an AI Refill Pack for only 15 EGP.',
-        message_ar: 'لقد نفدت كوتة استعلامات الذكاء الاصطناعي الخاصة بك لهذه الـ 12 ساعة. يرجى الانتظار حتى التجديد التلقائي أو الشحن الفوري لباقة التصفير بـ 15 ج.م فقط.'
+        message_en: 'Your AI request limit has been reached. Please wait for the automatic cooldown or upgrade your plan.',
+        message_ar: 'لقد نفدت كوتة استعلامات الذكاء الاصطناعي الخاصة بك. يرجى الانتظار حتى التجديد التلقائي أو ترقية خطتك.'
       }, { status: 403 })
     }
 
-    // 6. Rate Limit Verification (Only for Stage 1 & 2)
-    const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString()
-    const { data: cooldownLogs, error: cooldownError } = await supabaseAdmin
-      .from('ai_usage_logs')
-      .select('created_at')
-      .eq('user_id', user.id)
-      .eq('action_type', 'youtube_checklist')
-      .gte('created_at', fifteenMinsAgo)
-      .order('created_at', { ascending: false })
-      .limit(1)
-
-    const isLogsTableMissing = cooldownError?.code === '42P01'
-
-    if (!isLogsTableMissing && cooldownLogs && cooldownLogs.length > 0) {
-      const lastLogTime = new Date(cooldownLogs[0].created_at).getTime()
-      const remainingSeconds = Math.max(0, Math.ceil((lastLogTime + 15 * 60 * 1000 - Date.now()) / 1000))
-      if (remainingSeconds > 0) {
-        return NextResponse.json({
-          error: 'cooldown',
-          message: `Please wait ${remainingSeconds} seconds before generating another checklist.`,
-          remainingSeconds
-        }, { status: 429 })
-      }
-    }
-
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 1000).toISOString()
-    const { count } = await supabaseAdmin
-      .from('ai_usage_logs')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('action_type', 'youtube_checklist')
-      .gte('created_at', twentyFourHoursAgo)
-
-    if (!isLogsTableMissing && count !== null && count >= 3) {
-      return NextResponse.json({
-        error: 'daily_limit',
-        message: 'Daily threshold met. You can only generate 3 AI checklists per day.'
-      }, { status: 429 })
-    }
-
-    // 7. Initialize Gemini
-    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    // 5. Call Gemini
+    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
     if (!apiKey) {
-      return NextResponse.json({ 
-        error: "API Key is missing",
-        message: "Neither GEMINI_API_KEY nor NEXT_PUBLIC_GEMINI_API_KEY is set in environment variables."
-      }, { status: 500 });
+      return NextResponse.json({ error: "API Key is missing" }, { status: 500 })
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
@@ -250,18 +179,18 @@ export async function POST(req: Request) {
       prompt = `You are a highly precise Content Analyst and Task Extractor for a life-management system. Analyze the provided Video Title, Description, and Audio Transcript.
 Respond strictly in Arabic, and output ONLY a raw JSON object matching this exact schema:
 {
-  "isIntroOnly": boolean, // True ONLY if the video lacks actionable steps (e.g., just an intro/promo)
-  "summary": "string", // A concise 1-2 sentence summary
-  "keyTakeaways": ["string"], // 2-3 main points
-  "checklist": ["string"], // Actionable tasks. EMPTY [] if isIntroOnly is true.
-  "additionalNotes": "string" // Any warnings or advice, or empty string.
+  "isIntroOnly": boolean,
+  "summary": "string",
+  "keyTakeaways": ["string"],
+  "checklist": ["string"],
+  "additionalNotes": "string"
 }
 
 ### STRICT RULES:
 1. Zero Hallucination: ONLY use the provided transcript. Do not invent steps.
 2. If the video is an intro or lacks practical steps, set "isIntroOnly" to true and "checklist" to [].
 3. PLAIN TEXT ONLY: Do NOT use markdown formatting inside the strings. NO asterisks (*), NO bold (**), NO hashtags (#). The strings must be completely clean, plain Arabic text without any formatting symbols.
-4. CRITICAL: If the video transcript is vague, lacks explicit actionable steps, or if you are unsure, DO NOT GUESS AND DO NOT REPEAT YOURSELF. Immediately set isIntroOnly to true, leave checklist empty, and output this exact summary: 'عذراً، محتوى هذا الفيديو غير كافٍ أو لا يحتوي على خطوات واضحة يمكن استخراجها.' NO MARKDOWN ALLOWED. NO asterisks (*), NO pluses (+), NO dashes (-).
+4. CRITICAL: If the video transcript is vague, lacks explicit actionable steps, or if you are unsure, DO NOT GUESS AND DO NOT REPEAT YOURSELF. Immediately set isIntroOnly to true, leave checklist empty, and output this exact summary: 'عذراً، محتوى هذا الفيديو غير كافٍ أو لا يحتوي على خطوات واضحة يمكن استخراجها.'
 
 VIDEO DATA:
 Title: ${videoTitle}
@@ -269,19 +198,19 @@ Description: ${videoDescription}
 Transcript: ${transcriptText}
 `
     } else {
-      prompt = `Analyze this video based ONLY on the Title and Description because the audio transcript is missing. You MUST start your \`summary\` string exactly with: '(تنويه: التحليل مبني على وصف الفيديو فقط لعدم توفر نص مفرغ)'. Respond strictly in Arabic, and output ONLY a raw JSON object matching this exact schema:
+      prompt = `Analyze this video based ONLY on the Title and Description because the audio transcript is missing. You MUST start your summary string exactly with: '(تنويه: التحليل مبني على وصف الفيديو فقط لعدم توفر نص مفرغ)'. Respond strictly in Arabic, and output ONLY a raw JSON object matching this exact schema:
 {
-  "isIntroOnly": boolean, // True ONLY if the video lacks actionable steps
-  "summary": "string", // A concise 1-2 sentence summary (must start with: '(تنويه: التحليل مبني على وصف الفيديو فقط لعدم توفر نص مفرغ)')
-  "keyTakeaways": ["string"], // 2-3 main points
-  "checklist": ["string"], // Actionable tasks. EMPTY [] if isIntroOnly is true.
-  "additionalNotes": "string" // Any warnings or advice, or empty string.
+  "isIntroOnly": boolean,
+  "summary": "string",
+  "keyTakeaways": ["string"],
+  "checklist": ["string"],
+  "additionalNotes": "string"
 }
 
 ### STRICT RULES:
 1. Zero Hallucination: ONLY use the provided Title and Description. Do not invent steps.
 2. If the video is an intro or lacks practical steps, set "isIntroOnly" to true and "checklist" to [].
-3. PLAIN TEXT ONLY: Do NOT use markdown formatting inside the strings. NO asterisks (*), NO bold (**), NO hashtags (#). The strings must be completely clean, plain Arabic text without any formatting symbols.
+3. PLAIN TEXT ONLY: Do NOT use markdown formatting inside the strings. NO asterisks (*), NO bold (**), NO hashtags (#).
 
 TITLE: ${videoTitle}
 DESCRIPTION: ${videoDescription}
@@ -289,35 +218,25 @@ DESCRIPTION: ${videoDescription}
     }
 
     const result = await model.generateContent(prompt)
-    
+
     let responseText = ''
     try {
       responseText = result.response.text()
     } catch (textErr) {
       console.warn("Gemini response.text() failed, trying fallback:", textErr)
-      const candidate = result.response?.candidates?.[0];
-      const part = candidate?.content?.parts?.[0];
-      responseText = part?.text || '';
+      const candidate = result.response?.candidates?.[0]
+      const part = candidate?.content?.parts?.[0]
+      responseText = part?.text || ''
     }
-    
+
     let analysis: VideoAnalysisResponse
     try {
       analysis = JSON.parse(responseText.trim())
-      if (typeof analysis.isIntroOnly !== 'boolean') {
-        analysis.isIntroOnly = false
-      }
-      if (typeof analysis.summary !== 'string') {
-        analysis.summary = ''
-      }
-      if (!Array.isArray(analysis.keyTakeaways)) {
-        analysis.keyTakeaways = []
-      }
-      if (!Array.isArray(analysis.checklist)) {
-        analysis.checklist = []
-      }
-      if (typeof analysis.additionalNotes !== 'string') {
-        analysis.additionalNotes = ''
-      }
+      if (typeof analysis.isIntroOnly !== 'boolean') analysis.isIntroOnly = false
+      if (typeof analysis.summary !== 'string') analysis.summary = ''
+      if (!Array.isArray(analysis.keyTakeaways)) analysis.keyTakeaways = []
+      if (!Array.isArray(analysis.checklist)) analysis.checklist = []
+      if (typeof analysis.additionalNotes !== 'string') analysis.additionalNotes = ''
     } catch (parseErr) {
       console.error('Failed to parse Gemini response JSON:', responseText)
       analysis = {
@@ -329,7 +248,7 @@ DESCRIPTION: ${videoDescription}
       }
     }
 
-    // 8. Database Checklist Insertion / Update
+    // 6. Database Save & Return
     const { data: taskData } = await supabaseAdmin
       .from('tasks')
       .select('metadata')
@@ -337,43 +256,14 @@ DESCRIPTION: ${videoDescription}
       .single()
 
     const currentMetadata = (taskData?.metadata as any) || {}
-    const updatedMetadata = {
-      ...currentMetadata,
-      videoAnalysis: analysis // Store the new VideoAnalysisResponse
-    }
-
     await supabaseAdmin
       .from('tasks')
-      .update({ metadata: updatedMetadata })
+      .update({ metadata: { ...currentMetadata, videoAnalysis: analysis } })
       .eq('id', taskId)
-
-    // ONLY increment/deduct quota on successful response
-    const { error: incrementError } = await supabaseAdmin.rpc('check_and_increment_quota', {
-      p_user_id: user.id
-    })
-    if (incrementError) {
-      console.error('Failed to increment AI quota count:', incrementError)
-    }
-
-    // Log Creation
-    if (!isLogsTableMissing) {
-      try {
-        await supabaseAdmin.from('ai_usage_logs').insert({
-          user_id: user.id,
-          action_type: 'youtube_checklist'
-        })
-      } catch (logErr) {
-        console.error('Failed to write usage log:', logErr)
-      }
-    }
 
     return NextResponse.json({ success: true, analysis })
   } catch (error: any) {
     console.error('CHECKLIST_ROUTE_CRASH:', error)
-    return NextResponse.json({ 
-      error: 'Server error', 
-      message: error?.message || String(error),
-      stack: error?.stack || ''
-    }, { status: 500 })
+    return NextResponse.json({ error: 'Server error', message: error?.message || String(error) }, { status: 500 })
   }
 }

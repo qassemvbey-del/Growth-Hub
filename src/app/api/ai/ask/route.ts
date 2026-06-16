@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
-    // 1. Authentication Check
+    // 1. Auth & Input
     const supabase = await createServerClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -23,54 +23,33 @@ export async function POST(req: Request) {
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     if (!supabaseUrl || !supabaseServiceKey) {
       console.error("ASK_ROUTE_CRASH: Supabase env variables are missing.")
-      return NextResponse.json({ 
-        error: "Supabase environment configuration is missing",
-        message: `NEXT_PUBLIC_SUPABASE_URL: ${supabaseUrl ? 'present' : 'missing'}, SUPABASE_SERVICE_ROLE_KEY: ${supabaseServiceKey ? 'present' : 'missing'}`
-      }, { status: 500 })
+      return NextResponse.json({ error: "Supabase environment configuration is missing" }, { status: 500 })
     }
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
-    // 2. Quota Check (Pure check without incrementing)
-    const { data: profileData, error: profileErr } = await supabaseAdmin
-      .from('profiles')
-      .select('user_tier, ai_request_count, last_ai_reset')
-      .eq('id', user.id)
-      .single()
+    // 2. Centralized Quota Check (Atomic RPC — BEFORE Gemini)
+    const { data: quotaData, error: quotaError } = await supabaseAdmin.rpc('check_and_increment_quota', {
+      p_user_id: user.id
+    })
 
-    if (profileErr || !profileData) {
-      return NextResponse.json({ 
-        error: 'Failed to retrieve profile quota status',
-        message: profileErr?.message || 'Profile data is empty'
-      }, { status: 500 })
+    if (quotaError) {
+      console.error('Quota RPC error:', quotaError)
+      return NextResponse.json({ error: 'Quota validation failed', message: quotaError.message }, { status: 500 })
     }
 
-    const lastReset = new Date(profileData.last_ai_reset || Date.now()).getTime()
-    const nowTime = Date.now()
-    const cooldownPeriod = 12 * 60 * 60 * 1000 // 12 hours
-    let currentCount = profileData.ai_request_count || 0
-    if (nowTime - lastReset >= cooldownPeriod) {
-      currentCount = 0
-    }
-
-    const tier = profileData.user_tier || 'free'
-    let limit = 3
-    if (tier === 'pro') limit = 50
-    else if (tier === 'elite') limit = 150
-
-    if (currentCount >= limit) {
+    const quotaResult = typeof quotaData === 'string' ? JSON.parse(quotaData) : quotaData
+    if (!quotaResult || !quotaResult.allowed) {
       return NextResponse.json({
         error: 'Quota Exceeded',
-        message_en: 'Your 12-hour AI request limit has been reached. Please wait for the automatic cooldown or unlock instantly with an AI Refill Pack for only 15 EGP.',
-        message_ar: 'لقد نفدت كوتة استعلامات الذكاء الاصطناعي الخاصة بك لهذه الـ 12 ساعة. يرجى الانتظار حتى التجديد التلقائي أو الشحن الفوري لباقة التصفير بـ 15 ج.م فقط.'
+        message_en: 'Your AI request limit has been reached. Please wait for the automatic cooldown or upgrade your plan.',
+        message_ar: 'لقد نفدت كوتة استعلامات الذكاء الاصطناعي الخاصة بك. يرجى الانتظار حتى التجديد التلقائي أو ترقية خطتك.'
       }, { status: 403 })
     }
 
-    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    // 3. Call Gemini
+    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
     if (!apiKey) {
-      return NextResponse.json({ 
-        error: "API Key is missing",
-        message: "Neither GEMINI_API_KEY nor NEXT_PUBLIC_GEMINI_API_KEY is set in environment variables."
-      }, { status: 500 });
+      return NextResponse.json({ error: "API Key is missing" }, { status: 500 })
     }
 
     let systemPrompt = ''
@@ -79,11 +58,9 @@ export async function POST(req: Request) {
       systemPrompt = `You are a high-density Admin Report Generator. Analyze the provided task metadata and comments. Output ONLY the following format. Under no circumstances should you add intros, outros, conversational wrappers, markdown decoration outside the template, or repeat the query. Use this exact one-line output template format per task:
 [Task Title] 🔴 Stalled for [X] days. Root Cause: [Explicitly state the member's technical blocker extracted from comments]. Direct Action Required: [Specify exact guidance needed].`
     } else {
-      // Both general_ask and tactical_tool
       systemPrompt = `أنت مساعد ذكي. أجب باللغة العربية فقط. PLAIN TEXT ONLY. NO markdown formatting. NO asterisks (*), NO bold (**). If explaining a topic, focus on the core concept. Do NOT explain programming languages unless explicitly requested.`
     }
 
-    // Initialize Gemini
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
@@ -100,42 +77,21 @@ export async function POST(req: Request) {
         }
       ]
     })
-    
+
+    // 4. Parse & Return
     let aiResponse = ''
     try {
       aiResponse = result.response.text()
     } catch (textErr) {
       console.warn("Gemini response.text() failed, trying fallback:", textErr)
-      const candidate = result.response?.candidates?.[0];
-      const part = candidate?.content?.parts?.[0];
-      aiResponse = part?.text || '';
-    }
-
-    // ONLY increment/deduct quota on successful response
-    const { error: incrementError } = await supabaseAdmin.rpc('check_and_increment_quota', {
-      p_user_id: user.id
-    })
-    if (incrementError) {
-      console.error('Failed to increment AI quota count:', incrementError)
-    }
-
-    // Log Creation (if log table exists/not missing)
-    try {
-      await supabaseAdmin.from('ai_usage_logs').insert({
-        user_id: user.id,
-        action_type: type || 'ask_ai'
-      })
-    } catch (logErr) {
-      console.warn('Failed to write usage log (might be normal if table missing):', logErr)
+      const candidate = result.response?.candidates?.[0]
+      const part = candidate?.content?.parts?.[0]
+      aiResponse = part?.text || ''
     }
 
     return NextResponse.json({ text: aiResponse })
   } catch (err: any) {
     console.error('ASK_ROUTE_CRASH:', err)
-    return NextResponse.json({ 
-      error: 'Internal Server Error',
-      message: err.message || String(err),
-      stack: err.stack || ''
-    }, { status: 500 })
+    return NextResponse.json({ error: 'Internal Server Error', message: err.message || String(err) }, { status: 500 })
   }
 }
