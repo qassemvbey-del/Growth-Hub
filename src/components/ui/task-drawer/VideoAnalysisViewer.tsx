@@ -38,6 +38,16 @@ export default function VideoAnalysisViewer({
   const [isAdding, setIsAdding] = useState(false)
   const [added, setAdded] = useState(metadata?.analysisTasksAdded || false)
 
+  if (typeof analysis === 'string' || !analysis || typeof analysis !== 'object') {
+    return (
+      <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-xs text-red-500 font-space select-text" dir={isRTL ? 'rtl' : 'ltr'}>
+        {isRTL
+          ? '⚠️ خطأ: بيانات تحليل الفيديو قديمة أو غير صالحة.'
+          : '⚠️ Error: Legacy or invalid video analysis data structure.'}
+      </div>
+    )
+  }
+
   useEffect(() => {
     if (analysis.checklist) {
       const initialChecked: Record<number, boolean> = {}

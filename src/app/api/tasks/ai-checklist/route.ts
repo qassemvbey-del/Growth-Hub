@@ -155,7 +155,9 @@ export async function POST(req: Request) {
       console.warn('Transcript fetch failed:', err)
     }
 
-    const systemPrompt = `You are a highly precise Content Analyst and Task Extractor for a life-management system. Your task is to analyze the provided Video Title, Description, and Audio Transcript, and output a strict JSON object.
+    const systemPrompt = `You are a backend JSON API. You MUST output a raw, valid JSON object ONLY. Do NOT wrap it in markdown block quotes like \`\`\`json. Do NOT output lists with *, -, or +. NO conversational text.
+
+You are a highly precise Content Analyst and Task Extractor for a life-management system. Your task is to analyze the provided Video Title, Description, and Audio Transcript, and output a strict JSON object.
 
 ### STRICT RULES (DO NOT IGNORE):
 1. **Zero Hallucination:** You must ONLY use the information provided in the inputs. Do NOT add external knowledge, facts, or assumed steps.
@@ -169,7 +171,7 @@ export async function POST(req: Request) {
   "checklist": ["string", "string"],
   "additionalNotes": "string"
 }
-Do not include markdown code blocks (like \`\`\`json), just output the raw JSON object. All text content must be in Arabic.`
+All text content must be in Arabic.`
 
     const userMessage = `Analyze the following video data and return the JSON object:
 TITLE: ${videoTitle}
@@ -184,8 +186,8 @@ TRANSCRIPT: ${transcriptText}`
       },
       body: JSON.stringify({
         model: 'llama3-70b-8192',
-        response_format: { type: 'json_object' },
-        temperature: 0.1,
+        response_format: { type: "json_object" },
+        temperature: 0,
         messages: [
           {
             role: 'system',
@@ -211,9 +213,30 @@ TRANSCRIPT: ${transcriptText}`
     let analysis: VideoAnalysisResponse
     try {
       analysis = JSON.parse(content.trim())
+      if (typeof analysis.isIntroOnly !== 'boolean') {
+        analysis.isIntroOnly = false
+      }
+      if (typeof analysis.summary !== 'string') {
+        analysis.summary = ''
+      }
+      if (!Array.isArray(analysis.keyTakeaways)) {
+        analysis.keyTakeaways = []
+      }
+      if (!Array.isArray(analysis.checklist)) {
+        analysis.checklist = []
+      }
+      if (typeof analysis.additionalNotes !== 'string') {
+        analysis.additionalNotes = ''
+      }
     } catch (parseErr) {
       console.error('Failed to parse Groq response JSON:', content)
-      return NextResponse.json({ error: 'Failed to generate a valid checklist structure.' }, { status: 500 })
+      analysis = {
+        isIntroOnly: true,
+        summary: 'فشلت معالجة استجابة الذكاء الاصطناعي بنجاح.',
+        keyTakeaways: [],
+        checklist: [],
+        additionalNotes: ''
+      }
     }
 
     // 5. Database Checklist Insertion / Update
