@@ -24,6 +24,7 @@ export default function TaskDrawerDescription({
   const [aiQuery, setAiQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [aiError, setAiError] = useState('')
+  const [quotaExhausted, setQuotaExhausted] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Quota check
@@ -53,6 +54,7 @@ export default function TaskDrawerDescription({
 
     setLoading(true)
     setAiError('')
+    setQuotaExhausted(false)
     try {
       const res = await fetch('/api/ai/ask', {
         method: 'POST',
@@ -64,6 +66,11 @@ export default function TaskDrawerDescription({
           type: 'general_ask'
         })
       })
+      if (res.status === 403) {
+        setQuotaExhausted(true)
+        setLoading(false)
+        return
+      }
       if (!res.ok) throw new Error('API Error')
       const data = await res.json()
       if (data.text) {
@@ -175,6 +182,20 @@ export default function TaskDrawerDescription({
                 </div>
               )}
             </div>
+            {quotaExhausted && (
+              <div className="mt-3 bg-red-950/20 dark:bg-red-950/30 border border-red-500/30 dark:border-red-500/20 rounded-xl p-4 text-center space-y-3 shadow-[0_0_15px_rgba(239,68,68,0.1)] transition-all">
+                <div className="text-red-500 text-xs font-bold font-space">
+                  تم استهلاك رصيد الذكاء الاصطناعي للمحاولات الحالية.
+                </div>
+                <button
+                  type="button"
+                  onClick={() => router.push('/settings')}
+                  className="w-full py-2 px-4 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-lg text-[10px] font-space font-black tracking-wider uppercase transition-all shadow-[0_0_10px_rgba(239,68,68,0.2)] hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] cursor-pointer"
+                >
+                  ترقية الخطة / الإعدادات
+                </button>
+              </div>
+            )}
             {aiError && (
               <span className="text-[9px] font-space font-bold text-red-500/80 mt-1 block">
                 {aiError}

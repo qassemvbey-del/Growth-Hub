@@ -41,6 +41,7 @@ export default function TaskDrawerAiTacticalTools({
   const [error, setError] = useState('')
   const [response, setResponse] = useState('')
   const [collapsed, setCollapsed] = useState(false)
+  const [quotaExhausted, setQuotaExhausted] = useState(false)
 
   // Quota locks evaluation
   const fixErrorsUsage = getFeatureUsage('fix_errors')
@@ -94,6 +95,7 @@ export default function TaskDrawerAiTacticalTools({
     setLoading(true)
     setError('')
     setResponse('')
+    setQuotaExhausted(false)
     try {
       const res = await fetch('/api/ai/ask', {
         method: 'POST',
@@ -106,6 +108,12 @@ export default function TaskDrawerAiTacticalTools({
           type: 'tactical_tool'
         })
       })
+
+      if (res.status === 403) {
+        setQuotaExhausted(true)
+        setLoading(false)
+        return
+      }
 
       if (!res.ok) throw new Error('AI request failed')
 
@@ -243,6 +251,8 @@ export default function TaskDrawerAiTacticalTools({
   }
   */
 
+  const cleanText = (text: string) => text ? text.replace(/[*#`+\-~]/g, '').trim() : '';
+
   return (
     <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4 transition-colors relative overflow-hidden space-y-4">
       {/* Side Color bar indicator */}
@@ -370,12 +380,26 @@ export default function TaskDrawerAiTacticalTools({
         </span>
       )}
 
+      {quotaExhausted && (
+        <div className="mt-3 bg-red-950/20 dark:bg-red-950/30 border border-red-500/30 dark:border-red-500/20 rounded-xl p-4 text-center space-y-3 shadow-[0_0_15px_rgba(239,68,68,0.1)] transition-all">
+          <div className="text-red-500 text-xs font-bold font-space">
+            تم استهلاك رصيد الذكاء الاصطناعي للمحاولات الحالية.
+          </div>
+          <button
+            onClick={() => router.push('/settings')}
+            className="w-full py-2 px-4 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-lg text-[10px] font-space font-black tracking-wider uppercase transition-all shadow-[0_0_10px_rgba(239,68,68,0.2)] hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] cursor-pointer"
+          >
+            ترقية الخطة / الإعدادات
+          </button>
+        </div>
+      )}
+
       {response && !collapsed && (
         <div className="mt-3 bg-zinc-200/50 dark:bg-black/40 border border-zinc-300/50 dark:border-white/5 rounded-xl p-3 text-xs text-zinc-800 dark:text-zinc-300 font-space whitespace-pre-wrap leading-relaxed select-text transition-all max-h-[200px] overflow-y-auto scrollbar-thin">
           <div className="text-[8px] uppercase tracking-widest text-zinc-500/60 dark:text-white/20 font-bold mb-2 pb-1 border-b border-zinc-300 dark:border-white/5">
             {isRTL ? 'التحليل والحلول المقترحة' : 'AI Diagnostic Resolution'}
           </div>
-          {response}
+          {cleanText(response)}
         </div>
       )}
     </div>
