@@ -55,9 +55,9 @@ export async function POST(req: Request) {
       }, { status: 403 })
     }
 
-    const geminiApiKey = process.env.GEMINI_API_KEY
-    if (!geminiApiKey) {
-      return NextResponse.json({ error: 'GEMINI_API_KEY is not configured' }, { status: 500 })
+    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: "API Key is missing" }, { status: 500 });
     }
 
     let systemPrompt = ''
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
     }
 
     // Initialize Gemini
-    const genAI = new GoogleGenerativeAI(geminiApiKey)
+    const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
       generationConfig: {
