@@ -48,91 +48,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid YouTube URL' }, { status: 400 })
     }
 
-    // 1. Authentication Check
-    const supabase = await createServerClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
-
-    // 2. Quota Check (Pure check without incrementing)
-    const { data: profileData, error: profileErr } = await supabaseAdmin
-      .from('profiles')
-      .select('user_tier, ai_request_count, last_ai_reset')
-      .eq('id', user.id)
-      .single()
-
-    if (profileErr || !profileData) {
-      return NextResponse.json({ error: 'Failed to retrieve profile quota status' }, { status: 500 })
-    }
-
-    const lastReset = new Date(profileData.last_ai_reset || Date.now()).getTime()
-    const nowTime = Date.now()
-    const cooldownPeriod = 12 * 60 * 60 * 1000 // 12 hours
-    let currentCount = profileData.ai_request_count || 0
-    if (nowTime - lastReset >= cooldownPeriod) {
-      currentCount = 0
-    }
-
-    const tier = profileData.user_tier || 'free'
-    let limit = 3
-    if (tier === 'pro') limit = 50
-    else if (tier === 'elite') limit = 150
-
-    if (currentCount >= limit) {
-      return NextResponse.json({
-        error: 'Quota Exceeded',
-        message_en: 'Your 12-hour AI request limit has been reached. Please wait for the automatic cooldown or unlock instantly with an AI Refill Pack for only 15 EGP.',
-        message_ar: 'لقد نفدت كوتة استعلامات الذكاء الاصطناعي الخاصة بك لهذه الـ 12 ساعة. يرجى الانتظار حتى التجديد التلقائي أو الشحن الفوري لباقة التصفير بـ 15 ج.م فقط.'
-      }, { status: 403 })
-    }
-
-    // 3. Rate Limit Verification
-    const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString()
-    const { data: cooldownLogs, error: cooldownError } = await supabaseAdmin
-      .from('ai_usage_logs')
-      .select('created_at')
-      .eq('user_id', user.id)
-      .eq('action_type', 'youtube_checklist')
-      .gte('created_at', fifteenMinsAgo)
-      .order('created_at', { ascending: false })
-      .limit(1)
-
-    // Bypass logs check if relation does not exist yet (migration not applied on this instance)
-    const isLogsTableMissing = cooldownError?.code === '42P01'
-
-    if (!isLogsTableMissing && cooldownLogs && cooldownLogs.length > 0) {
-      const lastLogTime = new Date(cooldownLogs[0].created_at).getTime()
-      const remainingSeconds = Math.max(0, Math.ceil((lastLogTime + 15 * 60 * 1000 - Date.now()) / 1000))
-      if (remainingSeconds > 0) {
-        return NextResponse.json({
-          error: 'cooldown',
-          message: `Please wait ${remainingSeconds} seconds before generating another checklist.`,
-          remainingSeconds
-        }, { status: 429 })
-      }
-    }
-
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 1000).toISOString()
-    const { count } = await supabaseAdmin
-      .from('ai_usage_logs')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('action_type', 'youtube_checklist')
-      .gte('created_at', twentyFourHoursAgo)
-
-    if (!isLogsTableMissing && count !== null && count >= 3) {
-      return NextResponse.json({
-        error: 'daily_limit',
-        message: 'Daily threshold met. You can only generate 3 AI checklists per day.'
-      }, { status: 429 })
-    }
-
-    // Fetch video metadata
+    // 1. Fetch video metadata
     let videoTitle = taskTitle || 'YouTube Video'
     let videoDescription = ''
     const youtubeKey = process.env.YOUTUBE_DATA_API_KEY || process.env.YOUTUBE_API_KEY
@@ -164,20 +80,45 @@ export async function POST(req: Request) {
       }
     }
 
-    // Fetch video transcript
+    // 2. Fetch video transcript (catch error silently)
     let transcriptText = ''
     try {
       const transcriptItems = await YoutubeTranscript.fetchTranscript(videoId)
       transcriptText = transcriptItems.map(item => item.text).join(' ')
-    } catch (err) {
-      console.warn('Transcript fetch failed:', err)
+    } catch (_err) {
+      // Catch silently so transcriptText remains an empty string
     }
 
-    // 4. Transcript Guardrail (Crucial Check)
-    if (!transcriptText || transcriptText.trim().length < 50) {
+    // 3. Authentication Check (needed for DB saves)
+    const supabase = await createServerClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
+
+    // 4. Evaluate 3-Stage Validation
+    const transcriptLen = transcriptText.trim().length
+    const metadataCombined = (videoTitle + ' ' + videoDescription).trim()
+    const metadataLen = metadataCombined.length
+
+    let runStage: 1 | 2 | 3 = 3
+    if (transcriptLen > 50) {
+      runStage = 1
+    } else if (metadataLen > 50) {
+      runStage = 2
+    } else {
+      runStage = 3
+    }
+
+    // Stage 3 (Hard Reject) - Return fallback immediately without checking or deducting quota
+    if (runStage === 3) {
       const fallbackAnalysis = {
         isIntroOnly: true,
-        summary: "عذراً، هذا الفيديو لا يحتوي على نص مفرغ (Transcript) أو ترجمة متاحة لتحليله واستخراج المهام منه.",
+        summary: "عذراً، هذا الفيديو لا يحتوي على نص مفرغ (Transcript) أو وصف كافٍ. هذا الفيديو غير متوافق مع ميزة التحليل الذكي.",
         keyTakeaways: [],
         checklist: [],
         additionalNotes: ""
@@ -201,22 +142,82 @@ export async function POST(req: Request) {
         .update({ metadata: updatedMetadata })
         .eq('id', taskId)
 
-      // Log creation
-      if (!isLogsTableMissing) {
-        try {
-          await supabaseAdmin.from('ai_usage_logs').insert({
-            user_id: user.id,
-            action_type: 'youtube_checklist'
-          })
-        } catch (logErr) {
-          console.error('Failed to write usage log:', logErr)
-        }
-      }
-
       return NextResponse.json({ success: true, analysis: fallbackAnalysis })
     }
 
-    // Initialize Gemini
+    // 5. Quota Check (Only for Stage 1 & 2)
+    const { data: profileData, error: profileErr } = await supabaseAdmin
+      .from('profiles')
+      .select('user_tier, ai_request_count, last_ai_reset')
+      .eq('id', user.id)
+      .single()
+
+    if (profileErr || !profileData) {
+      return NextResponse.json({ error: 'Failed to retrieve profile quota status' }, { status: 500 })
+    }
+
+    const lastReset = new Date(profileData.last_ai_reset || Date.now()).getTime()
+    const nowTime = Date.now()
+    const cooldownPeriod = 12 * 60 * 60 * 1000 // 12 hours
+    let currentCount = profileData.ai_request_count || 0
+    if (nowTime - lastReset >= cooldownPeriod) {
+      currentCount = 0
+    }
+
+    const tier = profileData.user_tier || 'free'
+    let limit = 3
+    if (tier === 'pro') limit = 50
+    else if (tier === 'elite') limit = 150
+
+    if (currentCount >= limit) {
+      return NextResponse.json({
+        error: 'Quota Exceeded',
+        message_en: 'Your 12-hour AI request limit has been reached. Please wait for the automatic cooldown or unlock instantly with an AI Refill Pack for only 15 EGP.',
+        message_ar: 'لقد نفدت كوتة استعلامات الذكاء الاصطناعي الخاصة بك لهذه الـ 12 ساعة. يرجى الانتظار حتى التجديد التلقائي أو الشحن الفوري لباقة التصفير بـ 15 ج.م فقط.'
+      }, { status: 403 })
+    }
+
+    // 6. Rate Limit Verification (Only for Stage 1 & 2)
+    const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString()
+    const { data: cooldownLogs, error: cooldownError } = await supabaseAdmin
+      .from('ai_usage_logs')
+      .select('created_at')
+      .eq('user_id', user.id)
+      .eq('action_type', 'youtube_checklist')
+      .gte('created_at', fifteenMinsAgo)
+      .order('created_at', { ascending: false })
+      .limit(1)
+
+    const isLogsTableMissing = cooldownError?.code === '42P01'
+
+    if (!isLogsTableMissing && cooldownLogs && cooldownLogs.length > 0) {
+      const lastLogTime = new Date(cooldownLogs[0].created_at).getTime()
+      const remainingSeconds = Math.max(0, Math.ceil((lastLogTime + 15 * 60 * 1000 - Date.now()) / 1000))
+      if (remainingSeconds > 0) {
+        return NextResponse.json({
+          error: 'cooldown',
+          message: `Please wait ${remainingSeconds} seconds before generating another checklist.`,
+          remainingSeconds
+        }, { status: 429 })
+      }
+    }
+
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 1000).toISOString()
+    const { count } = await supabaseAdmin
+      .from('ai_usage_logs')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('action_type', 'youtube_checklist')
+      .gte('created_at', twentyFourHoursAgo)
+
+    if (!isLogsTableMissing && count !== null && count >= 3) {
+      return NextResponse.json({
+        error: 'daily_limit',
+        message: 'Daily threshold met. You can only generate 3 AI checklists per day.'
+      }, { status: 429 })
+    }
+
+    // 7. Initialize Gemini
     const geminiApiKey = process.env.GEMINI_API_KEY
     if (!geminiApiKey) {
       return NextResponse.json({ error: 'GEMINI_API_KEY is not configured' }, { status: 500 })
@@ -231,7 +232,9 @@ export async function POST(req: Request) {
       }
     })
 
-    const prompt = `You are a highly precise Content Analyst and Task Extractor for a life-management system. Analyze the provided Video Title, Description, and Audio Transcript.
+    let prompt = ''
+    if (runStage === 1) {
+      prompt = `You are a highly precise Content Analyst and Task Extractor for a life-management system. Analyze the provided Video Title, Description, and Audio Transcript.
 Respond strictly in Arabic, and output ONLY a raw JSON object matching this exact schema:
 {
   "isIntroOnly": boolean, // True ONLY if the video lacks actionable steps (e.g., just an intro/promo)
@@ -252,6 +255,25 @@ Title: ${videoTitle}
 Description: ${videoDescription}
 Transcript: ${transcriptText}
 `
+    } else {
+      prompt = `Analyze this video based ONLY on the Title and Description because the audio transcript is missing. You MUST start your \`summary\` string exactly with: '(تنويه: التحليل مبني على وصف الفيديو فقط لعدم توفر نص مفرغ)'. Respond strictly in Arabic, and output ONLY a raw JSON object matching this exact schema:
+{
+  "isIntroOnly": boolean, // True ONLY if the video lacks actionable steps
+  "summary": "string", // A concise 1-2 sentence summary (must start with: '(تنويه: التحليل مبني على وصف الفيديو فقط لعدم توفر نص مفرغ)')
+  "keyTakeaways": ["string"], // 2-3 main points
+  "checklist": ["string"], // Actionable tasks. EMPTY [] if isIntroOnly is true.
+  "additionalNotes": "string" // Any warnings or advice, or empty string.
+}
+
+### STRICT RULES:
+1. Zero Hallucination: ONLY use the provided Title and Description. Do not invent steps.
+2. If the video is an intro or lacks practical steps, set "isIntroOnly" to true and "checklist" to [].
+3. PLAIN TEXT ONLY: Do NOT use markdown formatting inside the strings. NO asterisks (*), NO bold (**), NO hashtags (#). The strings must be completely clean, plain Arabic text without any formatting symbols.
+
+TITLE: ${videoTitle}
+DESCRIPTION: ${videoDescription}
+`
+    }
 
     const result = await model.generateContent(prompt)
     const responseText = result.response.text()
@@ -285,7 +307,7 @@ Transcript: ${transcriptText}
       }
     }
 
-    // 5. Database Checklist Insertion / Update
+    // 8. Database Checklist Insertion / Update
     const { data: taskData } = await supabaseAdmin
       .from('tasks')
       .select('metadata')
