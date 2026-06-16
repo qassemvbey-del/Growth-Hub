@@ -3,6 +3,7 @@ import { createClient as createServerClient } from '@/lib/supabase-server'
 import { checkAndUpdateAiQuota } from '@/lib/quota-guard'
 import { createClient } from '@supabase/supabase-js'
 import { YoutubeTranscript } from 'youtube-transcript'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 export const maxDuration = 60;
 
@@ -109,11 +110,6 @@ export async function POST(req: Request) {
       }, { status: 429 })
     }
 
-    const apiKey = process.env.GROQ_API_KEY
-    if (!apiKey) {
-      return NextResponse.json({ error: 'GROQ_API_KEY is not configured' }, { status: 500 })
-    }
-
     // Fetch video metadata
     let videoTitle = taskTitle || 'YouTube Video'
     let videoDescription = ''
@@ -155,64 +151,90 @@ export async function POST(req: Request) {
       console.warn('Transcript fetch failed:', err)
     }
 
-    const systemPrompt = `You are a backend JSON API. You MUST output a raw, valid JSON object ONLY. Do NOT wrap it in markdown block quotes like \`\`\`json. Do NOT output lists with *, -, or +. NO conversational text.
+    // 4. Transcript Guardrail (Crucial Check)
+    if (!transcriptText || transcriptText.trim().length < 50) {
+      const fallbackAnalysis = {
+        isIntroOnly: true,
+        summary: "عذراً، هذا الفيديو لا يحتوي على نص مفرغ (Transcript) أو ترجمة متاحة لتحليله واستخراج المهام منه.",
+        keyTakeaways: [],
+        checklist: [],
+        additionalNotes: ""
+      }
 
-You are a highly precise Content Analyst and Task Extractor for a life-management system. Your task is to analyze the provided Video Title, Description, and Audio Transcript, and output a strict JSON object.
+      // Save fallback to database metadata so frontend can load it
+      const { data: taskData } = await supabaseAdmin
+        .from('tasks')
+        .select('metadata')
+        .eq('id', taskId)
+        .single()
 
-### STRICT RULES (DO NOT IGNORE):
-1. **Zero Hallucination:** You must ONLY use the information provided in the inputs. Do NOT add external knowledge, facts, or assumed steps.
-2. **Determine Content Type:** Evaluate if the video actually contains actionable steps. If it is merely an introduction, promo, or teaser, set "isIntroOnly" to true, and leave the "checklist" array completely EMPTY. Do not invent steps.
-3. **Actionable Checklist:** If and ONLY if the transcript contains clear steps, extract them into the "checklist" array as short, actionable strings.
-4. **JSON Only:** You must respond ONLY with a valid JSON object matching this exact schema:
-{
-  "isIntroOnly": boolean,
-  "summary": "string",
-  "keyTakeaways": ["string", "string"],
-  "checklist": ["string", "string"],
-  "additionalNotes": "string"
-}
-All text content must be in Arabic.`
+      const currentMetadata = (taskData?.metadata as any) || {}
+      const updatedMetadata = {
+        ...currentMetadata,
+        videoAnalysis: fallbackAnalysis
+      }
 
-    const userMessage = `Analyze the following video data and return the JSON object:
-TITLE: ${videoTitle}
-DESCRIPTION: ${videoDescription}
-TRANSCRIPT: ${transcriptText}`
+      await supabaseAdmin
+        .from('tasks')
+        .update({ metadata: updatedMetadata })
+        .eq('id', taskId)
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'llama3-70b-8192',
-        response_format: { type: "json_object" },
-        temperature: 0,
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: userMessage
-          }
-        ]
-      })
-    })
+      // Log creation
+      if (!isLogsTableMissing) {
+        try {
+          await supabaseAdmin.from('ai_usage_logs').insert({
+            user_id: user.id,
+            action_type: 'youtube_checklist'
+          })
+        } catch (logErr) {
+          console.error('Failed to write usage log:', logErr)
+        }
+      }
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Groq API Error:', errorText)
-      return NextResponse.json({ error: 'Failed to communicate with Groq API' }, { status: 502 })
+      return NextResponse.json({ success: true, analysis: fallbackAnalysis })
     }
 
-    const groqData = await response.json()
-    const content = groqData.choices?.[0]?.message?.content || '{}'
+    // Initialize Gemini
+    const geminiApiKey = process.env.GEMINI_API_KEY
+    if (!geminiApiKey) {
+      return NextResponse.json({ error: 'GEMINI_API_KEY is not configured' }, { status: 500 })
+    }
+
+    const genAI = new GoogleGenerativeAI(geminiApiKey)
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.1,
+      }
+    })
+
+    const prompt = `You are a highly precise Content Analyst and Task Extractor for a life-management system. Analyze the provided Video Title, Description, and Audio Transcript.
+Respond strictly in Arabic, and output ONLY a raw JSON object matching this exact schema:
+{
+  "isIntroOnly": boolean, // True ONLY if the video lacks actionable steps (e.g., just an intro/promo)
+  "summary": "string", // A concise 1-2 sentence summary
+  "keyTakeaways": ["string"], // 2-3 main points
+  "checklist": ["string"], // Actionable tasks. EMPTY [] if isIntroOnly is true.
+  "additionalNotes": "string" // Any warnings or advice, or empty string.
+}
+
+### STRICT RULES:
+1. Zero Hallucination: ONLY use the provided transcript. Do not invent steps.
+2. If the video is an intro or lacks practical steps, set "isIntroOnly" to true and "checklist" to [].
+
+VIDEO DATA:
+Title: ${videoTitle}
+Description: ${videoDescription}
+Transcript: ${transcriptText}
+`
+
+    const result = await model.generateContent(prompt)
+    const responseText = result.response.text()
     
     let analysis: VideoAnalysisResponse
     try {
-      analysis = JSON.parse(content.trim())
+      analysis = JSON.parse(responseText.trim())
       if (typeof analysis.isIntroOnly !== 'boolean') {
         analysis.isIntroOnly = false
       }
@@ -229,7 +251,7 @@ TRANSCRIPT: ${transcriptText}`
         analysis.additionalNotes = ''
       }
     } catch (parseErr) {
-      console.error('Failed to parse Groq response JSON:', content)
+      console.error('Failed to parse Gemini response JSON:', responseText)
       analysis = {
         isIntroOnly: true,
         summary: 'فشلت معالجة استجابة الذكاء الاصطناعي بنجاح.',
