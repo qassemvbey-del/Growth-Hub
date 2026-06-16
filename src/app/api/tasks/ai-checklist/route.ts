@@ -6,6 +6,7 @@ import { YoutubeTranscript } from 'youtube-transcript'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
 
 interface VideoAnalysisResponse {
   isIntroOnly: boolean;
@@ -222,6 +223,7 @@ Respond strictly in Arabic, and output ONLY a raw JSON object matching this exac
 ### STRICT RULES:
 1. Zero Hallucination: ONLY use the provided transcript. Do not invent steps.
 2. If the video is an intro or lacks practical steps, set "isIntroOnly" to true and "checklist" to [].
+3. PLAIN TEXT ONLY: Do NOT use markdown formatting inside the strings. NO asterisks (*), NO bold (**), NO hashtags (#). The strings must be completely clean, plain Arabic text without any formatting symbols.
 
 VIDEO DATA:
 Title: ${videoTitle}

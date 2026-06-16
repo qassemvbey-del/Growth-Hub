@@ -24,6 +24,8 @@ interface VideoAnalysisViewerProps {
   onUpdateTask: (taskId: string, updates: any) => Promise<void> | void
 }
 
+const cleanText = (text: string) => text ? text.replace(/[*#`]/g, '').trim() : '';
+
 export default function VideoAnalysisViewer({
   analysis,
   isRTL,
@@ -79,7 +81,7 @@ export default function VideoAnalysisViewer({
       
       const payload = selectedChecklist.map((title, index) => ({
         goal_id: goalId,
-        title,
+        title: cleanText(title),
         is_completed: false,
         type: 'standard',
         created_at: new Date(now + index * 10).toISOString(),
@@ -132,7 +134,7 @@ export default function VideoAnalysisViewer({
             {isRTL ? 'الملخص التنفيذي' : 'Executive Summary'}
           </span>
           <p className="text-zinc-300 font-sans leading-relaxed select-text">
-            {analysis.summary}
+            {cleanText(analysis.summary)}
           </p>
         </div>
       </div>
@@ -147,7 +149,7 @@ export default function VideoAnalysisViewer({
             {analysis.keyTakeaways.map((takeaway, idx) => (
               <li key={idx} className="text-xs text-zinc-400 flex items-start gap-2 select-text font-sans">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 mt-1.5 shrink-0" style={{ backgroundColor: themeColor }} />
-                <span>{takeaway}</span>
+                <span>{cleanText(takeaway)}</span>
               </li>
             ))}
           </ul>
@@ -205,7 +207,7 @@ export default function VideoAnalysisViewer({
                     )}
                     {added && <Check className="w-4 h-4 text-emerald-500 shrink-0" />}
                     <span className={cn("flex-1", isChecked ? "" : "line-through opacity-50")}>
-                      {item}
+                      {cleanText(item)}
                     </span>
                   </div>
                 )
@@ -251,7 +253,7 @@ export default function VideoAnalysisViewer({
           <span className="text-[8px] font-space font-black uppercase text-zinc-600 tracking-wider block">
             {isRTL ? 'ملاحظات إضافية' : 'Additional Notes'}
           </span>
-          <p>{analysis.additionalNotes}</p>
+          <p>{cleanText(analysis.additionalNotes)}</p>
         </div>
       )}
     </div>
