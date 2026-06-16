@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase-server'
-import { checkAndUpdateAiQuota } from '@/lib/quota-guard'
 import { createClient } from '@supabase/supabase-js'
 import { YoutubeTranscript } from 'youtube-transcript'
 import { GoogleGenerativeAI } from '@google/generative-ai'
@@ -56,19 +55,41 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // 2. Quota Check
-    const quotaStatus = await checkAndUpdateAiQuota(user.id)
-    if (!quotaStatus.allowed) {
-      return NextResponse.json({
-        error: 'Quota Exceeded',
-        message_en: quotaStatus.message_en,
-        message_ar: quotaStatus.message_ar
-      }, { status: 403 })
-    }
-
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
+
+    // 2. Quota Check (Pure check without incrementing)
+    const { data: profileData, error: profileErr } = await supabaseAdmin
+      .from('profiles')
+      .select('user_tier, ai_request_count, last_ai_reset')
+      .eq('id', user.id)
+      .single()
+
+    if (profileErr || !profileData) {
+      return NextResponse.json({ error: 'Failed to retrieve profile quota status' }, { status: 500 })
+    }
+
+    const lastReset = new Date(profileData.last_ai_reset || Date.now()).getTime()
+    const nowTime = Date.now()
+    const cooldownPeriod = 12 * 60 * 60 * 1000 // 12 hours
+    let currentCount = profileData.ai_request_count || 0
+    if (nowTime - lastReset >= cooldownPeriod) {
+      currentCount = 0
+    }
+
+    const tier = profileData.user_tier || 'free'
+    let limit = 3
+    if (tier === 'pro') limit = 50
+    else if (tier === 'elite') limit = 150
+
+    if (currentCount >= limit) {
+      return NextResponse.json({
+        error: 'Quota Exceeded',
+        message_en: 'Your 12-hour AI request limit has been reached. Please wait for the automatic cooldown or unlock instantly with an AI Refill Pack for only 15 EGP.',
+        message_ar: 'لقد نفدت كوتة استعلامات الذكاء الاصطناعي الخاصة بك لهذه الـ 12 ساعة. يرجى الانتظار حتى التجديد التلقائي أو الشحن الفوري لباقة التصفير بـ 15 ج.م فقط.'
+      }, { status: 403 })
+    }
 
     // 3. Rate Limit Verification
     const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString()
@@ -206,7 +227,7 @@ export async function POST(req: Request) {
       model: "gemini-1.5-flash",
       generationConfig: {
         responseMimeType: "application/json",
-        temperature: 0.1,
+        temperature: 0.3,
       }
     })
 
@@ -224,6 +245,7 @@ Respond strictly in Arabic, and output ONLY a raw JSON object matching this exac
 1. Zero Hallucination: ONLY use the provided transcript. Do not invent steps.
 2. If the video is an intro or lacks practical steps, set "isIntroOnly" to true and "checklist" to [].
 3. PLAIN TEXT ONLY: Do NOT use markdown formatting inside the strings. NO asterisks (*), NO bold (**), NO hashtags (#). The strings must be completely clean, plain Arabic text without any formatting symbols.
+4. CRITICAL: If the video transcript is vague, lacks explicit actionable steps, or if you are unsure, DO NOT GUESS AND DO NOT REPEAT YOURSELF. Immediately set isIntroOnly to true, leave checklist empty, and output this exact summary: 'عذراً، محتوى هذا الفيديو غير كافٍ أو لا يحتوي على خطوات واضحة يمكن استخراجها.' NO MARKDOWN ALLOWED. NO asterisks (*), NO pluses (+), NO dashes (-).
 
 VIDEO DATA:
 Title: ${videoTitle}
@@ -280,6 +302,14 @@ Transcript: ${transcriptText}
       .from('tasks')
       .update({ metadata: updatedMetadata })
       .eq('id', taskId)
+
+    // ONLY increment/deduct quota on successful response
+    const { error: incrementError } = await supabaseAdmin.rpc('check_and_increment_quota', {
+      p_user_id: user.id
+    })
+    if (incrementError) {
+      console.error('Failed to increment AI quota count:', incrementError)
+    }
 
     // Log Creation
     if (!isLogsTableMissing) {

@@ -24,7 +24,7 @@ interface VideoAnalysisViewerProps {
   onUpdateTask: (taskId: string, updates: any) => Promise<void> | void
 }
 
-const cleanText = (text: string) => text ? text.replace(/[*#`]/g, '').trim() : '';
+const cleanText = (text: string) => text ? text.replace(/[*#`+\-~]/g, '').trim() : '';
 
 export default function VideoAnalysisViewer({
   analysis,

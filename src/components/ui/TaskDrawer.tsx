@@ -89,6 +89,7 @@ function AiChecklistButton({
   goalTitle,
   hasAiChecklist
 }: AiChecklistButtonProps) {
+  const { refreshProfile } = useGrowth()
   const [isGenerating, setIsGenerating] = useState(false)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
 
@@ -218,6 +219,11 @@ function AiChecklistButton({
         
         if (updatedTask) {
           await onUpdateTask(taskId, { metadata: updatedTask.metadata })
+          try {
+            await refreshProfile()
+          } catch (profileErr) {
+            console.error('Failed to refresh profile quota:', profileErr)
+          }
           const seconds = 15 * 60
           setCooldownRemaining(seconds)
           if (typeof window !== 'undefined') {
