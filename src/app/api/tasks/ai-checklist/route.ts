@@ -96,8 +96,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error("CHECKLIST_ROUTE_CRASH: Supabase env variables are missing.")
+      return NextResponse.json({
+        error: "Supabase environment configuration is missing",
+        message: `NEXT_PUBLIC_SUPABASE_URL: ${supabaseUrl ? 'present' : 'missing'}, SUPABASE_SERVICE_ROLE_KEY: ${supabaseServiceKey ? 'present' : 'missing'}`
+      }, { status: 500 })
+    }
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
     // 4. Evaluate 3-Stage Validation
@@ -153,7 +160,10 @@ export async function POST(req: Request) {
       .single()
 
     if (profileErr || !profileData) {
-      return NextResponse.json({ error: 'Failed to retrieve profile quota status' }, { status: 500 })
+      return NextResponse.json({ 
+        error: 'Failed to retrieve profile quota status',
+        message: profileErr?.message || 'Profile data is empty'
+      }, { status: 500 })
     }
 
     const lastReset = new Date(profileData.last_ai_reset || Date.now()).getTime()
@@ -217,9 +227,13 @@ export async function POST(req: Request) {
       }, { status: 429 })
     }
 
+    // 7. Initialize Gemini
     const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: "API Key is missing" }, { status: 500 });
+      return NextResponse.json({ 
+        error: "API Key is missing",
+        message: "Neither GEMINI_API_KEY nor NEXT_PUBLIC_GEMINI_API_KEY is set in environment variables."
+      }, { status: 500 });
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
@@ -275,7 +289,16 @@ DESCRIPTION: ${videoDescription}
     }
 
     const result = await model.generateContent(prompt)
-    const responseText = result.response.text()
+    
+    let responseText = ''
+    try {
+      responseText = result.response.text()
+    } catch (textErr) {
+      console.warn("Gemini response.text() failed, trying fallback:", textErr)
+      const candidate = result.response?.candidates?.[0];
+      const part = candidate?.content?.parts?.[0];
+      responseText = part?.text || '';
+    }
     
     let analysis: VideoAnalysisResponse
     try {
@@ -346,7 +369,11 @@ DESCRIPTION: ${videoDescription}
 
     return NextResponse.json({ success: true, analysis })
   } catch (error: any) {
-    console.error('AI Checklist API Error:', error)
-    return NextResponse.json({ error: error?.message || 'Server error' }, { status: 500 })
+    console.error('CHECKLIST_ROUTE_CRASH:', error)
+    return NextResponse.json({ 
+      error: 'Server error', 
+      message: error?.message || String(error),
+      stack: error?.stack || ''
+    }, { status: 500 })
   }
 }

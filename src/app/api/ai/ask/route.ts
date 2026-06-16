@@ -19,8 +19,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Query is required' }, { status: 400 })
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error("ASK_ROUTE_CRASH: Supabase env variables are missing.")
+      return NextResponse.json({ 
+        error: "Supabase environment configuration is missing",
+        message: `NEXT_PUBLIC_SUPABASE_URL: ${supabaseUrl ? 'present' : 'missing'}, SUPABASE_SERVICE_ROLE_KEY: ${supabaseServiceKey ? 'present' : 'missing'}`
+      }, { status: 500 })
+    }
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
     // 2. Quota Check (Pure check without incrementing)
@@ -31,7 +38,10 @@ export async function POST(req: Request) {
       .single()
 
     if (profileErr || !profileData) {
-      return NextResponse.json({ error: 'Failed to retrieve profile quota status' }, { status: 500 })
+      return NextResponse.json({ 
+        error: 'Failed to retrieve profile quota status',
+        message: profileErr?.message || 'Profile data is empty'
+      }, { status: 500 })
     }
 
     const lastReset = new Date(profileData.last_ai_reset || Date.now()).getTime()
@@ -57,7 +67,10 @@ export async function POST(req: Request) {
 
     const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: "API Key is missing" }, { status: 500 });
+      return NextResponse.json({ 
+        error: "API Key is missing",
+        message: "Neither GEMINI_API_KEY nor NEXT_PUBLIC_GEMINI_API_KEY is set in environment variables."
+      }, { status: 500 });
     }
 
     let systemPrompt = ''
@@ -88,7 +101,15 @@ export async function POST(req: Request) {
       ]
     })
     
-    const aiResponse = result.response.text() || ''
+    let aiResponse = ''
+    try {
+      aiResponse = result.response.text()
+    } catch (textErr) {
+      console.warn("Gemini response.text() failed, trying fallback:", textErr)
+      const candidate = result.response?.candidates?.[0];
+      const part = candidate?.content?.parts?.[0];
+      aiResponse = part?.text || '';
+    }
 
     // ONLY increment/deduct quota on successful response
     const { error: incrementError } = await supabaseAdmin.rpc('check_and_increment_quota', {
@@ -110,7 +131,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ text: aiResponse })
   } catch (err: any) {
-    console.error('AI ask router error:', err)
-    return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 })
+    console.error('ASK_ROUTE_CRASH:', err)
+    return NextResponse.json({ 
+      error: 'Internal Server Error',
+      message: err.message || String(err),
+      stack: err.stack || ''
+    }, { status: 500 })
   }
 }

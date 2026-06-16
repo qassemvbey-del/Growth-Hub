@@ -4,9 +4,12 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 export async function POST(req: Request) {
   try {
     const { action, userData, language } = await req.json()
-    const apiKey = process.env.GEMINI_API_KEY
+    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
     if (!apiKey) {
-      return NextResponse.json({ error: 'API Key not configured' }, { status: 500 })
+      return NextResponse.json({ 
+        error: 'API Key not configured',
+        message: 'Neither GEMINI_API_KEY nor NEXT_PUBLIC_GEMINI_API_KEY is set in environment variables.'
+      }, { status: 500 })
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
@@ -44,10 +47,23 @@ Analyze this telemetry. Execute the requested action according to your savage, b
       contents: [{ role: 'user', parts: [{ text: systemPrompt + '\n\n' + promptText }] }]
     })
 
-    const text = response.response.text()
+    let text = ''
+    try {
+      text = response.response.text()
+    } catch (textErr) {
+      console.warn("Gemini response.text() failed, trying fallback:", textErr)
+      const candidate = response.response?.candidates?.[0];
+      const part = candidate?.content?.parts?.[0];
+      text = part?.text || '';
+    }
+
     return NextResponse.json({ response: text })
   } catch (error: any) {
-    console.error('Coach API error:', error)
-    return NextResponse.json({ error: error?.message || 'Server error' }, { status: 500 })
+    console.error('COACH_ROUTE_CRASH:', error)
+    return NextResponse.json({ 
+      error: 'Server error',
+      message: error?.message || String(error),
+      stack: error?.stack || ''
+    }, { status: 500 })
   }
 }
