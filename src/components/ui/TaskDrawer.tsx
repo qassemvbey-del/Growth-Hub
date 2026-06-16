@@ -19,6 +19,7 @@ import TaskDrawerDescription from './task-drawer/TaskDrawerDescription'
 import TaskDrawerChecklist from './task-drawer/TaskDrawerChecklist'
 import TaskDrawerComments from './task-drawer/TaskDrawerComments'
 import TaskDrawerAiTacticalTools from './task-drawer/TaskDrawerAiTacticalTools'
+import VideoAnalysisViewer from './task-drawer/VideoAnalysisViewer'
 
 
 interface TaskDrawerProps {
@@ -1447,7 +1448,19 @@ export default function TaskDrawer({
                 resolvedDuration={resolvedDuration}
                 taskTitle={task.title}
                 goalTitle={goals.find((g: any) => g.id === goalId || g.id === task.goal_id)?.title || 'Specialized Curriculum'}
-                hasAiChecklist={subtasks.some((s: any) => s.id?.startsWith('sub_ai_') || s.id?.startsWith('ai-'))}
+                hasAiChecklist={!!task.metadata?.videoAnalysis || subtasks.some((s: any) => s.id?.startsWith('sub_ai_') || s.id?.startsWith('ai-'))}
+              />
+            )}
+
+            {task.metadata?.videoAnalysis && (
+              <VideoAnalysisViewer
+                analysis={task.metadata.videoAnalysis}
+                isRTL={isRTL}
+                themeColor={themeColor}
+                goalId={goalId || task.goal_id}
+                taskId={task.id}
+                metadata={task.metadata}
+                onUpdateTask={updateTask}
               />
             )}
 
