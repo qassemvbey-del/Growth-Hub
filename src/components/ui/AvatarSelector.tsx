@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, HelpCircle, Save, X, Laptop, GraduationCap, Code, Globe, Calculator, Loader2, BookOpen } from 'lucide-react'
+import { Check, X, Code, Globe, Calculator, GraduationCap, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
@@ -14,8 +14,7 @@ const CLASSES = [
     label: 'Programmer',
     arLabel: 'مبرمج',
     icon: Code,
-    desc: 'Software, web, and systems development.',
-    arDesc: 'تطوير البرمجيات والمواقع والأنظمة.',
+    arDesc: 'تطوير البرمجيات، المواقع، وبناء الأنظمة والحلول الذكية.',
     skills: [
       { name: 'Fix Errors', arName: 'تعديل الأخطاء', rank: 'Silver', arRank: 'سيلفر' },
       { name: 'Code Review', arName: 'مراجعة الكود', rank: 'Gold', arRank: 'جولد' },
@@ -27,8 +26,7 @@ const CLASSES = [
     label: 'Network Engineer',
     arLabel: 'مهندس شبكات',
     icon: Globe,
-    desc: 'Infrastructure, routing, and security.',
-    arDesc: 'البنية التحتية والتوجيه والحماية.',
+    arDesc: 'إدارة البنية التحتية، الشبكات، وتأمين السيرفرات.',
     skills: [
       { name: 'Fix Errors', arName: 'تعديل الأخطاء', rank: 'Silver', arRank: 'سيلفر' },
       { name: 'Log Analyzer', arName: 'محلل السجلات', rank: 'Gold', arRank: 'جولد' },
@@ -40,8 +38,7 @@ const CLASSES = [
     label: 'Accountant',
     arLabel: 'محاسب',
     icon: Calculator,
-    desc: 'Financial planning, books, and analysis.',
-    arDesc: 'التخطيط المالي والدفاتر والتحليل.',
+    arDesc: 'التخطيط المالي، إدارة الأصول، وتحليل الحسابات.',
     skills: [
       { name: 'Formula Builder', arName: 'صانع المعادلات', rank: 'Silver', arRank: 'سيلفر' },
       { name: 'Financial Analyzer', arName: 'المحلل المالي', rank: 'Gold', arRank: 'جولد' },
@@ -53,8 +50,7 @@ const CLASSES = [
     label: 'Learner',
     arLabel: 'متعلم عام',
     icon: GraduationCap,
-    desc: 'General study, skills, and growth.',
-    arDesc: 'الدراسة العامة والمهارات والنمو الشخصي.',
+    arDesc: 'الدراسة العامة، تطوير المهارات، وتتبع النمو الشخصي.',
     skills: [
       { name: 'Concept Simplifier', arName: 'مبسط المفاهيم', rank: 'Silver', arRank: 'سيلفر' },
       { name: 'Study Assistant', arName: 'مساعد الدراسة', rank: 'Gold', arRank: 'جولد' },
@@ -130,131 +126,130 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
         exit={{ opacity: 0 }}
       >
         <motion.div
-          className="absolute inset-0 bg-white/60 dark:bg-black/80 backdrop-blur-md"
+          className="absolute inset-0 bg-black/60 dark:bg-black/90 backdrop-blur-xl"
           onClick={onClose}
         />
 
         <motion.div
-          className="relative z-10 w-full max-w-4xl rounded-3xl overflow-hidden bg-white/80 dark:bg-[#0c0c14]/90 backdrop-blur-2xl border border-zinc-200/50 dark:border-white/10 shadow-2xl flex flex-col max-h-[90vh]"
+          className="relative z-10 w-full max-w-3xl rounded-3xl overflow-hidden bg-white/95 dark:bg-[#0c0c14]/95 border border-zinc-200/50 dark:border-white/10 shadow-2xl flex flex-col max-h-[85vh] p-6 md:p-8"
           style={{
-            boxShadow: `0 0 60px ${currentTheme.color}33, inset 0 0 30px ${currentTheme.color}15`,
+            boxShadow: `0 0 60px ${currentTheme.color}25, inset 0 0 30px ${currentTheme.color}08`,
           }}
-          initial={{ scale: 0.95, opacity: 0, y: 20 }}
+          initial={{ scale: 0.95, opacity: 0, y: 15 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 20 }}
+          exit={{ scale: 0.95, opacity: 0, y: 15 }}
         >
-          <div className="h-1.5 w-full" style={{ background: `linear-gradient(90deg, transparent, ${currentTheme.color}, transparent)` }} />
-
-          <div className="p-6 md:p-8 flex-1 overflow-y-auto scrollbar-thin space-y-6">
-            <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/10 pb-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <HelpCircle className="w-4 h-4" />
-                  <p className="text-[10px] font-space tracking-[0.4em] uppercase font-black" style={{ color: currentTheme.color }}>
-                    {isRTL ? 'إعداد التخصص المهني // Class Selection' : 'Identity Setup // Class Selection'}
-                  </p>
-                </div>
-                <h2 className="text-xl md:text-2xl font-space font-black text-zinc-900 dark:text-white uppercase tracking-wider">
-                  {isRTL ? 'اختر تخصصك المهني (Class)' : 'Choose Your Class'}
-                </h2>
-              </div>
-              <button
-                onClick={onClose}
-                className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex items-center justify-center text-zinc-600 dark:text-white/60 hover:text-zinc-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 hover:scale-105 active:scale-95 transition-all shadow-lg cursor-pointer"
-              >
-                <X className="text-xl font-bold w-5 h-5" />
-              </button>
+          {/* Header */}
+          <div className="flex items-center justify-between pb-4 border-b border-zinc-200/50 dark:border-white/5">
+            <div className="space-y-1">
+              <h2 className="text-xl md:text-2xl font-space font-black text-zinc-900 dark:text-white tracking-tight">
+                {isRTL ? 'اختر تخصصك' : 'Choose Your Class'}
+              </h2>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                {isRTL ? 'اختر الهوية المناسبة لمجال عملك اليومي.' : 'Select the specialization that matches your workflow.'}
+              </p>
             </div>
+            <button
+              onClick={onClose}
+              className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {CLASSES.map((cls) => {
-                const ClassIcon = cls.icon
-                const isSelected = chosenClass === cls.id
-                return (
-                  <button
-                    key={cls.id}
-                    type="button"
-                    onClick={() => setChosenClass(cls.id)}
-                    className={cn(
-                      "relative flex flex-col items-start p-5 rounded-2xl border transition-all duration-300 group cursor-pointer bg-white/60 dark:bg-black/40 backdrop-blur-md text-left w-full",
-                      isSelected 
-                        ? "border-emerald-500/50 bg-emerald-950/10 ring-2 ring-emerald-500/20" 
-                        : "border-zinc-200 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/15"
-                    )}
-                    style={isSelected ? { borderColor: currentTheme.color } : {}}
-                  >
-                    <div className="flex items-center gap-3 mb-2 w-full">
+          {/* Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6 overflow-y-auto pr-1 flex-1 scrollbar-thin">
+            {CLASSES.map((cls) => {
+              const ClassIcon = cls.icon
+              const isSelected = chosenClass === cls.id
+              return (
+                <button
+                  key={cls.id}
+                  type="button"
+                  onClick={() => setChosenClass(cls.id)}
+                  className={cn(
+                    "relative flex flex-col items-start p-5 rounded-2xl border transition-all duration-300 group cursor-pointer bg-zinc-50/50 dark:bg-white/[0.01] text-left w-full",
+                    isSelected 
+                      ? "bg-zinc-100/80 dark:bg-white/[0.04] border-emerald-500/50 ring-1 ring-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
+                      : "border-zinc-200 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 hover:bg-zinc-100/20 dark:hover:bg-white/[0.02]"
+                  )}
+                  style={isSelected ? { borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}18` } : {}}
+                >
+                  {/* Icon & Title */}
+                  <div className="flex items-center gap-3 mb-3 w-full">
+                    <div 
+                      className="w-10 h-10 rounded-xl flex items-center justify-center border transition-all shrink-0 bg-black/5 dark:bg-white/5"
+                      style={isSelected ? { 
+                        borderColor: currentTheme.color,
+                        backgroundColor: `${currentTheme.color}15`
+                      } : {}}
+                    >
+                      <ClassIcon 
+                        className={cn(
+                          "w-5 h-5 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-transform duration-300 shrink-0",
+                          isSelected && "scale-105"
+                        )} 
+                        style={isSelected ? { color: currentTheme.color } : {}} 
+                      />
+                    </div>
+                    <span className="text-sm font-space font-black tracking-wide text-zinc-800 dark:text-zinc-200 block">
+                      {isRTL ? cls.arLabel : cls.label}
+                    </span>
+                  </div>
+
+                  {/* Arabic description (Fixed layout/translation) */}
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-space leading-relaxed mb-4" dir="rtl">
+                    {cls.arDesc}
+                  </p>
+
+                  {/* Vertically Stacked Pills for Skills */}
+                  <div className="w-full space-y-1.5 pt-3 border-t border-zinc-200/50 dark:border-white/5">
+                    {cls.skills.map((s, idx) => (
                       <div 
-                        className="w-10 h-10 rounded-xl flex items-center justify-center border transition-colors shrink-0"
-                        style={{ 
-                          borderColor: isSelected ? currentTheme.color : 'rgba(150,150,150,0.1)',
-                          backgroundColor: isSelected ? `${currentTheme.color}15` : 'transparent'
-                        }}
+                        key={idx} 
+                        className="flex justify-between items-center text-[10px] font-space text-zinc-600 dark:text-zinc-400 bg-zinc-200/40 dark:bg-white/[0.02] px-3 py-1.5 rounded-lg border-none w-full"
                       >
-                        <ClassIcon className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors" style={isSelected ? { color: currentTheme.color } : {}} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <span className="text-sm font-space font-black tracking-wider uppercase text-zinc-900 dark:text-white block">
-                          {isRTL ? cls.arLabel : cls.label}
+                        <span className="font-semibold">{isRTL ? s.arName : s.name}</span>
+                        <span 
+                          className="text-[9px] font-mono font-medium px-1.5 py-0.5 rounded bg-zinc-300/60 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+                          style={isSelected ? { color: currentTheme.color } : {}}
+                        >
+                          {isRTL ? s.arRank : s.rank}
                         </span>
                       </div>
+                    ))}
+                  </div>
+
+                  {/* Selected checkmark */}
+                  {isSelected && (
+                    <div className="absolute top-4 right-4 w-5 h-5 rounded-full flex items-center justify-center shadow-lg border border-black/10" style={{ backgroundColor: currentTheme.color }}>
+                      <Check className="text-black text-xs font-bold w-3 h-3" />
                     </div>
+                  )}
+                </button>
+              )
+            })}
+          </div>
 
-                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-space leading-relaxed mb-4">
-                      {isRTL ? cls.arDesc : cls.desc}
-                    </p>
-
-                    <div className="w-full border-t border-zinc-200 dark:border-white/5 pt-3 space-y-2">
-                      <span className="text-[9px] font-mono tracking-widest text-zinc-400 dark:text-zinc-500 uppercase block mb-1">
-                        {isRTL ? 'المهارات التكتيكية المتاحة:' : 'Tactical Skills:'}
-                      </span>
-                      <div className="grid grid-cols-1 gap-1.5 w-full">
-                        {cls.skills.map((s, idx) => (
-                          <div key={idx} className="flex justify-between items-center text-[10px] font-space text-zinc-500 dark:text-zinc-400 bg-black/10 dark:bg-black/20 px-2.5 py-1 rounded-lg border border-white/5">
-                            <span className="font-bold">{isRTL ? s.arName : s.name}</span>
-                            <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
-                              {isRTL ? s.arRank : s.rank}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {isSelected && (
-                      <div className="absolute top-4 right-4 w-5 h-5 rounded-full flex items-center justify-center shadow-lg border border-black/20" style={{ backgroundColor: currentTheme.color }}>
-                        <Check className="text-black text-xs font-bold w-3 h-3" />
-                      </div>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-
-            <div className="pt-4 border-t border-zinc-200 dark:border-white/10">
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={isSaving || !chosenClass}
-                className="w-full py-3.5 rounded-xl font-space font-black text-xs tracking-[0.2em] uppercase transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-2xl hover:scale-[1.01] active:scale-[0.99] cursor-pointer border border-white/20 hover:border-white/40"
-                style={{
-                  background: chosenClass ? currentTheme.color : '#71717a',
-                  color: '#000000',
-                  boxShadow: chosenClass ? `0 4px 30px ${currentTheme.color}66` : 'none',
-                }}
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin text-black" />
-                    <span className="font-bold">{isRTL ? 'جارٍ الحفظ والمزامنة...' : 'Saving and Syncing...'}</span>
-                  </>
-                ) : (
-                  <>
-                    <Save className="text-lg font-bold w-4 h-4" />
-                    <span className="font-bold">{isRTL ? 'تأكيد وحفظ التخصيص' : 'Confirm Class Selection'}</span>
-                  </>
-                )}
-              </button>
-            </div>
+          {/* Footer CTA */}
+          <div className="pt-4 border-t border-zinc-200/50 dark:border-white/5">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving || !chosenClass}
+              className="w-full py-3.5 rounded-xl font-space font-black text-xs tracking-wider transition-all disabled:opacity-50 flex items-center justify-center shadow-2xl hover:scale-[1.01] active:scale-[0.99] cursor-pointer border border-white/20 hover:border-white/40"
+              style={{
+                background: chosenClass ? currentTheme.color : '#71717a',
+                color: '#000000',
+                boxShadow: chosenClass ? `0 4px 30px ${currentTheme.color}35` : 'none',
+              }}
+            >
+              {isSaving ? (
+                <span>{isRTL ? 'جاري الحفظ...' : 'Saving...'}</span>
+              ) : (
+                <span>{isRTL ? 'تأكيد الاختيار' : 'Confirm Selection'}</span>
+              )}
+            </button>
           </div>
         </motion.div>
       </motion.div>

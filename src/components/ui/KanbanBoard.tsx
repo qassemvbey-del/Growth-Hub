@@ -211,10 +211,16 @@ export default function KanbanBoard({
                         />
 
                         {/* Checkbox + Title */}
-                        <div className="flex items-center gap-2.5 min-w-0 flex-1 pl-1">
+                        <div 
+                          dir={isRTL || (task.title && /[\u0600-\u06FF]/.test(task.title)) ? "rtl" : "ltr"}
+                          className={cn(
+                            "flex items-center gap-2.5 min-w-0 flex-1 pl-1",
+                            (isRTL || (task.title && /[\u0600-\u06FF]/.test(task.title))) && "text-right justify-start"
+                          )}
+                        >
                           <span 
                             className={cn(
-                              "text-sm font-medium text-[var(--text-primary)] dark:text-zinc-200 truncate",
+                              "text-sm font-medium text-[var(--text-primary)] dark:text-zinc-200 truncate w-full",
                               task.is_completed && "text-zinc-500 line-through opacity-55"
                             )}
                           >

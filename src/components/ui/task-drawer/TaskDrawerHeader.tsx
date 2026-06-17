@@ -140,6 +140,7 @@ export default function TaskDrawerHeader({
           rows={1}
           value={taskTitle}
           readOnly={!canEdit}
+          dir={isRTL || (taskTitle && /[\u0600-\u06FF]/.test(taskTitle)) ? "rtl" : "ltr"}
           onChange={(e) => {
             if (!canEdit) return
             setTaskTitle(e.target.value)
@@ -160,6 +161,7 @@ export default function TaskDrawerHeader({
           }}
           className={cn(
             "text-lg/snug font-medium font-space text-[#FFFFFF] tracking-tight bg-transparent w-full border-none focus:outline-none focus:ring-0 p-0 resize-none overflow-hidden break-words whitespace-normal flex-1",
+            (isRTL || (taskTitle && /[\u0600-\u06FF]/.test(taskTitle))) && "text-right",
             !canEdit && "cursor-default select-text"
           )}
           placeholder={isRTL ? "اسم المهمة..." : "Task Name..."}
