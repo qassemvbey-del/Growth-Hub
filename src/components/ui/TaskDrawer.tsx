@@ -19,7 +19,7 @@ import TaskDrawerDescription from './task-drawer/TaskDrawerDescription'
 import TaskDrawerChecklist from './task-drawer/TaskDrawerChecklist'
 import TaskDrawerComments from './task-drawer/TaskDrawerComments'
 import VideoAnalysisViewer from './task-drawer/VideoAnalysisViewer'
-import ChampionSkillsBar from './ChampionSkillsBar'
+import TaskSkills from './TaskSkills'
 
 
 interface TaskDrawerProps {
@@ -1392,7 +1392,7 @@ export default function TaskDrawer({
                 formatNoteContent={formatNoteContent}
               />
 
-              <ChampionSkillsBar
+              <TaskSkills
                 task={task}
                 profile={profile}
                 onUpdateTask={onUpdateTask}
@@ -1464,7 +1464,7 @@ export default function TaskDrawer({
                   canEdit={canEdit}
                 />
 
-                <ChampionSkillsBar
+                <TaskSkills
                   task={task}
                   profile={profile}
                   onUpdateTask={onUpdateTask}

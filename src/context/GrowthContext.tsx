@@ -1349,7 +1349,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
             ai_name: data.ai_name,
             ai_personality: data.ai_personality || 'GENTLE',
             xp: data.xp || 0,
-            rank: data.rank || 'RECRUIT',
+            rank: data.rank || 'SILVER',
             active_theme: data.active_theme || 'SILVER',
             blocked: data.blocked || false,
             last_seen: data.last_seen,
