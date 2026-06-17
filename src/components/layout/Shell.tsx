@@ -797,6 +797,10 @@ export default function Shell({ children }: ShellProps) {
 
   useEffect(() => {
     setShellIsRTL(isRTL)
+    if (typeof document !== 'undefined') {
+      document.documentElement.dir = isRTL ? 'rtl' : 'ltr'
+      document.documentElement.lang = isRTL ? 'ar' : 'en'
+    }
   }, [isRTL])
 
   useEffect(() => {

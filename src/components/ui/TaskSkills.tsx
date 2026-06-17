@@ -434,8 +434,8 @@ export default function TaskSkills({
                 {isLocked && (
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-zinc-950/90 text-white text-[9px] font-space rounded border border-white/10 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-xl">
                     {isRTL 
-                      ? `قم بالوصول لرتبة ${skill.requiredRank} لفتح هذه المهارة.`
-                      : `Unlock this skill by reaching ${skill.requiredRank} Rank.`}
+                      ? `قم بالوصول لرتبة ${skill.requiredRank.charAt(0).toUpperCase() + skill.requiredRank.slice(1).toLowerCase()} لفتح هذه المهارة.`
+                      : `Unlock this skill by reaching ${skill.requiredRank.charAt(0).toUpperCase() + skill.requiredRank.slice(1).toLowerCase()} Rank.`}
                   </div>
                 )}
 
@@ -472,7 +472,7 @@ export default function TaskSkills({
 
                   {isLocked && (
                     <span className="text-[8px] mt-0.5 text-zinc-400 dark:text-zinc-500 font-mono block">
-                      {skill.requiredRank}
+                      {skill.requiredRank.charAt(0).toUpperCase() + skill.requiredRank.slice(1).toLowerCase()}
                     </span>
                   )}
 
