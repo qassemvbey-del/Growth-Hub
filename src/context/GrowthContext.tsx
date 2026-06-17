@@ -64,6 +64,7 @@ export interface Profile {
   ai_request_count?: number
   last_ai_reset?: string | null
   max_squads_allowed?: number
+  champion_class?: 'programmer' | 'network_engineer'
 }
 
 export const THEME_PACKAGES = {
