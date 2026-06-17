@@ -157,7 +157,38 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
           language: profile?.language || 'en'
         })
       })
+
+      if (apiResponse.status === 429) {
+        const msg = profile?.language === 'ar'
+          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
+          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.'
+        setResponse(msg)
+        return
+      }
+      if (apiResponse.status === 503) {
+        const msg = profile?.language === 'ar'
+          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
+          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)'
+        setResponse(msg)
+        return
+      }
+
       const data = await apiResponse.json()
+      if (data.error === 'quota_exhausted') {
+        const msg = profile?.language === 'ar'
+          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
+          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.'
+        setResponse(msg)
+        return
+      }
+      if (data.error === 'ai_server_overloaded') {
+        const msg = profile?.language === 'ar'
+          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
+          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)'
+        setResponse(msg)
+        return
+      }
+
       if (data && data.response) {
         setResponse(data.response)
         setLastAiMessage(data.response)
@@ -166,7 +197,19 @@ export default function CoachPanel({ isOpen, onClose, missions }: CoachPanelProp
       }
     } catch (err: any) {
       console.error(err)
-      setResponse(profile?.language === 'ar' ? 'مش قادرين نوصل للمدرب دلوقتي. جرب تاني كمان شوية.' : 'Could not connect to the AI Coach. Please try again later.')
+      if (err.message === 'ai_server_overloaded') {
+        const msg = profile?.language === 'ar'
+          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
+          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)'
+        setResponse(msg)
+      } else if (err.message === 'quota_exhausted') {
+        const msg = profile?.language === 'ar'
+          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
+          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.'
+        setResponse(msg)
+      } else {
+        setResponse(profile?.language === 'ar' ? 'مش قادرين نوصل للمدرب دلوقتي. جرب تاني كمان شوية.' : 'Could not connect to the AI Coach. Please try again later.')
+      }
     } finally {
       setIsLoading(false)
       playBlip()

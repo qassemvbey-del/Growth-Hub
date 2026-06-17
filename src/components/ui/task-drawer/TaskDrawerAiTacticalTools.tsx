@@ -109,6 +109,18 @@ export default function TaskDrawerAiTacticalTools({
         })
       })
 
+      if (res.status === 429) {
+        setError(isRTL 
+          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
+          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
+        return
+      }
+      if (res.status === 503) {
+        setError(isRTL
+          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
+          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
+        return
+      }
       if (res.status === 403) {
         setQuotaExhausted(true)
         setLoading(false)
@@ -118,6 +130,19 @@ export default function TaskDrawerAiTacticalTools({
       if (!res.ok) throw new Error('AI request failed')
 
       const data = await res.json()
+      if (data.error === 'quota_exhausted') {
+        setError(isRTL 
+          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
+          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
+        return
+      }
+      if (data.error === 'ai_server_overloaded') {
+        setError(isRTL
+          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
+          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
+        return
+      }
+
       if (data.text) {
         incrementFeatureUsage('fix_errors')
         setResponse(data.text)
@@ -125,8 +150,18 @@ export default function TaskDrawerAiTacticalTools({
       } else {
         throw new Error('No diagnosis returned')
       }
-    } catch (err) {
-      setError(isRTL ? 'فشلت معالجة الاستعلام الذكي.' : 'Failed to process AI request.')
+    } catch (err: any) {
+      if (err.message === 'ai_server_overloaded') {
+        setError(isRTL
+          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
+          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
+      } else if (err.message === 'quota_exhausted') {
+        setError(isRTL 
+          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
+          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
+      } else {
+        setError(isRTL ? 'فشلت معالجة الاستعلام الذكي.' : 'Failed to process AI request.')
+      }
     } finally {
       setLoading(false)
     }
@@ -223,10 +258,34 @@ export default function TaskDrawerAiTacticalTools({
         })
       })
 
-      const data = await res.json()
       if (res.status === 429) {
-        setError(data.message || 'Rate limited')
-      } else if (!res.ok) {
+        setError(isRTL 
+          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
+          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
+        return
+      }
+      if (res.status === 503) {
+        setError(isRTL
+          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
+          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
+        return
+      }
+
+      const data = await res.json()
+      if (data.error === 'quota_exhausted') {
+        setError(isRTL 
+          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
+          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
+        return
+      }
+      if (data.error === 'ai_server_overloaded') {
+        setError(isRTL
+          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
+          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
+        return
+      }
+
+      if (!res.ok) {
         setError(data.error || 'Failed to generate checklist')
       } else {
         incrementFeatureUsage('generate_checklist')
@@ -243,8 +302,18 @@ export default function TaskDrawerAiTacticalTools({
           setCollapsed(false)
         }
       }
-    } catch (err) {
-      setError(isRTL ? 'حدث خطأ في الاتصال بالخادم' : 'Server communication error')
+    } catch (err: any) {
+      if (err.message === 'ai_server_overloaded') {
+        setError(isRTL
+          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
+          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
+      } else if (err.message === 'quota_exhausted') {
+        setError(isRTL 
+          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
+          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
+      } else {
+        setError(isRTL ? 'حدث خطأ في الاتصال بالخادم' : 'Server communication error')
+      }
     } finally {
       setLoading(false)
     }

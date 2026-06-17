@@ -66,6 +66,18 @@ export default function TaskDrawerDescription({
           type: 'general_ask'
         })
       })
+      if (res.status === 429) {
+        setAiError(isRTL 
+          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
+          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
+        return
+      }
+      if (res.status === 503) {
+        setAiError(isRTL
+          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
+          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
+        return
+      }
       if (res.status === 403) {
         setQuotaExhausted(true)
         setLoading(false)
@@ -73,6 +85,18 @@ export default function TaskDrawerDescription({
       }
       if (!res.ok) throw new Error('API Error')
       const data = await res.json()
+      if (data.error === 'quota_exhausted') {
+        setAiError(isRTL 
+          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
+          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
+        return
+      }
+      if (data.error === 'ai_server_overloaded') {
+        setAiError(isRTL
+          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
+          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
+        return
+      }
       if (data.text) {
         incrementFeatureUsage('explain_topic')
         const appended = description ? `${description}\n\n${data.text}` : data.text
@@ -82,8 +106,18 @@ export default function TaskDrawerDescription({
       } else {
         throw new Error('No description returned')
       }
-    } catch (err) {
-      setAiError(isRTL ? 'خطأ أثناء توليد الشرح.' : 'Error generating explanation.')
+    } catch (err: any) {
+      if (err.message === 'ai_server_overloaded') {
+        setAiError(isRTL
+          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
+          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
+      } else if (err.message === 'quota_exhausted') {
+        setAiError(isRTL 
+          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
+          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
+      } else {
+        setAiError(isRTL ? 'خطأ أثناء توليد الشرح.' : 'Error generating explanation.')
+      }
     } finally {
       setLoading(false)
     }

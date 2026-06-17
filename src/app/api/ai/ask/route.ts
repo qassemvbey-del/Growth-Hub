@@ -27,26 +27,35 @@ export async function POST(req: Request) {
     }
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
-    // 2. Centralized Quota Check (Atomic RPC — BEFORE Gemini)
-    const { data: quotaData, error: quotaError } = await supabaseAdmin.rpc('check_and_increment_quota', {
-      p_user_id: user.id
-    })
+    // 2. Step 1 (Validation): Read current quota
+    const { data: profile, error: profileErr } = await supabaseAdmin
+      .from('profiles')
+      .select('user_tier, ai_request_count, last_ai_reset')
+      .eq('id', user.id)
+      .single()
 
-    if (quotaError) {
-      console.error('Quota RPC error:', quotaError)
-      return NextResponse.json({ error: 'Quota validation failed', message: quotaError.message }, { status: 500 })
+    if (profileErr || !profile) {
+      console.error('Failed to fetch user profile for quota check:', profileErr)
+      return NextResponse.json({ error: 'Quota validation failed' }, { status: 500 })
     }
 
-    const quotaResult = typeof quotaData === 'string' ? JSON.parse(quotaData) : quotaData
-    if (!quotaResult || !quotaResult.allowed) {
-      return NextResponse.json({
-        error: 'Quota Exceeded',
-        message_en: 'Your AI request limit has been reached. Please wait for the automatic cooldown or upgrade your plan.',
-        message_ar: 'لقد نفدت كوتة استعلامات الذكاء الاصطناعي الخاصة بك. يرجى الانتظار حتى التجديد التلقائي أو ترقية خطتك.'
-      }, { status: 403 })
+    let limit = 3
+    if (profile.user_tier === 'pro') limit = 50
+    else if (profile.user_tier === 'elite') limit = 150
+
+    let currentCount = profile.ai_request_count || 0
+    const lastReset = profile.last_ai_reset ? new Date(profile.last_ai_reset) : new Date()
+    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000)
+
+    if (lastReset < twelveHoursAgo) {
+      currentCount = 0
     }
 
-    // 3. Call Gemini
+    if (currentCount >= limit) {
+      return NextResponse.json({ error: 'quota_exhausted' }, { status: 429 })
+    }
+
+    // 3. Call Gemini (with error catch block for Step 3)
     const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
     if (!apiKey) {
       return NextResponse.json({ error: "API Key is missing" }, { status: 500 })
@@ -69,24 +78,38 @@ export async function POST(req: Request) {
       }
     })
 
-    const result = await model.generateContent({
-      contents: [
-        {
-          role: 'user',
-          parts: [{ text: systemPrompt + '\n\nQuery: ' + query }]
-        }
-      ]
-    })
-
-    // 4. Parse & Return
     let aiResponse = ''
     try {
-      aiResponse = result.response.text()
-    } catch (textErr) {
-      console.warn("Gemini response.text() failed, trying fallback:", textErr)
-      const candidate = result.response?.candidates?.[0]
-      const part = candidate?.content?.parts?.[0]
-      aiResponse = part?.text || ''
+      const result = await model.generateContent({
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: systemPrompt + '\n\nQuery: ' + query }]
+          }
+        ]
+      })
+
+      // Parse response
+      try {
+        aiResponse = result.response.text()
+      } catch (textErr) {
+        console.warn("Gemini response.text() failed, trying fallback:", textErr)
+        const candidate = result.response?.candidates?.[0]
+        const part = candidate?.content?.parts?.[0]
+        aiResponse = part?.text || ''
+      }
+    } catch (geminiError: any) {
+      console.error("Gemini API execution failed:", geminiError)
+      return NextResponse.json({ error: 'ai_server_overloaded' }, { status: 503 })
+    }
+
+    // 4. Step 4 (Deduction on Success): Increment user's quota count
+    const { error: incrementError } = await supabaseAdmin.rpc('check_and_increment_quota', {
+      p_user_id: user.id
+    })
+
+    if (incrementError) {
+      console.error('Failed to deduct quota on success:', incrementError)
     }
 
     return NextResponse.json({ text: aiResponse })

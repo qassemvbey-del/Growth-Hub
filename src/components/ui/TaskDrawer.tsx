@@ -199,15 +199,34 @@ function AiChecklistButton({
         })
       })
 
-      const data = await res.json()
       if (res.status === 429) {
-        const seconds = data.remainingSeconds || 15 * 60
-        setCooldownRemaining(seconds)
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(`ai_cooldown_${taskId}`, String(Date.now() + seconds * 1000))
-        }
-        setAiErrorMessage(data.message)
-      } else if (!res.ok) {
+        setAiErrorMessage(isRTL 
+          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
+          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
+        return
+      }
+      if (res.status === 503) {
+        setAiErrorMessage(isRTL
+          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
+          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
+        return
+      }
+
+      const data = await res.json()
+      if (data.error === 'quota_exhausted') {
+        setAiErrorMessage(isRTL 
+          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
+          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
+        return
+      }
+      if (data.error === 'ai_server_overloaded') {
+        setAiErrorMessage(isRTL
+          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
+          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
+        return
+      }
+
+      if (!res.ok) {
         setAiErrorMessage(data.error || 'Failed to generate checklist')
       } else {
         const supabase = createClient()
@@ -231,8 +250,18 @@ function AiChecklistButton({
           }
         }
       }
-    } catch (err) {
-      setAiErrorMessage(isRTL ? 'حدث خطأ في الاتصال بالخادم' : 'Server communication error')
+    } catch (err: any) {
+      if (err.message === 'ai_server_overloaded') {
+        setAiErrorMessage(isRTL
+          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
+          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
+      } else if (err.message === 'quota_exhausted') {
+        setAiErrorMessage(isRTL 
+          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
+          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
+      } else {
+        setAiErrorMessage(isRTL ? 'حدث خطأ في الاتصال بالخادم' : 'Server communication error')
+      }
     } finally {
       setIsGenerating(false)
     }
