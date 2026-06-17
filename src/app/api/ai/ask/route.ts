@@ -72,36 +72,51 @@ export async function POST(req: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({
-      model: "gemini-3.5-flash",
-      generationConfig: {
-        temperature: 0.3,
+    const fallbackModels = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash"]
+    let result: any = null
+    let lastError: any = null
+
+    for (const modelName of fallbackModels) {
+      try {
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            temperature: 0.3,
+          }
+        })
+        result = await model.generateContent({
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: systemPrompt + '\n\nQuery: ' + query }]
+            }
+          ]
+        })
+        break; // Success
+      } catch (error: any) {
+        lastError = error
+        const errMsg = error.message || String(error)
+        if (errMsg.includes("503") || errMsg.includes("429") || errMsg.includes("overloaded") || errMsg.includes("rate limit")) {
+          console.warn(`Model ${modelName} failed with temporary error. Falling back to next model...`, error)
+          continue
+        } else {
+          throw error
+        }
       }
-    })
+    }
+
+    if (!result) {
+      throw new Error(`All fallback models failed. Last error: ${lastError?.message || String(lastError)}`)
+    }
 
     let aiResponse = ''
     try {
-      const result = await model.generateContent({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: systemPrompt + '\n\nQuery: ' + query }]
-          }
-        ]
-      })
-
-      // Parse response
-      try {
-        aiResponse = result.response.text()
-      } catch (textErr) {
-        console.warn("Gemini response.text() failed, trying fallback:", textErr)
-        const candidate = result.response?.candidates?.[0]
-        const part = candidate?.content?.parts?.[0]
-        aiResponse = part?.text || ''
-      }
-    } catch (geminiError: any) {
-      console.error("AI Route Error:", geminiError)
-      return NextResponse.json({ error: geminiError.message || String(geminiError) }, { status: 500 })
+      aiResponse = result.response.text()
+    } catch (textErr) {
+      console.warn("Gemini response.text() failed, trying fallback:", textErr)
+      const candidate = result.response?.candidates?.[0]
+      const part = candidate?.content?.parts?.[0]
+      aiResponse = part?.text || ''
     }
 
     // 4. Step 4 (Deduction on Success): Increment user's quota count

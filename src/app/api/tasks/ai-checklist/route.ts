@@ -175,20 +175,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'quota_exhausted' }, { status: 429 })
     }
 
-    // Call Gemini (with error catch block for Step 3)
+    // call Gemini (with error catch block for Step 3)
     const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
     if (!apiKey) {
       return NextResponse.json({ error: "API Key is missing" }, { status: 500 })
     }
-
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({
-      model: "gemini-3.5-flash",
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: 0.3,
-      }
-    })
 
     let prompt = ''
     if (aiExplanation && aiExplanation.trim().length > 10) {
@@ -252,21 +243,46 @@ DESCRIPTION: ${videoDescription}
 `
     }
 
+    const genAI = new GoogleGenerativeAI(apiKey)
+    const fallbackModels = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash"]
+    let result: any = null
+    let lastError: any = null
+
+    for (const modelName of fallbackModels) {
+      try {
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.3,
+          }
+        })
+        result = await model.generateContent(prompt)
+        break; // Success, exit loop
+      } catch (error: any) {
+        lastError = error
+        const errMsg = error.message || String(error)
+        if (errMsg.includes("503") || errMsg.includes("429") || errMsg.includes("overloaded") || errMsg.includes("rate limit")) {
+          console.warn(`Model ${modelName} failed with temporary error. Falling back to next model...`, error)
+          continue
+        } else {
+          throw error
+        }
+      }
+    }
+
+    if (!result) {
+      throw new Error(`All fallback models failed. Last error: ${lastError?.message || String(lastError)}`)
+    }
+
     let responseText = ''
     try {
-      const result = await model.generateContent(prompt)
-
-      try {
-        responseText = result.response.text()
-      } catch (textErr) {
-        console.warn("Gemini response.text() failed, trying fallback:", textErr)
-        const candidate = result.response?.candidates?.[0]
-        const part = candidate?.content?.parts?.[0]
-        responseText = part?.text || ''
-      }
-    } catch (geminiError: any) {
-      console.error("AI Route Error (Gemini API execution failed):", geminiError)
-      return NextResponse.json({ error: geminiError.message || String(geminiError) }, { status: 500 })
+      responseText = result.response.text()
+    } catch (textErr) {
+      console.warn("Gemini response.text() failed, trying fallback:", textErr)
+      const candidate = result.response?.candidates?.[0]
+      const part = candidate?.content?.parts?.[0]
+      responseText = part?.text || ''
     }
 
     let analysis: VideoAnalysisResponse
