@@ -64,8 +64,14 @@ export interface Profile {
   ai_request_count?: number
   last_ai_reset?: string | null
   max_squads_allowed?: number
-  champion_class?: 'programmer' | 'network_engineer'
+  champion_class?: 'programmer' | 'network_engineer' | 'accountant' | 'learner'
 }
+
+const RANKS = ['SILVER', 'GOLD', 'PLATINUM', 'DIAMOND', 'CROWN', 'ACE', 'CONQUEROR'];
+export const getRankIndex = (rankName?: string) => {
+  const idx = RANKS.indexOf((rankName || 'SILVER').toUpperCase());
+  return idx === -1 ? 0 : idx;
+};
 
 export const THEME_PACKAGES = {
   SILVER: {
@@ -1349,7 +1355,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
             ai_name: data.ai_name,
             ai_personality: data.ai_personality || 'GENTLE',
             xp: data.xp || 0,
-            rank: data.rank || 'SILVER',
+            rank: data.rank || 'RECRUIT',
             active_theme: data.active_theme || 'SILVER',
             blocked: data.blocked || false,
             last_seen: data.last_seen,

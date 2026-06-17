@@ -132,7 +132,7 @@ export default function TaskDrawerDescription({
       </div>
 
       {!canEdit ? (
-        <div className="text-sm text-zinc-350 whitespace-pre-wrap leading-relaxed font-space min-h-[40px] select-text">
+        <div className="text-sm text-zinc-300 whitespace-pre-wrap leading-relaxed font-space min-h-[40px] select-text">
           {description || (isRTL ? 'لا يوجد وصف للمهمة.' : 'No description provided.')}
         </div>
       ) : (
