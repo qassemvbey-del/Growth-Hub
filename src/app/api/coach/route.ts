@@ -3,6 +3,7 @@ import { createClient as createServerClient } from '@/lib/supabase-server'
 import { createClient } from '@supabase/supabase-js'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
+export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
@@ -103,8 +104,8 @@ Analyze this telemetry. Execute the requested action according to your savage, b
         text = part?.text || ''
       }
     } catch (geminiError: any) {
-      console.error("Gemini API execution failed:", geminiError)
-      return NextResponse.json({ error: 'ai_server_overloaded' }, { status: 503 })
+      console.error("AI Route Error (Gemini API execution failed):", geminiError)
+      return NextResponse.json({ error: geminiError.message || String(geminiError) }, { status: 500 })
     }
 
     // 4. Step 4 (Deduction on Success): Increment user's quota count

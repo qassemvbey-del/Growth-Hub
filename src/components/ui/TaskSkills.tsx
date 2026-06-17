@@ -35,7 +35,6 @@ export default function TaskSkills({
   const [activePanel, setActivePanel] = useState<string | null>(null)
   const [loadingSkill, setLoadingSkill] = useState<string | null>(null)
   const [customQuery, setCustomQuery] = useState('')
-  const [skillResponse, setSkillResponse] = useState('')
   const [skillError, setSkillError] = useState('')
 
   // Clean raw AI response markdown characters
@@ -52,71 +51,45 @@ export default function TaskSkills({
 
     setLoadingSkill('checklist')
     setSkillError('')
-    setSkillResponse('')
 
     const currentGoal = goals.find((g: any) => g.id === goalId || g.id === task.goal_id)
     const goalTitleText = currentGoal?.title || 'Specialized Curriculum'
 
     try {
       const res = await fetch('/api/tasks/ai-checklist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          taskId: task.id,
-          youtubeUrl: finalVideoUrl || task.video_url || '',
-          taskTitle: task.title,
-          goalTitle: goalTitleText,
-          language: isRTL ? 'ar' : 'en'
-        })
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            taskId: task.id,
+            youtubeUrl: finalVideoUrl || task.video_url || '',
+            taskTitle: task.title,
+            goalTitle: goalTitleText,
+            language: isRTL ? 'ar' : 'en'
+          })
       })
 
-      if (res.status === 429) {
-        setSkillError(isRTL 
-          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
-          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
-        return
-      }
-      if (res.status === 503) {
-        setSkillError(isRTL
-          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
-          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
-        return
-      }
-
-      const data = await res.json()
-      if (data.error === 'quota_exhausted') {
-        setSkillError(isRTL 
-          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
-          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
-        return
-      }
-      if (data.error === 'ai_server_overloaded') {
-        setSkillError(isRTL
-          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
-          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
-        return
-      }
+      const data = await res.json().catch(() => ({}))
 
       if (!res.ok) {
-        setSkillError(data.error || 'Failed to generate checklist')
-      } else {
-        const supabase = createClient()
-        const { data: updatedTask } = await supabase
-          .from('tasks')
-          .select('metadata')
-          .eq('id', task.id)
-          .single()
-        
-        if (updatedTask) {
-          await onUpdateTask(task.id, { metadata: updatedTask.metadata })
-          try {
-            await refreshProfile()
-          } catch (profileErr) {}
-          setSkillResponse(isRTL ? 'تم إنشاء قائمة المهام الذكية بنجاح!' : 'Smart Checklist generated successfully!')
-        }
+        setSkillError(data.error || (isRTL ? 'فشل إنشاء قائمة المهام الذكية' : 'Failed to generate checklist'))
+        return
       }
-    } catch (err) {
-      setSkillError(isRTL ? 'حدث خطأ في الاتصال بالخادم' : 'Server communication error')
+
+      const supabase = createClient()
+      const { data: updatedTask } = await supabase
+        .from('tasks')
+        .select('metadata')
+        .eq('id', task.id)
+        .single()
+      
+      if (updatedTask) {
+        await onUpdateTask(task.id, { metadata: updatedTask.metadata })
+        try {
+          await refreshProfile()
+        } catch (profileErr) {}
+      }
+    } catch (err: any) {
+      setSkillError(err.message || (isRTL ? 'حدث خطأ في الاتصال بالخادم' : 'Server communication error'))
     } finally {
       setLoadingSkill(null)
     }
@@ -127,7 +100,6 @@ export default function TaskSkills({
     if (loadingSkill || !canEdit) return
     setLoadingSkill('explain')
     setSkillError('')
-    setSkillResponse('')
 
     try {
       const res = await fetch('/api/ai/ask', {
@@ -139,47 +111,25 @@ export default function TaskSkills({
         })
       })
 
-      if (res.status === 429) {
-        setSkillError(isRTL 
-          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
-          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
-        return
-      }
-      if (res.status === 503) {
-        setSkillError(isRTL
-          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
-          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
-        return
-      }
+      const data = await res.json().catch(() => ({}))
 
-      const data = await res.json()
-      if (data.error === 'quota_exhausted') {
-        setSkillError(isRTL 
-          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
-          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
+      if (!res.ok) {
+        setSkillError(data.error || (isRTL ? 'خطأ أثناء توليد الشرح.' : 'Error generating explanation.'))
         return
       }
-      if (data.error === 'ai_server_overloaded') {
-        setSkillError(isRTL
-          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
-          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
-        return
-      }
-
-      if (!res.ok) throw new Error('API Error')
 
       if (data.text) {
-        const appended = task.description ? `${task.description}\n\n${data.text}` : data.text
+        const header = isRTL ? '\n\n### شرح الذكاء الاصطناعي للموضوع:\n' : '\n\n### AI Topic Explanation:\n'
+        const appended = task.description ? `${task.description}${header}${data.text}` : `${header.trim()}\n${data.text}`
         await onUpdateTask(task.id, { description: appended })
-        setSkillResponse(data.text)
         try {
           await refreshProfile()
         } catch (profileErr) {}
       } else {
-        throw new Error('No explanation returned')
+        throw new Error(isRTL ? 'لم يتم إرجاع أي شرح' : 'No explanation returned')
       }
-    } catch (err) {
-      setSkillError(isRTL ? 'خطأ أثناء توليد الشرح.' : 'Error generating explanation.')
+    } catch (err: any) {
+      setSkillError(err.message || (isRTL ? 'خطأ أثناء توليد الشرح.' : 'Error generating explanation.'))
     } finally {
       setLoadingSkill(null)
     }
@@ -190,7 +140,6 @@ export default function TaskSkills({
     if (loadingSkill || !customQuery.trim() || !canEdit) return
     setLoadingSkill(skillId)
     setSkillError('')
-    setSkillResponse('')
 
     let promptQuery = customQuery.trim()
     let isSpecialized = false
@@ -265,46 +214,26 @@ export default function TaskSkills({
         body: JSON.stringify(payload)
       })
 
-      if (res.status === 429) {
-        setSkillError(isRTL 
-          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
-          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
-        return
-      }
-      if (res.status === 503) {
-        setSkillError(isRTL
-          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
-          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
-        return
-      }
+      const data = await res.json().catch(() => ({}))
 
-      const data = await res.json()
-      if (data.error === 'quota_exhausted') {
-        setSkillError(isRTL 
-          ? 'لقد استهلكت رصيد الـ AI المتاح لخطتك الحالية. يمكنك انتظار التجديد الدوري أو ترقية اشتراكك للمتابعة فوراً.'
-          : 'You have reached the AI credit limit for your current plan. Please wait for the periodic reset or upgrade to continue immediately.')
+      if (!res.ok) {
+        setSkillError(data.error || (isRTL ? 'فشل معالجة استفسار الذكاء الاصطناعي.' : 'Failed to process AI query.'))
         return
       }
-      if (data.error === 'ai_server_overloaded') {
-        setSkillError(isRTL
-          ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مرتفعاً حالياً. يرجى إعادة المحاولة خلال دقيقة. (رصيدك لم يتأثر)'
-          : 'The AI servers are experiencing temporary high demand. Please try again in a moment. (Your credits are safe)')
-        return
-      }
-
-      if (!res.ok) throw new Error('API Error')
 
       if (data.text) {
-        setSkillResponse(data.text)
+        const header = isRTL ? `\n\n### استفسار ذكي [${promptQuery.split(']')[0]?.replace('[', '') || ''}]:\n` : `\n\n### AI Query Response [${promptQuery.split(']')[0]?.replace('[', '') || ''}]:\n`
+        const appended = task.description ? `${task.description}${header}${data.text}` : `${header.trim()}\n${data.text}`
+        await onUpdateTask(task.id, { description: appended })
         setCustomQuery('')
         try {
           await refreshProfile()
         } catch (profileErr) {}
       } else {
-        throw new Error('No response returned')
+        throw new Error(isRTL ? 'لم يتم إرجاع أي رد' : 'No response returned')
       }
-    } catch (err) {
-      setSkillError(isRTL ? 'فشل إرسال الاستفسار.' : 'Failed to process AI query.')
+    } catch (err: any) {
+      setSkillError(err.message || (isRTL ? 'فشل إرسال الاستفسار.' : 'Failed to process AI query.'))
     } finally {
       setLoadingSkill(null)
     }
@@ -332,7 +261,6 @@ export default function TaskSkills({
       icon: MessageSquare,
       requiredRank: 'SILVER',
       action: () => {
-        setSkillResponse('')
         setSkillError('')
         setActivePanel(activePanel === 'ask' ? null : 'ask')
       }
@@ -443,7 +371,6 @@ export default function TaskSkills({
                   type="button"
                   onClick={() => {
                     if (isLocked) return
-                    setSkillResponse('')
                     setSkillError('')
                     setActivePanel(activePanel === skill.id ? null : skill.id)
                   }}
@@ -518,18 +445,6 @@ export default function TaskSkills({
             >
               {isRTL ? 'إرسال' : 'Cast'}
             </button>
-          </div>
-        </div>
-      )}
-
-      {/* Skills Output Area */}
-      {skillResponse && (
-        <div className="bg-zinc-100/50 dark:bg-white/[0.01] border border-zinc-200/50 dark:border-white/5 rounded-xl p-4 text-xs font-space text-zinc-750 dark:text-zinc-300 whitespace-pre-wrap max-h-[300px] overflow-y-auto scrollbar-thin select-text space-y-2 leading-relaxed shadow-inner">
-          <div className="text-[9px] font-mono tracking-widest text-zinc-400 border-b border-zinc-200/50 dark:border-white/5 pb-1">
-            {isRTL ? 'نتائج المهارة' : 'Skills Output'}
-          </div>
-          <div className="pt-1 select-text">
-            {cleanText(skillResponse)}
           </div>
         </div>
       )}

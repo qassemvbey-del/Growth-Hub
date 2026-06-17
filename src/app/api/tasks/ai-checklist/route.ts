@@ -265,8 +265,8 @@ DESCRIPTION: ${videoDescription}
         responseText = part?.text || ''
       }
     } catch (geminiError: any) {
-      console.error("Gemini API execution failed:", geminiError)
-      return NextResponse.json({ error: 'ai_server_overloaded' }, { status: 503 })
+      console.error("AI Route Error (Gemini API execution failed):", geminiError)
+      return NextResponse.json({ error: geminiError.message || String(geminiError) }, { status: 500 })
     }
 
     let analysis: VideoAnalysisResponse
@@ -277,15 +277,9 @@ DESCRIPTION: ${videoDescription}
       if (!Array.isArray(analysis.keyTakeaways)) analysis.keyTakeaways = []
       if (!Array.isArray(analysis.checklist)) analysis.checklist = []
       if (typeof analysis.additionalNotes !== 'string') analysis.additionalNotes = ''
-    } catch (parseErr) {
-      console.error('Failed to parse Gemini response JSON:', responseText)
-      analysis = {
-        isIntroOnly: true,
-        summary: 'فشلت معالجة استجابة الذكاء الاصطناعي بنجاح.',
-        keyTakeaways: [],
-        checklist: [],
-        additionalNotes: ''
-      }
+    } catch (parseErr: any) {
+      console.error('Failed to parse Gemini response JSON:', responseText, parseErr)
+      return NextResponse.json({ error: `JSON Parse Error: ${parseErr.message || String(parseErr)}` }, { status: 500 })
     }
 
     // Step 4 (Deduction on Success): Increment user's quota count
@@ -306,7 +300,7 @@ DESCRIPTION: ${videoDescription}
 
     return NextResponse.json({ success: true, analysis })
   } catch (error: any) {
-    console.error('CHECKLIST_ROUTE_CRASH:', error)
-    return NextResponse.json({ error: 'Server error', message: error?.message || String(error) }, { status: 500 })
+    console.error('AI Route Error (CHECKLIST_ROUTE_CRASH):', error)
+    return NextResponse.json({ error: error?.message || String(error) }, { status: 500 })
   }
 }
