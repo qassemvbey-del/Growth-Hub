@@ -1206,18 +1206,6 @@ export default function TaskDrawer({
           )}>
             {/* Commented out legacy checklists button per layout rules */}
 
-            {task.metadata?.videoAnalysis && (
-              <VideoAnalysisViewer
-                analysis={task.metadata.videoAnalysis}
-                isRTL={isRTL}
-                themeColor={themeColor}
-                goalId={goalId || task.goal_id}
-                taskId={task.id}
-                metadata={task.metadata}
-                onUpdateTask={updateTask}
-              />
-            )}
-
             <TaskDrawerChecklist
               task={task}
               subtasks={subtasks}

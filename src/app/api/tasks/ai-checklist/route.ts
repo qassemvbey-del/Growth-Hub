@@ -183,40 +183,19 @@ export async function POST(req: Request) {
 
     let prompt = ''
     if (aiExplanation && aiExplanation.trim().length > 10) {
-      prompt = `You are a highly precise Content Analyst and Task Extractor for a life-management system. Analyze the provided AI Explanation / Description of the task topic.
-Respond strictly in Arabic, and output ONLY a raw JSON object matching this exact schema:
-{
-  "isIntroOnly": boolean,
-  "summary": "string",
-  "keyTakeaways": ["string"],
-  "checklist": ["string"],
-  "additionalNotes": "string"
-}
-
-### STRICT RULES:
-1. Zero Hallucination: ONLY use the provided AI Explanation / Description to extract the checklist. Do not invent steps outside of it.
-2. If the text lacks practical steps, set "isIntroOnly" to true and "checklist" to [].
-3. PLAIN TEXT ONLY: Do NOT use markdown formatting inside the strings. NO asterisks (*), NO bold (**), NO hashtags (#). The strings must be completely clean, plain Arabic text without any formatting symbols.
+      prompt = `You are a strict task breakdown machine. Analyze the provided AI Explanation / Description of the task topic.
+Respond strictly in Arabic, and output ONLY a valid JSON array of strings, where each string is a single, actionable, short step. DO NOT output markdown formatting, and do NOT wrap the JSON in codeblocks.
+Example output format:
+["الخطوة الأولى", "الخطوة الثانية"]
 
 AI EXPLANATION / DESCRIPTION:
 ${aiExplanation}
 `
     } else if (runStage === 1) {
-      prompt = `You are a highly precise Content Analyst and Task Extractor for a life-management system. Analyze the provided Video Title, Description, and Audio Transcript.
-Respond strictly in Arabic, and output ONLY a raw JSON object matching this exact schema:
-{
-  "isIntroOnly": boolean,
-  "summary": "string",
-  "keyTakeaways": ["string"],
-  "checklist": ["string"],
-  "additionalNotes": "string"
-}
-
-### STRICT RULES:
-1. Zero Hallucination: ONLY use the provided transcript. Do not invent steps.
-2. If the video is an intro or lacks practical steps, set "isIntroOnly" to true and "checklist" to [].
-3. PLAIN TEXT ONLY: Do NOT use markdown formatting inside the strings. NO asterisks (*), NO bold (**), NO hashtags (#). The strings must be completely clean, plain Arabic text without any formatting symbols.
-4. CRITICAL: If the video transcript is vague, lacks explicit actionable steps, or if you are unsure, DO NOT GUESS AND DO NOT REPEAT YOURSELF. Immediately set isIntroOnly to true, leave checklist empty, and output this exact summary: 'عذراً، محتوى هذا الفيديو غير كافٍ أو لا يحتوي على خطوات واضحة يمكن استخراجها.'
+      prompt = `You are a strict task breakdown machine. Analyze the provided Video Title, Description, and Audio Transcript.
+Respond strictly in Arabic, and output ONLY a valid JSON array of strings, where each string is a single, actionable, short step. DO NOT output markdown formatting, and do NOT wrap the JSON in codeblocks.
+Example output format:
+["الخطوة الأولى", "الخطوة الثانية"]
 
 VIDEO DATA:
 Title: ${videoTitle}
@@ -224,19 +203,10 @@ Description: ${videoDescription}
 Transcript: ${transcriptText}
 `
     } else {
-      prompt = `Analyze this video based ONLY on the Title and Description because the audio transcript is missing. You MUST start your summary string exactly with: '(تنويه: التحليل مبني على وصف الفيديو فقط لعدم توفر نص مفرغ)'. Respond strictly in Arabic, and output ONLY a raw JSON object matching this exact schema:
-{
-  "isIntroOnly": boolean,
-  "summary": "string",
-  "keyTakeaways": ["string"],
-  "checklist": ["string"],
-  "additionalNotes": "string"
-}
-
-### STRICT RULES:
-1. Zero Hallucination: ONLY use the provided Title and Description. Do not invent steps.
-2. If the video is an intro or lacks practical steps, set "isIntroOnly" to true and "checklist" to [].
-3. PLAIN TEXT ONLY: Do NOT use markdown formatting inside the strings. NO asterisks (*), NO bold (**), NO hashtags (#).
+      prompt = `You are a strict task breakdown machine. Analyze this video based ONLY on the Title and Description because the audio transcript is missing.
+Respond strictly in Arabic, and output ONLY a valid JSON array of strings, where each string is a single, actionable, short step. DO NOT output markdown formatting, and do NOT wrap the JSON in codeblocks.
+Example output format:
+["الخطوة الأولى", "الخطوة الثانية"]
 
 TITLE: ${videoTitle}
 DESCRIPTION: ${videoDescription}
@@ -285,16 +255,22 @@ DESCRIPTION: ${videoDescription}
       responseText = part?.text || ''
     }
 
-    let analysis: VideoAnalysisResponse
+    let steps: string[] = []
     try {
-      analysis = JSON.parse(responseText.trim())
-      if (typeof analysis.isIntroOnly !== 'boolean') analysis.isIntroOnly = false
-      if (typeof analysis.summary !== 'string') analysis.summary = ''
-      if (!Array.isArray(analysis.keyTakeaways)) analysis.keyTakeaways = []
-      if (!Array.isArray(analysis.checklist)) analysis.checklist = []
-      if (typeof analysis.additionalNotes !== 'string') analysis.additionalNotes = ''
+      const parsed = JSON.parse(responseText.trim())
+      if (Array.isArray(parsed)) {
+        steps = parsed.filter(item => typeof item === 'string' && item.trim().length > 0)
+      } else if (parsed && Array.isArray(parsed.checklist)) {
+        steps = parsed.checklist.filter((item: any) => typeof item === 'string' && item.trim().length > 0)
+      } else if (parsed && typeof parsed === 'object') {
+        // Fallback to extraction from object keys/values if it generated an object
+        const values = Object.values(parsed)
+        if (values.length > 0 && Array.isArray(values[0])) {
+          steps = (values[0] as any[]).filter(item => typeof item === 'string' && item.trim().length > 0)
+        }
+      }
     } catch (parseErr: any) {
-      console.error('Failed to parse Gemini response JSON:', responseText, parseErr)
+      console.error('Failed to parse Gemini response JSON array:', responseText, parseErr)
       return NextResponse.json({ error: `JSON Parse Error: ${parseErr.message || String(parseErr)}` }, { status: 500 })
     }
 
@@ -307,14 +283,28 @@ DESCRIPTION: ${videoDescription}
       console.error('Failed to deduct quota on success:', incrementError)
     }
 
-    // Save metadata
+    // Convert steps into subtasks structure and merge with existing non-AI subtasks
     const currentMetadata = (taskData?.metadata as any) || {}
+    const existingSubtasks = currentMetadata.subtasks || []
+    
+    // Filter out previous AI subtasks to avoid duplicates/mess
+    const userSubtasks = existingSubtasks.filter((s: any) => !s.id?.startsWith('sub_ai_') && !s.id?.startsWith('ai-'))
+
+    const newAiSubtasks = steps.map((stepText, idx) => ({
+      id: `sub_ai_${Date.now()}_${idx}`,
+      title: stepText.trim(),
+      is_completed: false
+    }))
+
+    const mergedSubtasks = [...userSubtasks, ...newAiSubtasks]
+
+    // Save metadata
     await supabaseAdmin
       .from('tasks')
-      .update({ metadata: { ...currentMetadata, videoAnalysis: analysis } })
+      .update({ metadata: { ...currentMetadata, subtasks: mergedSubtasks } })
       .eq('id', taskId)
 
-    return NextResponse.json({ success: true, analysis })
+    return NextResponse.json({ success: true, steps })
   } catch (error: any) {
     console.error('AI Route Error (CHECKLIST_ROUTE_CRASH):', error)
     return NextResponse.json({ error: error?.message || String(error) }, { status: 500 })
