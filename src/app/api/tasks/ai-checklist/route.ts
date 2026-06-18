@@ -214,7 +214,7 @@ DESCRIPTION: ${videoDescription}
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const fallbackModels = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash"]
+    const fallbackModels = ["gemini-3.5-flash", "gemini-3.1-pro", "gemini-3-flash"]
     let result: any = null
     let lastError: any = null
 
@@ -232,7 +232,7 @@ DESCRIPTION: ${videoDescription}
       } catch (error: any) {
         lastError = error
         const errMsg = error.message || String(error)
-        if (errMsg.includes("503") || errMsg.includes("429") || errMsg.includes("overloaded") || errMsg.includes("rate limit")) {
+        if (errMsg.includes("503") || errMsg.includes("429") || errMsg.includes("overloaded") || errMsg.includes("rate limit") || errMsg.includes("not found")) {
           console.warn(`Model ${modelName} failed with temporary error. Falling back to next model...`, error)
           continue
         } else {
