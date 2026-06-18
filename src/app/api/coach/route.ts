@@ -87,7 +87,7 @@ Analyze this telemetry. Execute the requested action according to your savage, b
 `
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const fallbackModels = ["gemini-3.5-flash", "gemini-3.1-pro", "gemini-3-flash"]
+    const fallbackModels = ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-2.5-flash"]
     let result: any = null
     let lastError: any = null
 
@@ -102,9 +102,9 @@ Analyze this telemetry. Execute the requested action according to your savage, b
         break; // Success, exit loop
       } catch (error: any) {
         lastError = error
-        const errMsg = error.message || String(error)
-        if (errMsg.includes("503") || errMsg.includes("429") || errMsg.includes("overloaded") || errMsg.includes("rate limit") || errMsg.includes("not found")) {
-          console.warn(`Model ${modelName} failed with temporary error. Falling back to next model...`, error)
+        const errMsg = error.message?.toLowerCase() || ""
+        if (errMsg.includes("503") || errMsg.includes("429") || errMsg.includes("404") || errMsg.includes("not found") || errMsg.includes("overloaded") || errMsg.includes("rate limit")) {
+          console.warn(`[AI Fallback] Model ${modelName} failed. Trying next candidate...`, error)
           continue
         } else {
           throw error
@@ -113,7 +113,7 @@ Analyze this telemetry. Execute the requested action according to your savage, b
     }
 
     if (!result) {
-      throw new Error(`All fallback models failed. Last error: ${lastError?.message || String(lastError)}`)
+      throw new Error(`All fallback models failed. Last API Error: ${lastError?.message || String(lastError)}`)
     }
 
     let text = ''
