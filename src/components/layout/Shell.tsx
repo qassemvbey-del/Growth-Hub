@@ -1405,8 +1405,8 @@ export default function Shell({ children }: ShellProps) {
 
       <main
         className={cn(
-        'flex-1 min-h-[100dvh] relative z-10 w-full max-w-full overflow-x-hidden',
-        'pb-24 lg:pb-8',
+        'flex-1 relative z-10 w-full max-w-full overflow-x-hidden',
+        pathname === '/auth/login' ? 'min-h-0 pb-0' : 'min-h-[100dvh] pb-20 lg:pb-8',
         showSidebar ? 'lg:ps-72 lg:max-w-none' : 'lg:max-w-none'
       )}>
         {/* Commented out per rule "Never delete code, only comment it out"
