@@ -1423,7 +1423,7 @@ export default function Shell({ children }: ShellProps) {
             <AnimatedLogo className="text-xl md:text-2xl tracking-[0.25em]" />
           </div>
 
-          {profile && (
+          {profile && pathname !== '/auth/login' && (
             <div className="flex items-center gap-6">
               {/* Real-time Network Radar */}
               {renderNetworkPill(false)}
