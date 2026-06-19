@@ -190,7 +190,10 @@ export default function LoginPage() {
   const hoverTextClass = "cursor-default transition-all duration-300 hover:text-teal-400 hover:scale-[1.02] hover:drop-shadow-[0_0_12px_rgba(20,184,166,0.9)]"
 
   return (
-    <div className="min-h-screen bg-transparent flex flex-col md:flex-row relative overflow-hidden font-space">
+    <div className="min-h-screen bg-[#0D0D0D] md:bg-transparent flex flex-col md:flex-row relative overflow-hidden font-space">
+      <style dangerouslySetInnerHTML={{ __html: `
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+      `}} />
       
       {/* PROCEDURAL 3D PARTICLE WAVE CANVAS BACKGROUND (Sits beautifully at z-0) */}
       <ParticleWave />
@@ -198,19 +201,120 @@ export default function LoginPage() {
       {/* Floating Scanlines Overlay */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.02] scanlines z-20" />
 
-      {/* LANGUAGE SELECTOR TOP BAR */}
-      <div className="absolute top-6 end-6 z-50 flex items-center gap-3">
-        <button 
-          onClick={toggleLanguage}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-200/20 dark:bg-white/5 border border-zinc-300/30 dark:border-white/10 hover:bg-zinc-200/30 dark:hover:bg-white/10 transition-all text-xs font-bold text-zinc-800 dark:text-white font-space uppercase"
-        >
-          <Globe className="w-3.5 h-3.5" />
-          <span>{lang === 'ar' ? 'English' : 'العربية'}</span>
-        </button>
+      {/* MOBILE LAYOUT (md and below) */}
+      <div 
+        className="flex md:hidden flex-col h-[100dvh] w-full justify-between relative z-10 px-6 overflow-hidden select-none bg-[#0D0D0D]"
+        style={{
+          paddingTop: 'calc(env(safe-area-inset-top) + 24px)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom) + 24px)',
+          fontFamily: lang === 'ar' ? "'Tajawal', sans-serif" : "'Inter', sans-serif"
+        }}
+      >
+        {/* Aurora Glow Effects on Mobile */}
+        <div className="absolute top-0 left-0 w-[300px] h-[300px] rounded-full bg-[#f97316] opacity-[0.08] blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] rounded-full bg-[#14b8a6] opacity-[0.06] blur-[100px] pointer-events-none" />
+
+        {/* Mobile Language Selector */}
+        <div className="absolute top-4 end-4 z-50">
+          <button 
+            onClick={toggleLanguage}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-xs text-white/80 font-medium"
+            style={{ fontFamily: lang === 'ar' ? "'Tajawal', sans-serif" : "'Inter', sans-serif" }}
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span>{lang === 'ar' ? 'English' : 'العربية'}</span>
+          </button>
+        </div>
+
+        {/* UPPER SECTION (60%) */}
+        <div className="h-[60%] flex flex-col items-center justify-center text-center space-y-4 pt-8">
+          <h1 
+            className="text-[2.5rem] font-black tracking-widest text-white leading-none"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            GROWTH<span className="text-[#f97316]">HUB</span>
+          </h1>
+          
+          <p 
+            className="text-[0.875rem] text-white/60 font-normal animate-pulse"
+            style={{ fontFamily: lang === 'ar' ? "'Tajawal', sans-serif" : "'Inter', sans-serif" }}
+          >
+            {lang === 'ar' ? 'ارتقِ بمستوى حياتك.' : 'Level up your life.'}
+          </p>
+
+          <div className="flex flex-row items-center gap-2 max-w-full overflow-x-auto py-1 px-1 no-scrollbar justify-center">
+            <span 
+              className="shrink-0 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[0.75rem] font-medium text-white/70 flex items-center gap-1.5"
+              style={{ fontFamily: lang === 'ar' ? "'Tajawal', sans-serif" : "'Inter', sans-serif" }}
+            >
+              <span>⚡</span> {lang === 'ar' ? 'XP System' : 'XP System'}
+            </span>
+            <span 
+              className="shrink-0 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[0.75rem] font-medium text-white/70 flex items-center gap-1.5"
+              style={{ fontFamily: lang === 'ar' ? "'Tajawal', sans-serif" : "'Inter', sans-serif" }}
+            >
+              <span>🎯</span> {lang === 'ar' ? 'Goal Tracking' : 'Goal Tracking'}
+            </span>
+            <span 
+              className="shrink-0 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[0.75rem] font-medium text-white/70 flex items-center gap-1.5"
+              style={{ fontFamily: lang === 'ar' ? "'Tajawal', sans-serif" : "'Inter', sans-serif" }}
+            >
+              <span>🤖</span> {lang === 'ar' ? 'AI Coach' : 'AI Coach'}
+            </span>
+          </div>
+        </div>
+
+        {/* LOWER SECTION (40%) */}
+        <div className="h-[40%] flex flex-col justify-end w-full pb-2 space-y-4">
+          {pendingMessage && (
+            <div className="p-3.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs text-center font-medium">
+              {pendingMessage}
+            </div>
+          )}
+
+          <div className="space-y-3 w-full">
+            {/* Google Sign In */}
+            <button
+              type="button"
+              disabled={loading}
+              onClick={handleGoogleLogin}
+              className="flex items-center justify-center gap-3 w-full h-[52px] rounded-[14px] bg-white text-black font-medium hover:bg-zinc-100 transition-all active:scale-95 text-sm"
+              style={{ fontFamily: lang === 'ar' ? "'Tajawal', sans-serif" : "'Inter', sans-serif" }}
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" className="shrink-0">
+                <path fill="#4285F4" d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.7v2.25h2.9c1.69-1.55 2.69-3.85 2.69-6.58z"/>
+                <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.22l-2.9-2.25c-.8.54-1.83.87-3.06.87-2.35 0-4.35-1.59-5.06-3.73H.95v2.3C2.43 15.89 5.47 18 9 18z"/>
+                <path fill="#FBBC05" d="M3.94 10.67A5.4 5.4 0 0 1 3.6 9c0-.58.1-1.14.28-1.67V5.03H.95A8.99 8.99 0 0 0 0 9c0 1.45.35 2.82.95 4.03l2.99-2.36z"/>
+                <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2A8.99 8.99 0 0 0 0 9l2.99 2.36C3.7 5.17 5.7 3.58 9 3.58z"/>
+              </svg>
+              <span>{loading ? t[lang].signingIn : (lang === 'ar' ? 'الدخول بواسطة Google' : 'Sign in with Google')}</span>
+            </button>
+
+            {/* Continue as Guest */}
+            <button
+              type="button"
+              onClick={handleGuestMode}
+              className="flex items-center justify-center w-full h-[52px] rounded-[14px] bg-transparent text-white/60 font-normal border border-white/15 hover:bg-white/5 active:scale-95 transition-all text-xs"
+              style={{ fontFamily: lang === 'ar' ? "'Tajawal', sans-serif" : "'Inter', sans-serif" }}
+            >
+              <span>{lang === 'ar' ? 'المتابعة كزائر' : 'Continue as Guest'}</span>
+            </button>
+          </div>
+
+          {/* Secure & Protected telemetry indicator */}
+          <div 
+            className="flex items-center justify-center gap-1.5 pt-2 text-[0.7rem] text-white/30"
+            style={{ fontFamily: lang === 'ar' ? "'Tajawal', sans-serif" : "'Inter', sans-serif" }}
+          >
+            <Shield className="w-3.5 h-3.5 text-emerald-500/40" />
+            <span>{lang === 'ar' ? 'آمن ومحمي' : 'Secure & Protected'}</span>
+          </div>
+        </div>
+
       </div>
 
-      {/* MAIN CONTENT WRAPPER: SET TO RELATIVE Z-10 TO SIT ABOVE CANVAS & VERTICALLY ALIGN COLUMNS */}
-      <div className="relative z-10 w-full min-h-screen grid grid-cols-1 md:grid-cols-2 items-center bg-transparent">
+      {/* DESKTOP LAYOUT (md and above) */}
+      <div className="hidden md:grid relative z-10 w-full min-h-screen grid-cols-2 items-center bg-transparent">
         
         {/* LEFT COLUMN: PURELY INVISIBLE LAYOUT SKELETON (No borders or backgrounds) */}
         <motion.div 
