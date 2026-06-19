@@ -1514,7 +1514,7 @@ export default function Shell({ children }: ShellProps) {
         {/* Commented out per safety rules:
         <header className="flex lg:hidden w-full h-14 px-4 items-center justify-between bg-[var(--sidebar-bg)] dark:bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-[var(--border)] dark:border-white/[0.03] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] z-[150] sticky top-0 transition-colors duration-500 relative">
         */}
-        {profile && (
+        {profile && pathname !== '/auth/login' && (
           <header className="flex lg:hidden w-full h-14 px-4 items-center justify-between bg-[var(--sidebar-bg)] dark:bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-[var(--border)] dark:border-white/[0.03] shadow-sm z-[150] sticky top-0 transition-colors duration-500 relative">
             {/* LEFT: Hamburger Menu Icon */}
             <div className="flex items-center order-first rtl:order-last">
