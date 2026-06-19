@@ -3,7 +3,7 @@
 import Sidebar from './Sidebar'
 import AnimatedLogo from '@/components/ui/AnimatedLogo'
 import { useGrowth } from '@/context/GrowthContext'
-import { motion, AnimatePresence, useMotionValue, useTransform, type PanInfo } from 'framer-motion'
+import { motion, AnimatePresence, useMotionValue, useTransform, animate, type PanInfo } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
@@ -671,7 +671,18 @@ export default function Shell({ children }: ShellProps) {
         shouldOpen = currentX > -threshold
       }
       if (shouldOpen !== isMobileNavOpen) playBlip()
-      setIsMobileNavOpen(shouldOpen)
+      
+      // Animate smoothly to final position instead of snapping
+      const targetX = shouldOpen 
+        ? 0 
+        : (isRTL ? SIDEBAR_WIDTH : -SIDEBAR_WIDTH)
+      
+      animate(sidebarX, targetX, {
+        type: 'spring',
+        stiffness: 300,
+        damping: 30,
+        onComplete: () => setIsMobileNavOpen(shouldOpen)
+      })
     }
 
     document.addEventListener('touchstart', handleTouchStart, { passive: true })
