@@ -26,13 +26,15 @@ export default function ParticleWave() {
     let animationId: number
     let width = (canvas.width = window.innerWidth)
     let height = (canvas.height = window.innerHeight)
+    const isMobile = width < 768
+    const spacing = isMobile ? 31 : 24
+    const speed = isMobile ? 0.0056 : 0.008
 
     let points: Point[] = []
 
     // GENERATE DENSE UNIFIED 2D GRID
     const generateGrid = (w: number, h: number) => {
       const tempPoints: Point[] = []
-      const spacing = 24
       const cols = Math.ceil(w / spacing) + 4
       const rows = Math.ceil(h / spacing) + 4
 
@@ -73,7 +75,7 @@ export default function ParticleWave() {
     let time = 0
 
     const render = () => {
-      time += 0.008
+      time += speed
 
       // Detect theme dynamically
       const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
