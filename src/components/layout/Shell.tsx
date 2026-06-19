@@ -1423,89 +1423,89 @@ export default function Shell({ children }: ShellProps) {
             <AnimatedLogo className="text-xl md:text-2xl tracking-[0.25em]" />
           </div>
 
-          <div className="flex items-center gap-6">
-            {/* Real-time Network Radar */}
-            {renderNetworkPill(false)}
+          {profile && (
+            <div className="flex items-center gap-6">
+              {/* Real-time Network Radar */}
+              {renderNetworkPill(false)}
 
-            {/* ⚡ XP */}
-            <div className="flex items-center gap-2 border-e border-[var(--card-border)] pe-6 shrink-0" title={isRTL ? 'نقاط الخبرة' : 'XP Readout'}>
-              <motion.span
-                className="shrink-0"
-                animate={{ opacity: [0.3, 1, 0.3] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <Zap className="w-5 h-5" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 6px ${currentTheme.color})` }} />
-              </motion.span>
-              <span className="text-sm md:text-base font-space font-black tracking-widest uppercase text-zinc-900 dark:text-zinc-100">
-                XP: <span style={{ color: currentTheme.color }}>{profile?.xp || 0}</span>
-              </span>
+              {/* ⚡ XP */}
+              <div className="flex items-center gap-2 border-e border-[var(--card-border)] pe-6 shrink-0" title={isRTL ? 'نقاط الخبرة' : 'XP Readout'}>
+                <motion.span
+                  className="shrink-0"
+                  animate={{ opacity: [0.3, 1, 0.3] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <Zap className="w-5 h-5" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 6px ${currentTheme.color})` }} />
+                </motion.span>
+                <span className="text-sm md:text-base font-space font-black tracking-widest uppercase text-zinc-900 dark:text-zinc-100">
+                  XP: <span style={{ color: currentTheme.color }}>{profile?.xp || 0}</span>
+                </span>
+              </div>
+
+              {/* 🔥 Streak */}
+              <div className="flex items-center gap-2 border-e border-[var(--card-border)] pe-6 shrink-0" title={isRTL ? 'سلسلة الأيام' : 'Streak'}>
+                <Flame
+                  className={cn('w-5 h-5 transition-all duration-500', streak > 0 ? 'scale-110 animate-pulse' : 'opacity-20')}
+                  style={{
+                    color: streak > 0 ? (personality === 'SAVAGE' ? '#FF0055' : '#FF5F00') : undefined,
+                    filter: streak > 0 ? `drop-shadow(0 0 6px ${personality === 'SAVAGE' ? '#FF0055' : '#FF5F00'})` : 'none'
+                  }}
+                />
+                <span
+                  className="text-sm md:text-base font-space tracking-wider font-black uppercase text-zinc-900 dark:text-zinc-100 flex items-center gap-1"
+                  style={{ opacity: streak > 0 ? 1 : 0.4 }}
+                >
+                  <span>{streak}</span>
+                  <span className="text-xs md:text-sm text-zinc-500 dark:text-zinc-400 font-bold">d</span>
+                </span>
+              </div>
+
+              {/* 🔔 Inbox Dropdown */}
+              <div className="relative shrink-0" ref={desktopInboxRef}>
+                <button
+                  onClick={() => {
+                    setInboxOpen(!inboxOpen)
+                    setAiOpen(false)
+                    playBlip()
+                  }}
+                  className={cn(
+                    "flex items-center justify-center w-10 h-10 rounded-full transition-all border relative cursor-pointer inbox-btn",
+                    inboxOpen 
+                      ? "bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-primary)] shadow-[0_0_15px_rgba(255,255,255,0.2)]" 
+                      : "bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)] hover:text-[var(--text-primary)]"
+                  )}
+                  title={isRTL ? 'الإشعارات' : 'Notifications'}
+                >
+                  <motion.div animate={bellShaking ? "shake" : ""} variants={bellVariants}>
+                    <Bell className="w-5 h-5" />
+                  </motion.div>
+                  {unreadCount > 0 && (
+                    <span 
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-[#FF0055] text-white text-[8px] font-black flex items-center justify-center rounded-full shadow-[0_0_10px_#FF0055]"
+                    >
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                <InboxDropdown 
+                  isOpen={inboxOpen}
+                  reports={reports}
+                  onClose={() => setInboxOpen(false)}
+                  onRead={(report) => {
+                    markAsRead(report.id)
+                    setInboxOpen(false)
+                  }}
+                  onMarkAllRead={async () => {
+                    const unread = reports.filter(r => !r.is_read)
+                    for (const r of unread) { await markAsRead(r.id) }
+                    fetchReports()
+                  }}
+                  themeColor={currentTheme.color}
+                />
+              </div>
             </div>
-
-            {/* 🔥 Streak */}
-            <div className="flex items-center gap-2 border-e border-[var(--card-border)] pe-6 shrink-0" title={isRTL ? 'سلسلة الأيام' : 'Streak'}>
-              <Flame
-                className={cn('w-5 h-5 transition-all duration-500', streak > 0 ? 'scale-110 animate-pulse' : 'opacity-20')}
-                style={{
-                  color: streak > 0 ? (personality === 'SAVAGE' ? '#FF0055' : '#FF5F00') : undefined,
-                  filter: streak > 0 ? `drop-shadow(0 0 6px ${personality === 'SAVAGE' ? '#FF0055' : '#FF5F00'})` : 'none'
-                }}
-              />
-              <span
-                className="text-sm md:text-base font-space tracking-wider font-black uppercase text-zinc-900 dark:text-zinc-100 flex items-center gap-1"
-                style={{ opacity: streak > 0 ? 1 : 0.4 }}
-              >
-                <span>{streak}</span>
-                <span className="text-xs md:text-sm text-zinc-500 dark:text-zinc-400 font-bold">d</span>
-              </span>
-            </div>
-
-
-
-            {/* 🔔 Inbox Dropdown */}
-            <div className="relative shrink-0" ref={desktopInboxRef}>
-              <button
-                onClick={() => {
-                  setInboxOpen(!inboxOpen)
-                  setAiOpen(false)
-                  playBlip()
-                }}
-                className={cn(
-                  "flex items-center justify-center w-10 h-10 rounded-full transition-all border relative cursor-pointer inbox-btn",
-                  inboxOpen 
-                    ? "bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-primary)] shadow-[0_0_15px_rgba(255,255,255,0.2)]" 
-                    : "bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)] hover:text-[var(--text-primary)]"
-                )}
-                title={isRTL ? 'الإشعارات' : 'Notifications'}
-              >
-                <motion.div animate={bellShaking ? "shake" : ""} variants={bellVariants}>
-                  <Bell className="w-5 h-5" />
-                </motion.div>
-                {unreadCount > 0 && (
-                  <span 
-                    className="absolute -top-1 -right-1 w-4 h-4 bg-[#FF0055] text-white text-[8px] font-black flex items-center justify-center rounded-full shadow-[0_0_10px_#FF0055]"
-                  >
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
-
-              <InboxDropdown 
-                isOpen={inboxOpen}
-                reports={reports}
-                onClose={() => setInboxOpen(false)}
-                onRead={(report) => {
-                  markAsRead(report.id)
-                  setInboxOpen(false)
-                }}
-                onMarkAllRead={async () => {
-                  const unread = reports.filter(r => !r.is_read)
-                  for (const r of unread) { await markAsRead(r.id) }
-                  fetchReports()
-                }}
-                themeColor={currentTheme.color}
-              />
-            </div>
-          </div>
+          )}
         </header>
 
         {/* Commented out per rule "Never delete code, only comment it out"
