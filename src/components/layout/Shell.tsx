@@ -1514,63 +1514,65 @@ export default function Shell({ children }: ShellProps) {
         {/* Commented out per safety rules:
         <header className="flex lg:hidden w-full h-14 px-4 items-center justify-between bg-[var(--sidebar-bg)] dark:bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-[var(--border)] dark:border-white/[0.03] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] z-[150] sticky top-0 transition-colors duration-500 relative">
         */}
-        <header className="flex lg:hidden w-full h-14 px-4 items-center justify-between bg-[var(--sidebar-bg)] dark:bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-[var(--border)] dark:border-white/[0.03] shadow-sm z-[150] sticky top-0 transition-colors duration-500 relative">
-          {/* LEFT: Hamburger Menu Icon */}
-          <div className="flex items-center order-first rtl:order-last">
-            {showSidebar ? (
-              <button
-                onClick={() => { setIsMobileNavOpen(true); playBlip(); }}
-                className="w-11 h-11 flex items-center justify-center bg-[var(--input-bg)] border border-[var(--card-border)] rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-white/20 transition-all cursor-pointer active:scale-95 shrink-0"
-                title={isRTL ? 'القائمة' : 'Menu'}
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-            ) : (
-              <div className="w-11 h-11 shrink-0" />
-            )}
-          </div>
-
-
-          {/* CENTER: Core Brand Text */}
-          <div className="absolute left-1/2 -translate-x-1/2 flex items-center" dir="ltr">
-            <AnimatedLogo className="text-lg md:text-xl tracking-[0.2em]" />
-          </div>
-
-          {/* RIGHT: exactly 🔔 (Notifications) */}
-          <div className="flex items-center gap-3 order-last rtl:order-first">
-            {renderNetworkPill(true)}
-
-            {/* 🔔 Notifications */}
-            <div className="relative" ref={mobileInboxRef}>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setInboxOpen(!inboxOpen)
-                  setAiOpen(false)
-                  playBlip()
-                }}
-                className={cn(
-                  "flex items-center justify-center w-11 h-11 rounded-full transition-all border relative cursor-pointer inbox-btn",
-                  inboxOpen 
-                    ? "bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-primary)] shadow-[0_0_15px_rgba(255,255,255,0.2)]" 
-                    : "bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)] hover:text-[var(--text-primary)]"
-                )}
-                title={isRTL ? 'الإشعارات' : 'Notifications'}
-              >
-                <motion.div animate={bellShaking ? "shake" : ""} variants={bellVariants}>
-                  <Bell className="w-[18px] h-[18px]" />
-                </motion.div>
-                {unreadCount > 0 && (
-                  <span 
-                    className="absolute -top-1 -right-1 w-4 h-4 bg-[#FF0055] text-white text-[8px] font-black flex items-center justify-center rounded-full shadow-[0_0_10px_#FF0055]"
-                  >
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
+        {profile && (
+          <header className="flex lg:hidden w-full h-14 px-4 items-center justify-between bg-[var(--sidebar-bg)] dark:bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-[var(--border)] dark:border-white/[0.03] shadow-sm z-[150] sticky top-0 transition-colors duration-500 relative">
+            {/* LEFT: Hamburger Menu Icon */}
+            <div className="flex items-center order-first rtl:order-last">
+              {showSidebar ? (
+                <button
+                  onClick={() => { setIsMobileNavOpen(true); playBlip(); }}
+                  className="w-11 h-11 flex items-center justify-center bg-[var(--input-bg)] border border-[var(--card-border)] rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-white/20 transition-all cursor-pointer active:scale-95 shrink-0"
+                  title={isRTL ? 'القائمة' : 'Menu'}
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+              ) : (
+                <div className="w-11 h-11 shrink-0" />
+              )}
             </div>
-          </div>
-        </header>
+
+
+            {/* CENTER: Core Brand Text */}
+            <div className="absolute left-1/2 -translate-x-1/2 flex items-center" dir="ltr">
+              <AnimatedLogo className="text-lg md:text-xl tracking-[0.2em]" />
+            </div>
+
+            {/* RIGHT: exactly 🔔 (Notifications) */}
+            <div className="flex items-center gap-3 order-last rtl:order-first">
+              {renderNetworkPill(true)}
+
+              {/* 🔔 Notifications */}
+              <div className="relative" ref={mobileInboxRef}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setInboxOpen(!inboxOpen)
+                    setAiOpen(false)
+                    playBlip()
+                  }}
+                  className={cn(
+                    "flex items-center justify-center w-11 h-11 rounded-full transition-all border relative cursor-pointer inbox-btn",
+                    inboxOpen 
+                      ? "bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-primary)] shadow-[0_0_15px_rgba(255,255,255,0.2)]" 
+                      : "bg-[var(--input-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:border-[var(--card-border)] hover:text-[var(--text-primary)]"
+                  )}
+                  title={isRTL ? 'الإشعارات' : 'Notifications'}
+                >
+                  <motion.div animate={bellShaking ? "shake" : ""} variants={bellVariants}>
+                    <Bell className="w-[18px] h-[18px]" />
+                  </motion.div>
+                  {unreadCount > 0 && (
+                    <span 
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-[#FF0055] text-white text-[8px] font-black flex items-center justify-center rounded-full shadow-[0_0_10px_#FF0055]"
+                    >
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+          </header>
+        )}
 
         <div className="relative pb-0">
           {children}

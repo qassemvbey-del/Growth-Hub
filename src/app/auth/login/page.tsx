@@ -190,7 +190,7 @@ export default function LoginPage() {
   const hoverTextClass = "cursor-default transition-all duration-300 hover:text-teal-400 hover:scale-[1.02] hover:drop-shadow-[0_0_12px_rgba(20,184,166,0.9)]"
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] md:bg-transparent flex flex-col md:flex-row relative overflow-hidden font-space">
+    <div className="h-[100dvh] md:min-h-screen bg-[#0D0D0D] md:bg-transparent flex flex-col md:flex-row relative overflow-hidden font-space">
       <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
       `}} />
@@ -203,10 +203,9 @@ export default function LoginPage() {
 
       {/* MOBILE LAYOUT (md and below) */}
       <div 
-        className="flex md:hidden flex-col h-[100dvh] w-full justify-between relative z-10 px-6 overflow-hidden select-none bg-[#0D0D0D]"
+        className="flex md:hidden flex-col h-[100dvh] w-full overflow-hidden select-none bg-[#0D0D0D] relative z-10 px-6"
         style={{
           paddingTop: 'calc(env(safe-area-inset-top) + 24px)',
-          paddingBottom: 'calc(env(safe-area-inset-bottom) + 24px)',
           fontFamily: lang === 'ar' ? "'Tajawal', sans-serif" : "'Inter', sans-serif"
         }}
       >
@@ -227,7 +226,7 @@ export default function LoginPage() {
         </div>
 
         {/* UPPER SECTION (60%) */}
-        <div className="h-[60%] flex flex-col items-center justify-center text-center space-y-4 pt-8">
+        <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 pt-8">
           <h1 
             className="text-[2.5rem] font-black tracking-widest text-white leading-none"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
@@ -265,7 +264,7 @@ export default function LoginPage() {
         </div>
 
         {/* LOWER SECTION (40%) */}
-        <div className="h-[40%] flex flex-col justify-end w-full pb-2 space-y-4">
+        <div className="h-[220px] flex flex-col justify-end w-full pb-[env(safe-area-inset-bottom)] space-y-4">
           {pendingMessage && (
             <div className="p-3.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs text-center font-medium">
               {pendingMessage}
@@ -314,152 +313,154 @@ export default function LoginPage() {
       </div>
 
       {/* DESKTOP LAYOUT (md and above) */}
-      <div className="hidden md:grid relative z-10 w-full min-h-screen grid-cols-2 items-center bg-transparent">
-        
-        {/* LEFT COLUMN: PURELY INVISIBLE LAYOUT SKELETON (No borders or backgrounds) */}
-        <motion.div 
-          variants={leftColumnVariants}
-          initial="hidden"
-          animate="visible"
-          className="w-full flex flex-col justify-between p-8 md:p-20 relative bg-transparent select-none min-h-[70vh] md:min-h-[80vh]"
-        >
+      <div className="hidden md:flex w-full min-h-screen justify-center items-center">
+        <div className="relative z-10 w-full grid grid-cols-2 items-center bg-transparent">
           
-          {/* Brand Header */}
-          <motion.div variants={childVariants} className="space-y-4">
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-200/20 dark:bg-white/5 border border-zinc-300/30 dark:border-white/10 text-[9px] uppercase tracking-[0.25em] font-black text-zinc-800 dark:text-zinc-300 ${hoverTextClass}`}>
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
-              {t[lang].title}
+          {/* LEFT COLUMN: PURELY INVISIBLE LAYOUT SKELETON (No borders or backgrounds) */}
+          <motion.div 
+            variants={leftColumnVariants}
+            initial="hidden"
+            animate="visible"
+            className="w-full flex flex-col justify-between p-8 md:p-20 relative bg-transparent select-none min-h-[70vh] md:min-h-[80vh]"
+          >
+            
+            {/* Brand Header */}
+            <motion.div variants={childVariants} className="space-y-4">
+              <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-200/20 dark:bg-white/5 border border-zinc-300/30 dark:border-white/10 text-[9px] uppercase tracking-[0.25em] font-black text-zinc-800 dark:text-zinc-300 ${hoverTextClass}`}>
+                <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+                {t[lang].title}
+              </div>
+              <h1 
+                className={`text-4xl md:text-6xl font-black font-space tracking-wider uppercase text-zinc-900 dark:text-white leading-none drop-shadow-[0_0_15px_rgba(20,184,166,0.5)] ${hoverTextClass}`}
+              >
+                <TypewriterText key={lang} text={t[lang].subtitle} />
+              </h1>
+              <p className={`text-sm text-zinc-600 dark:text-white/50 max-w-sm tracking-wide leading-relaxed ${hoverTextClass}`}>
+                {t[lang].tagline}
+              </p>
+            </motion.div>
+
+            {/* Feature Highlights Grid */}
+            <div className="my-12 md:my-0 space-y-8 max-w-md flex flex-col gap-6">
+              {/* Feature 1 */}
+              <motion.div variants={childVariants} className="group hover:bg-zinc-200/10 dark:hover:bg-white/5 transition-all rounded-xl p-2 -ms-2 flex gap-4 duration-300 cursor-pointer">
+                <div className="w-10 h-10 rounded-xl bg-zinc-200/20 dark:bg-white/5 border border-zinc-300/30 dark:border-white/10 flex items-center justify-center shrink-0 text-zinc-700 dark:text-white/75">
+                  <Target className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className={`text-sm font-black tracking-wide text-zinc-900 dark:text-white uppercase ${hoverTextClass}`}>
+                    <TypewriterText key={`f1-${lang}`} text={t[lang].feature1Title} />
+                  </h4>
+                  <p className={`text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed ${hoverTextClass}`}>{t[lang].feature1Desc}</p>
+                </div>
+              </motion.div>
+
+              {/* Feature 2 */}
+              <motion.div variants={childVariants} className="group hover:bg-zinc-200/10 dark:hover:bg-white/5 transition-all rounded-xl p-2 -ms-2 flex gap-4 duration-300 cursor-pointer">
+                <div className="w-10 h-10 rounded-xl bg-zinc-200/20 dark:bg-white/5 border border-zinc-300/30 dark:border-white/10 flex items-center justify-center shrink-0 text-zinc-700 dark:text-white/75">
+                  <Zap className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className={`text-sm font-black tracking-wide text-zinc-900 dark:text-white uppercase ${hoverTextClass}`}>
+                    <TypewriterText key={`f2-${lang}`} text={t[lang].feature2Title} />
+                  </h4>
+                  <p className={`text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed ${hoverTextClass}`}>{t[lang].feature2Desc}</p>
+                </div>
+              </motion.div>
+
+              {/* Feature 3 */}
+              <motion.div variants={childVariants} className="group hover:bg-zinc-200/10 dark:hover:bg-white/5 transition-all rounded-xl p-2 -ms-2 flex gap-4 duration-300 cursor-pointer">
+                <div className="w-10 h-10 rounded-xl bg-zinc-200/20 dark:bg-white/5 border border-zinc-300/30 dark:border-white/10 flex items-center justify-center shrink-0 text-zinc-700 dark:text-white/75">
+                  <Trophy className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className={`text-sm font-black tracking-wide text-zinc-900 dark:text-white uppercase ${hoverTextClass}`}>
+                    <TypewriterText key={`f3-${lang}`} text={t[lang].feature3Title} />
+                  </h4>
+                  <p className={`text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed ${hoverTextClass}`}>{t[lang].feature3Desc}</p>
+                </div>
+              </motion.div>
             </div>
-            <h1 
-              className={`text-4xl md:text-6xl font-black font-space tracking-wider uppercase text-zinc-900 dark:text-white leading-none drop-shadow-[0_0_15px_rgba(20,184,166,0.5)] ${hoverTextClass}`}
-            >
-              <TypewriterText key={lang} text={t[lang].subtitle} />
-            </h1>
-            <p className={`text-sm text-zinc-600 dark:text-white/50 max-w-sm tracking-wide leading-relaxed ${hoverTextClass}`}>
-              {t[lang].tagline}
-            </p>
+
+            {/* Brand Footer */}
+            <motion.div variants={childVariants} className={`text-[10px] tracking-[0.3em] font-monospace text-zinc-400/50 dark:text-white/30 uppercase ${hoverTextClass}`}>
+              {t[lang].footer}
+            </motion.div>
           </motion.div>
 
-          {/* Feature Highlights Grid */}
-          <div className="my-12 md:my-0 space-y-8 max-w-md flex flex-col gap-6">
-            {/* Feature 1 */}
-            <motion.div variants={childVariants} className="group hover:bg-zinc-200/10 dark:hover:bg-white/5 transition-all rounded-xl p-2 -ms-2 flex gap-4 duration-300 cursor-pointer">
-              <div className="w-10 h-10 rounded-xl bg-zinc-200/20 dark:bg-white/5 border border-zinc-300/30 dark:border-white/10 flex items-center justify-center shrink-0 text-zinc-700 dark:text-white/75">
-                <Target className="w-5 h-5" />
-              </div>
-              <div className="space-y-1">
-                <h4 className={`text-sm font-black tracking-wide text-zinc-900 dark:text-white uppercase ${hoverTextClass}`}>
-                  <TypewriterText key={`f1-${lang}`} text={t[lang].feature1Title} />
-                </h4>
-                <p className={`text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed ${hoverTextClass}`}>{t[lang].feature1Desc}</p>
-              </div>
-            </motion.div>
+          {/* RIGHT COLUMN: PURELY INVISIBLE LAYOUT SKELETON (No solid backgrounds or splits) */}
+          <div className="w-full flex items-center justify-center p-8 md:p-20 relative bg-transparent">
+            
+            {/* GLASSMORPHISM LOGIN GATEWAY */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, ease: 'easeOut' as const }}
+              className="w-full max-w-md bg-white/40 dark:bg-zinc-950/40 backdrop-blur-2xl border border-zinc-200 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.15)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] rounded-2xl relative overflow-hidden p-8 md:p-12 space-y-8"
+            >
+              {/* Subtle top border glow */}
+              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-teal-500/50 to-transparent" />
 
-            {/* Feature 2 */}
-            <motion.div variants={childVariants} className="group hover:bg-zinc-200/10 dark:hover:bg-white/5 transition-all rounded-xl p-2 -ms-2 flex gap-4 duration-300 cursor-pointer">
-              <div className="w-10 h-10 rounded-xl bg-zinc-200/20 dark:bg-white/5 border border-zinc-300/30 dark:border-white/10 flex items-center justify-center shrink-0 text-zinc-700 dark:text-white/75">
-                <Zap className="w-5 h-5" />
-              </div>
-              <div className="space-y-1">
-                <h4 className={`text-sm font-black tracking-wide text-zinc-900 dark:text-white uppercase ${hoverTextClass}`}>
-                  <TypewriterText key={`f2-${lang}`} text={t[lang].feature2Title} />
-                </h4>
-                <p className={`text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed ${hoverTextClass}`}>{t[lang].feature2Desc}</p>
-              </div>
-            </motion.div>
+              {pendingMessage && (
+                <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-sm text-center font-medium">
+                  {pendingMessage}
+                </div>
+              )}
 
-            {/* Feature 3 */}
-            <motion.div variants={childVariants} className="group hover:bg-zinc-200/10 dark:hover:bg-white/5 transition-all rounded-xl p-2 -ms-2 flex gap-4 duration-300 cursor-pointer">
-              <div className="w-10 h-10 rounded-xl bg-zinc-200/20 dark:bg-white/5 border border-zinc-300/30 dark:border-white/10 flex items-center justify-center shrink-0 text-zinc-700 dark:text-white/75">
-                <Trophy className="w-5 h-5" />
+              {/* Card Header */}
+              <div className="space-y-3 text-center md:text-left">
+                <h2 className={`text-3xl font-black font-space tracking-tight text-zinc-900 dark:text-white uppercase ${hoverTextClass}`}>
+                  {t[lang].welcome}
+                </h2>
+                <p className={`text-xs text-zinc-600 dark:text-white/40 leading-relaxed max-w-sm ${hoverTextClass}`}>
+                  {t[lang].desc}
+                </p>
               </div>
-              <div className="space-y-1">
-                <h4 className={`text-sm font-black tracking-wide text-zinc-900 dark:text-white uppercase ${hoverTextClass}`}>
-                  <TypewriterText key={`f3-${lang}`} text={t[lang].feature3Title} />
-                </h4>
-                <p className={`text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed ${hoverTextClass}`}>{t[lang].feature3Desc}</p>
+
+              {/* Secure Google OAuth Action Area with Premium Dark Google Button & Secondary Guest Button */}
+              <div className="space-y-4">
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={handleGoogleLogin}
+                  className="flex items-center justify-center gap-3 w-full py-3.5 bg-zinc-900 text-white font-bold rounded-lg border border-zinc-700 hover:bg-zinc-800 hover:border-zinc-500 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95 transition-all duration-300 group"
+                >
+                  <svg 
+                    width="20" 
+                    height="20" 
+                    viewBox="0 0 18 18" 
+                    className="shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
+                  >
+                    <path fill="#4285F4" d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.7v2.25h2.9c1.69-1.55 2.69-3.85 2.69-6.58z"/>
+                    <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.22l-2.9-2.25c-.8.54-1.83.87-3.06.87-2.35 0-4.35-1.59-5.06-3.73H.95v2.3C2.43 15.89 5.47 18 9 18z"/>
+                    <path fill="#FBBC05" d="M3.94 10.67A5.4 5.4 0 0 1 3.6 9c0-.58.1-1.14.28-1.67V5.03H.95A8.99 8.99 0 0 0 0 9c0 1.45.35 2.82.95 4.03l2.99-2.36z"/>
+                    <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2A8.99 8.99 0 0 0 0 9l2.99 2.36C3.7 5.17 5.7 3.58 9 3.58z"/>
+                  </svg>
+
+                  {/* Restored Google Button Text (Guaranteed visible with explicit text-white) */}
+                  <span className="font-space text-xs font-black tracking-[0.15em] uppercase text-white">
+                    {loading ? t[lang].signingIn : t[lang].button}
+                  </span>
+                </button>
+
+                {/* Continue as Guest Button */}
+                <button
+                  type="button"
+                  onClick={handleGuestMode}
+                  className="flex items-center justify-center w-full py-3.5 bg-transparent text-zinc-400 font-bold rounded-lg border border-zinc-800 hover:text-white hover:border-zinc-500 hover:bg-zinc-900 active:scale-95 transition-all duration-300 font-space text-xs tracking-[0.15em] uppercase"
+                >
+                  <span>{t[lang].guestButton}</span>
+                </button>
               </div>
+
+              {/* Secure lock telemetry indicator */}
+              <div className="flex items-center justify-center gap-2 text-[9px] font-monospace text-zinc-500 dark:text-white/30 uppercase tracking-widest pt-4 border-t border-zinc-200/50 dark:border-white/5">
+                <Shield className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500/60" />
+                <span className={`animate-pulse ${hoverTextClass}`}>{lang === 'ar' ? 'بيئة آمنة ومحمية' : 'SECURE & PROTECTED WORKSPACE'}</span>
+              </div>
+
             </motion.div>
           </div>
-
-          {/* Brand Footer */}
-          <motion.div variants={childVariants} className={`text-[10px] tracking-[0.3em] font-monospace text-zinc-400/50 dark:text-white/30 uppercase ${hoverTextClass}`}>
-            {t[lang].footer}
-          </motion.div>
-        </motion.div>
-
-        {/* RIGHT COLUMN: PURELY INVISIBLE LAYOUT SKELETON (No solid backgrounds or splits) */}
-        <div className="w-full flex items-center justify-center p-8 md:p-20 relative bg-transparent">
-          
-          {/* GLASSMORPHISM LOGIN GATEWAY */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, ease: 'easeOut' as const }}
-            className="w-full max-w-md bg-white/40 dark:bg-zinc-950/40 backdrop-blur-2xl border border-zinc-200 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.15)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] rounded-2xl relative overflow-hidden p-8 md:p-12 space-y-8"
-          >
-            {/* Subtle top border glow */}
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-teal-500/50 to-transparent" />
-
-            {pendingMessage && (
-              <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-sm text-center font-medium">
-                {pendingMessage}
-              </div>
-            )}
-
-            {/* Card Header */}
-            <div className="space-y-3 text-center md:text-left">
-              <h2 className={`text-3xl font-black font-space tracking-tight text-zinc-900 dark:text-white uppercase ${hoverTextClass}`}>
-                {t[lang].welcome}
-              </h2>
-              <p className={`text-xs text-zinc-600 dark:text-white/40 leading-relaxed max-w-sm ${hoverTextClass}`}>
-                {t[lang].desc}
-              </p>
-            </div>
-
-            {/* Secure Google OAuth Action Area with Premium Dark Google Button & Secondary Guest Button */}
-            <div className="space-y-4">
-              <button
-                type="button"
-                disabled={loading}
-                onClick={handleGoogleLogin}
-                className="flex items-center justify-center gap-3 w-full py-3.5 bg-zinc-900 text-white font-bold rounded-lg border border-zinc-700 hover:bg-zinc-800 hover:border-zinc-500 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95 transition-all duration-300 group"
-              >
-                <svg 
-                  width="20" 
-                  height="20" 
-                  viewBox="0 0 18 18" 
-                  className="shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
-                >
-                  <path fill="#4285F4" d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.7v2.25h2.9c1.69-1.55 2.69-3.85 2.69-6.58z"/>
-                  <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.22l-2.9-2.25c-.8.54-1.83.87-3.06.87-2.35 0-4.35-1.59-5.06-3.73H.95v2.3C2.43 15.89 5.47 18 9 18z"/>
-                  <path fill="#FBBC05" d="M3.94 10.67A5.4 5.4 0 0 1 3.6 9c0-.58.1-1.14.28-1.67V5.03H.95A8.99 8.99 0 0 0 0 9c0 1.45.35 2.82.95 4.03l2.99-2.36z"/>
-                  <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2A8.99 8.99 0 0 0 0 9l2.99 2.36C3.7 5.17 5.7 3.58 9 3.58z"/>
-                </svg>
-
-                {/* Restored Google Button Text (Guaranteed visible with explicit text-white) */}
-                <span className="font-space text-xs font-black tracking-[0.15em] uppercase text-white">
-                  {loading ? t[lang].signingIn : t[lang].button}
-                </span>
-              </button>
-
-              {/* Continue as Guest Button */}
-              <button
-                type="button"
-                onClick={handleGuestMode}
-                className="flex items-center justify-center w-full py-3.5 bg-transparent text-zinc-400 font-bold rounded-lg border border-zinc-800 hover:text-white hover:border-zinc-500 hover:bg-zinc-900 active:scale-95 transition-all duration-300 font-space text-xs tracking-[0.15em] uppercase"
-              >
-                <span>{t[lang].guestButton}</span>
-              </button>
-            </div>
-
-            {/* Secure lock telemetry indicator */}
-            <div className="flex items-center justify-center gap-2 text-[9px] font-monospace text-zinc-500 dark:text-white/30 uppercase tracking-widest pt-4 border-t border-zinc-200/50 dark:border-white/5">
-              <Shield className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500/60" />
-              <span className={`animate-pulse ${hoverTextClass}`}>{lang === 'ar' ? 'بيئة آمنة ومحمية' : 'SECURE & PROTECTED WORKSPACE'}</span>
-            </div>
-
-          </motion.div>
         </div>
       </div>
 
