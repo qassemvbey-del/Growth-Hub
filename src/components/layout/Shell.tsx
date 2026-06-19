@@ -1644,23 +1644,6 @@ export default function Shell({ children }: ShellProps) {
 
       {showSidebar && (
         <motion.div
-          drag="x"
-          dragConstraints={isRTL
-            ? { left: 0, right: SIDEBAR_WIDTH }
-            : { left: -SIDEBAR_WIDTH, right: 0 }
-          }
-          dragElastic={0.05}
-          dragMomentum={false}
-          onDragEnd={handleSidebarDragEnd}
-          onDrag={(_e, info) => {
-            const currentX = sidebarX.get()
-            const delta = info.delta.x
-            const newX = Math.max(
-              isRTL ? 0 : -SIDEBAR_WIDTH,
-              Math.min(isRTL ? SIDEBAR_WIDTH : 0, currentX + delta)
-            )
-            sidebarX.set(newX)
-          }}
           style={{ 
             x: sidebarX
           }}
