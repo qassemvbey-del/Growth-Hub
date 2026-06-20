@@ -11,54 +11,54 @@ import { cn } from '@/lib/utils'
 const CLASSES = [
   {
     id: 'programmer',
-    title: 'مبرمج',
-    description: 'تطوير البرمجيات، المواقع، وبناء الأنظمة والحلول الذكية.',
+    title: 'Programmer',
+    description: 'Software development, websites, and building smart systems.',
     image: '/champions/programmer.png',
     themeColor: '#0ea5e9',
     WatermarkIcon: Code2,
     skills: [
-      { name: 'Fix Errors', arName: 'تعديل الأخطاء', rank: 'Silver', arRank: 'سيلفر' },
-      { name: 'Code Review', arName: 'مراجعة الكود', rank: 'Gold', arRank: 'جولد' },
-      { name: 'Refactor Assistant', arName: 'مساعد الصياغة', rank: 'Platinum', arRank: 'بلاتينيوم' }
+      { name: 'Fix Errors', rank: 'Silver' },
+      { name: 'Code Review', rank: 'Gold' },
+      { name: 'Refactor Assistant', rank: 'Platinum' }
     ]
   },
   {
     id: 'network',
-    title: 'مهندس شبكات',
-    description: 'إدارة البنية التحتية، الشبكات، وتأمين السيرفرات.',
+    title: 'Network Engineer',
+    description: 'Infrastructure management, networks, and server security.',
     image: '/champions/network.png',
     themeColor: '#22c55e',
     WatermarkIcon: Network,
     skills: [
-      { name: 'Fix Errors', arName: 'تعديل الأخطاء', rank: 'Silver', arRank: 'سيلفر' },
-      { name: 'Log Analyzer', arName: 'محلل السجلات', rank: 'Gold', arRank: 'جولد' },
-      { name: 'Packet Troubleshooter', arName: 'مستكشف الحزم', rank: 'Platinum', arRank: 'بلاتينيوم' }
+      { name: 'Fix Errors', rank: 'Silver' },
+      { name: 'Log Analyzer', rank: 'Gold' },
+      { name: 'Packet Troubleshooter', rank: 'Platinum' }
     ]
   },
   {
     id: 'accountant',
-    title: 'محاسب',
-    description: 'التخطيط المالي، إدارة الأصول، وتحليل الحسابات.',
+    title: 'Accountant',
+    description: 'Financial planning, asset management, and account analysis.',
     image: '/champions/accountant.png',
     themeColor: '#eab308',
     WatermarkIcon: BarChartBig,
     skills: [
-      { name: 'Formula Builder', arName: 'صانع المعادلات', rank: 'Silver', arRank: 'سيلفر' },
-      { name: 'Financial Analyzer', arName: 'المحلل المالي', rank: 'Gold', arRank: 'جولد' },
-      { name: 'Audit Assistant', arName: 'مساعد التدقيق', rank: 'Platinum', arRank: 'بلاتينيوم' }
+      { name: 'Formula Builder', rank: 'Silver' },
+      { name: 'Financial Analyzer', rank: 'Gold' },
+      { name: 'Audit Assistant', rank: 'Platinum' }
     ]
   },
   {
     id: 'learner',
-    title: 'طالب',
-    description: 'الدراسة العامة، تطوير المهارات، وتتبع النمو الشخصي.',
+    title: 'Learner',
+    description: 'General studies, skill development, and personal growth tracking.',
     image: '/champions/learner.png',
     themeColor: '#a855f7',
     WatermarkIcon: GraduationCap,
     skills: [
-      { name: 'Concept Simplifier', arName: 'مبسط المفاهيم', rank: 'Silver', arRank: 'سيلفر' },
-      { name: 'Study Assistant', arName: 'مساعد الدراسة', rank: 'Gold', arRank: 'جولد' },
-      { name: 'Deep Explainer', arName: 'الشرح العميق', rank: 'Platinum', arRank: 'بلاتينيوم' }
+      { name: 'Concept Simplifier', rank: 'Silver' },
+      { name: 'Study Assistant', rank: 'Gold' },
+      { name: 'Deep Explainer', rank: 'Platinum' }
     ]
   }
 ]
@@ -69,8 +69,9 @@ interface Props {
 }
 
 export default function AvatarSelector({ onClose, onSaved }: Props) {
-  const { profile, setProfile, currentTheme, isRTL } = useGrowth()
-  const { showToast } = useToast()
+  const { profile, setProfile, showToast } = useGrowth() as any // fallback if not in typing context
+  const toast = useToast()
+  
   const [chosenClass, setChosenClass] = useState<string>(() => {
     const rawClass = profile?.champion_class || CLASSES[0].id
     if (rawClass === 'network_engineer') return 'network'
@@ -114,12 +115,12 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
         }
       }
 
-      showToast(isRTL ? 'تم تحديث التخصص بنجاح!' : 'Class updated successfully!', 'success')
+      toast.showToast('Class updated successfully!', 'success')
       onSaved?.(profile.avatar_url || '')
       onClose()
     } catch (err) {
       console.error('Save class error:', err)
-      showToast(isRTL ? 'فشل تحديث التخصص، يرجى المحاولة مرة أخرى' : 'Update failed', 'warning')
+      toast.showToast('Update failed', 'warning')
     } finally {
       setIsSaving(false)
     }
@@ -145,14 +146,13 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
           initial={{ scale: 0.95, opacity: 0, y: 15 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 15 }}
-          dir="rtl"
         >
           
-          {/* Roster Column (Right side in RTL) */}
-          <div className="w-full md:w-1/3 p-6 border-l border-white/5 flex flex-col gap-4 bg-[#07070b]">
+          {/* Roster Column (Left side in LTR) */}
+          <div className="w-full md:w-1/3 p-6 border-r border-white/5 flex flex-col gap-4 bg-[#07070b]">
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <h2 className="text-lg font-space font-black text-white tracking-tight">
-                {isRTL ? 'اختر الشخصية' : 'Select Champion'}
+                Choose Your Champion
               </h2>
               <button
                 onClick={onClose}
@@ -171,7 +171,7 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                     type="button"
                     onClick={() => setChosenClass(cls.id)}
                     className={cn(
-                      "flex items-center gap-4 p-3 rounded-xl transition-all cursor-pointer border border-transparent text-right w-full",
+                      "flex items-center gap-4 p-3 rounded-xl transition-all cursor-pointer border border-transparent text-left w-full",
                       isSelected 
                         ? "bg-white/10 scale-[1.02] opacity-100" 
                         : "bg-transparent opacity-60 grayscale hover:grayscale-0 hover:bg-white/5"
@@ -195,17 +195,17 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
             </div>
           </div>
 
-          {/* Details Column (Left side in RTL) */}
+          {/* Details Column (Right side in LTR) */}
           <div 
             className="w-full md:w-2/3 p-6 md:p-8 relative bg-black/30 flex flex-col justify-between overflow-hidden"
             style={{
-              background: `radial-gradient(circle at bottom left, ${selectedClassObj.themeColor}0f, transparent 70%)`
+              background: `radial-gradient(circle at bottom right, ${selectedClassObj.themeColor}0f, transparent 70%)`
             }}
           >
             {/* Close Button (Desktop only) */}
             <button
               onClick={onClose}
-              className="absolute top-6 left-6 w-9 h-9 rounded-full bg-white/5 hidden md:flex items-center justify-center text-zinc-400 hover:text-white hover:scale-105 active:scale-95 transition-all cursor-pointer border border-white/5 z-20"
+              className="absolute top-6 right-6 w-9 h-9 rounded-full bg-white/5 hidden md:flex items-center justify-center text-zinc-400 hover:text-white hover:scale-105 active:scale-95 transition-all cursor-pointer border border-white/5 z-20"
             >
               <X className="w-4 h-4" />
             </button>
@@ -225,7 +225,7 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                   style={{ borderColor: selectedClassObj.themeColor }}
                   alt={selectedClassObj.title}
                 />
-                <div className="space-y-3 text-center sm:text-right pt-2">
+                <div className="space-y-3 text-center sm:text-left pt-2">
                   <h3 className="text-3xl font-black text-white leading-none">
                     {selectedClassObj.title}
                   </h3>
@@ -249,13 +249,13 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                   return (
                     <div 
                       key={index}
-                      className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/5"
+                      className="flex flex-row items-center justify-between p-4 rounded-lg bg-white/5 border border-white/5"
                     >
                       <span className="text-sm font-medium text-white">
-                        {isRTL ? skill.arName : skill.name}
+                        {skill.name}
                       </span>
                       <span className={cn("text-xs font-semibold px-2.5 py-0.5 rounded", badgeColor)}>
-                        {isRTL ? skill.arRank : skill.rank}
+                        {skill.rank}
                       </span>
                     </div>
                   )
@@ -263,7 +263,7 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
               </div>
             </div>
 
-            {/* Pulsing Lock-in Button */}
+            {/* Lock-in Button */}
             <div className="mt-8 relative z-10">
               <motion.button
                 type="button"
@@ -278,9 +278,9 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
                 whileTap={{ scale: 0.99 }}
               >
                 {isSaving ? (
-                  <span>{isRTL ? 'جاري حفظ التغييرات...' : 'Locking in...'}</span>
+                  <span>Locking in...</span>
                 ) : (
-                  <span>{isRTL ? 'تأكيد اختيار الشخصية' : 'Confirm Selection'}</span>
+                  <span>Confirm Champion</span>
                 )}
               </motion.button>
             </div>
