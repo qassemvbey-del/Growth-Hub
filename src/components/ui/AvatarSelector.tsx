@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, X, Code, Globe, Calculator, GraduationCap, Loader2 } from 'lucide-react'
+import { Check, X, Code2, Network, BarChartBig, GraduationCap, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
@@ -13,8 +13,11 @@ const CLASSES = [
     id: 'programmer',
     label: 'Programmer',
     arLabel: 'مبرمج',
-    icon: Code,
+    image: "/champions/programmer.png",
+    themeColor: "#0ea5e9",
+    WatermarkIcon: Code2,
     arDesc: 'تطوير البرمجيات، المواقع، وبناء الأنظمة والحلول الذكية.',
+    enDesc: 'Software development, websites, and building systems and smart solutions.',
     skills: [
       { name: 'Fix Errors', arName: 'تعديل الأخطاء', rank: 'Silver', arRank: 'سيلفر' },
       { name: 'Code Review', arName: 'مراجعة الكود', rank: 'Gold', arRank: 'جولد' },
@@ -25,8 +28,11 @@ const CLASSES = [
     id: 'network_engineer',
     label: 'Network Engineer',
     arLabel: 'مهندس شبكات',
-    icon: Globe,
+    image: "/champions/network.png",
+    themeColor: "#22c55e",
+    WatermarkIcon: Network,
     arDesc: 'إدارة البنية التحتية، الشبكات، وتأمين السيرفرات.',
+    enDesc: 'Infrastructure management, networks, and securing servers.',
     skills: [
       { name: 'Fix Errors', arName: 'تعديل الأخطاء', rank: 'Silver', arRank: 'سيلفر' },
       { name: 'Log Analyzer', arName: 'محلل السجلات', rank: 'Gold', arRank: 'جولد' },
@@ -37,8 +43,11 @@ const CLASSES = [
     id: 'accountant',
     label: 'Accountant',
     arLabel: 'محاسب',
-    icon: Calculator,
+    image: "/champions/accountant.png",
+    themeColor: "#eab308",
+    WatermarkIcon: BarChartBig,
     arDesc: 'التخطيط المالي، إدارة الأصول، وتحليل الحسابات.',
+    enDesc: 'Financial planning, asset management, and analyzing accounts.',
     skills: [
       { name: 'Formula Builder', arName: 'صانع المعادلات', rank: 'Silver', arRank: 'سيلفر' },
       { name: 'Financial Analyzer', arName: 'المحلل المالي', rank: 'Gold', arRank: 'جولد' },
@@ -47,10 +56,13 @@ const CLASSES = [
   },
   {
     id: 'learner',
-    label: 'Learner',
+    label: 'General Learner',
     arLabel: 'متعلم عام',
-    icon: GraduationCap,
+    image: "/champions/learner.png",
+    themeColor: "#a855f7",
+    WatermarkIcon: GraduationCap,
     arDesc: 'الدراسة العامة، تطوير المهارات، وتتبع النمو الشخصي.',
+    enDesc: 'General studying, skill development, and tracking personal growth.',
     skills: [
       { name: 'Concept Simplifier', arName: 'مبسط المفاهيم', rank: 'Silver', arRank: 'سيلفر' },
       { name: 'Study Assistant', arName: 'مساعد الدراسة', rank: 'Gold', arRank: 'جولد' },
@@ -67,7 +79,7 @@ interface Props {
 export default function AvatarSelector({ onClose, onSaved }: Props) {
   const { profile, setProfile, currentTheme, isRTL } = useGrowth()
   const { showToast } = useToast()
-  const [chosenClass, setChosenClass] = useState<string | null>(profile?.champion_class || null)
+  const [chosenClass, setChosenClass] = useState<string>(profile?.champion_class || CLASSES[0].id)
   const [isSaving, setIsSaving] = useState(false)
   const supabase = createClient()
 
@@ -117,6 +129,8 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
     }
   }
 
+  const selectedClassObj = CLASSES.find(c => c.id === chosenClass) || CLASSES[0]
+
   return (
     <AnimatePresence>
       <motion.div
@@ -126,131 +140,154 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
         exit={{ opacity: 0 }}
       >
         <motion.div
-          className="absolute inset-0 bg-black/60 dark:bg-black/90 backdrop-blur-xl"
+          className="absolute inset-0 bg-black/80 backdrop-blur-xl"
           onClick={onClose}
         />
 
         <motion.div
-          className="relative z-10 w-full max-w-3xl rounded-3xl overflow-hidden bg-white/95 dark:bg-[#0c0c14]/95 border border-zinc-200/50 dark:border-white/10 shadow-2xl flex flex-col max-h-[85vh] p-6 md:p-8"
-          style={{
-            boxShadow: `0 0 60px ${currentTheme.color}25, inset 0 0 30px ${currentTheme.color}08`,
-          }}
+          className="relative z-10 w-full max-w-[1000px] max-h-[90vh] overflow-y-auto overflow-x-hidden bg-[#0a0a0f] border border-white/10 rounded-2xl shadow-2xl flex flex-col p-6 md:p-8 select-none"
           initial={{ scale: 0.95, opacity: 0, y: 15 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 15 }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between pb-4 border-b border-zinc-200/50 dark:border-white/5">
+          <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
             <div className="space-y-1">
-              <h2 className="text-xl md:text-2xl font-space font-black text-zinc-900 dark:text-white tracking-tight">
+              <h2 className="text-xl md:text-2xl font-space font-black text-white tracking-tight">
                 {isRTL ? 'اختر تخصصك' : 'Choose Your Class'}
               </h2>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              <p className="text-xs text-zinc-400">
                 {isRTL ? 'اختر الهوية المناسبة لمجال عملك اليومي.' : 'Select the specialization that matches your workflow.'}
               </p>
             </div>
             <button
               onClick={onClose}
-              className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:text-white hover:scale-105 active:scale-95 transition-all cursor-pointer border border-white/5"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6 overflow-y-auto pr-1 flex-1 scrollbar-thin">
-            {CLASSES.map((cls) => {
-              const ClassIcon = cls.icon
-              const isSelected = chosenClass === cls.id
-              return (
-                <button
-                  key={cls.id}
-                  type="button"
-                  onClick={() => setChosenClass(cls.id)}
-                  className={cn(
-                    "relative flex flex-col items-start p-5 rounded-2xl border transition-all duration-300 group cursor-pointer bg-zinc-50/50 dark:bg-white/[0.01] text-left w-full",
-                    isSelected 
-                      ? "bg-zinc-100/80 dark:bg-white/[0.04] border-emerald-500/50 ring-1 ring-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
-                      : "border-zinc-200 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 hover:bg-zinc-100/20 dark:hover:bg-white/[0.02]"
-                  )}
-                  style={isSelected ? { borderColor: currentTheme.color, boxShadow: `0 0 15px ${currentTheme.color}18` } : {}}
-                >
-                  {/* Icon & Title */}
-                  <div className="flex items-center gap-3 mb-3 w-full">
-                    <div 
-                      className="w-10 h-10 rounded-xl flex items-center justify-center border transition-all shrink-0 bg-black/5 dark:bg-white/5"
+          {/* Master-Detail Split Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full flex-1">
+            
+            {/* Left Column: Roster Grid */}
+            <div className="col-span-1 md:col-span-4">
+              <div className="grid grid-cols-4 md:grid-cols-2 gap-3">
+                {CLASSES.map((cls) => {
+                  const isSelected = chosenClass === cls.id
+                  return (
+                    <button
+                      key={cls.id}
+                      type="button"
+                      onClick={() => setChosenClass(cls.id)}
+                      className={cn(
+                        "aspect-square w-full relative rounded-xl overflow-hidden cursor-pointer transition-all duration-300",
+                        isSelected 
+                          ? "scale-[1.02] opacity-100 ring-2" 
+                          : "grayscale opacity-60 hover:opacity-80 hover:scale-[1.01]"
+                      )}
                       style={isSelected ? { 
-                        borderColor: currentTheme.color,
-                        backgroundColor: `${currentTheme.color}15`
+                        borderColor: cls.themeColor, 
+                        boxShadow: `0 0 20px ${cls.themeColor}` 
                       } : {}}
                     >
-                      <ClassIcon 
-                        className={cn(
-                          "w-5 h-5 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-transform duration-300 shrink-0",
-                          isSelected && "scale-105"
-                        )} 
-                        style={isSelected ? { color: currentTheme.color } : {}} 
+                      <img 
+                        src={cls.image} 
+                        alt={cls.label} 
+                        className="w-full h-full object-cover" 
                       />
-                    </div>
-                    <span className="text-sm font-space font-black tracking-wide text-zinc-800 dark:text-zinc-200 block">
-                      {isRTL ? cls.arLabel : cls.label}
-                    </span>
+                      {isSelected && (
+                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center shadow-lg border border-black/10" style={{ backgroundColor: cls.themeColor }}>
+                          <Check className="text-black text-xs font-bold w-3 h-3" />
+                        </div>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Right Column: Dynamic Details Panel */}
+            <div className="col-span-1 md:col-span-8">
+              <div 
+                className="relative rounded-xl p-6 md:p-8 bg-black/40 overflow-hidden border border-white/5 flex flex-col justify-between h-full min-h-[340px]"
+                style={{
+                  background: `radial-gradient(circle at top right, ${selectedClassObj.themeColor}12, transparent 60%)`
+                }}
+              >
+                {/* Massive Watermark Icon */}
+                <selectedClassObj.WatermarkIcon 
+                  className="text-white/5 opacity-10 absolute -bottom-10 -left-10 pointer-events-none" 
+                  size={250} 
+                />
+
+                <div className="space-y-6 relative z-10">
+                  {/* Title and Description */}
+                  <div className="space-y-2">
+                    <h3 className="text-2xl md:text-3xl font-space font-black text-white">
+                      {isRTL ? selectedClassObj.arLabel : selectedClassObj.label}
+                    </h3>
+                    <p className="text-sm text-zinc-400 leading-relaxed">
+                      {isRTL ? selectedClassObj.arDesc : selectedClassObj.enDesc}
+                    </p>
                   </div>
 
-                  {/* Arabic description (Fixed layout/translation) */}
-                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-space leading-relaxed mb-4" dir="rtl">
-                    {cls.arDesc}
-                  </p>
-
-                  {/* Vertically Stacked Pills for Skills */}
-                  <div className="w-full space-y-1.5 pt-3 border-t border-zinc-200/50 dark:border-white/5">
-                    {cls.skills.map((s, idx) => (
-                      <div 
-                        key={idx} 
-                        className="flex justify-between items-center text-[10px] font-space text-zinc-600 dark:text-zinc-400 bg-zinc-200/40 dark:bg-white/[0.02] px-3 py-1.5 rounded-lg border-none w-full"
-                      >
-                        <span className="font-semibold">{isRTL ? s.arName : s.name}</span>
-                        <span 
-                          className="text-[9px] font-mono font-medium px-1.5 py-0.5 rounded bg-zinc-300/60 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-                          style={isSelected ? { color: currentTheme.color } : {}}
+                  {/* Abilities List */}
+                  <div className="flex flex-col gap-3 mt-6">
+                    {selectedClassObj.skills.map((skill, index) => {
+                      const isGold = skill.rank === 'Gold'
+                      const isPlatinum = skill.rank === 'Platinum'
+                      const badgeColor = isGold 
+                        ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' 
+                        : isPlatinum 
+                        ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                        : 'bg-slate-400/20 text-slate-300 border border-slate-400/30'
+                      
+                      return (
+                        <div 
+                          key={index}
+                          className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors"
                         >
-                          {isRTL ? s.arRank : s.rank}
-                        </span>
-                      </div>
-                    ))}
+                          <span className="text-sm font-medium text-white">
+                            {isRTL ? skill.arName : skill.name}
+                          </span>
+                          <span className={cn("text-xs font-semibold px-2.5 py-0.5 rounded", badgeColor)}>
+                            {isRTL ? skill.arRank : skill.rank}
+                          </span>
+                        </div>
+                      )
+                    })}
                   </div>
+                </div>
 
-                  {/* Selected checkmark */}
-                  {isSelected && (
-                    <div className="absolute top-4 right-4 w-5 h-5 rounded-full flex items-center justify-center shadow-lg border border-black/10" style={{ backgroundColor: currentTheme.color }}>
-                      <Check className="text-black text-xs font-bold w-3 h-3" />
-                    </div>
-                  )}
-                </button>
-              )
-            })}
+                {/* Pulsing Lock-in Button */}
+                <div className="mt-8 relative z-10">
+                  <motion.button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="w-full py-4 rounded-xl font-space font-black text-sm tracking-wider transition-all disabled:opacity-50 flex items-center justify-center cursor-pointer text-black hover:brightness-110 active:scale-[0.99]"
+                    style={{
+                      backgroundColor: selectedClassObj.themeColor,
+                      boxShadow: `0 4px 25px ${selectedClassObj.themeColor}40`,
+                    }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                  >
+                    {isSaving ? (
+                      <span>{isRTL ? 'جاري حفظ اختيار البطل...' : 'Locking in...'}</span>
+                    ) : (
+                      <span>{isRTL ? 'تأكيد اختيار البطل' : 'Confirm Champion Selection'}</span>
+                    )}
+                  </motion.button>
+                </div>
+
+              </div>
+            </div>
+
           </div>
 
-          {/* Footer CTA */}
-          <div className="pt-4 border-t border-zinc-200/50 dark:border-white/5">
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={isSaving || !chosenClass}
-              className="w-full py-3.5 rounded-xl font-space font-black text-xs tracking-wider transition-all disabled:opacity-50 flex items-center justify-center shadow-2xl hover:scale-[1.01] active:scale-[0.99] cursor-pointer border border-white/20 hover:border-white/40"
-              style={{
-                background: chosenClass ? currentTheme.color : '#71717a',
-                color: '#000000',
-                boxShadow: chosenClass ? `0 4px 30px ${currentTheme.color}35` : 'none',
-              }}
-            >
-              {isSaving ? (
-                <span>{isRTL ? 'جاري الحفظ...' : 'Saving...'}</span>
-              ) : (
-                <span>{isRTL ? 'تأكيد الاختيار' : 'Confirm Selection'}</span>
-              )}
-            </button>
-          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
