@@ -161,15 +161,15 @@ export default function TaskSkills({
     } else if (skillId === 'network_silver') {
       promptQuery = `[Fix Errors Mode] Diagnose this connection drop or network anomaly:\n\n${customQuery}`
       isSpecialized = true
-      roleName = 'network_engineer'
+      roleName = 'network'
     } else if (skillId === 'network_gold') {
       promptQuery = `[Log Analyzer Mode] Audit these Cisco syslogs or show run outputs to find config issues:\n\n${customQuery}`
       isSpecialized = true
-      roleName = 'network_engineer'
+      roleName = 'network'
     } else if (skillId === 'network_platinum') {
       promptQuery = `[Packet Troubleshooter Mode] Diagnose routing anomalies or traceroute hops:\n\n${customQuery}`
       isSpecialized = true
-      roleName = 'network_engineer'
+      roleName = 'network'
     } else if (skillId === 'accountant_silver') {
       promptQuery = `[Formula Builder Mode] Construct a precise spreadsheet formula (Excel/Sheets) based on this description:\n\n${customQuery}`
       isSpecialized = true
@@ -274,7 +274,7 @@ export default function TaskSkills({
       { id: 'programmer_gold', label: isRTL ? 'مراجعة الكود' : 'Code Review', icon: Eye, requiredRank: 'GOLD', placeholder: isRTL ? 'أدخل الكود لمراجعته معمارياً...' : 'Paste code to check design patterns & bugs...', labelPrompt: isRTL ? 'الكود للمراجعة:' : 'Enter code for review:' },
       { id: 'programmer_platinum', label: isRTL ? 'مساعد الصياغة' : 'Refactor Assistant', icon: RefreshCw, requiredRank: 'PLATINUM', placeholder: isRTL ? 'أدخل الكود لتحسين وتحديث صياغته...' : 'Paste code to refactor...', labelPrompt: isRTL ? 'الكود لإعادة الصياغة:' : 'Enter code to refactor:' }
     ],
-    network_engineer: [
+    network: [
       { id: 'network_silver', label: isRTL ? 'تعديل الأخطاء' : 'Fix Errors', icon: Terminal, requiredRank: 'SILVER', placeholder: isRTL ? 'صف أعراض انقطاع الشبكة أو أخطاء التوجيه...' : 'Describe route drops or interface symptoms...', labelPrompt: isRTL ? 'وصف مشكلة الاتصال:' : 'Enter network connection symptoms:' },
       { id: 'network_gold', label: isRTL ? 'محلل السجلات' : 'Log Analyzer', icon: Eye, requiredRank: 'GOLD', placeholder: isRTL ? 'أدخل سجلات CLI أو show run الخاصة بـ Cisco...' : 'Paste Cisco CLI configuration/logs...', labelPrompt: isRTL ? 'سجلات CLI للتحليل:' : 'Paste Cisco CLI configs/syslogs:' },
       { id: 'network_platinum', label: isRTL ? 'مستكشف الحزم' : 'Packet Troubleshooter', icon: RefreshCw, requiredRank: 'PLATINUM', placeholder: isRTL ? 'أدخل مسارات traceroute أو حزم ping لفحصها...' : 'Paste packet tracer details or latency symptoms...', labelPrompt: isRTL ? 'بيانات تتبع الحزم:' : 'Enter packet trace details:' }

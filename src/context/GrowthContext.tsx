@@ -64,7 +64,7 @@ export interface Profile {
   ai_request_count?: number
   last_ai_reset?: string | null
   max_squads_allowed?: number
-  champion_class?: 'programmer' | 'network_engineer' | 'accountant' | 'learner'
+  champion_class?: 'programmer' | 'network' | 'accountant' | 'learner'
 }
 
 const RANKS = ['SILVER', 'GOLD', 'PLATINUM', 'DIAMOND', 'CROWN', 'ACE', 'CONQUEROR'];

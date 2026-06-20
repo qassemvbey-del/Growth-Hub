@@ -59,7 +59,7 @@ export default function TaskDrawerAiTacticalTools({
     fixErrorsPlaceholder = isRTL
       ? 'ارمي الكود البايظ أو الـ Error اللي طلعلك في الـ Console هنا...'
       : 'Paste your broken code or console error here...'
-  } else if (role === 'network_engineer') {
+  } else if (role === 'network') {
     fixErrorsPlaceholder = isRTL
       ? 'ارمي الـ CLI logs أو أوامر سيسكو هنا...'
       : 'Paste your Cisco CLI commands or router logs here...'
