@@ -150,7 +150,7 @@ export default function PricingPage() {
   const t = isAr ? pricingContent.ar : pricingContent.en
 
   return (
-    <div className="min-h-screen py-12 px-4 md:px-8 max-w-7xl mx-auto space-y-16 font-sans tracking-normal select-none">
+    <div className="min-h-screen py-12 px-4 md:px-8 w-full space-y-16 font-sans tracking-normal select-none">
       {/* Header */}
       <div className="text-center space-y-4 max-w-2xl mx-auto">
         <h1 className="text-3xl md:text-5xl font-bold text-zinc-100 flex items-center justify-center gap-2">
