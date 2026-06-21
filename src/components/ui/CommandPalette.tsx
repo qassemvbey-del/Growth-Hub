@@ -22,7 +22,7 @@ interface CommandPaletteProps {
 
 export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions = [] }: CommandPaletteProps) {
   // const { currentTheme, isRTL, openCreateGoalModal, profile, setProfile } = useGrowth()
-  const { currentTheme, isRTL, openCreateGoalModal, profile, setProfile, isGoalLimitReached } = useGrowth()
+  const { currentTheme, isRTL, openCreateGoalModal, profile, setProfile, isGoalLimitReached, showGuestLimitModal, setShowGuestLimitModal } = useGrowth() as any
   const { showToast } = useToast()
   const { playBlip, playSuccess, playClick, playError, playDeploy } = useSound()
   const router = useRouter()
@@ -42,7 +42,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
   // Create Goal Form State
   const [goalTitle, setGoalTitle] = useState('')
   const [goalDeadline, setGoalDeadline] = useState('')
-  const [goalPinned, setGoalPinned] = useState(true)
+  const [goalPinned, setGoalPinned] = useState(false)
   const [isSubmittingGoal, setIsSubmittingGoal] = useState(false)
 
   // AI Quota Info
@@ -120,7 +120,7 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
       setSubView(null)
       setGoalTitle('')
       setGoalDeadline('')
-      setGoalPinned(true)
+      setGoalPinned(false)
       setTaskName('')
       setTaskWeight(3)
       setSelectedGoalId('')
@@ -312,8 +312,8 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
 
       if (isLocal) {
         const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-        if (guestGoals.length >= 5) {
-          showToast(isRTL ? 'الحد الأقصى للأهداف المحلية هو 5' : 'Maximum 5 local goals allowed', 'warning')
+        if (guestGoals.length >= 4) {
+          setShowGuestLimitModal(true)
           playError()
           return
         }

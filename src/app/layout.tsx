@@ -43,8 +43,16 @@ const tajawal = Tajawal({
 
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: "Growth Hub | Level Up Your Learning",
   description: "Track your goals, crush your courses, and level up with your squad",
+  appleWebApp: {
+    title: "Growth Hub",
+    statusBarStyle: "black-translucent",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
 };
 
 export const viewport: Viewport = {
@@ -129,24 +137,35 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning style={{ WebkitTextSizeAdjust: '100%', textSizeAdjust: '100%' }}>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth" className="dark" style={{ WebkitTextSizeAdjust: '100%', textSizeAdjust: '100%' }}>
       <head>
-        {typeof window === 'undefined' && (
-          <script id="theme-lang-script" dangerouslySetInnerHTML={{
+        {process.env.NODE_ENV === 'production' ? (
+          <script id="theme-initializer-prod" dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 try {
-                  var savedTheme = localStorage.getItem('theme') || 'dark';
-                  document.documentElement.className = savedTheme;
-                  document.documentElement.setAttribute('data-theme', savedTheme);
-                  
-                  var lang = localStorage.getItem('language') || 'en';
-                  var isRTL = lang === 'ar';
-                  document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
-                  document.documentElement.lang = isRTL ? 'ar' : 'en';
-                  document.documentElement.style.webkitTextSizeAdjust = '100%';
-                  document.documentElement.style.textSizeAdjust = '100%';
-                  document.documentElement.style.fontSize = '100%';
+                  var mode = localStorage.getItem('theme') || 'dark';
+                  document.documentElement.className = mode;
+                  document.documentElement.style.colorScheme = mode;
+                  document.documentElement.style.lineHeight = 'normal';
+                  var cachedColor = localStorage.getItem('cached_theme_color') || '#22c55e';
+                  document.documentElement.style.setProperty('--color-neon-green', cachedColor);
+                  document.documentElement.style.setProperty('--color-primary', cachedColor);
+                  document.documentElement.style.setProperty('--theme-color', cachedColor);
+                } catch (e) {
+                  document.documentElement.className = 'dark';
+                }
+              })();
+            `
+          }} />
+        ) : (
+          <Script id="theme-initializer-dev" strategy="beforeInteractive" dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var mode = localStorage.getItem('theme') || 'dark';
+                  document.documentElement.className = mode;
+                  document.documentElement.style.colorScheme = mode;
                   document.documentElement.style.lineHeight = 'normal';
                   var cachedColor = localStorage.getItem('cached_theme_color') || '#22c55e';
                   document.documentElement.style.setProperty('--color-neon-green', cachedColor);
@@ -160,9 +179,6 @@ export default function RootLayout({
           }} />
         )}
         <link rel="manifest" href="/manifest.json" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="Growth Hub" />
         <link rel="icon" type="image/svg+xml" href="/icon.svg" />
         <link rel="apple-touch-icon" href="/icon.svg" />
       </head>

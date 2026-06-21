@@ -42,7 +42,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
   /* Commented out per rule "Never delete code, only comment it out"
   const { profile, t, calculateAccountability, isRTL, mounted, currentTheme, setShowAuthModal, addXp } = useGrowth()
   */
-  const { profile, t, calculateAccountability, isRTL, mounted, currentTheme, setShowAuthModal, addXp, isGoalLimitReached, openCreateGoalModal } = useGrowth()
+  const { profile, t, calculateAccountability, isRTL, mounted, currentTheme, setShowAuthModal, addXp, isGoalLimitReached, openCreateGoalModal, showGuestLimitModal, setShowGuestLimitModal } = useGrowth() as any
   const { showToast } = useToast()
   const router = useRouter()
   const { track } = useTrack()
@@ -53,7 +53,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
   const [showGuide, setShowGuide] = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [newSize, setNewSize] = useState('md')
-  const [syncOnCreate, setSyncOnCreate] = useState(true)
+  const [syncOnCreate, setSyncOnCreate] = useState(false)
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [defaultView, setDefaultView] = useState<'list' | 'board'>('list')
@@ -775,7 +775,7 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
   }
 
   const fetchAllAttachmentCounts = useCallback(async (userId: string, missionIds: string[]) => {
-    if (!missionIds.length) return
+    if (!userId || userId === 'guest' || !missionIds.length) return
     const { data } = await supabase
       .from('goal_attachments')
       // .select('mission_id')
@@ -850,9 +850,8 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
       // Guest Flow Support
       if (!user) {
         const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-        // if (guestGoals.length >= 1) {
-        if (guestGoals.length >= 5) {
-          setShowAuthModal(true)
+        if (guestGoals.length >= 4) {
+          setShowGuestLimitModal(true)
           playError()
           setIsSubmitting(false)
           return

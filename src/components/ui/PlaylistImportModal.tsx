@@ -288,6 +288,8 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
       localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
 
       onTasksAdded(generatedTasks)
+      window.dispatchEvent(new CustomEvent('onboarding_action', { detail: { action: 'import_playlist' } }));
+      window.dispatchEvent(new CustomEvent('onboarding-action', { detail: { action: 'import_playlist' } }));
       onClose()
       setConfirming(false)
       setPlaylistUrl('')
@@ -303,6 +305,8 @@ export default function PlaylistImportModal({ isOpen, onClose, goalId, themeColo
       setConfirming(false)
     } else {
       onTasksAdded(data || [])
+      window.dispatchEvent(new CustomEvent('onboarding_action', { detail: { action: 'import_playlist' } }));
+      window.dispatchEvent(new CustomEvent('onboarding-action', { detail: { action: 'import_playlist' } }));
       onClose()
       setConfirming(false)
       setPlaylistUrl('')

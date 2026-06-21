@@ -2147,10 +2147,7 @@ const { progress, isInRedZone } = useMemo(() => {
 
                                    {/* Main Row: Checkbox, index, title */}
                           <div className="flex items-center justify-between gap-4 w-full">
-                            <div className={cn(
-                              "flex items-center gap-3 w-full",
-                              isRTL ? "flex-row-reverse" : "flex-row"
-                            )}>
+                            <div className="flex items-center gap-3 w-full">
                               {/* RIGHT SIDE: Index + Check */}
                               <div className="flex items-center gap-3 shrink-0">
                                 <span className="font-space font-black text-[11px] text-white/30 w-5 text-right select-none">
@@ -2179,10 +2176,7 @@ const { progress, isInRedZone } = useMemo(() => {
                               </div>
 
                               {/* CENTER: Title & Metadata */}
-                              <div className={cn(
-                                "flex-1 min-w-0 flex flex-col justify-center",
-                                isRTL ? "items-end text-right" : "items-start text-left"
-                              )}>
+                              <div className="flex-1 min-w-0 flex flex-col justify-center items-start text-start">
                                 {/* Commented out per rule "Never delete code, only comment it out"
                                 <span className={cn(
                                   "text-base md:text-[17px] font-space font-bold tracking-tight transition-all duration-300 ease-in-out uppercase truncate max-w-full block",
@@ -2190,17 +2184,14 @@ const { progress, isInRedZone } = useMemo(() => {
                                 )}
                                 */}
                                 <span className={cn(
-                                  "text-base md:text-[17px] font-space font-bold tracking-tight transition-all duration-300 ease-in-out uppercase truncate max-w-full block",
+                                  "text-base md:text-[17px] font-space font-bold tracking-tight transition-all duration-300 ease-in-out uppercase truncate max-w-full block text-start",
                                   task.is_completed ? "text-gray-500 line-through opacity-55" : "text-[var(--text-primary)] dark:text-white"
                                 )}>
                                   {task.title}
                                 </span>
                                 
                                 {/* Tier 2: Metadata row directly below Title */}
-                                <div className={cn(
-                                  "flex flex-wrap items-center gap-2 mt-2 w-full",
-                                  isRTL ? "justify-end" : "justify-start"
-                                )}>
+                                <div className="flex flex-wrap items-center gap-2 mt-2 w-full justify-start">
                                   {hasVideo ? (
                                     <div className="flex items-center gap-1.5 shrink-0 bg-[var(--background-secondary)] dark:bg-white/[0.03] border border-[var(--border)] dark:border-zinc-800 px-2 py-0.5 rounded text-[11px] font-mono text-[var(--text-secondary)] dark:text-white/60">
                                       <Play className="w-3.5 h-3.5 fill-current" style={{ color: currentTheme.color }} />
@@ -2334,7 +2325,7 @@ const { progress, isInRedZone } = useMemo(() => {
 
                               {/* XP Reward Badge */}
                               <div className="flex items-center gap-1 bg-[#14b8a6]/10 border border-[#14b8a6]/20 px-2 py-0.5 rounded text-[10px] font-mono text-[#14b8a6] tracking-wider shrink-0 font-bold">
-                                +{task.weight * 10} XP
+                                <span dir="ltr" className="inline-block">+{task.weight * 10} XP</span>
                               </div>
                             </div>
 

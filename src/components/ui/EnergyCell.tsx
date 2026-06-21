@@ -117,7 +117,7 @@ export default function EnergyCell({
             x="0" 
             width="60"
             initial={{ y: 80, height: 0 }}
-            animate={{ y: fillLevelY, height: 80 - fillLevelY }}
+            animate={{ y: fillLevelY ?? 72, height: 80 - (fillLevelY ?? 72) }}
             transition={{ duration: 1.5, ease: "easeOut" }}
             fill={primary}
             opacity="0.5"
@@ -125,20 +125,22 @@ export default function EnergyCell({
           />
 
           {/* 2. Liquid ripple animation (Clipped by static crystal path) */}
-          <motion.path
-            d={`M 5 ${fillLevelY} Q 30 ${fillLevelY - 4}, 55 ${fillLevelY} L 55 80 L 5 80 Z`}
-            fill={primary}
-            opacity="0.25"
-            animate={{
-              d: [
-                `M 5 ${fillLevelY} Q 30 ${fillLevelY - 4}, 55 ${fillLevelY} L 55 80 L 5 80 Z`,
-                `M 5 ${fillLevelY} Q 30 ${fillLevelY + 4}, 55 ${fillLevelY} L 55 80 L 5 80 Z`,
-                `M 5 ${fillLevelY} Q 30 ${fillLevelY - 4}, 55 ${fillLevelY} L 55 80 L 5 80 Z`
-              ]
-            }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            clipPath={`url(#crystal-path-${uid})`}
-          />
+          {fillLevelY !== undefined && !isNaN(fillLevelY) && (
+            <motion.path
+              d={`M 5 ${fillLevelY} Q 30 ${fillLevelY - 4}, 55 ${fillLevelY} L 55 80 L 5 80 Z`}
+              fill={primary}
+              opacity="0.25"
+              animate={{
+                d: [
+                  `M 5 ${fillLevelY} Q 30 ${fillLevelY - 4}, 55 ${fillLevelY} L 55 80 L 5 80 Z`,
+                  `M 5 ${fillLevelY} Q 30 ${fillLevelY + 4}, 55 ${fillLevelY} L 55 80 L 5 80 Z`,
+                  `M 5 ${fillLevelY} Q 30 ${fillLevelY - 4}, 55 ${fillLevelY} L 55 80 L 5 80 Z`
+                ]
+              }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              clipPath={`url(#crystal-path-${uid})`}
+            />
+          )}
 
           {/* 3. Main Crystal Body Outline (Standard glow and styling) */}
           <motion.polygon 
@@ -170,7 +172,7 @@ export default function EnergyCell({
 
           {/* 5. Surface highlight line */}
           <motion.line
-            x1="5" y1={fillLevelY} x2="55" y2={fillLevelY}
+            x1="5" y1={fillLevelY ?? 72} x2="55" y2={fillLevelY ?? 72}
             stroke={primary}
             strokeWidth="1.5"
             opacity="0.8"

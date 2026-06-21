@@ -325,7 +325,7 @@ const RANKS_DATA = [
 ]
 
 export default function Shell({ children }: ShellProps) {
-  const { isRTL, profile, calculateAccountability, lastAiMessage, t, currentTheme, isRankUpModalOpen, setIsRankUpModalOpen, isLoading, showAuthModal, setShowAuthModal, openCreateGoalModal, isTaskDrawerOpen } = useGrowth()
+  const { isRTL, profile, calculateAccountability, lastAiMessage, t, currentTheme, isRankUpModalOpen, setIsRankUpModalOpen, isLoading, showAuthModal, setShowAuthModal, openCreateGoalModal, isTaskDrawerOpen, showGuestLimitModal, setShowGuestLimitModal } = useGrowth()
   const pathname = usePathname()
   const router = useRouter()
   // Commented out per rule "Never delete code, only comment it out"
@@ -1895,6 +1895,72 @@ export default function Shell({ children }: ShellProps) {
       />
       <Tutorial />
       <GlobalCreateGoalModal />
+
+      {/* Guest Limit Modal */}
+      <AnimatePresence>
+        {showGuestLimitModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9500] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+            onClick={() => setShowGuestLimitModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95 }}
+              onClick={e => e.stopPropagation()}
+              className="w-full max-w-[400px] bg-zinc-950 border border-white/10 p-6 rounded-2xl shadow-2xl relative flex flex-col items-center text-center space-y-6"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setShowGuestLimitModal(false)}
+                className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors p-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="relative">
+                <div className="w-16 h-16 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.15)] animate-pulse">
+                  <span className="text-3xl">⚠️</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-lg font-black text-white tracking-wide uppercase font-space">
+                  {isRTL ? 'اكتمل حد الضيف' : 'Guest Limit Reached'}
+                </h3>
+                <p className="text-xs text-zinc-400 font-body leading-relaxed max-w-[280px]">
+                  {isRTL 
+                    ? 'لقد وصلت إلى الحد الأقصى البالغ 4 أهداف لحسابات الضيوف. يرجى تسجيل الدخول أو إنشاء حساب لفتح أهداف غير محدودة.'
+                    : 'You have reached the limit of 4 goals for Guest accounts. Please sign in or create an account to unlock unlimited goals.'}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 w-full pt-2">
+                <button
+                  onClick={() => {
+                    setShowGuestLimitModal(false)
+                    router.push('/auth/login')
+                  }}
+                  className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 text-black font-space font-black text-xs tracking-widest rounded-md transition-all shadow-md cursor-pointer uppercase flex items-center justify-center gap-2"
+                  style={{ minHeight: '44px' }}
+                >
+                  <span>⚡ {isRTL ? 'تسجيل الدخول / إنشاء حساب' : 'Sign In / Create Account'}</span>
+                </button>
+                <button
+                  onClick={() => setShowGuestLimitModal(false)}
+                  className="w-full py-2.5 bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] text-zinc-400 hover:text-white font-space font-bold text-xs tracking-widest rounded-md transition-all cursor-pointer"
+                  style={{ minHeight: '44px' }}
+                >
+                  {isRTL ? 'إغلاق' : 'Close'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Mobile fullscreen overlay for notification list */}
       <div className="lg:hidden">
