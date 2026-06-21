@@ -1221,7 +1221,7 @@ export default function SquadGoalsPage() {
 
   if (loading || !mounted) return (
     <>
-      <div className="max-w-7xl mx-auto p-6 md:p-12 space-y-12">
+      <div className="w-full p-6 md:p-12 space-y-12">
         {/* Subtle holographic subtitle */}
         <div className="text-center md:text-left">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--theme-color)]/5 border border-[var(--theme-color)]/10 backdrop-blur-md">
@@ -1285,7 +1285,7 @@ export default function SquadGoalsPage() {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto p-6 md:p-12 space-y-6 md:space-y-12">
+      <div className="w-full p-6 md:p-12 space-y-6 md:space-y-12">
         <motion.header
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
