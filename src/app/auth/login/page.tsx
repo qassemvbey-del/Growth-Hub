@@ -49,7 +49,8 @@ function TypewriterText({ text, className = '' }: TypewriterTextProps) {
 
   return (
     <motion.span
-      style={{ display: 'inline-block' }}
+      dir="ltr"
+      style={{ display: 'inline-block', direction: 'ltr' }}
       variants={container}
       initial="hidden"
       animate="visible"
@@ -67,6 +68,19 @@ function TypewriterText({ text, className = '' }: TypewriterTextProps) {
     </motion.span>
   )
 }
+
+const getURL = () => {
+  let url =
+    process?.env?.NEXT_PUBLIC_SITE_URL ?? // Reads from .env.local
+    process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel
+    'http://localhost:3000/';
+  
+  // Make sure to include `http://` or `https://`
+  url = url.startsWith('http') ? url : `https://${url}`;
+  // Make sure to include a trailing `/`
+  url = url.endsWith('/') ? url : `${url}/`;
+  return url;
+};
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
@@ -115,7 +129,7 @@ export default function LoginPage() {
     }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/` },
+      options: { redirectTo: `${getURL()}auth/callback` },
     })
     if (error) {
       alert(error.message)

@@ -4,6 +4,7 @@ import { AlertCircle, ArrowRight, ArrowLeft } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
+import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
 const STEPS_EN = [
@@ -41,12 +42,30 @@ const STEPS_AR = [
 ]
 
 export default function Tutorial() {
+  const pathname = usePathname()
   const { isTourActive, setIsTourActive, profile, isRTL, currentTheme } = useGrowth()
   const [currentStep, setCurrentStep] = useState(0)
   const [spotlightRect, setSpotlightRect] = useState<DOMRect | null>(null)
   const [coords, setCoords] = useState({ top: 150, left: 200 })
 
   const steps = isRTL ? STEPS_AR : STEPS_EN
+
+  const updateSpotlight = () => {
+    const activeSteps = isRTL ? STEPS_AR : STEPS_EN
+    const target = document.querySelector(activeSteps[currentStep].target) as HTMLElement
+    if (target) {
+      const rect = target.getBoundingClientRect()
+      // Check if element is hidden (width/height is 0, or it's not displayed, e.g. parent is hidden)
+      const isHidden = rect.width === 0 && rect.height === 0 || (typeof window !== 'undefined' && window.getComputedStyle(target).display === 'none')
+      if (isHidden) {
+        setSpotlightRect(null)
+      } else {
+        setSpotlightRect(rect)
+      }
+    } else {
+      setSpotlightRect(null)
+    }
+  }
 
   useEffect(() => {
     if (isTourActive) {
@@ -60,26 +79,29 @@ export default function Tutorial() {
     }
   }, [isTourActive, currentStep])
 
-  const updateSpotlight = () => {
-    const activeSteps = isRTL ? STEPS_AR : STEPS_EN
-    const target = document.querySelector(activeSteps[currentStep].target)
-    if (target) {
-      setSpotlightRect(target.getBoundingClientRect())
-    } else {
-      setSpotlightRect(null)
-    }
-  }
-
   useEffect(() => {
-    if (spotlightRect && typeof window !== 'undefined') {
-      const margin = window.innerWidth < 640 ? 16 : 24
-      const popupWidth = Math.min(360, window.innerWidth - margin * 2)
+    if (typeof window !== 'undefined') {
+      const margin = window.innerWidth < 640 ? 10 : 20
+      const popupWidth = Math.min(350, window.innerWidth * 0.9)
       const popupHeight = 240
       
+      if (!spotlightRect || (spotlightRect.width === 0 && spotlightRect.height === 0)) {
+        // Fallback: Fixed Center
+        const top = (window.innerHeight - popupHeight) / 2
+        const left = (window.innerWidth - popupWidth) / 2
+        setCoords({ top, left })
+        return
+      }
+
       let top = 0
       let left = 0
       
-      const position = steps[currentStep].position
+      let position = steps[currentStep].position
+      // RTL Mirroring: Swap left/right placement
+      if (isRTL) {
+        if (position === 'right') position = 'left'
+        else if (position === 'left') position = 'right'
+      }
       
       if (position === 'right') {
         left = spotlightRect.right + margin
@@ -96,12 +118,14 @@ export default function Tutorial() {
       }
       
       // Screen boundary clamps to prevent clipping
-      left = Math.max(margin, Math.min(left, window.innerWidth - popupWidth - margin))
-      top = Math.max(margin, Math.min(top, window.innerHeight - popupHeight - margin))
+      left = Math.max(10, Math.min(left, window.innerWidth - popupWidth - 10))
+      top = Math.max(10, Math.min(top, window.innerHeight - popupHeight - 10))
       
       setCoords({ top, left })
     }
   }, [spotlightRect, currentStep, isRTL])
+
+  if (pathname === '/login' || pathname === '/auth' || pathname === '/auth/login' || pathname?.includes('/login') || pathname?.includes('/auth')) return null
 
   if (!isTourActive) return null
 
@@ -139,7 +163,7 @@ export default function Tutorial() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3 }}
-            className="absolute p-6 rounded-md border bg-zinc-950/95 border-white/10 text-white pointer-events-auto shadow-2xl z-[700] w-[calc(100vw-32px)] sm:w-[360px]"
+            className="absolute p-6 rounded-md border bg-zinc-950/95 border-white/10 text-white pointer-events-auto shadow-2xl z-[700] w-[90vw] max-w-[350px] mx-auto"
             style={{
               top: `${coords.top}px`,
               left: `${coords.left}px`,

@@ -25,17 +25,17 @@ export default function InlineGuideTip({ hasTasks }: InlineGuideTipProps) {
   */}
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const dismissed = localStorage.getItem('dismissed_core_tips') === 'true'
-      setIsDismissed(dismissed || hasTasks)
+      const hasSeenGuide = localStorage.getItem('hasDismissedQuickGuide') === 'true'
+      setIsDismissed(hasSeenGuide)
     }
-  }, [hasTasks])
+  }, [])
 
   if (isDismissed) return null
 
   const handleDismiss = () => {
     setIsDismissed(true)
     if (typeof window !== 'undefined') {
-      localStorage.setItem('dismissed_core_tips', 'true')
+      localStorage.setItem('hasDismissedQuickGuide', 'true')
     }
   }
 

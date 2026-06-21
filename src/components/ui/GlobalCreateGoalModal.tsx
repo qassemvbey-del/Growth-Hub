@@ -46,7 +46,9 @@ export default function GlobalCreateGoalModal() {
     addXp,
     calculateAccountability,
     isGoalLimitReached,
-  } = useGrowth()
+    showGuestLimitModal,
+    setShowGuestLimitModal,
+  } = useGrowth() as any
 
   const { showToast } = useToast()
   const { playDeploy, playBlip, playError, playClick } = useSound()
@@ -57,10 +59,11 @@ export default function GlobalCreateGoalModal() {
   // ── Local form state ──────────────────────────────────────────────────────
   const [newTitle, setNewTitle] = useState('')
   const [newSize, setNewSize] = useState('md')
-  const [syncOnCreate, setSyncOnCreate] = useState(true)
+  const [syncOnCreate, setSyncOnCreate] = useState(false)
   const [endDate, setEndDate] = useState('')
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [viewDate, setViewDate] = useState(new Date())
+  const [isGuestLimitReached, setIsGuestLimitReached] = useState(false)
 
   // Helper for generating days of a month
   const getDaysInMonth = (date: Date) => {
@@ -85,13 +88,20 @@ export default function GlobalCreateGoalModal() {
     if (isCreateGoalModalOpen) {
       setNewTitle(createGoalModalOpts.prefillTitle || '')
       setNewSize('md')
-      setSyncOnCreate(true)
+      setSyncOnCreate(false)
       setEndDate('')
       setIsSubmitting(false)
       setShowDatePicker(false)
       setViewDate(new Date())
+      
+      if (typeof window !== 'undefined' && (!profile?.id || profile.id === 'guest')) {
+        const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
+        setIsGuestLimitReached(guestGoals.length >= 4)
+      } else {
+        setIsGuestLimitReached(false)
+      }
     }
-  }, [isCreateGoalModalOpen, createGoalModalOpts.prefillTitle])
+  }, [isCreateGoalModalOpen, createGoalModalOpts.prefillTitle, profile?.id])
 
   // ── Close on global close-all-modals event ────────────────────────────────
   useEffect(() => {
@@ -147,9 +157,8 @@ export default function GlobalCreateGoalModal() {
       // ── Guest flow ──────────────────────────────────────────────────────
       if (!user) {
         const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-        // if (guestGoals.length >= 1) {
-        if (guestGoals.length >= 5) {
-          setShowAuthModal(true)
+        if (guestGoals.length >= 4) {
+          setShowGuestLimitModal(true)
           playError()
           return
         }
@@ -315,7 +324,7 @@ export default function GlobalCreateGoalModal() {
               <X className="w-4 h-4" />
             </button>
 
-            {isGoalLimitReached ? (
+            {isGoalLimitReached || isGuestLimitReached ? (
               /* Upgrade Required Panel */
               <div className="flex flex-col items-center text-center space-y-6 py-4">
                 <div className="relative">
@@ -326,12 +335,14 @@ export default function GlobalCreateGoalModal() {
 
                 <div className="space-y-2">
                   <h3 className="text-lg font-black text-white tracking-wide uppercase font-space">
-                    {isRTL ? 'اكتمل الحد الأقصى للأهداف' : 'Goal limit reached'}
+                    {isGuestLimitReached ? 'Guest Limit Reached' : (isRTL ? 'اكتمل الحد الأقصى للأهداف' : 'Goal limit reached')}
                   </h3>
                   <p className="text-xs text-zinc-400 font-body leading-relaxed max-w-[280px]">
-                    {isRTL 
-                      ? 'لقد وصلت إلى الحد الأقصى (5 أهداف نشطة) على الخطة المجانية. قم بالترقية الآن لفتح عدد غير محدود من الأهداف والميزات المتقدمة.'
-                      : "You've reached the maximum limit of 5 active goals on your Free tier. Upgrade to Pro to unlock unlimited goals and advanced AI features."}
+                    {isGuestLimitReached 
+                      ? 'You have reached the limit of 4 goals for Guest accounts. Please sign in or create an account to unlock unlimited goals.'
+                      : (isRTL 
+                        ? 'لقد وصلت إلى الحد الأقصى (5 أهداف نشطة) على الخطة المجانية. قم بالترقية الآن لفتح عدد غير محدود من الأهداف والميزات المتقدمة.'
+                        : "You've reached the maximum limit of 5 active goals on your Free tier. Upgrade to Pro to unlock unlimited goals and advanced AI features.")}
                   </p>
                 </div>
 
@@ -340,12 +351,12 @@ export default function GlobalCreateGoalModal() {
                     onClick={() => {
                       playClick()
                       closeCreateGoalModal()
-                      router.push('/pricing')
+                      router.push(isGuestLimitReached ? '/auth/login' : '/pricing')
                     }}
                     className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 text-black font-space font-black text-xs tracking-widest rounded-md transition-all shadow-md cursor-pointer uppercase flex items-center justify-center gap-2"
                     style={{ minHeight: '44px' }}
                   >
-                    <span>⚡ {isRTL ? 'الترقية إلى Pro' : 'Upgrade to Pro'}</span>
+                    <span>⚡ {isGuestLimitReached ? 'Sign In / Create Account' : (isRTL ? 'الترقية إلى Pro' : 'Upgrade to Pro')}</span>
                   </button>
                   <button
                     onClick={() => { playClick(); closeCreateGoalModal() }}

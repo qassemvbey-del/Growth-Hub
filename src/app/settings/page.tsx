@@ -121,6 +121,19 @@ const RANKS_DATA: RankData[] = [
   }
 ]
 
+const getURL = () => {
+  let url =
+    process?.env?.NEXT_PUBLIC_SITE_URL ?? // Reads from .env.local
+    process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel
+    'http://localhost:3000/';
+  
+  // Make sure to include `http://` or `https://`
+  url = url.startsWith('http') ? url : `https://${url}`;
+  // Make sure to include a trailing `/`
+  url = url.endsWith('/') ? url : `${url}/`;
+  return url;
+};
+
 export default function SettingsPage() {
   const { profile, setProfile, isLoading, refreshProfile, mounted, t, isRTL, currentTheme, restartTour } = useGrowth()
   const { showToast } = useToast()
@@ -506,7 +519,7 @@ export default function SettingsPage() {
                       sessionStorage.setItem('auth_redirect_url', window.location.href)
                       const { error } = await supabase.auth.signInWithOAuth({
                         provider: 'google',
-                        options: { redirectTo: `${window.location.origin}/` },
+                        options: { redirectTo: `${getURL()}auth/callback` },
                       })
                       if (error) alert(error.message)
                     }}

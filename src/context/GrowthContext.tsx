@@ -654,6 +654,8 @@ interface GrowthContextType {
   setIsTaskDrawerOpen: (open: boolean) => void
   activeGoalsCount: number
   isGoalLimitReached: boolean
+  showGuestLimitModal: boolean
+  setShowGuestLimitModal: (open: boolean) => void
 }
 
 const GrowthContext = createContext<GrowthContextType | undefined>(undefined)
@@ -751,20 +753,20 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
 
   const generateHelpGoal = async (userId: string) => {
-    const isAr = (profile?.language || 'en') === 'ar'
-    const seedGoalTitle = isAr ? "مرحباً بك في Growth Hub 🚀" : "Welcome to Growth Hub 🚀"
+    const seedGoalTitle = "ابدأ من هنا 🚀"
+    const seedGoalDesc = "دليلك السريع لاحتراف المنصة وبداية رحلتك"
+    
+    const initialTasks = [
+      { title: "اضغط على النيشان هنا عشان تقفل اول مهمة ليك وتكسب اول 10 XP", weight: 10 },
+      { title: "عشان تفتح الـ COMMAND PALETTE بسرعة اضغط CTRL + K", weight: 20 },
+      { title: "عشان تسحب كورس يوتيوب IMPORT PLAYLIST اضغط على زرار", weight: 30 },
+      { title: "اضغط على أيقونة الـ PIN في الهدف ده عشان يتثبت في الداشبورد", weight: 20 },
+      { title: "افتح الـ AI COACH من القائمة عشان تاخد تقرير تكتيكي", weight: 50 },
+      { title: "امسح الهدف التجريبي ده من سلة المهملات وابدأ هدفك الحقيقي", weight: 50 }
+    ]
 
     if (userId === 'guest') {
       const fakeId = 'local_' + Math.random().toString(36).substring(2, 9)
-      const arSteps = [
-        "أنشئ مهمتك الأولى لتنظيم يومك.",
-        "حدد موعداً نهائياً للمهمة لمتابعة وقتك."
-      ]
-      const enSteps = [
-        "Create your first task",
-        "Set a deadline"
-      ]
-      const steps = isAr ? arSteps : enSteps
       const newLocalGoal = {
         id: fakeId,
         user_id: 'guest',
@@ -776,12 +778,12 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
         isPinned: true,
         is_pinned: true,
         created_at: new Date().toISOString(),
-        metadata: { defaultView: 'list', is_tutorial: true },
-        tasks: steps.map((step) => ({
+        metadata: { defaultView: 'list', is_tutorial: true, description: seedGoalDesc },
+        tasks: initialTasks.map((t) => ({
           id: 'local_task_' + Math.random().toString(36).substring(2, 9),
           goal_id: fakeId,
-          title: step,
-          weight: 3,
+          title: t.title,
+          weight: t.weight,
           is_completed: false
         }))
       }
@@ -800,7 +802,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
         sync_to_dashboard: true,
         is_pinned: true,
         isPinned: true,
-        metadata: { defaultView: 'list', is_tutorial: true }
+        metadata: { defaultView: 'list', is_tutorial: true, description: seedGoalDesc }
       })
       .select()
       .single()
@@ -811,19 +813,10 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (newGoal) {
-      const arSteps = [
-        "أنشئ مهمتك الأولى لتنظيم يومك.",
-        "حدد موعداً نهائياً للمهمة لمتابعة وقتك."
-      ]
-      const enSteps = [
-        "Create your first task",
-        "Set a deadline"
-      ]
-      const steps = isAr ? arSteps : enSteps
-      const taskPayloads = steps.map((step) => ({
+      const taskPayloads = initialTasks.map((t) => ({
         goal_id: newGoal.id,
-        title: step,
-        weight: 3,
+        title: t.title,
+        weight: t.weight,
         is_completed: false
       }))
       const { error: tasksError } = await supabase.from('tasks').insert(taskPayloads)
@@ -856,6 +849,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
   const [oldRank, setOldRank] = useState('SILVER')
   const [newRank, setNewRank] = useState('SILVER')
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [showGuestLimitModal, setShowGuestLimitModal] = useState(false)
   const [topXpUserId, setTopXpUserId] = useState<string | null>(null)
   const [isCreateGoalModalOpen, setIsCreateGoalModalOpen] = useState(false)
   const [createGoalModalOpts, setCreateGoalModalOpts] = useState<{ prefillTitle?: string; goalType?: 'solo' | 'squad' }>({})
@@ -1560,7 +1554,7 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
 
   // Periodically update last_seen every 5 minutes
   useEffect(() => {
-    if (!profile?.id) return
+    if (!profile?.id || profile.id === 'guest') return
 
     const updateLastSeen = async () => {
       await supabase
@@ -1658,6 +1652,8 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
       },
       showAuthModal,
       setShowAuthModal,
+      showGuestLimitModal,
+      setShowGuestLimitModal,
       perks,
       getRankNeonClass,
       tasksCompletedToday,

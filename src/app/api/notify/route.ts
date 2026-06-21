@@ -5,8 +5,8 @@ export async function POST(request: Request) {
   try {
     const { targetUserId, type, title, contentText, taskId, taskTitle, senderId, senderName, goalId, cupId, isSquad } = await request.json()
 
-    if (!targetUserId) {
-      return NextResponse.json({ error: 'Missing targetUserId' }, { status: 400 })
+    if (!targetUserId || targetUserId === 'guest') {
+      return NextResponse.json({ error: 'Missing or invalid targetUserId' }, { status: 400 })
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!

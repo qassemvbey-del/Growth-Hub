@@ -30,7 +30,7 @@ import {
   ArrowRight, Search, Shield, Users, CheckCircle2, XCircle, Plus,
   HelpCircle, Eye, Info, List, Kanban, Loader2, Sparkles, Check, 
   AlertTriangle, FolderClosed, UserPlus, Users2, Network, X, BookOpen, 
-  Settings2, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard, Circle, Zap, Target
+  Settings2, Flame, SignalHigh, SignalMedium, SignalLow, LayoutDashboard, Circle, Zap, Target, Lock
 } from 'lucide-react'
 
 
@@ -61,7 +61,7 @@ export default function SquadGoalsPage() {
   /* Commented out per rule "Never delete code, only comment it out"
   const { profile, t, calculateAccountability, isRTL, mounted, currentTheme, setShowAuthModal, addXp } = useGrowth()
   */
-  const { profile, t, calculateAccountability, isRTL, mounted, currentTheme, setShowAuthModal, addXp, isGoalLimitReached, openCreateGoalModal } = useGrowth()
+  const { profile, t, calculateAccountability, isRTL, mounted, currentTheme, setShowAuthModal, addXp, isGoalLimitReached, openCreateGoalModal, showGuestLimitModal, setShowGuestLimitModal } = useGrowth() as any
   const { showToast } = useToast()
   const router = useRouter()
   const { track } = useTrack()
@@ -72,7 +72,7 @@ export default function SquadGoalsPage() {
   const [showGuide, setShowGuide] = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [newSize, setNewSize] = useState('md')
-  const [syncOnCreate, setSyncOnCreate] = useState(true)
+  const [syncOnCreate, setSyncOnCreate] = useState(false)
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [defaultView, setDefaultView] = useState<'list' | 'board'>('list')
@@ -93,6 +93,7 @@ export default function SquadGoalsPage() {
   const [joinRoleInput, setJoinRoleInput] = useState<string | null>(null)
   
   const supabase = createClient()
+  const isGuest = !profile?.id || profile.id === 'guest'
 
   // ── Attachments state ─────────────────────────────────────────────────
   const [attachmentMissionId, setAttachmentMissionId] = useState<string | null>(null)
@@ -448,7 +449,7 @@ export default function SquadGoalsPage() {
   // --- REAL-TIME SUBSCRIPTION FOR SQUAD CANVAS UPDATES ---
   useEffect(() => {
     console.log('🚀 REALTIME HOOK MOUNTED');
-    if (!profile?.id) {
+    if (!profile?.id || profile.id === 'guest') {
       console.log('Realtime hook waiting: profile session is not yet loaded');
       return;
     }
@@ -751,10 +752,7 @@ export default function SquadGoalsPage() {
   async function fetchMissions() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      if (typeof window !== 'undefined') {
-        const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-        setMissions(guestGoals)
-      }
+      setMissions([])
       setLoading(false)
       return
     }
@@ -950,7 +948,7 @@ export default function SquadGoalsPage() {
   }
 
   const fetchAllAttachmentCounts = useCallback(async (userId: string, missionIds: string[]) => {
-    if (!missionIds.length) return
+    if (!userId || userId === 'guest' || !missionIds.length) return
     const { data } = await supabase
       .from('goal_attachments')
       // .select('mission_id')
@@ -1028,9 +1026,8 @@ export default function SquadGoalsPage() {
       // Guest Flow Support
       if (!user) {
         const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-        // if (guestGoals.length >= 1) {
-        if (guestGoals.length >= 5) {
-          setShowAuthModal(true)
+        if (guestGoals.length >= 4) {
+          setShowGuestLimitModal(true)
           playError()
           setIsSubmitting(false)
           return
@@ -1358,20 +1355,26 @@ export default function SquadGoalsPage() {
             */
             <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:flex-row sm:gap-3 md:w-auto">
               <button
-                onClick={() => { playBlip(); setShowJoinGoal(true); }}
-                className="flex flex-row items-center justify-center gap-1 sm:gap-2 w-full md:w-auto h-11 px-2 sm:px-6 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-[9px] min-[375px]:text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-all duration-300 active:scale-[0.97] shadow-lg cursor-pointer animate-pulse"
+                onClick={() => { if (!isGuest) { playBlip(); setShowJoinGoal(true); } }}
+                disabled={isGuest}
+                className={cn(
+                  "flex flex-row items-center justify-center gap-1 sm:gap-2 w-full md:w-auto h-11 px-2 sm:px-6 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-[9px] min-[375px]:text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-all duration-300 active:scale-[0.97] shadow-lg cursor-pointer",
+                  isGuest ? "opacity-50 cursor-not-allowed animate-none" : "animate-pulse"
+                )}
               >
                 <LinkIcon className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" />
-                {/* {isRTL ? 'انضم لهدف' : 'JOIN GOAL'} */}
                 {isRTL ? 'انضم لهدف' : 'Join Goal'}
               </button>
               <button
-                onClick={() => { playBlip(); handleCreateGoalClick(); }}
-                className="flex flex-row items-center justify-center gap-1 sm:gap-2 w-full md:w-auto h-11 px-2 sm:px-6 rounded-md font-space text-[9px] min-[375px]:text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-all duration-300 hover:brightness-110 active:scale-[0.97] shadow-lg cursor-pointer text-white"
+                onClick={() => { if (!isGuest) { playBlip(); handleCreateGoalClick(); } }}
+                disabled={isGuest}
+                className={cn(
+                  "flex flex-row items-center justify-center gap-1 sm:gap-2 w-full md:w-auto h-11 px-2 sm:px-6 rounded-md font-space text-[9px] min-[375px]:text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-all duration-300 hover:brightness-110 active:scale-[0.97] shadow-lg cursor-pointer text-white",
+                  isGuest ? "opacity-50 cursor-not-allowed" : ""
+                )}
                 style={{ backgroundColor: currentTheme.color, boxShadow: `0 4px 20px ${currentTheme.color}33` }}
               >
                 <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                {/* {isRTL ? 'أنشئ هدفاً جماعياً' : 'CREATE SQUAD GOAL'} */}
                 {isRTL ? 'أنشئ هدفاً جماعياً' : 'Create Squad Goal'}
               </button>
             </div>
@@ -1703,7 +1706,29 @@ export default function SquadGoalsPage() {
         */}
 
         <div className="w-full">
-          {typeFilter === 'squad' ? (
+          {isGuest ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center border border-white/5 rounded-2xl bg-white/[0.01] p-6 max-w-xl mx-auto space-y-6">
+              <div className="w-16 h-16 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center shadow-lg">
+                <Lock className="w-8 h-8 text-zinc-500" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold text-zinc-300">
+                  {isRTL ? 'الأهداف الجماعية مغلقة' : 'Squad Goals Locked'}
+                </h3>
+                <p className="text-sm text-zinc-500 leading-relaxed">
+                  {isRTL 
+                    ? 'الأهداف الجماعية مخصصة للمستخدمين المسجلين فقط. سجل الدخول للتعاون مع فريقك.'
+                    : 'Squad Goals are exclusively for registered users. Sign in to collaborate with your team.'}
+                </p>
+              </div>
+              <button
+                onClick={() => { playBlip(); router.push('/auth/login'); }}
+                className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-black font-space font-black text-xs tracking-wider rounded-md hover:brightness-110 active:scale-[0.97] transition-all cursor-pointer uppercase"
+              >
+                {isRTL ? 'تسجيل الدخول' : 'Sign In'}
+              </button>
+            </div>
+          ) : typeFilter === 'squad' ? (
             <div className="space-y-10 w-full">
               {/* COMMANDING SECTION */}
               <div>
