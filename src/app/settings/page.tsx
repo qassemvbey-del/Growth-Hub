@@ -423,8 +423,8 @@ export default function SettingsPage() {
     : 100
 
   return (
-    <div className="min-h-[calc(100dvh-64px)] p-4 md:p-8 flex flex-col">
-      <div className="w-full max-w-2xl mx-auto space-y-6">
+    <div className="w-full flex-1 px-4 md:px-8 py-6 flex flex-col">
+      <div className="w-full max-w-2xl space-y-6">
         
         {/* Settings Header */}
         <header className="space-y-1 text-start">

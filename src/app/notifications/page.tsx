@@ -68,7 +68,7 @@ export default function NotificationsPage() {
 
   return (
     <>
-      <div className="w-full min-h-[calc(100vh-64px)] py-8 md:py-12 px-4 max-w-3xl mx-auto font-space space-y-8">
+      <div className="w-full min-h-[calc(100vh-64px)] py-8 md:py-12 px-4 font-space space-y-8">
         
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-black/5 dark:border-white/5">

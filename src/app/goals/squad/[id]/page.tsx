@@ -1669,7 +1669,7 @@ const { progress, isInRedZone } = useMemo(() => {
           </span>
         </div>
       )}
-      <div ref={exportRef} className={cn("w-full max-w-7xl mx-auto px-4 md:px-8 p-4 md:p-12 space-y-8 md:space-y-12", isReadOnly && "mt-12 pointer-events-none")}>
+      <div ref={exportRef} className={cn("w-full px-4 md:px-8 p-4 md:p-12 space-y-8 md:space-y-12", isReadOnly && "mt-12 pointer-events-none")}>
         
         {/* Mission Header Overview */}
         {/* rounded-md */}
