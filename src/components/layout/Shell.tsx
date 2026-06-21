@@ -1587,7 +1587,7 @@ export default function Shell({ children }: ShellProps) {
           </header>
         )}
 
-        <div className="relative pb-0">
+        <div className="relative pb-0 w-full flex-1 px-4 md:px-8 py-6">
           {children}
         </div>
       </main>
