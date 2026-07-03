@@ -1,16 +1,14 @@
 'use client'
 
-import { AlertTriangle, CheckCircle2, FileText, HelpCircle, Lock, LogOut, Star, User, Brain, Settings as SettingsIcon, Moon, Sun, Trophy, Volume2, ChevronRight, X } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
+import { AlertTriangle, CheckCircle2, FileText, HelpCircle, Lock, LogOut, Star, User, Settings as SettingsIcon, Moon, Sun, Trophy, ChevronRight, X, Sparkles } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useGrowth } from '@/context/GrowthContext'
 import { createClient } from '@/lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/components/ui/Toast'
-import { getFeatureUsage } from '@/lib/quota'
 import { useSound } from '@/context/SoundContext'
-import CustomSelect from '@/components/ui/CustomSelect'
 import { deleteOwnAccount } from '@/app/actions/adminActions'
 import AvatarSelector from '@/components/ui/AvatarSelector'
 import EnergyCell from '@/components/ui/EnergyCell'
@@ -30,8 +28,6 @@ interface RankData {
 const RANKS_DATA: RankData[] = [
   {
     id: 'SILVER',
-    // Commented out per safety rules:
-    // name: 'SILVER',
     name: 'Silver',
     threshold: 0,
     themeId: 'SILVER',
@@ -43,8 +39,6 @@ const RANKS_DATA: RankData[] = [
   },
   {
     id: 'GOLD',
-    // Commented out per safety rules:
-    // name: 'GOLD',
     name: 'Gold',
     threshold: 400,
     themeId: 'GOLD',
@@ -56,8 +50,6 @@ const RANKS_DATA: RankData[] = [
   },
   {
     id: 'PLATINUM',
-    // Commented out per safety rules:
-    // name: 'PLATINUM',
     name: 'Platinum',
     threshold: 1000,
     themeId: 'PLATINUM',
@@ -69,8 +61,6 @@ const RANKS_DATA: RankData[] = [
   },
   {
     id: 'DIAMOND',
-    // Commented out per safety rules:
-    // name: 'DIAMOND',
     name: 'Diamond',
     threshold: 2000,
     themeId: 'DIAMOND',
@@ -82,8 +72,6 @@ const RANKS_DATA: RankData[] = [
   },
   {
     id: 'CROWN',
-    // Commented out per safety rules:
-    // name: 'CROWN',
     name: 'Crown',
     threshold: 4000,
     themeId: 'CROWN',
@@ -95,8 +83,6 @@ const RANKS_DATA: RankData[] = [
   },
   {
     id: 'ACE',
-    // Commented out per safety rules:
-    // name: 'ACE',
     name: 'Ace',
     threshold: 7000,
     themeId: 'ACE',
@@ -108,8 +94,6 @@ const RANKS_DATA: RankData[] = [
   },
   {
     id: 'CONQUEROR',
-    // Commented out per safety rules:
-    // name: 'CONQUEROR',
     name: 'Conqueror',
     threshold: 12000,
     themeId: 'CONQUEROR',
@@ -121,15 +105,39 @@ const RANKS_DATA: RankData[] = [
   }
 ]
 
+const CHAMPIONS_MAP: Record<string, { title: string; description: string; image: string; color: string }> = {
+  programmer: {
+    title: 'Programmer',
+    description: 'Software development, websites, and building smart systems.',
+    image: '/champions/programmer.png',
+    color: '#0ea5e9'
+  },
+  network: {
+    title: 'Network Engineer',
+    description: 'Infrastructure management, networks, and server security.',
+    image: '/champions/network.png',
+    color: '#22c55e'
+  },
+  accountant: {
+    title: 'Accountant',
+    description: 'Financial planning, asset management, and account analysis.',
+    image: '/champions/accountant.png',
+    color: '#eab308'
+  },
+  learner: {
+    title: 'Learner',
+    description: 'General studies, skill development, and personal growth tracking.',
+    image: '/champions/learner.png',
+    color: '#a855f7'
+  }
+}
+
 const getURL = () => {
   let url =
-    process?.env?.NEXT_PUBLIC_SITE_URL ?? // Reads from .env.local
-    process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel
+    process?.env?.NEXT_PUBLIC_SITE_URL ??
+    process?.env?.NEXT_PUBLIC_VERCEL_URL ??
     'http://localhost:3000/';
-  
-  // Make sure to include `http://` or `https://`
   url = url.startsWith('http') ? url : `https://${url}`;
-  // Make sure to include a trailing `/`
   url = url.endsWith('/') ? url : `${url}/`;
   return url;
 };
@@ -139,7 +147,9 @@ export default function SettingsPage() {
   const { showToast } = useToast()
   const router = useRouter()
   const supabase = createClient()
-  const { volume, setVolume, isMuted, setIsMuted, playBlip } = useSound()
+  const { playBlip } = useSound()
+
+  const [activeTab, setActiveTab] = useState<'account' | 'energy' | 'preferences'>('account')
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -161,70 +171,6 @@ export default function SettingsPage() {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true)
   const [isPwaInstalled, setIsPwaInstalled] = useState<boolean>(false)
   const [pwaPromptAvailable, setPwaPromptAvailable] = useState<boolean>(false)
-  // Commented out per safety rules:
-  // const [quotaData, setQuotaData] = useState<any>(null)
-  const usageLimitsRef = useRef<HTMLDivElement>(null)
-
-  // Commented out per safety rules:
-  // useEffect(() => {
-  //   const fetchQuotas = () => {
-  //     const fix = getFeatureUsage('fix_errors')
-  //     const explain = getFeatureUsage('explain_topic')
-  //     const checklist = getFeatureUsage('generate_checklist')
-  //     setQuotaData({ fix, explain, checklist })
-  //   }
-  //   fetchQuotas()
-  //   const interval = setInterval(fetchQuotas, 15000)
-  //   return () => clearInterval(interval)
-  // }, [])
-
-  const [resetCountdown, setResetCountdown] = useState<string>('')
-
-  useEffect(() => {
-    if (!profile?.last_ai_reset) {
-      setResetCountdown('')
-      return
-    }
-
-    const updateCountdown = () => {
-      const lastReset = new Date(profile.last_ai_reset!).getTime()
-      const nextReset = lastReset + 12 * 60 * 60 * 1000
-      const remaining = nextReset - Date.now()
-
-      if (remaining <= 0) {
-        setResetCountdown('')
-      } else {
-        const hrs = Math.floor(remaining / (3600 * 1000))
-        const mins = Math.floor((remaining % (3600 * 1000)) / (60 * 1000))
-        const secs = Math.floor((remaining % (60 * 1000)) / 1000)
-        const hrsText = String(hrs).padStart(2, '0')
-        const minsText = String(mins).padStart(2, '0')
-        const secsText = String(secs).padStart(2, '0')
-        setResetCountdown(
-          isRTL
-            ? `يعاد التعيين خلال ${hrsText}س ${minsText}د ${secsText}ث`
-            : `Resets in ${hrsText}h ${minsText}m ${secsText}s`
-        )
-      }
-    }
-
-    updateCountdown()
-    const interval = setInterval(updateCountdown, 1000)
-    return () => clearInterval(interval)
-  }, [profile?.last_ai_reset, isRTL])
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search)
-      if (params.get('focus') === 'usage-limits' && usageLimitsRef.current) {
-        usageLimitsRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        usageLimitsRef.current.classList.add('ring-2', 'ring-amber-500/50', 'animate-pulse')
-        setTimeout(() => {
-          usageLimitsRef.current?.classList.remove('ring-2', 'ring-amber-500/50', 'animate-pulse')
-        }, 3000)
-      }
-    }
-  }, [profile])
 
   useEffect(() => {
     setIsDarkMode(document.documentElement.classList.contains('dark'))
@@ -273,7 +219,6 @@ export default function SettingsPage() {
     })
   }, [profile])
 
-  // Close all modals event listener from global Shell ESC matrix
   useEffect(() => {
     const handleCloseAll = () => {
       setIsAvatarSelectorOpen(false)
@@ -288,7 +233,6 @@ export default function SettingsPage() {
   const handleSaveDirectly = async (updatedData: typeof formData, customDarkMode?: boolean) => {
     setSaving(true)
 
-    // Apply theme on save
     const activeDarkMode = customDarkMode !== undefined ? customDarkMode : isDarkMode
     const themeKey = activeDarkMode ? 'dark' : 'light'
     document.documentElement.classList.toggle('dark', activeDarkMode)
@@ -296,7 +240,6 @@ export default function SettingsPage() {
 
     const { data: { user } } = await supabase.auth.getUser()
     
-    // ── GUEST MODE INTERCEPT ──
     if (!user || profile?.id === 'guest') {
       if (profile) {
         const optimistic = {
@@ -318,7 +261,6 @@ export default function SettingsPage() {
       return
     }
 
-    // ── OPTIMISTIC UPDATE: immediately push changes to context
     if (profile) {
       const optimistic = {
         ...profile,
@@ -368,18 +310,6 @@ export default function SettingsPage() {
     router.push('/auth/login')
   }
 
-  const handleDecrementVolume = () => {
-    const newVol = Math.max(0, volume - 0.05)
-    setVolume(newVol)
-    playBlip()
-  }
-
-  const handleIncrementVolume = () => {
-    const newVol = Math.min(1, volume + 0.05)
-    setVolume(newVol)
-    playBlip()
-  }
-
   const handlePermanentlyDeleteAccount = async () => {
     if (!profile) return
     playBlip()
@@ -388,8 +318,6 @@ export default function SettingsPage() {
       if (res?.success) {
         await supabase.auth.signOut()
         localStorage.clear()
-        // Commented out per safety rules:
-        // showToast(isRTL ? 'تم حذف حسابك نهائياً بنجاح' : 'ACCOUNT_WIPED_SUCCESSFULLY', 'success')
         showToast(isRTL ? 'تم حذف حسابك نهائياً بنجاح' : 'Account successfully deleted', 'success')
         router.push('/auth/login')
       } else {
@@ -397,8 +325,6 @@ export default function SettingsPage() {
       }
     } catch (err: any) {
       console.error('Delete own account error:', err)
-      // Commented out per safety rules:
-      // showToast('DELETE_FAILED', 'warning')
       showToast('Delete failed', 'warning')
       alert('Account deletion failed: ' + (err.message || 'Unknown error'))
     }
@@ -407,9 +333,6 @@ export default function SettingsPage() {
 
   if (isLoading || !mounted) return (
     <div className="p-16 font-space animate-pulse tracking-widest text-sm md:text-base text-center" style={{ color: currentTheme.color }}>
-      {/* Commented out per safety rules:
-      {isRTL ? 'جاري التحميل...' : 'LOADING USER DATA...'}
-      */}
       {isRTL ? 'جاري التحميل...' : 'Loading user data...'}
     </div>
   )
@@ -422,9 +345,12 @@ export default function SettingsPage() {
     ? Math.min(100, Math.max(0, (currentXp - activeRank.threshold) / (nextRank.threshold - activeRank.threshold) * 100))
     : 100
 
+  const activeChampClass = profile?.champion_class || 'learner'
+  const currentChamp = CHAMPIONS_MAP[activeChampClass] || CHAMPIONS_MAP.learner
+
   return (
     <div className="w-full flex-1 px-4 md:px-8 py-6 flex flex-col">
-      <div className="w-full max-w-2xl space-y-6">
+      <div className="w-full max-w-5xl space-y-8">
         
         {/* Settings Header */}
         <header className="space-y-1 text-start">
@@ -436,569 +362,495 @@ export default function SettingsPage() {
           </p>
         </header>
 
-        {/* 1. ACCOUNT BLOCK */}
-        <div>
-          <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
-            {isRTL ? 'الحساب الشخصي' : 'Account'}
-          </span>
-          <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4 space-y-4">
-            
-            {/* Avatar Row */}
-            <div className="flex items-center gap-4 pb-4 border-b border-white/5">
-              <button
-                type="button"
-                onClick={() => { setIsAvatarSelectorOpen(true); playBlip(); }}
-                className="relative w-14 h-14 rounded-full border border-white/20 flex items-center justify-center bg-zinc-100/80 dark:bg-white/10 overflow-hidden shadow-md group cursor-pointer"
-              >
-                {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover rounded-full" />
-                ) : (
-                  <User className="text-white/40 w-8 h-8" />
-                )}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <FileText className="text-white w-4 h-4" />
-                </div>
-              </button>
-              <div className="flex-1 min-w-0 text-start">
-                <h4 className="font-medium text-sm text-white truncate">
-                  {profile?.full_name || (isRTL ? 'عضو' : 'Member')}
-                </h4>
-                <p className="text-[10px] text-zinc-500 truncate mt-0.5">
-                  {userEmail || (isRTL ? 'حساب محلي مؤقت' : 'Temporary Local Account')}
-                </p>
-              </div>
-            </div>
+        {/* Split Screen Layout */}
+        <div className="flex flex-col md:flex-row gap-8 items-start">
+          
+          {/* Left Sidebar Menu */}
+          <aside className="w-full md:w-64 flex flex-row md:flex-col gap-1 p-1 bg-black/10 dark:bg-black/30 border border-white/5 rounded-xl shrink-0">
+            {[
+              { key: 'account', label: isRTL ? 'الحساب' : 'Account', Icon: User },
+              { key: 'energy', label: isRTL ? 'إينرجي+' : 'Energy+', Icon: Trophy },
+              { key: 'preferences', label: isRTL ? 'التفضيلات' : 'Preferences', Icon: SettingsIcon }
+            ].map(tab => {
+              const Icon = tab.Icon
+              const isActive = activeTab === tab.key
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => { playBlip(); setActiveTab(tab.key as any) }}
+                  className={cn(
+                    "flex-1 md:flex-initial flex items-center justify-center md:justify-start gap-2.5 px-4 py-3 rounded-lg text-xs font-space font-black uppercase tracking-wider transition-all cursor-pointer border border-transparent text-center md:text-left",
+                    isActive
+                      ? "text-black bg-white shadow-md font-bold"
+                      : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+                  )}
+                  style={isActive ? { backgroundColor: currentTheme.color } : {}}
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  <span>{tab.label}</span>
+                </button>
+              )
+            })}
+          </aside>
 
-            {/* Inputs (Name, Age) */}
-            <div className="flex items-center justify-between py-2 border-b border-white/5">
-              <span className="text-xs font-space font-black uppercase tracking-wider text-[var(--text-secondary)]">{t('fullName')}</span>
-              <input
-                value={formData.full_name}
-                onChange={e => setFormData({ ...formData, full_name: e.target.value })}
-                onBlur={() => handleSaveDirectly({ ...formData, full_name: formData.full_name })}
-                className="bg-transparent border-none text-end font-space text-sm font-bold text-[var(--text-primary)] outline-none w-48 focus:ring-0 px-0"
-              />
-            </div>
-
-            <div className="flex items-center justify-between py-2 border-b border-white/5 last:border-b-0">
-              <span className="text-xs font-space font-black uppercase tracking-wider text-[var(--text-secondary)]">{t('age')}</span>
-              <input
-                type="number"
-                min={10}
-                max={99}
-                value={formData.age}
-                onChange={e => {
-                  const raw = e.target.value
-                  if (raw === '') {
-                    setFormData({ ...formData, age: '' })
-                  } else {
-                    const val = parseInt(raw, 10)
-                    if (!isNaN(val) && val >= 0 && val <= 99) {
-                      setFormData({ ...formData, age: String(val) })
-                    }
-                  }
-                }}
-                onBlur={() => handleSaveDirectly(formData)}
-                className="bg-transparent border-none text-end font-space text-sm font-bold text-[var(--text-primary)] outline-none w-20 focus:ring-0 px-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              />
-            </div>
-            
-            {/* Connected User Email Security / Guest Link Fallback */}
-            {!userEmail && (
-              <div className="pt-2">
-                <div className="border border-amber-500/30 bg-amber-500/[0.02] rounded-xl p-3 flex flex-col gap-2">
-                  <p className="text-[10px] font-space text-amber-500/80 leading-relaxed text-start">
-                    {isRTL 
-                      ? 'حسابك الحالي مؤقت ومخزن محلياً. اضغط لتأمين بياناتك ومزامنتها على السيرفر.' 
-                      : 'Your current account is temporary and stored locally. Click to secure and sync with server.'}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      playBlip()
-                      sessionStorage.setItem('auth_redirect_url', window.location.href)
-                      const { error } = await supabase.auth.signInWithOAuth({
-                        provider: 'google',
-                        options: { redirectTo: `${getURL()}auth/callback` },
-                      })
-                      if (error) alert(error.message)
-                    }}
-                    className="w-full h-8 rounded-lg flex items-center justify-center gap-2 font-space font-black tracking-widest transition-all duration-300 bg-white text-black hover:bg-zinc-200 uppercase text-[10px] shadow-md cursor-pointer"
-                  >
-                    <svg width="12" height="12" viewBox="0 0 18 18">
-                      <path fill="#4285F4" d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.7v2.25h2.9c1.69-1.55 2.69-3.85 2.69-6.58z"/>
-                      <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.22l-2.9-2.25c-.8.54-1.83.87-3.06.87-2.35 0-4.35-1.59-5.06-3.73H.95v2.3C2.43 15.89 5.47 18 9 18z"/>
-                      <path fill="#FBBC05" d="M3.94 10.67A5.4 5.4 0 0 1 3.6 9c0-.58.1-1.14.28-1.67V5.03H.95A8.99 8.99 0 0 0 0 9c0 1.45.35 2.82.95 4.03l2.99-2.36z"/>
-                      <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2A8.99 8.99 0 0 0 0 9l2.99 2.36C3.7 5.17 5.7 3.58 9 3.58z"/>
-                    </svg>
-                    {/* Commented out per safety rules:
-                    <span>{isRTL ? 'ربط الحساب بمزود جوجل' : 'LINK ACCOUNT WITH GOOGLE'}</span>
-                    */}
-                    <span>{isRTL ? 'ربط الحساب بمزود جوجل' : 'Link account with Google'}</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-          </div>
-        </div>
-
-        {/* 2. RANKS BLOCK */}
-        <div>
-          <div className="flex items-center justify-between px-3 mb-1.5">
-            <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-space font-black text-start">
-              {isRTL ? 'الرتبة والترقية' : 'Rank'}
-            </span>
-            <button
-              type="button"
-              onClick={() => { setIsRanksRoadmapOpen(true); playBlip(); }}
-              className="text-[10px] uppercase font-space font-black tracking-wider flex items-center gap-1 cursor-pointer transition-colors hover:text-white"
-              style={{ color: currentTheme.color }}
-            >
-              <span>{isRTL ? 'عرض الرتب' : 'View All Ranks'}</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-          <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4">
-            <div className="flex flex-col gap-3 text-start">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full border flex items-center justify-center bg-zinc-100/80 dark:bg-white/10 shrink-0" style={{ borderColor: `${activeRank.color}40` }}>
-                  <Trophy className="w-6 h-6" style={{ color: activeRank.color }} />
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm text-white">
-                    {activeRank.name}
-                  </h4>
-                  <p className="text-[10px] text-zinc-500 font-mono">
-                    {currentXp.toLocaleString()} / {nextRank.threshold.toLocaleString()} XP
-                  </p>
-                </div>
-              </div>
-              <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full rounded-full" style={{ width: `${progressPercent}%`, backgroundColor: activeRank.color, boxShadow: `0 0 8px ${activeRank.color}` }} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 3. AI SYSTEM BLOCK */}
-        <div>
-          <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
-            {isRTL ? 'المساعد الذكي' : 'AI Assistant'}
-          </span>
-          <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4 space-y-3">
-            
-            {/* Custom AI Name */}
-            <div className="flex items-center justify-between py-2 border-b border-white/5">
-              <div className="flex items-center gap-3">
-                <Brain className="w-4 h-4 text-zinc-400" />
-                <span className="text-xs font-space font-black uppercase tracking-wider text-[var(--text-primary)]">
-                  {t('aiName')}
-                </span>
-              </div>
-              <input
-                value={formData.ai_name}
-                onChange={e => setFormData({ ...formData, ai_name: e.target.value })}
-                onBlur={() => handleSaveDirectly({ ...formData, ai_name: formData.ai_name })}
-                className="bg-transparent border-none text-end font-space text-sm font-bold text-[var(--text-primary)] outline-none w-40 focus:ring-0 px-0"
-              />
-            </div>
-
-            {/* Auto rank sync status row */}
-            <div className="flex items-center justify-between py-1">
-              <div className="flex items-center gap-3">
-                <SettingsIcon className="w-4 h-4 text-zinc-400" />
-                <span className="text-xs font-space font-black uppercase tracking-wider text-[var(--text-primary)]">
-                  {isRTL ? 'المزامنة التلقائية للرتبة' : 'Rank tone sync'}
-                </span>
-              </div>
-              <div 
-                className="px-2.5 py-0.5 border text-[9px] font-space font-black rounded-md uppercase tracking-wider shrink-0"
-                style={{
-                  color: currentTheme.color,
-                  borderColor: `${currentTheme.color}40`,
-                  backgroundColor: `${currentTheme.color}15`,
-                }}
-              >
-                {isRTL ? 'مفعّلة' : 'Active'}
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Commented out per safety rules:
-        {quotaData && (
-          <div>
-            <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
-              {isRTL ? 'حدود استخدام الذكاء الاصطناعي' : 'AI USAGE LIMITS'}
-            </span>
-            <div ref={usageLimitsRef} className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4 space-y-4">
-              <div className="space-y-2 text-start">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-space font-black uppercase tracking-wider text-white">
-                    {isRTL ? 'الاستهلاك الإجمالي' : 'Total Consumption'}
-                  </span>
-                  <span className="text-xs font-mono font-bold text-zinc-400">
-                    {quotaData.fix.used + quotaData.explain.used + quotaData.checklist.used} / {quotaData.fix.limit + quotaData.explain.limit + quotaData.checklist.limit} {isRTL ? 'مستخدم' : 'used'}
-                  </span>
-                </div>
-                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-teal-500 to-cyan-500"
-                    style={{ 
-                      width: `${((quotaData.fix.used + quotaData.explain.used + quotaData.checklist.used) / (quotaData.fix.limit + quotaData.explain.limit + quotaData.checklist.limit)) * 100}%`,
-                      boxShadow: `0 0 10px ${currentTheme.color}`
-                    }} 
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4 pt-2 border-t border-white/5">
-                {[
-                  { key: 'fix_errors', name: isRTL ? 'مصحح الأخطاء (Fix Errors)' : 'Fix Errors', data: quotaData.fix },
-                  { key: 'explain_topic', name: isRTL ? 'شرح الموضوع (Explain Topic)' : 'Explain Topic', data: quotaData.explain },
-                  { key: 'generate_checklist', name: isRTL ? 'إنشاء المهام (Generate Checklist)' : 'Generate Checklist', data: quotaData.checklist }
-                ].map(feat => {
-                  const now = Date.now()
-                  const remainingMs = Math.max(0, feat.data.nextResetMs - now)
-                  const hrs = Math.floor(remainingMs / (3600 * 1000))
-                  const mins = Math.floor((remainingMs % (3600 * 1000)) / (60 * 1000))
-                  const hrsText = String(hrs).padStart(2, '0')
-                  const minsText = String(mins).padStart(2, '0')
-                  const countdownText = feat.data.used > 0 && remainingMs > 0
-                    ? (isRTL ? `يعاد التعيين خلال ${hrsText}س ${minsText}د` : `Resets in ${hrsText}h ${minsText}m`)
-                    : null
-
-                  return (
-                    <div key={feat.key} className="space-y-1.5 text-start">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="font-space font-medium text-zinc-300">
-                          {feat.name}
-                        </span>
-                        {countdownText ? (
-                          <span className="font-mono text-[10px] text-zinc-500">
-                            {countdownText}
-                          </span>
-                        ) : (
-                          <span className="font-space text-[10px] text-emerald-400 font-bold uppercase tracking-wide">
-                            {isRTL ? 'متاح' : 'Available'}
-                          </span>
-                        )}
+          {/* Right Content Tab Panels */}
+          <main className="flex-1 w-full max-w-2xl min-h-[400px]">
+            <AnimatePresence mode="wait">
+              {activeTab === 'account' && (
+                <motion.div
+                  key="account"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.15 }}
+                  className="space-y-6"
+                >
+                  {/* Account Settings Card */}
+                  <div>
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
+                      {isRTL ? 'الحساب الشخصي' : 'Profile info'}
+                    </span>
+                    <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4 space-y-4">
+                      
+                      {/* Avatar Selector Trigger */}
+                      <div className="flex items-center gap-4 pb-4 border-b border-white/5">
+                        <button
+                          type="button"
+                          onClick={() => { setIsAvatarSelectorOpen(true); playBlip(); }}
+                          className="relative w-14 h-14 rounded-full border border-white/20 flex items-center justify-center bg-zinc-100/80 dark:bg-white/10 overflow-hidden shadow-md group cursor-pointer"
+                        >
+                          {profile?.avatar_url ? (
+                            <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                          ) : (
+                            <User className="text-white/40 w-8 h-8" />
+                          )}
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Sparkles className="text-white w-4 h-4" />
+                          </div>
+                        </button>
+                        <div className="flex-1 min-w-0 text-start">
+                          <h4 className="font-medium text-sm text-white truncate">
+                            {profile?.full_name || (isRTL ? 'عضو' : 'Member')}
+                          </h4>
+                          <p className="text-[10px] text-zinc-500 truncate mt-0.5 font-mono">
+                            {userEmail || (isRTL ? 'حساب محلي مؤقت' : 'Temporary Local Account')}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+
+                      {/* Inputs (Name, Age) */}
+                      <div className="flex items-center justify-between py-2 border-b border-white/5">
+                        <span className="text-xs font-space font-black uppercase tracking-wider text-[var(--text-secondary)]">{t('fullName')}</span>
+                        <input
+                          value={formData.full_name}
+                          onChange={e => setFormData({ ...formData, full_name: e.target.value })}
+                          onBlur={() => handleSaveDirectly({ ...formData, full_name: formData.full_name })}
+                          className="bg-transparent border-none text-end font-space text-sm font-bold text-[var(--text-primary)] outline-none w-48 focus:ring-0 px-0"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between py-2 border-b border-white/5 last:border-b-0">
+                        <span className="text-xs font-space font-black uppercase tracking-wider text-[var(--text-secondary)]">{t('age')}</span>
+                        <input
+                          type="number"
+                          min={10}
+                          max={99}
+                          value={formData.age}
+                          onChange={e => {
+                            const raw = e.target.value
+                            if (raw === '') {
+                              setFormData({ ...formData, age: '' })
+                            } else {
+                              const val = parseInt(raw, 10)
+                              if (!isNaN(val) && val >= 0 && val <= 99) {
+                                setFormData({ ...formData, age: String(val) })
+                              }
+                            }
+                          }}
+                          onBlur={() => handleSaveDirectly(formData)}
+                          className="bg-transparent border-none text-end font-space text-sm font-bold text-[var(--text-primary)] outline-none w-20 focus:ring-0 px-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                      </div>
+                      
+                      {/* Connected User Email Security / Guest Link Fallback */}
+                      {!userEmail && (
+                        <div className="pt-2">
+                          <div className="border border-amber-500/30 bg-amber-500/[0.02] rounded-xl p-3 flex flex-col gap-2">
+                            <p className="text-[10px] font-space text-amber-500/80 leading-relaxed text-start">
+                              {isRTL 
+                                ? 'حسابك الحالي مؤقت ومخزن محلياً. اضغط لتأمين بياناتك ومزامنتها على السيرفر.' 
+                                : 'Your current account is temporary and stored locally. Click to secure and sync with server.'}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                playBlip()
+                                sessionStorage.setItem('auth_redirect_url', window.location.href)
+                                const { error } = await supabase.auth.signInWithOAuth({
+                                  provider: 'google',
+                                  options: { redirectTo: `${getURL()}auth/callback` },
+                                })
+                                if (error) alert(error.message)
+                              }}
+                              className="w-full h-8 rounded-lg flex items-center justify-center gap-2 font-space font-black tracking-widest transition-all duration-300 bg-white text-black hover:bg-zinc-200 uppercase text-[10px] shadow-md cursor-pointer"
+                            >
+                              <svg width="12" height="12" viewBox="0 0 18 18">
+                                <path fill="#4285F4" d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.7v2.25h2.9c1.69-1.55 2.69-3.85 2.69-6.58z"/>
+                                <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.22l-2.9-2.25c-.8.54-1.83.87-3.06.87-2.35 0-4.35-1.59-5.06-3.73H.95v2.3C2.43 15.89 5.47 18 9 18z"/>
+                                <path fill="#FBBC05" d="M3.94 10.67A5.4 5.4 0 0 1 3.6 9c0-.58.1-1.14.28-1.67V5.03H.95A8.99 8.99 0 0 0 0 9c0 1.45.35 2.82.95 4.03l2.99-2.36z"/>
+                                <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2A8.99 8.99 0 0 0 0 9l2.99 2.36C3.7 5.17 5.7 3.58 9 3.58z"/>
+                              </svg>
+                              <span>{isRTL ? 'ربط الحساب بمزود جوجل' : 'Link account with Google'}</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                    </div>
+                  </div>
+
+                  {/* Rank Status Card */}
+                  <div>
+                    <div className="flex items-center justify-between px-3 mb-1.5">
+                      <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-space font-black text-start">
+                        {isRTL ? 'الرتبة والترقية' : 'Rank'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => { setIsRanksRoadmapOpen(true); playBlip(); }}
+                        className="text-[10px] uppercase font-space font-black tracking-wider flex items-center gap-1 cursor-pointer transition-colors hover:text-white"
+                        style={{ color: currentTheme.color }}
+                      >
+                        <span>{isRTL ? 'عرض الرتب' : 'View All Ranks'}</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4">
+                      <div className="flex flex-col gap-3 text-start">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-full border flex items-center justify-center bg-zinc-100/80 dark:bg-white/10 shrink-0" style={{ borderColor: `${activeRank.color}40` }}>
+                            <Trophy className="w-6 h-6" style={{ color: activeRank.color }} />
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-sm text-white">
+                              {activeRank.name}
+                            </h4>
+                            <p className="text-[10px] text-zinc-500 font-mono">
+                              {currentXp.toLocaleString()} / {nextRank.threshold.toLocaleString()} XP
+                            </p>
+                          </div>
+                        </div>
+                        <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full" style={{ width: `${progressPercent}%`, backgroundColor: activeRank.color, boxShadow: `0 0 8px ${activeRank.color}` }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions / Destructive Section */}
+                  <div className="pt-6 border-t border-zinc-800/50 flex flex-col gap-4 text-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsLogoutModalOpen(true)
+                        playBlip()
+                      }}
+                      className="text-xs font-space font-black uppercase tracking-widest text-zinc-400 hover:text-white transition-all cursor-pointer"
+                    >
+                      {t('logout')}
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsDeleteModalOpen(true)
+                        playBlip()
+                      }}
+                      className="text-[10px] font-space font-black uppercase tracking-widest text-red-500/60 hover:text-red-500 transition-all cursor-pointer"
+                    >
+                      {isRTL ? 'حذف الحساب نهائياً' : 'Delete Account'}
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === 'energy' && (
+                <motion.div
+                  key="energy"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.15 }}
+                  className="space-y-6"
+                >
+                  {/* Energy+ Counter Card */}
+                  <div>
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
+                      {isRTL ? 'عداد إينرجي+' : 'Energy+ Counter'}
+                    </span>
+                    <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-6 text-start flex flex-col sm:flex-row items-center gap-6">
+                      <div className="w-24 h-24 shrink-0 flex items-center justify-center relative">
+                        <EnergyCell percentage={Math.round(progressPercent)} color={currentTheme.color} size="md" />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-space font-black text-white uppercase tracking-wider">
+                          {isRTL ? 'شحنة إينرجي النشطة' : 'Active Energy Charge'}
+                        </h3>
+                        <p className="text-[10px] font-mono text-zinc-400">
+                          {isRTL ? 'إجمالي النقاط المكتسبة:' : 'Total XP Accumulated:'} <span className="text-white font-bold">{currentXp} XP</span>
+                        </p>
+                        <p className="text-xs text-zinc-400 leading-relaxed max-w-sm">
+                          {isRTL 
+                            ? 'يمثل مستوى شحن الإينرجي طاقتك الإنتاجية النشطة في المنصة ويتحسن عبر استكمال المهام وتراكم الخبرة.'
+                            : 'Your Energy+ counter represents your active productivity output. Accumulate XP by completing missions.'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* My Champion Card */}
+                  <div>
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
+                      {isRTL ? 'البطل الحالي' : 'Active Champion'}
+                    </span>
+                    <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-6 text-start flex flex-col sm:flex-row items-center gap-6 relative overflow-hidden">
+                      <div 
+                        className="absolute inset-0 opacity-10 pointer-events-none"
+                        style={{
+                          background: `radial-gradient(circle at bottom right, ${currentChamp.color}, transparent 60%)`
+                        }}
+                      />
+                      <img 
+                        src={currentChamp.image} 
+                        alt={currentChamp.title} 
+                        className="w-24 h-24 rounded-xl object-cover border-2 shrink-0 relative z-10" 
+                        style={{ borderColor: currentChamp.color }}
+                      />
+                      <div className="space-y-3 flex-1 relative z-10">
+                        <div>
+                          <h4 className="text-lg font-space font-black text-white uppercase tracking-wider">
+                            {currentChamp.title}
+                          </h4>
+                          <p className="text-xs text-zinc-400 leading-relaxed max-w-sm">
+                            {currentChamp.description}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => { setIsAvatarSelectorOpen(true); playBlip(); }}
+                          className="px-4 py-2 text-[10px] font-space font-black rounded-lg uppercase tracking-wider text-black hover:brightness-110 active:scale-98 transition-all cursor-pointer"
+                          style={{ backgroundColor: currentChamp.color }}
+                        >
+                          {isRTL ? 'تغيير البطل' : 'Change Champion'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Evolution Status */}
+                  <div>
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
+                      {isRTL ? 'حالة التطور والنمو' : 'Evolution Status'}
+                    </span>
+                    <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-5 text-start space-y-4">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-space font-black uppercase tracking-wider text-[var(--text-secondary)]">
+                          {isRTL ? 'الوعاء النشط' : 'Active Vessel'}
+                        </span>
+                        <span className="font-mono text-white font-bold uppercase tracking-wider" style={{ color: activeRank.color }}>
+                          {activeRank.vessel} ({activeRank.name})
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-space font-black uppercase tracking-wider text-[var(--text-secondary)]">
+                          {isRTL ? 'المكافأة الحالية' : 'Current Reward Perk'}
+                        </span>
+                        <span className="text-zinc-300 font-medium">
+                          {activeRank.perk}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-space font-black uppercase tracking-wider text-[var(--text-secondary)]">
+                          {isRTL ? 'المستوى القادم' : 'Next Rank Threshold'}
+                        </span>
+                        <span className="font-mono text-zinc-400">
+                          {nextRank.name} ({nextRank.threshold} XP)
+                        </span>
+                      </div>
+
+                      <div className="space-y-1.5 pt-2 border-t border-white/5">
+                        <div className="flex justify-between text-[10px] font-mono text-zinc-500">
+                          <span>{currentXp} XP</span>
+                          <span>{nextRank.threshold} XP</span>
+                        </div>
+                        <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
                           <div 
-                            className="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-amber-500 to-orange-500"
+                            className="h-full rounded-full" 
                             style={{ 
-                              width: `${(feat.data.used / feat.data.limit) * 100}%`,
-                              boxShadow: `0 0 6px ${currentTheme.color}80`
+                              width: `${progressPercent}%`, 
+                              backgroundColor: activeRank.color, 
+                              boxShadow: `0 0 10px ${activeRank.color}` 
                             }} 
                           />
                         </div>
-                        <span className="text-[10px] font-mono text-zinc-400 min-w-[55px] text-right shrink-0">
-                          {feat.data.used} / {feat.data.limit} {isRTL ? 'مستخدم' : 'used'}
-                        </span>
                       </div>
                     </div>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
-        )}
-        */}
-
-        {/* Global AI Quota Block */}
-        {profile && (
-          <div>
-            <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
-              {isRTL ? 'حدود استخدام الذكاء الاصطناعي' : 'AI Quota'}
-            </span>
-            <div ref={usageLimitsRef} className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4 space-y-4 text-start">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h4 className="font-medium text-sm text-white">
-                    {isRTL ? 'الاستهلاك الإجمالي للذكاء الاصطناعي' : 'Global AI Quota'}
-                  </h4>
-                  <p className="text-[10px] text-zinc-500 mt-0.5 font-medium">
-                    {isRTL
-                      ? `الباقة الحالية: ${profile.user_tier === 'pro' ? 'المحترفين (Pro)' : profile.user_tier === 'elite' ? 'النخبة (Elite)' : 'المجانية (Free)'}`
-                      : `Current tier: ${profile.user_tier === 'pro' ? 'Pro' : profile.user_tier === 'elite' ? 'Elite' : 'Free'}`}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs font-mono font-bold text-zinc-400">
-                    {profile.ai_request_count || 0} / {
-                      profile.user_tier === 'pro' ? 50 : profile.user_tier === 'elite' ? 150 : 3
-                    } {isRTL ? 'مستخدم' : 'used'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                <div 
-                  className="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-teal-500 to-cyan-500"
-                  style={{ 
-                    width: `${Math.min(100, (((profile.ai_request_count || 0) / (profile.user_tier === 'pro' ? 50 : profile.user_tier === 'elite' ? 150 : 3)) * 100))}%`,
-                    boxShadow: `0 0 10px ${currentTheme.color}`
-                  }} 
-                />
-              </div>
-
-              <div className="flex justify-between items-center text-xs pt-1">
-                <span className="font-space text-[10px] text-zinc-500 font-bold uppercase tracking-wide">
-                  {isRTL ? 'حالة التعيين' : 'Reset status'}
-                </span>
-                {(profile.ai_request_count || 0) > 0 && resetCountdown ? (
-                  <span className="font-mono text-[10px] text-zinc-400">
-                    {resetCountdown}
-                  </span>
-                ) : (
-                  <span className="font-space text-[10px] text-emerald-400 font-bold uppercase tracking-wide">
-                    {isRTL ? 'متاح بالكامل' : 'Fully Available'}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 4. SYSTEM PREFERENCES BLOCK */}
-        <div>
-          <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
-            {isRTL ? 'تفضيلات النظام' : 'System Preferences'}
-          </span>
-          <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4 space-y-3">
-            
-            {/* Language */}
-            <div className="flex items-center justify-between py-2 border-b border-white/5">
-              <div className="flex items-center gap-3">
-                <FileText className="w-4 h-4 text-zinc-400" />
-                <span className="text-xs font-space font-black uppercase tracking-wider text-[var(--text-primary)]">
-                  {isRTL ? 'لغة الواجهة' : 'Language'}
-                </span>
-              </div>
-              {/* Commented out per safety rules:
-            <div className="flex bg-zinc-900/50 p-1 rounded-lg border border-white/5 shrink-0">
-            */}
-            <div className="flex bg-[var(--background-secondary)] dark:bg-zinc-900/50 p-1 rounded-lg border border-[var(--border)] dark:border-white/5 shrink-0">
-                {[
-                  { key: 'en', label: 'EN' },
-                  { key: 'ar', label: 'AR' }
-                ].map(l => (
-                  <button
-                    key={l.key}
-                    type="button"
-                    onClick={async () => {
-                      playBlip()
-                      const updated = { ...formData, language: l.key as any }
-                      setFormData(updated)
-                      await handleSaveDirectly(updated)
-                    }}
-                    className={cn(
-                      'px-3 py-1 font-space text-[10px] font-black transition-all rounded-md uppercase tracking-wider cursor-pointer',
-                      formData.language === l.key 
-                        ? 'text-black font-black' 
-                        : 'text-[var(--text-secondary)] hover:text-white'
-                    )}
-                    style={formData.language === l.key ? { backgroundColor: currentTheme.color } : {}}
-                  >
-                    {l.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Appearance */}
-            <div className="flex items-center justify-between py-2 border-b border-white/5">
-              <div className="flex items-center gap-3">
-                <Moon className="w-4 h-4 text-zinc-400" />
-                <span className="text-xs font-space font-black uppercase tracking-wider text-[var(--text-primary)]">
-                  {isRTL ? 'المظهر' : 'Appearance'}
-                </span>
-              </div>
-              {/* Commented out per safety rules:
-            <div className="flex bg-zinc-900/50 p-1 rounded-lg border border-white/5 shrink-0">
-            */}
-            <div className="flex bg-[var(--background-secondary)] dark:bg-zinc-900/50 p-1 rounded-lg border border-[var(--border)] dark:border-white/5 shrink-0">
-                {[
-                  { key: 'dark', label: isRTL ? 'ليلي' : 'Dark' },
-                  { key: 'light', label: isRTL ? 'نهاري' : 'Light' }
-                ].map(theme => {
-                  const isActive = (theme.key === 'dark' && isDarkMode) || (theme.key === 'light' && !isDarkMode)
-                  return (
-                    <button
-                      key={theme.key}
-                      type="button"
-                      onClick={async () => {
-                        playBlip()
-                        const setDark = theme.key === 'dark'
-                        setIsDarkMode(setDark)
-                        await handleSaveDirectly(formData, setDark)
-                      }}
-                      className={cn(
-                        'px-3 py-1 flex items-center gap-1 font-space text-[10px] font-black transition-all rounded-md uppercase tracking-wider cursor-pointer',
-                        isActive
-                          ? 'text-black font-black' 
-                          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                      )}
-                      style={isActive ? { backgroundColor: currentTheme.color } : {}}
-                    >
-                      {theme.key === 'dark' ? <Moon className="w-3 h-3" /> : <Sun className="w-3 h-3" />}
-                      <span>{theme.label}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Volume Control */}
-            <div className="flex items-center justify-between py-2 border-b border-white/5">
-              <div className="flex items-center gap-3">
-                <Volume2 className="w-4 h-4 text-zinc-400" />
-                <span className="text-xs font-space font-black uppercase tracking-wider text-[var(--text-primary)]">
-                  {isRTL ? 'مستوى الصوت' : 'Volume'}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={handleDecrementVolume}
-                  disabled={isMuted || volume <= 0}
-                  className="w-6 h-6 rounded-md flex items-center justify-center border font-bold text-xs transition-all duration-300 hover:bg-white/5 text-white/80 disabled:opacity-30 cursor-pointer"
-                  style={{ borderColor: `${currentTheme.color}40`, color: currentTheme.color }}
-                >
-                  &minus;
-                </button>
-                <span className="text-xs font-space font-black w-8 text-center" style={{ color: currentTheme.color }}>
-                  {Math.round(volume * 100)}%
-                </span>
-                <button
-                  type="button"
-                  onClick={handleIncrementVolume}
-                  disabled={isMuted || volume >= 1}
-                  className="w-6 h-6 rounded-md flex items-center justify-center border font-bold text-xs transition-all duration-300 hover:bg-white/5 text-white/80 disabled:opacity-30 cursor-pointer"
-                  style={{ borderColor: `${currentTheme.color}40`, color: currentTheme.color }}
-                >
-                  &#43;
-                </button>
-              </div>
-            </div>
-
-            {/* Mute toggle */}
-            <div className="flex items-center justify-between py-2 border-b border-white/5">
-              <div className="flex items-center gap-3">
-                <Volume2 className="w-4 h-4 text-zinc-400" />
-                <span className="text-xs font-space font-black uppercase tracking-wider text-[var(--text-primary)]">
-                  {isRTL ? 'أصوات النظام' : 'System Sounds'}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  const nextMute = !isMuted
-                  setIsMuted(nextMute)
-                  if (!nextMute) {
-                    setTimeout(() => playBlip(), 50)
-                  }
-                }}
-                className={cn(
-                  "w-10 h-5 rounded-full transition-all relative border flex items-center px-0.5 cursor-pointer shrink-0",
-                  !isMuted 
-                    ? "justify-end" 
-                    : "justify-start bg-white/[0.02] border-white/10"
-                )}
-                style={!isMuted ? { backgroundColor: `${currentTheme.color}20`, borderColor: `${currentTheme.color}50` } : {}}
-              >
-                <motion.div 
-                  layout
-                  className="w-3.5 h-3.5 rounded-full shadow-lg"
-                  style={!isMuted ? { backgroundColor: currentTheme.color } : { backgroundColor: 'rgba(255,255,255,0.2)' }}
-                />
-              </button>
-            </div>
-
-            {/* Install native app */}
-            <div className="flex items-center justify-between py-2 border-b border-white/5">
-              <div className="flex items-center gap-3">
-                <SettingsIcon className="w-4 h-4 text-zinc-400" />
-                <span className="text-xs font-space font-black uppercase tracking-wider text-[var(--text-primary)]">
-                  {isRTL ? 'تطبيق النظام' : 'Native App'}
-                </span>
-              </div>
-              {isPwaInstalled ? (
-                <span className="text-[10px] font-space font-black text-zinc-500 uppercase tracking-wider">
-                  {isRTL ? 'مثبّت' : 'Installed'}
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    playBlip()
-                    window.dispatchEvent(new CustomEvent('open-pwa-install-modal'))
-                  }}
-                  className="px-3 py-1.5 border border-teal-500/50 text-teal-400 text-[10px] font-space font-black rounded-lg uppercase tracking-wider hover:bg-teal-500/10 transition-all cursor-pointer"
-                >
-                  {isRTL ? 'تثبيت' : 'Install'}
-                </button>
+                  </div>
+                </motion.div>
               )}
-            </div>
 
-            {/* Restart Tour */}
-            <div className="flex items-center justify-between py-2 last:border-b-0">
-              <div className="flex items-center gap-3">
-                <HelpCircle className="w-4 h-4 text-zinc-400" />
-                <span className="text-xs font-space font-black uppercase tracking-wider text-[var(--text-primary)]">
-                  {isRTL ? 'إعادة تشغيل الجولة' : 'Interactive Tour'}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  playBlip()
-                  restartTour()
-                }}
-                className="px-3 py-1.5 border border-white/20 text-white/80 text-[10px] font-space font-black rounded-lg uppercase tracking-wider hover:bg-white/5 transition-all cursor-pointer"
-              >
-                {isRTL ? 'بدء الجولة' : 'Restart'}
-              </button>
-            </div>
+              {activeTab === 'preferences' && (
+                <motion.div
+                  key="preferences"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.15 }}
+                  className="space-y-6"
+                >
+                  {/* Preferences Card */}
+                  <div>
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
+                      {isRTL ? 'تفضيلات الواجهة' : 'System Preferences'}
+                    </span>
+                    <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-4 space-y-3">
+                      
+                      {/* Language selection */}
+                      <div className="flex items-center justify-between py-2 border-b border-white/5">
+                        <div className="flex items-center gap-3">
+                          <FileText className="w-4 h-4 text-zinc-400" />
+                          <span className="text-xs font-space font-black uppercase tracking-wider text-[var(--text-primary)]">
+                            {isRTL ? 'لغة الواجهة' : 'Language'}
+                          </span>
+                        </div>
+                        <div className="flex bg-[var(--background-secondary)] dark:bg-zinc-900/50 p-1 rounded-lg border border-[var(--border)] dark:border-white/5 shrink-0">
+                          {[
+                            { key: 'en', label: 'EN' },
+                            { key: 'ar', label: 'AR' }
+                          ].map(l => (
+                            <button
+                              key={l.key}
+                              type="button"
+                              onClick={async () => {
+                                playBlip()
+                                const updated = { ...formData, language: l.key as any }
+                                setFormData(updated)
+                                await handleSaveDirectly(updated)
+                              }}
+                              className={cn(
+                                'px-3 py-1 font-space text-[10px] font-black transition-all rounded-md uppercase tracking-wider cursor-pointer',
+                                formData.language === l.key 
+                                  ? 'text-black font-black' 
+                                  : 'text-[var(--text-secondary)] hover:text-white'
+                              )}
+                              style={formData.language === l.key ? { backgroundColor: currentTheme.color } : {}}
+                            >
+                              {l.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
 
-          </div>
-        </div>
+                      {/* Appearance selection */}
+                      <div className="flex items-center justify-between py-2 border-b border-white/5">
+                        <div className="flex items-center gap-3">
+                          <Moon className="w-4 h-4 text-zinc-400" />
+                          <span className="text-xs font-space font-black uppercase tracking-wider text-[var(--text-primary)]">
+                            {isRTL ? 'المظهر' : 'Appearance'}
+                          </span>
+                        </div>
+                        <div className="flex bg-[var(--background-secondary)] dark:bg-zinc-900/50 p-1 rounded-lg border border-[var(--border)] dark:border-white/5 shrink-0">
+                          {[
+                            { key: 'dark', label: isRTL ? 'ليلي' : 'Dark' },
+                            { key: 'light', label: isRTL ? 'نهاري' : 'Light' }
+                          ].map(theme => {
+                            const isActive = (theme.key === 'dark' && isDarkMode) || (theme.key === 'light' && !isDarkMode)
+                            return (
+                              <button
+                                key={theme.key}
+                                type="button"
+                                onClick={async () => {
+                                  playBlip()
+                                  const setDark = theme.key === 'dark'
+                                  setIsDarkMode(setDark)
+                                  await handleSaveDirectly(formData, setDark)
+                                }}
+                                className={cn(
+                                  'px-3 py-1 flex items-center gap-1 font-space text-[10px] font-black transition-all rounded-md uppercase tracking-wider cursor-pointer',
+                                  isActive
+                                    ? 'text-black font-black' 
+                                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                                )}
+                                style={isActive ? { backgroundColor: currentTheme.color } : {}}
+                              >
+                                {theme.key === 'dark' ? <Moon className="w-3 h-3" /> : <Sun className="w-3 h-3" />}
+                                <span>{theme.label}</span>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
 
-        {/* 5. DESTRUCTIVE / FOOTER ACTIONS */}
-        <div className="pt-6 border-t border-zinc-800/50 flex flex-col gap-4 text-center pb-24">
-          <button
-            type="button"
-            onClick={() => {
-              setIsLogoutModalOpen(true)
-              playBlip()
-            }}
-            className="text-xs font-space font-black uppercase tracking-widest text-zinc-400 hover:text-white transition-all cursor-pointer"
-          >
-            {t('logout')}
-          </button>
-          
-          <button
-            type="button"
-            onClick={() => {
-              setIsDeleteModalOpen(true)
-              playBlip()
-            }}
-            className="text-[10px] font-space font-black uppercase tracking-widest text-red-500/60 hover:text-red-500 transition-all cursor-pointer"
-          >
-            {/* Commented out per safety rules:
-            {isRTL ? 'حذف الحساب نهائياً' : 'DELETE ACCOUNT'}
-            */}
-            {isRTL ? 'حذف الحساب نهائياً' : 'Delete Account'}
-          </button>
+                      {/* Install App selection */}
+                      <div className="flex items-center justify-between py-2 border-b border-white/5">
+                        <div className="flex items-center gap-3">
+                          <SettingsIcon className="w-4 h-4 text-zinc-400" />
+                          <span className="text-xs font-space font-black uppercase tracking-wider text-[var(--text-primary)]">
+                            {isRTL ? 'تطبيق النظام' : 'Native App'}
+                          </span>
+                        </div>
+                        {isPwaInstalled ? (
+                          <span className="text-[10px] font-space font-black text-zinc-500 uppercase tracking-wider">
+                            {isRTL ? 'مثبّت' : 'Installed'}
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              playBlip()
+                              window.dispatchEvent(new CustomEvent('open-pwa-install-modal'))
+                            }}
+                            className="px-3 py-1.5 border border-teal-500/50 text-teal-400 text-[10px] font-space font-black rounded-lg uppercase tracking-wider hover:bg-teal-500/10 transition-all cursor-pointer"
+                          >
+                            {isRTL ? 'تثبيت' : 'Install'}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Interactive Tour restart */}
+                      <div className="flex items-center justify-between py-2 last:border-b-0">
+                        <div className="flex items-center gap-3">
+                          <HelpCircle className="w-4 h-4 text-zinc-400" />
+                          <span className="text-xs font-space font-black uppercase tracking-wider text-[var(--text-primary)]">
+                            {isRTL ? 'إعادة تشغيل الجولة' : 'Interactive Tour'}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            playBlip()
+                            restartTour()
+                          }}
+                          className="px-3 py-1.5 border border-white/20 text-white/80 text-[10px] font-space font-black rounded-lg uppercase tracking-wider hover:bg-white/5 transition-all cursor-pointer"
+                        >
+                          {isRTL ? 'بدء الجولة' : 'Restart'}
+                        </button>
+                      </div>
+
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </main>
+
         </div>
 
       </div>
 
-      {/* BEAUTIFUL LOGOUT CONFIRMATION MODAL */}
+      {/* LOGOUT CONFIRMATION MODAL */}
       <AnimatePresence>
         {isLogoutModalOpen && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
@@ -1007,9 +859,6 @@ export default function SettingsPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ duration: 0.2 }}
-              /* Commented out per safety rules:
-              className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl relative space-y-6 text-center"
-              */
               className="bg-[var(--card)] dark:bg-[#0c0c0c] border border-[var(--border)] dark:border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl relative space-y-6 text-center"
               style={{ boxShadow: `0 0 40px ${currentTheme.color}15` }}
             >
@@ -1020,9 +869,6 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                {/* Commented out per safety rules:
-                <h3 className="font-semibold text-xl text-white leading-none">
-                */}
                 <h3 className="font-semibold text-xl text-[var(--text-primary)] dark:text-white leading-none">
                   {isRTL ? 'تسجيل الخروج' : 'Log out?'}
                 </h3>
@@ -1031,9 +877,6 @@ export default function SettingsPage() {
                 </p>
               </div>
 
-              {/* Commented out per safety rules:
-              <p className="text-sm font-space text-white/60 leading-relaxed">
-              */}
               <p className="text-sm font-space text-[var(--text-secondary)] dark:text-white/60 leading-relaxed">
                 {isRTL 
                   ? 'هل أنت متأكد من رغبتك في تسجيل الخروج؟ نتمنى رؤيتك مجدداً في أقرب وقت.'
@@ -1047,9 +890,6 @@ export default function SettingsPage() {
                   className="w-full text-black py-3.5 font-space font-black text-xs uppercase tracking-widest rounded-xl transition-all duration-300 shadow-lg cursor-pointer active:scale-98 font-bold"
                   style={{ backgroundColor: currentTheme.color, boxShadow: `0 4px 15px ${currentTheme.color}20` }}
                 >
-                  {/* Commented out per safety rules:
-                  {isRTL ? 'نعم، تسجيل الخروج' : 'YES, LOGOUT'}
-                  */}
                   {isRTL ? 'نعم، تسجيل الخروج' : 'Yes, Logout'}
                 </button>
 
@@ -1059,9 +899,6 @@ export default function SettingsPage() {
                     setIsLogoutModalOpen(false)
                     playBlip()
                   }}
-                  /* Commented out per safety rules:
-                  className="w-full bg-transparent border border-white/10 hover:bg-white/5 text-white/60 hover:text-white py-3 font-medium text-sm rounded-xl transition-all duration-150 cursor-pointer active:scale-[0.97]"
-                  */
                   className="w-full bg-transparent border border-[var(--border)] dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] dark:text-white/60 hover:text-[var(--text-primary)] dark:hover:text-white py-3 font-medium text-sm rounded-xl transition-all duration-150 cursor-pointer active:scale-[0.97]"
                 >
                   {isRTL ? 'إلغاء' : 'Cancel'}
@@ -1072,25 +909,18 @@ export default function SettingsPage() {
         )}
       </AnimatePresence>
 
-      {/* CATASTROPHIC DATA WIPE & SURVEY MODAL */}
+      {/* CATASTROPHIC DATA WIPE MODAL */}
       <AnimatePresence>
         {isDeleteModalOpen && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
-            
-            {/* Modal Box */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
-              /* Commented out per safety rules:
-              className="bg-[#0c0c0c] border border-red-500/20 rounded-2xl p-6 md:p-8 max-w-lg w-full shadow-2xl relative space-y-6 flex flex-col max-h-[90vh] overflow-hidden"
-              */
               className="bg-[var(--card)] dark:bg-[#0c0c0c] border border-red-500/20 rounded-2xl p-6 md:p-8 max-w-lg w-full shadow-2xl relative space-y-6 flex flex-col max-h-[90vh] overflow-hidden"
               style={{ boxShadow: '0 0 50px rgba(239, 68, 68, 0.15)' }}
             >
-              
-              {/* Header */}
               <div className="flex items-center gap-4 border-b border-white/5 pb-4">
                 <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center flex-shrink-0">
                   <AlertTriangle className="text-red-500 text-2xl font-bold w-6 h-6" />
@@ -1105,10 +935,7 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Scrollable Content */}
               <div className="flex-1 overflow-y-auto pe-1 space-y-6 py-2 scrollbar-thin text-start">
-                
-                {/* Warning message */}
                 <div className="p-4 bg-red-500/[0.03] border border-red-500/10 rounded-xl space-y-2">
                   <p className="font-space text-xs text-red-400 font-bold tracking-wide">
                     {isRTL 
@@ -1117,12 +944,10 @@ export default function SettingsPage() {
                   </p>
                 </div>
 
-                {/* Question 1: What bothered you? */}
                 <div className="space-y-3">
                   <label className="text-[10px] md:text-xs text-white/50 block font-medium">
                     {isRTL ? '1. ما هو سبب حذف الحساب؟' : '1. What made you leave?'}
                   </label>
-                  
                   <div className="grid grid-cols-1 gap-2">
                     {[
                       { key: 'COMPLICATED', ar: 'صعوبة الاستخدام أو تعقيد الواجهة', en: 'Too complicated/hard to use' },
@@ -1154,12 +979,10 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                {/* Question 2: Star rating */}
                 <div className="space-y-3">
                   <label className="text-[10px] md:text-xs text-white/50 font-medium block">
                     {isRTL ? '2. كيف تقيم تجربتك من 5؟' : '2. How would you rate your experience out of 5?'}
                   </label>
-                  
                   <div className="flex items-center gap-3 justify-center py-2 bg-white/[0.02] border border-white/5 rounded-xl">
                     {[1, 2, 3, 4, 5].map(star => {
                       const isActive = surveyRating >= star
@@ -1173,7 +996,7 @@ export default function SettingsPage() {
                           }}
                           className="p-2 transition-transform duration-200 active:scale-90 cursor-pointer"
                         >
-                          <Star className={cn(" text-3xl font-black transition-all",
+                          <Star className={cn("text-3xl font-black transition-all",
                               isActive ? "fill-1 text-red-500 scale-110 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]" : "text-white/20 hover:text-white/40")} />
                         </button>
                       )
@@ -1181,12 +1004,10 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                {/* Question 3: Better alternative? */}
                 <div className="space-y-3">
                   <label className="text-[10px] md:text-xs text-white/50 font-medium block">
                     {isRTL ? '3. هل وجدت بديلاً أفضل؟ (اختياري)' : '3. Did you find a better alternative? (optional)'}
                   </label>
-                  
                   <textarea
                     value={surveyAlternative}
                     onChange={e => setSurveyAlternative(e.target.value)}
@@ -1195,10 +1016,8 @@ export default function SettingsPage() {
                     className="w-full bg-white/[0.02] border border-white/5 rounded-xl p-4 font-space text-xs text-white outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500/30 transition-all placeholder:text-white/20"
                   />
                 </div>
-
               </div>
 
-              {/* Action Buttons */}
               <div className="flex flex-col gap-3 pt-4 border-t border-white/5">
                 <button
                   type="button"
@@ -1219,9 +1038,7 @@ export default function SettingsPage() {
                   {isRTL ? 'إلغاء' : 'Cancel'}
                 </button>
               </div>
-
             </motion.div>
-
           </div>
         )}
       </AnimatePresence>
@@ -1235,13 +1052,9 @@ export default function SettingsPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ duration: 0.2 }}
-              /* Commented out per safety rules:
-              className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-6 max-w-lg w-full shadow-2xl relative flex flex-col max-h-[85vh] overflow-hidden"
-              */
               className="bg-[var(--card)] dark:bg-[#0c0c0c] border border-[var(--border)] dark:border-white/10 rounded-2xl p-6 max-w-lg w-full shadow-2xl relative flex flex-col max-h-[85vh] overflow-hidden"
               style={{ boxShadow: `0 0 40px ${currentTheme.color}15` }}
             >
-              {/* Header */}
               <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4">
                 <div className="text-start">
                   <h3 className="font-space font-black text-lg text-white uppercase tracking-widest leading-none">
@@ -1260,7 +1073,6 @@ export default function SettingsPage() {
                 </button>
               </div>
 
-              {/* Scrollable list of ranks */}
               <div className="flex-1 overflow-y-auto pe-1 space-y-4 scrollbar-thin text-start">
                 {RANKS_DATA.map((rank) => {
                   const isCurrent = activeRank.id === rank.id
@@ -1271,9 +1083,6 @@ export default function SettingsPage() {
                     <div
                       key={rank.id}
                       className={cn(
-                        /* Commented out per safety rules:
-                        "p-4 rounded-2xl border flex items-center justify-between transition-all relative overflow-hidden backdrop-blur-md bg-black/40",
-                        */
                         "p-4 rounded-2xl border flex items-center justify-between transition-all relative overflow-hidden backdrop-blur-md bg-[var(--background-secondary)] dark:bg-black/40 border-[var(--border)] dark:border-white/5",
                         isCurrent 
                           ? "border-[var(--card-border)] ring-1 ring-white/15 scale-[1.02]"
@@ -1286,9 +1095,7 @@ export default function SettingsPage() {
                         boxShadow: `0 0 25px ${rank.color}25, inset 0 0 12px ${rank.color}10`
                       } : {}}
                     >
-                      {/* Left Side: Crystal & Info */}
                       <div className="flex items-center gap-4">
-                        {/* Crystal Container */}
                         <div className="relative shrink-0 w-16 h-20 flex items-center justify-center">
                           {isLocked ? (
                             <div className="grayscale opacity-40 relative flex items-center justify-center w-full h-full">
@@ -1304,7 +1111,6 @@ export default function SettingsPage() {
                           )}
                         </div>
 
-                        {/* Title and XP */}
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 
@@ -1372,368 +1178,3 @@ export default function SettingsPage() {
     </div>
   )
 }
-
-/*
-ORIGINAL_UNTOUCHED_CODE_FOR_REFERENCE:
-'use client'
-
-import { AlertTriangle, CheckCircle2, FileText, HelpCircle, Lock, LogOut, Star, User, Brain, Settings as SettingsIcon, Moon, Sun, Trophy, Volume2 } from 'lucide-react'
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useGrowth } from '@/context/GrowthContext'
-import { createClient } from '@/lib/supabase'
-import { motion, AnimatePresence } from 'framer-motion'
-import { cn } from '@/lib/utils'
-import { useToast } from '@/components/ui/Toast'
-import { useSound } from '@/context/SoundContext'
-import CustomSelect from '@/components/ui/CustomSelect'
-import { deleteOwnAccount } from '@/app/actions/adminActions'
-import AvatarSelector from '@/components/ui/AvatarSelector'
-
-interface RankData {
-  id: string
-  name: string
-  threshold: number
-  themeId: string
-  color: string
-  neonClass: string
-  perk: string
-  unlocks: string
-  vessel: string
-}
-
-const RANKS_DATA: RankData[] = [
-  {
-    id: 'SILVER',
-    name: 'SILVER',
-    threshold: 0,
-    themeId: 'SILVER',
-    color: '#94a3b8',
-    neonClass: 'neon-silver',
-    perk: 'Standard Features Unlocked',
-    unlocks: 'Access to Notes and Settings pages',
-    vessel: 'Cylinder'
-  },
-  {
-    id: 'GOLD',
-    name: 'GOLD',
-    threshold: 400,
-    themeId: 'GOLD',
-    color: '#FACC15',
-    neonClass: 'neon-gold',
-    perk: 'Exclusive Title Badge',
-    unlocks: 'Special title showing below username',
-    vessel: 'Cylinder'
-  },
-  {
-    id: 'PLATINUM',
-    name: 'PLATINUM',
-    threshold: 1000,
-    themeId: 'PLATINUM',
-    color: '#38bdf8',
-    neonClass: 'neon-platinum',
-    perk: 'Premium Avatar Border',
-    unlocks: 'Glow border framing profile picture',
-    vessel: 'Hex'
-  },
-  {
-    id: 'DIAMOND',
-    name: 'DIAMOND',
-    threshold: 2000,
-    themeId: 'DIAMOND',
-    color: '#d500f9',
-    neonClass: 'neon-diamond',
-    perk: 'Exclusive Chat Emojis',
-    unlocks: 'Special reactive emojis in squad threads',
-    vessel: 'Crystal'
-  },
-  {
-    id: 'CROWN',
-    name: 'CROWN',
-    threshold: 4000,
-    themeId: 'CROWN',
-    color: '#F97316',
-    neonClass: 'neon-crown',
-    perk: 'Name Neon Glow effect',
-    unlocks: 'Vibrant custom neon glow around username',
-    vessel: 'Crystal'
-  },
-  {
-    id: 'ACE',
-    name: 'ACE',
-    threshold: 7000,
-    themeId: 'ACE',
-    color: '#EF4444',
-    neonClass: 'neon-ace',
-    perk: 'Player Calling Card',
-    unlocks: 'Interactive profile card on user hover',
-    vessel: 'Shard'
-  },
-  {
-    id: 'CONQUEROR',
-    name: 'CONQUEROR',
-    threshold: 12000,
-    themeId: 'CONQUEROR',
-    color: '#FACC15',
-    neonClass: 'neon-conqueror',
-    perk: 'Top #1 Champion Dominance',
-    unlocks: 'Exclusive animated dynamic gradient badge (Top XP Leader)',
-    vessel: 'Sphere'
-  }
-]
-
-export default function SettingsPage() {
-  const { profile, setProfile, isLoading, refreshProfile, mounted, t, isRTL, currentTheme, restartTour } = useGrowth()
-  const { showToast } = useToast()
-  const router = useRouter()
-  const supabase = createClient()
-  const { volume, setVolume, isMuted, setIsMuted, playBlip } = useSound()
-
-  const [formData, setFormData] = useState({
-    full_name: '',
-    age: '18',
-    language: 'en',
-    ai_name: '',
-    gender: ''
-  })
-  
-  const [userEmail, setUserEmail] = useState<string | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
-  const [isAvatarSelectorOpen, setIsAvatarSelectorOpen] = useState(false)
-  const [surveyBothered, setSurveyBothered] = useState<string>('')
-  const [surveyRating, setSurveyRating] = useState<number>(0)
-  const [surveyAlternative, setSurveyAlternative] = useState<string>('')
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true)
-  const [isPwaInstalled, setIsPwaInstalled] = useState<boolean>(false)
-  const [pwaPromptAvailable, setPwaPromptAvailable] = useState<boolean>(false)
-
-  useEffect(() => {
-    setIsDarkMode(document.documentElement.classList.contains('dark'))
-  }, [])
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setIsPwaInstalled(
-        window.matchMedia('(display-mode: standalone)').matches ||
-        (window.navigator as any).standalone === true
-      )
-      setPwaPromptAvailable(!!(window as any).deferredPWAInstallPrompt)
-    }
-
-    const handlePwaPrompt = () => setPwaPromptAvailable(true)
-    const handleAppInstalled = () => {
-      setIsPwaInstalled(true)
-      setPwaPromptAvailable(false)
-    }
-
-    window.addEventListener('pwa-prompt-available', handlePwaPrompt)
-    window.addEventListener('appinstalled', handleAppInstalled)
-
-    return () => {
-      window.removeEventListener('pwa-prompt-available', handlePwaPrompt)
-      window.removeEventListener('appinstalled', handleAppInstalled)
-    }
-  }, [])
-
-  // Dynamic AI Name Header calculation (No hardcoded "COACH" word)
-  const aiNameHeader = profile?.ai_name 
-    ? profile.ai_name 
-    : (isRTL ? 'المنظومة الذكية' : 'AI Coach')
-
-  useEffect(() => {
-    async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) setUserEmail(user.email || null)
-    }
-    getUser()
-  }, [])
-
-  useEffect(() => {
-    if (!profile) return
-    setFormData({
-      full_name: profile.full_name || '',
-      age: profile.age?.toString() || '18',
-      language: profile.language || 'en',
-      ai_name: profile.ai_name || '',
-      gender: profile.gender || ''
-    })
-  }, [profile])
-
-  // Close all modals event listener from global Shell ESC matrix
-  useEffect(() => {
-    const handleCloseAll = () => {
-      setIsAvatarSelectorOpen(false)
-      setIsLogoutModalOpen(false)
-      setIsDeleteModalOpen(false)
-    }
-    window.addEventListener('close-all-modals', handleCloseAll)
-    return () => window.removeEventListener('close-all-modals', handleCloseAll)
-  }, [])
-
-  const handleSaveDirectly = async (updatedData: typeof formData, customDarkMode?: boolean) => {
-    setSaving(true)
-
-    // Apply theme on save
-    const activeDarkMode = customDarkMode !== undefined ? customDarkMode : isDarkMode
-    const themeKey = activeDarkMode ? 'dark' : 'light'
-    document.documentElement.classList.toggle('dark', activeDarkMode)
-    localStorage.setItem('theme', themeKey)
-
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    // ── GUEST MODE INTERCEPT ──
-    if (!user || profile?.id === 'guest') {
-      if (profile) {
-        const optimistic = {
-          ...profile,
-          full_name: updatedData.full_name || profile.full_name,
-          ai_name: updatedData.ai_name || null,
-          language: updatedData.language as any,
-          gender: updatedData.gender || profile.gender,
-          age: updatedData.age ? parseInt(updatedData.age) : profile.age,
-        }
-        setProfile(optimistic)
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('cached_profile', JSON.stringify(optimistic))
-          localStorage.setItem('language', updatedData.language)
-          localStorage.setItem('cached_name', updatedData.full_name)
-        }
-      }
-      // showToast(updatedData.language === 'ar' ? 'تم الحفظ ✓' : 'Saved ✓', 'success')
-      setSaving(false)
-      return
-    }
-
-    // ── OPTIMISTIC UPDATE: immediately push changes to context
-    if (profile) {
-      const optimistic = {
-        ...profile,
-        full_name: updatedData.full_name || profile.full_name,
-        ai_name: updatedData.ai_name || null,
-        language: updatedData.language as any,
-        gender: updatedData.gender || profile.gender,
-        age: updatedData.age ? parseInt(updatedData.age) : profile.age,
-      }
-      setProfile(optimistic)
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('cached_profile', JSON.stringify(optimistic))
-        localStorage.setItem('language', updatedData.language)
-        localStorage.setItem('cached_name', updatedData.full_name)
-      }
-    }
-
-    const { error } = await supabase
-      .from('profiles')
-      .upsert({
-        id: user.id,
-        full_name: updatedData.full_name,
-        age: updatedData.age ? parseInt(updatedData.age) : null,
-        language: updatedData.language,
-        ai_name: updatedData.ai_name || null,
-        gender: updatedData.gender || null,
-        xp: profile?.xp || 0,
-        onboarded: profile?.onboarded ?? true,
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'id'
-      })
-
-    if (!error) {
-      localStorage.setItem('language', updatedData.language)
-      localStorage.setItem('cached_name', updatedData.full_name)
-      refreshProfile()
-      // showToast(updatedData.language === 'ar' ? 'تم الحفظ ✓' : 'Saved ✓', 'success')
-    } else {
-      showToast(updatedData.language === 'ar' ? 'فشل حفظ الإعدادات ⚠️' : 'Failed to update settings ⚠️', 'warning')
-      console.error('Save failed:', error)
-    }
-    setSaving(false)
-  }
-
-  const handleSave = () => handleSaveDirectly(formData)
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/auth/login')
-  }
-
-  // Counter Widget Increments/Decrements
-  const handleDecrementAge = () => {
-    const currentAge = parseInt(formData.age) || 18
-    if (currentAge > 13) {
-      setFormData(prev => ({ ...prev, age: (currentAge - 1).toString() }))
-      playBlip()
-    }
-  }
-
-  const handleIncrementAge = () => {
-    const currentAge = parseInt(formData.age) || 18
-    if (currentAge < 120) {
-      setFormData(prev => ({ ...prev, age: (currentAge + 1).toString() }))
-      playBlip()
-    }
-  }
-
-  const handleDecrementVolume = () => {
-    const newVol = Math.max(0, volume - 0.05)
-    setVolume(newVol)
-    playBlip()
-  }
-
-  const handleIncrementVolume = () => {
-    const newVol = Math.min(1, volume + 0.05)
-    setVolume(newVol)
-    playBlip()
-  }
-
-  // Catastrophic Delete Action
-  const handlePermanentlyDeleteAccount = async () => {
-    if (!profile) return
-    playBlip()
-    try {
-      const res = await deleteOwnAccount()
-      if (res?.success) {
-        await supabase.auth.signOut()
-        localStorage.clear()
-        showToast(isRTL ? 'تم حذف حسابك نهائياً بنجاح' : 'ACCOUNT_WIPED_SUCCESSFULLY', 'success')
-        router.push('/auth/login')
-      } else {
-        throw new Error('Deletion was not successful')
-      }
-    } catch (err: any) {
-      console.error('Delete own account error:', err)
-      showToast('DELETE_FAILED', 'warning')
-      alert('Account deletion failed: ' + (err.message || 'Unknown error'))
-    }
-    setIsDeleteModalOpen(false)
-  }
-
-  if (isLoading || !mounted) return (
-    <>
-      <div className="p-16 font-space animate-pulse tracking-widest text-sm md:text-base text-center" style={{ color: currentTheme.color }}>
-        {isRTL ? 'جاري التحميل...' : 'LOADING USER DATA...'}
-      </div>
-    </>
-  )
-
-  const currentRankId = profile?.rank?.toUpperCase() || 'SILVER'
-  const currentXp = profile?.xp || 0
-  const activeRank = RANKS_DATA.find(r => r.id === currentRankId) || RANKS_DATA[0]
-  const nextRank = RANKS_DATA[RANKS_DATA.indexOf(activeRank) + 1] || activeRank
-  const progressPercent = nextRank !== activeRank 
-    ? Math.min(100, Math.max(0, (currentXp - activeRank.threshold) / (nextRank.threshold - activeRank.threshold) * 100))
-    : 100
-
-  return (
-    <div className="min-h-[calc(100dvh-64px)] p-4 md:p-8 flex flex-col items-center">
-      <div className="w-full max-w-2xl space-y-6">
-        
-        {... rest of original return ...}
-
-      </div>
-    </div>
-  )
-}
-*/

@@ -83,3 +83,72 @@ WHERE role = 'co-admin';
 ALTER TABLE squad_join_requests 
 ADD COLUMN IF NOT EXISTS role text 
 DEFAULT 'member';
+
+-- Inbox Reports table
+create table if not exists inbox_reports (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users not null,
+  title text not null,
+  type text not null,
+  content jsonb default '{}'::jsonb not null,
+  is_read boolean default false,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  constraint inbox_reports_type_check check (
+    type in (
+      'daily_brief',
+      'deadline_alert',
+      'mission_complete',
+      'weekly_review',
+      'squad_join_request',
+      'squad_join_approved',
+      'squad_join_rejected',
+      'squad_request',
+      'squad_accept',
+      'squad_reject',
+      'squad_promote',
+      'squad_demote',
+      'custom_alert',
+      'rank_up',
+      'squad_invite',
+      'system',
+      'squad_request_pending',
+      'join_approved',
+      'join_rejected',
+      'squad_member_joined',
+      'squad_member_left'
+    )
+  )
+);
+
+-- Enable RLS for inbox_reports
+alter table inbox_reports enable row level security;
+
+-- RLS Policies for inbox_reports
+create policy "Users can view their own inbox reports" on inbox_reports
+  for select using (auth.uid() = user_id);
+
+create policy "Users can update their own inbox reports" on inbox_reports
+  for update using (auth.uid() = user_id);
+
+create policy "System/Admins can insert inbox reports" on inbox_reports
+  for insert with check (true);
+
+-- Push Subscriptions table
+create table if not exists push_subscriptions (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade,
+  subscription jsonb not null,
+  device text default 'desktop',
+  created_at timestamptz default now(),
+  constraint push_subscriptions_device_check check (device in ('desktop', 'mobile')),
+  unique(user_id, device)
+);
+
+-- Enable RLS for push_subscriptions
+alter table push_subscriptions enable row level security;
+
+-- RLS Policies for push_subscriptions
+create policy "Users manage own subscriptions"
+  on push_subscriptions for all using (auth.uid() = user_id);
+
+

@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGrowth } from '@/context/GrowthContext'
 import { useSound } from '@/context/SoundContext'
+import { createClient } from '@/lib/supabase'
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: Array<string>
@@ -15,18 +16,79 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>
 }
 
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 export default function PWARegistration() {
   const { currentTheme, isRTL } = useGrowth()
   const { playBlip, playNeuralLink } = useSound()
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showPrompt, setShowPrompt] = useState(false)
 
+  const initPushSubscription = async (registration: ServiceWorkerRegistration) => {
+    try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user?.id) return
+
+      if ('Notification' in window) {
+        const permission = await Notification.requestPermission()
+        if (permission !== 'granted') {
+          console.log('Notification permission not granted')
+          return
+        }
+      }
+
+      const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      if (!vapidPublicKey) {
+        console.warn('NEXT_PUBLIC_VAPID_PUBLIC_KEY is not defined')
+        return
+      }
+
+      const convertedKey = urlBase64ToUint8Array(vapidPublicKey)
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: convertedKey
+      })
+
+      const deviceType = /Mobile|Android|iP(hone|od|ad)/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+      const { error } = await supabase.from('push_subscriptions').upsert({
+        user_id: session.user.id,
+        subscription: JSON.parse(JSON.stringify(subscription)),
+        device: deviceType
+      })
+
+      if (error) {
+        console.error('Failed to save push subscription to Supabase:', error)
+      } else {
+        console.log('Push subscription saved successfully')
+      }
+    } catch (err) {
+      console.error('Error during push subscription initialization:', err)
+    }
+  }
+
   useEffect(() => {
     // Register Service Worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/sw.js')
-        .then(() => console.log('SW registered'))
+        .then((registration) => {
+          console.log('SW registered')
+          initPushSubscription(registration)
+        })
         .catch(err => console.log('SW failed:', err))
     }
 

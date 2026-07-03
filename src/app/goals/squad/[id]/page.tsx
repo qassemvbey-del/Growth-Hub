@@ -27,7 +27,7 @@ import {
   Plus, List, Kanban, Check, Timer, HelpCircle, X, Pin, 
   Shield, CheckCircle2, Award, Download, Clipboard as ClipboardIcon, FileText, 
   Share2, Calendar, Paperclip, Users2, Medal, EyeOff, ListPlus, LayoutGrid, Eye, ChevronDown, Play, Tv, Circle, Trophy,
-  BarChart2
+  BarChart2, AlignJustify, Columns, Maximize
 } from 'lucide-react'
 import html2canvas from 'html2canvas'
 
@@ -168,7 +168,64 @@ export default function MissionDetailPage() {
   const [timeFilter, setTimeFilter] = useState<'ALL' | 'WEEK' | 'OVERDUE' | 'today'>('ALL')
   const [selectedTaskState, setSelectedTaskState] = useState<any | null>(null)
   const [showReportModal, setShowReportModal] = useState(false)
+  const [layoutWidth, setLayoutWidth] = useState<'focused' | 'balanced' | 'ultrawide'>('ultrawide')
+  const [isLayoutMenuOpen, setIsLayoutMenuOpen] = useState(false)
   const searchParams = useSearchParams()
+
+  useEffect(() => {
+    if (!mission) return
+    const isGuest = (typeof id === 'string' && id.includes('local_')) || (mission.id && String(mission.id).includes('local_')) || !profile
+    if (isGuest) {
+      const cached = localStorage.getItem(`goal_layout_${mission.id || id}`)
+      if (cached === 'focused' || cached === 'balanced' || cached === 'ultrawide') {
+        setLayoutWidth(cached)
+      } else {
+        setLayoutWidth('ultrawide')
+      }
+    } else {
+      if (mission.metadata?.layoutWidth) {
+        setLayoutWidth(mission.metadata.layoutWidth)
+      } else {
+        setLayoutWidth('ultrawide')
+      }
+    }
+  }, [mission, id, profile])
+
+  const handleLayoutChange = async (newLayout: 'focused' | 'balanced' | 'ultrawide') => {
+    setLayoutWidth(newLayout)
+    const goalId = mission?.id || id
+    const isGuest = (typeof id === 'string' && id.includes('local_')) || (mission?.id && String(mission.id).includes('local_')) || !profile
+    if (isGuest) {
+      localStorage.setItem(`goal_layout_${goalId}`, newLayout)
+      setMission((prev: any) => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          metadata: {
+            ...(prev.metadata || {}),
+            layoutWidth: newLayout
+          }
+        }
+      })
+    } else {
+      const updatedMetadata = { ...(mission?.metadata || {}), layoutWidth: newLayout }
+      setMission((prev: any) => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          metadata: updatedMetadata
+        }
+      })
+      try {
+        await supabase
+          .from('goals')
+          .update({ metadata: updatedMetadata })
+          .eq('id', goalId)
+      } catch (err) {
+        console.error('Failed to update goal layout width in DB:', err)
+      }
+    }
+  }
 
   useEffect(() => {
     if (!mission?.tasks) return
@@ -1987,7 +2044,12 @@ const { progress, isInRedZone } = useMemo(() => {
          </div>
 
         {/* Full-width Kanban board / Tasks layout */}
-        <div className="w-full space-y-8">
+        <div className={cn(
+          "transition-all duration-300 ease-in-out space-y-8",
+          layoutWidth === 'focused' ? 'max-w-4xl mx-auto w-full' :
+          layoutWidth === 'balanced' ? 'max-w-6xl mx-auto w-full' :
+          'w-full'
+        )}>
             <section className="space-y-8">
             <div className="flex justify-between items-center border-b border-[var(--border)] dark:border-zinc-800/80 pb-3">
               <h2 className="text-[10px] font-medium font-space text-[var(--text-secondary)]">
@@ -2042,6 +2104,62 @@ const { progress, isInRedZone } = useMemo(() => {
 
            {/* Smart Time Filters wrapped underneath the header row */}
            <div className="flex flex-wrap gap-2 py-2 p-3 bg-[var(--background-secondary)] dark:bg-zinc-900/30 border border-[var(--border)] dark:border-white/5 rounded-lg">
+             {/* Layout Switcher Dropdown */}
+             <div className="relative">
+               <button
+                 type="button"
+                 onClick={() => setIsLayoutMenuOpen(!isLayoutMenuOpen)}
+                 className="h-8 px-3 rounded-full text-[10px] font-space font-black uppercase tracking-wider transition-all duration-200 cursor-pointer whitespace-nowrap flex items-center gap-1.5 border border-[var(--border)] dark:border-zinc-700 text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white bg-[var(--card)] dark:bg-black/20"
+               >
+                 {layoutWidth === 'focused' && <AlignJustify className="w-3.5 h-3.5" />}
+                 {layoutWidth === 'balanced' && <Columns className="w-3.5 h-3.5" />}
+                 {layoutWidth === 'ultrawide' && <Maximize className="w-3.5 h-3.5" />}
+                 <span>
+                   {layoutWidth === 'focused' && 'Focused'}
+                   {layoutWidth === 'balanced' && 'Balanced'}
+                   {layoutWidth === 'ultrawide' && 'Ultrawide'}
+                 </span>
+                 <ChevronDown className="w-3 h-3 transition-transform duration-200" style={{ transform: isLayoutMenuOpen ? 'rotate(180deg)' : 'none' }} />
+               </button>
+
+               {isLayoutMenuOpen && (
+                 <>
+                   <div className="fixed inset-0 z-40" onClick={() => setIsLayoutMenuOpen(false)} />
+                   <div className="absolute left-0 mt-1.5 w-40 rounded-md border border-[var(--border)] dark:border-zinc-800/80 bg-[var(--card)] dark:bg-zinc-950 shadow-lg z-50 p-1 font-space text-[10px] font-black uppercase tracking-wider">
+                     {[
+                       { key: 'focused', label: 'Focused', Icon: AlignJustify },
+                       { key: 'balanced', label: 'Balanced', Icon: Columns },
+                       { key: 'ultrawide', label: 'Ultrawide', Icon: Maximize }
+                     ].map(opt => {
+                       const Icon = opt.Icon
+                       const isActive = layoutWidth === opt.key
+                       return (
+                         <button
+                           key={opt.key}
+                           type="button"
+                           onClick={() => {
+                             playBlip()
+                             handleLayoutChange(opt.key as any)
+                             setIsLayoutMenuOpen(false)
+                           }}
+                           className={cn(
+                             "w-full px-2.5 py-1.5 rounded flex items-center gap-2 cursor-pointer transition-colors text-left",
+                             isActive
+                               ? "text-white"
+                               : "text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white hover:bg-white/5"
+                           )}
+                           style={isActive ? { color: missionColor, backgroundColor: `${missionColor}15` } : {}}
+                         >
+                           <Icon className="w-3.5 h-3.5" />
+                           <span>{opt.label}</span>
+                         </button>
+                       )
+                     })}
+                   </div>
+                 </>
+               )}
+             </div>
+
              {[
                { key: 'ALL', label: isRTL ? 'الكل' : 'All Active' },
                { key: 'today', label: isRTL ? 'اليوم' : 'Today' },

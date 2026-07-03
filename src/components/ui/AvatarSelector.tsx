@@ -83,11 +83,13 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
   const handleSave = async () => {
     if (!profile?.id || !chosenClass) return
     setIsSaving(true)
+    const selectedClassObj = CLASSES.find(c => c.id === chosenClass) || CLASSES[0]
     try {
       const { error } = await supabase
         .from('profiles')
         .update({ 
           champion_class: chosenClass,
+          avatar_url: selectedClassObj.image,
           onboarded: true
         })
         .eq('id', profile.id)
@@ -97,6 +99,7 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
       const updatedProfile = {
         ...profile,
         champion_class: chosenClass as any,
+        avatar_url: selectedClassObj.image,
         onboarded: true
       }
       setProfile(updatedProfile)
@@ -107,6 +110,7 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
           try {
             const parsed = JSON.parse(cached)
             parsed.champion_class = chosenClass
+            parsed.avatar_url = selectedClassObj.image
             parsed.onboarded = true
             localStorage.setItem('cached_profile', JSON.stringify(parsed))
           } catch (e) {}
@@ -116,10 +120,10 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
       }
 
       toast.showToast('Class updated successfully!', 'success')
-      onSaved?.(profile.avatar_url || '')
+      onSaved?.(selectedClassObj.image)
       onClose()
-    } catch (err) {
-      console.error('Save class error:', err)
+    } catch (err: any) {
+      console.error('Avatar Update Failed. Error Details:', { message: err?.message, details: err?.details, hint: err?.hint, fullError: err });
       toast.showToast('Update failed', 'warning')
     } finally {
       setIsSaving(false)

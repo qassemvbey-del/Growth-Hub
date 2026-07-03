@@ -84,6 +84,26 @@ self.addEventListener('message', event => {
   }
 })
 
+self.addEventListener('push', (event) => {
+  let data = {}
+  try {
+    data = event.data?.json() || {}
+  } catch (e) {
+    data = { title: 'Growth Hub', body: event.data?.text() || '' }
+  }
+  event.waitUntil(
+    self.registration.showNotification(
+      data.title || 'Growth Hub',
+      {
+        body: data.body || '',
+        icon: '/icon.png',
+        badge: '/icon.png',
+        data: { url: data.url || '/' }
+      }
+    )
+  )
+})
+
 self.addEventListener('notificationclick', event => {
   event.notification.close()
   if (event.action === 'pause') {
@@ -95,12 +115,13 @@ self.addEventListener('notificationclick', event => {
       })
     )
   } else {
+    const targetUrl = event.notification.data?.url || '/'
     event.waitUntil(
       self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
         if (clients.length > 0) {
           return clients[0].focus()
         }
-        return self.clients.openWindow('/')
+        return self.clients.openWindow(targetUrl)
       })
     )
   }
