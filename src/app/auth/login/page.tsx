@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { getURL } from '@/lib/utils'
 import ParticleWave from '@/components/ui/ParticleWave'
 // import { useMousePosition } from '@/hooks/useMousePosition'
 // import NeuralMesh from '@/components/ui/NeuralMesh'
@@ -69,18 +70,7 @@ function TypewriterText({ text, className = '' }: TypewriterTextProps) {
   )
 }
 
-const getURL = () => {
-  let url =
-    process?.env?.NEXT_PUBLIC_SITE_URL ?? // Reads from .env.local
-    process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel
-    'http://localhost:3000/';
-  
-  // Make sure to include `http://` or `https://`
-  url = url.startsWith('http') ? url : `https://${url}`;
-  // Make sure to include a trailing `/`
-  url = url.endsWith('/') ? url : `${url}/`;
-  return url;
-};
+// getURL is imported from '@/lib/utils'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)

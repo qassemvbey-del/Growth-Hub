@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useGrowth } from '@/context/GrowthContext'
 import { createClient } from '@/lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
-import { cn } from '@/lib/utils'
+import { cn, getURL } from '@/lib/utils'
 import { useToast } from '@/components/ui/Toast'
 import { useSound } from '@/context/SoundContext'
 import { deleteOwnAccount } from '@/app/actions/adminActions'
@@ -132,15 +132,7 @@ const CHAMPIONS_MAP: Record<string, { title: string; description: string; image:
   }
 }
 
-const getURL = () => {
-  let url =
-    process?.env?.NEXT_PUBLIC_SITE_URL ??
-    process?.env?.NEXT_PUBLIC_VERCEL_URL ??
-    'http://localhost:3000/';
-  url = url.startsWith('http') ? url : `https://${url}`;
-  url = url.endsWith('/') ? url : `${url}/`;
-  return url;
-};
+// getURL is imported from '@/lib/utils'
 
 export default function SettingsPage() {
   const { profile, setProfile, isLoading, refreshProfile, mounted, t, isRTL, currentTheme, restartTour } = useGrowth()
