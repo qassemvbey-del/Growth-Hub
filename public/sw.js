@@ -1,4 +1,4 @@
-const CACHE_NAME = 'growth-hub-v2'
+const CACHE_NAME = 'growth-hub-v3'
 const urlsToCache = [
   '/manifest.json',
   '/logo.svg',

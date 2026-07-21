@@ -44,20 +44,20 @@ webpush.setVapidDetails(
 );
 
 const subscription = {
-  endpoint: "https://fcm.googleapis.com/fcm/send/fBx5QulLIXk:APA91bE-s4MNLGhlQmEhmW5RYPzdVkXp5zOS0SgeX5eK8LX04EdgW14EVAWdGXTf4LWWCwq3q8W9ApCkCXm4u6M1bNfe4A-iHjoTmf6Uzz0ej2bgarvNYbnRmbdwRLdVHOmghQ0fQnIn",
+  endpoint: "https://fcm.googleapis.com/fcm/send/dlT3l_PGNak:APA91bHTtPPIrg9putYgi1PyzzV7QC4CwN5O5xMw91HFkOBBQmOo6JAX7sFBAb6GKQzJs_ITBDeEBIbvbYmIS8jvWzLbxMUFp5B6eXKcXb_5wvfe13vZNEbNRH4N1HYLDT73u87eZgy4",
   keys: {
-    auth: "jfopSUitg3kwK0O-cl36EA",
-    p256dh: "BC5vGkMTEsRboBXAnDaOilUsOzc71Kj98eA-Dtms_wkfA0bUBiunY2zhPv0xKmkn5DqrfOxKaNk700qg9CypAkE"
+    auth: "72FtSsCDDhLqxkiLc_aijg",
+    p256dh: "BHlYNpIipcVU49vLwK2MYhGyQXVaQmleRZIXnt8mRHLLvG9cdInGlnDjZIFFY1zKsujxTIMdkQfpIRlu00iQJHY"
   }
 };
 
 const payload = JSON.stringify({
-  title: "Growth Hub Test 🚀",
-  body: "Push notifications شغالة!",
+  title: "Growth Hub 🚀",
+  body: "النوتيفيكيشن شغالة!",
   url: "/"
 });
 
-console.log('Sending push notification...');
+console.log('Sending push notification to subscription...');
 
 webpush.sendNotification(subscription, payload)
   .then(response => {
