@@ -64,11 +64,19 @@ export default function PWARegistration() {
       })
 
       const deviceType = /Mobile|Android|iP(hone|od|ad)/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
-      const { error } = await supabase.from('push_subscriptions').upsert({
-        user_id: session.user.id,
-        subscription: JSON.parse(JSON.stringify(subscription)),
-        device: deviceType
-      })
+      const { error } = await supabase
+        .from('push_subscriptions')
+        .upsert(
+          {
+            user_id: session.user.id,
+            subscription: JSON.parse(JSON.stringify(subscription)),
+            device: deviceType
+          },
+          {
+            onConflict: 'user_id,device',
+            ignoreDuplicates: false
+          }
+        )
 
       if (error) {
         console.error('Failed to save push subscription to Supabase:', error)
