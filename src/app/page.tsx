@@ -1,11 +1,15 @@
 'use client'
 
-import { Activity, AlertTriangle, BarChart3, Lightbulb, Target, Zap, Crosshair, Calendar, Users, Swords } from 'lucide-react'
+import { Activity, AlertTriangle, BarChart3, Lightbulb, Target, Zap, Crosshair, Calendar, Users, Swords, Crown, Trophy, Plus, UserPlus } from 'lucide-react'
 import { NeonIcon } from '@/components/ui/NeonIcon'
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 // import Shell from '@/components/layout/Shell'
 import EnergyCell from '@/components/ui/EnergyCell'
+import DiamondProgress from '@/components/ui/DiamondProgress'
+import GoalCard from '@/components/ui/GoalCard'
+import Avatar from '@/components/ui/Avatar'
+import TaskDrawer from '@/components/ui/TaskDrawer'
 import { createClient } from '@/lib/supabase'
 import { useGrowth } from '@/context/GrowthContext'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -35,6 +39,7 @@ export default function Dashboard() {
   const [selectedSquadId, setSelectedSquadId] = useState<string>('')
   const [squadMembersMap, setSquadMembersMap] = useState<Record<string, any[]>>({})
   const [isDark, setIsDark] = useState(true)
+  const [selectedTaskForDrawer, setSelectedTaskForDrawer] = useState<any>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -261,7 +266,82 @@ export default function Dashboard() {
     return missions.filter((m: any) => m.isPinned || m.sync_to_dashboard)
   }, [missions])
 
-  // Calculate rivalry tracking for selected squad
+  // Combined squad leaderboard across all squads the user belongs to, deduplicating members
+  const combinedSquadLeaderboard = useMemo(() => {
+    const map: Record<string, any> = {}
+
+    if (profile?.id) {
+      map[profile.id] = {
+        id: profile.id,
+        full_name: profile.full_name || 'You',
+        avatar_url: profile.avatar_url || null,
+        xp: profile.xp || 0,
+        rank: profile.rank || 'ROOKIE'
+      }
+    }
+
+    Object.values(squadMembersMap).forEach((membersList) => {
+      membersList.forEach((m: any) => {
+        if (m.profiles && !m.profiles.blocked) {
+          const p = m.profiles
+          if (!map[p.id] || (p.xp && p.xp > (map[p.id].xp || 0))) {
+            map[p.id] = {
+              id: p.id,
+              full_name: p.full_name || 'Member',
+              avatar_url: p.avatar_url || null,
+              xp: p.xp || 0,
+              rank: p.rank || 'ROOKIE'
+            }
+          }
+        }
+      })
+    })
+
+    return Object.values(map).sort((a, b) => b.xp - a.xp)
+  }, [squadMembersMap, profile])
+
+  // Group Action Inbox tasks by due date
+  const actionInboxGrouped = useMemo(() => {
+    const groups: { dateKey: string; dateLabel: string; isOverdue: boolean; tasks: any[] }[] = []
+    const map: Record<string, { dateKey: string; dateLabel: string; isOverdue: boolean; tasks: any[] }> = {}
+    const todayStr = new Date().toISOString().split('T')[0]
+
+    actionInboxTasks.forEach((task: any) => {
+      const rawDate = task.metadata?.endDate || task.metadata?.dueDate || ''
+      let key = 'No Date'
+      let label = 'No Date'
+      let isOverdue = false
+
+      if (rawDate) {
+        try {
+          const d = new Date(rawDate)
+          const dateISO = d.toISOString().split('T')[0]
+          key = dateISO
+          isOverdue = dateISO < todayStr
+
+          if (dateISO === todayStr) {
+            label = isRTL ? 'اليوم' : 'Today'
+          } else {
+            label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+            if (isOverdue) {
+              label = `${isRTL ? 'متأخر' : 'Overdue'} • ${label}`
+            }
+          }
+        } catch {
+          key = rawDate
+          label = rawDate
+        }
+      }
+
+      if (!map[key]) {
+        map[key] = { dateKey: key, dateLabel: label, isOverdue, tasks: [] }
+        groups.push(map[key])
+      }
+      map[key].tasks.push(task)
+    })
+
+    return groups
+  }, [actionInboxTasks, isRTL])
   const computedRivalryText = useMemo(() => {
     /*
     if (!selectedSquadId || !squadMembersMap[selectedSquadId]) {
@@ -479,33 +559,34 @@ export default function Dashboard() {
         </div>
         ── */}
 
-        {/* ── TOP STATS GRID (Daily Focus Stats & The Rivalry Tracker Side-by-Side) ── */}
-        <div className="grid grid-cols-2 gap-2 sm:gap-6 w-full items-stretch">
+        {/* ── TOP STATS GRID (Daily Focus Stats & Squad Leaderboard Side-by-Side) ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 w-full items-stretch font-space">
           
           {/* 1. Daily Focus Stats */}
           <div 
-            className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 space-y-2 sm:space-y-4 shadow-xl relative overflow-hidden flex flex-col justify-between transition-all duration-150 hover:-translate-y-0.5"
+            className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 space-y-3 shadow-none relative overflow-hidden flex flex-col justify-between transition-all duration-150"
           >
-            <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r" style={{ backgroundImage: `linear-gradient(to right, ${currentTheme.color}, transparent)` }} />
+            <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: currentTheme.color }} />
             
             <div className="flex justify-between items-center gap-1.5">
-              <div className="flex items-center gap-1 sm:gap-2 min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                <Zap className="w-4 h-4 shrink-0 text-amber-400" />
                 <span className={cn(
-                  "font-semibold text-[var(--text-secondary)] truncate",
-                  isRTL ? "text-[8px] sm:text-[10px]" : "text-[9px] sm:text-xs"
+                  "font-semibold text-[var(--text-secondary)] dark:text-zinc-300 truncate",
+                  isRTL ? "text-[10px] sm:text-xs" : "text-xs sm:text-sm"
                 )}>
                   {isRTL ? 'تركيزك اليومي' : 'Daily Focus'}
                 </span>
               </div>
-              <div className="text-[10px] sm:text-lg font-black tracking-tight shrink-0">
+              <div className="text-xs sm:text-lg font-black tracking-tight shrink-0">
                 <span style={{ color: currentTheme.color }}>{completedTasksToday}</span>
-                <span className="text-zinc-500 text-[8px] sm:text-sm">/{totalTasksDueToday}</span>
+                <span className="text-zinc-500 text-xs sm:text-sm">/{totalTasksDueToday}</span>
               </div>
             </div>
 
-            {/* Segmented Energy Bar */}
+            {/* Segmented Progress Bar (FLAT DESIGN — NO GLOW) */}
             <div 
-              className="flex gap-1 h-5 sm:h-7 p-0.5 sm:p-1 rounded-lg sm:rounded-xl border bg-zinc-100 dark:bg-[#050505] overflow-hidden shadow-inner w-full mt-1.5"
+              className="flex gap-1 h-5 sm:h-6 p-0.5 rounded-lg border bg-zinc-100 dark:bg-[#050505] overflow-hidden w-full mt-1.5"
               style={{ borderColor: `${currentTheme.color}30` }}
             >
               {totalTasksDueToday === 0 ? (
@@ -516,269 +597,223 @@ export default function Dashboard() {
                   return (
                     <div
                       key={i}
-                      className="flex-1 rounded-sm transition-all duration-500 relative overflow-hidden"
+                      className="flex-1 rounded-sm transition-colors duration-300 relative"
                       style={{
                         backgroundColor: isActive ? currentTheme.color : 'transparent',
-                        border: isActive ? 'none' : '1px solid rgba(255, 255, 255, 0.05)',
-                        boxShadow: isActive ? `0 0 10px ${currentTheme.color}` : 'none',
+                        border: isActive ? 'none' : '1px solid rgba(255, 255, 255, 0.12)',
+                        boxShadow: 'none'
                       }}
-                    >
-                      {isActive && (
-                        <div className="absolute inset-0 bg-white/20 animate-pulse" />
-                      )}
-                    </div>
+                    />
                   )
                 })
               )}
             </div>
           </div>
 
-          {/* 2. Rivalry Tracker */}
+          {/* 2. Squad Leaderboard Mini-Card */}
           <div 
-            className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 space-y-2 sm:space-y-4 shadow-xl relative overflow-hidden transition-all duration-150 hover:-translate-y-0.5 flex flex-col justify-between"
+            className="bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 space-y-3 shadow-none relative overflow-hidden flex flex-col justify-between"
           >
-            <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: currentTheme.color }} />
-            
-            <div className="flex justify-between items-center gap-1.5">
-              <div className="flex items-center gap-1 sm:gap-2 min-w-0">
-                <span className={cn(
-                  "font-semibold text-[var(--text-secondary)] truncate",
-                  isRTL ? "text-[8px] sm:text-[10px]" : "text-[9px] sm:text-xs"
-                )}>
-                  {isRTL ? 'المنافسة' : 'Rivalry'}
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Trophy className="w-4 h-4 text-amber-500 shrink-0" />
+                <span className="font-semibold text-xs sm:text-sm text-[var(--text-primary)] dark:text-zinc-100 truncate">
+                  {isRTL ? 'ترتيب الفريق' : 'Squad Leaderboard'}
                 </span>
               </div>
-              
-              {squadsList.length > 1 && (
-                /* Commented out per rule "Never delete code, only comment it out" */
-                /* <select
-                  value={selectedSquadId}
-                  onChange={(e) => { playBlip(); setSelectedSquadId(e.target.value); }}
-                  className="bg-black/60 border rounded px-1 py-0.5 text-[8px] sm:text-[10px] font-space font-black uppercase text-zinc-300 outline-none cursor-pointer focus:border-teal-500 shrink-0 max-w-[65px] sm:max-w-none truncate"
-                  style={{ color: currentTheme.color, borderColor: `${currentTheme.color}30` }}
-                >
-                  {squadsList.map((sq) => (
-                    <option key={sq.id} value={sq.id} className="bg-zinc-950 text-white">
-                      {sq.title}
-                    </option>
-                  ))}
-                </select> */
-                /* <select
-                  value={selectedSquadId}
-                  onChange={(e) => { playBlip(); setSelectedSquadId(e.target.value); }}
-                  className="bg-[var(--card)] border border-[var(--border)] rounded-xl py-2 px-4 shadow-lg text-sm outline-none cursor-pointer truncate max-w-[200px] shrink-0 font-space font-medium text-zinc-300"
-                  style={{ borderColor: `var(--border)` }}
-                >
-                  {squadsList.map((sq) => (
-                    <option key={sq.id} value={sq.id} className="py-2 px-4 bg-[var(--card)] hover:bg-[var(--card-hover)] text-white text-sm">
-                      {sq.title}
-                    </option>
-                  ))}
-                </select> */
-                /* Commented out per rule "Never delete code, only comment it out"
-                <select
-                  value={selectedSquadId}
-                  onChange={(e) => { playBlip(); setSelectedSquadId(e.target.value); }}
-                  className="bg-zinc-900 border border-zinc-700 rounded-lg py-1 px-2 text-[10px] sm:text-[11px] outline-none cursor-pointer truncate max-w-[90px] sm:max-w-[130px] shrink-0 font-space font-bold text-zinc-200"
-                  style={{ colorScheme: 'dark', borderColor: `${currentTheme.color}40`, color: currentTheme.color }}
-                >
-                  {squadsList.map((sq) => (
-                    <option key={sq.id} value={sq.id} className="bg-zinc-900 text-zinc-200">
-                      {sq.title}
-                    </option>
-                  ))}
-                </select>
-                */
-                <select
-                  value={selectedSquadId}
-                  onChange={(e) => { playBlip(); setSelectedSquadId(e.target.value); }}
-                  className="bg-[var(--card)] border border-[var(--border)] text-[var(--text-primary)] dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-200 rounded-lg py-1 px-2 text-[10px] sm:text-[11px] outline-none cursor-pointer truncate max-w-[90px] sm:max-w-[130px] shrink-0 font-space font-bold"
-                  style={{ colorScheme: isDark ? 'dark' : 'light', borderColor: isDark ? `${currentTheme.color}40` : 'var(--border)', color: isDark ? currentTheme.color : 'var(--text-primary)' }}
-                >
-                  {squadsList.map((sq) => (
-                    <option key={sq.id} value={sq.id} className="bg-[var(--card)] text-[var(--text-primary)] dark:bg-zinc-900 dark:text-zinc-200">
-                      {sq.title}
-                    </option>
-                  ))}
-                </select>
-              )}
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 mt-1.5">
-              {/* Commented out per rule "Never delete code, only comment it out"
-              <p className={cn(
-                "font-medium text-zinc-100 leading-tight flex-1 line-clamp-2 break-words whitespace-normal",
-                isRTL ? "text-[8px] sm:text-[10px]" : "text-[9px] sm:text-xs"
-              )}>
-                {computedRivalryText}
-              </p>
-              */}
-              <p className="text-xs font-mono text-[var(--text-secondary)] dark:text-zinc-500 mt-1 leading-tight flex-1 line-clamp-2 break-words whitespace-normal">
-                {computedRivalryText}
-              </p>
-            </div>
+            {combinedSquadLeaderboard.length < 3 ? (
+              /* Simple empty state inviting user to join or create a squad goal */
+              <div className="py-3 flex flex-col items-center justify-center text-center space-y-2 my-auto">
+                <p className="text-xs text-[var(--text-secondary)] dark:text-zinc-400">
+                  {isRTL ? 'انضم أو أنشئ هدف فريق لمشاهدة الترتيب' : 'Join or create a squad goal to see leaderboard'}
+                </p>
+                <button
+                  onClick={() => router.push('/goals/squad')}
+                  className="px-3 py-1.5 rounded-lg border border-teal-500/30 bg-teal-500/10 text-teal-400 hover:bg-teal-500/20 text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <UserPlus className="w-3.5 h-3.5" />
+                  {isRTL ? 'فرق العمل' : 'Squad Goals'}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-1.5 my-auto">
+                {/* Top 3 members */}
+                {combinedSquadLeaderboard.slice(0, 3).map((member, idx) => {
+                  const rank = idx + 1
+                  const isRank1 = rank === 1
+                  const isCurrentUser = member.id === profile?.id
+
+                  return (
+                    <div
+                      key={member.id}
+                      className={cn(
+                        "flex items-center justify-between p-1.5 rounded-lg transition-colors text-xs",
+                        isCurrentUser ? "bg-white/10 dark:bg-zinc-800/50 font-medium" : "hover:bg-white/5"
+                      )}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        {/* Rank number / crown badge */}
+                        <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                          {isRank1 ? (
+                            <span className="text-amber-500 font-bold text-xs flex items-center gap-0.5" title="Rank 1">
+                              👑 <span className="text-[10px]">1</span>
+                            </span>
+                          ) : (
+                            <span className="text-[11px] font-mono text-zinc-400 font-semibold">{rank}</span>
+                          )}
+                        </div>
+
+                        {/* Avatar component */}
+                        <Avatar
+                          avatarUrl={member.avatar_url}
+                          name={member.full_name}
+                          size={22}
+                        />
+
+                        {/* Name */}
+                        <span className="truncate text-zinc-900 dark:text-zinc-100 font-medium text-xs">
+                          {member.full_name} {isCurrentUser && <span className="text-[10px] text-teal-400">(You)</span>}
+                        </span>
+                      </div>
+
+                      {/* XP value */}
+                      <span className="font-mono text-xs font-semibold text-zinc-400 shrink-0 ml-2">
+                        {member.xp || 0} XP
+                      </span>
+                    </div>
+                  )
+                })}
+
+                {/* 4th row for current user if user is not in top 3 */}
+                {(() => {
+                  const userIdx = combinedSquadLeaderboard.findIndex(m => m.id === profile?.id)
+                  if (userIdx < 3) return null
+                  const userMember = combinedSquadLeaderboard[userIdx]
+                  if (!userMember) return null
+
+                  return (
+                    <>
+                      <div className="border-t border-white/10 my-1" />
+                      <div className="flex items-center justify-between p-1.5 rounded-lg bg-white/10 dark:bg-zinc-800/50 text-xs font-medium">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                            <span className="text-[11px] font-mono text-teal-400 font-semibold">{userIdx + 1}</span>
+                          </div>
+
+                          <Avatar
+                            avatarUrl={userMember.avatar_url}
+                            name={userMember.full_name}
+                            size={22}
+                          />
+
+                          <span className="truncate text-zinc-900 dark:text-zinc-100 font-medium text-xs">
+                            {userMember.full_name} <span className="text-[10px] text-teal-400">(You)</span>
+                          </span>
+                        </div>
+
+                        <span className="font-mono text-xs font-semibold text-teal-400 shrink-0 ml-2">
+                          {userMember.xp || 0} XP
+                        </span>
+                      </div>
+                    </>
+                  )
+                })()}
+              </div>
+            )}
           </div>
 
         </div>
 
         <InlineGuideTip hasTasks={allTasks.length > 0} />
 
-        {/* ── MIDDLE GRID (Action Inbox - Fully Optimized for Mobile & Desktop) ── */}
+        {/* ── MIDDLE GRID (Action Inbox - Date Grouped & Direct TaskDrawer Navigation) ── */}
         <div className="w-full font-space">
           
           {/* Action Inbox */}
-          {/* Commented out per rule "Never delete code, only comment it out" */}
-          {/*
           <div 
-            className="w-full bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 shadow-xl relative overflow-hidden"
+            className="w-full bg-white dark:bg-black/40 border border-[var(--border)] dark:border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 shadow-none relative overflow-hidden"
           >
             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r to-transparent" style={{ backgroundImage: `linear-gradient(to right, ${currentTheme.color}, transparent)` }} />
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <h2 className={cn(
                   "font-semibold text-[var(--text-secondary)]",
-                  isRTL ? "text-[9px] sm:text-[11px]" : "text-[10px] sm:text-xs"
+                  isRTL ? "text-[10px] sm:text-xs" : "text-xs sm:text-sm"
                 )}>
                   {isRTL ? 'المهام العاجلة' : 'Action Inbox'}
                 </h2>
               </div>
-              <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[10px] font-medium border shrink-0 transition-colors duration-200" style={{ color: currentTheme.color, borderColor: `${currentTheme.color}30`, backgroundColor: `${currentTheme.color}15` }}>
+              <span className="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-medium border shrink-0 transition-colors duration-200" style={{ color: currentTheme.color, borderColor: `${currentTheme.color}30`, backgroundColor: `${currentTheme.color}15` }}>
                 {actionInboxTasks.length} {isRTL ? 'مهمة' : 'tasks'}
               </span>
             </div>
 
-            <div className="space-y-2.5 sm:space-y-3 max-h-[300px] sm:max-h-[380px] overflow-y-auto pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {actionInboxTasks.map((task) => {
-                const tDate = new Date(task.metadata.endDate || task.metadata.dueDate)
-                tDate.setHours(0,0,0,0)
-                const today = new Date()
-                today.setHours(0,0,0,0)
-                const isOverdue = tDate < today
+            <div className="space-y-4 max-h-[380px] sm:max-h-[440px] overflow-y-auto pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {actionInboxGrouped.map((group) => (
+                <div key={group.dateKey} className="space-y-2">
+                  {/* Lightweight Date Group Header */}
+                  <div className="flex items-center gap-2 pt-1 pb-0.5 border-b border-white/5 dark:border-white/10">
+                    <span className={cn(
+                      "text-[10px] font-mono uppercase font-bold tracking-wider inline-flex items-center gap-1.5",
+                      group.isOverdue ? "text-red-400" : "text-[var(--text-secondary)] dark:text-zinc-400"
+                    )}>
+                      <Calendar className="w-3 h-3 shrink-0" />
+                      <span>{group.dateLabel}</span>
+                    </span>
+                    <div className="flex-1 h-[1px] bg-white/5 dark:bg-white/10" />
+                    <span className="text-[9px] font-mono text-zinc-500">
+                      {group.tasks.length}
+                    </span>
+                  </div>
 
-                return (
-                  <motion.div
-                    key={task.id}
-                    layout
-                    className="flex items-center justify-between p-2.5 sm:p-4 rounded-xl border border-white/5 bg-zinc-950/20 hover:bg-white/5 hover:border-white/10 transition-all gap-2.5 sm:gap-4 font-space"
-                  >
-                    <div className="flex items-center gap-2 sm:gap-3.5 min-w-0 flex-1">
-                      <button
-                        onClick={() => toggleTask(task)}
-                        className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-full border flex items-center justify-center bg-transparent hover:bg-white/5 transition-all shrink-0 cursor-pointer animate-none group/btn"
-                        style={{ borderColor: task.missionColor || currentTheme.color }}
+                  {/* Tasks under this date group */}
+                  <div className="space-y-2">
+                    {group.tasks.map((task: any) => (
+                      <motion.div
+                        key={task.id}
+                        layout
+                        onClick={() => setSelectedTaskForDrawer(task)}
+                        className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl border border-[var(--border)] dark:border-white/5 bg-white dark:bg-zinc-950/20 hover:bg-[var(--card-hover)] dark:hover:bg-white/5 transition-all gap-2.5 sm:gap-4 font-space cursor-pointer group"
                       >
-                        <NeonIcon 
-                          icon={Crosshair} 
-                          interactive 
-                          className="w-3 sm:w-3.5 sm:h-3.5 opacity-0 group-hover/btn:opacity-100 transition-opacity" 
-                          style={{ color: task.missionColor || currentTheme.color }} 
-                        />
-                      </button>
+                        <div className="flex items-center gap-2 sm:gap-3.5 min-w-0 flex-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleTask(task);
+                            }}
+                            className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-full border flex items-center justify-center bg-transparent hover:bg-white/5 transition-all shrink-0 cursor-pointer group/btn"
+                            style={{ borderColor: task.missionColor || currentTheme.color }}
+                          >
+                            <NeonIcon 
+                              icon={Crosshair} 
+                              interactive 
+                              className="w-3 sm:w-3.5 sm:h-3.5 opacity-0 group-hover/btn:opacity-100 transition-opacity" 
+                              style={{ color: task.missionColor || currentTheme.color }} 
+                            />
+                          </button>
 
-                      <div className="flex flex-col min-w-0 flex-1">
-                        <span className="text-xs sm:text-sm font-semibold text-white/95 truncate leading-tight">{task.title}</span>
-                        <span className="text-[8px] sm:text-[9px] text-zinc-500 font-medium tracking-wide mt-0.5 truncate">{task.missionTitle}</span>
-                      </div>
-                    </div>
+                          <div className="flex flex-col min-w-0 flex-1">
+                            <span className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] dark:text-white/95 truncate leading-tight group-hover:text-teal-400 transition-colors">
+                              {task.title}
+                            </span>
+                            <span className="text-[8px] sm:text-[9px] text-[var(--text-secondary)] dark:text-zinc-500 font-medium tracking-wide mt-0.5 truncate">
+                              {task.missionTitle}
+                            </span>
+                          </div>
+                        </div>
 
-                    <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-                      <span className={cn(
-                        "font-mono text-[8px] sm:text-[9px] px-1.5 sm:px-2 py-0.5 rounded border tracking-wider",
-                        isOverdue 
-                          ? "text-red-500 border-red-500/30 bg-red-950/15 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse font-black" 
-                          : "text-zinc-400 border-white/5 bg-white/[0.02]"
-                      )}>
-                        📅 {task.metadata.endDate || task.metadata.dueDate}
-                      </span>
-
-                      <span className="text-[8px] sm:text-[10px] font-mono text-zinc-500 tracking-wider">
-                        +{task.weight * 10}XP
-                      </span>
-                    </div>
-                  </motion.div>
-                )
-              })}
-
-              {actionInboxTasks.length === 0 && (
-                <div className="py-12 sm:py-16 text-center space-y-2 border border-dashed border-white/5 rounded-xl">
-                  <p className="text-[9px] sm:text-xs text-zinc-500 dark:text-white/30 uppercase tracking-widest">
-                    {isRTL ? 'عاش! مفيش أي مهام متأخرة عليك دلوقتي.' : "You're all caught up! Overdue tasks will appear here."}
-                  </p>
+                        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+                          <span className="text-[8px] sm:text-[10px] font-mono text-[var(--text-muted)] dark:text-zinc-500 tracking-wider">
+                            +{task.weight * 10}XP
+                          </span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
-          */}
-
-          <div 
-            className="w-full bg-white dark:bg-black/40 border border-[var(--border)] dark:border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 shadow-xl relative overflow-hidden"
-          >
-            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r to-transparent" style={{ backgroundImage: `linear-gradient(to right, ${currentTheme.color}, transparent)` }} />
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <h2 className={cn(
-                  "font-semibold text-[var(--text-secondary)]",
-                  isRTL ? "text-[9px] sm:text-[11px]" : "text-[10px] sm:text-xs"
-                )}>
-                  {isRTL ? 'المهام العاجلة' : 'Action Inbox'}
-                </h2>
-              </div>
-              <span className="px-2 py-0.5 rounded-full text-[8px] sm:text-[10px] font-medium border shrink-0 transition-colors duration-200" style={{ color: currentTheme.color, borderColor: `${currentTheme.color}30`, backgroundColor: `${currentTheme.color}15` }}>
-                {actionInboxTasks.length} {isRTL ? 'مهمة' : 'tasks'}
-              </span>
-            </div>
-
-            <div className="space-y-2.5 sm:space-y-3 max-h-[300px] sm:max-h-[380px] overflow-y-auto pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {actionInboxTasks.map((task) => {
-                const tDate = new Date(task.metadata.endDate || task.metadata.dueDate)
-                tDate.setHours(0,0,0,0)
-                const today = new Date()
-                today.setHours(0,0,0,0)
-                const isOverdue = tDate < today
-
-                return (
-                  <motion.div
-                    key={task.id}
-                    layout
-                    className="flex items-center justify-between p-2.5 sm:p-4 rounded-xl border border-[var(--border)] dark:border-white/5 bg-white dark:bg-zinc-950/20 hover:bg-[var(--card-hover)] dark:hover:bg-white/5 transition-all gap-2.5 sm:gap-4 font-space"
-                  >
-                    <div className="flex items-center gap-2 sm:gap-3.5 min-w-0 flex-1">
-                      <button
-                        onClick={() => toggleTask(task)}
-                        className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-full border flex items-center justify-center bg-transparent hover:bg-white/5 transition-all shrink-0 cursor-pointer animate-none group/btn"
-                        style={{ borderColor: task.missionColor || currentTheme.color }}
-                      >
-                        <NeonIcon 
-                          icon={Crosshair} 
-                          interactive 
-                          className="w-3 sm:w-3.5 sm:h-3.5 opacity-0 group-hover/btn:opacity-100 transition-opacity" 
-                          style={{ color: task.missionColor || currentTheme.color }} 
-                        />
-                      </button>
-
-                      <div className="flex flex-col min-w-0 flex-1">
-                        <span className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] dark:text-white/95 truncate leading-tight">{task.title}</span>
-                        <span className="text-[8px] sm:text-[9px] text-[var(--text-secondary)] dark:text-zinc-500 font-medium tracking-wide mt-0.5 truncate">{task.missionTitle}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-                      <span className={cn(
-                        "font-mono text-[8px] sm:text-[9px] px-1.5 sm:px-2 py-0.5 rounded border tracking-wider",
-                        isOverdue 
-                          ? "text-red-500 border-red-500/30 bg-red-950/15 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse font-black" 
-                          : "text-[var(--text-secondary)] dark:text-zinc-400 border border-[var(--border)] dark:border-white/5 bg-[var(--background-secondary)] dark:bg-white/[0.02]"
-                      )}>
-                        📅 {task.metadata.endDate || task.metadata.dueDate}
-                      </span>
-
-                      <span className="text-[8px] sm:text-[10px] font-mono text-[var(--text-muted)] dark:text-zinc-500 tracking-wider">
-                        +{task.weight * 10}XP
-                      </span>
-                    </div>
-                  </motion.div>
-                )
-              })}
+              ))}
 
               {actionInboxTasks.length === 0 && (
                 <div className="py-12 sm:py-16 text-center space-y-2 border border-dashed border-[var(--border)] dark:border-white/5 rounded-xl">
@@ -790,62 +825,10 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* The Rivalry Tracker (Old card placement commented out for Mobile Grid Optimization) ──
-          <div 
-            className="lg:col-span-4 bg-white/60 dark:bg-black/40 backdrop-blur-3xl border border-black/5 dark:border-white/5 rounded-2xl p-6 md:p-8 space-y-6 shadow-xl relative overflow-hidden transition-all duration-300"
-            style={{ 
-              borderColor: currentTheme.color,
-              boxShadow: `0 0 20px ${currentTheme.color}25`
-            }}
-          >
-            <div className="absolute top-0 inset-x-0 h-1" style={{ backgroundColor: currentTheme.color }} />
-            
-            <div className="flex justify-between items-center gap-4 flex-wrap">
-              <div className="flex items-center gap-2">
-                <NeonIcon icon={Users} className="w-4 h-4 shrink-0" style={{ color: currentTheme.color }} />
-                <h2 className="text-sm font-black tracking-widest text-[var(--text-secondary)] uppercase">
-                  {isRTL ? 'متتبع المنافسة' : 'THE RIVALRY TRACKER'}
-                </h2>
-              </div>
-              
-              {squadsList.length > 1 && (
-                <select
-                  value={selectedSquadId}
-                  onChange={(e) => { playBlip(); setSelectedSquadId(e.target.value); }}
-                  className="bg-black/60 border rounded-lg px-2 py-1 text-[10px] font-space font-black uppercase text-zinc-300 outline-none cursor-pointer focus:border-teal-500"
-                  style={{ color: currentTheme.color, borderColor: `${currentTheme.color}30` }}
-                >
-                  {squadsList.map((sq) => (
-                    <option key={sq.id} value={sq.id} className="bg-zinc-950 text-white">
-                      {sq.title}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-
-            <div className="py-8 flex flex-col items-center justify-center text-center space-y-4">
-              <Swords className="w-12 h-12 stroke-[1.5] animate-pulse" style={{ color: currentTheme.color }} />
-              <p className="text-base font-black tracking-wide text-zinc-100 leading-relaxed uppercase max-w-xs">
-                {computedRivalryText}
-              </p>
-            </div>
-
-            <div className="pt-4 border-t border-white/5 text-center">
-              <button
-                onClick={() => router.push('/goals/squad')}
-                className="w-full py-2.5 bg-white/[0.02] hover:bg-white/5 border border-white/10 rounded-xl text-xs font-black uppercase tracking-widest text-white transition-all cursor-pointer"
-              >
-                {isRTL ? 'إدارة فرق العمل' : 'MANAGE TEAM WORKSPACES'}
-              </button>
-            </div>
-          </div>
-          ── */}
-
         </div>
 
-        {/* ── PINNED GOALS (Bottom Section - Full Width Grid) ── */}
-        <div className="w-full space-y-6 pt-8 border-t border-white/10">
+        {/* ── PINNED GOALS (Bottom Section - Shared GoalCard Grid) ── */}
+        <div className="w-full space-y-4 pt-6 border-t border-white/10 font-space">
           <div className="flex items-center gap-3">
             <h2 className={cn(
               "font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight",
@@ -855,76 +838,42 @@ export default function Dashboard() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-6 cells-target">
+          <div
+            className="w-full"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: '12px'
+            }}
+          >
             {pinnedGoals.map((mission, idx) => {
-               const { progress, isInRedZone } = calculateAccountability(mission)
-               const roundedProgress = Math.round(progress)
-               const customColor = mission.color || currentTheme.color
+              const { progress } = calculateAccountability(mission)
+              const roundedProgress = Math.round(progress)
+              const completedTasks = mission.tasks?.filter((t: any) => t.is_completed).length || 0
+              const totalTasks = mission.tasks?.length || 0
+              const members = squadMembersMap[mission.id] || []
 
-               return (
-                 <div
-                   key={mission.id}
-                   onClick={() => router.push(mission.metadata?.type === 'public' ? `/goals/public/${mission.id}` : `/goals/squad/${mission.id}`)}
-                   className={cn(
-                      "relative group cursor-pointer p-3 sm:p-5 rounded-xl border bg-white/60 dark:bg-black/40 backdrop-blur-3xl transition-all duration-150 overflow-hidden flex flex-col gap-2.5 sm:gap-4 hover:-translate-y-0.5",
-                      isInRedZone ? "border-red-500/40" : "border-white/10 hover:border-white/20",
-                      (mission.title === "Start Here 🚀" || mission.title === "ابدأ من هنا 🚀") && "onboarding-start-goal"
-                    )}
-                 >
-                   <div className="absolute top-0 inset-x-0 h-[2px]" style={{ backgroundColor: isInRedZone ? '#ef4444' : customColor }} />
+              let userRole = 'SOLO'
+              if (mission.metadata?.type === 'squad') {
+                userRole = mission.user_id === profile?.id ? 'ADMIN' : 'MEMBER'
+              }
 
-                   <div className="flex justify-between items-start gap-1.5 sm:gap-2 min-w-0">
-                       {/* Commented out per rule "Never delete code, only comment it out" */}
-                       {/* <h3 className="font-black uppercase tracking-wide truncate max-w-[120px] md:max-w-none text-sm md:text-base text-zinc-100 font-space">
-                        {mission.title}
-                       </h3> */}
-                       {/* <h3 className="uppercase tracking-wide truncate min-w-0 flex-1 text-sm md:text-base font-medium text-zinc-100 font-space">
-                        {mission.title}
-                       </h3> */}
-                        {/* <h3 className="tracking-wide truncate min-w-0 flex-1 text-xs sm:text-sm font-semibold text-zinc-100 font-space">
-                         {mission.title}
-                        </h3> */}
-                        {/* Commented out per rule "Never delete code, only comment it out" */}
-                        {/* <h3 className="tracking-wide truncate min-w-0 flex-1 font-semibold text-zinc-100 font-space" style={{ fontSize: '0.75rem', lineHeight: '1.25rem' }}> */}
-                        <h3 className="tracking-wide truncate min-w-0 flex-1 font-semibold text-[var(--text-primary)] dark:text-zinc-100 font-space" style={{ fontSize: '0.75rem', lineHeight: '1.25rem' }}>
-                         {mission.title}
-                        </h3>
-                    <span 
-                      className="text-xs font-black font-mono shrink-0"
-                      style={{ color: isInRedZone ? '#ef4444' : customColor }}
-                    >
-                      {roundedProgress}%
-                    </span>
-                  </div>
-
-                  {/* Sleek horizontal Progress Bar */}
-                  {/* Commented out per rule "Never delete code, only comment it out"
-                  <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${roundedProgress}%` }}
-                      transition={{ duration: 1.2 }}
-                      className="h-full rounded-full"
-                      style={{ 
-                        backgroundColor: isInRedZone ? '#ef4444' : customColor,
-                        boxShadow: `0 0 8px ${isInRedZone ? '#ef4444' : customColor}`
-                      }}
-                    />
-                  </div>
-                  */}
-                  <div className="w-full h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800/80 overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${roundedProgress}%` }}
-                      transition={{ duration: 1.2 }}
-                      className="h-full rounded-full"
-                      style={{ 
-                        backgroundColor: isInRedZone ? '#ef4444' : customColor,
-                        boxShadow: `0 0 8px ${isInRedZone ? '#ef4444' : customColor}`
-                      }}
-                    />
-                  </div>
-                </div>
+              return (
+                <GoalCard
+                  key={mission.id}
+                  idx={idx}
+                  title={mission.title}
+                  completedTasks={completedTasks}
+                  totalTasks={totalTasks}
+                  dueDate={mission.end_date || mission.start_date}
+                  percentage={roundedProgress}
+                  color={mission.color || currentTheme.color}
+                  isActive={Boolean(mission.sync_to_dashboard)}
+                  role={userRole}
+                  members={members}
+                  typeFilter={mission.metadata?.type || 'solo'}
+                  onClick={() => router.push(mission.metadata?.type === 'public' ? `/goals/public/${mission.id}` : `/goals/squad/${mission.id}`)}
+                />
               )
             })}
 
@@ -940,7 +889,28 @@ export default function Dashboard() {
 
         </div>
       </div>
-    {/* </Shell> */}
+
+      {/* Task Drawer modal when clicking task from Action Inbox */}
+      {selectedTaskForDrawer && (
+        <TaskDrawer
+          task={selectedTaskForDrawer}
+          onClose={() => setSelectedTaskForDrawer(null)}
+          isGuest={!profile?.id}
+          themeColor={currentTheme.color}
+          onComplete={() => {
+            toggleTask(selectedTaskForDrawer)
+            setSelectedTaskForDrawer(null)
+          }}
+          onUpdateTask={async (taskId, updates) => {
+            setMissions(prev => prev.map(m => ({
+              ...m,
+              tasks: m.tasks?.map((t: any) => t.id === taskId ? { ...t, ...updates } : t)
+            })))
+            await supabase.from('tasks').update(updates).eq('id', taskId)
+          }}
+          goalId={selectedTaskForDrawer.goal_id}
+        />
+      )}
     </>
   )
 }

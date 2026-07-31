@@ -18,6 +18,7 @@ import MissionAttachmentsModal from '@/components/ui/MissionAttachmentsModal'
 import { validateContent } from '@/lib/profanityFilter'
 import { aiProfanityCheck } from '@/app/actions/profanityCheck'
 import { useTrack } from '@/hooks/useTrack'
+import GoalCard from '@/components/ui/GoalCard'
 
 // Commented out per safety rules:
 // const SIZES = [
@@ -102,289 +103,32 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
   }
 
   const renderMissionCard = (mission: any, idx: number) => {
-    const { progress, isInRedZone } = calculateAccountability(mission)
+    const { progress } = calculateAccountability(mission)
     const percentage = Math.round(progress)
-    const color = currentTheme.color
     const completedTasks = mission.tasks?.filter((t: any) => t.is_completed).length || 0
     const totalTasks = mission.tasks?.length || 0
-    const kasaSize = mission.size === 'lg' ? 'md' : mission.size === 'md' ? 'sm' : 'sm'
-    const SizeIconComp = SIZES.find(s => s.key === mission.size)?.icon || Layers
-    const fmtDate = (d: string | null) => {
-      if (!d) return '—'
-      try { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) } catch { return '—' }
-    }
+    const userRole = getUserRole(mission)
+    const members = goalMembersMap[mission.id] || []
 
     return (
-      <motion.div
+      <GoalCard
         key={mission.id}
-        layout
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: idx * 0.05 }}
-        onClick={() => { playBlip(); router.push(mission.metadata?.type === 'public' ? `/goals/public/${mission.id}` : `/goals/squad/${mission.id}`); }}
-        className={cn(
-          "group relative flex flex-row items-center justify-between card-base cursor-pointer overflow-hidden p-4",
-          "border border-white/10 dark:border-white/10 light:border-black/8 hover:-translate-y-0.5 hover:border-orange-500/20 active:scale-[0.97] transition-all duration-150"
-        )}
-        style={typeFilter === 'squad' ? { borderInlineStart: `4px solid ${mission.color || color}` } : {}}
-      >
-        {/* Left Section: Info and Controls */}
-        <div className="flex flex-col flex-1 min-w-0 pr-3 text-start">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <SizeIconComp className="w-3.5 h-3.5 opacity-60 shrink-0" style={{ color: isInRedZone ? '#FF0055' : (mission.color || color) }} />
-            
-            <span className={cn(
-              "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors duration-200",
-              mission.sync_to_dashboard 
-                ? "bg-teal-500/10 text-teal-600 dark:text-teal-400" 
-                : "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400"
-            )}>
-              <span className={cn("w-1 h-1 rounded-full inline-block", mission.sync_to_dashboard ? "bg-teal-500" : "bg-zinc-400")} />
-              {mission.sync_to_dashboard ? (isRTL ? 'نشط' : 'Active') : (isRTL ? 'استعداد' : 'Standby')}
-            </span>
-
-            {typeFilter === 'solo' && (
-              <span className="inline-flex items-center rounded-full bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 px-2 py-0.5 text-[10px] font-medium transition-colors duration-200">
-                {isRTL ? 'فردي' : 'Solo'}
-              </span>
-            )}
-            {typeFilter === 'squad' && (
-              mission.user_id === profile?.id ? (
-                <span className="inline-flex items-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 text-[10px] font-medium transition-colors duration-200">
-                  {isRTL ? '👑 مشرف' : '👑 Admin'}
-                </span>
-              ) : (
-                <span className="inline-flex items-center rounded-full bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 px-2 py-0.5 text-[10px] font-medium transition-colors duration-200">
-                  {isRTL ? 'عضو' : 'Member'}
-                </span>
-              )
-            )}
-          </div>
-
-          <h3 className="text-sm md:text-base font-heading font-medium text-[var(--text-primary)] truncate min-w-0 mt-2">
-            {mission.title}
-          </h3>
-
-          {typeFilter === 'squad' && (
-            <div className="flex flex-col gap-1.5 my-2 py-1.5 border-y border-zinc-800/20 dark:border-zinc-800/40 select-none">
-              <div className="flex items-center justify-between flex-wrap gap-1.5">
-                <div className="flex items-center -space-x-1.5">
-                  {(goalMembersMap[mission.id] || []).slice(0, 4).map((member: any) => (
-                    <div
-                      key={member.id}
-                      className={cn(
-                        "w-5 h-5 rounded-full border bg-zinc-900 flex items-center justify-center text-[7px] font-body font-medium text-white shadow-md relative overflow-hidden shrink-0",
-                        getRankBorderClass(member.rank)
-                      )}
-                      title={`${member.full_name} (${member.rank || 'MEMBER'}) - ${member.role}`}
-                    >
-                      {member.avatar_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={member.avatar_url}
-                          alt={member.full_name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span>{member.full_name?.substring(0, 2) || 'OP'}</span>
-                      )}
-                    </div>
-                  ))}
-
-                  {(goalMembersMap[mission.id] || []).length > 4 && (
-                    <div className="w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[6px] font-body font-medium text-teal-400 shadow-md shrink-0">
-                      +{(goalMembersMap[mission.id] || []).length - 4}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[10px] font-body font-medium text-zinc-500 dark:text-zinc-400">
-                    {(goalMembersMap[mission.id] || []).length} {isRTL ? 'أعضاء' : 'Members'}
-                  </span>
-                  <span className="text-zinc-400 dark:text-zinc-600 text-[8px] font-body font-medium">•</span>
-                  <div className="flex items-center gap-1">
-                    <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-body font-medium text-emerald-600 dark:text-emerald-400">
-                      {goalActiveTodayMap[mission.id] || 0} {isRTL ? 'نشط اليوم' : 'Active'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="flex items-center gap-3 flex-wrap mt-1.5">
-            <p className="text-xs font-body text-[var(--text-secondary)]">
-              {completedTasks}/{totalTasks} {isRTL ? 'المهام' : 'Tasks'}
-            </p>
-            {(mission.start_date || mission.end_date) && (
-              <p className="text-[10px] font-body text-[var(--text-secondary)]/60">
-                {fmtDate(mission.start_date)} → {fmtDate(mission.end_date)}
-              </p>
-            )}
-          </div>
-
-          <div className="w-full h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full relative mt-2.5 mb-2.5 overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${percentage}%` }}
-              className="h-full rounded-full progress-fill absolute top-0 start-0"
-              style={{ backgroundColor: percentage === 100 ? '#14b8a6' : (isInRedZone ? '#ef4444' : '#f97316') }}
-            />
-          </div>
-
-          {/* Action Buttons inside Left Column */}
-          <div className="flex items-center gap-1.5 flex-wrap mt-1">
-            {typeFilter === 'squad' && mission.metadata?.invite_code && (
-              <button
-                onClick={(e) => handleCopyInviteLink(e, mission.metadata.invite_code)}
-                className="relative flex items-center justify-center w-6 h-6 border border-white/10 dark:border-white/10 hover:border-teal-400/50 hover:bg-teal-500/5 transition-all rounded-md shrink-0 active:scale-[0.97]"
-                title="Copy Invite Link"
-              >
-                <Link className="text-[10px] text-teal-400 w-3 h-3" />
-              </button>
-            )}
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                const { progress } = calculateAccountability(mission);
-                const percentage = Math.round(progress);
-                const completed = mission.tasks?.filter((t: any) => t.is_completed).length || 0;
-                const total = mission.tasks?.length || 0;
-
-                const formatDate = (dateStr: string | null, fallbackDate?: Date) => {
-                  const d = dateStr ? new Date(dateStr) : (fallbackDate || new Date());
-                  return d.toISOString().split('T')[0].replace(/-/g, '');
-                };
-
-                const dtStart = formatDate(mission.start_date);
-                let dtEnd;
-                if (mission.end_date) {
-                  dtEnd = formatDate(mission.end_date);
-                } else {
-                  const d = mission.start_date ? new Date(mission.start_date) : new Date();
-                  d.setDate(d.getDate() + 30);
-                  dtEnd = d.toISOString().split('T')[0].replace(/-/g, '');
-                }
-
-                const details = encodeURIComponent(`Growth Hub Goal | Progress: ${percentage}% | Tasks: ${completed}/${total}`);
-                const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(mission.title)}&dates=${dtStart}/${dtEnd}&details=${details}&location=Growth_Hub`;
-
-                window.open(googleUrl, '_blank');
-                playBlip();
-              }}
-              className="relative flex items-center justify-center w-6 h-6 border border-white/10 dark:border-white/10 transition-all rounded-md shrink-0 active:scale-[0.97]"
-              onMouseEnter={e => e.currentTarget.style.borderColor = `${(mission.color || color)}60`}
-              onMouseLeave={e => e.currentTarget.style.borderColor = ''}
-              title="Add to Google Calendar"
-            >
-              <Calendar className="text-[10px] w-3 h-3" />
-            </button>
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                openAttachments(mission.id);
-              }}
-              className="relative flex items-center justify-center w-6 h-6 border border-white/10 dark:border-white/10 transition-all rounded-md shrink-0 active:scale-[0.97]"
-              onMouseEnter={e => e.currentTarget.style.borderColor = `${(mission.color || color)}60`}
-              onMouseLeave={e => e.currentTarget.style.borderColor = ''}
-              title="Attachments"
-              style={{
-                borderColor: (attachmentCounts[mission.id] || 0) > 0 ? `${(mission.color || color)}44` : undefined,
-                boxShadow: (attachmentCounts[mission.id] || 0) > 0 ? `0 0 10px ${(mission.color || color)}22` : undefined
-              }}
-            >
-              <HelpCircle className="text-[10px] w-3 h-3" />
-              {(attachmentCounts[mission.id] || 0) > 0 && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 text-black text-[7px] font-black flex items-center justify-center rounded-full shadow-lg"
-                  style={{ backgroundColor: (mission.color || color) }}
-                >
-                  {attachmentCounts[mission.id]}
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Right Section: Energy Cell & Actions */}
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="flex flex-col items-center">
-            <EnergyCell
-              percentage={percentage}
-              color={isInRedZone ? '#FF0055' : (mission.color || color)}
-              size="sm"
-              isInRedZone={isInRedZone}
-            />
-          </div>
-
-          <div className="flex flex-col items-center gap-2">
-            {typeFilter === 'squad' && mission.user_id === profile?.id && (
-              <div className="relative">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    playBlip();
-                    setActiveRulesGoalId(activeRulesGoalId === mission.id ? null : mission.id);
-                  }}
-                  className="text-[var(--text-secondary)] hover:text-white transition-colors p-1 flex items-center justify-center shrink-0 active:scale-[0.97]"
-                >
-                  <Settings className="w-3.5 h-3.5" />
-                </button>
-
-                <AnimatePresence>
-                  {activeRulesGoalId === mission.id && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                      className="absolute right-0 top-full mt-2 w-64 bg-zinc-950/95 border border-white/10 rounded-md p-4 shadow-2xl backdrop-blur-md z-[150] space-y-3 font-body text-left"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <p className="text-[10px] font-medium tracking-wide text-zinc-500 border-b border-zinc-800 pb-1.5">
-                        Squad Rules
-                      </p>
-
-                      <label className="flex items-center justify-between text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer select-none">
-                        <span>No date changes for members</span>
-                        <input
-                          type="checkbox"
-                          checked={!!mission.metadata?.rules?.no_date_changes}
-                          onChange={() => toggleSquadRule(mission, 'no_date_changes')}
-                          className="accent-teal-400 cursor-pointer"
-                        />
-                      </label>
-
-                      <label className="flex items-center justify-between text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer select-none">
-                        <span>XP penalty 2x for late tasks</span>
-                        <input
-                          type="checkbox"
-                          checked={!!mission.metadata?.rules?.xp_multiplier}
-                          onChange={() => toggleSquadRule(mission, 'xp_multiplier')}
-                          className="accent-teal-400 cursor-pointer"
-                        />
-                      </label>
-
-                      <label className="flex items-center justify-between text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer select-none">
-                        <span>Members cannot delete tasks</span>
-                        <input
-                          type="checkbox"
-                          checked={!!mission.metadata?.rules?.no_delete}
-                          onChange={() => toggleSquadRule(mission, 'no_delete')}
-                          className="accent-teal-400 cursor-pointer"
-                        />
-                      </label>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
-            <ArrowRight className="text-[var(--text-secondary)]/35 group-hover:translate-x-1.5 rtl:group-hover:-translate-x-1.5 transition-transform text-base w-[16px] h-[16px]" />
-          </div>
-        </div>
-      </motion.div>
+        idx={idx}
+        title={mission.title}
+        completedTasks={completedTasks}
+        totalTasks={totalTasks}
+        dueDate={mission.end_date || mission.start_date}
+        percentage={percentage}
+        color={mission.color || currentTheme.color}
+        isActive={Boolean(mission.sync_to_dashboard)}
+        role={userRole}
+        members={members}
+        typeFilter={typeFilter || 'solo'}
+        onClick={() => {
+          playBlip()
+          router.push(mission.metadata?.type === 'public' ? `/goals/public/${mission.id}` : `/goals/squad/${mission.id}`)
+        }}
+      />
     )
   }
 
@@ -1362,214 +1106,101 @@ export default function MissionsPage({ typeFilter }: { typeFilter?: 'solo' | 'sq
 
         <div className="w-full">
           {typeFilter === 'squad' ? (
-            <div className="space-y-10 w-full">
-              {/* COMMANDING SECTION */}
-              <div>
-                <h2 className="text-xl font-bold text-teal-400 mb-4">Commanding</h2>
-                {commandingMissions.length === 0 ? (
-                  <div className="py-12 text-center border border-dashed border-white/5 rounded-md bg-white/[0.01]">
-                    <p className="text-[10px] font-space font-black tracking-widest text-zinc-500 uppercase">
-                      {isRTL ? 'لا توجد أهداف تقودها حالياً' : 'No commanding squad goals'}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <AnimatePresence mode='popLayout'>
+            <div className="space-y-8 w-full">
+              {commandingMissions.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-bold text-teal-400 mb-3">Leading</h2>
+                  <div
+                    className="w-full"
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                      gap: '12px',
+                    }}
+                  >
+                    <AnimatePresence mode="popLayout">
                       {commandingMissions.map((m, idx) => renderMissionCard(m, idx))}
                     </AnimatePresence>
+                    {assignedMissions.length === 0 && (
+                      <GoalCard
+                        isDashed
+                        dashedLabel="New squad goal"
+                        onDashedClick={() => {
+                          playBlip()
+                          handleCreateGoalClick()
+                        }}
+                      />
+                    )}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
-              {/* ASSIGNED SECTION */}
-              <div>
-                <h2 className="text-xl font-bold text-zinc-400 mb-4 mt-8">Assigned</h2>
-                {assignedMissions.length === 0 ? (
-                  <div className="py-12 text-center border border-dashed border-white/5 rounded-md bg-white/[0.01]">
-                    <p className="text-[10px] font-space font-black tracking-widest text-zinc-500 uppercase">
-                      {isRTL ? 'لا توجد أهداف معينة لك حالياً' : 'No assigned squad goals'}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <AnimatePresence mode='popLayout'>
+              {assignedMissions.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-bold text-zinc-400 mb-3 mt-6">Assigned</h2>
+                  <div
+                    className="w-full"
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                      gap: '12px',
+                    }}
+                  >
+                    <AnimatePresence mode="popLayout">
                       {assignedMissions.map((m, idx) => renderMissionCard(m, idx))}
                     </AnimatePresence>
+                    <GoalCard
+                      isDashed
+                      dashedLabel="New squad goal"
+                      onDashedClick={() => {
+                        playBlip()
+                        handleCreateGoalClick()
+                      }}
+                    />
                   </div>
-                )}
-              </div>
+                </div>
+              )}
+
+              {commandingMissions.length === 0 && assignedMissions.length === 0 && (
+                <div
+                  className="w-full"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                    gap: '12px',
+                  }}
+                >
+                  <GoalCard
+                    isDashed
+                    dashedLabel="New squad goal"
+                    onDashedClick={() => {
+                      playBlip()
+                      handleCreateGoalClick()
+                    }}
+                  />
+                </div>
+              )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <AnimatePresence mode='popLayout'>
+            <div
+              className="w-full"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                gap: '12px',
+              }}
+            >
+              <AnimatePresence mode="popLayout">
                 {missions.map((mission, idx) => renderMissionCard(mission, idx))}
               </AnimatePresence>
-            </div>
-          )}
-
-          {/* ── ATTACHMENTS MODAL (rendered once, outside cards) ── */}
-          {attachmentMissionId && (
-            <MissionAttachmentsModal
-              goalId={attachmentMissionId}
-              missionTitle={missions.find(m => m.id === attachmentMissionId)?.title ?? ''}
-              themeColor={currentTheme.color}
-              isOpen={!!attachmentMissionId}
-              attachments={activeAttachments}
-              setAttachments={setActiveAttachments}
-              loading={modalLoading}
-              onClose={() => {
-                setAttachmentMissionId(null)
-                setActiveAttachments([])
-              }}
-              onCountChange={count => handleAttachmentCountChange(attachmentMissionId, count)}
-              canAddAttachment={true}
-            />
-          )}
-
-          {/* FEATURE 3: CONTEXT SWITCHING WARNING OVERLAY */}
-          {/* Commented out per safety rules to permanently nuke context switching warning modal
-          <AnimatePresence>
-            {showWarningModal && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-white/90 dark:bg-black/85 backdrop-blur-md"
-              >
-                <motion.div
-                  initial={{ scale: 0.9, y: 20 }}
-                  animate={{ scale: 1, y: 0 }}
-                  exit={{ scale: 0.9, y: 20 }}
-                  className="w-full max-w-md border bg-[var(--card-bg)] p-6 rounded-md shadow-[0_0_50px_rgba(255,0,85,0.3)] relative overflow-hidden"
-                  style={{ borderColor: '#FF0055' }}
-                >
-                  <div className="absolute top-0 inset-x-0 h-[2.5px] bg-[#FF0055]" />
-
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-3 text-[#FF0055]">
-                      <AlertTriangle className="text-3xl animate-pulse w-8 h-8" />
-                      <h3 className="text-lg font-black tracking-widest uppercase font-space">
-                        {isRTL ? 'تحذير: تشتيت التركيز' : 'Warning: Context switching'}
-                      </h3>
-                    </div>
-
-                    <div className="space-y-4 font-space text-xs leading-relaxed text-[var(--text-primary)]">
-                      <p className="font-bold border-l-2 border-[#FF0055] pl-3 py-1 bg-[#FF0055]/5">
-                        {isRTL
-                          ? '🚧 تشتيت التركيز يقلل الأداء الذهني بنسبة تصل إلى 40%.'
-                          : '🚧 Warning: Context switching degrades cognitive performance by up to 40%.'}
-                      </p>
-                      <p className="text-[var(--text-secondary)]">
-                        {isRTL
-                          ? 'توجد مهام نشطة تستهلك سعة التركيز أو مهام حرجة قريبة من الموعد النهائي. إضافة هدف جديد سيقلل من جودة التنفيذ.'
-                          : 'Multiple cognitive focus slots are active, or critical goals are near their deadline. Adding a new goal will degrade execution quality.'}
-                      </p>
-
-                      <div className="p-3 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-md space-y-2">
-                        {warningSlots >= 7 && (
-                          <div className="flex justify-between items-center text-[10px] uppercase font-bold text-[var(--text-secondary)] font-space">
-                            <span>{isRTL ? 'سعة التركيز النشطة:' : 'Active focus capacity:'}</span>
-                            <span className="text-[#FF0055] font-black">{warningSlots.toFixed(1).replace('.0', '')}/9 slots ({(warningSlots / 9 * 100).toFixed(0)}%)</span>
-                          </div>
-                        )}
-                        {warningCriticalCount > 0 && (
-                          <div className="flex justify-between items-center text-[10px] uppercase font-bold text-[var(--text-secondary)] font-space">
-                            <span>{isRTL ? 'المهام الحرجة القريبة:' : 'Critical Near-Deadline Goals:'}</span>
-                            <span className="text-[#FF0055] font-black">{warningCriticalCount} {isRTL ? 'مهام' : 'Goals'}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                      <button
-                        onClick={() => {
-                          localStorage.setItem('context_warning_cooldown', Date.now().toString());
-                          addMission(true);
-                        }}
-                        className="flex-1 py-2.5 bg-[#FF0055]/10 text-[#FF0055] border border-[#FF0055]/30 hover:bg-[#FF0055]/20 font-space font-black text-xs uppercase tracking-widest transition-all rounded-md"
-                      >
-                        {isRTL ? 'استبدال المهمة' : 'Swap task'}
-                      </button>
-                      <button
-                        onClick={() => {
-                          playBlip();
-                          setShowWarningModal(false);
-                        }}
-                        className="flex-1 py-2.5 text-black font-space font-black text-xs uppercase tracking-widest transition-all shadow-lg rounded-md"
-                        style={{ backgroundColor: currentTheme.color }}
-                      >
-                        {isRTL ? 'الاستمرار بالتركيز' : 'Keep Focusing'}
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          */}
-
-          {missions.length === 0 && !loading && (
-            <div className="col-span-full py-24 flex flex-col items-center justify-center text-center space-y-6">
-              {typeFilter === 'solo' ? (
-                <>
-                  <div className="space-y-2">
-                    <h3 className="text-2xl font-black font-space tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
-                      {isRTL ? 'لا توجد أهداف بعد' : 'No Solo Goals Yet'}
-                    </h3>
-                    <p className="text-zinc-500 dark:text-zinc-600 text-sm font-space">
-                      {isRTL ? 'أنشئ هدفك الشخصي الأول للبدء' : 'Create your first personal goal to begin'}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => { playBlip(); handleCreateGoalClick(); }}
-                    className="flex flex-row items-center justify-center gap-2 h-11 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg cursor-pointer"
-                    style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
-                  >
-                    <Plus className="text-[16px] leading-none" />
-                    {isRTL ? 'أنشئ هدفاً' : 'Create Goal'}
-                  </button>
-                </>
-              ) : typeFilter === 'squad' ? (
-                <>
-                  <div className="space-y-2 flex flex-col items-center justify-center select-none">
-                    <Users2 className="text-5xl text-zinc-600 dark:text-zinc-500 mb-2 animate-pulse w-12 h-12" />
-                    <h3 className="text-2xl font-black font-space tracking-widest text-zinc-400 dark:text-zinc-500 uppercase">
-                      {isRTL ? 'لا توجد أهداف بعد' : 'No squad goals yet'}
-                    </h3>
-                    <p className="text-zinc-500 dark:text-zinc-600 text-sm font-space">
-                      {isRTL ? 'قُد فريقاً أو انضم لأحدها برمز دعوة' : 'Lead a squad or join one with an invite code'}
-                    </p>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <button
-                      onClick={() => { playBlip(); setShowJoinGoal(true); }}
-                      className="flex flex-row items-center justify-center gap-2 h-11 px-6 rounded-md border border-teal-500/50 hover:border-teal-400 text-teal-400 hover:text-teal-300 bg-teal-500/5 hover:bg-teal-500/10 font-space text-xs font-black uppercase tracking-widest transition-all duration-300 active:scale-95 shadow-lg cursor-pointer animate-pulse"
-                    >
-                      <Link className="text-[16px] leading-none" />
-                      {isRTL ? 'انضم برمز' : 'Join with Code'}
-                    </button>
-                    <button
-                      onClick={() => { playBlip(); handleCreateGoalClick(); }}
-                      className="flex flex-row items-center justify-center gap-2 h-11 px-6 rounded-md font-space text-xs font-black uppercase tracking-widest transition-all duration-300 hover:brightness-110 active:scale-95 shadow-lg cursor-pointer"
-                      style={{ backgroundColor: currentTheme.color, color: '#000', boxShadow: `0 4px 20px ${currentTheme.color}33` }}
-                    >
-                      <Plus className="text-[16px] leading-none" />
-                      {isRTL ? 'أنشئ هدفاً جماعياً' : 'Create Team Goal'}
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <p className="text-[var(--text-secondary)]/50 text-sm text-center font-space">
-                  {isRTL ? 
-                    // 'لا توجد أهداف نشطة حالياً. استخدم لوحة الإنشاء بالأعلى للبدء.'
-                    'مفيش مهام نشطة دلوقتي. خد نفسك وخطط لخطوتك الجاية.'
-                    : 
-                    // 'No active goals synced. Use the action panel above to initiate.'
-                    'No active tasks. Take a breath and plan your next move.'
-                  }
-                </p>
-              )}
+              <GoalCard
+                isDashed
+                dashedLabel={typeFilter === 'solo' ? 'New goal' : 'New goal'}
+                onDashedClick={() => {
+                  playBlip()
+                  handleCreateGoalClick()
+                }}
+              />
             </div>
           )}
         </div>

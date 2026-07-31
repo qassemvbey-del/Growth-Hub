@@ -765,6 +765,7 @@ export default function TaskDrawer({
   useEffect(() => {
     if (isGuest || !task?.id) return
 
+    let isJoined = false
     const supabase = createClient()
     const channel = supabase.channel('workspace', {
       config: {
@@ -786,6 +787,7 @@ export default function TaskDrawer({
 
       channel.subscribe(async (status: string) => {
         if (status === 'SUBSCRIBED') {
+          isJoined = true
           await channel.track({
             user_id: user.id,
             full_name: profile?.full_name || 'Anonymous',
@@ -801,8 +803,14 @@ export default function TaskDrawer({
     run()
 
     return () => {
-      channel.untrack()
-      supabase.removeChannel(channel)
+      try {
+        if (isJoined) {
+          channel.untrack()
+        }
+        supabase.removeChannel(channel)
+      } catch (err) {
+        // Safe fallback for rapid unmount edge cases
+      }
     }
   }, [task?.id, isGuest])
 

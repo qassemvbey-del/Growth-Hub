@@ -5,6 +5,8 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 // import Shell from '@/components/layout/Shell'
 import EnergyCell from '@/components/ui/EnergyCell'
+import DiamondProgress from '@/components/ui/DiamondProgress'
+import Avatar from '@/components/ui/Avatar'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
 import { useGrowth } from '@/context/GrowthContext'
@@ -768,9 +770,9 @@ export default function MissionDetailPage() {
         })
         setMission(goal)
       } else {
-        // router.push('/goals/squad')
-        if (window.location.pathname !== '/goals/squad') {
-          router.push('/goals/squad')
+        const fallbackRoute = window.location.pathname.startsWith('/goals/solo') ? '/goals/solo' : '/goals/squad'
+        if (window.location.pathname !== fallbackRoute) {
+          router.push(fallbackRoute)
         }
       }
       setLoading(false)
@@ -813,9 +815,9 @@ export default function MissionDetailPage() {
         }
       }
     } else {
-      // router.push('/goals/squad')
-      if (window.location.pathname !== '/goals/squad') {
-        router.push('/goals/squad')
+      const fallbackRoute = window.location.pathname.startsWith('/goals/solo') ? '/goals/solo' : '/goals/squad'
+      if (window.location.pathname !== fallbackRoute) {
+        router.push(fallbackRoute)
       }
     }
     setLoading(false)
@@ -951,6 +953,7 @@ export default function MissionDetailPage() {
       },
     })
 
+    let isJoined = false
     presenceChannelRef.current = channel
 
     channel
@@ -984,12 +987,22 @@ export default function MissionDetailPage() {
           return assigned
         })
       })
-      .subscribe()
+      .subscribe((status: string) => {
+        if (status === 'SUBSCRIBED') {
+          isJoined = true
+        }
+      })
 
     return () => {
       if (presenceChannelRef.current) {
-        presenceChannelRef.current.untrack()
-        supabase.removeChannel(presenceChannelRef.current)
+        try {
+          if (isJoined) {
+            presenceChannelRef.current.untrack()
+          }
+          supabase.removeChannel(presenceChannelRef.current)
+        } catch (err) {
+          // Safe fallback for rapid unmount edge cases
+        }
         presenceChannelRef.current = null
       }
     }
@@ -1558,6 +1571,11 @@ export default function MissionDetailPage() {
     }
     // if (!confirm(isRTL ? 'هل أنت متأكد من حذف هذه المهمة؟' : 'CONFIRM GOAL TERMINATION?')) return
     if (!confirm(isRTL ? 'هل أنت متأكد من حذف هذه المهمة؟' : 'Are you sure you want to delete this goal?')) return
+
+    const targetRoute = (mission?.metadata?.type === 'squad' && !window.location.pathname.startsWith('/goals/solo'))
+      ? '/goals/squad'
+      : '/goals/solo'
+
     const isLocal = typeof id === 'string' && id.startsWith('local_')
 
     if (isLocal) {
@@ -1566,7 +1584,7 @@ export default function MissionDetailPage() {
       localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
       // showToast(isRTL ? 'تم حذف المهمة' : 'GOAL DELETED', 'success')
       showToast(isRTL ? 'تم حذف المهمة' : 'Goal deleted', 'success')
-      router.push('/goals/squad')
+      router.push(targetRoute)
       return
     }
 
@@ -1577,7 +1595,7 @@ export default function MissionDetailPage() {
       showToast(isRTL ? `فشل الحذف: ${error.message}` : `Delete failed: ${error.message}`, 'warning')
     } else {
       showToast(isRTL ? 'تم حذف المهمة' : 'GOAL DELETED', 'success')
-      router.push('/goals/squad')
+      router.push(targetRoute)
     }
   }
 
@@ -1761,8 +1779,8 @@ const { progress, isInRedZone } = useMemo(() => {
                            <Trash2 className="w-5 h-5 text-zinc-400 hover:text-red-500" />
                         </button>
                       )}
-                      <span className="text-3xl md:text-6xl font-black font-space" style={{ color: missionColor }}>{roundedProgress}%</span>
-                   </div>
+                       <DiamondProgress percentage={roundedProgress} color={missionColor} size="lg" />
+                    </div>
                    <p className="text-[9px] font-space text-[var(--text-secondary)] font-medium">{isRTL ? 'مكتمل' : 'Complete'}</p>
                 </div>
             </div>
