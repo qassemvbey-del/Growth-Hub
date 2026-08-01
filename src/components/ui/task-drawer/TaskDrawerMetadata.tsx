@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { Circle, Calendar, CalendarPlus } from 'lucide-react'
 import { NeonIcon } from '../NeonIcon'
+import { DifficultyVisualizer } from '../DifficultyVisualizer'
 import { cn } from '@/lib/utils'
 
 const formatDeadline = (dateStr: string) => {
@@ -95,15 +96,18 @@ export default function TaskDrawerMetadata({
       <div className="flex flex-wrap gap-2 text-xs">
 
 
-        {/* Difficulty Weight Pill */}
-        <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md font-mono font-bold border border-white/5 bg-white/[0.02] text-white/80">
-          ⚡ {task.weight || 1} / 6
-        </span>
-
-        {/* XP Reward Pill */}
-        <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md font-mono font-bold border border-teal-500/20 bg-teal-500/5 text-teal-400">
-          +{(task.weight || 1) * 10} XP
-        </span>
+        {/* Difficulty 6-Segment Indicator */}
+        <div className="px-3 py-1.5 rounded-md border border-white/5 bg-white/[0.02] flex items-center">
+          <DifficultyVisualizer
+            weight={task.weight || 1}
+            color={themeColor}
+            interactive={false}
+            isCompleted={task.is_completed}
+            isRTL={isRTL}
+            showLabel={true}
+            showXp={true}
+          />
+        </div>
 
         {/* Deadline Pill */}
         {/* <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md font-mono font-bold border border-white/5 bg-white/[0.02] text-white/70">

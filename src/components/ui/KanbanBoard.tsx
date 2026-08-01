@@ -4,8 +4,9 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { usePomodoro } from '@/context/PomodoroContext'
-import { Play, Clock, FolderOpen, Circle, CheckCircle2 } from 'lucide-react'
+import { Play, Clock, FolderOpen, Circle, CheckCircle2, ListTodo } from 'lucide-react'
 import { NeonIcon } from './NeonIcon'
+import { DifficultyVisualizer } from './DifficultyVisualizer'
 
 interface KanbanBoardProps {
   tasks: any[]
@@ -139,7 +140,10 @@ export default function KanbanBoard({
   }
 
   return (
-    <div className="flex md:grid md:grid-cols-3 overflow-x-auto snap-x snap-mandatory gap-4 w-full pb-4 custom-scrollbar items-start">
+    <div 
+      className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full min-w-0 pb-4 items-start font-space"
+      style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}
+    >
       {columns.map((col) => {
         const colTasks = tasks.filter(t => getTaskColumn(t) === col.id)
         const isOver = dragOverColumnId === col.id
@@ -151,7 +155,7 @@ export default function KanbanBoard({
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, col.id)}
             className={cn(
-              "w-[85vw] md:w-full max-w-[310px] md:max-w-none shrink-0 snap-center flex flex-col h-auto min-h-[52px] max-h-[75vh] rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-[var(--border)] p-2 transition-all overflow-hidden relative",
+              "w-full min-w-0 flex flex-col h-auto min-h-[64px] max-h-[75vh] rounded-2xl bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-white/10 dark:border-white/10 p-2 transition-all overflow-hidden relative",
               isOver ? "border-dashed" : ""
             )}
             style={isOver ? { borderColor: col.color, boxShadow: `0 0 20px ${col.color}22` } : {}}
@@ -179,7 +183,7 @@ export default function KanbanBoard({
 
             {/* Tasks Container */}
             <div 
-              className="flex-1 flex flex-col gap-3 overflow-y-auto scrollbar-thin pr-1"
+              className="flex-1 flex flex-col gap-3 overflow-y-auto scrollbar-thin pr-1 mt-2"
             >
               <AnimatePresence mode='popLayout'>
                 {colTasks.map((task) => {
@@ -228,6 +232,19 @@ export default function KanbanBoard({
                           </span>
                         </div>
 
+                        {/* Difficulty Visualizer */}
+                        <div className="shrink-0">
+                          <DifficultyVisualizer
+                            weight={task.weight || 1}
+                            color={col.color || themeColor}
+                            interactive={false}
+                            isCompleted={task.is_completed}
+                            isRTL={isRTL}
+                            showLabel={false}
+                            showXp={true}
+                          />
+                        </div>
+
                         {/* Play icon if video task */}
                         {hasVideo && !task.is_completed && (
                           <Play className="w-3.5 h-3.5 text-zinc-500 shrink-0 mr-1" />
@@ -267,10 +284,17 @@ export default function KanbanBoard({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="py-2 flex flex-col items-center justify-center text-center border border-dashed border-[var(--border)] dark:border-white/5 rounded-xl bg-zinc-50/50 dark:bg-white/[0.01] text-[var(--text-muted)] dark:text-white/20 select-none"
+                    className="py-4 px-2 flex flex-col items-center justify-center text-center border border-dashed border-[var(--border)] dark:border-white/5 rounded-xl bg-zinc-50/50 dark:bg-white/[0.01] text-[var(--text-muted)] dark:text-zinc-500 select-none my-1"
                   >
-                    <FolderOpen className="w-4 h-4 mb-0.5 opacity-45" />
-                    <span className="text-[9px] font-space tracking-widest uppercase text-[var(--text-muted)] dark:text-white/20">Empty</span>
+                    {col.id === 'to-do' && <ListTodo className="w-4 h-4 mb-1 opacity-50 text-cyan-400" />}
+                    {col.id === 'in-progress' && <Clock className="w-4 h-4 mb-1 opacity-50 text-amber-400" />}
+                    {col.id === 'done' && <CheckCircle2 className="w-4 h-4 mb-1 opacity-50 text-emerald-400" />}
+
+                    <span className="text-[10px] font-space font-medium text-[var(--text-secondary)] dark:text-zinc-400">
+                      {col.id === 'to-do' && (isRTL ? 'لا توجد مهام معلقة' : 'No tasks to do')}
+                      {col.id === 'in-progress' && (isRTL ? 'لا توجد مهام قيد التنفيذ' : 'No tasks in progress')}
+                      {col.id === 'done' && (isRTL ? 'لم يتم إنجاز شيء بعد' : 'Nothing done yet')}
+                    </span>
                   </motion.div>
                 )}
               </AnimatePresence>

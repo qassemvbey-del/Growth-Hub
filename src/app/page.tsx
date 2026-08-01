@@ -428,7 +428,7 @@ export default function Dashboard() {
           else if (sizeStr === 'lg' || sizeStr === 'l' || sizeStr === 'large') xpCeiling = 20
 
           if (taskIndex < xpCeiling) {
-            await addXp(updatedStatus ? ((Number(task.weight) || 3) * 10) : -((Number(task.weight) || 3) * 10), updatedStatus ? task.title : undefined, updatedStatus ? task.id : undefined)
+            await addXp(updatedStatus ? ((Number(task.weight) || 3) * 10) : -((Number(task.weight) || 3) * 10), task.title, task.id)
           }
         }
       }
@@ -460,9 +460,9 @@ export default function Dashboard() {
       */}
       <div 
         className="w-full min-h-[calc(100dvh-64px)] font-space relative animate-page-fade-in bg-gradient-to-b from-[#E8EFF2] to-[#F2F6F8] dark:bg-transparent"
-        style={isDark ? { background: `radial-gradient(ellipse at 50% 0%, ${currentTheme.color}45 0%, transparent 55%), radial-gradient(ellipse at 80% 20%, ${currentTheme.color}30 0%, transparent 45%)` } : {}}
+        style={isDark ? { background: `radial-gradient(ellipse at 50% -10%, ${currentTheme.color}30 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, ${currentTheme.color}25 0%, transparent 45%)` } : {}}
       >
-        <div className="w-full flex flex-col py-4 sm:py-8 md:py-12 px-2 sm:px-6 md:px-12 space-y-4 sm:space-y-6 md:space-y-8 bg-transparent border-l-0 border-r-0">
+        <div className="w-full flex flex-col pt-8 sm:pt-12 md:pt-16 pb-4 sm:pb-8 md:pb-12 px-2 sm:px-6 md:px-12 space-y-4 sm:space-y-6 md:space-y-8 bg-transparent border-l-0 border-r-0">
         
         {/* ── COMMAND CENTER TITLE ── */}
         <div className="w-full flex flex-col items-center text-center space-y-2 sm:space-y-3">

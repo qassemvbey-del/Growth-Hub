@@ -23,6 +23,7 @@ import { aiProfanityCheck } from '@/app/actions/profanityCheck'
 import TaskDrawer from '@/components/ui/TaskDrawer'
 import InlineGuideTip from '@/components/ui/InlineGuideTip'
 import KanbanBoard from '@/components/ui/KanbanBoard'
+import { DifficultyVisualizer } from '@/components/ui/DifficultyVisualizer'
 import SquadReportModal from '@/components/ui/SquadReportModal'
 import { 
   Lock, Link as LinkIcon, Trash2, Clock, Radio, CheckSquare, 
@@ -45,6 +46,11 @@ const formatDeadline = (dateStr: string) => {
     return `DUE: ${dateStr.toUpperCase()}`;
   }
 }
+
+const VIEW_OPTIONS = [
+  { id: 'list', labelEn: 'List', labelAr: 'قائمة', icon: List },
+  { id: 'board', labelEn: 'Board', labelAr: 'كانبان', icon: Kanban },
+] as const
 
 // --- HELPER COMPONENT: CYBERPUNK WEIGHT BARS ---
 const WeightVisualizer = ({ weight, color, isCompleted = false, onSelect }: { weight: number, color: string, isCompleted?: boolean, onSelect?: (w: number) => void }) => {
@@ -1248,7 +1254,7 @@ export default function MissionDetailPage() {
           else if (sizeStr === 'lg' || sizeStr === 'l' || sizeStr === 'large') xpCeiling = 20
 
           if (taskIndex < xpCeiling) {
-            await addXp(-(task.weight * 10))
+            await addXp(-(task.weight * 10), task.title, task.id)
           }
         }
       }
@@ -1400,7 +1406,7 @@ export default function MissionDetailPage() {
             else if (sizeStr === 'lg' || sizeStr === 'l' || sizeStr === 'large') xpCeiling = 20
 
             if (taskIndex < xpCeiling) {
-              await addXp(-(task.weight * 10))
+              await addXp(-(task.weight * 10), task.title, task.id)
             }
           }
           playBlip()
@@ -1748,7 +1754,13 @@ const { progress, isInRedZone } = useMemo(() => {
         
         {/* Mission Header Overview */}
         {/* rounded-md */}
-        <section className="bg-[var(--card-bg)] border border-[var(--card-border)] p-6 md:p-12 rounded-md space-y-6 relative overflow-hidden">
+        <section 
+          className="bg-[var(--card-bg)] p-6 md:p-12 rounded-md space-y-6 relative overflow-hidden"
+          style={{
+            maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)',
+          }}
+        >
             <div className="absolute top-0 inset-x-0 h-[2.5px]" style={{ background: missionColor }} />
             
             <div className="flex justify-between items-start gap-4">
@@ -2091,31 +2103,29 @@ const { progress, isInRedZone } = useMemo(() => {
                   <Pin className={cn("w-3.5 h-3.5", pinnedView === activeView ? "fill-current" : "")} />
                 </button>
 
-                <div className="flex items-center gap-1 p-0.5 bg-[var(--card)] dark:bg-black/40 border border-[var(--border)] dark:border-white/5 backdrop-blur-md rounded-md">
-                  <button
-                    type="button"
-                    onClick={() => { playBlip(); setActiveView('list'); }}
-                    className={cn(
-                      "p-1.5 rounded transition-colors cursor-pointer",
-                       activeView === 'list' ? "text-white" : "text-[var(--text-muted)] dark:text-white/40 hover:text-[var(--text-primary)] dark:hover:text-white/70"
-                    )}
-                    style={activeView === 'list' ? { color: missionColor, backgroundColor: `${missionColor}15` } : {}}
-                    title={isRTL ? 'عرض القائمة' : 'List View'}
-                  >
-                    <List className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { playBlip(); setActiveView('board'); }}
-                    className={cn(
-                      "p-1.5 rounded transition-colors cursor-pointer",
-                       activeView === 'board' ? "text-white" : "text-[var(--text-muted)] dark:text-white/40 hover:text-[var(--text-primary)] dark:hover:text-white/70"
-                    )}
-                    style={activeView === 'board' ? { color: missionColor, backgroundColor: `${missionColor}15` } : {}}
-                    title={isRTL ? 'عرض كانبان' : 'Board View'}
-                  >
-                    <Kanban className="w-4 h-4" />
-                  </button>
+                <div className="flex items-center gap-1 p-1 bg-[var(--card)] dark:bg-black/40 border border-[var(--border)] dark:border-white/10 backdrop-blur-md rounded-lg">
+                  {VIEW_OPTIONS.map((opt) => {
+                    const Icon = opt.icon
+                    const isActive = activeView === opt.id
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => { playBlip(); setActiveView(opt.id as any); }}
+                        className={cn(
+                          "px-2.5 py-1 rounded-md text-xs font-space font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5",
+                          isActive 
+                            ? "text-white shadow-sm" 
+                            : "text-[var(--text-muted)] dark:text-white/40 hover:text-[var(--text-primary)] dark:hover:text-white/70"
+                        )}
+                        style={isActive ? { color: missionColor, backgroundColor: `${missionColor}20`, border: `1px solid ${missionColor}44` } : { border: '1px solid transparent' }}
+                        title={isRTL ? (opt.id === 'list' ? 'عرض القائمة' : 'عرض كانبان') : `${opt.labelEn} View`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                        <span className="text-[11px] font-semibold">{isRTL ? opt.labelAr : opt.labelEn}</span>
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             </div>
@@ -2204,7 +2214,7 @@ const { progress, isInRedZone } = useMemo(() => {
            <InlineGuideTip hasTasks={(mission.tasks || []).length > 0} />
 
            {/* Task List — V27.1 Symmetric Card Layout */}
-           {activeView === 'list' ? (
+           {activeView === 'list' && (
              <div className="space-y-3">
                 <AnimatePresence mode='popLayout'>
                    {(filteredTasks || []).map((task: any, index: number) => {
@@ -2359,9 +2369,16 @@ const { progress, isInRedZone } = useMemo(() => {
                                       </span>
                                     )
                                   })()}
-                                  <div className="flex items-center gap-2 bg-[var(--background-secondary)] dark:bg-white/[0.01] border border-[var(--border)] dark:border-zinc-900/50 px-2 py-0.5 rounded shrink-0">
-                                    <span className="text-[9px] uppercase font-mono text-[var(--text-muted)] dark:text-white/30 tracking-widest">{isRTL ? 'الوزن:' : 'Weight:'}</span>
-                                    <ComplexityDashes weight={task.weight} color={currentTheme.color} />
+                                  <div className="flex items-center bg-[var(--background-secondary)] dark:bg-white/[0.01] border border-[var(--border)] dark:border-zinc-900/50 px-2.5 py-1 rounded shrink-0">
+                                    <DifficultyVisualizer
+                                      weight={task.weight || 1}
+                                      color={currentTheme.color}
+                                      interactive={false}
+                                      isCompleted={task.is_completed}
+                                      isRTL={isRTL}
+                                      showLabel={true}
+                                      showXp={true}
+                                    />
                                   </div>
                                 </div>
                               </div>
@@ -2505,7 +2522,9 @@ const { progress, isInRedZone } = useMemo(() => {
                    })}
                 </AnimatePresence>
              </div>
-           ) : (
+           )}
+
+           {activeView === 'board' && (
              <KanbanBoard
                tasks={filteredTasks}
                onMoveTask={onMoveTask}
@@ -2522,10 +2541,15 @@ const { progress, isInRedZone } = useMemo(() => {
              />
            )}
 
-           {/* Add Task Input */}
-           <div className="relative mt-8 md:mt-12 flex flex-col gap-3">
-             <form onSubmit={addTask} className="relative flex flex-col md:flex-row gap-4 md:gap-6">
-                <div className="relative flex-1">
+           {/* Add Task Input (Unified Single Container) */}
+           <div className="relative mt-8 md:mt-12">
+             <form
+               onSubmit={addTask}
+               className="w-full flex flex-col md:flex-row items-stretch border border-[var(--card-border)] bg-[var(--input-bg)] rounded-2xl overflow-hidden shadow-lg transition-all"
+               style={{ borderColor: `${currentTheme.color}33` }}
+             >
+                {/* Left/Main Section: Input + Add Button */}
+                <div className="relative flex-1 flex items-center min-w-0">
                    <input
                       value={newTaskTitle}
                       onChange={e => setNewTaskTitle(e.target.value)}
@@ -2543,21 +2567,14 @@ const { progress, isInRedZone } = useMemo(() => {
                 </div>
 
                 <div className="flex flex-col gap-2 justify-center px-4 md:px-6 py-3 md:py-0 border border-[var(--card-border)] bg-[var(--input-bg)]">
-                   <div className="flex items-center gap-2">
-                     <span className="text-[8px] font-space text-[var(--text-secondary)] font-medium">Set Power</span>
-                     <div className="group relative flex items-center cursor-help">
-                       <HelpCircle className="text-[12px] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
-                       <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 rounded bg-[var(--card-bg)] border border-[var(--card-border)] p-2 text-[10px] md:text-xs text-[var(--text-primary)] shadow-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-[300] text-center">
-                         {isRTL 
-                           ? "هذه الأشرطة تحدد وزن أو حجم المهمة. المهمة الأكبر تمنحك نقاط خبرة أكثر وتأخذ وقتاً أطول."
-                           : "These bars set the task weight/power. A heavier task grants more XP and takes more effort."}
-                       </div>
-                     </div>
-                   </div>
-                   <WeightVisualizer 
-                     weight={newTaskWeight} 
-                     color={missionColor} 
-                     onSelect={(w) => setNewTaskWeight(w)} 
+                   <DifficultyVisualizer
+                     weight={newTaskWeight}
+                     color={missionColor}
+                     interactive={true}
+                     onSelect={(w) => setNewTaskWeight(w)}
+                     isRTL={isRTL}
+                     showLabel={true}
+                     showXp={true}
                    />
                 </div>
              </form>

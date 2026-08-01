@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { NeonIcon } from '../ui/NeonIcon'
 
-export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolean, onOpenCoach?: () => void }) {
+export default function Sidebar({ isRTL = false, isCollapsed = false, onOpenCoach }: { isRTL?: boolean, isCollapsed?: boolean, onOpenCoach?: () => void }) {
   const pathname = usePathname()
   const router = useRouter()
   const { profile, t, currentTheme, perks, getRankNeonClass } = useGrowth()
@@ -81,104 +81,150 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
     { icon: Trophy, label: mounted ? (isRTL ? 'إنجازاتي' : 'Wins') : 'Wins', href: '/achievements', shortcut: '04', exact: false },
   ]
 
+  const userName = mounted ? (profile?.full_name || cachedName || (t ? t('operator') : 'USER')) : 'USER'
+  const userRank = mounted ? (profile?.rank ? profile.rank.charAt(0) + profile.rank.slice(1).toLowerCase() : 'Silver') : 'Silver'
+
   return (
-    /* Commented out per rule "Never delete code, only comment it out"
     <aside className={cn(
-      "hidden lg:flex w-[220px] bg-black/50 backdrop-blur-xl border-e border-white/10 h-screen fixed top-0 flex-col z-[110] sidebar-target",
-      "inset-inline-start-0"
-    )}>
-    */
-    <aside className={cn(
-      "hidden lg:flex w-[220px] bg-[var(--sidebar-bg)] dark:bg-black/50 backdrop-blur-xl border-e border-[var(--border)] dark:border-white/10 h-screen fixed top-0 flex-col z-[110] sidebar-target",
+      "hidden lg:flex bg-[var(--sidebar-bg)] dark:bg-black/50 backdrop-blur-xl border-none h-screen fixed top-0 flex-col z-[110] sidebar-target transition-all duration-300",
+      isCollapsed ? "w-16 items-center" : "w-[220px]",
       "inset-inline-start-0"
     )}>
       {/* ── PROFILE IDENTITY LAYER ── */}
-      <div className="pt-12 px-6 flex flex-col items-center text-center relative overflow-hidden group pb-8 bg-transparent">
-        <div className={cn(
-          "relative p-1.5 rounded-full bg-gradient-to-tr shadow-2xl group-hover:scale-105 transition-transform duration-500 cursor-pointer",
-          mounted && perks.hasAvatarBorder ? "ring-4 ring-offset-2 ring-[var(--theme-color)] ring-offset-[var(--sidebar-bg)] animate-pulse" : ""
-        )} onClick={() => router.push('/settings')} style={{ backgroundImage: `linear-gradient(to top right, ${currentTheme.color}, ${currentTheme.color}88, transparent, ${currentTheme.color})`, boxShadow: `0 0 30px ${currentTheme.color}50` }}>
-          <div className="w-20 h-20 rounded-full bg-zinc-100/80 dark:bg-white/10 backdrop-blur-md p-1 overflow-hidden flex items-center justify-center border border-black/20 dark:border-white/10 shadow-inner">
-            {mounted && profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="User" className="w-[90%] h-[90%] mx-auto object-contain p-1 rounded-full shadow-md" />
-            ) : (
-              <NeonIcon icon={UserCircle2} size={40} className="text-[var(--text-secondary)]" />
-            )}
-          </div>
-          {mounted && profile?.avatar_url && (
-            <div 
-              className="absolute bottom-0 right-0 w-6 h-6 rounded-full flex items-center justify-center border border-[var(--sidebar-bg)] shadow-lg z-20 backdrop-blur-md"
-              style={{ 
-                backgroundColor: currentTheme.color, 
-                color: '#000000',
-                boxShadow: `0 0 10px ${currentTheme.color}` 
-              }}
-              title="Active Persona Role"
-            >
-              {(() => {
-                const IconComponent = getRoleIconComponent(profile.avatar_url)
-                return <NeonIcon icon={IconComponent} size={12} className="text-black" />
-              })()}
+      {isCollapsed ? (
+        <div className="pt-12 pb-6 flex flex-col items-center justify-center">
+          <div
+            onClick={() => router.push('/settings')}
+            className="w-9 h-9 rounded-full bg-gradient-to-tr p-0.5 shadow-lg cursor-pointer hover:scale-110 transition-transform"
+            style={{ backgroundImage: `linear-gradient(to top right, ${currentTheme.color}, ${currentTheme.color}88)` }}
+            title={`${userName} (${userRank})`}
+          >
+            <div className="w-full h-full rounded-full bg-zinc-900 p-0.5 overflow-hidden flex items-center justify-center">
+              {mounted && profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="User" className="w-full h-full object-cover rounded-full" />
+              ) : (
+                <NeonIcon icon={UserCircle2} size={20} className="text-white" />
+              )}
             </div>
-          )}
-        </div>
-
-        <span className={cn(
-          "text-sm font-heading font-medium truncate max-w-[180px] transition-all mt-4 text-center",
-          mounted && perks.hasNameGlow ? getRankNeonClass(profile?.rank || '') : "text-zinc-900 dark:text-zinc-100"
-        )}>
-          {mounted ? (profile?.full_name || cachedName || (t ? t('operator') : 'USER')) : 'USER'}
-        </span>
-
-        {mounted && perks.hasTitle && (
-          <span className="text-xs font-body font-medium opacity-80 mt-1" style={{ color: currentTheme.color }}>
-            {isRTL ? (
-              profile?.rank === 'GOLD' ? 'الأوبريتور الذهبي' :
-              profile?.rank === 'PLATINUM' ? 'النخبة البلاتينية' :
-              profile?.rank === 'DIAMOND' ? 'الماستر الماسي' :
-              profile?.rank === 'CROWN' ? 'الملك المتوج' :
-              profile?.rank === 'ACE' ? 'البطل القرمزي' : 'الفاتح الأعظم'
-            ) : (
-              profile?.rank === 'GOLD' ? 'Gold Operator' :
-              profile?.rank === 'PLATINUM' ? 'Platinum Elite' :
-              profile?.rank === 'DIAMOND' ? 'Diamond Master' :
-              profile?.rank === 'CROWN' ? 'Crown Monarch' :
-              profile?.rank === 'ACE' ? 'Ace Champion' : 'Conqueror Supreme'
-            )}
-          </span>
-        )}
-
-        <div className="flex items-center gap-1.5 mt-2">
-          <span className={cn("text-xs font-body font-medium text-center", mounted ? getRankNeonClass(profile?.rank || '') : '')}>
-            ◆ {mounted ? (profile?.rank ? profile.rank.charAt(0) + profile.rank.slice(1).toLowerCase() : 'Silver') : 'Silver'}
-          </span>
-        </div>
-
-        <div className="w-full space-y-1.5 mt-5 px-1">
-          <div className="flex justify-between items-center w-full text-[11px] font-body font-medium">
-            <span className="text-zinc-500 dark:text-zinc-400 text-left leading-tight">
-              {mounted
-                ? (isRTL
-                    ? `${xpNeeded} XP إلى ${nextRankName === 'MAX RANK' ? 'أعلى رتبة' : (nextRankName ? nextRankName.charAt(0) + nextRankName.slice(1).toLowerCase() : '')}`
-                    : `${xpNeeded} XP to ${nextRankName === 'MAX RANK' ? 'Max Rank' : (nextRankName ? nextRankName.charAt(0) + nextRankName.slice(1).toLowerCase() : '')}`)
-                : `800 XP to Platinum`}
-            </span>
-            <span className="text-xs font-bold shrink-0 ps-2" style={{ color: currentTheme.color }}>
-              {progressPct.toFixed(0)}%
-            </span>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="pt-12 px-6 flex flex-col items-center text-center relative overflow-hidden group pb-8 bg-transparent">
+          <div className={cn(
+            "relative p-1.5 rounded-full bg-gradient-to-tr shadow-2xl group-hover:scale-105 transition-transform duration-500 cursor-pointer",
+            mounted && perks.hasAvatarBorder ? "ring-4 ring-offset-2 ring-[var(--theme-color)] ring-offset-[var(--sidebar-bg)] animate-pulse" : ""
+          )} onClick={() => router.push('/settings')} style={{ backgroundImage: `linear-gradient(to top right, ${currentTheme.color}, ${currentTheme.color}88, transparent, ${currentTheme.color})`, boxShadow: `0 0 30px ${currentTheme.color}50` }}>
+            <div className="w-20 h-20 rounded-full bg-zinc-100/80 dark:bg-white/10 backdrop-blur-md p-1 overflow-hidden flex items-center justify-center border border-black/20 dark:border-white/10 shadow-inner">
+              {mounted && profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="User" className="w-[90%] h-[90%] mx-auto object-contain p-1 rounded-full shadow-md" />
+              ) : (
+                <NeonIcon icon={UserCircle2} size={40} className="text-[var(--text-secondary)]" />
+              )}
+            </div>
+            {mounted && profile?.avatar_url && (
+              <div 
+                className="absolute bottom-0 right-0 w-6 h-6 rounded-full flex items-center justify-center border border-[var(--sidebar-bg)] shadow-lg z-20 backdrop-blur-md"
+                style={{ 
+                  backgroundColor: currentTheme.color, 
+                  color: '#000000',
+                  boxShadow: `0 0 10px ${currentTheme.color}` 
+                }}
+                title="Active Persona Role"
+              >
+                {(() => {
+                  const IconComponent = getRoleIconComponent(profile.avatar_url)
+                  return <NeonIcon icon={IconComponent} size={12} className="text-black" />
+                })()}
+              </div>
+            )}
+          </div>
+
+          <span className={cn(
+            "text-sm font-heading font-medium truncate max-w-[180px] transition-all mt-4 text-center",
+            mounted && perks.hasNameGlow ? getRankNeonClass(profile?.rank || '') : "text-zinc-900 dark:text-zinc-100"
+          )}>
+            {userName}
+          </span>
+
+          {mounted && perks.hasTitle && (
+            <span className="text-xs font-body font-medium opacity-80 mt-1" style={{ color: currentTheme.color }}>
+              {isRTL ? (
+                profile?.rank === 'GOLD' ? 'الأوبريتور الذهبي' :
+                profile?.rank === 'PLATINUM' ? 'النخبة البلاتينية' :
+                profile?.rank === 'DIAMOND' ? 'الماستر الماسي' :
+                profile?.rank === 'CROWN' ? 'الملك المتوج' :
+                profile?.rank === 'ACE' ? 'البطل القرمزي' : 'الفاتح الأعظم'
+              ) : (
+                profile?.rank === 'GOLD' ? 'Gold Operator' :
+                profile?.rank === 'PLATINUM' ? 'Platinum Elite' :
+                profile?.rank === 'DIAMOND' ? 'Diamond Master' :
+                profile?.rank === 'CROWN' ? 'Crown Monarch' :
+                profile?.rank === 'ACE' ? 'Ace Champion' : 'Conqueror Supreme'
+              )}
+            </span>
+          )}
+
+          <div className="flex items-center gap-1.5 mt-2">
+            <span className={cn("text-xs font-body font-medium text-center", mounted ? getRankNeonClass(profile?.rank || '') : '')}>
+              ◆ {userRank}
+            </span>
+          </div>
+
+          <div className="w-full space-y-1.5 mt-5 px-1">
+            <div className="flex justify-between items-center w-full text-[11px] font-body font-medium">
+              <span className="text-zinc-500 dark:text-zinc-400 text-left leading-tight">
+                {mounted
+                  ? (isRTL
+                      ? `${xpNeeded} XP إلى ${nextRankName === 'MAX RANK' ? 'أعلى رتبة' : (nextRankName ? nextRankName.charAt(0) + nextRankName.slice(1).toLowerCase() : '')}`
+                      : `${xpNeeded} XP to ${nextRankName === 'MAX RANK' ? 'Max Rank' : (nextRankName ? nextRankName.charAt(0) + nextRankName.slice(1).toLowerCase() : '')}`)
+                  : `800 XP to Platinum`}
+              </span>
+              <span className="text-xs font-bold shrink-0 ps-2" style={{ color: currentTheme.color }}>
+                {progressPct.toFixed(0)}%
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── NAVIGATION MATRIX ── */}
-      <nav className="flex-grow px-4 py-8 space-y-1.5 overflow-y-auto font-body">
-        <h3 className="px-4 text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2 font-medium font-body">
-          {mounted ? (isRTL ? 'القائمة' : 'Menu') : 'Menu'}
-        </h3>
+      <nav className={cn("flex-grow py-6 space-y-1.5 overflow-y-auto font-body w-full", isCollapsed ? "px-2" : "px-4")}>
+        {!isCollapsed && (
+          <h3 className="px-4 text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2 font-medium font-body">
+            {mounted ? (isRTL ? 'القائمة' : 'Menu') : 'Menu'}
+          </h3>
+        )}
+
         {MENU_ITEMS.map((item, idx) => {
+          const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
+          const isHovered = hoveredIndex === idx
+
+          if (isCollapsed) {
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={playBlip}
+                title={item.label}
+                className={cn(
+                  "flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-150 active:scale-95 my-1.5 mx-auto cursor-pointer",
+                  isActive
+                    ? "bg-orange-500/10 text-orange-500 border border-orange-500/30 shadow-md"
+                    : "text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
+                )}
+              >
+                <NeonIcon
+                  icon={item.icon}
+                  interactive
+                  className="w-5 h-5 shrink-0"
+                  style={{ color: isActive ? currentTheme.color : undefined }}
+                />
+              </Link>
+            )
+          }
+
           if (item.shortcut === '02') {
             const isGoalsActive = pathname.startsWith('/goals')
-            const isHovered = hoveredIndex === idx
             return (
               <div key={item.href} className="flex flex-col w-full font-body">
                 <button
@@ -191,11 +237,6 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                   onMouseLeave={() => setHoveredIndex(null)}
                   className={cn(
                     "flex items-center p-3 px-6 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[44px] w-full text-left rtl:text-right cursor-pointer rtl:flex-row-reverse",
-                     /* Commented out per safety rules:
-                     isGoalsActive && !pathname.startsWith('/goals/')
-                       ? "bg-[var(--active-nav-bg)] text-[var(--active-nav-text)] border border-[var(--border)] dark:border-white/10 shadow-sm" 
-                       : "text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:text-[var(--active-nav-text)] border border-transparent hover:border-[var(--border)] dark:hover:border-white/10 hover:bg-[var(--active-nav-bg)]"
-                     */
                      isGoalsActive && !pathname.startsWith('/goals/')
                        ? "bg-orange-500/10 text-orange-600 font-bold border-s-4 border-orange-500 ps-3" 
                        : "text-[var(--text-secondary)] hover:text-orange-600 hover:bg-orange-500/10 font-medium border-s-4 border-transparent ps-3"
@@ -261,11 +302,6 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                             onMouseLeave={() => setHoveredIndex(null)}
                             className={cn(
                               "flex items-center p-2 px-3 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[34px] border border-transparent rtl:flex-row-reverse rtl:text-right",
-                              /* Commented out per safety rules:
-                              isSubActive 
-                                ? "bg-[var(--active-nav-bg)] text-[var(--active-nav-text)] border border-[var(--border)] dark:border-white/10 shadow-sm" 
-                                : "text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:text-[var(--active-nav-text)] hover:bg-[var(--active-nav-bg)]"
-                              */
                               isSubActive 
                                 ? "bg-orange-500/10 text-orange-600 font-bold border-s-4 border-orange-500 ps-3" 
                                 : "text-[var(--text-secondary)] hover:text-orange-600 hover:bg-orange-500/10 font-medium border-s-4 border-transparent ps-3"
@@ -301,8 +337,6 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
             )
           }
 
-          const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
-          const isHovered = hoveredIndex === idx
           return (
             <Link
               key={item.href}
@@ -312,11 +346,6 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
               onMouseLeave={() => setHoveredIndex(null)}
               className={cn(
                 "flex items-center p-3 px-6 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[44px] rtl:flex-row-reverse rtl:text-right",
-                 /* Commented out per safety rules:
-                 isActive 
-                   ? "bg-[var(--active-nav-bg)] text-[var(--active-nav-text)] border border-[var(--border)] dark:border-white/10 shadow-sm" 
-                   : "text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:text-[var(--active-nav-text)] border border-transparent hover:border-[var(--border)] dark:hover:border-white/10 hover:bg-[var(--active-nav-bg)]"
-                 */
                  isActive 
                    ? "bg-orange-500/10 text-orange-600 font-bold border-s-4 border-orange-500 ps-3" 
                    : "text-[var(--text-secondary)] hover:text-orange-600 hover:bg-orange-500/10 font-medium border-s-4 border-transparent ps-3"
@@ -333,9 +362,7 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
                 }}
               />
               
-              <span className={cn(
-                "font-body font-medium flex-grow transition-colors duration-300 text-sm"
-              )}
+              <span className="font-body font-medium flex-grow transition-colors duration-300 text-sm"
               style={{ 
                 color: isActive 
                   ? 'var(--active-nav-text)' 
@@ -358,11 +385,15 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
         })}
 
         {/* ── PROMINENT GLOWING AI COACH BLOCK ── */}
-        <div className="pt-6 px-2">
+        <div className={cn("pt-4", isCollapsed ? "px-0 flex justify-center" : "px-2")}>
           <button
             type="button"
             onClick={() => onOpenCoach?.()}
-            className="w-full group relative flex items-center justify-between p-4 rounded-md border transition-all duration-150 active:scale-[0.97] hover:brightness-105 overflow-hidden cursor-pointer shadow-lg"
+            title={mounted ? (isRTL ? 'المساعد' : 'Coach') : 'Coach'}
+            className={cn(
+              "group relative flex items-center justify-between rounded-md border transition-all duration-150 active:scale-[0.97] hover:brightness-105 overflow-hidden cursor-pointer shadow-lg",
+              isCollapsed ? "w-10 h-10 justify-center p-0 rounded-xl" : "w-full p-4"
+            )}
             style={{
               backgroundColor: `${currentTheme.color}15`,
               borderColor: `${currentTheme.color}50`,
@@ -370,44 +401,45 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 pointer-events-none" />
-            <div className="flex items-center gap-3 relative z-10">
+            <div className={cn("flex items-center relative z-10", isCollapsed ? "justify-center" : "gap-3")}>
               <motion.span 
                 animate={{ opacity: [1, 0.4, 1], scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
               >
                 <NeonIcon icon={Bot} className="w-4 h-4" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }} />
               </motion.span>
-              <span className="font-heading font-medium text-xs text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors">
-                {mounted ? (isRTL ? 'المساعد' : 'Coach') : 'Coach'}
-              </span>
+              {!isCollapsed && (
+                <span className="font-heading font-medium text-xs text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors">
+                  {mounted ? (isRTL ? 'المساعد' : 'Coach') : 'Coach'}
+                </span>
+              )}
             </div>
           </button>
         </div>
       </nav>
 
       {/* ── Docked Settings ── */}
-      <div className="p-4 mt-auto border-t border-white/10 flex flex-col bg-transparent shrink-0">
+      <div className={cn("mt-auto border-t border-white/10 flex flex-col bg-transparent shrink-0", isCollapsed ? "p-2 items-center" : "p-4")}>
         <Link 
           href="/settings" 
           onClick={playBlip}
+          title={mounted ? (isRTL ? 'الإعدادات' : 'Settings') : 'Settings'}
           onMouseEnter={() => setIsSettingsHovered(true)}
           onMouseLeave={() => setIsSettingsHovered(false)}
           className={cn(
-            "flex items-center gap-4 p-3 px-6 rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[44px]",
-            /* Commented out per safety rules:
-            pathname === '/settings'
-              ? "bg-[var(--active-nav-bg)] text-[var(--active-nav-text)] border border-[var(--border)] dark:border-white/10 shadow-sm"
-              : "text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:text-[var(--active-nav-text)] hover:bg-[var(--active-nav-bg)]"
-            */
+            "flex items-center rounded-md transition-all duration-150 active:scale-[0.97] hover:brightness-105 relative group overflow-hidden min-h-[44px]",
+            isCollapsed ? "w-10 h-10 justify-center p-0 rounded-xl" : "gap-4 p-3 px-6 w-full",
             pathname === '/settings'
               ? "bg-orange-500/10 text-orange-600 font-bold border-s-4 border-orange-500 ps-3"
               : "text-[var(--text-secondary)] hover:text-orange-600 hover:bg-orange-500/10 font-medium border-s-4 border-transparent ps-3"
           )}
         >
           <NeonIcon icon={Sliders} interactive className="w-4 h-4 transition-colors duration-300" style={{ color: (pathname === '/settings' || isSettingsHovered) ? 'var(--active-nav-text)' : undefined }} />
-          <span className="font-body font-medium text-sm transition-colors duration-300 text-zinc-900 dark:text-zinc-100">
-            {mounted ? (isRTL ? 'الإعدادات' : 'Settings') : 'Settings'}
-          </span>
+          {!isCollapsed && (
+            <span className="font-body font-medium text-sm transition-colors duration-300 text-zinc-900 dark:text-zinc-100">
+              {mounted ? (isRTL ? 'الإعدادات' : 'Settings') : 'Settings'}
+            </span>
+          )}
         </Link>
       </div>
     </aside>

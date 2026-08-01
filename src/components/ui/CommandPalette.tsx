@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation'
 import { Plus, Users, LayoutGrid, Trophy, Bot, Sun, Moon, CornerDownLeft, Sparkles, History, Search, Swords, PlusSquare, RefreshCw } from 'lucide-react'
 import { NeonIcon } from './NeonIcon'
 import { createClient } from '@/lib/supabase'
+import { DifficultyVisualizer } from './DifficultyVisualizer'
 import { getFeatureUsage } from '@/lib/quota'
 
 interface CommandPaletteProps {
@@ -514,28 +515,16 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                         />
                       </div>
 
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-black tracking-widest text-zinc-400 block mb-1">
-                          {isRTL ? 'الوزن / الأهمية (1-6 ⚡)' : 'Weight / Importance (1-6 ⚡)'}
-                        </label>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1 bg-black/30 p-1.5 rounded-lg border border-white/5">
-                            {[1, 2, 3, 4, 5, 6].map((w) => (
-                              <button
-                                key={w}
-                                type="button"
-                                onClick={() => { playClick(); setTaskWeight(w) }}
-                                className={cn(
-                                  "p-1 rounded transition-all text-base focus:outline-none hover:scale-110",
-                                  taskWeight >= w ? "text-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.6)]" : "text-zinc-600"
-                                )}
-                              >
-                                ⚡
-                              </button>
-                            ))}
-                          </div>
-                          <span className="text-xs font-mono font-bold text-amber-400">{taskWeight}/6</span>
-                        </div>
+                      <div className="py-2">
+                        <DifficultyVisualizer
+                          weight={taskWeight}
+                          color={currentTheme.color}
+                          interactive={true}
+                          onSelect={(w) => { playClick(); setTaskWeight(w); }}
+                          isRTL={isRTL}
+                          showLabel={true}
+                          showXp={true}
+                        />
                       </div>
                     </div>
 

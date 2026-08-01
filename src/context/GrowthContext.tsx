@@ -1140,79 +1140,125 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
 
   const addXp = async (amount: number, taskTitle?: string, taskId?: string) => {
     if (!profile) return
-    
-    let resolvedAmount = amount
-    if (amount > 0 && taskId && taskId !== 'guest') {
-      try {
-        const { data: taskData } = await supabase
-          .from('tasks')
-          .select('metadata, deadline, goal_id')
-          .eq('id', taskId)
-          .single()
-        
-        if (taskData && taskData.goal_id) {
-          const { data: goalData } = await supabase
-            .from('goals')
-            .select('metadata')
-            .eq('id', taskData.goal_id)
+
+    const now = Date.now()
+    const baseAmount = Math.abs(amount)
+    let finalAwarded = amount
+    let reasonCode = amount > 0 ? 'task_completed' : 'task_uncompleted'
+    let logReason = taskTitle || (amount > 0 ? 'Task Completed' : 'Task Uncompleted')
+
+    if (amount > 0) {
+      // ── B. Overdue Decay (Tiered 50% / 25% with 5 XP Minimum Floor) ──
+      if (taskId && taskId !== 'guest') {
+        try {
+          const { data: taskData } = await supabase
+            .from('tasks')
+            .select('metadata, deadline, goal_id')
+            .eq('id', taskId)
             .single()
-          
-          if (goalData && goalData.metadata?.rules?.xp_multiplier) {
+
+          if (taskData) {
             const taskDeadline = taskData.metadata?.endDate || taskData.metadata?.dueDate || taskData.deadline || taskData.metadata?.deadline
             const hasDate = !!taskDeadline && taskDeadline !== "NOT SET" && taskDeadline !== "SET DEADLINE" && taskDeadline !== "غير محدد" && taskDeadline !== "تحديد موعد"
-            
+
             if (hasDate) {
               const tDate = new Date(taskDeadline)
-              tDate.setHours(23, 59, 59, 999) // end of deadline day
-              const isOverdue = tDate.getTime() < Date.now()
-              if (isOverdue) {
-                resolvedAmount = Math.round(amount / 2)
+              tDate.setHours(23, 59, 59, 999) // End of deadline day
+              
+              if (tDate.getTime() < now) {
+                const diffDays = Math.ceil((now - tDate.getTime()) / (1000 * 60 * 60 * 24))
+                if (diffDays > 7) {
+                  finalAwarded = Math.round(baseAmount * 0.25)
+                  reasonCode = 'overdue_decay_25'
+                } else if (diffDays >= 1) {
+                  finalAwarded = Math.round(baseAmount * 0.50)
+                  reasonCode = 'overdue_decay_50'
+                }
+                // Enforce Minimum XP Floor of 5 XP
+                finalAwarded = Math.max(5, finalAwarded)
               }
             }
           }
+        } catch (err) {
+          console.error('Error checking task overdue status:', err)
         }
-      } catch (err) {
-        console.error('Error calculating xp_multiplier penalty:', err)
       }
-    }
-    
-    const { xpToAward, reason, silent } = checkXpAward(resolvedAmount, taskTitle)
-    
-    // Update daily tasks count only on positive XP award attempts (which represent a task completion)
-    if (amount > 0) {
-      incrementTasksCompletedToday()
-      
-      // Handle velocity stamps if not already on cooldown
-      const now = Date.now()
+
+      // ── C. Soft Anti-Spam (60s rolling window & 5-min sustained cooldown) ──
       const isOnCooldown = cooldownEnd && new Date(cooldownEnd).getTime() > now
-      if (!isOnCooldown) {
-        const nextTimestamps = [...completionTimestamps, now].filter(t => now - t < 60000)
-        setCompletionTimestamps(nextTimestamps)
-        localStorage.setItem('completion_timestamps', JSON.stringify(nextTimestamps))
-        if (nextTimestamps.length >= 3) {
-          const end = new Date(now + 15 * 60 * 1000).toISOString()
-          setCooldownEnd(end)
-          localStorage.setItem('xp_cooldown_end', end)
+      if (isOnCooldown) {
+        finalAwarded = 0
+        reasonCode = 'spam_blocked'
+        triggerToast(
+          isRTL ? "كسب الـ XP موقوف مؤقتاً لحماية النظام من السبام." : "XP gain paused temporarily due to sustained spam.",
+          'warning'
+        )
+      } else {
+        const rollingTimestamps = [...completionTimestamps, now].filter(t => now - t < 60000)
+        setCompletionTimestamps(rollingTimestamps)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('completion_timestamps', JSON.stringify(rollingTimestamps))
+        }
+
+        // 3rd or subsequent completion within 60 seconds awards 0 XP for this specific task
+        if (rollingTimestamps.length >= 3) {
+          finalAwarded = 0
+          reasonCode = 'spam_blocked'
+          triggerToast(
+            isRTL ? "معدل الإنجاز سريع جداً. تم حظر XP لهذه المهمة." : "Completion rate too fast. 0 XP awarded for this task.",
+            'warning'
+          )
+
+          // Sustained Spam Check: Track 3+/min occurrences in rolling 5-minute window
+          const recentSpamTriggers = (typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('spam_trigger_timestamps') || '[]') : [])
+            .filter((t: number) => now - t < 5 * 60 * 1000)
+          const updatedSpamTriggers = [...recentSpamTriggers, now]
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('spam_trigger_timestamps', JSON.stringify(updatedSpamTriggers))
+          }
+
+          if (updatedSpamTriggers.length >= 5) {
+            const fiveMinEnd = new Date(now + 5 * 60 * 1000).toISOString()
+            setCooldownEnd(fiveMinEnd)
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('xp_cooldown_end', fiveMinEnd)
+            }
+          }
         }
       }
+
+      incrementTasksCompletedToday()
+
+    } else {
+      // ── D. Task Un-completion (Reverses exact prior award from xp_logs) ──
+      if (taskId && taskId !== 'guest') {
+        try {
+          const { data: priorLog } = await supabase
+            .from('xp_logs')
+            .select('amount, base_amount')
+            .eq('user_id', profile.id)
+            .eq('task_id', taskId)
+            .gt('amount', 0)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single()
+
+          if (priorLog && typeof priorLog.amount === 'number') {
+            finalAwarded = -priorLog.amount
+          } else {
+            finalAwarded = -baseAmount
+          }
+        } catch (err) {
+          finalAwarded = -baseAmount
+        }
+      } else {
+        finalAwarded = -baseAmount
+      }
+      reasonCode = 'task_uncompleted'
     }
 
-    // Trigger toasts
-    if (reason === 'quality') {
-      triggerToast(
-        // isRTL ? "اسم المهمة غير واضح. تم تشغيل فلتر الجودة. تم منح 0 XP." : "Task name too vague. Quality filter triggered. 0 XP awarded.",
-        isRTL ? "اسم الـ Task مش واضح. فلتر الجودة اشتغل. اتمنح 0 XP." : "Task name too vague. Quality filter triggered. 0 XP awarded.",
-        'warning'
-      )
-    } else if (reason === 'velocity' || (amount > 0 && completionTimestamps.filter(t => Date.now() - t < 60000).length >= 2)) {
-      triggerToast(
-        // isRTL ? "تم اكتشاف سبام. تم إيقاف كسب نقاط الـ XP مؤقتاً لمدة 15 دقيقة." : "Spam detected. XP gain is on cooldown for 15 minutes.",
-        isRTL ? "شكلها سبام. كسب الـ XP وقف مؤقتاً لمدة 15 دقيقة." : "Spam detected. XP gain is on cooldown for 15 minutes.",
-        'warning'
-      )
-    }
-
-    const newXp = Math.max(0, (profile.xp || 0) + Math.round(xpToAward))
+    // ── Update Profile XP Total ──
+    const newXp = Math.max(0, (profile.xp || 0) + Math.round(finalAwarded))
 
     const { data, error } = await supabase
       .from('profiles')
@@ -1226,7 +1272,6 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
       const nextRank = data.rank || 'SILVER'
       if (prevRank !== nextRank) {
         triggerRankUp(prevRank, nextRank)
-
         const isRTL = profile.language === 'ar'
         const notifTitle = isRTL ? '🎉 ترقية الرتبة!' : '🎉 Rank Up!'
         const notifContent = isRTL 
@@ -1237,13 +1282,28 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
           user_id: profile.id,
           type: 'rank_up',
           title: notifTitle,
-          content: {
-            text: notifContent,
-            rank: nextRank
-          }
+          content: { text: notifContent, rank: nextRank }
         })
       }
       setProfile({ ...profile, ...data } as Profile)
+    }
+
+    // ── E. Insert Row into xp_logs (Non-blocking) ──
+    try {
+      const isUuid = (val?: string | null) => !!val && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val)
+      const validUserId = isUuid(profile.id) ? profile.id : null
+      const validTaskId = isUuid(taskId) ? taskId : null
+
+      await supabase.from('xp_logs').insert({
+        user_id: validUserId,
+        amount: Math.round(finalAwarded),
+        base_amount: baseAmount,
+        reason: logReason,
+        reason_code: reasonCode,
+        task_id: validTaskId,
+      })
+    } catch (logErr) {
+      console.error('Non-blocking xp_logs insert failed:', logErr)
     }
   }
 

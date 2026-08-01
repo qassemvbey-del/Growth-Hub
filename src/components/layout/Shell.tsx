@@ -13,13 +13,14 @@ import {
   LayoutGrid, Trophy, Target, FileText, User, Users, Settings, Zap, Bell, Flame, Bot, X, Home,
   Laptop, GraduationCap, Briefcase, Rocket, Video, TrendingUp, CloudLightning,
   Crosshair, Shield, CheckCircle, Menu, Search, Plus, StickyNote, Loader2, UserPlus,
-  Lock, CheckCircle2
+  Lock, CheckCircle2, PanelLeftClose, PanelLeftOpen
 } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import EnergyCell from '@/components/ui/EnergyCell'
 
 import { useInbox } from '@/hooks/useInbox'
 import InboxDropdown from '@/components/ui/InboxDropdown'
+import { XpHistoryDropdown } from './XpHistoryDropdown'
 import PomodoroHUD from '@/components/ui/PomodoroHUD'
 import CoachPanel from '@/components/ui/CoachPanel'
 import OperatorGuide from '@/components/ui/OperatorGuide'
@@ -337,6 +338,16 @@ export default function Shell({ children }: ShellProps) {
   const [aiOpen, setAiOpen] = useState(false)
   const [coachPanelOpen, setCoachPanelOpen] = useState(false)
   const [inboxOpen, setInboxOpen] = useState(false)
+  const [xpHistoryOpen, setXpHistoryOpen] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('growth_sidebar_collapsed')
+      if (saved !== null) {
+        try { return JSON.parse(saved) } catch (e) {}
+      }
+    }
+    return false
+  })
   const [selectedReport, setSelectedReport] = useState<any>(null)
   const [streak, setStreak] = useState(0)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
@@ -1411,24 +1422,62 @@ export default function Shell({ children }: ShellProps) {
       <div className="fixed inset-0 pointer-events-none z-0 cyber-grid opacity-[0.05]" />
 
       {showSidebar && (
-        <Sidebar isRTL={isRTL} onOpenCoach={() => { setCoachPanelOpen(true); playNeuralLink(); window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ai-coach' })); }} />
+        <Sidebar
+          isRTL={isRTL}
+          isCollapsed={isSidebarCollapsed}
+          onOpenCoach={() => { setCoachPanelOpen(true); playNeuralLink(); window.dispatchEvent(new CustomEvent('onboarding-action', { detail: 'ai-coach' })); }}
+        />
       )}
 
       <main
         className={cn(
-        'flex-1 relative z-10 w-full max-w-full overflow-x-hidden',
+        'flex-1 relative z-10 w-full max-w-full overflow-x-hidden transition-all duration-300',
         pathname === '/auth/login' ? 'min-h-0 pb-0' : 'min-h-[100dvh] pb-20 lg:pb-8',
-        showSidebar ? 'lg:ps-72 lg:max-w-none' : 'lg:max-w-none'
+        showSidebar ? (isSidebarCollapsed ? 'lg:ps-16 lg:max-w-none' : 'lg:ps-[220px] lg:max-w-none') : 'lg:max-w-none'
       )}>
-        {/* Commented out per rule "Never delete code, only comment it out"
-        <header className="hidden lg:flex w-full px-8 h-16 justify-end items-center bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-black/5 dark:border-white/[0.03] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] z-[150] sticky top-0 transition-colors duration-500 relative header-target">
-        */}
-        {/* Commented out per safety rules:
-        <header className="hidden lg:flex w-full px-8 h-16 justify-end items-center bg-[var(--sidebar-bg)] dark:bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-[var(--border)] dark:border-white/[0.03] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] z-[150] sticky top-0 transition-colors duration-500 relative header-target">
-        */}
         {pathname !== '/auth/login' && (
-          <header className="hidden lg:flex w-full px-8 h-16 justify-end items-center bg-[var(--sidebar-bg)] dark:bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-[var(--border)] dark:border-white/[0.03] shadow-sm z-[150] sticky top-0 transition-colors duration-500 relative header-target">
-            <div className="absolute -bottom-[1px] inset-inline-start-12 w-48 h-[1px] shadow-[0_0_15px_currentcolor]" style={{ backgroundColor: currentTheme.color, color: currentTheme.color }} />
+          <div 
+            className={cn(
+              "fixed top-0 h-24 pointer-events-none z-[140] transition-all duration-300",
+              showSidebar 
+                ? (shellIsRTL 
+                    ? (isSidebarCollapsed ? "left-0 right-0 lg:right-16" : "left-0 right-0 lg:right-[220px]") 
+                    : (isSidebarCollapsed ? "right-0 left-0 lg:left-16" : "right-0 left-0 lg:left-[220px]")
+                  )
+                : "left-0 right-0"
+            )}
+            style={{
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.85), rgba(0,0,0,0.3) 60%, transparent 100%)'
+            }}
+          />
+        )}
+
+        {pathname !== '/auth/login' && (
+          <header className="hidden lg:flex w-full px-8 h-16 justify-between items-center bg-transparent border-b-0 shadow-none z-[150] sticky top-0 transition-colors duration-500 relative header-target">
+            {/* LEFT / FAR-START: Sidebar Collapse Toggle Button */}
+            {showSidebar && (
+              <div className="flex items-center gap-3 z-10">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = !isSidebarCollapsed
+                    setIsSidebarCollapsed(next)
+                    if (typeof window !== 'undefined') {
+                      localStorage.setItem('growth_sidebar_collapsed', JSON.stringify(next))
+                    }
+                    playBlip()
+                  }}
+                  className="flex items-center justify-center w-9 h-9 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-all border border-white/10 cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+                  title={isSidebarCollapsed ? (isRTL ? "توسيع القائمة" : "Expand Sidebar") : (isRTL ? "طَي القائمة" : "Collapse Sidebar")}
+                >
+                  {isSidebarCollapsed ? (
+                    <PanelLeftOpen className="w-4.5 h-4.5" />
+                  ) : (
+                    <PanelLeftClose className="w-4.5 h-4.5" />
+                  )}
+                </button>
+              </div>
+            )}
 
             {/* CENTER: Core Brand Text */}
             <div className="absolute left-1/2 -translate-x-1/2 flex items-center" dir="ltr">
@@ -1440,18 +1489,38 @@ export default function Shell({ children }: ShellProps) {
                 {/* Real-time Network Radar */}
                 {renderNetworkPill(false)}
 
-                {/* ⚡ XP */}
-                <div className="flex items-center gap-2 border-e border-[var(--card-border)] pe-6 shrink-0" title={isRTL ? 'نقاط الخبرة' : 'XP Readout'}>
-                  <motion.span
-                    className="shrink-0"
-                    animate={{ opacity: [0.3, 1, 0.3] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                {/* ⚡ XP Dropdown */}
+                <div className="relative shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setXpHistoryOpen(!xpHistoryOpen)
+                      setInboxOpen(false)
+                      setAiOpen(false)
+                      playBlip()
+                    }}
+                    className="flex items-center gap-2 border-e border-[var(--card-border)] pe-6 shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                    title={isRTL ? 'سجل نقاط الخبرة' : 'XP History'}
                   >
-                    <Zap className="w-5 h-5" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 6px ${currentTheme.color})` }} />
-                  </motion.span>
-                  <span className="text-sm md:text-base font-space font-black tracking-widest uppercase text-zinc-900 dark:text-zinc-100">
-                    XP: <span style={{ color: currentTheme.color }}>{profile?.xp || 0}</span>
-                  </span>
+                    <motion.span
+                      className="shrink-0"
+                      animate={{ opacity: [0.3, 1, 0.3] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                    >
+                      <Zap className="w-5 h-5" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 6px ${currentTheme.color})` }} />
+                    </motion.span>
+                    <span className="text-sm md:text-base font-space font-black tracking-widest uppercase text-zinc-900 dark:text-zinc-100">
+                      XP: <span style={{ color: currentTheme.color }}>{profile?.xp || 0}</span>
+                    </span>
+                  </button>
+
+                  <XpHistoryDropdown
+                    isOpen={xpHistoryOpen}
+                    onClose={() => setXpHistoryOpen(false)}
+                    themeColor={currentTheme.color}
+                    totalXp={profile?.xp || 0}
+                    isRTL={isRTL}
+                  />
                 </div>
 
                 {/* 🔥 Streak */}
@@ -1528,7 +1597,7 @@ export default function Shell({ children }: ShellProps) {
         <header className="flex lg:hidden w-full h-14 px-4 items-center justify-between bg-[var(--sidebar-bg)] dark:bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-[var(--border)] dark:border-white/[0.03] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] z-[150] sticky top-0 transition-colors duration-500 relative">
         */}
         {profile && pathname !== '/auth/login' && (
-          <header className="flex lg:hidden w-full h-14 px-4 items-center justify-between bg-[var(--sidebar-bg)] dark:bg-transparent dark:bg-gradient-to-b dark:from-black/10 dark:to-transparent backdrop-blur-[40px] border-b border-[var(--border)] dark:border-white/[0.03] shadow-sm z-[150] sticky top-0 transition-colors duration-500 relative">
+          <header className="flex lg:hidden w-full h-14 px-4 items-center justify-between bg-transparent border-b-0 shadow-none z-[150] sticky top-0 transition-colors duration-500 relative">
             {/* LEFT: Hamburger Menu Icon */}
             <div className="flex items-center order-first rtl:order-last">
               {showSidebar ? (
@@ -1879,10 +1948,12 @@ export default function Shell({ children }: ShellProps) {
         missions={syncedMissions}
       />
 
+      {/* Commented out per rule "Never delete code, only comment it out"
       <div className={cn(
         "fixed top-0 bottom-0 w-[1px] bg-black/5 dark:bg-white/5 z-20 hidden md:block",
         "inset-inline-start-72"
       )} />
+      */}
 
       <LevelUpModal />
       <GlitchOverlay active={isRankUpModalOpen} />
