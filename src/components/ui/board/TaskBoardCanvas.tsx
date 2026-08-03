@@ -26,7 +26,7 @@ interface TaskBoardCanvasProps {
   themeColor: string
   isRTL: boolean
   onUpdateTask: (taskId: string, updates: any) => Promise<void> | void
-  onToggleTask?: (taskId: string) => Promise<void> | void
+  onToggleTask?: (taskId: string, currentStatus?: boolean) => Promise<void> | void
   onOpenDrawer: (task: any) => void
 }
 
@@ -157,7 +157,7 @@ export default function TaskBoardCanvas({
     if (!tasks || tasks.length === 0) return
 
     const savedLayout = getSavedLayout()
-    const layoutNodesMap = new Map((savedLayout?.nodes || []).map((n: any) => [n.id, n]))
+    const layoutNodesMap = new Map<string, any>((savedLayout?.nodes || []).map((n: any) => [n.id, n]))
     const taskMap = new Map(tasks.map(t => [t.id, t]))
 
     setNodes((existingNodes: Node[]) => {
@@ -175,7 +175,7 @@ export default function TaskBoardCanvas({
         const row = Math.floor(index / cols)
         const defaultPos = { x: col * 360 + 50, y: row * 260 + 50 }
 
-        const position = existingInState?.position || savedNode?.position || defaultPos
+        const position = existingInState?.position || (savedNode as any)?.position || defaultPos
 
         updatedNodes.push({
           id: nodeNodeId,

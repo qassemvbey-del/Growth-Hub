@@ -16,6 +16,7 @@ import { useSound } from '@/context/SoundContext'
 import PlaylistImportModal from '@/components/ui/PlaylistImportModal'
 import { usePomodoro } from '@/context/PomodoroContext'
 import { cleanPlaylistTitles } from '@/app/actions/ai-magic'
+import { checkAndAutoJoinSquadGoal } from '@/app/actions/squadActions'
 import MissionAttachmentsModal from '@/components/ui/MissionAttachmentsModal'
 import SmartImportModal from '@/components/ui/SmartImportModal'
 import { validateContent } from '@/lib/profanityFilter'
@@ -817,6 +818,10 @@ export default function MissionDetailPage() {
       setMission(goal)
       setLoading(false)
       return
+    }
+
+    if (typeof id === 'string' && !id.startsWith('local_')) {
+      await checkAndAutoJoinSquadGoal(id)
     }
 
     const { data } = await supabase
@@ -2570,7 +2575,10 @@ const { progress, isInRedZone } = useMemo(() => {
                themeColor={missionColor}
                isRTL={isRTL}
                onUpdateTask={onUpdateTask}
-               onToggleTask={toggleTask}
+               onToggleTask={(taskId, currentStatus) => {
+                 const t = mission?.tasks?.find((x: any) => x.id === taskId);
+                 return toggleTask(taskId, currentStatus ?? t?.is_completed ?? false);
+               }}
                onOpenDrawer={(task) => setSelectedTask(task)}
              />
            )}
@@ -3504,13 +3512,13 @@ const { progress, isInRedZone } = useMemo(() => {
                   <input
                     type="text"
                     readOnly
-                    value={typeof window !== 'undefined' ? `${window.location.origin}/goals/public/${id}` : ''}
+                    value={typeof window !== 'undefined' ? `${window.location.origin}/goals/squad/${id}` : ''}
                     className="flex-grow bg-white/5 border border-white/10 py-2 px-3 rounded-xl text-xs text-zinc-300 outline-none select-all focus:border-teal-500/30"
                   />
                   <button
                     onClick={() => {
                       playBlip()
-                      const inviteUrl = `${window.location.origin}/goals/public/${id}`
+                      const inviteUrl = `${window.location.origin}/goals/squad/${id}`
                       navigator.clipboard.writeText(inviteUrl)
                       setCopiedRow('invite')
                       setTimeout(() => setCopiedRow(null), 2000)
@@ -3535,12 +3543,12 @@ const { progress, isInRedZone } = useMemo(() => {
                     <input
                       type="radio"
                       name="sharing_mode"
-                      checked={mission?.is_public === true && mission?.requires_approval === false}
+                      checked={(mission?.general_access === 'anyone_with_link' || mission?.metadata?.general_access === 'anyone_with_link') || (mission?.is_public === true && mission?.requires_approval === false)}
                       onChange={async () => {
-                        setMission((prev: any) => ({ ...prev, is_public: true, requires_approval: false }));
+                        setMission((prev: any) => ({ ...prev, is_public: true, requires_approval: false, general_access: 'anyone_with_link' }));
                         await supabase
                           .from('goals')
-                          .update({ is_public: true, requires_approval: false })
+                          .update({ is_public: true, requires_approval: false, general_access: 'anyone_with_link' })
                           .eq('id', id);
                       }}
                       className="mt-1 accent-orange-500 w-4 h-4 shrink-0"
@@ -3559,12 +3567,12 @@ const { progress, isInRedZone } = useMemo(() => {
                     <input
                       type="radio"
                       name="sharing_mode"
-                      checked={mission?.requires_approval !== false}
+                      checked={mission?.requires_approval !== false && mission?.general_access !== 'anyone_with_link'}
                       onChange={async () => {
-                        setMission((prev: any) => ({ ...prev, is_public: true, requires_approval: true }));
+                        setMission((prev: any) => ({ ...prev, is_public: true, requires_approval: true, general_access: 'restricted' }));
                         await supabase
                           .from('goals')
-                          .update({ is_public: true, requires_approval: true })
+                          .update({ is_public: true, requires_approval: true, general_access: 'restricted' })
                           .eq('id', id);
                       }}
                       className="mt-1 accent-orange-500 w-4 h-4 shrink-0"
