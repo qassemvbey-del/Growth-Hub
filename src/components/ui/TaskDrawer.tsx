@@ -1004,10 +1004,30 @@ export default function TaskDrawer({
 
 
   // Stored local video details
-  const storedProgress = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`growth_hub_video_progress_${task.id}`) || '0') : 0
+  const storedProgress = (() => {
+    if (typeof window === 'undefined') return 0
+    try {
+      const ytStored = localStorage.getItem(`yt_progress_${task.id}`)
+      if (ytStored) {
+        const parsed = JSON.parse(ytStored)
+        if (parsed?.time && typeof parsed.time === 'number' && parsed.time > 0) {
+          return Math.floor(parsed.time)
+        }
+      }
+    } catch (e) {}
+    const legacy = parseFloat(localStorage.getItem(`growth_hub_video_progress_${task.id}`) || '0')
+    return legacy > 0 ? Math.floor(legacy) : 0
+  })()
+
   const storedDuration = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`growth_hub_video_duration_${task.id}`) || '0') : 0
-  const videoProgress = task.video_progress ?? storedProgress
-  const videoDuration = task.video_duration ?? storedDuration
+  const videoProgress = task.video_progress ?? task.metadata?.videoProgress ?? task.metadata?.video_time ?? storedProgress
+  const videoDuration = task.video_duration ?? task.metadata?.videoDuration ?? storedDuration
+
+  const [liveVideoProgress, setLiveVideoProgress] = useState<number>(videoProgress)
+
+  useEffect(() => {
+    setLiveVideoProgress(videoProgress)
+  }, [task.id, videoProgress])
 
   const [ytDuration, setYtDuration] = useState<number>(0)
 
@@ -1162,7 +1182,10 @@ export default function TaskDrawer({
                     isGuest={isGuest}
                     themeColor={themeColor}
                     onComplete={onComplete}
-                    onProgressUpdate={onProgressUpdate}
+                    onProgressUpdate={(currentTime, duration) => {
+                      setLiveVideoProgress(currentTime)
+                      if (onProgressUpdate) onProgressUpdate(currentTime, duration)
+                    }}
                   />
                 </div>
                 {/* Mini video meta bar */}
@@ -1172,7 +1195,7 @@ export default function TaskDrawer({
                     {t('savedProgress')}
                   </span>
                   <span className="px-2 tracking-widest">
-                    {formatVideoTime(videoProgress)} / {formatVideoTime(resolvedDuration)}
+                    {formatVideoTime(liveVideoProgress)} / {formatVideoTime(resolvedDuration)}
                   </span>
                 </div>
               </div>

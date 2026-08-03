@@ -36,7 +36,9 @@ export default function SmartTaskPlayer({
   )
   const progressRef = useRef(0)
   const durationRef = useRef(0)
-  const hasSeeked = useRef(false)
+  const initialLoadedTimeRef = useRef(0)
+  const hasReachedStartRef = useRef(false)
+  const hasInitializedRef = useRef<string | null>(null)
 
   // 1. Extract videoId or playlistId from multiple YouTube formats
   const parsedMedia = useMemo(() => {
@@ -79,14 +81,25 @@ export default function SmartTaskPlayer({
     return { type: 'video', id: videoUrl }
   }, [url])
 
-  // 2. Fetch saved time from Supabase/localStorage and build static iframeUrl once on mount
+  // 2. Fetch saved time from Supabase/localStorage and build static iframeUrl ONCE per task/media
   useEffect(() => {
     setIsMounted(true)
+
+    const initKey = `${taskId}_${parsedMedia.id}`
+    if (hasInitializedRef.current === initKey) {
+      return
+    }
+
     async function loadProgressAndBuildUrl() {
       let time = 0
+
+      // A. Try initialProgress prop if provided and valid
+      if (initialProgress && initialProgress > 0) {
+        time = Math.floor(initialProgress)
+      }
       
-      // A. Try fetching progress from Supabase task_progress table
-      if (!isGuest) {
+      // B. Try fetching progress from Supabase task_progress table
+      if (time <= 0 && !isGuest) {
         try {
           const { data: { user } } = await supabase.auth.getUser()
           if (user) {
@@ -97,8 +110,8 @@ export default function SmartTaskPlayer({
               .eq('user_id', user.id)
               .maybeSingle()
             
-            if (data && typeof data.video_time === 'number') {
-              time = data.video_time
+            if (data && typeof data.video_time === 'number' && data.video_time > 0) {
+              time = Math.floor(data.video_time)
             }
           }
         } catch (err) {
@@ -106,13 +119,31 @@ export default function SmartTaskPlayer({
         }
       }
 
-      // B. Fallback to localStorage structured JSON key
+      // C. Try fetching progress from Supabase task metadata
+      if (time <= 0 && !isGuest) {
+        try {
+          const { data: taskData } = await supabase
+            .from('tasks')
+            .select('metadata')
+            .eq('id', taskId)
+            .maybeSingle()
+
+          const meta = taskData?.metadata
+          if (meta?.videoProgress && typeof meta.videoProgress === 'number' && meta.videoProgress > 0) {
+            time = Math.floor(meta.videoProgress)
+          } else if (meta?.video_time && typeof meta.video_time === 'number' && meta.video_time > 0) {
+            time = Math.floor(meta.video_time)
+          }
+        } catch (err) {}
+      }
+
+      // D. Fallback to localStorage structured JSON key
       if (time <= 0) {
         const stored = localStorage.getItem(`yt_progress_${taskId}`)
         if (stored) {
           try {
             const parsedObj = JSON.parse(stored)
-            if (parsedObj && typeof parsedObj.time === 'number') {
+            if (parsedObj && typeof parsedObj.time === 'number' && parsedObj.time > 0) {
               time = Math.floor(parsedObj.time)
             }
           } catch (e) {
@@ -122,7 +153,7 @@ export default function SmartTaskPlayer({
         }
       }
 
-      // C. Fallback to legacy localStorage key
+      // E. Fallback to legacy localStorage key
       if (time <= 0) {
         const legacyStored = localStorage.getItem(`growth_hub_video_progress_${taskId}`)
         const parsedLegacy = parseFloat(legacyStored || '0')
@@ -131,12 +162,12 @@ export default function SmartTaskPlayer({
         }
       }
 
-      // D. Fallback to initialProgress prop
-      if (time <= 0 && initialProgress > 0) {
-        time = Math.floor(initialProgress)
-      }
+      initialLoadedTimeRef.current = time
+      progressRef.current = time
+      hasReachedStartRef.current = time <= 2
+      hasInitializedRef.current = initKey
 
-      // E. Build and set strictly static iframeUrl
+      // F. Build and set static iframeUrl
       if (parsedMedia.id) {
         const base = parsedMedia.type === 'playlist'
           ? `https://www.youtube-nocookie.com/embed/videoseries?list=${parsedMedia.id}`
@@ -145,19 +176,14 @@ export default function SmartTaskPlayer({
         const finalUrl = `${base}?enablejsapi=1&start=${Math.floor(time)}&rel=0&playsinline=1&modestbranding=1&iv_load_policy=3${originParam}`
         
         setIframeUrl(finalUrl)
-
-        if (time > 2) {
-          const isRTL = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
-          // showToast(isRTL ? 'تم استئناف التشغيل من حيث توقفت' : 'Resumed playback', 'success')
-        }
       }
       setIsReady(true)
     }
 
     loadProgressAndBuildUrl()
-  }, [taskId, isGuest, supabase, parsedMedia]) // Omit initialProgress so state is built once on mount
+  }, [taskId, isGuest, supabase, parsedMedia, initialProgress])
 
-  // 3. Progress saving helper for localStorage and Supabase (persistent across devices)
+  // 3. Progress saving helper for localStorage and Supabase task_progress table
   const saveProgress = useCallback(async (time: number, duration: number) => {
     try {
       localStorage.setItem(
@@ -176,24 +202,6 @@ export default function SmartTaskPlayer({
             video_duration: duration,
             updated_at: new Date().toISOString()
           })
-
-          const { data: taskData } = await supabase
-            .from('tasks')
-            .select('metadata')
-            .eq('id', taskId)
-            .maybeSingle()
-
-          const currentMeta = taskData?.metadata || {}
-          const updatedMeta = {
-            ...currentMeta,
-            videoDuration: duration > 0 ? duration : (currentMeta.videoDuration || null),
-            videoProgress: time
-          }
-
-          await supabase
-            .from('tasks')
-            .update({ metadata: updatedMeta })
-            .eq('id', taskId)
         }
       }
     } catch (err) {
@@ -271,6 +279,14 @@ export default function SmartTaskPlayer({
             const time = Math.floor(currentTime)
             const dur = Math.floor(duration || durationRef.current || 0)
             
+            // Guard against premature 0 currentTime burst during initial YouTube iframe load before seeking to start parameter
+            if (!hasReachedStartRef.current && initialLoadedTimeRef.current > 2) {
+              if (time < 1) {
+                return
+              }
+              hasReachedStartRef.current = true
+            }
+
             progressRef.current = time
             
             // Instantly save to localStorage (fast)

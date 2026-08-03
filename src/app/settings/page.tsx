@@ -601,43 +601,46 @@ export default function SettingsPage() {
                   </div>
 
                   {/* My Champion Card */}
-                  <div>
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
-                      {isRTL ? 'البطل الحالي' : 'Active Champion'}
-                    </span>
-                    <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-6 text-start flex flex-col sm:flex-row items-center gap-6 relative overflow-hidden">
-                      <div 
-                        className="absolute inset-0 opacity-10 pointer-events-none"
-                        style={{
-                          background: `radial-gradient(circle at bottom right, ${currentChamp.color}, transparent 60%)`
-                        }}
-                      />
-                      <img 
-                        src={currentChamp.image} 
-                        alt={currentChamp.title} 
-                        className="w-24 h-24 rounded-xl object-cover border-2 shrink-0 relative z-10" 
-                        style={{ borderColor: currentChamp.color }}
-                      />
-                      <div className="space-y-3 flex-1 relative z-10">
-                        <div>
-                          <h4 className="text-lg font-space font-black text-white uppercase tracking-wider">
-                            {currentChamp.title}
-                          </h4>
-                          <p className="text-xs text-zinc-400 leading-relaxed max-w-sm">
-                            {currentChamp.description}
-                          </p>
+                  {/* CHAMPIONS_HIDDEN */}
+                  {false && (
+                    <div>
+                      <span className="text-[10px] text-zinc-500 uppercase tracking-widest px-3 block mb-1.5 font-space font-black text-start">
+                        {isRTL ? 'البطل الحالي' : 'Active Champion'}
+                      </span>
+                      <div className="bg-black/20 backdrop-blur-xl border border-white/10 shadow-[0_12px_40px_0_rgba(0,0,0,0.5)] rounded-2xl p-6 text-start flex flex-col sm:flex-row items-center gap-6 relative overflow-hidden">
+                        <div 
+                          className="absolute inset-0 opacity-10 pointer-events-none"
+                          style={{
+                            background: `radial-gradient(circle at bottom right, ${currentChamp.color}, transparent 60%)`
+                          }}
+                        />
+                        <img 
+                          src={currentChamp.image} 
+                          alt={currentChamp.title} 
+                          className="w-24 h-24 rounded-xl object-cover border-2 shrink-0 relative z-10" 
+                          style={{ borderColor: currentChamp.color }}
+                        />
+                        <div className="space-y-3 flex-1 relative z-10">
+                          <div>
+                            <h4 className="text-lg font-space font-black text-white uppercase tracking-wider">
+                              {currentChamp.title}
+                            </h4>
+                            <p className="text-xs text-zinc-400 leading-relaxed max-w-sm">
+                              {currentChamp.description}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => { setIsAvatarSelectorOpen(true); playBlip(); }}
+                            className="px-4 py-2 text-[10px] font-space font-black rounded-lg uppercase tracking-wider text-black hover:brightness-110 active:scale-98 transition-all cursor-pointer"
+                            style={{ backgroundColor: currentChamp.color }}
+                          >
+                            {isRTL ? 'تغيير البطل' : 'Change Champion'}
+                          </button>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => { setIsAvatarSelectorOpen(true); playBlip(); }}
-                          className="px-4 py-2 text-[10px] font-space font-black rounded-lg uppercase tracking-wider text-black hover:brightness-110 active:scale-98 transition-all cursor-pointer"
-                          style={{ backgroundColor: currentChamp.color }}
-                        >
-                          {isRTL ? 'تغيير البطل' : 'Change Champion'}
-                        </button>
                       </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Evolution Status */}
                   <div>

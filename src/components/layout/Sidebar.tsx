@@ -385,37 +385,40 @@ export default function Sidebar({ isRTL = false, isCollapsed = false, onOpenCoac
         })}
 
         {/* ── PROMINENT GLOWING AI COACH BLOCK ── */}
-        <div className={cn("pt-4", isCollapsed ? "px-0 flex justify-center" : "px-2")}>
-          <button
-            type="button"
-            onClick={() => onOpenCoach?.()}
-            title={mounted ? (isRTL ? 'المساعد' : 'Coach') : 'Coach'}
-            className={cn(
-              "group relative flex items-center justify-between rounded-md border transition-all duration-150 active:scale-[0.97] hover:brightness-105 overflow-hidden cursor-pointer shadow-lg",
-              isCollapsed ? "w-10 h-10 justify-center p-0 rounded-xl" : "w-full p-4"
-            )}
-            style={{
-              backgroundColor: `${currentTheme.color}15`,
-              borderColor: `${currentTheme.color}50`,
-              boxShadow: `0 0 25px ${currentTheme.color}26, inset 0 0 15px ${currentTheme.color}15`
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 pointer-events-none" />
-            <div className={cn("flex items-center relative z-10", isCollapsed ? "justify-center" : "gap-3")}>
-              <motion.span 
-                animate={{ opacity: [1, 0.4, 1], scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <NeonIcon icon={Bot} className="w-4 h-4" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }} />
-              </motion.span>
-              {!isCollapsed && (
-                <span className="font-heading font-medium text-xs text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors">
-                  {mounted ? (isRTL ? 'المساعد' : 'Coach') : 'Coach'}
-                </span>
+        {/* COACH_PANEL_HIDDEN */}
+        {false && (
+          <div className={cn("pt-4", isCollapsed ? "px-0 flex justify-center" : "px-2")}>
+            <button
+              type="button"
+              onClick={() => onOpenCoach?.()}
+              title={mounted ? (isRTL ? 'المساعد' : 'Coach') : 'Coach'}
+              className={cn(
+                "group relative flex items-center justify-between rounded-md border transition-all duration-150 active:scale-[0.97] hover:brightness-105 overflow-hidden cursor-pointer shadow-lg",
+                isCollapsed ? "w-10 h-10 justify-center p-0 rounded-xl" : "w-full p-4"
               )}
-            </div>
-          </button>
-        </div>
+              style={{
+                backgroundColor: `${currentTheme.color}15`,
+                borderColor: `${currentTheme.color}50`,
+                boxShadow: `0 0 25px ${currentTheme.color}26, inset 0 0 15px ${currentTheme.color}15`
+              }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 pointer-events-none" />
+              <div className={cn("flex items-center relative z-10", isCollapsed ? "justify-center" : "gap-3")}>
+                <motion.span 
+                  animate={{ opacity: [1, 0.4, 1], scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <NeonIcon icon={Bot} className="w-4 h-4" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }} />
+                </motion.span>
+                {!isCollapsed && (
+                  <span className="font-heading font-medium text-xs text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors">
+                    {mounted ? (isRTL ? 'المساعد' : 'Coach') : 'Coach'}
+                  </span>
+                )}
+              </div>
+            </button>
+          </div>
+        )}
       </nav>
 
       {/* ── Docked Settings ── */}

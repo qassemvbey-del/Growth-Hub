@@ -174,7 +174,7 @@ export default function MissionDetailPage() {
   const [loading, setLoading] = useState(true)
   const [activeView, setActiveView] = useState<'list' | 'board' | 'map'>('list')
   const [activeViewInitialized, setActiveViewInitialized] = useState(false)
-  const [pinnedView, setPinnedView] = useState<'list' | 'board' | null>(null)
+  const [pinnedView, setPinnedView] = useState<'list' | 'board' | 'map' | null>(null)
   const [timeFilter, setTimeFilter] = useState<'ALL' | 'WEEK' | 'OVERDUE' | 'today'>('ALL')
   const [selectedTaskState, setSelectedTaskState] = useState<any | null>(null)
   const [showReportModal, setShowReportModal] = useState(false)
@@ -267,7 +267,25 @@ export default function MissionDetailPage() {
     canComment
   } = useSquadPermissions({ mission, profile, squadMembers })
 
-  const isReadOnly = !profile || normalizedRole === 'viewer' || normalizedRole === 'guest';
+  const isLocal = typeof id === 'string' && id.startsWith('local_');
+  const isReadOnly = isLocal ? false : (!profile || normalizedRole === 'viewer' || normalizedRole === 'guest');
+
+  const saveLocalGoal = useCallback((goalId: string, updatedGoal: any) => {
+    if (typeof window === 'undefined' || !goalId) return
+    try {
+      const raw = localStorage.getItem('guest_goals') || '[]'
+      const guestGoals = JSON.parse(raw)
+      const index = guestGoals.findIndex((g: any) => g.id === goalId)
+      if (index >= 0) {
+        guestGoals[index] = updatedGoal
+      } else {
+        guestGoals.push(updatedGoal)
+      }
+      localStorage.setItem('guest_goals', JSON.stringify(guestGoals))
+    } catch (e) {
+      console.error('Error saving local goal:', e)
+    }
+  }, [])
 
   const setSelectedTask = (task: any | null) => {
     setSelectedTaskState(task)
@@ -567,13 +585,13 @@ export default function MissionDetailPage() {
   const { startFocus } = usePomodoro()
 
   const fetchTimeStats = useCallback(async () => {
+    if (typeof id === 'string' && id.startsWith('local_')) return
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
     const { data, error } = await supabase
       .from('time_logs')
       .select('duration_minutes, task_id')
-      // .eq('cup_id', id)
       .eq('goal_id', id)
       .eq('user_id', user.id)
 
@@ -687,6 +705,7 @@ export default function MissionDetailPage() {
   }, [mission?.tasks])
 
   async function fetchAttachmentCount() {
+    if (typeof id === 'string' && id.startsWith('local_')) return
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     const { count } = await supabase
@@ -727,9 +746,7 @@ export default function MissionDetailPage() {
             ...prev,
             tasks: prev.tasks.map((t: any, idx: number) => ({ ...t, title: cleanedTitles[idx] }))
           }
-          const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-          const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g)
-          localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+          saveLocalGoal(id as string, next)
           return next
         })
       } else {
@@ -769,20 +786,35 @@ export default function MissionDetailPage() {
   async function fetchMission() {
     if (typeof id === 'string' && id.startsWith('local_')) {
       const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-      const goal = guestGoals.find((g: any) => g.id === id)
-      if (goal) {
-        goal.tasks = (goal.tasks || []).sort((a: any, b: any) => {
-          const diff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-          if (diff !== 0) return diff
-          return a.id.localeCompare(b.id)
-        })
-        setMission(goal)
-      } else {
-        const fallbackRoute = window.location.pathname.startsWith('/goals/solo') ? '/goals/solo' : '/goals/squad'
-        if (window.location.pathname !== fallbackRoute) {
-          router.push(fallbackRoute)
+      let goal = guestGoals.find((g: any) => g.id === id)
+
+      if (!goal) {
+        // Create demo goal if local_ ID doesn't exist in guest_goals yet
+        goal = {
+          id: id,
+          title: 'Mindmap Test Goal (Demo)',
+          description: 'Interactive Board / Map View Test Canvas',
+          category: 'DEVELOPMENT',
+          size: 'medium',
+          status: 'in_progress',
+          created_at: new Date().toISOString(),
+          metadata: { type: 'solo', color: '#10B981' },
+          tasks: [
+            { id: `task_demo_1`, title: 'Explore Map View Canvas', is_completed: false, weight: 3, created_at: new Date(Date.now() - 3000).toISOString(), metadata: { subtasks: [{ id: 'st1', title: 'Click + Insert to add cards', is_completed: true }] } },
+            { id: `task_demo_2`, title: 'Connect Checklist & Notes', is_completed: false, weight: 2, created_at: new Date(Date.now() - 2000).toISOString(), metadata: {} },
+            { id: `task_demo_3`, title: 'Drag nodes & adjust layout', is_completed: true, weight: 1, created_at: new Date(Date.now() - 1000).toISOString(), metadata: {} }
+          ]
         }
       }
+
+      saveLocalGoal(id, goal)
+
+      goal.tasks = (goal.tasks || []).sort((a: any, b: any) => {
+        const diff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        if (diff !== 0) return diff
+        return a.id.localeCompare(b.id)
+      })
+      setMission(goal)
       setLoading(false)
       return
     }
@@ -832,6 +864,7 @@ export default function MissionDetailPage() {
   }
 
   async function fetchLinkedNotes() {
+    if (typeof id === 'string' && id.startsWith('local_')) return
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     const { data } = await supabase
@@ -1076,13 +1109,11 @@ export default function MissionDetailPage() {
       const next = { ...prev, tasks: nextTasks }
       const isLocal = typeof id === 'string' && id.startsWith('local_')
       if (isLocal) {
-        const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-        const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g)
-        localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+        saveLocalGoal(id as string, next)
       }
       return next
     })
-  }, [id])
+  }, [id, saveLocalGoal])
 
   const onUpdateTask = async (taskId: string, updates: any) => {
     // Force "no_date_changes" rule check
@@ -1105,9 +1136,7 @@ export default function MissionDetailPage() {
           t.id === taskId ? { ...t, ...updates } : t
         )
         const next = { ...prev, tasks: nextTasks }
-        const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-        const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g)
-        localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+        saveLocalGoal(id as string, next)
         return next
       })
       return
@@ -1131,39 +1160,37 @@ export default function MissionDetailPage() {
       })
     } else {
       console.error("Error updating task backend:", error)
-      // showToast(isRTL ? 'فشل تحديث البيانات في قاعدة البيانات' : 'DATABASE_UPDATE_ERROR', 'warning')
       showToast(isRTL ? 'فشل تحديث البيانات في قاعدة البيانات' : 'Failed to update database', 'warning')
       playError()
     }
   }
 
-  const toggleTask = async (taskId: string, currentStatus: boolean) => {
+  const toggleTask = async (taskId: string, currentStatus?: boolean) => {
     const taskObj = mission?.tasks?.find((t: any) => t.id === taskId)
+    const effectiveCurrentStatus = currentStatus !== undefined ? currentStatus : (taskObj?.is_completed || false)
+
     if (mission?.metadata?.type === 'squad' && taskObj && !canToggleTask(taskObj)) {
       showToast(isRTL ? "⚠️ ليس لديك صلاحية لهذا الإجراء" : "⚠️ You don't have permission for this action", "warning")
       playError()
       return
     }
 
-    const nextStatus = !currentStatus
+    const nextStatus = !effectiveCurrentStatus
     const isLocal = typeof id === 'string' && id.startsWith('local_')
 
     // Optimistically update the state
-    setMission((prev: any) => ({
-      ...prev,
-      tasks: prev.tasks.map((t: any) =>
+    setMission((prev: any) => {
+      const nextTasks = (prev?.tasks || []).map((t: any) =>
         t.id === taskId ? { ...t, is_completed: nextStatus } : t
       )
-    }))
+      const next = { ...prev, tasks: nextTasks }
+      if (isLocal) {
+        saveLocalGoal(id as string, next)
+      }
+      return next
+    })
 
     if (isLocal) {
-      const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-      const next = {
-        ...mission,
-        tasks: mission.tasks.map((t: any) => t.id === taskId ? { ...t, is_completed: nextStatus } : t)
-      }
-      const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g)
-      localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
       if (nextStatus) playSuccess()
       else playBlip()
       return
@@ -1319,9 +1346,7 @@ export default function MissionDetailPage() {
           ...prev,
           tasks: prev.tasks.map((t: any) => t.id === taskId ? { ...t, ...updates } : t)
         }
-        const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-        const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g)
-        localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+        saveLocalGoal(id as string, next)
         return next
       })
 
@@ -1463,14 +1488,13 @@ export default function MissionDetailPage() {
       const fakeId = 'task_' + Math.random().toString(36).substring(2, 9)
       const data = { ...payload, id: fakeId }
       setMission((prev: any) => {
-        const next = { ...prev, tasks: [...prev.tasks, data] }
-        const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-        const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g)
-        localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+        const next = { ...prev, tasks: [...(prev?.tasks || []), data] }
+        saveLocalGoal(id as string, next)
         return next
       })
       setNewTaskTitle('')
-      // showToast(isRTL ? 'تم إضافة الهدف محلياً' : 'TASK_SAVED', 'success')
+      showToast(isRTL ? 'تم إضافة المهمة' : 'Task added', 'success')
+      playSuccess()
       return
     }
 
@@ -1479,7 +1503,6 @@ export default function MissionDetailPage() {
     if (data) {
       setMission((prev: any) => ({ ...prev, tasks: [...prev.tasks, data] }))
       setNewTaskTitle('')
-      // showToast(isRTL ? 'تم إضافة الهدف' : 'TASK_SAVED', 'success')
     }
   }
 
@@ -1497,12 +1520,12 @@ export default function MissionDetailPage() {
     const isLocal = typeof id === 'string' && id.startsWith('local_')
     if (isLocal) {
       setMission((prev: any) => {
-        const next = { ...prev, tasks: prev.tasks.filter((t: any) => t.id !== taskId) }
-        const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-        const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g)
-        localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+        const next = { ...prev, tasks: (prev?.tasks || []).filter((t: any) => t.id !== taskId) }
+        saveLocalGoal(id as string, next)
         return next
       })
+      showToast(isRTL ? 'تم حذف المهمة' : 'Task deleted', 'success')
+      playSuccess()
       return
     }
 
@@ -1524,12 +1547,9 @@ export default function MissionDetailPage() {
     if (isLocal) {
       setMission((prev: any) => {
         const next = { ...prev, ...updates }
-        const guestGoals = JSON.parse(localStorage.getItem('guest_goals') || '[]')
-        const updatedGoals = guestGoals.map((g: any) => g.id === id ? next : g)
-        localStorage.setItem('guest_goals', JSON.stringify(updatedGoals))
+        saveLocalGoal(id as string, next)
         return next
       })
-      // showToast(isRTL ? 'تم التحديث' : 'GOAL UPDATED', 'success')
       return
     }
 

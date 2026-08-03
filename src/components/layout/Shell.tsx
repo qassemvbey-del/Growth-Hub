@@ -1942,11 +1942,14 @@ export default function Shell({ children }: ShellProps) {
 
       <PomodoroHUD />
 
-      <CoachPanel 
-        isOpen={coachPanelOpen}
-        onClose={() => setCoachPanelOpen(false)}
-        missions={syncedMissions}
-      />
+      {/* COACH_PANEL_HIDDEN */}
+      {false && (
+        <CoachPanel 
+          isOpen={coachPanelOpen}
+          onClose={() => setCoachPanelOpen(false)}
+          missions={syncedMissions}
+        />
+      )}
 
       {/* Commented out per rule "Never delete code, only comment it out"
       <div className={cn(

@@ -134,12 +134,14 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
 
   return (
     <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 z-[2000] flex items-center justify-center p-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      >
+      {/* CHAMPIONS_HIDDEN */}
+      {false && (
+        <motion.div
+          className="fixed inset-0 z-[2000] flex items-center justify-center p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
         <motion.div
           className="absolute inset-0 bg-black/80 backdrop-blur-xl"
           onClick={onClose}
@@ -293,6 +295,7 @@ export default function AvatarSelector({ onClose, onSaved }: Props) {
 
         </motion.div>
       </motion.div>
+      )}
     </AnimatePresence>
   )
 }

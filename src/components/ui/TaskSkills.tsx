@@ -252,14 +252,14 @@ export default function TaskSkills({
       id: 'explain',
       label: isRTL ? 'شرح الموضوع' : 'Explain Topic',
       icon: BookOpen,
-      requiredRank: 'SILVER',
+      requiredRank: 'GOLD',
       action: handleExplainSkill
     },
     {
       id: 'ask',
       label: isRTL ? 'اسأل المساعد' : 'Ask AI',
       icon: MessageSquare,
-      requiredRank: 'SILVER',
+      requiredRank: 'PLATINUM',
       action: () => {
         setSkillError('')
         setActivePanel(activePanel === 'ask' ? null : 'ask')
@@ -310,55 +310,11 @@ export default function TaskSkills({
             const isCurrentLoading = loadingSkill === skill.id
             const isAnyLoading = loadingSkill !== null
 
-            return (
-              <button
-                key={skill.id}
-                type="button"
-                onClick={skill.action}
-                disabled={isAnyLoading || !canEdit}
-                className={cn(
-                  "flex flex-col items-center justify-center py-3 px-2 rounded-xl transition-all duration-300 border relative overflow-hidden bg-zinc-50/50 dark:bg-white/[0.01] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border-zinc-200 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 hover:bg-zinc-100/50 dark:hover:bg-white/[0.02]",
-                  isCurrentLoading && "border-cyan-500/30 bg-cyan-950/5 animate-pulse cursor-wait",
-                  activePanel === skill.id && "border-emerald-500/30 bg-emerald-950/5 text-emerald-600 dark:text-emerald-400"
-                )}
-              >
-                {isCurrentLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-cyan-500 mb-1" />
-                ) : (
-                  <Icon className="w-4 h-4 mb-1" />
-                )}
-                <span className="text-[10px] font-bold tracking-tight text-center block whitespace-nowrap">
-                  {skill.label}
-                </span>
-
-                {isCurrentLoading && (
-                  <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-cyan-950">
-                    <div className="bg-cyan-500 h-full animate-[loading-bar_1.5s_infinite]" style={{ width: '40%' }} />
-                  </div>
-                )}
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Row 2: Champion Skills (RPG Lock Progression) */}
-      <div className="space-y-2.5 border-t border-zinc-200/50 dark:border-white/5 pt-4">
-        <h4 className="text-[10px] font-mono tracking-widest text-zinc-500">
-          {isRTL ? 'مهارات البطل' : 'Champion Skills'}
-        </h4>
-        <div className="grid grid-cols-3 gap-3">
-          {championSkills.map(skill => {
-            const Icon = skill.icon
-            const isCurrentLoading = loadingSkill === skill.id
-            const isAnyLoading = loadingSkill !== null
-
             const requiredRankIdx = getRankIndex(skill.requiredRank)
             const isLocked = activeUserRankIndex < requiredRankIdx
 
             return (
               <div key={skill.id} className="relative group w-full">
-                {/* Custom hover tooltip trigger container */}
                 {isLocked && (
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-zinc-950/90 text-white text-[9px] font-space rounded border border-white/10 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-xl">
                     {isRTL 
@@ -371,8 +327,7 @@ export default function TaskSkills({
                   type="button"
                   onClick={() => {
                     if (isLocked) return
-                    setSkillError('')
-                    setActivePanel(activePanel === skill.id ? null : skill.id)
+                    skill.action()
                   }}
                   disabled={isLocked || isAnyLoading || !canEdit}
                   className={cn(
@@ -414,6 +369,82 @@ export default function TaskSkills({
           })}
         </div>
       </div>
+
+      {/* Row 2: Champion Skills (RPG Lock Progression) */}
+      {/* CHAMPIONS_HIDDEN */}
+      {false && (
+        <div className="space-y-2.5 border-t border-zinc-200/50 dark:border-white/5 pt-4">
+          <h4 className="text-[10px] font-mono tracking-widest text-zinc-500">
+            {isRTL ? 'مهارات البطل' : 'Champion Skills'}
+          </h4>
+          <div className="grid grid-cols-3 gap-3">
+            {championSkills.map(skill => {
+              const Icon = skill.icon
+              const isCurrentLoading = loadingSkill === skill.id
+              const isAnyLoading = loadingSkill !== null
+
+              const requiredRankIdx = getRankIndex(skill.requiredRank)
+              const isLocked = activeUserRankIndex < requiredRankIdx
+
+              return (
+                <div key={skill.id} className="relative group w-full">
+                  {/* Custom hover tooltip trigger container */}
+                  {isLocked && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-zinc-950/90 text-white text-[9px] font-space rounded border border-white/10 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 z-50 whitespace-nowrap shadow-xl">
+                      {isRTL 
+                        ? `قم بالوصول لرتبة ${skill.requiredRank.charAt(0).toUpperCase() + skill.requiredRank.slice(1).toLowerCase()} لفتح هذه المهارة.`
+                        : `Unlock this skill by reaching ${skill.requiredRank.charAt(0).toUpperCase() + skill.requiredRank.slice(1).toLowerCase()} Rank.`}
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (isLocked) return
+                      setSkillError('')
+                      setActivePanel(activePanel === skill.id ? null : skill.id)
+                    }}
+                    disabled={isLocked || isAnyLoading || !canEdit}
+                    className={cn(
+                      "w-full flex flex-col items-center justify-center py-3 px-2 rounded-xl transition-all duration-300 border relative overflow-hidden",
+                      isLocked 
+                        ? "opacity-35 grayscale border-zinc-200 dark:border-white/5 bg-zinc-100/30 dark:bg-white/[0.005] text-zinc-400 dark:text-zinc-600 cursor-not-allowed" 
+                        : isCurrentLoading
+                          ? "border-cyan-500/30 bg-cyan-950/5 animate-pulse cursor-wait"
+                          : activePanel === skill.id
+                            ? "border-emerald-500/30 bg-emerald-950/5 text-emerald-600 dark:text-emerald-400"
+                            : "border-zinc-200 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 hover:bg-zinc-100/50 dark:hover:bg-white/[0.02] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                    )}
+                  >
+                    {isCurrentLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-cyan-500 mb-1" />
+                    ) : isLocked ? (
+                      <Lock className="w-4 h-4 mb-1 text-zinc-400 dark:text-zinc-600" />
+                    ) : (
+                      <Icon className="w-4 h-4 mb-1" />
+                    )}
+                    <span className="text-[10px] font-bold tracking-tight text-center block whitespace-nowrap">
+                      {skill.label}
+                    </span>
+
+                    {isLocked && (
+                      <span className="text-[8px] mt-0.5 text-zinc-400 dark:text-zinc-500 font-mono block">
+                        {skill.requiredRank.charAt(0).toUpperCase() + skill.requiredRank.slice(1).toLowerCase()}
+                      </span>
+                    )}
+
+                    {isCurrentLoading && (
+                      <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-cyan-950">
+                        <div className="bg-cyan-500 h-full animate-[loading-bar_1.5s_infinite]" style={{ width: '40%' }} />
+                      </div>
+                    )}
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Expandable Custom Query Panel for specialized text output */}
       {activePanel && activePanel !== 'checklist' && activePanel !== 'explain' && !loadingSkill && (
