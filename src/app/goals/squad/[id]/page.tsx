@@ -3003,9 +3003,9 @@ const { progress, isInRedZone } = useMemo(() => {
                                                   setIsReviewing(req.id)
                                                   playBlip()
                                                   const { data, error } = await supabase.rpc('review_squad_join_request', { p_request_id: req.id, p_action: 'approve' })
-                                                  if (error) {
+                                                  if (error || data?.success === false) {
                                                     // showToast(isRTL ? 'فشل قبول الطلب' : 'FAILED TO APPROVE', 'warning')
-                                                    showToast(isRTL ? 'فشل قبول الطلب' : 'Failed to approve', 'warning')
+                                                    showToast(data?.error || error?.message || (isRTL ? 'فشل قبول الطلب' : 'Failed to approve'), 'warning')
                                                     playError()
                                                   } else {
                                                     if (req.role && ['admin', 'member', 'viewer', 'guest'].includes(req.role)) {
@@ -3046,9 +3046,9 @@ const { progress, isInRedZone } = useMemo(() => {
                                                      p_action: 'reject'
                                                    })
                                                    console.log('REJECT result:', { data, error })
-                                                  if (error) {
+                                                  if (error || data?.success === false) {
                                                     // showToast(isRTL ? 'فشل رفض الطلب' : 'FAILED TO REJECT', 'warning')
-                                                    showToast(isRTL ? 'فشل رفض الطلب' : 'Failed to reject', 'warning')
+                                                    showToast(data?.error || error?.message || (isRTL ? 'فشل رفض الطلب' : 'Failed to reject'), 'warning')
                                                     playError()
                                                   } else {
                                                     // showToast(isRTL ? 'تم رفض طلب الانضمام' : 'MEMBER REJECTED // SQUAD SECURE', 'success')

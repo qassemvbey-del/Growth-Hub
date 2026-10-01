@@ -52,8 +52,8 @@ export default function ReportModal({ report, onClose, themeColor, isRTL }: Prop
         p_action: action
       })
 
-      if (error) {
-        alert(error.message)
+      if (error || data?.success === false) {
+        alert(data?.error || error?.message)
         playError()
         setLoading(false)
         return

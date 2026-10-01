@@ -1051,7 +1051,12 @@ export default function Shell({ children }: ShellProps) {
         p_action: 'approve'
       })
 
-      if (error) throw error
+      if (error || data?.success === false) {
+        showToast(data?.error || error?.message || (isRTL ? "حدث خطأ أثناء معالجة الطلب" : "Error processing request"), "warning")
+        setShowNotificationPopup(false)
+        setActiveToast(null)
+        return
+      }
 
       showToast(isRTL ? "تم قبول الطلب" : "Join request approved", "success")
       
@@ -1124,7 +1129,12 @@ export default function Shell({ children }: ShellProps) {
         p_action: 'reject'
       })
 
-      if (error) throw error
+      if (error || data?.success === false) {
+        showToast(data?.error || error?.message || (isRTL ? "حدث خطأ أثناء معالجة الطلب" : "Error processing request"), "warning")
+        setShowNotificationPopup(false)
+        setActiveToast(null)
+        return
+      }
 
       showToast(isRTL ? "تم رفض الطلب" : "Join request declined", "success")
       
