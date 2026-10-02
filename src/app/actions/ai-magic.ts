@@ -2,6 +2,8 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@/lib/supabase-server'
+import { requireUserAndQuota } from '@/lib/quota-guard'
+import { FEATURES } from '@/lib/features'
 
 const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!)
 
@@ -30,9 +32,12 @@ interface CoachUserData {
 }
 
 export async function chatWithCoach(prompt: string, userData: CoachUserData, language: string) {
+  if (!FEATURES.coach) {
+    return 'disabled'
+  }
+
   if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
     console.error('COACH_UPLINK_ERROR: NEXT_PUBLIC_GEMINI_API_KEY is missing from environment')
-    // return "CONNECTION ERROR // NO_API_KEY_FOUND"
     return "I couldn't connect to the server because the API key is missing. Please check your setup."
   }
   const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' })
@@ -72,67 +77,67 @@ export async function chatWithCoach(prompt: string, userData: CoachUserData, lan
     `
   }
 
-    const languageInstruction = language === 'ar' 
-      ? 'IMPORTANT: Always respond in Arabic only.'
-      : 'IMPORTANT: Always respond in English only.'
+  const languageInstruction = language === 'ar' 
+    ? 'IMPORTANT: Always respond in Arabic only.'
+    : 'IMPORTANT: Always respond in English only.'
 
-    const systemPrompt = `
-      ${personalityPrompt}
-      You are inside the Growth Hub interface.
-      Your job is to act as a tactical coach who knows the user's data perfectly.
+  const systemPrompt = `
+    ${personalityPrompt}
+    You are inside the Growth Hub interface.
+    Your job is to act as a tactical coach who knows the user's data perfectly.
 
-      MEMBER_DATA:
-      - Name: ${userData.username}
-      - Rank: ${userData.rank}
-      - Total XP: ${userData.xp}
-      - Focus Capacity: ${userData.capacity_used}/9
+    MEMBER_DATA:
+    - Name: ${userData.username}
+    - Rank: ${userData.rank}
+    - Total XP: ${userData.xp}
+    - Focus Capacity: ${userData.capacity_used}/9
 
-      ACTIVE_MISSIONS:
-      ${missionsList || 'NO ACTIVE MISSIONS DETECTED.'}
+    ACTIVE_MISSIONS:
+    ${missionsList || 'NO ACTIVE MISSIONS DETECTED.'}
 
-      CRITICAL_ALERTS (under 3 days):
-      ${criticalList || 'NONE'}
+    CRITICAL_ALERTS (under 3 days):
+    ${criticalList || 'NONE'}
 
-      RESPONSE RULES:
-      1. Context: Use real mission/task names from the data provided.
-      2. Actionable: Always give specific advice based on the data. Mention specific missions and their next_task names.
-      3. Max 6 lines per response.
-      4. End every response with ONE specific action to take now.
-      5. Tone: Match the personality defined above based on the user's rank.
+    RESPONSE RULES:
+    1. Context: Use real mission/task names from the data provided.
+    2. Actionable: Always give specific advice based on the data. Mention specific missions and their next_task names.
+    3. Max 6 lines per response.
+    4. End every response with ONE specific action to take now.
+    5. Tone: Match the personality defined above based on the user's rank.
 
-      FORMATS (Use these exact formats based on the user request):
+    FORMATS (Use these exact formats based on the user request):
 
-      If user input implies SCAN_STATUS (تحليل الوضع):
-      "وضعك دلوقتي:
-      ✓ [الـ Goals اللي ماشية كويس]
-      ⚠ [اللي محتاج تركز فيها]
-      ❌ [اللي في خطر]
-      الأولوية دلوقتي: [اسم المهمة الأهم]"
+    If user input implies SCAN_STATUS (تحليل الوضع):
+    "وضعك دلوقتي:
+    ✓ [الـ Goals اللي ماشية كويس]
+    ⚠ [اللي محتاج تركز فيها]
+    ❌ [اللي في خطر]
+    الأولوية دلوقتي: [اسم المهمة الأهم]"
 
-      If user input implies DAILY_PLAN (خطة النهارده):
-      "خطة النهارده:
-      ١. [أول حاجة تعملها]
-      ٢. [تاني حاجة]
-      ٣. [تالت حاجة]
-      خلاص، متعقدش الدنيا أكتر من كده."
+    If user input implies DAILY_PLAN (خطة النهارده):
+    "خطة النهارده:
+    ١. [أول حاجة تعملها]
+    ٢. [تاني حاجة]
+    ٣. [تالت حاجة]
+    خلاص، متعقدش الدنيا أكتر من كده."
 
-      If user input implies CRITICAL_ALERT (تنبيهات خطيرة):
-      "⚠ كلام جد:
-      [اسم المهمة] - فاضل [X] أيام وإنت عند [X]%
-      لازم تخلص [عدد tasks] في اليوم عشان تلحق."
+    If user input implies CRITICAL_ALERT (تنبيهات خطيرة):
+    "⚠ كلام جد:
+    [اسم المهمة] - فاضل [X] أيام وإنت عند [X]%
+    لازم تخلص [عدد tasks] في اليوم عشان تلحق."
 
-      If user input implies BRIEF_MISSION (بريف عن المهام):
-      "[اسم أهم Goal]:
-      - وصلت لـ: [X]%
-      - فاضل: [X] tasks
-      - عندك: [X] أيام
-      - ابدأ بـ: [اسم next_task]
-      - المطلوب: [X tasks في اليوم]"
+    If user input implies BRIEF_MISSION (بريف عن المهام):
+    "[اسم أهم Goal]:
+    - وصلت لـ: [X]%
+    - فاضل: [X] tasks
+    - عندك: [X] أيام
+    - ابدأ بـ: [اسم next_task]
+    - المطلوب: [X tasks في اليوم]"
 
-      ${languageInstruction}
+    ${languageInstruction}
 
-      USER_INPUT: "${prompt}"
-    `
+    USER_INPUT: "${prompt}"
+  `
 
   try {
     const result = await model.generateContent(systemPrompt)
@@ -140,12 +145,19 @@ export async function chatWithCoach(prompt: string, userData: CoachUserData, lan
     return response.text()
   } catch (error: any) {
     console.error('COACH_UPLINK_ERROR:', error)
-    // return `CONNECTION ERROR // ${error.message?.toUpperCase() || 'RETRY_SEQUENCE'}`
     return `I'm having trouble connecting to the service. Please try again in a moment. (Error: ${error.message || 'unknown'})`
   }
 }
 
 export async function generateTasks(goal: string, goalId: string) {
+  const quota = await requireUserAndQuota()
+  if (!quota.ok) {
+    return {
+      success: false,
+      error: quota.status === 429 ? quota.message_ar : quota.error
+    }
+  }
+
   if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
     console.error('AI_MAGIC_ERROR: NEXT_PUBLIC_GEMINI_API_KEY is missing from environment')
     return { success: false, error: 'PROTOCOL_FAILURE: NO_API_KEY' }
@@ -180,7 +192,6 @@ export async function generateTasks(goal: string, goalId: string) {
       const { data: insertedTask, error } = await supabase
         .from('tasks')
         .insert({
-          // cup_id: cupId,
           goal_id: goalId,
           parent_id: parentId,
           title: task.title,
@@ -211,6 +222,11 @@ export async function generateTasks(goal: string, goalId: string) {
 }
 
 export async function cleanPlaylistTitles(titles: string[]) {
+  const quota = await requireUserAndQuota()
+  if (!quota.ok) {
+    return titles
+  }
+
   if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
     console.error('AI_MAGIC_ERROR: NEXT_PUBLIC_GEMINI_API_KEY is missing from environment')
     return titles
@@ -293,12 +309,20 @@ export async function cleanPlaylistTitles(titles: string[]) {
 
 // ── SMART_IMPORT: Extract tasks from any pasted text ──
 export async function extractTasksFromText(text: string): Promise<{ success: boolean; tasks?: string[]; error?: string }> {
-  if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
-    return { success: false, error: 'PROTOCOL_FAILURE: NO_API_KEY' }
-  }
-
   if (!text.trim()) {
     return { success: false, error: 'EMPTY_INPUT' }
+  }
+
+  const quota = await requireUserAndQuota()
+  if (!quota.ok) {
+    return {
+      success: false,
+      error: quota.status === 429 ? quota.message_ar : quota.error
+    }
+  }
+
+  if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
+    return { success: false, error: 'PROTOCOL_FAILURE: NO_API_KEY' }
   }
 
   const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' })

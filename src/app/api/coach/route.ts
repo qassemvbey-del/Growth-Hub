@@ -1,14 +1,19 @@
 import { NextResponse } from 'next/server'
+import { FEATURES } from '@/lib/features'
 import { createClient as createServerClient } from '@/lib/supabase-server'
 import { createClient } from '@supabase/supabase-js'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-export const maxDuration = 60;
-export const dynamic = 'force-dynamic';
+export const maxDuration = 60
+export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
+  // Feature disabled check before any auth, quota, or Gemini work
+  if (!FEATURES.coach) {
+    return NextResponse.json({ error: 'Feature disabled' }, { status: 403 })
+  }
+
   try {
-    // 1. Auth & Inputs
     const { action, userData, language } = await req.json()
 
     const supabase = await createServerClient()
@@ -20,40 +25,11 @@ export async function POST(req: Request) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error("COACH_ROUTE_CRASH: Supabase env variables are missing.")
-      return NextResponse.json({ error: "Supabase environment configuration is missing" }, { status: 500 })
+      console.error('COACH_ROUTE_CRASH: Supabase env variables are missing.')
+      return NextResponse.json({ error: 'Supabase environment configuration is missing' }, { status: 500 })
     }
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
-    // 2. Step 1 (Validation): Read current quota
-    const { data: profile, error: profileErr } = await supabaseAdmin
-      .from('profiles')
-      .select('user_tier, ai_request_count, last_ai_reset')
-      .eq('id', user.id)
-      .single()
-
-    if (profileErr || !profile) {
-      console.error('Failed to fetch user profile for quota check:', profileErr)
-      return NextResponse.json({ error: 'Quota validation failed' }, { status: 500 })
-    }
-
-    let limit = 3
-    if (profile.user_tier === 'pro') limit = 50
-    else if (profile.user_tier === 'elite') limit = 150
-
-    let currentCount = profile.ai_request_count || 0
-    const lastReset = profile.last_ai_reset ? new Date(profile.last_ai_reset) : new Date()
-    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000)
-
-    if (lastReset < twelveHoursAgo) {
-      currentCount = 0
-    }
-
-    if (currentCount >= limit) {
-      return NextResponse.json({ error: 'quota_exhausted' }, { status: 429 })
-    }
-
-    // 3. Call Gemini
     const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
     if (!apiKey) {
       return NextResponse.json({ error: 'API Key not configured' }, { status: 500 })
@@ -87,7 +63,7 @@ Analyze this telemetry. Execute the requested action according to your savage, b
 `
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const fallbackModels = ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-2.5-flash"]
+    const fallbackModels = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-flash']
     let result: any = null
     let lastError: any = null
 
@@ -99,11 +75,11 @@ Analyze this telemetry. Execute the requested action according to your savage, b
         result = await model.generateContent({
           contents: [{ role: 'user', parts: [{ text: systemPrompt + '\n\n' + promptText }] }]
         })
-        break; // Success, exit loop
+        break
       } catch (error: any) {
         lastError = error
-        const errMsg = error.message?.toLowerCase() || ""
-        if (errMsg.includes("503") || errMsg.includes("429") || errMsg.includes("404") || errMsg.includes("not found") || errMsg.includes("overloaded") || errMsg.includes("rate limit")) {
+        const errMsg = error.message?.toLowerCase() || ''
+        if (errMsg.includes('503') || errMsg.includes('429') || errMsg.includes('404') || errMsg.includes('not found') || errMsg.includes('overloaded') || errMsg.includes('rate limit')) {
           console.warn(`[AI Fallback] Model ${modelName} failed. Trying next candidate...`, error)
           continue
         } else {
@@ -120,24 +96,15 @@ Analyze this telemetry. Execute the requested action according to your savage, b
     try {
       text = result.response.text()
     } catch (textErr) {
-      console.warn("Gemini response.text() failed, trying fallback:", textErr)
+      console.warn('Gemini response.text() failed, trying fallback:', textErr)
       const candidate = result.response?.candidates?.[0]
       const part = candidate?.content?.parts?.[0]
       text = part?.text || ''
     }
 
-    // 4. Step 4 (Deduction on Success): Increment user's quota count
-    const { error: incrementError } = await supabaseAdmin.rpc('check_and_increment_quota', {
-      p_user_id: user.id
-    })
-
-    if (incrementError) {
-      console.error('Failed to deduct quota on success:', incrementError)
-    }
-
     return NextResponse.json({ response: text })
   } catch (error: any) {
     console.error('COACH_ROUTE_CRASH:', error)
-    return NextResponse.json({ error: 'Server error', message: error?.message || String(error) }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

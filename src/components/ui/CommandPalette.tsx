@@ -13,6 +13,7 @@ import { NeonIcon } from './NeonIcon'
 import { createClient } from '@/lib/supabase'
 import { DifficultyVisualizer } from './DifficultyVisualizer'
 import { getFeatureUsage } from '@/lib/quota'
+import { FEATURES } from '@/lib/features'
 
 interface CommandPaletteProps {
   isOpen: boolean
@@ -866,23 +867,25 @@ export default function CommandPalette({ isOpen, onClose, onOpenCoach, missions 
                         </div>
                       </Command.Item>
 
-                      <Command.Item
-                        value="go to coach"
-                        onSelect={() => runCommand(() => { if (onOpenCoach) onOpenCoach(); onClose(); })}
-                        className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-[var(--text-secondary)] dark:text-zinc-300 hover:text-[var(--text-primary)] dark:hover:text-white cursor-pointer transition-all gap-3 mt-1"
-                        style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="p-1.5 bg-white/[0.03] border border-white/10 rounded">
-                            <NeonIcon icon={Bot} className="w-4 h-4" style={{ color: currentTheme.color }} />
+                      {FEATURES.coach && (
+                        <Command.Item
+                          value="go to coach"
+                          onSelect={() => runCommand(() => { if (onOpenCoach) onOpenCoach(); onClose(); })}
+                          className="flex items-center justify-between px-3 py-3 rounded-lg text-sm text-[var(--text-secondary)] dark:text-zinc-300 hover:text-[var(--text-primary)] dark:hover:text-white cursor-pointer transition-all gap-3 mt-1"
+                          style={{ '--selected-border-color': currentTheme.color } as React.CSSProperties}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="p-1.5 bg-white/[0.03] border border-white/10 rounded">
+                              <NeonIcon icon={Bot} className="w-4 h-4" style={{ color: currentTheme.color }} />
+                            </div>
+                            <span className="font-semibold tracking-wide">{isRTL ? "الذهاب إلى المدرب الشخصي" : "Go to Coach"}</span>
                           </div>
-                          <span className="font-semibold tracking-wide">{isRTL ? "الذهاب إلى المدرب الشخصي" : "Go to Coach"}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono">
-                          <span>{isRTL ? "ملاحة" : "NAV"}</span>
-                          <CornerDownLeft className="w-3 h-3" />
-                        </div>
-                      </Command.Item>
+                          <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono">
+                            <span>{isRTL ? "ملاحة" : "NAV"}</span>
+                            <CornerDownLeft className="w-3 h-3" />
+                          </div>
+                        </Command.Item>
+                      )}
 
                       <Command.Item
                         value="go to notes"

@@ -1,19 +1,12 @@
 import { NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase-server'
-import { createClient } from '@supabase/supabase-js'
+import { createAdminClient } from '@/lib/supabase-admin'
+import { requireUserAndQuota } from '@/lib/quota-guard'
 import { YoutubeTranscript } from 'youtube-transcript'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-export const maxDuration = 60;
-export const dynamic = 'force-dynamic';
-
-interface VideoAnalysisResponse {
-  isIntroOnly: boolean;
-  summary: string;
-  keyTakeaways: string[];
-  checklist: string[];
-  additionalNotes: string;
-}
+export const maxDuration = 60
+export const dynamic = 'force-dynamic'
 
 function getYouTubeId(urlOrId: string) {
   if (!urlOrId) return ''
@@ -38,7 +31,6 @@ function getYouTubeId(urlOrId: string) {
 
 export async function POST(req: Request) {
   try {
-    // 1. Auth & Setup
     const { taskId, youtubeUrl, taskTitle } = await req.json()
     if (!taskId || !youtubeUrl) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 })
@@ -55,22 +47,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error("CHECKLIST_ROUTE_CRASH: Supabase env variables are missing.")
-      return NextResponse.json({ error: "Supabase environment configuration is missing" }, { status: 500 })
-    }
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
+    const supabaseAdmin = createAdminClient()
 
-    // 2. Query task description / explanation first to optimize (Requirement 2)
+    // Query task description / explanation first to optimize
     const { data: taskData } = await supabaseAdmin
       .from('tasks')
       .select('description, metadata')
       .eq('id', taskId)
       .single()
 
-    const aiExplanation = taskData?.description || taskData?.metadata?.ai_explanation || taskData?.metadata?.description || '';
+    const aiExplanation = taskData?.description || taskData?.metadata?.ai_explanation || taskData?.metadata?.description || ''
 
     let runStage: 1 | 2 | 3 = 3
     let transcriptText = ''
@@ -132,10 +118,10 @@ export async function POST(req: Request) {
     if (runStage === 3) {
       const fallbackAnalysis = {
         isIntroOnly: true,
-        summary: "عذراً، هذا الفيديو لا يحتوي على نص مفرغ (Transcript) أو وصف كافٍ. هذا الفيديو غير متوافق مع ميزة التحليل الذكي.",
+        summary: 'عذراً، هذا الفيديو لا يحتوي على نص مفرغ (Transcript) أو وصف كافٍ. هذا الفيديو غير متوافق مع ميزة التحليل الذكي.',
         keyTakeaways: [],
         checklist: [],
-        additionalNotes: ""
+        additionalNotes: ''
       }
 
       const currentMetadata = (taskData?.metadata as any) || {}
@@ -147,38 +133,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, analysis: fallbackAnalysis })
     }
 
-    // Step 1 (Validation): Read current quota
-    const { data: profile, error: profileErr } = await supabaseAdmin
-      .from('profiles')
-      .select('user_tier, ai_request_count, last_ai_reset')
-      .eq('id', user.id)
-      .single()
-
-    if (profileErr || !profile) {
-      console.error('Failed to fetch user profile for quota check:', profileErr)
-      return NextResponse.json({ error: 'Quota validation failed' }, { status: 500 })
+    // Atomic quota check before Gemini call
+    const quota = await requireUserAndQuota()
+    if (!quota.ok) {
+      return NextResponse.json(
+        {
+          error: quota.status === 429 ? quota.message_ar : quota.error,
+          message_en: quota.message_en,
+          message_ar: quota.message_ar
+        },
+        { status: quota.status }
+      )
     }
 
-    let limit = 3
-    if (profile.user_tier === 'pro') limit = 50
-    else if (profile.user_tier === 'elite') limit = 150
-
-    let currentCount = profile.ai_request_count || 0
-    const lastReset = profile.last_ai_reset ? new Date(profile.last_ai_reset) : new Date()
-    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000)
-
-    if (lastReset < twelveHoursAgo) {
-      currentCount = 0
-    }
-
-    if (currentCount >= limit) {
-      return NextResponse.json({ error: 'quota_exhausted' }, { status: 429 })
-    }
-
-    // call Gemini (with error catch block for Step 3)
+    // Call Gemini
     const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
     if (!apiKey) {
-      return NextResponse.json({ error: "API Key is missing" }, { status: 500 })
+      return NextResponse.json({ error: 'API Key is missing' }, { status: 500 })
     }
 
     let prompt = ''
@@ -208,13 +179,14 @@ Respond strictly in Arabic, and output ONLY a valid JSON array of strings, where
 Example output format:
 ["الخطوة الأولى", "الخطوة الثانية"]
 
-TITLE: ${videoTitle}
-DESCRIPTION: ${videoDescription}
+VIDEO DATA:
+Title: ${videoTitle}
+Description: ${videoDescription}
 `
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const fallbackModels = ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-2.5-flash"]
+    const fallbackModels = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-flash']
     let result: any = null
     let lastError: any = null
 
@@ -223,17 +195,25 @@ DESCRIPTION: ${videoDescription}
         const model = genAI.getGenerativeModel({
           model: modelName,
           generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.3,
+            temperature: 0.2
           }
         })
-        result = await model.generateContent(prompt)
-        break; // Success, exit loop
+        result = await model.generateContent({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }]
+        })
+        break
       } catch (error: any) {
         lastError = error
-        const errMsg = error.message?.toLowerCase() || ""
-        if (errMsg.includes("503") || errMsg.includes("429") || errMsg.includes("404") || errMsg.includes("not found") || errMsg.includes("overloaded") || errMsg.includes("rate limit")) {
-          console.warn(`[AI Fallback] Model ${modelName} failed. Trying next candidate...`, error)
+        const errMsg = error.message?.toLowerCase() || ''
+        if (
+          errMsg.includes('503') ||
+          errMsg.includes('429') ||
+          errMsg.includes('404') ||
+          errMsg.includes('not found') ||
+          errMsg.includes('overloaded') ||
+          errMsg.includes('rate limit')
+        ) {
+          console.warn(`[AI Fallback] Model ${modelName} failed in Checklist. Trying next candidate...`, error)
           continue
         } else {
           throw error
@@ -248,8 +228,7 @@ DESCRIPTION: ${videoDescription}
     let responseText = ''
     try {
       responseText = result.response.text()
-    } catch (textErr) {
-      console.warn("Gemini response.text() failed, trying fallback:", textErr)
+    } catch (_textErr) {
       const candidate = result.response?.candidates?.[0]
       const part = candidate?.content?.parts?.[0]
       responseText = part?.text || ''
@@ -257,37 +236,24 @@ DESCRIPTION: ${videoDescription}
 
     let steps: string[] = []
     try {
-      const parsed = JSON.parse(responseText.trim())
-      if (Array.isArray(parsed)) {
-        steps = parsed.filter(item => typeof item === 'string' && item.trim().length > 0)
-      } else if (parsed && Array.isArray(parsed.checklist)) {
-        steps = parsed.checklist.filter((item: any) => typeof item === 'string' && item.trim().length > 0)
-      } else if (parsed && typeof parsed === 'object') {
-        // Fallback to extraction from object keys/values if it generated an object
-        const values = Object.values(parsed)
-        if (values.length > 0 && Array.isArray(values[0])) {
-          steps = (values[0] as any[]).filter(item => typeof item === 'string' && item.trim().length > 0)
+      const cleanedText = responseText.replace(/```json|```/g, '').trim()
+      steps = JSON.parse(cleanedText)
+      if (!Array.isArray(steps)) {
+        if (typeof steps === 'object' && steps !== null) {
+          const possibleArray = Object.values(steps).find(v => Array.isArray(v))
+          if (possibleArray) steps = possibleArray as string[]
+          else throw new Error('Response is not an array')
         }
       }
     } catch (parseErr: any) {
       console.error('Failed to parse Gemini response JSON array:', responseText, parseErr)
-      return NextResponse.json({ error: `JSON Parse Error: ${parseErr.message || String(parseErr)}` }, { status: 500 })
-    }
-
-    // Step 4 (Deduction on Success): Increment user's quota count
-    const { error: incrementError } = await supabaseAdmin.rpc('check_and_increment_quota', {
-      p_user_id: user.id
-    })
-
-    if (incrementError) {
-      console.error('Failed to deduct quota on success:', incrementError)
+      return NextResponse.json({ error: 'Server error' }, { status: 500 })
     }
 
     // Convert steps into subtasks structure and merge with existing non-AI subtasks
     const currentMetadata = (taskData?.metadata as any) || {}
     const existingSubtasks = currentMetadata.subtasks || []
-    
-    // Filter out previous AI subtasks to avoid duplicates/mess
+
     const userSubtasks = existingSubtasks.filter((s: any) => !s.id?.startsWith('sub_ai_') && !s.id?.startsWith('ai-'))
 
     const newAiSubtasks = steps.map((stepText, idx) => ({
@@ -298,15 +264,14 @@ DESCRIPTION: ${videoDescription}
 
     const mergedSubtasks = [...userSubtasks, ...newAiSubtasks]
 
-    // Save metadata
     await supabaseAdmin
       .from('tasks')
       .update({ metadata: { ...currentMetadata, subtasks: mergedSubtasks } })
       .eq('id', taskId)
 
-    return NextResponse.json({ success: true, steps })
+    return NextResponse.json({ success: true, steps, remaining: quota.remaining })
   } catch (error: any) {
     console.error('AI Route Error (CHECKLIST_ROUTE_CRASH):', error)
-    return NextResponse.json({ error: error?.message || String(error) }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

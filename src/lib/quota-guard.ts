@@ -1,49 +1,96 @@
+import { User } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { AI_DAILY_LIMIT } from '@/lib/features'
 
-export interface QuotaCheckResult {
-  allowed: boolean
-  message_en?: string
-  message_ar?: string
-}
+export type QuotaGuardResult =
+  | {
+      ok: true
+      user: User
+      remaining: number
+    }
+  | {
+      ok: false
+      status: 401
+      error: string
+      message_en: string
+      message_ar: string
+    }
+  | {
+      ok: false
+      status: 429
+      error: string
+      message_ar: string
+      message_en: string
+    }
+  | {
+      ok: false
+      status: 500
+      error: string
+      message_en: string
+      message_ar: string
+    }
 
-export async function checkAndUpdateAiQuota(userId: string): Promise<QuotaCheckResult> {
+export async function requireUserAndQuota(): Promise<QuotaGuardResult> {
   try {
-    const supabase = createAdminClient()
+    const supabase = await createServerClient()
+    const {
+      data: { user },
+      error: authError
+    } = await supabase.auth.getUser()
 
-    // Call stored procedure atomically
-    const { data, error } = await supabase.rpc('check_and_increment_quota', {
-      p_user_id: userId
+    if (authError || !user) {
+      return {
+        ok: false,
+        status: 401,
+        error: 'Unauthorized',
+        message_en: 'Unauthorized',
+        message_ar: 'غير مصرح'
+      }
+    }
+
+    const supabaseAdmin = createAdminClient()
+    const { data, error } = await supabaseAdmin.rpc('check_and_increment_quota', {
+      p_user_id: user.id,
+      p_limit: AI_DAILY_LIMIT
     })
 
     if (error) {
-      console.error('Database error in checkAndUpdateAiQuota RPC:', error)
+      console.error('Database error in check_and_increment_quota RPC:', error)
       return {
-        allowed: false,
-        message_en: 'System validation failed. Please try again later.',
-        message_ar: 'فشل التحقق من كوتة الاستخدام. يرجى المحاولة مرة أخرى لاحقاً.'
+        ok: false,
+        status: 500,
+        error: 'Server error',
+        message_en: 'Server error. Please try again later.',
+        message_ar: 'حدث خطأ في الخادم. يرجى المحاولة لاحقاً.'
       }
     }
 
-    // const result = data as { allowed: boolean; lang: string } | null
-    const result = typeof data === 'string'
-      ? JSON.parse(data) as { allowed: boolean; lang: string }
-      : data as { allowed: boolean; lang: string } | null
+    const result = typeof data === 'string' ? JSON.parse(data) : data
 
     if (!result || !result.allowed) {
       return {
-        allowed: false,
-        message_en: 'Your 12-hour AI request limit has been reached. Please wait for the automatic cooldown or unlock instantly with an AI Refill Pack for only 15 EGP.',
-        message_ar: 'لقد نفدت كوتة استعلامات الذكاء الاصطناعي الخاصة بك لهذه الـ 12 ساعة. يرجى الانتظار حتى التجديد التلقائي أو الشحن الفوري لباقة التصفير بـ 15 ج.م فقط.'
+        ok: false,
+        status: 429,
+        error: 'Daily AI limit reached',
+        message_ar: 'وصلت للحد اليومي (20 طلب). بيتجدد بكرة.',
+        message_en: 'You have reached the daily limit (20 requests). It resets tomorrow.'
       }
     }
 
-    return { allowed: true }
-  } catch (err) {
-    console.error('System error in checkAndUpdateAiQuota:', err)
     return {
-      allowed: false,
-      message_en: 'An unexpected error occurred during quota validation.',
-      message_ar: 'حدث خطأ غير متوقع أثناء التحقق من كوتة الاستخدام.'
+      ok: true,
+      user,
+      remaining: typeof result.remaining === 'number' ? result.remaining : 0
+    }
+  } catch (err) {
+    console.error('System error in requireUserAndQuota:', err)
+    return {
+      ok: false,
+      status: 500,
+      error: 'Server error',
+      message_en: 'Server error. Please try again later.',
+      message_ar: 'حدث خطأ في الخادم. يرجى المحاولة لاحقاً.'
     }
   }
 }

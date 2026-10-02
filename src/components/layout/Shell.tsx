@@ -23,6 +23,7 @@ import InboxDropdown from '@/components/ui/InboxDropdown'
 import { XpHistoryDropdown } from './XpHistoryDropdown'
 import PomodoroHUD from '@/components/ui/PomodoroHUD'
 import CoachPanel from '@/components/ui/CoachPanel'
+import { FEATURES } from '@/lib/features'
 import OperatorGuide from '@/components/ui/OperatorGuide'
 import GlobalActionMenu from '@/components/ui/GlobalActionMenu'
 import LevelUpModal from '@/components/ui/LevelUpModal'
@@ -1930,7 +1931,7 @@ export default function Shell({ children }: ShellProps) {
       <PomodoroHUD />
 
       {/* COACH_PANEL_HIDDEN */}
-      {false && (
+      {FEATURES.coach && (
         <CoachPanel 
           isOpen={coachPanelOpen}
           onClose={() => setCoachPanelOpen(false)}

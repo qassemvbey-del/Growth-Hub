@@ -14,6 +14,7 @@ import {
   Shield, Home, User, Users, ChevronDown
 } from 'lucide-react'
 import { NeonIcon } from '../ui/NeonIcon'
+import { FEATURES } from '@/lib/features'
 
 export default function Sidebar({ isRTL = false, isCollapsed = false, onOpenCoach }: { isRTL?: boolean, isCollapsed?: boolean, onOpenCoach?: () => void }) {
   const pathname = usePathname()
@@ -386,7 +387,7 @@ export default function Sidebar({ isRTL = false, isCollapsed = false, onOpenCoac
 
         {/* ── PROMINENT GLOWING AI COACH BLOCK ── */}
         {/* COACH_PANEL_HIDDEN */}
-        {false && (
+        {FEATURES.coach && (
           <div className={cn("pt-4", isCollapsed ? "px-0 flex justify-center" : "px-2")}>
             <button
               type="button"
@@ -789,31 +790,33 @@ export default function Sidebar({ isRTL = false, onOpenCoach }: { isRTL?: boolea
           )
         })}
 
-        <div className="pt-6 px-2">
-          <button
-            type="button"
-            onClick={() => onOpenCoach?.()}
-            className="w-full group relative flex items-center justify-between p-4 rounded-md border transition-all duration-300 overflow-hidden cursor-pointer shadow-lg active:scale-98"
-            style={{
-              backgroundColor: `${currentTheme.color}15`,
-              borderColor: `${currentTheme.color}50`,
-              boxShadow: `0 0 25px ${currentTheme.color}26, inset 0 0 15px ${currentTheme.color}15`
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 pointer-events-none" />
-            <div className="flex items-center gap-3 relative z-10">
-              <motion.span 
-                animate={{ opacity: [1, 0.4, 1], scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <NeonIcon icon={Bot} className="w-5 h-5" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }} />
-              </motion.span>
-              <span className="font-space font-black text-xs tracking-[0.3em] uppercase text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors font-space">
-                {mounted ? (isRTL ? 'المساعد' : 'Coach') : 'Coach'}
-              </span>
-            </div>
-          </button>
-        </div>
+        {FEATURES.coach && (
+          <div className="pt-6 px-2">
+            <button
+              type="button"
+              onClick={() => onOpenCoach?.()}
+              className="w-full group relative flex items-center justify-between p-4 rounded-md border transition-all duration-300 overflow-hidden cursor-pointer shadow-lg active:scale-98"
+              style={{
+                backgroundColor: `${currentTheme.color}15`,
+                borderColor: `${currentTheme.color}50`,
+                boxShadow: `0 0 25px ${currentTheme.color}26, inset 0 0 15px ${currentTheme.color}15`
+              }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 pointer-events-none" />
+              <div className="flex items-center gap-3 relative z-10">
+                <motion.span 
+                  animate={{ opacity: [1, 0.4, 1], scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <NeonIcon icon={Bot} className="w-5 h-5" style={{ color: currentTheme.color, filter: `drop-shadow(0 0 8px ${currentTheme.color})` }} />
+                </motion.span>
+                <span className="font-space font-black text-xs tracking-[0.3em] uppercase text-zinc-900 dark:text-zinc-100 group-hover:text-white transition-colors font-space">
+                  {mounted ? (isRTL ? 'المساعد' : 'Coach') : 'Coach'}
+                </span>
+              </div>
+            </button>
+          </div>
+        )}
       </nav>
 
       <div className="p-4 mt-auto border-t-0 flex items-center gap-2 bg-transparent shrink-0">
