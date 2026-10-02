@@ -2,6 +2,7 @@
 /* Commented out per rule "Never delete code, only comment it out" */
 /* @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Cairo:wght@400;600;700;900&display=swap'); */
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Readex+Pro:wght@400;500;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400,0..1,0&display=swap');
 
 @import "tailwindcss";
 
@@ -48,6 +49,54 @@
   /* --animate-aurora-blob: aurora-blob 20s infinite ease-in-out; */
   --animate-aurora-blob: aurora-blob 10s infinite ease-in-out;
   --animate-page-fade-in: page-fade-in 0.3s ease-out forwards;
+
+  /* M3 tokens — source: design/STYLE.md. Do not use hex values in pages. */
+  --color-md-bg: var(--md-bg);
+  --color-md-sc-low: var(--md-sc-low);
+  --color-md-sc: var(--md-sc);
+  --color-md-sc-high: var(--md-sc-high);
+  --color-md-sc-highest: var(--md-sc-highest);
+  --color-md-on: var(--md-on);
+  --color-md-on-sv: var(--md-on-sv);
+  --color-md-outline: var(--md-outline);
+  --color-md-outline-v: var(--md-outline-v);
+  --color-md-primary: var(--md-primary);
+  --color-md-on-primary: var(--md-on-primary);
+  --color-md-pc: var(--md-pc);
+  --color-md-on-pc: var(--md-on-pc);
+  --color-md-sec-c: var(--md-sec-c);
+  --color-md-on-sec-c: var(--md-on-sec-c);
+  --color-md-tc: var(--md-tc);
+  --color-md-on-tc: var(--md-on-tc);
+  --color-md-xp: var(--md-xp);
+  --color-md-xp-c: var(--md-xp-c);
+  --color-md-on-xp-c: var(--md-on-xp-c);
+  --color-md-error: var(--md-error);
+  --color-md-err-c: var(--md-err-c);
+  --color-md-on-err-c: var(--md-on-err-c);
+  --color-md-yt-chip: var(--md-yt-chip);
+  --color-md-on-yt-chip: var(--md-on-yt-chip);
+  --color-md-inverse: var(--md-inverse);
+  --color-md-on-inverse: var(--md-on-inverse);
+  --color-md-inverse-primary: var(--md-inverse-primary);
+  --color-md-chip-line-on-pc: var(--md-chip-line-on-pc);
+  --color-md-track: var(--md-track);
+  --color-md-track-on-tc: var(--md-track-on-tc);
+  --color-md-scrim: var(--md-scrim);
+  --color-md-cup-bronze: var(--md-cup-bronze);
+  --color-md-on-cup-bronze: var(--md-on-cup-bronze);
+  --color-md-cup-silver: var(--md-cup-silver);
+  --color-md-on-cup-silver: var(--md-on-cup-silver);
+  --color-md-cup-gold: var(--md-cup-gold);
+  --color-md-on-cup-gold: var(--md-on-cup-gold);
+
+  --radius-chip: 8px;
+  --radius-card: 24px;
+  --radius-sheet: 28px;
+  --radius-hero: 40px;
+
+  --font-readex: 'Readex Pro', sans-serif;
+  --font-ibm-arabic: 'IBM Plex Sans Arabic', sans-serif;
 }
 
 :root {
@@ -97,6 +146,46 @@
   --font-heading: var(--font-heading);
   --font-body: var(--font-body);
   --font-arabic: var(--font-arabic);
+
+  /* M3 tokens — source: design/STYLE.md. Do not use hex values in pages. */
+  --md-bg: #0f1511;
+  --md-sc-low: #171d19;
+  --md-sc: #1b211d;
+  --md-sc-high: #262b28;
+  --md-sc-highest: #303632;
+  --md-on: #dee4de;
+  --md-on-sv: #c0c9c1;
+  --md-outline: #8a938c;
+  --md-outline-v: #404943;
+  --md-primary: #8ed5b0;
+  --md-on-primary: #003824;
+  --md-pc: #005236;
+  --md-on-pc: #aaf2cb;
+  --md-sec-c: #364b3f;
+  --md-on-sec-c: #d0e8d8;
+  --md-tc: #244c5a;
+  --md-on-tc: #c0e9fa;
+  --md-xp: #f6be41;
+  --md-xp-c: #5c4200;
+  --md-on-xp-c: #ffdea3;
+  --md-error: #ffb4ab;
+  --md-err-c: #93000a;
+  --md-on-err-c: #ffdad6;
+  --md-yt-chip: #3a1d1a;
+  --md-on-yt-chip: #ffb4ab;
+  --md-inverse: #dee4de;
+  --md-on-inverse: #2c322e;
+  --md-inverse-primary: #226a4c;
+  --md-chip-line-on-pc: #3f8a68;
+  --md-track: #303632;
+  --md-track-on-tc: #3d6878;
+  --md-scrim: rgba(0,0,0,0.6);
+  --md-cup-bronze: #f0bb8f;
+  --md-on-cup-bronze: #3d2209;
+  --md-cup-silver: #c9c3b8;
+  --md-on-cup-silver: #2f2c26;
+  --md-cup-gold: #f6be41;
+  --md-on-cup-gold: #402d00;
 }
 
 .light,
@@ -123,6 +212,40 @@
   --sidebar-bg: #F8FAFC;            /* Sleek Off-White Sidebarbg */
   --active-nav-text: #f97316;
   --active-nav-bg: rgba(249, 115, 22, 0.1);
+
+  /* M3 tokens — source: design/STYLE.md. Do not use hex values in pages. */
+  --md-bg: #f5fbf5;
+  --md-sc-low: #eff5ef;
+  --md-sc: #eaefe9;
+  --md-sc-high: #e4eae4;
+  --md-sc-highest: #dee4de;
+  --md-on: #171d19;
+  --md-on-sv: #404943;
+  --md-outline: #707973;
+  --md-outline-v: #c0c9c1;
+  --md-primary: #226a4c;
+  --md-on-primary: #ffffff;
+  --md-pc: #aaf2cb;
+  --md-on-pc: #005236;
+  --md-sec-c: #d0e8d8;
+  --md-on-sec-c: #364b3f;
+  --md-tc: #c0e9fa;
+  --md-on-tc: #244c5a;
+  --md-xp: #7a5900;
+  --md-xp-c: #ffdea3;
+  --md-on-xp-c: #261900;
+  --md-error: #ba1a1a;
+  --md-err-c: #ffdad6;
+  --md-on-err-c: #410002;
+  --md-yt-chip: #ffdad6;
+  --md-on-yt-chip: #93000a;
+  --md-inverse: #2c322e;
+  --md-on-inverse: #ecf2ec;
+  --md-inverse-primary: #8ed5b0;
+  --md-chip-line-on-pc: #5f9a7d;
+  --md-track: #dee4de;
+  --md-track-on-tc: #8fc3d8;
+  --md-scrim: rgba(0,0,0,0.6);
 }
 
 :root.dark,
