@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>الرئيسية</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&amp;family=Readex+Pro:wght@400;500;600;700&amp;family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400,0..1,0&amp;display=swap">
+<style>
+body{margin:0}
+.ms{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;white-space:nowrap;direction:ltr;font-feature-settings:'liga';-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+.ms.f{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+button{font:inherit;cursor:pointer}
+</style>
+</helmet>
+<div dir="rtl" style="width: 390px; height: 1320px; box-sizing: border-box; position: relative; overflow: hidden; background: {{c.bg}}; color: {{c.on}}; font-family: 'IBM Plex Sans Arabic', sans-serif; display: flex; flex-direction: column">
+
+<header style="flex-shrink: 0; display: flex; align-items: center; gap: 12px; padding: 16px 16px 8px">
+<div style="width: 40px; height: 40px; border-radius: 50%; background: {{c.tc}}; color: {{c.onTc}}; display: flex; align-items: center; justify-content: center; font-family: 'Readex Pro'; font-weight: 600; font-size: 16px">م</div>
+<div style="flex-grow: 1; display: flex; flex-direction: column">
+<span style="font-size: 13px; line-height: 18px; color: {{c.onSV}}">صباح الخير</span>
+<span style="font-family: 'Readex Pro'; font-size: 18px; line-height: 24px; font-weight: 500">محمد</span>
+</div>
+<button aria-label="الإشعارات، فيه 2 جداد" style="position: relative; width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; color: {{c.onSV}}; display: flex; align-items: center; justify-content: center"><span class="ms">notifications</span><span style="position: absolute; top: 10px; left: 10px; width: 8px; height: 8px; border-radius: 4px; background: {{c.error}}"></span></button>
+<a href="Streak.dc.html" style="position: relative; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; text-decoration: none" aria-label="سلسلة 12 يوم">
+<svg width="56" height="56" viewBox="0 0 56 56" style="position: absolute; inset: 0" aria-hidden="true"><path fill="{{c.xpC}}" d="M54.9 28.0 L54.4 29.7 L53.2 31.3 L51.5 32.7 L49.8 33.8 L48.4 34.9 L47.5 36.1 L47.3 37.5 L47.5 39.3 L48.0 41.3 L48.2 43.5 L47.9 45.5 L47.0 47.0 L45.5 47.9 L43.5 48.2 L41.3 48.0 L39.3 47.5 L37.5 47.3 L36.1 47.5 L34.9 48.4 L33.8 49.8 L32.7 51.5 L31.3 53.2 L29.7 54.4 L28.0 54.9 L26.3 54.4 L24.7 53.2 L23.3 51.5 L22.2 49.8 L21.1 48.4 L19.9 47.5 L18.5 47.3 L16.7 47.5 L14.7 48.0 L12.5 48.2 L10.5 47.9 L9.0 47.0 L8.1 45.5 L7.8 43.5 L8.0 41.3 L8.5 39.3 L8.7 37.5 L8.5 36.1 L7.6 34.9 L6.2 33.8 L4.5 32.7 L2.8 31.3 L1.6 29.7 L1.1 28.0 L1.6 26.3 L2.8 24.7 L4.5 23.3 L6.2 22.2 L7.6 21.1 L8.5 19.9 L8.7 18.5 L8.5 16.7 L8.0 14.7 L7.8 12.5 L8.1 10.5 L9.0 9.0 L10.5 8.1 L12.5 7.8 L14.7 8.0 L16.7 8.5 L18.5 8.7 L19.9 8.5 L21.1 7.6 L22.2 6.2 L23.3 4.5 L24.7 2.8 L26.3 1.6 L28.0 1.1 L29.7 1.6 L31.3 2.8 L32.7 4.5 L33.8 6.2 L34.9 7.6 L36.1 8.5 L37.5 8.7 L39.3 8.5 L41.3 8.0 L43.5 7.8 L45.5 8.1 L47.0 9.0 L47.9 10.5 L48.2 12.5 L48.0 14.7 L47.5 16.7 L47.3 18.5 L47.5 19.9 L48.4 21.1 L49.8 22.2 L51.5 23.3 L53.2 24.7 L54.4 26.3Z"></path></svg>
+<span style="position: relative; display: flex; flex-direction: column; align-items: center; color: {{c.onXpC}}; line-height: 1">
+<span class="ms f" style="font-size: 18px">local_fire_department</span>
+<span style="font-family: 'Readex Pro'; font-weight: 700; font-size: 15px">12</span>
+</span>
+</a>
+</header>
+
+<section style="flex-shrink: 0; margin: 8px 16px 0; padding: 20px; border-radius: 28px; background: {{c.pc}}; color: {{c.onPc}}; display: flex; flex-direction: column; gap: 14px">
+<h1 style="margin: 0; font-family: 'Readex Pro'; font-size: 30px; line-height: 38px; font-weight: 600">عايز تعمل إيه؟</h1>
+<div style="display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 18px 0 6px; border-radius: 28px; background: {{c.bg}}">
+<label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden">عايز تعمل إيه</label>
+<input id="q" placeholder="الصق لينك يوتيوب أو اكتب هدفك" style="flex-grow: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: {{c.on}}; font: 400 15px 'IBM Plex Sans Arabic'">
+<button aria-label="ابدأ" style="width: 44px; height: 44px; border: 0; border-radius: 50%; background: {{c.primary}}; color: {{c.onPrimary}}; display: flex; align-items: center; justify-content: center"><span class="ms">arrow_back</span></button>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<button style="height: 32px; padding: 0 12px 0 14px; border-radius: 8px; border: 1px solid {{c.chipLine}}; background: transparent; color: {{c.onPc}}; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500"><span class="ms" style="font-size: 18px">school</span>ذاكر لامتحان</button>
+<button style="height: 32px; padding: 0 12px 0 14px; border-radius: 8px; border: 1px solid {{c.chipLine}}; background: transparent; color: {{c.onPc}}; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500"><span class="ms" style="font-size: 18px">smart_display</span>اتعلم من يوتيوب</button>
+<button style="height: 32px; padding: 0 12px 0 14px; border-radius: 8px; border: 1px solid {{c.chipLine}}; background: transparent; color: {{c.onPc}}; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500"><span class="ms" style="font-size: 18px">group</span>مشروع مع فريق</button>
+<button style="height: 32px; padding: 0 12px 0 14px; border-radius: 8px; border: 1px solid {{c.chipLine}}; background: transparent; color: {{c.onPc}}; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500"><span class="ms" style="font-size: 18px">event_repeat</span>خلّص حاجات متأجلة</button>
+</div>
+</section>
+
+<div style="flex-shrink: 0; display: flex; align-items: baseline; justify-content: space-between; padding: 22px 20px 4px">
+<h2 style="margin: 0; font-family: 'Readex Pro'; font-size: 20px; line-height: 28px; font-weight: 500">النهارده</h2>
+<span style="font-size: 13px; color: {{c.onSV}}">2 من 5 مهام خلصوا</span>
+</div>
+<div style="flex-shrink: 0; padding: 0 20px 10px">
+<svg width="350" height="16" viewBox="0 0 350 16" aria-hidden="true" style="display: block"><path d="M350 8 q-5.5 -6 -11 0 t-11 0 t-11 0 t-11 0 t-11 0 t-11 0 t-11 0 t-11 0 t-11 0 t-11 0 t-11 0 t-11 0 t-11 0" fill="none" stroke="{{c.primary}}" stroke-width="4" stroke-linecap="round"></path><path d="M198 8 L2 8" stroke="{{c.track}}" stroke-width="4" stroke-linecap="round"></path></svg>
+</div>
+
+<div style="flex-shrink: 0; margin: 0 16px 8px; padding: 8px 8px 8px 16px; border-radius: 20px; background: {{c.scHigh}}; display: flex; align-items: center; gap: 12px">
+<span class="ms" style="font-size: 22px; color: {{c.onSV}}; margin-right: 4px">event_repeat</span>
+<span style="flex-grow: 1; display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 500">3 مهام فات ميعادها</span><span style="font-size: 12px; color: {{c.onSV}}">لسه بتاخد XP كامل</span></span>
+<button style="height: 40px; padding: 0 14px; border: 0; border-radius: 20px; background: {{c.secC}}; color: {{c.onSecC}}; font-size: 13px; font-weight: 600">نظّم مواعيدي</button>
+</div>
+
+<div style="flex-shrink: 0; margin: 0 16px; display: flex; flex-direction: column; gap: 2px">
+<a href="VideoSheet.dc.html" style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 20px 20px 4px 4px; background: {{c.sc}}; color: {{c.on}}; text-decoration: none">
+<span style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid {{c.outline}}; box-sizing: border-box; flex-shrink: 0"></span>
+<span style="flex-grow: 1; display: flex; flex-direction: column">
+<span style="font-size: 15px; line-height: 22px; font-weight: 500">الدرس 14: الـ Hooks</span>
+<span style="font-size: 13px; line-height: 18px; color: {{c.onSV}}">كورس React · شفت 40%</span>
+</span>
+<span style="font-family: 'Readex Pro'; font-size: 13px; font-weight: 600; color: {{c.xp}}" dir="ltr">+20 XP</span>
+</a>
+<a href="TaskSheet.dc.html" style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 4px; background: {{c.sc}}; color: {{c.on}}; text-decoration: none">
+<span style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid {{c.outline}}; box-sizing: border-box; flex-shrink: 0"></span>
+<span style="flex-grow: 1; display: flex; flex-direction: column">
+<span style="font-size: 15px; line-height: 22px; font-weight: 500">اكتب ملخص الفصل التالت</span>
+<span style="font-size: 13px; line-height: 18px; color: {{c.onSV}}">مذاكرة الإحصاء · بكرة</span>
+</span>
+<span style="font-family: 'Readex Pro'; font-size: 13px; font-weight: 600; color: {{c.xp}}" dir="ltr">+30 XP</span>
+</a>
+<div style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 4px 4px 20px 20px; background: {{c.sc}}">
+<span style="width: 24px; height: 24px; border-radius: 50%; background: {{c.primary}}; color: {{c.onPrimary}}; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><span class="ms" style="font-size: 18px">check</span></span>
+<span style="flex-grow: 1; display: flex; flex-direction: column">
+<span style="font-size: 15px; line-height: 22px; font-weight: 500; color: {{c.onSV}}; text-decoration: line-through">حل تمارين الدرس 3</span>
+<span style="font-size: 13px; line-height: 18px; color: {{c.onSV}}">خلصت الساعة 10 الصبح</span>
+</span>
+</div>
+</div>
+
+<div style="flex-shrink: 0; display: flex; align-items: baseline; justify-content: space-between; padding: 22px 20px 10px">
+<h2 style="margin: 0; font-family: 'Readex Pro'; font-size: 20px; line-height: 28px; font-weight: 500">ترتيب الأسبوع</h2>
+<a href="Leaderboard.dc.html" style="font-size: 14px; font-weight: 500; color: {{c.primary}}; text-decoration: none">مشروع التخرج</a>
+</div>
+<a href="Leaderboard.dc.html" style="flex-shrink: 0; margin: 0 16px; padding: 16px; border-radius: 24px; background: {{c.sc}}; color: {{c.on}}; text-decoration: none; display: flex; flex-direction: column; gap: 12px">
+<span style="display: flex; align-items: flex-end; justify-content: center; gap: 12px" aria-hidden="true">
+<span style="display: flex; flex-direction: column; align-items: center; gap: 6px"><span style="width: 40px; height: 40px; border-radius: 20px; background: {{c.secC}}; color: {{c.onSecC}}; display: flex; align-items: center; justify-content: center; font-size: 15px">ع</span><span style="width: 72px; height: 32px; border-radius: 12px 12px 4px 4px; background: {{c.scHighest}}; display: flex; align-items: center; justify-content: center; font-family: 'Readex Pro'; font-size: 14px; font-weight: 600; color: {{c.onSV}}">3</span></span>
+<span style="display: flex; flex-direction: column; align-items: center; gap: 6px"><span style="width: 48px; height: 48px; border-radius: 24px; background: {{c.tc}}; color: {{c.onTc}}; display: flex; align-items: center; justify-content: center; font-size: 17px">س</span><span style="width: 72px; height: 56px; border-radius: 12px 12px 4px 4px; background: {{c.xpC}}; display: flex; align-items: center; justify-content: center; color: {{c.onXpC}}"><span class="ms f" style="font-size: 22px">emoji_events</span></span></span>
+<span style="display: flex; flex-direction: column; align-items: center; gap: 6px"><span style="width: 44px; height: 44px; border-radius: 22px; background: {{c.primary}}; color: {{c.onPrimary}}; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">م</span><span style="width: 72px; height: 44px; border-radius: 12px 12px 4px 4px; background: {{c.secC}}; display: flex; align-items: center; justify-content: center; font-family: 'Readex Pro'; font-size: 14px; font-weight: 600; color: {{c.onSecC}}">2</span></span>
+</span>
+<span style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<span style="font-size: 14px; line-height: 20px">إنت التاني. فاضلك <span dir="ltr" style="font-family: 'Readex Pro'; font-weight: 600; color: {{c.xp}}">20 XP</span> وتعدّي سارة.</span>
+<span style="font-size: 12px; color: {{c.onSV}}; white-space: nowrap">بيبدأ تاني السبت</span>
+</span>
+</a>
+
+<div style="flex-shrink: 0; display: flex; align-items: baseline; justify-content: space-between; padding: 22px 20px 10px">
+<h2 style="margin: 0; font-family: 'Readex Pro'; font-size: 20px; line-height: 28px; font-weight: 500">أهدافك</h2>
+<a href="Goals.dc.html" style="font-size: 14px; font-weight: 500; color: {{c.primary}}; text-decoration: none">الكل</a>
+</div>
+<div style="flex-shrink: 0; display: flex; gap: 8px; padding: 0 16px; overflow: hidden">
+<a href="Goal.dc.html" style="width: 196px; height: 132px; flex-shrink: 0; box-sizing: border-box; border-radius: 28px; background: {{c.tc}}; color: {{c.onTc}}; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; text-decoration: none">
+<span style="display: flex; justify-content: space-between; align-items: center"><span class="ms f" style="font-size: 22px">smart_display</span><span style="font-size: 13px">13 من 32 درس</span></span>
+<span style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-family: 'Readex Pro'; font-size: 16px; font-weight: 500">كورس React كامل</span>
+<span style="height: 4px; border-radius: 2px; background: {{c.onTcTrack}}; display: flex"><span style="width: 40%; border-radius: 2px; background: {{c.onTc}}"></span></span>
+</span>
+</a>
+<a href="GoalSquad.dc.html" style="width: 156px; height: 132px; flex-shrink: 0; box-sizing: border-box; border-radius: 28px; background: {{c.xpC}}; color: {{c.onXpC}}; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; text-decoration: none">
+<span style="display: flex; justify-content: space-between; align-items: center"><span class="ms f" style="font-size: 22px">groups</span><span dir="ltr" style="font-family: 'Readex Pro'; font-size: 13px; font-weight: 600">72%</span></span>
+<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Readex Pro'; font-size: 15px; font-weight: 500">مشروع التخرج</span><span style="font-size: 12px">مع 3</span></span>
+</a>
+<a href="GoalText.dc.html" style="width: 156px; height: 132px; flex-shrink: 0; box-sizing: border-box; border-radius: 28px; background: {{c.secC}}; color: {{c.onSecC}}; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; text-decoration: none">
+<span class="ms" style="font-size: 22px">school</span>
+<span style="font-family: 'Readex Pro'; font-size: 15px; font-weight: 500">مذاكرة الإحصاء</span>
+</a>
+</div>
+
+
+
+<a href="Focus.dc.html" style="position: absolute; left: 16px; right: 16px; bottom: 88px; height: 56px; padding: 0 4px 0 16px; border-radius: 16px; background: {{c.pc}}; color: {{c.onPc}}; display: flex; align-items: center; gap: 12px; text-decoration: none" aria-label="جلسة تركيز شغالة: الدرس 14، فاضل 18 دقيقة و42 ثانية">
+<span class="ms f" style="font-size: 22px">timer</span>
+<span style="flex-grow: 1; min-width: 0; font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">الدرس 14: الـ Hooks</span>
+<span dir="ltr" style="font-family: 'Readex Pro'; font-size: 16px; font-weight: 600">18:42</span>
+<span role="button" aria-label="وقف مؤقت" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center"><span class="ms f">pause</span></span>
+</a>
+
+<button aria-label="جديد" style="position: absolute; left: 16px; bottom: 160px; width: 56px; height: 56px; border: 0; border-radius: 16px; background: {{c.pc}}; color: {{c.onPc}}; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,0.25)"><span class="ms" style="font-size: 26px">add</span></button>
+
+<nav style="position: absolute; left: 0; right: 0; bottom: 0; height: 80px; background: {{c.scHigh}}; display: flex; align-items: flex-start; padding-top: 12px; box-sizing: border-box" aria-label="التنقل">
+<a href="Main.dc.html" aria-current="page" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: {{c.on}}; font-size: 12px; font-weight: 600"><span style="width: 56px; height: 32px; border-radius: 16px; background: {{c.secC}}; color: {{c.onSecC}}; display: flex; align-items: center; justify-content: center"><span class="ms f">home</span></span>الرئيسية</a>
+<a href="Goals.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: {{c.onSV}}; font-size: 12px; font-weight: 500"><span style="width: 56px; height: 32px; display: flex; align-items: center; justify-content: center"><span class="ms">flag</span></span>أهدافي</a>
+<a href="Notes.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: {{c.onSV}}; font-size: 12px; font-weight: 500"><span style="width: 56px; height: 32px; display: flex; align-items: center; justify-content: center"><span class="ms">sticky_note_2</span></span>الملاحظات</a>
+<a href="Wins.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: {{c.onSV}}; font-size: 12px; font-weight: 500"><span style="width: 56px; height: 32px; display: flex; align-items: center; justify-content: center"><span class="ms">trophy</span></span>الكاسات</a>
+<a href="Profile.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: {{c.onSV}}; font-size: 12px; font-weight: 500"><span style="width: 56px; height: 32px; display: flex; align-items: center; justify-content: center"><span class="ms">person</span></span>أنا</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["dark","light"],"default":"dark"},"$preview":{"width":390,"height":1320}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var dark = {bg:'#0f1511',on:'#dee4de',onSV:'#c0c9c1',outline:'#8a938c',track:'#303632',sc:'#1b211d',scHigh:'#262b28',scHighest:'#303632',primary:'#8ed5b0',onPrimary:'#003824',pc:'#005236',onPc:'#aaf2cb',chipLine:'#3f8a68',secC:'#364b3f',onSecC:'#d0e8d8',tc:'#244c5a',onTc:'#c0e9fa',onTcTrack:'#3d6878',xp:'#f6be41',xpC:'#5c4200',onXpC:'#ffdea3',error:'#ffb4ab'};
+    var light = {bg:'#f5fbf5',on:'#171d19',onSV:'#404943',outline:'#707973',track:'#dee4de',sc:'#eaefe9',scHigh:'#e4eae4',scHighest:'#dee4de',primary:'#226a4c',onPrimary:'#ffffff',pc:'#aaf2cb',onPc:'#005236',chipLine:'#5f9a7d',secC:'#d0e8d8',onSecC:'#364b3f',tc:'#c0e9fa',onTc:'#244c5a',onTcTrack:'#8fc3d8',xp:'#7a5900',xpC:'#ffdea3',onXpC:'#261900',error:'#ba1a1a'};
+    return { c: (this.props.theme === 'light') ? light : dark };
+  }
+}
+</script>
+</body>
+</html>

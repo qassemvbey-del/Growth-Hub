@@ -20,6 +20,31 @@ a code comment, or `supabase/schema.sql` disagrees with this file, THIS FILE WIN
 5. XP, permissions, plans and money are decided on the server (Supabase function or API route),
    never in the browser.
 6. When done, report: what changed, which files, how to test it.
+7. Delete dead code; do not comment it out. Git keeps the history. (The old rule "never delete code, only
+   comment it out" is cancelled: thousands of commented lines with old names like `cup_id` confuse every agent.)
+8. Work on the branch `redesign`. Show the diff and wait for Mohamed's OK before you commit or push. Push only to
+   `redesign` (Vercel builds a preview link for it). Never push to `main`: it is merged after review.
+9. UI work follows `design/README.md` (artboards, tokens, rules). If the design does not answer a question, ask.
+
+## Names (UI ↔ code ↔ database)
+The database is the source of truth. Do NOT rename tables or columns. New and rebuilt code uses the database names.
+| UI (ar / en) | Database | Old code names (rename while rebuilding a file) |
+|---|---|---|
+| هدف / Goal | `goals` | mission, Mission, MissionTask |
+| مهمة / Task | `tasks` | task, mission task |
+| هدف مشترك / Shared (Squad) | `goals.metadata.type = 'squad'` | squad |
+| الكاسات / Cups | finished goals (`goals.is_archived`) | achievements, wins, vault |
+| ملاحظة / Note | `notes` | brain |
+| الإشعارات / Notifications | `inbox_reports` | inbox, reports |
+Never query the old `cups` table (it does not exist; three commented-out queries still mention it).
+
+## Database leftovers (know them, do not build on them)
+- Dead: function `enforce_goal_limits` (5-goal limit, no trigger attached), code that checks `PLAN_LIMIT_EXCEEDED`.
+- Still active, but from the old paid plans: trigger `trigger_update_squad_limits` + `profiles.max_squads_allowed`,
+  `profiles.user_tier` (still read by `check_and_increment_quota` and the coach / AI routes).
+- Unused columns: `profiles.mission_goal, weekly_project, daily_focus, ai_name, ai_personality, champion_class`,
+  `tasks.video_progress` (watch progress lives in `task_progress`).
+- Removing any of these is a migration with a rollback section, after the code stops using it.
 
 ## Code rules
 - No file over 400 lines. Split it.
@@ -69,12 +94,48 @@ Realtime) · Vercel · Gemini 2.5 Flash (2.0 is forbidden) · Capacitor for mobi
   owner/admin/member, once per goal.
 - Streak: daily; starts with 2 freeze days; +1 freeze every 7 days (max 2); a broken streak can be
   restored within 48h by completing 2 tasks in one day.
-- Ranks unlock cosmetics only. AI features are open to every rank (daily quota only).
-- Leaderboard is weekly inside a squad only. No global leaderboard.
+- First goal ever: starts with its first step already done.
+- Ranks unlock cosmetics only: each rank unlocks a new app colour (Settings → Appearance);
+  Conqueror also gets an animated frame. AI features are open to every rank (daily quota only).
+- Cups: every finished goal becomes a cup in the Cups tab (bottom nav, where Focus used to be).
+  Cup type by goal size: bronze < 10 tasks, silver 10–30, gold > 30. (DB/SQL for cup type: not built yet.)
+- Leaderboard is weekly inside a squad only (resets Saturday 00:00 Cairo, i.e. the night between Friday
+  and Saturday). No global leaderboard.
 - Year one is fully free: no pricing page, no goal limit. Energy+ page and the "XP penalty" squad rule are removed.
 - First screen for a new user: one big input "What do you want to do?" (YouTube link → course,
-  a goal → AI steps, a quick thing → task) + 3–4 templates.
+  a goal → AI steps, a quick thing → task) + 4 templates: Study for an exam · Learn from YouTube ·
+  Project with a team · Finish things I put off (ar: ذاكر لامتحان · اتعلم من يوتيوب · مشروع مع فريق ·
+  خلّص حاجات متأجلة).
+- YouTube playlist: ask the user (en + ar) "Study it as a course" (60% rule + XP) or
+  "Save it and take notes" (no XP gate). A single video goes straight to a course.
+- Goal header always names the noun: "13 of 32 lessons done" / "8 of 12 tasks done".
+- The attachments button is visible on the goal page and inside every task.
+- Web course page looks like YouTube: big video, note points under it, lesson list on the side.
+- Rank app colours (8 swatches, 2 rows of 4): Silver = green (default) + blue · Gold = purple ·
+  Platinum = magenta · Diamond = orange · Crown = blue-leaning cyan · Ace = graphite (neutral grey) ·
+  Conqueror = gold. Gold-the-colour is kept for the top rank so it matches the gold cup. Hexes: `STYLE.md`.
+- Mobile bottom nav has 5 tabs: Home · Goals · Notes · Cups · Me (same as the web rail).
+- The Focus screen is full screen: no nav bar, rail, header or FAB while it is open (it replaces Zen mode).
+- Focus has no tab: it starts from inside a task ("Focus 25 min"). While a timer runs, a small timer bar
+  sits above the bottom nav on every screen (on web: at the bottom of the content panel); tap it to open Focus.
+- A simple landing page at `/` for signed-out visitors; signed-in users get Home at `/`. In-app hints (coach marks) keep appearing after onboarding until dismissed.
+
+## Existing features: keep and redesign
+- Rule: every feature that exists in the code today stays in the new design, unless a decision here
+  removes it explicitly (removed so far: Energy+, pricing page, the 5-goal limit, the late-task XP penalty
+  and its squad rule, rank-gated AI, click sounds, Zen mode, the Champions, the old neon effects).
+- The Coach (`CoachPanel`, 3 times a day: "واجهني بالحقيقة" · "أهم 3 حاجات" · "حاجة سريعة أبدأ بيها").
+- AI specialties (`TaskSkills`): programmer / networks / accountant / student, 3 extra skills each.
+- The Command Palette (`CommandPalette`, Ctrl+K).
+- Guest access: guest links expire after 7 days, with the current guest permissions.
+
+## Design system (locked)
+- Material 3 Expressive, seed green #2E7D5B. Dark is the default, light is optional.
+- Fonts: Readex Pro (headings, numbers) + IBM Plex Sans Arabic (body). Icons: Material Symbols Rounded.
+- Tokens and screen rules: `STYLE.md`. Approved screens: the "Growth Hub — شاشات M3" canvas.
+- The older "Calm & warm" design system (apricot accent, lucide icons, "drop Material Symbols")
+  is RETIRED. Do not use its tokens or advice.
 
 ## Open (do not build until decided)
-The product mascot/character · the exact AI daily quota · pricing after year one · unifying the 4 sharing flags (`is_public`, `requires_approval`,
-`general_access`, `metadata.public_share`).
+- The product mascot/character · the exact AI daily quota · pricing after year one.
+- Unifying the 4 sharing flags (`is_public`, `requires_approval`, `general_access`, `metadata.public_share`).
