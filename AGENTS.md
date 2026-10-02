@@ -11,6 +11,10 @@ The full reference (product, decisions, open questions, roadmap) lives in the pr
 a code comment, or `supabase/schema.sql` disagrees with this file, THIS FILE WINS.
 (`supabase/schema.sql` is outdated: it still says `cups`. The real tables are below.)
 
+## Other docs to read
+- `Docs/CODE_AUDIT.md`: known security and code problems (S1–S12, Q1–Q12). Fixes refer to these ids.
+- `Docs/CLEANUP_PLAN.md`: the order of the cleanup (phases 0–4).
+
 ## How to work
 1. One change per task. Touch only what was asked. Never commit or push unrelated work.
 2. Diagnose before fixing: state the cause first, then the fix.
@@ -45,6 +49,29 @@ Never query the old `cups` table (it does not exist; three commented-out queries
 - Unused columns: `profiles.mission_goal, weekly_project, daily_focus, ai_name, ai_personality, champion_class`,
   `tasks.video_progress` (watch progress lives in `task_progress`).
 - Removing any of these is a migration with a rollback section, after the code stops using it.
+
+## Code architecture (target; so any developer understands the project fast)
+Migrate file by file while we rebuild a page. NO big-bang move of the whole project.
+- `src/app/` = routes only. A `page.tsx` is thin: it composes feature components (aim for under 100 lines).
+- `src/features/<feature>/` = everything about one feature, with a barrel `index.ts` and a short `README.md`
+  (what it does, entry points, tables + RPCs it uses, business rules):
+  `components/`, `hooks/`, `api/` (all Supabase calls), `types.ts`, `constants.ts`.
+  Features: auth, landing, home, goals, tasks, focus, game (xp, streak, ranks, cups), notes, notifications,
+  settings, admin, coach, search (command palette).
+- `src/components/m3/` = design system only: no Supabase, no business logic, no translated text.
+- `src/lib/` = infrastructure (Supabase clients, utils, one `reportError` helper). `src/hooks/` = shared hooks.
+- Data access: never call `supabase.from(...)` inside a component. Put it in the feature's `api/` or a hook.
+  Use types generated from the database (`supabase gen types`), not hand-written copies.
+- Text: translation files per feature `src/i18n/{ar,en}/<feature>.ts`. The giant `TRANSLATIONS` object in
+  `GrowthContext` is split out feature by feature. Keys are camelCase, no ALL CAPS.
+- `GrowthContext` (huge) is split into smaller providers (auth, profile, language/theme, data) when we rebuild Home.
+- Errors: never swallow silently. `reportError(where, error)` logs it; the user sees a translated message.
+- Naming: components PascalCase and the file name equals the export; hooks `useX`; constants UPPER_SNAKE in
+  `constants.ts`; identifiers in English and DATABASE names (see "Names").
+- Comments explain WHY, not what. Exported functions get a one-line JSDoc. No commented-out code.
+- Git: branch `redesign`; conventional commits (`feat:`, `fix:`, `refactor:`, `chore:`). After each step Mohamed
+  approves, tag it: `redesign/<NN>-<short-name>` (e.g. `redesign/03-login`) and `git push --tags`.
+  Before any deletion of old code, tag the starting point: `archive/before-cleanup`.
 
 ## Code rules
 - No file over 400 lines. Split it.
@@ -95,6 +122,9 @@ Realtime) · Vercel · Gemini 2.5 Flash (2.0 is forbidden) · Capacitor for mobi
 - Streak: daily; starts with 2 freeze days; +1 freeze every 7 days (max 2); a broken streak can be
   restored within 48h by completing 2 tasks in one day.
 - First goal ever: starts with its first step already done.
+- AI daily quota: 20 AI requests per user per Cairo day, same for everyone (explain, ask AI, checklist, AI steps,
+  smart import, playlist titles). (The Coach is hidden.) The number lives in ONE server constant so it can
+  change later; checked and counted on the server with `check_and_increment_quota` before every Gemini call.
 - Ranks unlock cosmetics only: each rank unlocks a new app colour (Settings → Appearance);
   Conqueror also gets an animated frame. AI features are open to every rank (daily quota only).
 - Cups: every finished goal becomes a cup in the Cups tab (bottom nav, where Focus used to be).
@@ -124,8 +154,12 @@ Realtime) · Vercel · Gemini 2.5 Flash (2.0 is forbidden) · Capacitor for mobi
 - Rule: every feature that exists in the code today stays in the new design, unless a decision here
   removes it explicitly (removed so far: Energy+, pricing page, the 5-goal limit, the late-task XP penalty
   and its squad rule, rank-gated AI, click sounds, Zen mode, the Champions, the old neon effects).
-- The Coach (`CoachPanel`, 3 times a day: "واجهني بالحقيقة" · "أهم 3 حاجات" · "حاجة سريعة أبدأ بيها").
-- AI specialties (`TaskSkills`): programmer / networks / accountant / student, 3 extra skills each.
+- The Coach (`CoachPanel`): HIDDEN (decided 2 Oct). Turned off with one flag `FEATURES.coach = false` in
+  `src/lib/features.ts`: no sidebar/nav item, no Command Palette entry, no button anywhere, and the server side
+  (`chatWithCoach`, `/api/coach`) returns "disabled" without calling Gemini. The code stays for a possible comeback.
+- AI specialties (programmer / networks / accountant / student, 3 extra skills each): REMOVED (decided 2 Oct).
+  Delete them together with the rank-lock code in `TaskSkills`. The 3 general skills (explain · ask AI ·
+  checklist) stay until Mohamed says otherwise.
 - The Command Palette (`CommandPalette`, Ctrl+K).
 - Guest access: guest links expire after 7 days, with the current guest permissions.
 
@@ -137,5 +171,5 @@ Realtime) · Vercel · Gemini 2.5 Flash (2.0 is forbidden) · Capacitor for mobi
   is RETIRED. Do not use its tokens or advice.
 
 ## Open (do not build until decided)
-- The product mascot/character · the exact AI daily quota · pricing after year one.
+- The product mascot/character · pricing after year one.
 - Unifying the 4 sharing flags (`is_public`, `requires_approval`, `general_access`, `metadata.public_share`).

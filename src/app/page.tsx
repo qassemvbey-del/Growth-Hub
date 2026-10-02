@@ -10,6 +10,7 @@ import DiamondProgress from '@/components/ui/DiamondProgress'
 import GoalCard from '@/components/ui/GoalCard'
 import Avatar from '@/components/ui/Avatar'
 import TaskDrawer from '@/components/ui/TaskDrawer'
+import Landing from '@/components/landing/Landing'
 import { createClient } from '@/lib/supabase'
 import { useGrowth } from '@/context/GrowthContext'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -33,6 +34,7 @@ export default function Dashboard() {
   const [missions, setMissions] = useState<any[]>([])
   const [weeklyMinutes, setWeeklyMinutes] = useState<number>(0)
   const [loading, setLoading] = useState(true)
+  const [showLanding, setShowLanding] = useState(false)
 
   // Rivalry Tracker States
   const [squadsList, setSquadsList] = useState<any[]>([])
@@ -70,7 +72,8 @@ export default function Dashboard() {
 
         const entryPathSelected = localStorage.getItem('entry_path_selected') === 'true'
         if (!user && !entryPathSelected) {
-          router.push('/auth/login')
+          setShowLanding(true)
+          setLoading(false)
           return
         }
         fetchDashboardMissions()
@@ -445,6 +448,10 @@ export default function Dashboard() {
         }
       }
     }
+  }
+
+  if (showLanding) {
+    return <Landing />
   }
 
   return (

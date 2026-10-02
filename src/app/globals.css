@@ -45,6 +45,10 @@
     100% { opacity: 1; transform: translateY(0); }
   }
 
+  @keyframes gh-spin { to { transform: rotate(360deg); } }
+  @keyframes gh-rev { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+  @keyframes gh-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
   --animate-scanline: scanline 12s linear infinite;
   /* --animate-aurora-blob: aurora-blob 20s infinite ease-in-out; */
   --animate-aurora-blob: aurora-blob 10s infinite ease-in-out;

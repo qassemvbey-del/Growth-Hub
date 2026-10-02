@@ -132,15 +132,10 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col md:flex-row min-h-[100dvh] bg-md-bg text-md-on overflow-hidden relative" dir={isAr ? 'rtl' : 'ltr'}>
-      <style>{`
-        @keyframes gh-spin { to { transform: rotate(360deg); } }
-        @keyframes gh-rev { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
-        @keyframes gh-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-      `}</style>
       
       {/* LEFT SECTION (Web) / MAIN CONTENT (Mobile) */}
       <section className="flex flex-col w-full md:w-[560px] md:shrink-0 px-4 md:py-8 md:px-16 lg:px-20 z-10 h-full relative overflow-y-auto">
-        <header className="flex items-center justify-between h-16 shrink-0 pt-2 mb-4 md:mb-auto">
+        <header className="flex items-center justify-between h-16 shrink-0 pt-2">
           {/* Mobile Back / Web Brand */}
           <div className="md:hidden">
             <button className="w-12 h-12 rounded-full flex items-center justify-center text-md-on hover:bg-md-on-sv/10 transition-colors">
@@ -173,19 +168,19 @@ export default function LoginPage() {
 
           <div className="absolute top-2 end-2 motion-safe:animate-[gh-float_7s_ease-in-out_infinite]">
             <Shape type="sunny" size={92} colorToken="md-xp-c" spin>
-              <Icon name="local_fire_department" size={36} filled className="text-md-xp" />
+              <Icon name="local_fire_department" size={26} filled className="text-md-xp" />
             </Shape>
           </div>
 
           <div className="absolute top-6 start-3 motion-safe:animate-[gh-float_7s_ease-in-out_infinite] [animation-delay:-2.3s]">
             <Shape type="clover" size={76} colorToken="md-tc">
-              <Icon name="smart_display" size={30} filled className="text-md-on-tc" />
+              <Icon name="smart_display" size={40} filled className="text-md-on-tc" />
             </Shape>
           </div>
 
           <div className="absolute bottom-0 start-10 motion-safe:animate-[gh-float_7s_ease-in-out_infinite] [animation-delay:-4.6s]">
             <Shape type="flower" size={72} colorToken="md-xp" spin>
-              <Icon name="trophy" size={30} filled className="text-md-on-cup-gold" />
+              <Icon name="trophy" size={44} filled className="text-md-on-cup-gold" />
             </Shape>
           </div>
 
@@ -195,7 +190,7 @@ export default function LoginPage() {
         </div>
 
         {/* MAIN TEXT */}
-        <div className="flex flex-col gap-2 mt-4 md:my-auto md:gap-4">
+        <div className="my-auto flex flex-col justify-center gap-2 mt-4 md:gap-4 py-8">
           <h1 className="m-0 font-readex text-[28px] md:text-[36px] leading-tight font-semibold">
             {l.welcome}
           </h1>
@@ -230,7 +225,7 @@ export default function LoginPage() {
         </div>
 
         {/* BOTTOM FOOTER */}
-        <div className="mt-auto pt-4 md:pt-8 pb-6 flex flex-col gap-3 items-center">
+        <div className="pt-4 md:pt-8 pb-6 flex flex-col gap-3 items-center">
           <span className="flex items-center gap-2 text-[13px] text-md-on-sv">
             <Icon name="lock" size={18} className="text-md-primary shrink-0" />
             {l.privacyNote1}
@@ -245,19 +240,19 @@ export default function LoginPage() {
       </section>
 
       {/* RIGHT SECTION (Web Only) */}
-      <section className="hidden md:flex flex-1 my-4 me-4 ms-0 rounded-[28px] bg-md-pc relative overflow-hidden p-12 flex-col justify-end gap-1">
+      <section className="hidden md:flex flex-1 my-4 me-4 ms-0 rounded-[28px] bg-md-pc relative overflow-hidden p-12 flex-col justify-center items-center">
         <div className="absolute -top-[140px] -end-[80px] opacity-15" aria-hidden="true">
           <Shape type="sunny" size={420} colorToken="md-on-pc" spin />
         </div>
         
         {/* Floating Animation Graph Container */}
-        <div className="absolute top-0 start-0 w-full h-full flex items-start justify-center pointer-events-none" aria-hidden="true">
-          <div className="relative w-full max-w-[640px] h-[470px] mt-8">
+        <div className="w-full flex justify-center pointer-events-none" aria-hidden="true">
+          <div className="relative w-full max-w-[640px] h-[470px]">
             <div className="absolute top-[110px] start-[210px]">
              <Shape type="cookie" size={240} colorToken="md-bg" spin>
                <div className="flex flex-col items-center justify-center">
                  <span dir="ltr" className="font-readex text-[56px] leading-[64px] font-semibold text-md-primary">40%</span>
-                 <span className="text-[15px] text-md-on-sv">13 من 32 درس</span>
+                 <span className="text-[15px] text-md-on-sv">13 of 32 lessons</span>
                </div>
              </Shape>
           </div>
@@ -285,15 +280,16 @@ export default function LoginPage() {
 
           <div className="absolute top-[380px] start-[290px] py-2.5 px-3.5 rounded-xl bg-md-inverse text-md-on-inverse flex items-center gap-2 text-sm motion-safe:animate-[gh-float_7s_ease-in-out_infinite] [animation-delay:-2.3s]">
             <Icon name="check_circle" filled size={20} className="text-md-inverse-primary" />
-            خلّصت الدرس 14
+            Finished lesson 14
             <span dir="ltr" className="font-readex font-semibold text-md-inverse-primary">+24 XP</span>
           </div>
           </div>
         </div>
 
-        <h2 className="relative m-0 mb-4 font-readex text-[32px] leading-tight font-semibold text-md-on-pc">
-          {l.featuresTitle}
-        </h2>
+        <div className="shrink-0 pt-4 flex flex-col gap-4 w-full max-w-[640px]">
+          <h2 className="relative m-0 font-readex text-[32px] leading-tight font-semibold text-md-on-pc">
+            {l.featuresTitle}
+          </h2>
         <ul className="relative m-0 p-0 list-none flex flex-col gap-3 text-md-on-pc text-base">
           <li className="flex items-center gap-3">
             <Icon name="smart_display" filled size={22} className="text-md-on-pc" />
@@ -308,6 +304,7 @@ export default function LoginPage() {
             {l.feature3}
           </li>
         </ul>
+        </div>
       </section>
 
       {/* ERROR SNACKBAR */}

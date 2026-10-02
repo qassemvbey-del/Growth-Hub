@@ -46,3 +46,5 @@ next-env.d.ts
 
 # Configs
 .mcp.json
+
+build_output.txt

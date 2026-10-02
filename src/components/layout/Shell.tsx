@@ -1376,10 +1376,15 @@ export default function Shell({ children }: ShellProps) {
   }, [profile?.rank])
 
   if (isLoading || !mounted) {
+    if (pathname === '/' || pathname === '/auth/login') {
+      return <div className="bg-md-bg min-h-[100dvh] w-full" />
+    }
     return <WorkspaceLoader isRTL={shellIsRTL} rank={profile?.rank} />
   }
 
-  if (pathname === '/auth/login') {
+  const isLandingPage = pathname === '/' && !profile && (typeof window !== 'undefined' ? localStorage.getItem('entry_path_selected') !== 'true' : false)
+
+  if (pathname === '/auth/login' || isLandingPage) {
     return (
       <div className="bg-md-bg min-h-[100dvh] w-full relative overflow-hidden text-md-on font-ibm-arabic" dir={shellIsRTL ? 'rtl' : 'ltr'}>
         {children}
