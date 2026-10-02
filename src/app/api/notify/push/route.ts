@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createAdminClient } from '@/lib/supabase-admin'
 import webpush from 'web-push'
+import crypto from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,25 +13,44 @@ webpush.setVapidDetails(
 
 export async function POST(req: Request) {
   try {
-    const { userId, title, body, url } = await req.json()
+    const pushSecret = process.env.PUSH_SECRET
+    const incomingSecret = req.headers.get('x-push-secret')
+
+    // Missing secret or env variable -> 403
+    if (!pushSecret || !incomingSecret) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const pushSecretBuffer = Buffer.from(pushSecret)
+    const incomingSecretBuffer = Buffer.from(incomingSecret)
+
+    if (
+      pushSecretBuffer.length !== incomingSecretBuffer.length ||
+      !crypto.timingSafeEqual(pushSecretBuffer, incomingSecretBuffer)
+    ) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    let body: any
+    try {
+      body = await req.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+    }
+
+    const { userId, title, body: pushBody, url } = body || {}
 
     if (!userId) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 })
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('PUSH_ROUTE_CRASH: Supabase environment variables are missing.')
-      return NextResponse.json({ error: 'Supabase environment configuration is missing' }, { status: 500 })
+    // Relative path starting with "/" (not "//")
+    let targetUrl = '/'
+    if (typeof url === 'string' && url.startsWith('/') && !url.startsWith('//') && !url.startsWith('/\\')) {
+      targetUrl = url
     }
 
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        persistSession: false
-      }
-    })
+    const supabaseAdmin = createAdminClient()
 
     // Fetch user subscriptions
     const { data: subscriptions, error: fetchError } = await supabaseAdmin
@@ -40,7 +60,7 @@ export async function POST(req: Request) {
 
     if (fetchError) {
       console.error('Failed to fetch push subscriptions:', fetchError)
-      return NextResponse.json({ error: 'Database fetch failed' }, { status: 500 })
+      return NextResponse.json({ error: 'Server error' }, { status: 500 })
     }
 
     if (!subscriptions || subscriptions.length === 0) {
@@ -49,8 +69,8 @@ export async function POST(req: Request) {
 
     const payload = JSON.stringify({
       title: title || 'Growth Hub',
-      body: body || '',
-      url: url || '/'
+      body: pushBody || '',
+      url: targetUrl
     })
 
     const results = await Promise.all(
@@ -62,10 +82,9 @@ export async function POST(req: Request) {
           console.error(`Failed to send push to subscription ${sub.id}:`, err)
           // If the subscription is expired/invalid (410 Gone / 404 Not Found), delete it
           if (err.statusCode === 410 || err.statusCode === 404) {
-            console.log(`Deleting invalid push subscription: ${sub.id}`)
             await supabaseAdmin.from('push_subscriptions').delete().eq('id', sub.id)
           }
-          return { id: sub.id, success: false, error: err.message || String(err) }
+          return { id: sub.id, success: false, error: 'Failed to send notification' }
         }
       })
     )
@@ -73,6 +92,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, results })
   } catch (err: any) {
     console.error('PUSH_ROUTE_ERROR:', err)
-    return NextResponse.json({ error: err.message || String(err) }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
