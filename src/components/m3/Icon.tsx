@@ -10,7 +10,7 @@ interface IconProps {
 export default function Icon({ name, filled, size = 24, className = '' }: IconProps) {
   return (
     <span 
-      className={`select-none ${filled ? '[font-variation-settings:\'FILL\'_1]' : '[font-variation-settings:\'FILL\'_0]'} ${className}`}
+      className={`material-symbols-rounded select-none ${filled ? '[font-variation-settings:\'FILL\'_1]' : '[font-variation-settings:\'FILL\'_0]'} ${className}`}
       style={{ 
         fontFamily: "'Material Symbols Rounded'", 
         fontWeight: 'normal', 

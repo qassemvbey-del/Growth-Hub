@@ -389,6 +389,19 @@
     font-family: 'Material Symbols Outlined' !important;
     font-weight: normal !important;
   }
+
+  /* M3 component overrides */
+  .material-symbols-rounded {
+    font-family: 'Material Symbols Rounded' !important;
+    font-weight: normal !important;
+    direction: ltr !important;
+  }
+  .font-readex {
+    font-family: var(--font-readex) !important;
+  }
+  .font-ibm-arabic {
+    font-family: var(--font-ibm-arabic) !important;
+  }
 }
 
 @layer components {
