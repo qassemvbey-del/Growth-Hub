@@ -95,9 +95,18 @@ Links between screens: `<a href="OtherScreen.dc.html">` (style the `<a>` itself 
 | scrim | rgba(0,0,0,0.6) | behind sheets/dialogs |
 | cup bronze | #f0bb8f (icon #3d2209) | silver #c9c3b8 (icon #2f2c26) | gold #f6be41 (icon #402d00) |
 
-Light theme only where a task says so: bg #f5fbf5, sc #eaefe9, scHigh #e4eae4, on #171d19, onSV #404943,
-outline #707973, primary #226a4c, onPrimary #fff, pc #aaf2cb, onPc #005236, secC #d0e8d8, onSecC #364b3f,
-tc #c0e9fa, onTc #244c5a, xp #7a5900, xpC #ffdea3, onXpC #261900.
+Light theme only where a task says so: bg #f5fbf5, scLow #eff5ef, sc #eaefe9, scHigh #e4eae4, scHighest #dee4de,
+on #171d19, onSV #404943, outline #707973, outlineV #c0c9c1, primary #226a4c, onPrimary #fff, pc #aaf2cb, onPc #005236,
+secC #d0e8d8, onSecC #364b3f, tc #c0e9fa, onTc #244c5a, xp #7a5900, xpC #ffdea3, onXpC #261900,
+error #ba1a1a, errC #ffdad6, onErrC #410002, ytChip #ffdad6 (text #93000a), inverse bg #2c322e / text #ecf2ec /
+inversePrimary #8ed5b0, chip border on pc #5f9a7d, progress track on tc #8fc3d8, track #dee4de. Cup colours are the
+same in both themes.
+
+Full token list for code (dark / light): bg, scLow, sc, scHigh, scHighest, on, onSV, outline, outlineV, primary,
+onPrimary, pc, onPc, secC, onSecC, tc, onTc, xp, xpC, onXpC, error, errC, onErrC (dark #ffdad6), ytChip, onYtChip
+(dark #ffb4ab), inverse, onInverse (dark #2c322e), inversePrimary (dark #226a4c), chipLineOnPc (dark #3f8a68),
+trackOnTc (dark #3d6878), track (dark #303632), scrim rgba(0,0,0,0.6) both, cup bronze/silver/gold + their icon colours.
+Fonts: loaded with a Google Fonts @import for now; move to next/font when layout.tsx is rebuilt (faster first paint).
 
 ## Type
 - Headings, numbers, labels that matter: `font-family: 'Readex Pro'`. Body: IBM Plex Sans Arabic (root default).
