@@ -131,7 +131,7 @@ export default function LoginPage() {
   const isAr = lang === 'ar'
 
   return (
-    <div className="flex flex-col md:flex-row min-h-[100dvh] bg-md-bg text-md-on overflow-hidden relative">
+    <div className="flex flex-col md:flex-row min-h-[100dvh] bg-md-bg text-md-on overflow-hidden relative" dir={isAr ? 'rtl' : 'ltr'}>
       <style>{`
         @keyframes gh-spin { to { transform: rotate(360deg); } }
         @keyframes gh-rev { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
@@ -251,8 +251,9 @@ export default function LoginPage() {
         </div>
         
         {/* Floating Animation Graph Container */}
-        <div className="absolute top-0 start-0 w-full h-[470px]" aria-hidden="true">
-          <div className="absolute top-[110px] start-[210px]">
+        <div className="absolute top-0 start-0 w-full h-full flex items-start justify-center pointer-events-none" aria-hidden="true">
+          <div className="relative w-full max-w-[640px] h-[470px] mt-8">
+            <div className="absolute top-[110px] start-[210px]">
              <Shape type="cookie" size={240} colorToken="md-bg" spin>
                <div className="flex flex-col items-center justify-center">
                  <span dir="ltr" className="font-readex text-[56px] leading-[64px] font-semibold text-md-primary">40%</span>
@@ -286,6 +287,7 @@ export default function LoginPage() {
             <Icon name="check_circle" filled size={20} className="text-md-inverse-primary" />
             خلّصت الدرس 14
             <span dir="ltr" className="font-readex font-semibold text-md-inverse-primary">+24 XP</span>
+          </div>
           </div>
         </div>
 

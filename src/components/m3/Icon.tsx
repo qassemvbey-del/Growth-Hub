@@ -15,7 +15,10 @@ export default function Icon({ name, filled, size = 24, className = '' }: IconPr
         fontFamily: "'Material Symbols Rounded'", 
         fontWeight: 'normal', 
         fontSize: size, 
-        lineHeight: 1 
+        lineHeight: 1,
+        direction: 'ltr',
+        wordWrap: 'normal',
+        whiteSpace: 'nowrap'
       }}
       aria-hidden="true"
     >

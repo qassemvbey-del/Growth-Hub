@@ -1379,6 +1379,14 @@ export default function Shell({ children }: ShellProps) {
     return <WorkspaceLoader isRTL={shellIsRTL} rank={profile?.rank} />
   }
 
+  if (pathname === '/auth/login') {
+    return (
+      <div className="bg-md-bg min-h-[100dvh] w-full relative overflow-hidden text-md-on font-ibm-arabic" dir={shellIsRTL ? 'rtl' : 'ltr'}>
+        {children}
+      </div>
+    )
+  }
+
   return (
     <>
     <div

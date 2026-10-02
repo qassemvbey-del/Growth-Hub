@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 // Commented out per rule "Never delete code, only comment it out"
 // import { Inter, Space_Grotesk, Tajawal, Exo_2 } from "next/font/google";
-import { Space_Grotesk, Inter, Tajawal } from 'next/font/google';
+import { Space_Grotesk, Inter, Tajawal, Readex_Pro, IBM_Plex_Sans_Arabic } from 'next/font/google';
 import "./globals.css";
 import { GrowthProvider } from "@/context/GrowthContext";
 import { SoundProvider } from "@/context/SoundContext";
@@ -38,6 +38,20 @@ const tajawal = Tajawal({
   subsets: ['arabic'],
   weight: ['400', '500', '700'],
   variable: '--font-arabic',
+  display: 'swap'
+});
+
+const readexPro = Readex_Pro({
+  subsets: ['arabic', 'latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-readex',
+  display: 'swap'
+});
+
+const ibmArabic = IBM_Plex_Sans_Arabic({
+  subsets: ['arabic', 'latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-ibm-arabic',
   display: 'swap'
 });
 
@@ -181,8 +195,9 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" type="image/svg+xml" href="/icon.svg" />
         <link rel="apple-touch-icon" href="/icon.svg" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400,0..1,0&display=swap" />
       </head>
-      <body className={`${inter.variable} ${spaceGrotesk.variable} ${tajawal.variable} antialiased text-lg md:text-xl`}>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} ${tajawal.variable} ${readexPro.variable} ${ibmArabic.variable} antialiased text-lg md:text-xl`}>
         <SoundProvider>
           <GrowthProvider>
             <ToastProvider>
