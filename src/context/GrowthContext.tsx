@@ -233,12 +233,12 @@ export const THEME_PACKAGES = {
 
 export const RANK_THRESHOLDS = [
   { rank: 'SILVER', xp: 0, theme: 'SILVER', perk: 'Standard Features' },
-  { rank: 'GOLD', xp: 400, theme: 'GOLD', perk: 'Title Badge' },
+  { rank: 'GOLD', xp: 300, theme: 'GOLD', perk: 'Title Badge' },
   { rank: 'PLATINUM', xp: 1000, theme: 'PLATINUM', perk: 'Avatar Border' },
-  { rank: 'DIAMOND', xp: 2000, theme: 'DIAMOND', perk: 'Exclusive Emojis' },
-  { rank: 'CROWN', xp: 4000, theme: 'CROWN', perk: 'Glowing Name' },
-  { rank: 'ACE', xp: 7000, theme: 'ACE', perk: 'Calling Card' },
-  { rank: 'CONQUEROR', xp: 12000, theme: 'CONQUEROR', perk: 'Top #1 Lead Title' }
+  { rank: 'DIAMOND', xp: 2500, theme: 'DIAMOND', perk: 'Exclusive Emojis' },
+  { rank: 'CROWN', xp: 5000, theme: 'CROWN', perk: 'Glowing Name' },
+  { rank: 'ACE', xp: 10000, theme: 'ACE', perk: 'Calling Card' },
+  { rank: 'CONQUEROR', xp: 20000, theme: 'CONQUEROR', perk: 'Top #1 Lead Title' }
 ]
 
 export interface MissionTask {
@@ -961,15 +961,13 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const calculatedRank = useMemo(() => {
-    if (profile?.id && topXpUserId && profile.id === topXpUserId) {
-      return 'CONQUEROR'
-    }
     const xp = profile?.xp || 0
-    if (xp >= 7000) return 'ACE'
-    if (xp >= 4000) return 'CROWN'
-    if (xp >= 2000) return 'DIAMOND'
+    if (xp >= 20000) return 'CONQUEROR'
+    if (xp >= 10000) return 'ACE'
+    if (xp >= 5000) return 'CROWN'
+    if (xp >= 2500) return 'DIAMOND'
     if (xp >= 1000) return 'PLATINUM'
-    if (xp >= 400) return 'GOLD'
+    if (xp >= 300) return 'GOLD'
     return 'SILVER'
   }, [profile?.xp, profile?.id, topXpUserId])
 
@@ -1160,6 +1158,27 @@ export function GrowthProvider({ children }: { children: React.ReactNode }) {
           ? 'معدل الإنجاز سريع جداً. تم حظر XP لهذه المهمة.'
           : 'Completion rate too fast. 0 XP awarded for this task.',
         'warning'
+      )
+    } else if (data.reason_code === 'video_not_watched') {
+      triggerToast(
+        isRTL
+          ? 'شوف 60% من الفيديو على الأقل عشان تاخد XP على المهمة دي.'
+          : 'Watch at least 60% of the video to earn XP for this task.',
+        'warning'
+      )
+    } else if (data.reason_code === 'daily_cap') {
+      triggerToast(
+        isRTL
+          ? 'وصلت لحد الـ XP النهارده (15 مهمة). المهمة اتسجلت عادي.'
+          : "You've hit today's XP limit (15 tasks). The task is still saved.",
+        'info'
+      )
+    }
+
+    if (data.goal_completed === true && data.goal_bonus > 0) {
+      triggerToast(
+        isRTL ? '🎉 خلّصت الهدف! +100 XP' : '🎉 Goal complete! +100 XP',
+        'success'
       )
     }
 

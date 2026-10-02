@@ -329,7 +329,7 @@ export function VaultContent() {
     {
       id: 'GOLD',
       name: 'Gold',
-      threshold: 400,
+      threshold: 300,
       themeId: 'GOLD',
       color: '#FACC15',
       neonClass: 'neon-gold',
@@ -351,7 +351,7 @@ export function VaultContent() {
     {
       id: 'DIAMOND',
       name: 'Diamond',
-      threshold: 2000,
+      threshold: 2500,
       themeId: 'DIAMOND',
       color: '#d500f9',
       neonClass: 'neon-diamond',
@@ -362,7 +362,7 @@ export function VaultContent() {
     {
       id: 'CROWN',
       name: 'Crown',
-      threshold: 4000,
+      threshold: 5000,
       themeId: 'CROWN',
       color: '#F97316',
       neonClass: 'neon-crown',
@@ -373,7 +373,7 @@ export function VaultContent() {
     {
       id: 'ACE',
       name: 'Ace',
-      threshold: 7000,
+      threshold: 10000,
       themeId: 'ACE',
       color: '#EF4444',
       neonClass: 'neon-ace',
@@ -384,7 +384,7 @@ export function VaultContent() {
     {
       id: 'CONQUEROR',
       name: 'Conqueror',
-      threshold: 12000,
+      threshold: 20000,
       themeId: 'CONQUEROR',
       color: '#FACC15',
       neonClass: 'neon-conqueror',

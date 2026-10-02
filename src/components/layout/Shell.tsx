@@ -260,7 +260,7 @@ const RANKS_DATA = [
   {
     id: 'GOLD',
     name: 'Gold',
-    threshold: 400,
+    threshold: 300,
     themeId: 'GOLD',
     color: '#FACC15',
     neonClass: 'neon-gold',
@@ -282,7 +282,7 @@ const RANKS_DATA = [
   {
     id: 'DIAMOND',
     name: 'Diamond',
-    threshold: 2000,
+    threshold: 2500,
     themeId: 'DIAMOND',
     color: '#d500f9',
     neonClass: 'neon-diamond',
@@ -293,7 +293,7 @@ const RANKS_DATA = [
   {
     id: 'CROWN',
     name: 'Crown',
-    threshold: 4000,
+    threshold: 5000,
     themeId: 'CROWN',
     color: '#F97316',
     neonClass: 'neon-crown',
@@ -304,7 +304,7 @@ const RANKS_DATA = [
   {
     id: 'ACE',
     name: 'Ace',
-    threshold: 7000,
+    threshold: 10000,
     themeId: 'ACE',
     color: '#EF4444',
     neonClass: 'neon-ace',
@@ -315,7 +315,7 @@ const RANKS_DATA = [
   {
     id: 'CONQUEROR',
     name: 'Conqueror',
-    threshold: 12000,
+    threshold: 20000,
     themeId: 'CONQUEROR',
     color: '#FACC15',
     neonClass: 'neon-conqueror',
@@ -1160,35 +1160,12 @@ export default function Shell({ children }: ShellProps) {
   useEffect(() => {
     async function calculateStreak() {
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data } = await supabase
-        .from('task_completion_log')
-        .select('completed_at')
-        .eq('user_id', user.id)
-        .order('completed_at', { ascending: false })
-
-      if (!data || data.length === 0) return
-
-      const days = [...new Set(data.map((r: any) =>
-        new Date(r.completed_at).toISOString().split('T')[0]
-      ))].sort((a: any, b: any) => b.localeCompare(a))
-
-      let count = 0
-      const today = new Date().toISOString().split('T')[0]
-      let cursor = new Date(today)
-
-      for (const day of days) {
-        const cursorStr = cursor.toISOString().split('T')[0]
-        if (day === cursorStr) {
-          count++
-          cursor.setDate(cursor.getDate() - 1)
-        } else {
-          break
-        }
+      const { data, error } = await supabase.rpc('my_streak')
+      if (error || !data) {
+        setStreak(0)
+      } else {
+        setStreak(data.current || 0)
       }
-      setStreak(count)
     }
     calculateStreak()
   }, [])

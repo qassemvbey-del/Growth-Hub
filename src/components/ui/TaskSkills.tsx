@@ -252,14 +252,14 @@ export default function TaskSkills({
       id: 'explain',
       label: isRTL ? 'شرح الموضوع' : 'Explain Topic',
       icon: BookOpen,
-      requiredRank: 'GOLD',
+      requiredRank: 'SILVER',
       action: handleExplainSkill
     },
     {
       id: 'ask',
       label: isRTL ? 'اسأل المساعد' : 'Ask AI',
       icon: MessageSquare,
-      requiredRank: 'PLATINUM',
+      requiredRank: 'SILVER',
       action: () => {
         setSkillError('')
         setActivePanel(activePanel === 'ask' ? null : 'ask')
@@ -271,23 +271,23 @@ export default function TaskSkills({
   const matrices = {
     programmer: [
       { id: 'programmer_silver', label: isRTL ? 'تعديل الأخطاء' : 'Fix Errors', icon: Terminal, requiredRank: 'SILVER', placeholder: isRTL ? 'أدخل الكود ورسالة الخطأ لمعالجتها...' : 'Paste broken code or traceback here...', labelPrompt: isRTL ? 'أدخل الكود المطلوب تصحيحه:' : 'Enter code to debug:' },
-      { id: 'programmer_gold', label: isRTL ? 'مراجعة الكود' : 'Code Review', icon: Eye, requiredRank: 'GOLD', placeholder: isRTL ? 'أدخل الكود لمراجعته معمارياً...' : 'Paste code to check design patterns & bugs...', labelPrompt: isRTL ? 'الكود للمراجعة:' : 'Enter code for review:' },
-      { id: 'programmer_platinum', label: isRTL ? 'مساعد الصياغة' : 'Refactor Assistant', icon: RefreshCw, requiredRank: 'PLATINUM', placeholder: isRTL ? 'أدخل الكود لتحسين وتحديث صياغته...' : 'Paste code to refactor...', labelPrompt: isRTL ? 'الكود لإعادة الصياغة:' : 'Enter code to refactor:' }
+      { id: 'programmer_gold', label: isRTL ? 'مراجعة الكود' : 'Code Review', icon: Eye, requiredRank: 'SILVER', placeholder: isRTL ? 'أدخل الكود لمراجعته معمارياً...' : 'Paste code to check design patterns & bugs...', labelPrompt: isRTL ? 'الكود للمراجعة:' : 'Enter code for review:' },
+      { id: 'programmer_platinum', label: isRTL ? 'مساعد الصياغة' : 'Refactor Assistant', icon: RefreshCw, requiredRank: 'SILVER', placeholder: isRTL ? 'أدخل الكود لتحسين وتحديث صياغته...' : 'Paste code to refactor...', labelPrompt: isRTL ? 'الكود لإعادة الصياغة:' : 'Enter code to refactor:' }
     ],
     network: [
       { id: 'network_silver', label: isRTL ? 'تعديل الأخطاء' : 'Fix Errors', icon: Terminal, requiredRank: 'SILVER', placeholder: isRTL ? 'صف أعراض انقطاع الشبكة أو أخطاء التوجيه...' : 'Describe route drops or interface symptoms...', labelPrompt: isRTL ? 'وصف مشكلة الاتصال:' : 'Enter network connection symptoms:' },
-      { id: 'network_gold', label: isRTL ? 'محلل السجلات' : 'Log Analyzer', icon: Eye, requiredRank: 'GOLD', placeholder: isRTL ? 'أدخل سجلات CLI أو show run الخاصة بـ Cisco...' : 'Paste Cisco CLI configuration/logs...', labelPrompt: isRTL ? 'سجلات CLI للتحليل:' : 'Paste Cisco CLI configs/syslogs:' },
-      { id: 'network_platinum', label: isRTL ? 'مستكشف الحزم' : 'Packet Troubleshooter', icon: RefreshCw, requiredRank: 'PLATINUM', placeholder: isRTL ? 'أدخل مسارات traceroute أو حزم ping لفحصها...' : 'Paste packet tracer details or latency symptoms...', labelPrompt: isRTL ? 'بيانات تتبع الحزم:' : 'Enter packet trace details:' }
+      { id: 'network_gold', label: isRTL ? 'محلل السجلات' : 'Log Analyzer', icon: Eye, requiredRank: 'SILVER', placeholder: isRTL ? 'أدخل سجلات CLI أو show run الخاصة بـ Cisco...' : 'Paste Cisco CLI configuration/logs...', labelPrompt: isRTL ? 'سجلات CLI للتحليل:' : 'Paste Cisco CLI configs/syslogs:' },
+      { id: 'network_platinum', label: isRTL ? 'مستكشف الحزم' : 'Packet Troubleshooter', icon: RefreshCw, requiredRank: 'SILVER', placeholder: isRTL ? 'أدخل مسارات traceroute أو حزم ping لفحصها...' : 'Paste packet tracer details or latency symptoms...', labelPrompt: isRTL ? 'بيانات تتبع الحزم:' : 'Enter packet trace details:' }
     ],
     accountant: [
       { id: 'accountant_silver', label: isRTL ? 'صانع المعادلات' : 'Formula Builder', icon: Calculator, requiredRank: 'SILVER', placeholder: isRTL ? 'صف المعادلة الحسابية المطلوبة لـ Excel...' : 'Describe the Excel spreadsheet calculation you need...', labelPrompt: isRTL ? 'وصف المعادلة:' : 'Describe spreadsheet formula goal:' },
-      { id: 'accountant_gold', label: isRTL ? 'المحلل المالي' : 'Financial Analyzer', icon: Eye, requiredRank: 'GOLD', placeholder: isRTL ? 'أدخل تفاصيل الأرقام أو الميزانية العمومية للتحليل...' : 'Paste balance sheet details or account ledger summary...', labelPrompt: isRTL ? 'تفاصيل الميزانية:' : 'Enter financial data to analyze:' },
-      { id: 'accountant_platinum', label: isRTL ? 'مساعد التدقيق' : 'Audit Assistant', icon: RefreshCw, requiredRank: 'PLATINUM', placeholder: isRTL ? 'أدخل كشف المعاملات أو المصاريف للتدقيق...' : 'Paste transaction logs or statements to audit...', labelPrompt: isRTL ? 'بيانات المعاملات للتدقيق:' : 'Paste transactions to audit:' }
+      { id: 'accountant_gold', label: isRTL ? 'المحلل المالي' : 'Financial Analyzer', icon: Eye, requiredRank: 'SILVER', placeholder: isRTL ? 'أدخل تفاصيل الأرقام أو الميزانية العمومية للتحليل...' : 'Paste balance sheet details or account ledger summary...', labelPrompt: isRTL ? 'تفاصيل الميزانية:' : 'Enter financial data to analyze:' },
+      { id: 'accountant_platinum', label: isRTL ? 'مساعد التدقيق' : 'Audit Assistant', icon: RefreshCw, requiredRank: 'SILVER', placeholder: isRTL ? 'أدخل كشف المعاملات أو المصاريف للتدقيق...' : 'Paste transaction logs or statements to audit...', labelPrompt: isRTL ? 'بيانات المعاملات للتدقيق:' : 'Paste transactions to audit:' }
     ],
     learner: [
       { id: 'learner_silver', label: isRTL ? 'مبسط المفاهيم' : 'Concept Simplifier', icon: HelpCircle, requiredRank: 'SILVER', placeholder: isRTL ? 'أدخل المفهوم المعقد لتبسيطه...' : 'Enter technical concept to simplify...', labelPrompt: isRTL ? 'المفهوم المراد تبسيطه:' : 'Enter concept to simplify:' },
-      { id: 'learner_gold', label: isRTL ? 'مساعد الدراسة' : 'Study Assistant', icon: Eye, requiredRank: 'GOLD', placeholder: isRTL ? 'أدخل الموضوع لصياغة أسئلة وبطاقات مراجعة...' : 'Enter study topic to generate review cards...', labelPrompt: isRTL ? 'موضوع الدراسة:' : 'Enter study topic:' },
-      { id: 'learner_platinum', label: isRTL ? 'الشرح العميق' : 'Deep Explainer', icon: RefreshCw, requiredRank: 'PLATINUM', placeholder: isRTL ? 'أدخل الموضوع للشرح المفصل...' : 'Enter topic for granular, foundational breakdown...', labelPrompt: isRTL ? 'موضوع الشرح العميق:' : 'Enter topic for deep explanation:' }
+      { id: 'learner_gold', label: isRTL ? 'مساعد الدراسة' : 'Study Assistant', icon: Eye, requiredRank: 'SILVER', placeholder: isRTL ? 'أدخل الموضوع لصياغة أسئلة وبطاقات مراجعة...' : 'Enter study topic to generate review cards...', labelPrompt: isRTL ? 'موضوع الدراسة:' : 'Enter study topic:' },
+      { id: 'learner_platinum', label: isRTL ? 'الشرح العميق' : 'Deep Explainer', icon: RefreshCw, requiredRank: 'SILVER', placeholder: isRTL ? 'أدخل الموضوع للشرح المفصل...' : 'Enter topic for granular, foundational breakdown...', labelPrompt: isRTL ? 'موضوع الشرح العميق:' : 'Enter topic for deep explanation:' }
     ]
   }
 

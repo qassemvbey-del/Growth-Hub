@@ -40,8 +40,14 @@ Realtime) · Vercel · Gemini 2.5 Flash (2.0 is forbidden) · Capacitor for mobi
   (`no_date_changes`, `xp_multiplier`, `no_delete`).
 - Roles in `goal_members.role`: owner, admin, member, viewer, guest.
 - XP: call RPC `award_task_xp(p_task_id, p_completed)` AFTER updating `tasks.is_completed`.
-  The browser cannot write `profiles.xp/rank/user_tier/blocked` or insert into `xp_logs`
+  The browser cannot write `profiles.xp/rank/user_tier/blocked/streak_*` or insert into `xp_logs`
   (a trigger and RLS block it).
+- Streak: read it with RPC `my_streak()` → {current, best, freezes, done_today, status, can_repair, repair_value}.
+  Never compute the streak in the browser. It is updated on the server by task completion and by a
+  `time_logs` row with duration_minutes >= 25.
+- Weekly squad leaderboard: RPC `squad_weekly_leaderboard(p_goal_id)` (resets Saturday 00:00 Cairo).
+- Rank thresholds (must match `rank_for_xp` in the DB): SILVER 0, GOLD 300, PLATINUM 1000,
+  DIAMOND 2500, CROWN 5000, ACE 10000, CONQUEROR 20000.
 - Joining a squad: RPCs only (`join_squad_by_link`, `request_squad_join`,
   `review_squad_join_request`, `verify_squad_invite`, `submit_squad_join_request`).
   The browser may insert into `goal_members` only its own 'owner' row for a goal it owns.
@@ -57,12 +63,18 @@ Realtime) · Vercel · Gemini 2.5 Flash (2.0 is forbidden) · Capacitor for mobi
 - In a shared goal, completing a task completes it for everyone. Video position is per user
   (`task_progress`).
 - Goal cards from a YouTube playlist show a YouTube icon.
-- Gamification is being simplified: XP + streak + a few clear ranks. Energy+ page goes away.
+- Game rules (enforced in `award_task_xp`): XP = difficulty (1–6) × 10; +20% if done on or before the
+  deadline; NO penalty for late tasks; video tasks need 60% watched; max 15 XP-earning tasks per day
+  (Cairo time); 3rd completion within a minute = 0; finishing a whole goal = +100 for every
+  owner/admin/member, once per goal.
+- Streak: daily; starts with 2 freeze days; +1 freeze every 7 days (max 2); a broken streak can be
+  restored within 48h by completing 2 tasks in one day.
+- Ranks unlock cosmetics only. AI features are open to every rank (daily quota only).
+- Leaderboard is weekly inside a squad only. No global leaderboard.
+- Year one is fully free: no pricing page, no goal limit. Energy+ page and the "XP penalty" squad rule are removed.
 - First screen for a new user: one big input "What do you want to do?" (YouTube link → course,
   a goal → AI steps, a quick thing → task) + 3–4 templates.
 
 ## Open (do not build until decided)
-Rank thresholds and names · what each rank unlocks · final XP rules (streak daily vs weekly,
-anti-spam) · the "only the first N tasks give XP" rule · pricing and plans · free plan limits ·
-XP penalty rule · unifying the 4 sharing flags (`is_public`, `requires_approval`,
+The product mascot/character · the exact AI daily quota · pricing after year one · unifying the 4 sharing flags (`is_public`, `requires_approval`,
 `general_access`, `metadata.public_share`).

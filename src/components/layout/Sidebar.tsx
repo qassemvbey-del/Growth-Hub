@@ -47,7 +47,7 @@ export default function Sidebar({ isRTL = false, isCollapsed = false, onOpenCoac
   }, [profile?.full_name])
 
   const { currentXp, nextRankName, xpNeeded, progressPct } = useMemo(() => {
-    if (!profile) return { currentXp: 0, nextRankName: 'PLATINUM', xpNeeded: 800, progressPct: 0 }
+    if (!profile) return { currentXp: 0, nextRankName: RANK_THRESHOLDS[1]?.rank || 'GOLD', xpNeeded: RANK_THRESHOLDS[1]?.xp || 300, progressPct: 0 }
     const xp = profile.xp || 0
     const currentRankIdx = Math.max(0, RANK_THRESHOLDS.findIndex(r => r.rank === profile.rank))
     const nextRank = RANK_THRESHOLDS[currentRankIdx + 1]
@@ -177,7 +177,7 @@ export default function Sidebar({ isRTL = false, isCollapsed = false, onOpenCoac
                   ? (isRTL
                       ? `${xpNeeded} XP إلى ${nextRankName === 'MAX RANK' ? 'أعلى رتبة' : (nextRankName ? nextRankName.charAt(0) + nextRankName.slice(1).toLowerCase() : '')}`
                       : `${xpNeeded} XP to ${nextRankName === 'MAX RANK' ? 'Max Rank' : (nextRankName ? nextRankName.charAt(0) + nextRankName.slice(1).toLowerCase() : '')}`)
-                  : `800 XP to Platinum`}
+                  : `${RANK_THRESHOLDS[1]?.xp || 300} XP to ${RANK_THRESHOLDS[1]?.rank ? RANK_THRESHOLDS[1].rank.charAt(0) + RANK_THRESHOLDS[1].rank.slice(1).toLowerCase() : 'Gold'}`}
               </span>
               <span className="text-xs font-bold shrink-0 ps-2" style={{ color: currentTheme.color }}>
                 {progressPct.toFixed(0)}%

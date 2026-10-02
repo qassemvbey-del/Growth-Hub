@@ -3234,16 +3234,6 @@ const { progress, isInRedZone } = useMemo(() => {
                                     </label>
 
                                     <label className="flex items-center justify-between text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer select-none">
-                                      <span>XP penalty 2x for late tasks</span>
-                                      <input
-                                        type="checkbox"
-                                        checked={!!mission?.metadata?.rules?.xp_multiplier}
-                                        onChange={() => toggleSquadRule(mission, 'xp_multiplier')}
-                                        className="accent-teal-400 cursor-pointer"
-                                      />
-                                    </label>
-
-                                    <label className="flex items-center justify-between text-[11px] font-bold text-zinc-300 hover:text-white cursor-pointer select-none">
                                       <span>Members cannot delete tasks</span>
                                       <input
                                         type="checkbox"
